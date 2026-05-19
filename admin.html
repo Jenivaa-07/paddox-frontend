@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Paddox — Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="page-transition-init">
+
+  <canvas id="particles-canvas"></canvas>
+  <div id="page-overlay"></div>
+
+  <!-- ░░ ADMIN LAYOUT ░░ -->
+  <div class="admin-layout">
+
+    <!-- ── ADMIN SIDEBAR ── -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="adm-logo-wrap">
+        <div class="adm-helmet animate-icon">🏎️</div>
+        <div>
+          <div class="adm-logo">PADDO<span class="logo-x">X</span></div>
+          <div class="adm-badge-label">Admin Panel</div>
+        </div>
+      </div>
+
+      <nav class="adm-nav">
+        <div class="adm-nav-section">Main</div>
+        <div class="adm-nav-item on" data-page="overview">
+          <span class="adm-icon animate-icon">📊</span> Overview
+        </div>
+        <div class="adm-nav-item" data-page="orders">
+          <span class="adm-icon animate-icon">📦</span> Orders
+          <span class="adm-badge">3</span>
+        </div>
+
+        <div class="adm-nav-section">Catalogue</div>
+        <div class="adm-nav-item" data-page="products">
+          <span class="adm-icon animate-icon">🏷️</span> Products
+        </div>
+        <div class="adm-nav-item" data-page="inventory">
+          <span class="adm-icon animate-icon">📋</span> Inventory
+        </div>
+        <div class="adm-nav-item" data-page="assets">
+          <span class="adm-icon animate-icon">🖼️</span> Digital Assets
+        </div>
+
+        <div class="adm-nav-section">People</div>
+        <div class="adm-nav-item" data-page="users">
+          <span class="adm-icon animate-icon">👥</span> Users
+        </div>
+
+        <div class="adm-nav-section">Insights</div>
+        <div class="adm-nav-item" data-page="analytics">
+          <span class="adm-icon animate-icon">📈</span> Analytics
+        </div>
+        <div class="adm-nav-item" data-page="moderation">
+          <span class="adm-icon animate-icon">🛡️</span> Moderation
+          <span class="adm-badge">2</span>
+        </div>
+      </nav>
+
+      <div class="adm-sidebar-footer">
+        <div class="adm-profile">
+          <div class="adm-avatar animate-icon">👑</div>
+          <div>
+            <div class="adm-pname">Super Admin</div>
+            <div class="adm-prole">admin@paddox.com</div>
+          </div>
+        </div>
+        <a href="index.html" class="adm-back-btn">← Back to Site</a>
+      </div>
+    </aside>
+
+    <!-- ── ADMIN MAIN ── -->
+    <div class="admin-main">
+
+      <!-- Top Bar -->
+      <div class="adm-topbar" id="adm-topbar">
+        <div class="adm-topbar-left">
+          <button class="adm-menu-btn" id="adm-menu-btn">☰</button>
+          <div>
+            <div class="adm-topbar-title" id="adm-topbar-title">OVERVIEW</div>
+            <div class="adm-topbar-sub">Wednesday, 13 May 2026 · Paddox Admin Panel</div>
+          </div>
+        </div>
+        <div class="adm-topbar-right">
+          <div class="adm-search-wrap">
+            <span>🔍</span>
+            <input class="adm-search" type="text" placeholder="Search products, orders, users…"/>
+          </div>
+          <div class="adm-notif animate-icon">🔔<span class="adm-notif-dot"></span></div>
+          <button class="adm-action-btn" id="adm-action-btn">+ Add Product</button>
+        </div>
+      </div>
+
+      <!-- Pages Container -->
+      <div class="adm-pages">
+
+        <!-- ── OVERVIEW ── -->
+        <div class="adm-page on" id="adm-overview">
+          <div class="kpi-grid">
+            <div class="kpi-card kpi-red reveal-up">
+              <div class="kpi-icon animate-icon">💰</div>
+              <div class="kpi-label">Total Revenue</div>
+              <div class="kpi-value">₹48.2L</div>
+              <div class="kpi-change kpi-up">↑ 18.4% vs last month</div>
+            </div>
+            <div class="kpi-card kpi-green reveal-up delay-1">
+              <div class="kpi-icon animate-icon">📦</div>
+              <div class="kpi-label">Total Orders</div>
+              <div class="kpi-value">1,284</div>
+              <div class="kpi-change kpi-up">↑ 12.1% vs last month</div>
+            </div>
+            <div class="kpi-card kpi-blue reveal-up delay-2">
+              <div class="kpi-icon animate-icon">👥</div>
+              <div class="kpi-label">Active Users</div>
+              <div class="kpi-value">8,941</div>
+              <div class="kpi-change kpi-up">↑ 9.7% vs last month</div>
+            </div>
+            <div class="kpi-card kpi-gold reveal-up delay-3">
+              <div class="kpi-icon animate-icon">⭐</div>
+              <div class="kpi-label">Avg. Rating</div>
+              <div class="kpi-value">4.8</div>
+              <div class="kpi-change kpi-up">↑ 0.2 this month</div>
+            </div>
+          </div>
+
+          <div class="charts-row">
+            <div class="chart-card reveal-up">
+              <div class="chart-title">📈 Revenue Overview</div>
+              <div class="chart-sub">Monthly revenue · Jan – May 2026</div>
+              <div class="bar-chart" id="bar-chart"></div>
+            </div>
+            <div class="chart-card reveal-up delay-1">
+              <div class="chart-title">🥧 Sales by Category</div>
+              <div class="chart-sub">This month's breakdown</div>
+              <div class="donut-wrap">
+                <svg width="140" height="140" viewBox="0 0 140 140" class="donut-svg">
+                  <circle cx="70" cy="70" r="52" fill="none" stroke="#1e1e1e" stroke-width="22"/>
+                  <circle cx="70" cy="70" r="52" fill="none" stroke="#e8002d" stroke-width="22" stroke-dasharray="130 197" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+                  <circle cx="70" cy="70" r="52" fill="none" stroke="#c9a84c" stroke-width="22" stroke-dasharray="65 262" stroke-dashoffset="-130" transform="rotate(-90 70 70)"/>
+                  <circle cx="70" cy="70" r="52" fill="none" stroke="#0088ff" stroke-width="22" stroke-dasharray="52 275" stroke-dashoffset="-195" transform="rotate(-90 70 70)"/>
+                  <circle cx="70" cy="70" r="52" fill="none" stroke="#00b400" stroke-width="22" stroke-dasharray="80 247" stroke-dashoffset="-247" transform="rotate(-90 70 70)"/>
+                  <text x="70" y="66" text-anchor="middle" fill="#fff" font-family="Bebas Neue" font-size="18">40%</text>
+                  <text x="70" y="80" text-anchor="middle" fill="#888" font-family="Inter" font-size="8">Apparel</text>
+                </svg>
+                <div class="donut-legend">
+                  <div class="leg-item"><div class="leg-dot" style="background:#e8002d"></div><span class="leg-lbl">Apparel</span><span class="leg-val">40%</span></div>
+                  <div class="leg-item"><div class="leg-dot" style="background:#c9a84c"></div><span class="leg-lbl">Collectibles</span><span class="leg-val">20%</span></div>
+                  <div class="leg-item"><div class="leg-dot" style="background:#0088ff"></div><span class="leg-lbl">Accessories</span><span class="leg-val">16%</span></div>
+                  <div class="leg-item"><div class="leg-dot" style="background:#00b400"></div><span class="leg-lbl">Digital</span><span class="leg-val">24%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tables-row">
+            <div class="table-card reveal-up">
+              <div class="table-card-head">
+                <div class="table-card-title">📦 Recent Orders</div>
+                <span class="view-all-link" onclick="switchPage('orders')">View All →</span>
+              </div>
+              <table class="mini-table">
+                <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td class="oid">#PDX-00819</td><td>Arjun Mehta</td><td>₹6,498</td><td><span class="sb s-pr">Processing</span></td></tr>
+                  <tr><td class="oid">#PDX-00818</td><td>Priya Sharma</td><td>₹2,499</td><td><span class="sb s-sh">Shipped</span></td></tr>
+                  <tr><td class="oid">#PDX-00817</td><td>Kenji Tanaka</td><td>₹14,999</td><td><span class="sb s-del">Delivered</span></td></tr>
+                  <tr><td class="oid">#PDX-00816</td><td>Rohan Das</td><td>₹3,999</td><td><span class="sb s-sh">Shipped</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-card reveal-up delay-1">
+              <div class="table-card-head">
+                <div class="table-card-title">⚠️ Low Stock Alerts</div>
+                <span class="view-all-link" onclick="switchPage('inventory')">Manage →</span>
+              </div>
+              <table class="mini-table">
+                <thead><tr><th>Product</th><th>Stock</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>Monaco Watch</td><td>4</td><td><span class="sb s-low">Low</span></td></tr>
+                  <tr><td>Vettel Print</td><td>2</td><td><span class="sb s-low">Low</span></td></tr>
+                  <tr><td>F1 Helmet Replica</td><td>0</td><td><span class="sb s-out">Out</span></td></tr>
+                  <tr><td>W15 Diecast</td><td>6</td><td><span class="sb s-low">Low</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ORDERS ── -->
+        <div class="adm-page" id="adm-orders">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <select class="adm-select"><option>All Statuses</option><option>Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select>
+              <select class="adm-select"><option>All Time</option><option>Today</option><option>This Week</option><option>This Month</option></select>
+              <input class="adm-input" type="text" placeholder="Search order ID or customer…"/>
+            </div>
+            <button class="adm-btn-red" onclick="showToast('📥 Exporting orders to CSV…')">Export CSV</button>
+          </div>
+          <div class="data-table-wrap"><table class="data-table" id="orders-table">
+            <thead><tr><th><input type="checkbox"/></th><th>Order ID</th><th>Customer</th><th>Products</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="orders-tbody"></tbody>
+          </table></div>
+        </div>
+
+        <!-- ── PRODUCTS ── -->
+        <div class="adm-page" id="adm-products">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <select class="adm-select"><option>All Categories</option><option>Apparel</option><option>Collectibles</option><option>Accessories</option><option>Posters</option><option>Custom</option></select>
+              <select class="adm-select"><option>All Teams</option><option>Ferrari</option><option>Red Bull</option><option>Mercedes</option><option>McLaren</option></select>
+              <input class="adm-input" type="text" placeholder="Search products…"/>
+            </div>
+            <button class="adm-btn-red" onclick="openAddModal()">+ Add Product</button>
+          </div>
+          <div class="data-table-wrap"><table class="data-table">
+            <thead><tr><th><input type="checkbox"/></th><th>Product</th><th>Category</th><th>Team</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="products-tbody"></tbody>
+          </table></div>
+        </div>
+
+        <!-- ── INVENTORY ── -->
+        <div class="adm-page" id="adm-inventory">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <select class="adm-select"><option>All Stock</option><option>In Stock</option><option>Low Stock</option><option>Out of Stock</option></select>
+              <input class="adm-input" type="text" placeholder="Search inventory…"/>
+            </div>
+            <button class="adm-btn-red" onclick="showToast('✓ Restock request sent to supplier!')">Restock All Low</button>
+          </div>
+          <div class="data-table-wrap"><table class="data-table">
+            <thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Level</th><th>Reorder Pt.</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="inventory-tbody"></tbody>
+          </table></div>
+        </div>
+
+        <!-- ── DIGITAL ASSETS ── -->
+        <div class="adm-page" id="adm-assets">
+          <div class="upload-zone" id="upload-zone">
+            <div class="upload-icon animate-icon">☁️</div>
+            <div class="upload-text"><strong>Drag &amp; drop files here</strong><br/>or click to browse · PNG, JPG, SVG, MP4 · Max 50MB</div>
+          </div>
+          <div class="page-toolbar" style="margin-bottom:16px">
+            <div class="toolbar-filters">
+              <select class="adm-select"><option>All Assets</option><option>Cars</option><option>Drivers</option><option>Circuits</option><option>Abstract</option></select>
+              <select class="adm-select"><option>All Access</option><option>Free</option><option>Premium</option></select>
+            </div>
+            <span class="asset-meta-info">8 assets · 240 MB used</span>
+          </div>
+          <div class="assets-grid" id="assets-grid"></div>
+        </div>
+
+        <!-- ── USERS ── -->
+        <div class="adm-page" id="adm-users">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <select class="adm-select"><option>All Users</option><option>Pro Fan</option><option>Regular</option><option>New</option></select>
+              <select class="adm-select"><option>All Regions</option><option>India</option><option>UK</option><option>Japan</option></select>
+              <input class="adm-input" type="text" placeholder="Search users…"/>
+            </div>
+            <button class="adm-btn-red" onclick="showToast('📥 Exporting users…')">Export Users</button>
+          </div>
+          <div class="data-table-wrap"><table class="data-table">
+            <thead><tr><th><input type="checkbox"/></th><th>User</th><th>Email</th><th>Tier</th><th>Orders</th><th>Fan Pts</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table></div>
+        </div>
+
+        <!-- ── ANALYTICS ── -->
+        <div class="adm-page" id="adm-analytics">
+          <div class="analytics-kpis">
+            <div class="kpi-card kpi-red reveal-up"><div class="kpi-label">Conversion Rate</div><div class="kpi-value" style="font-size:2rem">3.84%</div><div class="kpi-change kpi-up">↑ 0.4% this month</div></div>
+            <div class="kpi-card kpi-blue reveal-up delay-1"><div class="kpi-label">Avg. Order Value</div><div class="kpi-value" style="font-size:2rem">₹4,820</div><div class="kpi-change kpi-up">↑ ₹320 this month</div></div>
+            <div class="kpi-card kpi-green reveal-up delay-2"><div class="kpi-label">Customer Retention</div><div class="kpi-value" style="font-size:2rem">68.2%</div><div class="kpi-change kpi-up">↑ 3.1% this month</div></div>
+          </div>
+          <div class="analytics-charts">
+            <div class="chart-card reveal-up">
+              <div class="chart-title">🌍 Traffic Sources</div>
+              <div class="met-list" id="traffic-list"></div>
+            </div>
+            <div class="chart-card reveal-up delay-1">
+              <div class="chart-title">🏎️ Top Products</div>
+              <div class="met-list" id="top-products-list"></div>
+            </div>
+            <div class="chart-card reveal-up delay-2">
+              <div class="chart-title">🗺️ User Geography</div>
+              <div class="met-list" id="geo-list"></div>
+            </div>
+            <div class="chart-card reveal-up delay-3">
+              <div class="chart-title">🎮 Fan Engagement</div>
+              <div class="met-list" id="engagement-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MODERATION ── -->
+        <div class="adm-page" id="adm-moderation">
+          <div class="mod-list" id="mod-list"></div>
+        </div>
+
+      </div><!-- /adm-pages -->
+    </div><!-- /admin-main -->
+  </div><!-- /admin-layout -->
+
+  <!-- ── ADD PRODUCT MODAL ── -->
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-title">➕ ADD NEW PRODUCT</div>
+        <button class="modal-close" onclick="closeAddModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Product Name</label><input class="form-input" placeholder="e.g. SF-25 Podium Cap"/></div>
+          <div class="form-group"><label class="form-label">Team</label><select class="form-input"><option>Ferrari</option><option>Red Bull</option><option>Mercedes</option><option>McLaren</option><option>Paddox</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Category</label><select class="form-input"><option>Apparel</option><option>Collectibles</option><option>Accessories</option><option>Posters</option><option>Custom</option></select></div>
+          <div class="form-group"><label class="form-label">Price (₹)</label><input class="form-input" type="number" placeholder="2499"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Stock Qty</label><input class="form-input" type="number" placeholder="50"/></div>
+          <div class="form-group"><label class="form-label">Badge</label><select class="form-input"><option>None</option><option>New</option><option>Hot</option><option>Limited</option><option>Sale</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="3" style="resize:vertical" placeholder="Product description…"></textarea></div>
+        <div class="form-group"><label class="form-label">Image URL</label><input class="form-input" placeholder="https://images.unsplash.com/…"/></div>
+      </div>
+      <div class="modal-footer">
+        <button class="adm-btn-ghost" onclick="closeAddModal()">Cancel</button>
+        <button class="adm-btn-red" onclick="closeAddModal();showToast('✓ Product added successfully!')">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="admin.js"></script>
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="js/api.js"></script>
+</body>
+</html>

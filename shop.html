@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Paddox — Shop</title>
+  <link rel="stylesheet" href="shop.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="page-transition-init">
+
+  <!-- PARTICLES -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- PAGE TRANSITION OVERLAY -->
+  <div id="page-overlay"></div>
+
+  <!-- ░░ NAVBAR ░░ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="helmet-wrap" id="helmet-wrap">
+          <span class="helmet-icon">🏎️</span>
+        </span>
+        <span class="logo-text">PADDO<span class="logo-x">X</span></span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link"><span class="nl-icon">🏠</span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
+        <li><a href="shop.html"  class="nav-link active"><span class="nl-icon">🛒</span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
+        <li><a href="fanhub.html" class="nav-link"><span class="nl-icon">🎮</span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
+        <li><a href="account.html" class="nav-link"><span class="nl-icon">👤</span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
+      </ul>
+      <div class="nav-right">
+        <button class="nav-search-btn" id="nav-search-btn" aria-label="Search">
+          <span class="search-icon-anim">🔍</span>
+        </button>
+        <button class="nav-cart-btn" id="nav-cart-btn" aria-label="Cart">
+          <span class="cart-icon-anim">🛒</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </button>
+        <a href="account.html" class="nav-cta-btn">Sign Up <span class="cta-flag">🏁</span></a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <div class="nav-search-drawer" id="search-drawer">
+      <input type="text" class="search-input" id="search-input" placeholder="Search products, teams, drivers…" autocomplete="off"/>
+      <button class="search-close" id="search-close">✕</button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="index.html"   class="mob-link">🏠 Home</a>
+      <a href="shop.html"    class="mob-link active">🛒 Shop</a>
+      <a href="fanhub.html"  class="mob-link">🎮 Fan Hub</a>
+      <a href="account.html" class="mob-link">👤 Account</a>
+    </div>
+  </nav>
+
+  <!-- ░░ SHOP HERO ░░ -->
+  <section class="shop-hero" id="shop-hero">
+    <div class="shop-hero-bg"></div>
+    <div class="shop-hero-overlay"></div>
+    <div class="shop-hero-grid"></div>
+    <div class="speed-lines" id="speed-lines"></div>
+    <div class="shop-hero-content">
+      <div class="breadcrumb animate-fade-up delay-1">
+        <a href="index.html">Paddox</a>
+        <span class="bc-sep">／</span>
+        <span>Shop</span>
+      </div>
+      <h1 class="shop-hero-title animate-fade-up delay-2">
+        THE <span class="accent">PADDOX</span><br/>STORE
+      </h1>
+      <p class="shop-hero-sub animate-fade-up delay-3">
+        Official F1-inspired merchandise, collectibles, apparel &amp; accessories — built for real fans.
+      </p>
+      <div class="shop-hero-stats animate-fade-up delay-4">
+        <div class="sh-stat"><span class="sh-num">500<span class="sh-plus">+</span></span><span class="sh-lbl">Products</span></div>
+        <div class="sh-divider"></div>
+        <div class="sh-stat"><span class="sh-num">10</span><span class="sh-lbl">Teams</span></div>
+        <div class="sh-divider"></div>
+        <div class="sh-stat"><span class="sh-num">Free</span><span class="sh-lbl">Shipping ₹999+</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ CATEGORY TABS ░░ -->
+  <div class="cat-bar" id="cat-bar">
+    <div class="cat-bar-inner">
+      <button class="cat-tab on" data-cat="all">
+        <span class="ct-icon">🏁</span> All Products
+      </button>
+      <button class="cat-tab" data-cat="apparel">
+        <span class="ct-icon">👕</span> Apparel
+      </button>
+      <button class="cat-tab" data-cat="collectibles">
+        <span class="ct-icon">🏆</span> Collectibles
+      </button>
+      <button class="cat-tab" data-cat="accessories">
+        <span class="ct-icon">⌚</span> Accessories
+      </button>
+      <button class="cat-tab" data-cat="posters">
+        <span class="ct-icon">🖼️</span> Posters &amp; Art
+      </button>
+      <button class="cat-tab" data-cat="custom">
+        <span class="ct-icon">🎨</span> Custom Merch
+      </button>
+    </div>
+  </div>
+
+  <!-- ░░ SHOP MAIN LAYOUT ░░ -->
+  <div class="shop-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="shop-sidebar" id="shop-sidebar">
+      <div class="sidebar-inner">
+
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>🏎️</span> Teams
+            <button class="filter-collapse-btn" data-target="team-opts">−</button>
+          </div>
+          <div class="filter-opts" id="team-opts">
+            <label class="fopt"><input type="checkbox" value="Ferrari" class="team-filter"> <span class="fopt-dot" style="background:#dc0000"></span> Scuderia Ferrari</label>
+            <label class="fopt"><input type="checkbox" value="Red Bull" class="team-filter"> <span class="fopt-dot" style="background:#3671c6"></span> Oracle Red Bull</label>
+            <label class="fopt"><input type="checkbox" value="Mercedes" class="team-filter"> <span class="fopt-dot" style="background:#27f4d2"></span> Mercedes-AMG</label>
+            <label class="fopt"><input type="checkbox" value="McLaren" class="team-filter"> <span class="fopt-dot" style="background:#ff8000"></span> McLaren F1</label>
+            <label class="fopt"><input type="checkbox" value="Aston Martin" class="team-filter"> <span class="fopt-dot" style="background:#358c75"></span> Aston Martin</label>
+            <label class="fopt"><input type="checkbox" value="Alpine" class="team-filter"> <span class="fopt-dot" style="background:#0093cc"></span> BWT Alpine</label>
+            <label class="fopt"><input type="checkbox" value="Paddox" class="team-filter"> <span class="fopt-dot" style="background:#e8002d"></span> Paddox Original</label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>💰</span> Price Range
+            <button class="filter-collapse-btn" data-target="price-opts">−</button>
+          </div>
+          <div class="filter-opts" id="price-opts">
+            <div class="price-range-wrap">
+              <input type="range" class="price-slider" id="price-slider" min="0" max="20000" value="20000" step="500"/>
+              <div class="price-labels">
+                <span>₹0</span>
+                <span id="price-max-lbl">₹20,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>⭐</span> Rating
+            <button class="filter-collapse-btn" data-target="rating-opts">−</button>
+          </div>
+          <div class="filter-opts" id="rating-opts">
+            <label class="fopt"><input type="radio" name="rating" value="5" class="rating-filter"> ★★★★★ Only</label>
+            <label class="fopt"><input type="radio" name="rating" value="4" class="rating-filter"> ★★★★☆ &amp; up</label>
+            <label class="fopt"><input type="radio" name="rating" value="0" class="rating-filter" checked> All Ratings</label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>🏷️</span> Availability
+            <button class="filter-collapse-btn" data-target="avail-opts">−</button>
+          </div>
+          <div class="filter-opts" id="avail-opts">
+            <label class="fopt"><input type="checkbox" class="avail-filter" value="ltd"> Limited Edition</label>
+            <label class="fopt"><input type="checkbox" class="avail-filter" value="sale"> On Sale</label>
+            <label class="fopt"><input type="checkbox" class="avail-filter" value="new"> New Arrivals</label>
+          </div>
+        </div>
+
+        <button class="clear-filters-btn" id="clear-filters">
+          ✕ Clear All Filters
+        </button>
+
+        <!-- Promo banner -->
+        <div class="sidebar-promo">
+          <div class="sp-icon animate-icon">🏁</div>
+          <div class="sp-text">Free shipping on orders above ₹999!</div>
+          <div class="sp-sub">Use code: <strong>PADDOX25</strong></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PRODUCTS AREA -->
+    <div class="products-area">
+
+      <!-- Toolbar -->
+      <div class="shop-toolbar">
+        <div class="toolbar-left">
+          <button class="filter-toggle-btn" id="filter-toggle">
+            <span>⚙️</span> Filters
+          </button>
+          <span class="results-count">
+            Showing <strong id="results-num">0</strong> products
+          </span>
+        </div>
+        <div class="toolbar-right">
+          <select class="sort-select" id="sort-select">
+            <option value="featured">Featured</option>
+            <option value="pl">Price: Low → High</option>
+            <option value="ph">Price: High → Low</option>
+            <option value="rating">Top Rated</option>
+            <option value="newest">Newest</option>
+          </select>
+          <div class="view-toggle">
+            <button class="view-btn on" data-view="grid" aria-label="Grid view">⊞</button>
+            <button class="view-btn" data-view="list" aria-label="List view">☰</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active filter chips -->
+      <div class="active-filters" id="active-filters"></div>
+
+      <!-- Grid -->
+      <div class="products-grid" id="products-grid"></div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state" style="display:none">
+        <div class="empty-icon">🔍</div>
+        <h3>No products found</h3>
+        <p>Try adjusting your filters or <button class="empty-reset" id="empty-reset">clear all filters</button></p>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <!-- ░░ CART DRAWER ░░ -->
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <div class="cart-title">
+        <span class="cart-title-icon animate-icon">🛒</span>
+        <span>YOUR CART</span>
+        <span class="cart-count-label" id="cart-count-label">0 items</span>
+      </div>
+      <button class="cart-close" id="cart-close">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty">
+        <div class="cart-empty-icon">🏎️</div>
+        <p>Your cart is empty.<br/>Find your favourite F1 gear!</p>
+        <button class="cart-empty-btn" id="cart-empty-btn">Browse Shop</button>
+      </div>
+    </div>
+    <div class="cart-footer" id="cart-footer" style="display:none">
+      <div class="cart-summary">
+        <div class="cart-row"><span>Subtotal</span><span id="cart-subtotal">₹0</span></div>
+        <div class="cart-row"><span>Shipping</span><span class="free-ship">FREE</span></div>
+        <div class="cart-row cart-total-row"><span>Total</span><span id="cart-total">₹0</span></div>
+      </div>
+      <button class="checkout-btn" id="checkout-btn">
+        <span>Proceed to Checkout</span>
+        <span>🏁</span>
+      </button>
+      <button class="continue-btn" id="continue-btn">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- ░░ QUICK VIEW MODAL ░░ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box" id="modal-box">
+      <button class="modal-close" id="modal-close">✕</button>
+
+      <div class="modal-left">
+        <div class="modal-img-main" id="modal-img-main"></div>
+        <div class="modal-img-thumbs" id="modal-img-thumbs"></div>
+        <div class="modal-badges" id="modal-badges"></div>
+      </div>
+
+      <div class="modal-right">
+        <div class="modal-team"  id="modal-team"></div>
+        <div class="modal-name"  id="modal-name"></div>
+        <div class="modal-rating" id="modal-rating"></div>
+        <div class="modal-price-wrap">
+          <span class="modal-price" id="modal-price"></span>
+          <span class="modal-original" id="modal-original"></span>
+        </div>
+        <p class="modal-desc" id="modal-desc"></p>
+        <div class="modal-divider"></div>
+
+        <div class="modal-option-group">
+          <div class="modal-option-label">Size</div>
+          <div class="size-opts" id="modal-sizes">
+            <button class="sz on">XS</button>
+            <button class="sz">S</button>
+            <button class="sz">M</button>
+            <button class="sz">L</button>
+            <button class="sz">XL</button>
+            <button class="sz">XXL</button>
+          </div>
+        </div>
+
+        <div class="modal-option-group">
+          <div class="modal-option-label">Quantity</div>
+          <div class="qty-wrap">
+            <button class="qty-btn" id="modal-qty-minus">−</button>
+            <span class="qty-val" id="modal-qty">1</span>
+            <button class="qty-btn" id="modal-qty-plus">+</button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-add-btn" id="modal-add-btn">
+            <span>Add to Cart</span>
+            <span class="animate-icon">🛒</span>
+          </button>
+          <button class="modal-wish-btn" id="modal-wish-btn">
+            <span id="wish-icon">♡</span>
+          </button>
+        </div>
+
+        <div class="modal-meta">
+          <span>✅ In Stock</span>
+          <span>·</span>
+          <span>🚚 Free shipping above ₹999</span>
+          <span>·</span>
+          <span>↩️ 30-day returns</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="shop.js"></script>
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="js/api.js"></script>
+</body>
+</html>

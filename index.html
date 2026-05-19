@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paddox — F1 Fan Universe</title>
+  <link rel="stylesheet" href="home.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body class="page-transition-init">
+
+  <!-- ░░ PARTICLE CANVAS ░░ -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ░░ PAGE TRANSITION OVERLAY ░░ -->
+  <div id="page-overlay"></div>
+
+  <!-- ░░ NAVBAR ░░ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+
+      <!-- Logo -->
+      <a href="index.html" class="nav-logo" id="nav-logo">
+        <span class="helmet-wrap" id="helmet-wrap">
+          <span class="helmet-icon" id="helmet-icon">🏎️</span>
+        </span>
+        <span class="logo-text">PADDO<span class="logo-x">X</span></span>
+      </a>
+
+      <!-- Desktop Links -->
+      <ul class="nav-links" id="nav-links">
+        <li>
+          <a href="index.html" class="nav-link active">
+            <span class="nl-icon">🏠</span>
+            <span class="nl-label">Home</span>
+            <span class="nl-underline"></span>
+          </a>
+        </li>
+        <li>
+          <a href="shop.html" class="nav-link">
+            <span class="nl-icon">🛒</span>
+            <span class="nl-label">Shop</span>
+            <span class="nl-underline"></span>
+          </a>
+        </li>
+        <li>
+          <a href="fanhub.html" class="nav-link">
+            <span class="nl-icon">🎮</span>
+            <span class="nl-label">Fan Hub</span>
+            <span class="nl-underline"></span>
+          </a>
+        </li>
+        <li>
+          <a href="account.html" class="nav-link">
+            <span class="nl-icon">👤</span>
+            <span class="nl-label">Account</span>
+            <span class="nl-underline"></span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right Controls -->
+      <div class="nav-right">
+        <button class="nav-search-btn" id="nav-search-btn" aria-label="Search">
+          <span class="search-icon-anim">🔍</span>
+        </button>
+        <a href="shop.html" class="nav-cart-btn" aria-label="Cart">
+          <span class="cart-icon-anim">🛒</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+        <a href="account.html" class="nav-cta-btn">
+          Sign Up
+          <span class="cta-flag">🏁</span>
+        </a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Drawer -->
+    <div class="nav-search-drawer" id="search-drawer">
+      <input
+        type="text"
+        class="search-input"
+        id="search-input"
+        placeholder="Search products, drivers, circuits…"
+        autocomplete="off"
+      />
+      <button class="search-close" id="search-close">✕</button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="index.html" class="mob-link active">🏠 Home</a>
+      <a href="shop.html" class="mob-link">🛒 Shop</a>
+      <a href="fanhub.html" class="mob-link">🎮 Fan Hub</a>
+      <a href="account.html" class="mob-link">👤 Account</a>
+    </div>
+  </nav>
+
+  <!-- ░░ HERO SECTION ░░ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-image"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-grid-lines"></div>
+
+    <!-- Speed lines -->
+    <div class="speed-lines" id="speed-lines"></div>
+
+    <div class="hero-content" id="hero-content">
+      <div class="hero-eyebrow animate-fade-up delay-1">
+        <span class="eyebrow-line"></span>
+        <span class="eyebrow-text">The Ultimate F1 Fan Universe</span>
+        <span class="eyebrow-dot"></span>
+      </div>
+
+      <h1 class="hero-h1">
+        <span class="h1-line animate-fade-up delay-2">LIVE</span>
+        <span class="h1-line animate-fade-up delay-3">THE
+          <span class="h1-accent"> RACE</span>
+        </span>
+      </h1>
+
+      <p class="hero-sub animate-fade-up delay-4">
+        Premium Formula 1 merchandise, digital collectibles &amp; immersive
+        fan experiences — engineered for motorsport obsessives.
+      </p>
+
+      <div class="hero-btns animate-fade-up delay-5">
+        <a href="shop.html" class="btn-primary">
+          <span class="btn-text">Shop Now</span>
+          <span class="btn-icon">🏎️</span>
+          <span class="btn-shine"></span>
+        </a>
+        <a href="fanhub.html" class="btn-outline">
+          <span class="btn-text">Explore Hub</span>
+          <span class="btn-icon">🎮</span>
+        </a>
+      </div>
+
+      <!-- Live Race Ticker -->
+      <div class="hero-ticker animate-fade-up delay-6">
+        <span class="ticker-dot"></span>
+        <span class="ticker-label">LIVE</span>
+        <span class="ticker-text" id="ticker-text">Monaco GP · Round 8 · May 25</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="hero-stats animate-fade-up delay-6">
+      <div class="stat-item">
+        <div class="stat-num" data-count="24">0</div>
+        <div class="stat-sep">GP</div>
+        <div class="stat-label">Circuits</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num" data-count="500">0</div>
+        <div class="stat-sep">+</div>
+        <div class="stat-label">Products</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num" data-count="120">0</div>
+        <div class="stat-sep">K</div>
+        <div class="stat-label">Fans</div>
+      </div>
+    </div>
+
+    <!-- Scroll Cue -->
+    <div class="scroll-cue" id="scroll-cue">
+      <div class="scroll-cue-line"></div>
+      <div class="scroll-cue-label">Scroll</div>
+    </div>
+  </section>
+
+  <!-- ░░ GRAND PRIX COUNTDOWN ░░ -->
+  <section class="countdown-strip reveal-section" id="countdown-strip">
+    <div class="cs-inner">
+      <div class="cs-left reveal-left">
+        <div class="cs-label">⏱️ Next Grand Prix</div>
+        <div class="cs-race">
+          <span class="cs-flag">🇲🇨</span>
+          <div>
+            <div class="cs-name">Monaco Grand Prix</div>
+            <div class="cs-circuit">Circuit de Monaco · Monte Carlo</div>
+          </div>
+        </div>
+        <span class="cs-chip">Round 8 · Season 2025</span>
+      </div>
+      <div class="cs-right reveal-right">
+        <div class="cd-blocks">
+          <div class="cd-block">
+            <div class="cd-num" id="cd-d">00</div>
+            <div class="cd-lbl">Days</div>
+          </div>
+          <div class="cd-colon">:</div>
+          <div class="cd-block">
+            <div class="cd-num" id="cd-h">00</div>
+            <div class="cd-lbl">Hours</div>
+          </div>
+          <div class="cd-colon">:</div>
+          <div class="cd-block">
+            <div class="cd-num" id="cd-m">00</div>
+            <div class="cd-lbl">Mins</div>
+          </div>
+          <div class="cd-colon">:</div>
+          <div class="cd-block">
+            <div class="cd-num" id="cd-s">00</div>
+            <div class="cd-lbl">Secs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ FEATURED MERCHANDISE ░░ -->
+  <section class="section featured-section" id="featured">
+    <div class="container">
+      <div class="section-head">
+        <div class="reveal-up">
+          <div class="section-label">🏷️ Exclusive Drops</div>
+          <h2 class="section-title">FEATURED <span class="accent">MERCH</span></h2>
+        </div>
+        <a href="shop.html" class="see-all reveal-up delay-1">
+          View All <span class="sa-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="products-grid" id="products-grid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ MARQUEE STRIP ░░ -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track">
+      <span>🏎️ FORMULA 1</span><span>⚡ SPEED</span>
+      <span>🏆 CHAMPIONS</span><span>🔴 FERRARI</span>
+      <span>🔵 RED BULL</span><span>⚫ MERCEDES</span>
+      <span>🟠 MCLAREN</span><span>🟢 ASTON MARTIN</span>
+      <span>🏁 PADDOX</span><span>🎯 FAN UNIVERSE</span>
+      <!-- repeated for seamless loop -->
+      <span>🏎️ FORMULA 1</span><span>⚡ SPEED</span>
+      <span>🏆 CHAMPIONS</span><span>🔴 FERRARI</span>
+      <span>🔵 RED BULL</span><span>⚫ MERCEDES</span>
+      <span>🟠 MCLAREN</span><span>🟢 ASTON MARTIN</span>
+      <span>🏁 PADDOX</span><span>🎯 FAN UNIVERSE</span>
+    </div>
+  </div>
+
+  <!-- ░░ DRIVER QUOTE ░░ -->
+  <section class="quote-section parallax-section" id="quote-section">
+    <div class="quote-bg-img"></div>
+    <div class="quote-overlay"></div>
+    <div class="container">
+      <div class="quote-inner reveal-up">
+        <div class="section-label" style="text-align:center;margin-bottom:16px">💬 Driver of the Day</div>
+        <div class="quote-mark">"</div>
+        <p class="quote-text" id="quote-text">
+          I have no idea how I did that lap. Sometimes the car just talks to
+          you and you have to listen.
+        </p>
+        <div class="quote-driver">
+          <div class="quote-avatar" id="quote-avatar">🔵</div>
+          <div>
+            <div class="quote-name" id="quote-name">Max Verstappen</div>
+            <div class="quote-team" id="quote-team">Oracle Red Bull Racing</div>
+          </div>
+        </div>
+        <div class="quote-dots" id="quote-dots"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ DIGITAL EXPERIENCE TEASER ░░ -->
+  <section class="section experience-section" id="experience-section">
+    <div class="container">
+      <div class="section-head">
+        <div class="reveal-up">
+          <div class="section-label">🎮 Digital Fan Hub</div>
+          <h2 class="section-title">BEYOND THE <span class="accent">TRACK</span></h2>
+        </div>
+      </div>
+      <div class="exp-grid">
+        <div class="exp-card reveal-up delay-1">
+          <div class="exp-card-img exp-img-1"></div>
+          <div class="exp-card-overlay"></div>
+          <div class="exp-card-content">
+            <div class="exp-icon animate-icon">🖼️</div>
+            <h3 class="exp-title">Wallpapers</h3>
+            <p class="exp-desc">4K F1 art, circuit maps & driver portraits — free &amp; premium.</p>
+            <a href="fanhub.html" class="exp-link">Explore →</a>
+          </div>
+        </div>
+        <div class="exp-card reveal-up delay-2">
+          <div class="exp-card-img exp-img-2"></div>
+          <div class="exp-card-overlay"></div>
+          <div class="exp-card-content">
+            <div class="exp-icon animate-icon">📊</div>
+            <h3 class="exp-title">Driver Stats</h3>
+            <p class="exp-desc">Compare pace, racecraft, wet weather ability &amp; more.</p>
+            <a href="fanhub.html" class="exp-link">Compare →</a>
+          </div>
+        </div>
+        <div class="exp-card reveal-up delay-3">
+          <div class="exp-card-img exp-img-3"></div>
+          <div class="exp-card-overlay"></div>
+          <div class="exp-card-content">
+            <div class="exp-icon animate-icon">📅</div>
+            <h3 class="exp-title">Race Calendar</h3>
+            <p class="exp-desc">Full 2025 season calendar with live countdowns &amp; results.</p>
+            <a href="fanhub.html" class="exp-link">View Calendar →</a>
+          </div>
+        </div>
+        <div class="exp-card exp-card-wide reveal-up delay-4">
+          <div class="exp-card-img exp-img-4"></div>
+          <div class="exp-card-overlay"></div>
+          <div class="exp-card-content">
+            <div class="exp-icon animate-icon">🏆</div>
+            <h3 class="exp-title">Fan Community</h3>
+            <p class="exp-desc">Polls, trivia, leaderboards &amp; live fan feed — earn Fan Points.</p>
+            <a href="fanhub.html" class="exp-link">Join Now →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ TESTIMONIALS ░░ -->
+  <section class="section testi-section" id="testi-section">
+    <div class="container">
+      <div class="section-head">
+        <div class="reveal-up">
+          <div class="section-label">⭐ Fan Stories</div>
+          <h2 class="section-title">WHAT FANS <span class="accent">SAY</span></h2>
+        </div>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card reveal-up delay-1">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">
+            "The quality of the merch is insane. My Verstappen cap arrived in
+            3 days and it looks exactly like what the team wears on the grid."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar">AM</div>
+            <div>
+              <div class="testi-name">Arjun Mehta</div>
+              <div class="testi-loc">📍 Mumbai, India</div>
+            </div>
+          </div>
+          <div class="testi-badge">Verified Purchase ✓</div>
+        </div>
+        <div class="testi-card reveal-up delay-2">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">
+            "The digital wallpaper packs are absolutely stunning. My entire
+            setup is now full Paddox F1 art. Worth every rupee."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar">PS</div>
+            <div>
+              <div class="testi-name">Priya Sharma</div>
+              <div class="testi-loc">📍 Bengaluru, India</div>
+            </div>
+          </div>
+          <div class="testi-badge">Verified Purchase ✓</div>
+        </div>
+        <div class="testi-card reveal-up delay-3">
+          <div class="testi-stars">★★★★☆</div>
+          <p class="testi-text">
+            "Been collecting F1 diecasts for 10 years. Paddox has the best
+            curated selection I've found anywhere in India. Incredible."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar">RD</div>
+            <div>
+              <div class="testi-name">Rohan Das</div>
+              <div class="testi-loc">📍 Chennai, India</div>
+            </div>
+          </div>
+          <div class="testi-badge">Verified Purchase ✓</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ NEWSLETTER ░░ -->
+  <section class="newsletter-section reveal-section" id="newsletter-section">
+    <div class="nl-bg-img"></div>
+    <div class="nl-overlay"></div>
+    <div class="container">
+      <div class="nl-inner reveal-up">
+        <div class="section-label" style="text-align:center;margin-bottom:12px">
+          📬 Stay in the Race
+        </div>
+        <h2 class="nl-title">
+          JOIN THE PADDOX <span class="accent">PADDOCK</span>
+        </h2>
+        <p class="nl-sub">
+          Early access to drops, exclusive wallpapers, race day alerts &amp;
+          fan-only offers — all in one inbox.
+        </p>
+        <div class="nl-form" id="nl-form">
+          <input
+            class="nl-input"
+            type="email"
+            id="nl-email"
+            placeholder="Enter your email address"
+          />
+          <button class="nl-btn" id="nl-btn">
+            <span>Subscribe</span>
+            <span class="nl-btn-icon">🏁</span>
+          </button>
+        </div>
+        <div class="nl-trust">
+          <span>🔒 No spam</span>
+          <span>·</span>
+          <span>📦 Exclusive drops first</span>
+          <span>·</span>
+          <span>🏎️ Race day alerts</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="footer-logo">
+          PADDO<span class="logo-x">X</span>
+        </a>
+        <p class="footer-tagline">
+          The ultimate Formula 1 fan engagement &amp; ecommerce ecosystem.
+          Built for speed. Designed for fans.
+        </p>
+        <div class="footer-socials">
+          <a href="#" class="soc-link" aria-label="Twitter">𝕏</a>
+          <a href="#" class="soc-link" aria-label="Instagram">ig</a>
+          <a href="#" class="soc-link" aria-label="YouTube">yt</a>
+          <a href="#" class="soc-link" aria-label="LinkedIn">in</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-col-title">🛒 Shop</h4>
+        <ul>
+          <li><a href="shop.html">Apparel</a></li>
+          <li><a href="shop.html">Collectibles</a></li>
+          <li><a href="shop.html">Accessories</a></li>
+          <li><a href="shop.html">Posters &amp; Art</a></li>
+          <li><a href="shop.html">Custom Merch</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-col-title">🎮 Experience</h4>
+        <ul>
+          <li><a href="fanhub.html">Wallpapers</a></li>
+          <li><a href="fanhub.html">Driver Stats</a></li>
+          <li><a href="fanhub.html">Race Calendar</a></li>
+          <li><a href="fanhub.html">Fan Hub</a></li>
+          <li><a href="fanhub.html">Trivia &amp; Polls</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-col-title">👤 Account</h4>
+        <ul>
+          <li><a href="account.html">Sign Up</a></li>
+          <li><a href="account.html">Login</a></li>
+          <li><a href="account.html">Wishlist</a></li>
+          <li><a href="account.html">Order Tracking</a></li>
+          <li><a href="account.html">Support</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">
+        © 2025 Paddox. All rights reserved. Not affiliated with Formula 1® or FOM.
+      </p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <!-- Secret admin link -->
+        <a href="admin.html" class="admin-secret-link" title="Admin">·</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ░░ PRODUCT QUICK VIEW MODAL ░░ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box" id="modal-box">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-img-wrap" id="modal-img-wrap"></div>
+      <div class="modal-info">
+        <div class="modal-team" id="modal-team"></div>
+        <div class="modal-name" id="modal-name"></div>
+        <div class="modal-rating" id="modal-rating"></div>
+        <div class="modal-price" id="modal-price"></div>
+        <div class="modal-desc" id="modal-desc"></div>
+        <div class="modal-divider"></div>
+        <div class="modal-sizes">
+          <div class="modal-size-label">Size</div>
+          <div class="size-opts">
+            <button class="size-btn active">XS</button>
+            <button class="size-btn">S</button>
+            <button class="size-btn">M</button>
+            <button class="size-btn">L</button>
+            <button class="size-btn">XL</button>
+            <button class="size-btn">XXL</button>
+          </div>
+        </div>
+        <button class="modal-add-btn" id="modal-add-btn">
+          <span>Add to Cart</span>
+          <span>🛒</span>
+        </button>
+        <button class="modal-wish-btn" id="modal-wish-btn">
+          <span>♡</span>
+          <span>Add to Wishlist</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ TOAST ░░ -->
+  <div class="toast" id="toast"></div>
+
+  <script src="home.js"></script>
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="js/api.js"></script>
+</body>
+</html>
