@@ -787,12 +787,11 @@ function showToast(msg) {
   const tickerEl = document.getElementById('ticker-text');
   if (!tickerEl) return;
   const tickers = [
-    'Monaco GP · Round 8 · May 25',
-    '🔴 Leclerc leads Championship',
-    '🔵 Verstappen P2 · -12 pts',
-    '🟠 Norris P3 · McLaren strong',
-    '🏁 Next race: Circuit de Monaco'
-  ];
+  '🏁 Live F1 data connected',
+  '🏎️ Next race loading from API',
+  '📅 2026 race calendar active',
+  '🔥 Paddox live deployment working'
+];
   let ti = 0;
   setInterval(() => {
     ti = (ti + 1) % tickers.length;
