@@ -125,7 +125,7 @@ async function loadRealCalendar() {
 async function loadRealDriverStandings() {
   const sel  = document.getElementById('drv-selector');
   const card = document.getElementById('drv-card');
-  const bars = document.getElementById('drv-bars');
+  const bars = document.getElementById('stat-bars');
   const cmp  = document.getElementById('cmp-grid');
   if (!sel) return;
 
