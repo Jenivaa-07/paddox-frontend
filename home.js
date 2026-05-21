@@ -283,12 +283,17 @@ async function initRealCountdown() {
     const race     = data.data.race;
 
     /* Update race name if element exists */
-    const nameEl = document.querySelector('.race-meta h3');
-    if (nameEl) nameEl.textContent = `${race.flag} ${race.name}`;
-    const circEl = document.querySelector('.race-meta p');
-    if (circEl) circEl.textContent = `${race.circuit} · ${race.location}, ${race.country}`;
-    const chipEl = document.querySelector('.race-chip');
-    if (chipEl) chipEl.textContent = `Round ${race.round} · ${race.season}`;
+ const flagEl = document.querySelector('.cs-flag');
+if (flagEl) flagEl.textContent = race.flag;
+
+const nameEl = document.querySelector('.cs-name');
+if (nameEl) nameEl.textContent = race.name;
+
+const circEl = document.querySelector('.cs-circuit');
+if (circEl) circEl.textContent = `${race.circuit} · ${race.location}, ${race.country}`;
+
+const chipEl = document.querySelector('.cs-chip');
+if (chipEl) chipEl.textContent = `Round ${race.round} · Season ${race.season}`;
 
     function tick() {
       const diff = raceDate - new Date();
