@@ -158,7 +158,7 @@ function renderWallpapers(){
   const list=WALLPAPERS.filter(w=>wpCat==='all'||(wpCat==='free'?w.type==='free':w.cat===wpCat));
   grid.innerHTML=list.map((w,i)=>`
     <div class="wp-card" style="animation-delay:${i*.06}s">
-      <img class="wp-img" src="${w.img}" alt="${w.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"/>
+      <img class="wp-img" src="${w.img}" alt="${w.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
       <div class="wp-thumb" style="display:none">${w.emoji}</div>
       <span class="wp-tag wt-${w.type==='free'?'free':'prem'}">${w.type==='free'?'Free':'Premium'}</span>
       <span class="wp-res">${w.res}</span>
