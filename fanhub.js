@@ -453,7 +453,7 @@ function renderDriverStats(){
     <div class="cmp-c"><div class="cmp-v">${d.season.pts}</div><div class="cmp-l">Points</div></div>
   `;
 }
-renderDriverSelector(); renderDriverStats();
+loadRealDriverStandings();
 
 /* ══ RACE CALENDAR ══ */
 function renderCalendar(){
