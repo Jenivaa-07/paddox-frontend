@@ -1,8 +1,8 @@
 /* ============================================================
    PADDOX Frontend — API Configuration
    ============================================================ */
-const API_BASE = 'http://localhost:5000/api';
-const SOCKET_URL = 'http://localhost:5000';
+const API_BASE = 'https://paddox-backend.onrender.com/api';
+const SOCKET_URL = 'https://paddox-backend.onrender.com';
 
 /* ── Token Management ── */
 const TokenManager = {
