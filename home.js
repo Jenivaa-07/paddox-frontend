@@ -273,48 +273,65 @@ const QUOTES = [
   }
 })();
 
-/* ══════════════════════════════════════
-   COUNTDOWN TIMER
-══════════════════════════════════════ */
-(function initCountdown() {
-  const RACE_DATE = new Date('2025-05-25T13:00:00Z');
-  const els = {
-    d: document.getElementById('cd-d'),
-    h: document.getElementById('cd-h'),
-    m: document.getElementById('cd-m'),
-    s: document.getElementById('cd-s')
-  };
-  if (!els.d) return;
+/* Real F1 countdown — auto-detects next race */
+async function initRealCountdown() {
+  try {
+    const data = await PaddoxAPI.f1.nextRace();
+    if (!data.success || !data.data.race) return;
 
-  function pad(n) { return String(Math.max(0, n)).padStart(2, '0'); }
+    const raceDate = new Date(data.data.raceDate);
+    const race     = data.data.race;
 
-  function tick() {
-    const diff = RACE_DATE - Date.now();
-    if (diff <= 0) {
-      Object.values(els).forEach(el => { if (el) el.textContent = '00'; });
-      return;
+    /* Update race name if element exists */
+    const nameEl = document.querySelector('.race-meta h3');
+    if (nameEl) nameEl.textContent = `${race.flag} ${race.name}`;
+    const circEl = document.querySelector('.race-meta p');
+    if (circEl) circEl.textContent = `${race.circuit} · ${race.location}, ${race.country}`;
+    const chipEl = document.querySelector('.race-chip');
+    if (chipEl) chipEl.textContent = `Round ${race.round} · ${race.season}`;
+
+    function tick() {
+      const diff = raceDate - new Date();
+      if (diff <= 0) return;
+      const d = Math.floor(diff / 864e5);
+      const h = Math.floor((diff % 864e5) / 36e5);
+      const m = Math.floor((diff % 36e5) / 6e4);
+      const s = Math.floor((diff % 6e4) / 1e3);
+      const cdD = document.getElementById('cd-d');
+      const cdH = document.getElementById('cd-h');
+      const cdM = document.getElementById('cd-m');
+      const cdS = document.getElementById('cd-s');
+      if (cdD) cdD.textContent = String(d).padStart(2,'0');
+      if (cdH) cdH.textContent = String(h).padStart(2,'0');
+      if (cdM) cdM.textContent = String(m).padStart(2,'0');
+      if (cdS) cdS.textContent = String(s).padStart(2,'0');
     }
-    const d = Math.floor(diff / 864e5);
-    const h = Math.floor((diff % 864e5) / 36e5);
-    const m = Math.floor((diff % 36e5) / 6e4);
-    const s = Math.floor((diff % 6e4) / 1e3);
+    tick();
+    setInterval(tick, 1000);
 
-    /* Flip animation on change */
-    [['d',d],['h',h],['m',m],['s',s]].forEach(([key, val]) => {
-      const el = els[key];
-      if (!el) return;
-      const padded = pad(val);
-      if (el.textContent !== padded) {
-        el.classList.add('flip');
-        el.textContent = padded;
-        setTimeout(() => el.classList.remove('flip'), 400);
-      }
-    });
+  } catch (err) {
+    console.warn('Countdown API failed — using fallback');
+    /* Original hardcoded fallback */
+    function fallbackTick() {
+      const race = new Date('2026-12-31T13:00:00Z');
+      const diff = race - new Date();
+      if (diff <= 0) return;
+      const cdD = document.getElementById('cd-d');
+      const cdH = document.getElementById('cd-h');
+      const cdM = document.getElementById('cd-m');
+      const cdS = document.getElementById('cd-s');
+      if (cdD) cdD.textContent = String(Math.floor(diff/864e5)).padStart(2,'0');
+      if (cdH) cdH.textContent = String(Math.floor((diff%864e5)/36e5)).padStart(2,'0');
+      if (cdM) cdM.textContent = String(Math.floor((diff%36e5)/6e4)).padStart(2,'0');
+      if (cdS) cdS.textContent = String(Math.floor((diff%6e4)/1e3)).padStart(2,'0');
+    }
+    fallbackTick();
+    setInterval(fallbackTick, 1000);
   }
+}
 
-  tick();
-  setInterval(tick, 1000);
-})();
+/* Replace old updateCD() call with this */
+initRealCountdown();
 
 /* ══════════════════════════════════════
    HERO SPEED LINES

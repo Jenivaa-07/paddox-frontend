@@ -2,7 +2,230 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
+/* ============================================================
+   REAL F1 2026 DATA FUNCTIONS
+   Replace all hardcoded arrays with live API calls
+   ============================================================ */
 
+/* ── Load next race countdown ── */
+async function loadNextRaceCountdown() {
+  try {
+    const data = await PaddoxAPI.f1.nextRace();
+    if (!data.success || !data.data.race) return;
+
+    const { race, countdown } = data.data;
+
+    /* Update race info */
+    const nameEl = document.querySelector('.cs-name');
+    if (nameEl) nameEl.textContent = race.name;
+
+    const circEl = document.querySelector('.cs-circuit');
+    if (circEl) circEl.textContent = `${race.circuit} · ${race.location}`;
+
+    const flagEl = document.querySelector('.cs-flag');
+    if (flagEl) flagEl.textContent = race.flag;
+
+    const chipEl = document.querySelector('.cs-chip');
+    if (chipEl) chipEl.textContent = `Round ${race.round} · Season ${race.season}`;
+
+    /* Start live countdown */
+    function tick() {
+      const now  = new Date();
+      const race_date = new Date(data.data.raceDate);
+      const diff = race_date - now;
+      if (diff <= 0) return;
+
+      const d = Math.floor(diff / 864e5);
+      const h = Math.floor((diff % 864e5) / 36e5);
+      const m = Math.floor((diff % 36e5) / 6e4);
+      const s = Math.floor((diff % 6e4) / 1e3);
+
+      ['d','h','m','s'].forEach((key, i) => {
+        const val = [d,h,m,s][i];
+        const el  = document.getElementById(`cd-${key}`);
+        if (el) el.textContent = String(val).padStart(2,'0');
+      });
+    }
+    tick();
+    setInterval(tick, 1000);
+
+  } catch (err) {
+    console.warn('Next race load failed — using fallback', err);
+  }
+}
+
+/* ── Load real race calendar ── */
+async function loadRealCalendar() {
+  const grid = document.getElementById('race-grid');
+  if (!grid) return;
+
+  try {
+    /* Show loading state */
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">
+        <div style="font-size:2rem;margin-bottom:12px">🏎️</div>
+        <p>Loading 2026 Race Calendar...</p>
+      </div>`;
+
+    const data = await PaddoxAPI.f1.schedule();
+    if (!data.success) throw new Error('API failed');
+
+    const races = data.data.races;
+
+    /* Find the "next" race */
+    const now     = new Date();
+    let nextFound = false;
+    const tagged  = races.map(r => {
+      const rDate = new Date(`${r.date}T${r.time || '13:00:00Z'}`);
+      const past  = rDate < now;
+      let status  = past ? 'completed' : 'upcoming';
+      if (!past && !nextFound) { status = 'next'; nextFound = true; }
+      return { ...r, status };
+    });
+
+    grid.innerHTML = tagged.map((r, i) => {
+      const isNext = r.status === 'next';
+      const rDate  = new Date(`${r.date}T${r.time || '13:00:00Z'}`);
+      const diff   = rDate - now;
+      const d      = Math.max(0, Math.floor(diff / 864e5));
+      const h      = Math.max(0, Math.floor((diff % 864e5) / 36e5));
+      const m      = Math.max(0, Math.floor((diff % 36e5) / 6e4));
+
+      return `
+        <div class="rcard" style="animation-delay:${i * 0.05}s">
+          <div class="rc-flag">${r.flag}</div>
+          <div class="rc-round">Round ${r.round}</div>
+          <div class="rc-name">${r.name}</div>
+          <div class="rc-circuit">${r.circuit} · ${r.location}</div>
+          <div class="rc-date">📅 ${new Date(r.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</div>
+          <span class="rc-status rs-${r.status === 'next' ? 'next' : r.status === 'completed' ? 'done' : 'up'}">
+            ${r.status === 'next' ? '▶ Next Race' : r.status === 'completed' ? '✓ Completed' : 'Upcoming'}
+          </span>
+          ${isNext ? `
+            <div class="rc-mini-cd">
+              <div class="rcb"><div class="rcb-n">${String(d).padStart(2,'0')}</div><div class="rcb-l">Days</div></div>
+              <div class="rcb"><div class="rcb-n">${String(h).padStart(2,'0')}</div><div class="rcb-l">Hrs</div></div>
+              <div class="rcb"><div class="rcb-n">${String(m).padStart(2,'0')}</div><div class="rcb-l">Min</div></div>
+            </div>` : ''}
+        </div>`;
+    }).join('');
+
+  } catch (err) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">
+        <p>⚠️ Could not load calendar. Using cached data.</p>
+      </div>`;
+    console.warn('Calendar load failed:', err);
+    /* Fallback to existing renderCalendar() function */
+    if (typeof renderCalendar === 'function') renderCalendar();
+  }
+}
+
+/* ── Load real driver standings ── */
+async function loadRealDriverStandings() {
+  const sel  = document.getElementById('drv-selector');
+  const card = document.getElementById('drv-card');
+  const bars = document.getElementById('drv-bars');
+  const cmp  = document.getElementById('cmp-grid');
+  if (!sel) return;
+
+  try {
+    sel.innerHTML = `<div style="color:var(--muted);font-size:.85rem">Loading 2026 drivers...</div>`;
+
+    const data = await PaddoxAPI.f1.driverStands();
+    if (!data.success || !data.data.standings.length) throw new Error('No standings');
+
+    const standings = data.data.standings;
+    let active = 0;
+
+    function renderDriver(i) {
+      active = i;
+      const s = standings[i];
+      const d = s.driver;
+      const t = s.team;
+
+      /* Selector pills */
+      sel.innerHTML = standings.slice(0, 10).map((st, idx) => `
+        <div class="drv-pill ${idx === i ? 'on' : ''}" onclick="selectRealDriver(${idx})">
+          <div class="dp-av">${st.team.emoji}</div>
+          <div>
+            <div class="dp-name">${st.driver.code || st.driver.lastName}</div>
+            <div class="dp-team">${st.team.name}</div>
+          </div>
+        </div>`).join('');
+
+      /* Driver card */
+      if (card) card.innerHTML = `
+        <div class="drv-num-bg">${d.number || i + 1}</div>
+        <div class="drv-big-av">${t.emoji}</div>
+        <div class="drv-name">${d.fullName}</div>
+        <div class="drv-team">${t.name}</div>
+        <div style="font-size:.8rem;color:#ccc;margin-bottom:14px">${d.flag} ${d.nationality}</div>
+        <div class="drv-tags">
+          <span class="drv-tag">#${d.number || '?'}</span>
+          <span class="drv-tag">P${s.position}</span>
+          <span class="drv-tag">${s.points} PTS</span>
+        </div>`;
+
+      /* Stat bars */
+      const statMap = [
+        { label:'Championship Points', val: Math.min(100, Math.round(s.points / standings[0].points * 100)) },
+        { label:'Wins',     val: Math.min(100, Math.round(s.wins / Math.max(standings[0].wins, 1) * 100)) },
+        { label:'Podiums',  val: Math.min(100, 80 - i * 5) },
+        { label:'Pace',     val: Math.min(100, 99 - i * 2) },
+        { label:'Racecraft',val: Math.min(100, 98 - i * 2) },
+        { label:'Consistency', val: Math.min(100, 96 - i * 2) },
+      ];
+      if (bars) {
+        bars.innerHTML = statMap.map(st => `
+          <div class="sb-row">
+            <div class="sb-hd">
+              <span class="sb-lbl">${st.label}</span>
+              <span class="sb-val">${st.val}</span>
+            </div>
+            <div class="sb-track">
+              <div class="sb-fill" data-w="${st.val}%" style="width:0%;background:${t.color}"></div>
+            </div>
+          </div>`).join('');
+        setTimeout(() => bars.querySelectorAll('.sb-fill').forEach(b => b.style.width = b.dataset.w), 80);
+      }
+
+      /* Stats grid */
+      if (cmp) cmp.innerHTML = `
+        <div class="cmp-c"><div class="cmp-v">${s.wins}</div><div class="cmp-l">Wins</div></div>
+        <div class="cmp-c"><div class="cmp-v">${s.points}</div><div class="cmp-l">Points</div></div>
+        <div class="cmp-c"><div class="cmp-v">P${s.position}</div><div class="cmp-l">Position</div></div>
+        <div class="cmp-c"><div class="cmp-v">${d.number || '—'}</div><div class="cmp-l">Car No.</div></div>`;
+    }
+
+    /* Make selectRealDriver global */
+    window.selectRealDriver = renderDriver;
+    renderDriver(0);
+
+  } catch (err) {
+    console.warn('Driver standings failed — using fallback', err);
+    if (typeof renderDriverSelector === 'function') {
+      renderDriverSelector();
+      renderDriverStats();
+    }
+  }
+}
+
+/* ── Load last race result for fan hub ── */
+async function loadLastResult() {
+  try {
+    const data = await PaddoxAPI.f1.lastResult();
+    if (!data.success || !data.data.race) return;
+
+    const race = data.data.race;
+    const ticker = document.getElementById('ticker-text');
+    if (ticker && race.winner) {
+      ticker.textContent = `🏆 ${race.name} Winner: ${race.winner.name} (${race.winner.team})`;
+    }
+  } catch (err) {
+    console.warn('Last result load failed:', err);
+  }
+}
 /* ══ DATA ══ */
 const WALLPAPERS = [
   { name:'Ferrari SF-25 Dawn',  cat:'cars',     type:'free',    img:'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&q=80',     res:'4K · 3840×2160', emoji:'🏎️' },
@@ -194,7 +417,7 @@ function renderDriverSelector(){
   `).join('');
 }
 function selectDriver(i){
-  activeDriver=i; renderDriverSelector(); renderDriverStats();
+  activeDriver=i; loadRealDriverStandings();
 }
 function renderDriverStats(){
   const d=DRIVERS[activeDriver];
@@ -256,7 +479,7 @@ function renderCalendar(){
     </div>
   `).join('');
 }
-renderCalendar();
+loadRealCalendar();
 
 /* ══ QUOTES ══ */
 let qIdx=0;
@@ -409,5 +632,8 @@ function showToast(msg){
   t.textContent=msg; t.classList.add('show');
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3000);
 }
+/* Load real F1 data on page load */
+loadNextRaceCountdown();
+loadLastResult();
 
 console.log('%c🎮 PADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
