@@ -375,34 +375,147 @@ document.querySelectorAll('.hub-tab').forEach(tab=>{
 });
 
 /* ══ WALLPAPERS ══ */
-let wpCat='all';
-function renderWallpapers(){
-  const grid=document.getElementById('wp-grid'); if(!grid) return;
-  const list=WALLPAPERS.filter(w=>wpCat==='all'||(wpCat==='free'?w.type==='free':w.cat===wpCat));
-  grid.innerHTML=list.map((w,i)=>`
-    <div class="wp-card" style="animation-delay:${i*.06}s">
-      <img class="wp-img" src="${w.img}" alt="${w.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+let wpCat = 'all';
+
+async function renderWallpapers() {
+  const grid = document.getElementById('wp-grid');
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted)">
+      🖼️ Loading wallpapers...
+    </div>
+  `;
+
+  try {
+    const data = await PaddoxAPI.asset.getAll({ limit: 20 });
+
+    const assets = data.data?.assets || data.data || [];
+
+    if (!data.success || !assets.length) {
+      renderWallpapersFallback();
+      return;
+    }
+
+    const list = assets.filter(w =>
+      wpCat === 'all' ||
+      (wpCat === 'free' ? w.type === 'free' : w.category === wpCat)
+    );
+
+    grid.innerHTML = list.map((w, i) => `
+      <div class="wp-card" style="animation-delay:${i * 0.06}s">
+        <img class="wp-img"
+          src="${w.image?.url}"
+          alt="${w.name}"
+          loading="lazy"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+        />
+        <div class="wp-thumb" style="display:none">🖼️</div>
+
+        <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">
+          ${w.type === 'free' ? 'Free' : 'Premium'}
+        </span>
+
+        <span class="wp-res">${w.resolution || 'HD'}</span>
+
+        <div class="wp-overlay">
+          <div class="wp-name">${w.name}</div>
+
+          <button class="wp-dl-btn"
+            onclick="event.stopPropagation();handleWpDownload('${w._id}')">
+            ${w.type === 'free' ? '↓ Download' : '🔒 Unlock Premium'}
+          </button>
+
+          <button class="wp-prev-btn"
+            onclick="event.stopPropagation();window.open('${w.image?.url}', '_blank')">
+            Preview
+          </button>
+
+          <div style="font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px">
+            ↓ ${(w.downloads || 0).toLocaleString()} downloads
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    console.error('Wallpaper API failed:', err);
+    renderWallpapersFallback();
+  }
+}
+
+async function handleWpDownload(assetId) {
+  try {
+    showToast('⏳ Preparing download...');
+
+    const data = await PaddoxAPI.asset.download(assetId);
+
+    if (!data.success) {
+      showToast(`❌ ${data.message || 'Download failed'}`);
+      return;
+    }
+
+    const info = data.data;
+    const downloadUrl = info.downloadUrl || info.url;
+
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${(info.name || 'paddox_wallpaper').replace(/\s+/g, '_')}.jpg`;
+    link.target = '_blank';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast(`✅ Downloading ${info.name || 'wallpaper'}`);
+
+  } catch (err) {
+    console.error('Download failed:', err);
+    showToast('❌ Download failed. Please try again.');
+  }
+}
+
+function renderWallpapersFallback() {
+  const grid = document.getElementById('wp-grid');
+  if (!grid || typeof WALLPAPERS === 'undefined') return;
+
+  const list = WALLPAPERS.filter(w =>
+    wpCat === 'all' ||
+    (wpCat === 'free' ? w.type === 'free' : w.cat === wpCat)
+  );
+
+  grid.innerHTML = list.map((w, i) => `
+    <div class="wp-card" style="animation-delay:${i * 0.06}s">
+      <img class="wp-img" src="${w.img}" alt="${w.name}" loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
       <div class="wp-thumb" style="display:none">${w.emoji}</div>
-      <span class="wp-tag wt-${w.type==='free'?'free':'prem'}">${w.type==='free'?'Free':'Premium'}</span>
+
+      <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">
+        ${w.type === 'free' ? 'Free' : 'Premium'}
+      </span>
+
       <span class="wp-res">${w.res}</span>
+
       <div class="wp-overlay">
         <div class="wp-name">${w.name}</div>
-        <button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w.name}','${w.type}')">
-          ${w.type==='free'?'↓ Download':'🔒 Unlock Premium'}
+        <button class="wp-dl-btn"
+          onclick="event.stopPropagation();showToast('${w.type === 'free' ? '↓ Downloading...' : '🔒 Sign in for premium'}')">
+          ${w.type === 'free' ? '↓ Download' : '🔒 Unlock'}
         </button>
-        <button class="wp-prev-btn">Preview</button>
       </div>
     </div>
   `).join('');
 }
-function handleWpDownload(name,type){showToast(type==='free'?`↓ Downloading: ${name}`:`🔒 Sign in to unlock premium wallpapers`)}
 
-document.querySelectorAll('.wpf').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.wpf').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on'); wpCat=btn.dataset.cat; renderWallpapers();
+document.querySelectorAll('.wpf').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.wpf').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    wpCat = btn.dataset.cat;
+    renderWallpapers();
   });
 });
+
 renderWallpapers();
 
 /* ══ DRIVER STATS ══ */
