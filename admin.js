@@ -278,7 +278,7 @@ renderInventory();
 const ASSET_API_BASE = 'https://paddox-backend.onrender.com/api/assets';
 
 let REAL_ASSETS = [];
-
+let EDIT_ASSET_ID = null;
 /* LOAD ASSETS */
 async function loadAssets() {
   try {
@@ -365,7 +365,8 @@ function renderAssets() {
     '${asset._id}',
     '${name}',
     '${category}',
-    '${access}'
+    '${access}',
+    '${asset.resolution || '4K'}'
   )"
 >
   Edit
@@ -416,65 +417,49 @@ async function deleteAsset(id) {
 
   }
 }
-async function editAsset(id, name, category, type) {
+function editAsset(id, name, category, type, resolution = '4K') {
+  EDIT_ASSET_ID = id;
 
-  const newName =
-    prompt('Wallpaper name:', name);
+  document.getElementById('edit-asset-name').value = name || '';
+  document.getElementById('edit-asset-category').value = String(category || 'cars').toLowerCase();
+  document.getElementById('edit-asset-type').value = String(type || 'free').toLowerCase();
+  document.getElementById('edit-asset-resolution').value = resolution || '4K';
 
-  if (!newName) return;
+  document.getElementById('edit-asset-modal')?.classList.add('show');
+}
 
-  const newCategory =
-    prompt(
-      'Category:',
-      category
-    ) || category;
+function closeEditModal() {
+  document.getElementById('edit-asset-modal')?.classList.remove('show');
+  EDIT_ASSET_ID = null;
+}
 
-  const newType =
-    prompt(
-      'Type:',
-      type
-    ) || type;
-
-  const newResolution =
-    prompt(
-      'Resolution:',
-      '4K'
-    ) || '4K';
+async function saveAssetEdit() {
+  if (!EDIT_ASSET_ID) return;
 
   try {
+    showToast('✏️ Updating asset...');
 
-    const res = await fetch(
-      `${ASSET_API_BASE}/${id}`,
-      {
-        method: 'PUT',
-
-        headers: {
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-          name: newName,
-          category: newCategory,
-          type: newType,
-          resolution: newResolution
-        })
-      }
-    );
+    const res = await fetch(`${ASSET_API_BASE}/${EDIT_ASSET_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('edit-asset-name').value.trim(),
+        category: document.getElementById('edit-asset-category').value,
+        type: document.getElementById('edit-asset-type').value,
+        resolution: document.getElementById('edit-asset-resolution').value.trim() || '4K'
+      })
+    });
 
     const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message);
-    }
+    if (!res.ok) throw new Error(data.message || 'Update failed');
 
-    showToast('✏️ Asset updated');
-
+    showToast('🔥 Asset updated');
+    closeEditModal();
     loadAssets();
 
   } catch (err) {
-
     console.error(err);
-
     showToast('❌ Update failed');
   }
 }
