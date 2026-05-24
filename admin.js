@@ -123,11 +123,7 @@ const PAGE_META = {
   orders:     { title:'ORDERS',          action:'Export CSV',     fn:()=>showToast('📥 Exporting orders…') },
   products:   { title:'PRODUCTS',        action:'+ Add Product',  fn:()=>openAddModal() },
   inventory:  { title:'INVENTORY',       action:'Restock All',    fn:()=>showToast('✓ Restock request sent!') },
-  assets: {
-  title:'DIGITAL ASSETS',
-  action:'+ Upload Asset',
-  fn:()=>document.getElementById('upload-zone')?.click()
-},
+  assets:     { title:'DIGITAL ASSETS',  action:'+ Upload Asset', fn:()=>showToast('📁 File picker opened') },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
   analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>showToast('📊 Report downloaded!') },
   moderation: { title:'MODERATION',      action:'Clear All',      fn:()=>showToast('✓ All items reviewed!') },
@@ -489,7 +485,7 @@ if (uploadZone) {
 
         formData.append('tags', JSON.stringify(['admin-upload', 'wallpaper']));
 
-        const res = await fetch(`${ASSET_API_BASE}`, {
+        const res = await fetch(`${ASSET_API_BASE}/upload`, {
           method: 'POST',
           body: formData
         });
