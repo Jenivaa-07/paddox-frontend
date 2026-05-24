@@ -135,6 +135,13 @@ function switchPage(id) {
   const actionBtn = document.getElementById('adm-action-btn');
   if (titleEl) titleEl.textContent = meta.title;
   if (actionBtn) { actionBtn.textContent = meta.action; actionBtn.onclick = meta.fn; }
+  if (id === 'products') {
+  loadProducts();
+}
+
+if (id === 'assets') {
+  loadAssets();
+}
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
@@ -214,6 +221,7 @@ async function loadProducts() {
       [];
 
     renderProducts();
+    renderInventory();
 
   } catch(err) {
 
@@ -328,14 +336,13 @@ function renderProducts() {
     }).join('');
 }
 
-loadProducts();
 
 /* ══ INVENTORY TABLE ══ */
 function renderInventory() {
   const tbody = document.getElementById('inventory-tbody');
   if (!tbody) return;
   const skus = ['PDX-APP-001','PDX-APP-002','PDX-COL-001','PDX-APP-003','PDX-ART-001','PDX-COL-002','PDX-ACC-001','PDX-ACC-002'];
-  tbody.innerHTML = ADM_PRODUCTS.map((p, i) => {
+  tbody.innerHTML = REAL_PRODUCTS.map((p, i) => {
     const pct    = Math.min(100, Math.round(p.stock / 130 * 100));
     const sc     = p.stock === 0 ? 's-out' : p.stock < 10 ? 's-low' : 's-act';
     const sl     = p.stock === 0 ? 'Out of Stock' : p.stock < 10 ? 'Low Stock' : 'In Stock';
@@ -361,7 +368,6 @@ function renderInventory() {
     `;
   }).join('');
 }
-renderInventory();
 
 /* ══ DIGITAL ASSETS GRID ══ */
 /* ═══════════════════════════════════════
