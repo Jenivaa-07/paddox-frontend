@@ -177,6 +177,32 @@
 
   </div><!-- /hub-body -->
 
+  <!-- PREVIEW MODAL -->
+  <div class="preview-modal" id="preview-modal" aria-hidden="true">
+    <div class="preview-backdrop" onclick="closePreview()"></div>
+
+    <div class="preview-card" role="dialog" aria-modal="true" aria-label="Wallpaper preview">
+      <button class="preview-close" onclick="closePreview()" aria-label="Close preview">✕</button>
+
+      <div class="preview-image-wrap">
+        <img id="preview-image" class="preview-image" src="" alt="Wallpaper Preview"/>
+        <div class="preview-watermark">PADDOX</div>
+        <div class="preview-watermark small">LOW RES PREVIEW</div>
+      </div>
+
+      <div class="preview-bottom">
+        <div>
+          <div class="preview-title" id="preview-title">Wallpaper Preview</div>
+          <div class="preview-lowres">Watermarked low-resolution preview</div>
+        </div>
+
+        <button id="preview-download-btn" class="preview-download-btn">
+          ↓ DOWNLOAD HD
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 

@@ -402,6 +402,17 @@ async function renderWallpapers() {
       (wpCat === 'free' ? w.type === 'free' : w.category === wpCat)
     );
 
+    window.__PADDOX_ASSETS__ = {};
+    list.forEach(w => {
+      window.__PADDOX_ASSETS__[w._id] = {
+        id: w._id,
+        name: w.name,
+        url: w.image?.url,
+        type: w.type,
+        resolution: w.resolution
+      };
+    });
+
     grid.innerHTML = list.map((w, i) => `
       <div class="wp-card" style="animation-delay:${i * 0.06}s">
         <img class="wp-img"
@@ -427,7 +438,7 @@ async function renderWallpapers() {
           </button>
 
           <button class="wp-prev-btn"
-            onclick="event.stopPropagation();window.open('${w.image?.url}', '_blank')">
+            onclick="event.stopPropagation();openPreview('${w.image?.url}', '${w._id}', '${String(w.name || 'Wallpaper').replace(/'/g, "\\'")}')">
             Preview
           </button>
 
@@ -446,36 +457,49 @@ async function renderWallpapers() {
 
 async function handleWpDownload(assetId) {
   try {
-    showToast('⏳ Preparing download...');
+    showToast('⏳ Preparing HD wallpaper...');
 
-    const data = await PaddoxAPI.asset.download(assetId);
+    const localAsset = window.__PADDOX_ASSETS__?.[assetId] || {};
+    let downloadUrl = localAsset.url;
+    let name = localAsset.name || 'Paddox Wallpaper';
 
-    console.log('DOWNLOAD RESPONSE:', data);
+    try {
+      const data = await PaddoxAPI.asset.download(assetId);
+      console.log('DOWNLOAD RESPONSE:', data);
 
-    if (!data.success) {
-      showToast(`❌ ${data.message || 'Download failed'}`);
-      return;
+      if (data?.success) {
+        const info = data.data || data;
+        downloadUrl =
+          info.downloadUrl ||
+          info.url ||
+          info.image?.url ||
+          downloadUrl;
+        name = info.name || name;
+      }
+    } catch (apiErr) {
+      console.warn('Download API failed, using local Cloudinary URL:', apiErr);
     }
 
-    /* Backend may return inside data.data OR directly */
-    const info = data.data || data;
-
-    /* Support both keys */
-    const downloadUrl =
-      info.downloadUrl ||
-      info.url ||
-      info.image?.url;
-
     if (!downloadUrl) {
-      console.error('Missing download URL:', info);
       showToast('❌ Download URL missing');
       return;
     }
 
-    /* Open Cloudinary image */
-    window.open(downloadUrl, '_blank');
+    const finalUrl = makeCloudinaryDownloadUrl(downloadUrl);
+    const safeName = name.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'paddox_wallpaper';
 
-    showToast(`✅ Opened ${info.name || 'wallpaper'}`);
+    const link = document.createElement('a');
+    link.href = finalUrl;
+    link.download = `${safeName}.jpg`;
+    link.target = '_blank';
+    link.rel = 'noopener';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    closePreview();
+    showToast(`✅ Downloading ${name}`);
 
   } catch (err) {
     console.error('Download failed:', err);
@@ -483,7 +507,71 @@ async function handleWpDownload(assetId) {
   }
 }
 
-function renderWallpapersFallback() {
+function makeCloudinaryDownloadUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    if (url.includes('/image/upload/fl_attachment/')) return url;
+    return url.replace('/image/upload/', '/image/upload/fl_attachment/');
+  }
+
+  return url;
+}
+
+/* ═════════ GLASSMORPHISM PREVIEW ═════════ */
+function openPreview(img, assetId, name) {
+  const modal = document.getElementById('preview-modal');
+  const image = document.getElementById('preview-image');
+  const title = document.getElementById('preview-title');
+  const btn   = document.getElementById('preview-download-btn');
+
+  if (!modal || !image || !btn) return;
+
+  image.src = makeCloudinaryPreviewUrl(img);
+  image.alt = name || 'Wallpaper Preview';
+
+  if (title) title.textContent = name || 'Wallpaper Preview';
+
+  btn.onclick = () => handleWpDownload(assetId);
+
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePreview() {
+  const modal = document.getElementById('preview-modal');
+  const image = document.getElementById('preview-image');
+
+  if (modal) {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (image) {
+    setTimeout(() => {
+      if (!modal?.classList.contains('show')) image.src = '';
+    }, 250);
+  }
+
+  document.body.style.overflow = '';
+}
+
+function makeCloudinaryPreviewUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    return url.replace('/image/upload/', '/image/upload/w_900,q_auto:low/');
+  }
+
+  return url;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePreview();
+});
+
+function renderWallpapersFallbackfunction renderWallpapersFallback() {
   const grid = document.getElementById('wp-grid');
   if (!grid || typeof WALLPAPERS === 'undefined') return;
 
