@@ -123,7 +123,11 @@ const PAGE_META = {
   orders:     { title:'ORDERS',          action:'Export CSV',     fn:()=>showToast('📥 Exporting orders…') },
   products:   { title:'PRODUCTS',        action:'+ Add Product',  fn:()=>openAddModal() },
   inventory:  { title:'INVENTORY',       action:'Restock All',    fn:()=>showToast('✓ Restock request sent!') },
-  assets:     { title:'DIGITAL ASSETS',  action:'+ Upload Asset', fn:()=>showToast('📁 File picker opened') },
+  assets: {
+  title:'DIGITAL ASSETS',
+  action:'+ Upload Asset',
+  fn:()=>document.getElementById('upload-zone')?.click()
+},
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
   analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>showToast('📊 Report downloaded!') },
   moderation: { title:'MODERATION',      action:'Clear All',      fn:()=>showToast('✓ All items reviewed!') },
@@ -419,6 +423,24 @@ async function editAsset(id, name, category, type) {
 
   if (!newName) return;
 
+  const newCategory =
+    prompt(
+      'Category:',
+      category
+    ) || category;
+
+  const newType =
+    prompt(
+      'Type:',
+      type
+    ) || type;
+
+  const newResolution =
+    prompt(
+      'Resolution:',
+      '4K'
+    ) || '4K';
+
   try {
 
     const res = await fetch(
@@ -432,8 +454,9 @@ async function editAsset(id, name, category, type) {
 
         body: JSON.stringify({
           name: newName,
-          category,
-          type
+          category: newCategory,
+          type: newType,
+          resolution: newResolution
         })
       }
     );
@@ -499,23 +522,45 @@ function previewAsset(encodedImageUrl) {
 }
 
 /* UPLOAD */
+/* UPLOAD */
 const uploadZone = document.getElementById('upload-zone');
 
 if (uploadZone) {
 
   uploadZone.addEventListener('click', () => {
 
-    const input = document.createElement('input');
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
 
-    input.type = 'file';
+    fileInput.onchange = async () => {
 
-    input.accept = 'image/*';
-
-    input.onchange = async () => {
-
-      const file = input.files[0];
+      const file = fileInput.files[0];
 
       if (!file) return;
+
+      /* FORM VALUES */
+      const name =
+        prompt('Wallpaper name:') ||
+        file.name.replace(/\.[^/.]+$/, '');
+
+      const category =
+        prompt(
+          'Category?\n(cars/drivers/circuits/art/abstract)',
+          'cars'
+        ) || 'cars';
+
+      const type =
+        prompt(
+          'Access type?\n(free/premium)',
+          'free'
+        ) || 'free';
+
+      const resolution =
+        prompt(
+          'Resolution?',
+          '4K'
+        ) || '4K';
 
       try {
 
@@ -525,27 +570,42 @@ if (uploadZone) {
 
         formData.append('asset', file);
 
-        formData.append('name', file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+        formData.append('name', name);
 
-        formData.append('description', 'Uploaded from PADDOX admin panel');
+        formData.append(
+          'description',
+          'Uploaded from PADDOX admin panel'
+        );
 
-        formData.append('category', 'cars');
+        formData.append('category', category);
 
-        formData.append('type', 'free');
+        formData.append('type', type);
 
-        formData.append('resolution', '4K');
+        formData.append('resolution', resolution);
 
-        formData.append('tags', JSON.stringify(['admin-upload', 'wallpaper']));
+        formData.append(
+          'tags',
+          JSON.stringify([
+            category,
+            type,
+            'paddox'
+          ])
+        );
 
-        const res = await fetch(`${ASSET_API_BASE}/upload`, {
-          method: 'POST',
-          body: formData
-        });
+        const res = await fetch(
+          `${ASSET_API_BASE}/upload`,
+          {
+            method: 'POST',
+            body: formData
+          }
+        );
 
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.message || 'Upload failed');
+          throw new Error(
+            data.message || 'Upload failed'
+          );
         }
 
         showToast('🔥 Asset uploaded');
@@ -559,10 +619,10 @@ if (uploadZone) {
         showToast('❌ Upload failed');
       }
     };
-    input.click();
+
+    fileInput.click();
   });
 }
-
 /* INIT */
 loadAssets();
 /* ══ USERS TABLE ══ */
