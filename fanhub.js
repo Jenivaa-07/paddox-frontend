@@ -528,7 +528,21 @@ function openPreview(img, assetId, name) {
   if (!modal || !image || !btn) return;
 
   image.src = makeCloudinaryPreviewUrl(img);
-  image.alt = name || 'Wallpaper Preview';
+image.alt = name || 'Wallpaper Preview';
+
+/* Disable right click */
+image.oncontextmenu = e => {
+  e.preventDefault();
+  showToast('🔒 Preview image saving is disabled.');
+};
+
+/* Disable dragging */
+image.draggable = false;
+
+/* Disable selecting */
+image.style.userSelect = 'none';
+image.style.webkitUserDrag = 'none';
+image.style.pointerEvents = 'auto';
 
   if (title) title.textContent = name || 'Wallpaper Preview';
 
@@ -570,7 +584,16 @@ function makeCloudinaryPreviewUrl(url) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePreview();
 });
-
+/* ═════════ PREVIEW PROTECTION ═════════ */
+document.addEventListener('contextmenu', e => {
+  if (
+    e.target.id === 'preview-image' ||
+    e.target.closest('.preview-card')
+  ) {
+    e.preventDefault();
+    showToast('🔒 Use Download HD for full wallpaper.');
+  }
+});
 function renderWallpapersFallback() {
   const grid = document.getElementById('wp-grid');
   if (!grid || typeof WALLPAPERS === 'undefined') return;
