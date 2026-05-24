@@ -238,21 +238,79 @@
         </div>
 
         <!-- ── DIGITAL ASSETS ── -->
-        <div class="adm-page" id="adm-assets">
-          <div class="upload-zone" id="upload-zone">
-            <div class="upload-icon animate-icon">☁️</div>
-            <div class="upload-text"><strong>Drag &amp; drop files here</strong><br/>or click to browse · PNG, JPG, SVG, MP4 · Max 50MB</div>
-          </div>
-          <div class="page-toolbar" style="margin-bottom:16px">
-            <div class="toolbar-filters">
-              <select class="adm-select"><option>All Assets</option><option>Cars</option><option>Drivers</option><option>Circuits</option><option>Abstract</option></select>
-              <select class="adm-select"><option>All Access</option><option>Free</option><option>Premium</option></select>
-            </div>
-            <span class="asset-meta-info">8 assets · 240 MB used</span>
-          </div>
-          <div class="assets-grid" id="assets-grid"></div>
-        </div>
+<!-- ═══════════════════════════════════
+     ASSET UPLOAD MODAL
+═══════════════════════════════════ -->
+<div class="asset-modal" id="asset-modal">
 
+  <div class="asset-modal-card">
+
+    <div class="asset-modal-head">
+      <h2>UPLOAD WALLPAPER</h2>
+
+      <button
+        class="asset-modal-close"
+        onclick="closeAssetModal()"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="asset-form">
+
+      <input
+        type="text"
+        id="asset-name"
+        class="asset-input"
+        placeholder="Wallpaper Name"
+      />
+
+      <select
+        id="asset-category"
+        class="asset-input"
+      >
+        <option value="cars">Cars</option>
+        <option value="drivers">Drivers</option>
+        <option value="circuits">Circuits</option>
+        <option value="art">Art</option>
+        <option value="abstract">Abstract</option>
+      </select>
+
+      <select
+        id="asset-type"
+        class="asset-input"
+      >
+        <option value="free">Free</option>
+        <option value="premium">Premium</option>
+      </select>
+
+      <input
+        type="text"
+        id="asset-resolution"
+        class="asset-input"
+        value="4K"
+        placeholder="Resolution"
+      />
+
+      <input
+        type="file"
+        id="asset-file"
+        class="asset-input"
+        accept="image/*"
+      />
+
+      <button
+        class="asset-upload-btn"
+        onclick="submitAssetUpload()"
+      >
+        Upload Wallpaper
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
         <!-- ── USERS ── -->
         <div class="adm-page" id="adm-users">
           <div class="page-toolbar">

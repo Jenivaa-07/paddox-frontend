@@ -126,7 +126,7 @@ const PAGE_META = {
   assets: {
   title:'DIGITAL ASSETS',
   action:'+ Upload Asset',
-  fn:()=>document.getElementById('upload-zone')?.click()
+  fn:()=>openAssetModal()
 },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
   analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>showToast('📊 Report downloaded!') },
@@ -522,106 +522,91 @@ function previewAsset(encodedImageUrl) {
 }
 
 /* UPLOAD */
-/* UPLOAD */
-const uploadZone = document.getElementById('upload-zone');
+/* ═══════════════════════════════════
+   ASSET MODAL SYSTEM
+═══════════════════════════════════ */
 
-if (uploadZone) {
+function openAssetModal() {
+  document
+    .getElementById('asset-modal')
+    ?.classList.add('show');
+}
 
-  uploadZone.addEventListener('click', () => {
+function closeAssetModal() {
+  document
+    .getElementById('asset-modal')
+    ?.classList.remove('show');
+}
 
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
+async function submitAssetUpload() {
 
-    fileInput.onchange = async () => {
+  const file =
+    document.getElementById('asset-file').files[0];
 
-      const file = fileInput.files[0];
+  if (!file) {
+    showToast('❌ Select a file');
+    return;
+  }
 
-      if (!file) return;
+  const formData = new FormData();
 
-      /* FORM VALUES */
-      const name =
-        prompt('Wallpaper name:') ||
-        file.name.replace(/\.[^/.]+$/, '');
+  formData.append('asset', file);
 
-      const category =
-        prompt(
-          'Category?\n(cars/drivers/circuits/art/abstract)',
-          'cars'
-        ) || 'cars';
+  formData.append(
+    'name',
+    document.getElementById('asset-name').value
+  );
 
-      const type =
-        prompt(
-          'Access type?\n(free/premium)',
-          'free'
-        ) || 'free';
+  formData.append(
+    'category',
+    document.getElementById('asset-category').value
+  );
 
-      const resolution =
-        prompt(
-          'Resolution?',
-          '4K'
-        ) || '4K';
+  formData.append(
+    'type',
+    document.getElementById('asset-type').value
+  );
 
-      try {
+  formData.append(
+    'resolution',
+    document.getElementById('asset-resolution').value
+  );
 
-        showToast('⬆ Uploading asset...');
+  formData.append(
+    'description',
+    'Uploaded from PADDOX Admin'
+  );
 
-        const formData = new FormData();
+  try {
 
-        formData.append('asset', file);
+    showToast('⬆ Uploading...');
 
-        formData.append('name', name);
-
-        formData.append(
-          'description',
-          'Uploaded from PADDOX admin panel'
-        );
-
-        formData.append('category', category);
-
-        formData.append('type', type);
-
-        formData.append('resolution', resolution);
-
-        formData.append(
-          'tags',
-          JSON.stringify([
-            category,
-            type,
-            'paddox'
-          ])
-        );
-
-        const res = await fetch(
-          `${ASSET_API_BASE}/upload`,
-          {
-            method: 'POST',
-            body: formData
-          }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(
-            data.message || 'Upload failed'
-          );
-        }
-
-        showToast('🔥 Asset uploaded');
-
-        loadAssets();
-
-      } catch (err) {
-
-        console.error(err);
-
-        showToast('❌ Upload failed');
+    const res = await fetch(
+      `${ASSET_API_BASE}/upload`,
+      {
+        method:'POST',
+        body:formData
       }
-    };
+    );
 
-    fileInput.click();
-  });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message);
+    }
+
+    showToast('🔥 Wallpaper uploaded');
+
+    closeAssetModal();
+
+    loadAssets();
+
+  } catch(err) {
+
+    console.error(err);
+
+    showToast('❌ Upload failed');
+  }
 }
 /* INIT */
 loadAssets();

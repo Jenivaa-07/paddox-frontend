@@ -367,3 +367,82 @@ select.form-input option{background:var(--dark2)}
     opacity:1;
   }
 }
+/* ═══════════════════════════════════
+   ASSET MODAL
+═══════════════════════════════════ */
+
+.asset-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  backdrop-filter:blur(12px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+}
+
+.asset-modal.show{
+  display:flex;
+}
+
+.asset-modal-card{
+  width:min(500px,92vw);
+  background:#0b0b0b;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  padding:28px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+}
+
+.asset-modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.asset-modal-head h2{
+  font-family:'Bebas Neue';
+  letter-spacing:3px;
+  font-size:2rem;
+}
+
+.asset-modal-close{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:1.4rem;
+  cursor:pointer;
+}
+
+.asset-form{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.asset-input{
+  width:100%;
+  background:#111;
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+  padding:14px;
+  border-radius:14px;
+  outline:none;
+}
+
+.asset-upload-btn{
+  background:#e8002d;
+  color:#fff;
+  border:none;
+  padding:14px;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:700;
+  transition:.3s;
+}
+
+.asset-upload-btn:hover{
+  transform:translateY(-2px);
+}
