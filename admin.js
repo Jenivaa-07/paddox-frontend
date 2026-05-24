@@ -355,7 +355,17 @@ function renderAssets() {
             >
               Preview
             </button>
-
+<button
+  class="asset-btn"
+  onclick="editAsset(
+    '${asset._id}',
+    '${name}',
+    '${category}',
+    '${access}'
+  )"
+>
+  Edit
+</button>
             <button
               class="asset-btn"
               onclick="deleteAsset('${asset._id}')"
@@ -402,7 +412,49 @@ async function deleteAsset(id) {
 
   }
 }
+async function editAsset(id, name, category, type) {
 
+  const newName =
+    prompt('Wallpaper name:', name);
+
+  if (!newName) return;
+
+  try {
+
+    const res = await fetch(
+      `${ASSET_API_BASE}/${id}`,
+      {
+        method: 'PUT',
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify({
+          name: newName,
+          category,
+          type
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message);
+    }
+
+    showToast('✏️ Asset updated');
+
+    loadAssets();
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast('❌ Update failed');
+  }
+}
 /* PREVIEW */
 function previewAsset(encodedImageUrl) {
 
