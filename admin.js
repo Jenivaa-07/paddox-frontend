@@ -35,16 +35,7 @@ const ADM_USERS = [
   { name:'Nadia Roy',     email:'nadia@example.com',   tier:'Regular', orders:2, pts:1800, joined:'Apr 2025', status:'s-ina', stxt:'Inactive' },
 ];
 
-const ADM_ASSETS = [
-  { name:'Ferrari SF-25 Dawn',   cat:'Cars',     type:'Free',    img:'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400&q=80', size:'8.2 MB',  dl:1240 },
-  { name:'Max Attack Mode',      cat:'Drivers',  type:'Premium', img:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80', size:'10.1 MB', dl:890  },
-  { name:'Silverstone Aerial',   cat:'Circuits', type:'Free',    img:'https://images.unsplash.com/photo-1504197832061-98658c95b13e?w=400&q=80', size:'6.8 MB',  dl:2100 },
-  { name:'McLaren Papaya Burst', cat:'Cars',     type:'Premium', img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80',   size:'9.4 MB',  dl:670  },
-  { name:'Scuderia Fire Art',    cat:'Abstract', type:'Free',    img:'https://images.unsplash.com/photo-1541005329-22a78da1b5f0?w=400&q=80',    size:'5.2 MB',  dl:1830 },
-  { name:'Hamilton Era',         cat:'Drivers',  type:'Premium', img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80', size:'11.3 MB', dl:440  },
-  { name:'Monaco Neon Circuit',  cat:'Circuits', type:'Free',    img:'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=400&q=80',    size:'7.6 MB',  dl:2780 },
-  { name:'Golden Lap Abstract',  cat:'Abstract', type:'Premium', img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&q=80', size:'9.1 MB',  dl:320  },
-];
+
 
 const ADM_MOD = [
   { type:'Review',      user:'anonymous_fan_99',  content:'"Absolute trash, never buying again. Service is terrible and product is fake."', flag:'Spam / Hostile',   time:'2 hours ago' },
@@ -276,32 +267,242 @@ function renderInventory() {
 renderInventory();
 
 /* ══ DIGITAL ASSETS GRID ══ */
-function renderAssets() {
-  const grid = document.getElementById('assets-grid');
-  if (!grid) return;
-  grid.innerHTML = ADM_ASSETS.map(a => `
-    <div class="asset-card">
-      <div class="asset-thumb">
-        <img src="${a.img}" alt="${a.name}"
-          loading="lazy"
-          onerror="this.style.display='none';this.nextSibling.style.display='flex'"
-          style="width:100%;height:100%;object-fit:cover;transition:transform .5s,filter .4s;filter:brightness(.8)"/>
-        <div class="asset-thumb-emoji" style="display:none">🖼️</div>
-      </div>
-      <div class="asset-info">
-        <div class="asset-name">${a.name}</div>
-        <div class="asset-meta">${a.cat} · ${a.type} · ${a.size}</div>
-        <div class="asset-dl">↓ ${a.dl.toLocaleString()} downloads</div>
-        <div class="asset-actions">
-          <button class="asset-btn" onclick="showToast('Editing ${a.name}')">Edit</button>
-          <button class="asset-btn" onclick="showToast('${a.name} deleted')">Delete</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-renderAssets();
+/* ═══════════════════════════════════════
+   REAL DIGITAL ASSETS SYSTEM
+═══════════════════════════════════════ */
 
+const API_BASE = 'https://paddox-backend.onrender.com/api/assets';
+
+let REAL_ASSETS = [];
+
+/* LOAD ASSETS */
+async function loadAssets() {
+  try {
+    const res = await fetch(API_BASE);
+    const data = await res.json();
+
+    REAL_ASSETS = data.assets || [];
+
+    renderAssets();
+
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Failed to load assets');
+  }
+}
+
+/* RENDER ASSETS */
+function renderAssets() {
+
+  const grid = document.getElementById('assets-grid');
+
+  if (!grid) return;
+
+  if (!REAL_ASSETS.length) {
+    grid.innerHTML = `
+      <div style="
+        padding:40px;
+        color:#888;
+        font-family:'Barlow Condensed';
+        letter-spacing:2px;
+      ">
+        No assets uploaded yet.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = REAL_ASSETS.map(asset => {
+
+    const image =
+      asset.previewUrl ||
+      asset.image ||
+      asset.url ||
+      'https://via.placeholder.com/400x300?text=Paddox';
+
+    return `
+      <div class="asset-card">
+
+        <div class="asset-thumb">
+          <img src="${image}" alt="${asset.title}">
+        </div>
+
+        <div class="asset-info">
+
+          <div class="asset-name">
+            ${asset.title || 'Untitled'}
+          </div>
+
+          <div class="asset-meta">
+            ${asset.category || 'Wallpaper'} ·
+            ${asset.access || 'Free'}
+          </div>
+
+          <div class="asset-dl">
+            ↓ ${(asset.downloads || 0).toLocaleString()} downloads
+          </div>
+
+          <div class="asset-actions">
+
+            <button
+              class="asset-btn"
+              onclick="previewAsset('${image}')"
+            >
+              Preview
+            </button>
+
+            <button
+              class="asset-btn"
+              onclick="deleteAsset('${asset._id}')"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+  }).join('');
+}
+
+/* DELETE ASSET */
+async function deleteAsset(id) {
+
+  if (!confirm('Delete this asset?')) return;
+
+  try {
+
+    const res = await fetch(`${API_BASE}/${id}`, {
+      method: 'DELETE'
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Delete failed');
+    }
+
+    showToast('🗑️ Asset deleted');
+
+    loadAssets();
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast('❌ Failed to delete asset');
+
+  }
+}
+
+/* PREVIEW */
+function previewAsset(imageUrl) {
+
+  const modal = document.createElement('div');
+
+  modal.innerHTML = `
+    <div class="preview-overlay">
+
+      <div class="preview-card">
+
+        <button class="preview-close">
+          ✕
+        </button>
+
+        <img
+          src="${imageUrl}"
+          class="preview-image"
+        />
+
+        <div class="preview-watermark">
+          PADDOX
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('.preview-close')
+    .onclick = () => modal.remove();
+
+  modal.querySelector('.preview-overlay')
+    .onclick = e => {
+      if (e.target.classList.contains('preview-overlay')) {
+        modal.remove();
+      }
+    };
+}
+
+/* UPLOAD */
+const uploadZone = document.getElementById('upload-zone');
+
+if (uploadZone) {
+
+  uploadZone.addEventListener('click', () => {
+
+    const input = document.createElement('input');
+
+    input.type = 'file';
+
+    input.accept = 'image/*';
+
+    input.onchange = async () => {
+
+      const file = input.files[0];
+
+      if (!file) return;
+
+      try {
+
+        showToast('⬆ Uploading asset...');
+
+        const formData = new FormData();
+
+        formData.append('asset', file);
+
+        formData.append('title', file.name);
+
+        formData.append('category', 'Cars');
+
+        formData.append('access', 'Free');
+
+        const res = await fetch(
+          `${API_BASE}/upload`,
+          {
+            method: 'POST',
+            body: formData
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Upload failed');
+        }
+
+        showToast('🔥 Asset uploaded');
+
+        loadAssets();
+
+      } catch (err) {
+
+        console.error(err);
+
+        showToast('❌ Upload failed');
+      }
+    };
+    input.click();
+  });
+}
+
+/* INIT */
+loadAssets();
 /* ══ USERS TABLE ══ */
 function renderUsers() {
   const tbody = document.getElementById('users-tbody');
