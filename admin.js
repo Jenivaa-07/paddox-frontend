@@ -271,17 +271,17 @@ renderInventory();
    REAL DIGITAL ASSETS SYSTEM
 ═══════════════════════════════════════ */
 
-const API_BASE = 'https://paddox-backend.onrender.com/api/assets';
+const ASSET_API_BASE = 'https://paddox-backend.onrender.com/api/assets';
 
 let REAL_ASSETS = [];
 
 /* LOAD ASSETS */
 async function loadAssets() {
   try {
-    const res = await fetch(API_BASE);
+    const res = await fetch(ASSET_API_BASE);
     const data = await res.json();
 
-    REAL_ASSETS = data.assets || [];
+    REAL_ASSETS = Array.isArray(data.data) ? data.data : (Array.isArray(data.assets) ? data.assets : []);
 
     renderAssets();
 
@@ -316,26 +316,31 @@ function renderAssets() {
 
     const image =
       asset.previewUrl ||
+      asset.image?.url ||
       asset.image ||
       asset.url ||
       'https://via.placeholder.com/400x300?text=Paddox';
+
+    const name = asset.name || asset.title || 'Untitled';
+    const category = asset.category || 'Wallpaper';
+    const access = asset.type || asset.access || 'Free';
 
     return `
       <div class="asset-card">
 
         <div class="asset-thumb">
-          <img src="${image}" alt="${asset.title}">
+          <img src="${image}" alt="${name}">
         </div>
 
         <div class="asset-info">
 
           <div class="asset-name">
-            ${asset.title || 'Untitled'}
+            ${name}
           </div>
 
           <div class="asset-meta">
-            ${asset.category || 'Wallpaper'} ·
-            ${asset.access || 'Free'}
+            ${category} ·
+            ${access}
           </div>
 
           <div class="asset-dl">
@@ -346,7 +351,7 @@ function renderAssets() {
 
             <button
               class="asset-btn"
-              onclick="previewAsset('${image}')"
+              onclick="previewAsset('${encodeURIComponent(image)}')"
             >
               Preview
             </button>
@@ -375,7 +380,7 @@ async function deleteAsset(id) {
 
   try {
 
-    const res = await fetch(`${API_BASE}/${id}`, {
+    const res = await fetch(`${ASSET_API_BASE}/${id}`, {
       method: 'DELETE'
     });
 
@@ -399,7 +404,9 @@ async function deleteAsset(id) {
 }
 
 /* PREVIEW */
-function previewAsset(imageUrl) {
+function previewAsset(encodedImageUrl) {
+
+  const imageUrl = decodeURIComponent(encodedImageUrl || '');
 
   const modal = document.createElement('div');
 
@@ -466,19 +473,22 @@ if (uploadZone) {
 
         formData.append('asset', file);
 
-        formData.append('title', file.name);
+        formData.append('name', file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
 
-        formData.append('category', 'Cars');
+        formData.append('description', 'Uploaded from PADDOX admin panel');
 
-        formData.append('access', 'Free');
+        formData.append('category', 'cars');
 
-        const res = await fetch(
-          `${API_BASE}/upload`,
-          {
-            method: 'POST',
-            body: formData
-          }
-        );
+        formData.append('type', 'free');
+
+        formData.append('resolution', '4K');
+
+        formData.append('tags', JSON.stringify(['admin-upload', 'wallpaper']));
+
+        const res = await fetch(`${ASSET_API_BASE}/upload`, {
+          method: 'POST',
+          body: formData
+        });
 
         const data = await res.json();
 
@@ -587,11 +597,6 @@ function modAction(i, action) {
   const msgs = { approve:'✓ Content approved', remove:'✗ Content removed', warn:'⚑ User warned', ban:'🚫 User banned' };
   showToast(msgs[action] || 'Action taken');
 }
-
-/* ══ UPLOAD ZONE ══ */
-document.getElementById('upload-zone')?.addEventListener('click', () => {
-  showToast('📁 File picker opened — drag & drop or browse to upload assets');
-});
 
 /* ══ ADD PRODUCT MODAL ══ */
 function openAddModal() {
