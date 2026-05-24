@@ -450,24 +450,32 @@ async function handleWpDownload(assetId) {
 
     const data = await PaddoxAPI.asset.download(assetId);
 
+    console.log('DOWNLOAD RESPONSE:', data);
+
     if (!data.success) {
       showToast(`❌ ${data.message || 'Download failed'}`);
       return;
     }
 
-    const info = data.data;
-    const downloadUrl = info.downloadUrl || info.url;
+    /* Backend may return inside data.data OR directly */
+    const info = data.data || data;
 
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = `${(info.name || 'paddox_wallpaper').replace(/\s+/g, '_')}.jpg`;
-    link.target = '_blank';
+    /* Support both keys */
+    const downloadUrl =
+      info.downloadUrl ||
+      info.url ||
+      info.image?.url;
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!downloadUrl) {
+      console.error('Missing download URL:', info);
+      showToast('❌ Download URL missing');
+      return;
+    }
 
-    showToast(`✅ Downloading ${info.name || 'wallpaper'}`);
+    /* Open Cloudinary image */
+    window.open(downloadUrl, '_blank');
+
+    showToast(`✅ Opened ${info.name || 'wallpaper'}`);
 
   } catch (err) {
     console.error('Download failed:', err);
