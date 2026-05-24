@@ -396,6 +396,71 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>
   <script src="admin.js"></script>
+  <!-- ═══════════════════════════════
+     EDIT WALLPAPER MODAL
+═══════════════════════════════ -->
+<div class="asset-modal" id="edit-asset-modal">
+
+  <div class="asset-modal-card">
+
+    <div class="asset-modal-head">
+      <h2>EDIT WALLPAPER</h2>
+
+      <button
+        class="asset-modal-close"
+        onclick="closeEditModal()"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="asset-form">
+
+      <input
+        type="text"
+        id="edit-asset-name"
+        class="asset-input"
+        placeholder="Wallpaper Name"
+      />
+
+      <select
+        id="edit-asset-category"
+        class="asset-input"
+      >
+        <option value="cars">Cars</option>
+        <option value="drivers">Drivers</option>
+        <option value="circuits">Circuits</option>
+        <option value="art">Art</option>
+        <option value="abstract">Abstract</option>
+      </select>
+
+      <select
+        id="edit-asset-type"
+        class="asset-input"
+      >
+        <option value="free">Free</option>
+        <option value="premium">Premium</option>
+      </select>
+
+      <input
+        type="text"
+        id="edit-asset-resolution"
+        class="asset-input"
+        placeholder="Resolution"
+      />
+
+      <button
+        class="asset-upload-btn"
+        onclick="saveAssetEdit()"
+      >
+        Save Changes
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 </body>
 
 </html>
