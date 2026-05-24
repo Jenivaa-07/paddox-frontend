@@ -14,16 +14,6 @@ const ADM_ORDERS = [
   { id:'PDX-00813', customer:'Nadia Roy',      products:'Monaco Circuit Watch',   date:'May 5, 2026',  amount:'₹18,999', status:'s-ca', stxt:'Cancelled'  },
 ];
 
-const ADM_PRODUCTS = [
-  { id:1,  icon:'🧢', name:'SF-25 Podium Cap',        cat:'Apparel',      team:'Ferrari',   price:'₹2,499',  stock:48, status:'s-act', stxt:'Active' },
-  { id:2,  icon:'👕', name:'RB20 Team Tee',            cat:'Apparel',      team:'Red Bull',  price:'₹3,999',  stock:35, status:'s-act', stxt:'Active' },
-  { id:3,  icon:'🏆', name:'W15 Collector Diecast',    cat:'Collectibles', team:'Mercedes',  price:'₹8,999',  stock:6,  status:'s-act', stxt:'Active' },
-  { id:4,  icon:'🎽', name:'Fan Polo Jacket',          cat:'Apparel',      team:'Alpine',    price:'₹5,499',  stock:22, status:'s-act', stxt:'Active' },
-  { id:5,  icon:'🖼️', name:'MCL38 Speed Poster',       cat:'Posters',      team:'McLaren',   price:'₹1,299',  stock:80, status:'s-act', stxt:'Active' },
-  { id:6,  icon:'🪖', name:'F1 Helmet Replica',        cat:'Collectibles', team:'Collector', price:'₹14,999', stock:0,  status:'s-act', stxt:'Active' },
-  { id:7,  icon:'⌚', name:'Monaco Circuit Watch',     cat:'Accessories',  team:'Paddox',    price:'₹18,999', stock:4,  status:'s-act', stxt:'Active' },
-  { id:8,  icon:'📌', name:'Driver Enamel Pin Set',    cat:'Accessories',  team:'Multi',     price:'₹799',    stock:120,status:'s-act', stxt:'Active' },
-];
 
 const ADM_USERS = [
   { name:'Arjun Mehta',   email:'arjun@example.com',   tier:'Pro Fan', orders:7, pts:4820, joined:'Jan 2025', status:'s-act', stxt:'Active'   },
@@ -208,34 +198,137 @@ function renderOrders() {
 renderOrders();
 
 /* ══ PRODUCTS TABLE ══ */
+async function loadProducts() {
+
+  try {
+
+    const res =
+      await fetch(PRODUCT_API_BASE);
+
+    const data =
+      await res.json();
+
+    REAL_PRODUCTS =
+      data.data ||
+      data.products ||
+      [];
+
+    renderProducts();
+
+  } catch(err) {
+
+    console.error(err);
+
+    showToast('❌ Failed to load products');
+  }
+}
+
 function renderProducts() {
-  const tbody = document.getElementById('products-tbody');
+
+  const tbody =
+    document.getElementById('products-tbody');
+
   if (!tbody) return;
-  tbody.innerHTML = ADM_PRODUCTS.map(p => {
-    const stkColor = p.stock === 0 ? 'var(--red)' : p.stock < 10 ? 'var(--orange)' : 'var(--white)';
-    return `
+
+  if (!REAL_PRODUCTS.length) {
+
+    tbody.innerHTML = `
       <tr>
-        <td><input type="checkbox"/></td>
-        <td>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;background:var(--gray);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">${p.icon}</div>
-            <span>${p.name}</span>
-          </div>
-        </td>
-        <td style="color:var(--muted2)">${p.cat}</td>
-        <td style="color:var(--muted2)">${p.team}</td>
-        <td style="font-family:var(--font-d);font-size:1.1rem">${p.price}</td>
-        <td style="font-weight:600;color:${stkColor}">${p.stock} units</td>
-        <td><span class="sb ${p.status}">${p.stxt}</span></td>
-        <td>
-          <button class="act-btn" onclick="openAddModal()">Edit</button>
-          <button class="act-btn" onclick="showToast('✓ Product deleted')">Delete</button>
+        <td colspan="8"
+          style="
+            text-align:center;
+            padding:40px;
+            color:#777;
+          ">
+          No realtime products yet
         </td>
       </tr>
     `;
-  }).join('');
+
+    return;
+  }
+
+  tbody.innerHTML =
+    REAL_PRODUCTS.map(product => {
+
+      const image =
+        product.images?.[0]?.url ||
+        'https://via.placeholder.com/80';
+
+      return `
+        <tr>
+
+          <td>
+            <input type="checkbox"/>
+          </td>
+
+          <td>
+            <div style="
+              display:flex;
+              align-items:center;
+              gap:10px;
+            ">
+
+              <img
+                src="${image}"
+                style="
+                  width:42px;
+                  height:42px;
+                  object-fit:cover;
+                  border-radius:8px;
+                "
+              >
+
+              <span>${product.name}</span>
+            </div>
+          </td>
+
+          <td>
+            ${product.category}
+          </td>
+
+          <td>
+            ${product.team}
+          </td>
+
+          <td>
+            ₹${product.price}
+          </td>
+
+          <td>
+            ${product.stock}
+          </td>
+
+          <td>
+            <span class="sb s-act">
+              Active
+            </span>
+          </td>
+
+          <td>
+
+            <button
+              class="act-btn"
+              onclick="showToast('✏ Edit coming next')"
+            >
+              Edit
+            </button>
+
+            <button
+              class="act-btn"
+              onclick="deleteProduct('${product._id}')"
+            >
+              Delete
+            </button>
+
+          </td>
+
+        </tr>
+      `;
+    }).join('');
 }
-renderProducts();
+
+loadProducts();
 
 /* ══ INVENTORY TABLE ══ */
 function renderInventory() {
@@ -276,6 +369,10 @@ renderInventory();
 ═══════════════════════════════════════ */
 
 const ASSET_API_BASE = 'https://paddox-backend.onrender.com/api/assets';
+const PRODUCT_API_BASE =
+  'https://paddox-backend.onrender.com/api/products';
+
+let REAL_PRODUCTS = [];
 
 let REAL_ASSETS = [];
 let EDIT_ASSET_ID = null;
@@ -716,6 +813,32 @@ function showToast(msg) {
   t.classList.add('show');
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+async function deleteProduct(id) {
+
+  try {
+
+    const res =
+      await fetch(
+        `${PRODUCT_API_BASE}/${id}`,
+        {
+          method:'DELETE'
+        }
+      );
+
+    if (!res.ok)
+      throw new Error();
+
+    showToast('🔥 Product deleted');
+
+    loadProducts();
+
+  } catch(err) {
+
+    console.error(err);
+
+    showToast('❌ Delete failed');
+  }
 }
 
 /* ══ INIT LOG ══ */
