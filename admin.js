@@ -4,15 +4,6 @@
 'use strict';
 
 /* ══ DATA ══ */
-const ADM_ORDERS = [
-  { id:'PDX-00819', customer:'Arjun Mehta',   products:'SF-25 Cap, RB20 Tee',   date:'May 11, 2026', amount:'₹6,498',  status:'s-pr', stxt:'Processing' },
-  { id:'PDX-00818', customer:'Priya Sharma',   products:'SF-25 Podium Cap',       date:'May 10, 2026', amount:'₹2,499',  status:'s-sh', stxt:'Shipped'    },
-  { id:'PDX-00817', customer:'Kenji Tanaka',   products:'F1 Helmet Replica',      date:'May 9, 2026',  amount:'₹14,999', status:'s-del', stxt:'Delivered' },
-  { id:'PDX-00816', customer:'Rohan Das',      products:'RB20 Team Tee',          date:'May 8, 2026',  amount:'₹3,999',  status:'s-sh', stxt:'Shipped'    },
-  { id:'PDX-00815', customer:'Sofia García',   products:'Aston Key Ring',         date:'May 7, 2026',  amount:'₹899',    status:'s-del', stxt:'Delivered' },
-  { id:'PDX-00814', customer:'Liam Chen',      products:'McLaren Poster',         date:'May 6, 2026',  amount:'₹1,299',  status:'s-del', stxt:'Delivered' },
-  { id:'PDX-00813', customer:'Nadia Roy',      products:'Monaco Circuit Watch',   date:'May 5, 2026',  amount:'₹18,999', status:'s-ca', stxt:'Cancelled'  },
-];
 
 
 const ADM_USERS = [
@@ -183,21 +174,59 @@ function renderBarChart() {
 renderBarChart();
 
 /* ══ ORDERS TABLE ══ */
+let REAL_ORDERS = [];
+
+async function loadOrders() {
+  try {
+    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+      }
+    });
+
+    const data = await res.json();
+
+    REAL_ORDERS = data.data || data.orders || [];
+
+    renderOrders();
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Failed to load orders');
+  }
+}
+
 function renderOrders() {
   const tbody = document.getElementById('orders-tbody');
   if (!tbody) return;
-  tbody.innerHTML = ADM_ORDERS.map(o => `
+
+  if (!REAL_ORDERS.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center;padding:40px;color:#777">
+          No realtime orders yet
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = REAL_ORDERS.map(order => `
     <tr>
       <td><input type="checkbox"/></td>
-      <td class="oid">#${o.id}</td>
-      <td>${o.customer}</td>
-      <td style="color:var(--muted2);font-size:.76rem">${o.products}</td>
-      <td style="color:var(--muted2)">${o.date}</td>
-      <td style="font-family:var(--font-d);font-size:1.1rem">${o.amount}</td>
-      <td><span class="sb ${o.status}">${o.stxt}</span></td>
+      <td class="oid">#${order.orderNumber || order._id}</td>
+      <td>${order.user?.firstName || ''} ${order.user?.lastName || ''}</td>
+      <td style="color:var(--muted2);font-size:.76rem">
+        ${(order.items || []).map(i => i.name).join(', ')}
+      </td>
+      <td style="color:var(--muted2)">
+        ${new Date(order.createdAt).toLocaleDateString()}
+      </td>
+      <td style="font-family:var(--font-d);font-size:1.1rem">
+        ₹${order.pricing?.total || 0}
+      </td>
+      <td><span class="sb s-pr">${order.status}</span></td>
       <td>
-        <button class="act-btn" onclick="showToast('Viewing order #${o.id}')">View</button>
-        <button class="act-btn" onclick="showToast('Status updated for #${o.id}')">Update</button>
+        <button class="act-btn" onclick="showToast('Viewing ${order.orderNumber}')">View</button>
       </td>
     </tr>
   `).join('');
