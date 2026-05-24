@@ -238,81 +238,41 @@
         </div>
 
         <!-- ── DIGITAL ASSETS ── -->
-<!-- ═══════════════════════════════════
-     ASSET UPLOAD MODAL
-═══════════════════════════════════ -->
-<div class="asset-modal" id="asset-modal">
+        <div class="adm-page" id="adm-assets">
+          <div class="upload-zone" id="upload-zone" onclick="openAssetModal()">
+            <div class="upload-icon animate-icon">☁️</div>
+            <div class="upload-text">
+              <strong>Click to upload wallpaper</strong><br/>
+              PNG, JPG, SVG · Max 50MB
+            </div>
+          </div>
 
-  <div class="asset-modal-card">
+          <div class="page-toolbar" style="margin-bottom:16px">
+            <div class="toolbar-filters">
+              <select class="adm-select" id="asset-category-filter">
+                <option value="all">All Assets</option>
+                <option value="cars">Cars</option>
+                <option value="drivers">Drivers</option>
+                <option value="circuits">Circuits</option>
+                <option value="art">Art</option>
+                <option value="abstract">Abstract</option>
+              </select>
 
-    <div class="asset-modal-head">
-      <h2>UPLOAD WALLPAPER</h2>
+              <select class="adm-select" id="asset-type-filter">
+                <option value="all">All Access</option>
+                <option value="free">Free</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
 
-      <button
-        class="asset-modal-close"
-        onclick="closeAssetModal()"
-      >
-        ✕
-      </button>
-    </div>
+            <span class="asset-meta-info" id="asset-meta-info">Realtime Cloudinary Assets</span>
+          </div>
 
-    <div class="asset-form">
+          <div class="assets-grid" id="assets-grid"></div>
+        </div>
 
-      <input
-        type="text"
-        id="asset-name"
-        class="asset-input"
-        placeholder="Wallpaper Name"
-      />
-
-      <select
-        id="asset-category"
-        class="asset-input"
-      >
-        <option value="cars">Cars</option>
-        <option value="drivers">Drivers</option>
-        <option value="circuits">Circuits</option>
-        <option value="art">Art</option>
-        <option value="abstract">Abstract</option>
-      </select>
-
-      <select
-        id="asset-type"
-        class="asset-input"
-      >
-        <option value="free">Free</option>
-        <option value="premium">Premium</option>
-      </select>
-
-      <input
-        type="text"
-        id="asset-resolution"
-        class="asset-input"
-        value="4K"
-        placeholder="Resolution"
-      />
-
-      <input
-        type="file"
-        id="asset-file"
-        class="asset-input"
-        accept="image/*"
-      />
-
-      <button
-        class="asset-upload-btn"
-        onclick="submitAssetUpload()"
-      >
-        Upload Wallpaper
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
         <!-- ── USERS ── -->
-        <div class="adm-page" id="adm-users">
+        <div class="adm-page" id="adm-users"><div class="adm-page" id="adm-assets"></div>
           <div class="page-toolbar">
             <div class="toolbar-filters">
               <select class="adm-select"><option>All Users</option><option>Pro Fan</option><option>Regular</option><option>New</option></select>
@@ -362,6 +322,41 @@
       </div><!-- /adm-pages -->
     </div><!-- /admin-main -->
   </div><!-- /admin-layout -->
+
+  <!-- ═══════════════════════════════════
+       ASSET UPLOAD MODAL
+  ═══════════════════════════════════ -->
+  <div class="asset-modal" id="asset-modal">
+    <div class="asset-modal-card">
+      <div class="asset-modal-head">
+        <h2>UPLOAD WALLPAPER</h2>
+        <button class="asset-modal-close" onclick="closeAssetModal()">✕</button>
+      </div>
+
+      <div class="asset-form">
+        <input type="text" id="asset-name" class="asset-input" placeholder="Wallpaper Name"/>
+
+        <select id="asset-category" class="asset-input">
+          <option value="cars">Cars</option>
+          <option value="drivers">Drivers</option>
+          <option value="circuits">Circuits</option>
+          <option value="art">Art</option>
+          <option value="abstract">Abstract</option>
+        </select>
+
+        <select id="asset-type" class="asset-input">
+          <option value="free">Free</option>
+          <option value="premium">Premium</option>
+        </select>
+
+        <input type="text" id="asset-resolution" class="asset-input" value="4K" placeholder="Resolution"/>
+
+        <input type="file" id="asset-file" class="asset-input" accept="image/*"/>
+
+        <button class="asset-upload-btn" onclick="submitAssetUpload()">Upload Wallpaper</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ── ADD PRODUCT MODAL ── -->
   <div class="modal-overlay" id="add-modal">
