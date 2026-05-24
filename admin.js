@@ -408,6 +408,7 @@ async function deleteAsset(id) {
     showToast('🗑️ Asset deleted');
 
     loadAssets();
+    setInterval(loadAssets, 15000);
 
   } catch (err) {
 

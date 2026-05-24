@@ -500,6 +500,9 @@ async function handleWpDownload(assetId) {
 
     closePreview();
     showToast(`✅ Downloading ${name}`);
+    setTimeout(() => {
+  renderWallpapers();
+}, 1200);
 
   } catch (err) {
     console.error('Download failed:', err);
