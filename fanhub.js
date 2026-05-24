@@ -571,7 +571,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePreview();
 });
 
-function renderWallpapersFallbackfunction renderWallpapersFallback() {
+function renderWallpapersFallback() {
   const grid = document.getElementById('wp-grid');
   if (!grid || typeof WALLPAPERS === 'undefined') return;
 
