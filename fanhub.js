@@ -746,108 +746,563 @@ function setQuote(i){qIdx=i;renderQuotes()}
 renderQuotes();
 setInterval(()=>setQuote((qIdx+1)%QUOTES.length),7000);
 
-/* ══ COMMUNITY ══ */
+/* ══ COMMUNITY — REALTIME ══ */
+const FAN_API_BASE =
+  'https://paddox-backend.onrender.com/api/fan';
+
+let CURRENT_POLL = null;
+let CURRENT_TRIVIA = null;
+let TRIVIA_ANSWERED = false;
+let LIVE_FEED_POSTS = [];
+
+function fanToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+function fanAuthHeaders(json = false) {
+  const token = fanToken();
+
+  return {
+    ...(json ? { 'Content-Type': 'application/json' } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  };
+}
+
+function fanLoginRequired() {
+  showToast('🔐 Please login to use Fan Hub actions');
+
+  setTimeout(() => {
+    window.location.href = 'account.html';
+  }, 900);
+}
+
+function timeAgo(dateValue) {
+  if (!dateValue) return 'Just now';
+
+  const diff = Date.now() - new Date(dateValue).getTime();
+
+  if (diff < 60000) return 'Just now';
+
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
 /* Poll */
-const POLL = { q:"Who will win the 2025 Drivers' Championship?",
-  opts:[{lbl:'Max Verstappen 🔵',pct:42},{lbl:'Charles Leclerc 🔴',pct:24},{lbl:'Lando Norris 🟠',pct:19},{lbl:'Lewis Hamilton ⭐',pct:15}]};
-let pollVoted=false;
-function renderPoll(){
-  const qEl=document.getElementById('poll-q'),optsEl=document.getElementById('poll-opts'),metaEl=document.getElementById('poll-meta');
-  if(qEl) qEl.textContent=POLL.q;
-  if(optsEl) optsEl.innerHTML=POLL.opts.map((o,i)=>`
-    <div class="popt" onclick="votePoll(${i})">
-      <div class="popt-fill" style="width:${pollVoted?o.pct:0}%"></div>
-      <span class="popt-lbl">${o.lbl}</span>
-      ${pollVoted?`<span class="popt-pct">${o.pct}%</span>`:''}
-    </div>
-  `).join('');
-  if(metaEl) metaEl.textContent='84,312 votes · Updated live';
+async function loadFanPoll() {
+  const qEl = document.getElementById('poll-q');
+  const optsEl = document.getElementById('poll-opts');
+  const metaEl = document.getElementById('poll-meta');
+
+  if (!qEl || !optsEl) return;
+
+  qEl.textContent = 'Loading fan poll...';
+  optsEl.innerHTML = '';
+
+  try {
+    const data = await PaddoxAPI.fan.getPoll();
+
+    if (!data.success) {
+      throw new Error(data.message || 'No active poll');
+    }
+
+    CURRENT_POLL = data.data?.poll || data.poll;
+    const totalVotes = data.data?.totalVotes || data.totalVotes || 0;
+
+    renderRealtimePoll(CURRENT_POLL, totalVotes);
+
+  } catch (err) {
+    console.warn(err);
+
+    qEl.textContent = 'No active poll right now';
+    optsEl.innerHTML = `
+      <div class="poll-empty">
+        Admin can create a poll later.
+      </div>
+    `;
+    if (metaEl) metaEl.textContent = 'Realtime poll inactive';
+  }
 }
-function votePoll(i){
-  if(pollVoted) return; pollVoted=true;
-  POLL.opts[i].pct=Math.min(POLL.opts[i].pct+3,100);
-  renderPoll(); showToast('✓ Vote registered! Thanks for participating.');
+
+function renderRealtimePoll(poll, totalVotes = 0) {
+  const qEl = document.getElementById('poll-q');
+  const optsEl = document.getElementById('poll-opts');
+  const metaEl = document.getElementById('poll-meta');
+
+  if (!poll || !qEl || !optsEl) return;
+
+  qEl.textContent = poll.question || 'Fan Poll';
+
+  optsEl.innerHTML = (poll.options || []).map((option, index) => {
+    const pct =
+      option.percentage ??
+      (totalVotes > 0 ? Math.round((Number(option.votes || 0) / totalVotes) * 100) : 0);
+
+    return `
+      <div class="popt" onclick="voteRealtimePoll(${index})">
+        <div class="popt-fill" style="width:${pct}%"></div>
+        <span class="popt-lbl">${option.label}</span>
+        <span class="popt-pct">${pct}%</span>
+      </div>
+    `;
+  }).join('');
+
+  if (metaEl) {
+    metaEl.textContent =
+      `${Number(totalVotes || 0).toLocaleString('en-IN')} votes · Realtime MongoDB poll`;
+  }
 }
-renderPoll();
+
+async function voteRealtimePoll(optionIndex) {
+  try {
+    if (!fanToken()) {
+      fanLoginRequired();
+      return;
+    }
+
+    if (!CURRENT_POLL?._id) {
+      showToast('❌ Poll not ready');
+      return;
+    }
+
+    showToast('⏳ Recording vote...');
+
+    const data = await PaddoxAPI.fan.vote(
+      CURRENT_POLL._id,
+      optionIndex
+    );
+
+    if (!data.success) {
+      throw new Error(data.message || 'Vote failed');
+    }
+
+    CURRENT_POLL.options =
+      data.data?.options ||
+      data.options ||
+      CURRENT_POLL.options;
+
+    renderRealtimePoll(
+      CURRENT_POLL,
+      data.data?.totalVotes || data.totalVotes || 0
+    );
+
+    showToast(data.message || '🔥 Vote recorded! +50 Fan Points');
+
+    loadFanLeaderboard();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
 
 /* Leaderboard */
-const LB=[{r:1,n:'Arjun Mehta',pts:4820,badge:'Season MVP'},{r:2,n:'Priya Sharma',pts:4210,badge:'Trivia King'},{r:3,n:'Rohan Das',pts:3980,badge:'Collector'},{r:4,n:'Kenji Tanaka',pts:3450,badge:''},{r:5,n:'Sofia García',pts:3120,badge:''}];
-const lbEl=document.getElementById('lb-list');
-if(lbEl) lbEl.innerHTML=LB.map(l=>`
-  <div class="lb-row">
-    <span class="lb-rank ${l.r===1?'g':l.r===2?'s':l.r===3?'b':''}">${l.r===1?'🥇':l.r===2?'🥈':l.r===3?'🥉':l.r}</span>
-    <span style="font-size:1.3rem">👤</span>
-    <span class="lb-n">${l.n}</span>
-    ${l.badge?`<span class="lb-badge">${l.badge}</span>`:''}
-    <span class="lb-p">${l.pts.toLocaleString()} pts</span>
-  </div>
-`).join('');
+async function loadFanLeaderboard() {
+  const lbEl = document.getElementById('lb-list');
+
+  if (!lbEl) return;
+
+  lbEl.innerHTML = `
+    <div class="lb-empty">
+      Loading leaderboard...
+    </div>
+  `;
+
+  try {
+    const data = await PaddoxAPI.fan.leaderboard();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Leaderboard failed');
+    }
+
+    const leaderboard =
+      data.data?.leaderboard ||
+      data.leaderboard ||
+      [];
+
+    if (!leaderboard.length) {
+      lbEl.innerHTML = `
+        <div class="lb-empty">
+          No fan points yet.
+        </div>
+      `;
+      return;
+    }
+
+    lbEl.innerHTML = leaderboard.slice(0, 8).map(user => {
+      const medal =
+        user.rank === 1 ? '🥇' :
+        user.rank === 2 ? '🥈' :
+        user.rank === 3 ? '🥉' :
+        user.rank;
+
+      return `
+        <div class="lb-row">
+          <span class="lb-rank ${user.rank === 1 ? 'g' : user.rank === 2 ? 's' : user.rank === 3 ? 'b' : ''}">
+            ${medal}
+          </span>
+
+          <span style="
+            width:28px;
+            height:28px;
+            border-radius:50%;
+            overflow:hidden;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            background:#151515;
+            font-size:1.1rem;
+          ">
+            ${
+              user.avatar
+                ? `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover">`
+                : '👤'
+            }
+          </span>
+
+          <span class="lb-n">${user.name || 'Paddox Fan'}</span>
+
+          ${
+            user.fanTier
+              ? `<span class="lb-badge">${user.fanTier}</span>`
+              : ''
+          }
+
+          <span class="lb-p">${Number(user.fanPoints || 0).toLocaleString('en-IN')} pts</span>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error(err);
+
+    lbEl.innerHTML = `
+      <div class="lb-empty">
+        Could not load leaderboard.
+      </div>
+    `;
+  }
+}
 
 /* Trivia */
-let tIdx=0,tAnswered=false;
-function renderTrivia(){
-  tAnswered=false; const t=TRIVIA[tIdx];
-  const qEl=document.getElementById('triv-q'),optsEl=document.getElementById('triv-opts'),
-        resEl=document.getElementById('triv-res'),nextBtn=document.getElementById('triv-next');
-  if(qEl) qEl.textContent=`Q${tIdx+1}. ${t.q}`;
-  if(optsEl) optsEl.innerHTML=t.opts.map((o,i)=>`<button class="topt" onclick="answerTrivia(${i})">${o}</button>`).join('');
-  if(resEl){resEl.style.display='none';resEl.textContent=''}
-  if(nextBtn) nextBtn.style.display='none';
-}
-function answerTrivia(i){
-  if(tAnswered) return; tAnswered=true;
-  const t=TRIVIA[tIdx];
-  document.querySelectorAll('.topt').forEach((b,j)=>{
-    if(j===t.correct) b.classList.add('correct');
-    else if(j===i&&i!==t.correct) b.classList.add('wrong');
-    b.disabled=true;
-  });
-  const resEl=document.getElementById('triv-res'),nextBtn=document.getElementById('triv-next');
-  if(resEl){
-    resEl.style.display='block';
-    resEl.style.color=i===t.correct?'#00e000':'var(--red)';
-    resEl.textContent=i===t.correct?'✓ Correct! +100 Fan Points':'✗ Wrong! Answer: '+t.opts[t.correct];
+async function loadRealtimeTrivia() {
+  const qEl = document.getElementById('triv-q');
+  const optsEl = document.getElementById('triv-opts');
+  const resEl = document.getElementById('triv-res');
+  const nextBtn = document.getElementById('triv-next');
+
+  if (!qEl || !optsEl) return;
+
+  TRIVIA_ANSWERED = false;
+  CURRENT_TRIVIA = null;
+
+  qEl.textContent = 'Loading trivia...';
+  optsEl.innerHTML = '';
+  if (resEl) {
+    resEl.style.display = 'none';
+    resEl.textContent = '';
   }
-  if(nextBtn) nextBtn.style.display='block';
+  if (nextBtn) nextBtn.style.display = 'none';
+
+  try {
+    const data = await PaddoxAPI.fan.getTrivia();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Trivia unavailable');
+    }
+
+    CURRENT_TRIVIA =
+      data.data?.trivia ||
+      data.trivia;
+
+    renderRealtimeTrivia();
+
+  } catch (err) {
+    console.warn(err);
+
+    qEl.textContent = 'No trivia question available';
+    optsEl.innerHTML = `
+      <div class="triv-empty">
+        Admin can add trivia questions later.
+      </div>
+    `;
+  }
 }
-document.getElementById('triv-next')?.addEventListener('click',()=>{tIdx=(tIdx+1)%TRIVIA.length;renderTrivia()});
-renderTrivia();
+
+function renderRealtimeTrivia() {
+  const qEl = document.getElementById('triv-q');
+  const optsEl = document.getElementById('triv-opts');
+  const resEl = document.getElementById('triv-res');
+  const nextBtn = document.getElementById('triv-next');
+
+  if (!CURRENT_TRIVIA || !qEl || !optsEl) return;
+
+  const points =
+    Number(CURRENT_TRIVIA.points || 100);
+
+  qEl.textContent =
+    `${CURRENT_TRIVIA.question} (${points} pts)`;
+
+  optsEl.innerHTML =
+    (CURRENT_TRIVIA.options || []).map((option, index) => `
+      <button
+        class="topt"
+        onclick="answerRealtimeTrivia(${index})"
+      >
+        ${option}
+      </button>
+    `).join('');
+
+  if (resEl) {
+    resEl.style.display = 'none';
+    resEl.textContent = '';
+  }
+
+  if (nextBtn) {
+    nextBtn.style.display = 'none';
+  }
+}
+
+async function answerRealtimeTrivia(answerIndex) {
+  if (TRIVIA_ANSWERED) return;
+
+  try {
+    TRIVIA_ANSWERED = true;
+
+    const resEl = document.getElementById('triv-res');
+    const nextBtn = document.getElementById('triv-next');
+
+    const data = await PaddoxAPI.fan.answerTrivia(
+      CURRENT_TRIVIA._id,
+      answerIndex
+    );
+
+    if (!data.success) {
+      throw new Error(data.message || 'Answer failed');
+    }
+
+    const result = data.data || data;
+    const correctIndex = result.correctIndex;
+
+    document.querySelectorAll('.topt').forEach((btn, index) => {
+      if (index === correctIndex) {
+        btn.classList.add('correct');
+      } else if (index === answerIndex && !result.correct) {
+        btn.classList.add('wrong');
+      }
+    });
+
+    if (resEl) {
+      resEl.style.display = 'block';
+      resEl.style.color = result.correct ? '#00e000' : 'var(--red)';
+      resEl.textContent =
+        result.correct
+          ? `✓ Correct! +${result.pointsEarned || 0} Fan Points`
+          : `✗ Wrong! Answer: ${result.correctAnswer}`;
+    }
+
+    if (nextBtn) nextBtn.style.display = 'block';
+
+    if (result.correct) {
+      loadFanLeaderboard();
+    }
+
+  } catch (err) {
+    console.error(err);
+    TRIVIA_ANSWERED = false;
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+document
+  .getElementById('triv-next')
+  ?.addEventListener('click', loadRealtimeTrivia);
 
 /* Live Feed */
-const FEED=[
-  {av:'👤',user:'Arjun_F1Fan',   txt:'That Leclerc qualifying lap in Monaco was UNBELIEVABLE 🔥 Absolute masterclass',time:'2m ago'},
-  {av:'👤',user:'PriyaRaces',    txt:'Just received my Ferrari SF-25 cap from Paddox! Quality is insane ⭐',         time:'5m ago'},
-  {av:'👤',user:'RedBullRohan',  txt:'Verstappen to win Monaco? History says no, but Max doesn\'t care about history 😤',time:'8m ago'},
-  {av:'👤',user:'McLarenMike',   txt:'Norris in P3 after FP2 — papaya is looking strong this weekend! 🟠',           time:'12m ago'},
-  {av:'👤',user:'F1Forever',     txt:'Just unlocked the Monaco Circuit wallpaper pack. Absolutely stunning art! 🖼️',  time:'17m ago'},
-];
-const feedEl=document.getElementById('live-feed');
-if(feedEl) feedEl.innerHTML=FEED.map(f=>`
-  <div class="feed-item">
-    <div class="feed-av">${f.av}</div>
-    <div>
-      <div class="feed-user">@${f.user}</div>
-      <div class="feed-txt">${f.txt}</div>
-      <div class="feed-time">${f.time}</div>
-    </div>
-  </div>
-`).join('');
+function renderFanFeed(posts = LIVE_FEED_POSTS) {
+  const feedEl = document.getElementById('live-feed');
 
-/* Simulate new feed items */
-const newFeedItems=[
-  {av:'👤',user:'SpeedKing_99',   txt:'Just got my Monaco Circuit Watch from Paddox — absolutely premium quality! 🏁',time:'Just now'},
-  {av:'👤',user:'TifosiFan',      txt:'Leclerc pole in Monaco would be pure cinema 🎬 Come on Charles!',             time:'Just now'},
-  {av:'👤',user:'F1DataNerd',     txt:'Verstappen\'s wet weather stat of 96 is genuinely absurd. GOAT tier 📊',       time:'Just now'},
-];
-let feedIdx=0;
-setInterval(()=>{
-  if(!feedEl) return;
-  const item=newFeedItems[feedIdx%newFeedItems.length]; feedIdx++;
-  const div=document.createElement('div'); div.className='feed-item';
-  div.innerHTML=`<div class="feed-av">${item.av}</div><div><div class="feed-user">@${item.user}</div><div class="feed-txt">${item.txt}</div><div class="feed-time">${item.time}</div></div>`;
-  feedEl.insertBefore(div,feedEl.firstChild);
-  if(feedEl.children.length>8) feedEl.removeChild(feedEl.lastChild);
-},8000);
+  if (!feedEl) return;
+
+  if (!posts.length) {
+    feedEl.innerHTML = `
+      <div class="feed-empty">
+        No fan posts yet. Be the first on the grid.
+      </div>
+    `;
+    return;
+  }
+
+  feedEl.innerHTML = posts.map(post => {
+    const user = post.user || {};
+    const name =
+      `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+      post.userName ||
+      'Paddox Fan';
+
+    const avatar =
+      user.avatar?.url ||
+      post.avatar ||
+      '';
+
+    return `
+      <div class="feed-item">
+        <div class="feed-av">
+          ${
+            avatar && avatar.startsWith('http')
+              ? `<img src="${avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+              : '👤'
+          }
+        </div>
+
+        <div>
+          <div class="feed-user">@${name.replace(/\s+/g, '')}</div>
+          <div class="feed-txt">${post.text || ''}</div>
+          <div class="feed-time">${timeAgo(post.createdAt)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadFanFeed() {
+  try {
+    const data = await PaddoxAPI.fan.feed();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Feed failed');
+    }
+
+    LIVE_FEED_POSTS =
+      data.data?.posts ||
+      data.posts ||
+      [];
+
+    renderFanFeed();
+
+  } catch (err) {
+    console.error(err);
+    renderFanFeed([]);
+  }
+}
+
+async function submitFanPost() {
+  const input = document.getElementById('feed-post-input');
+
+  if (!input) return;
+
+  const text = input.value.trim();
+
+  if (!text) {
+    showToast('⚠️ Write something first');
+    return;
+  }
+
+  if (!fanToken()) {
+    fanLoginRequired();
+    return;
+  }
+
+  try {
+    showToast('⏳ Posting to live feed...');
+
+    const data = await PaddoxAPI.fan.post(text);
+
+    if (!data.success) {
+      throw new Error(data.message || 'Post failed');
+    }
+
+    input.value = '';
+    updateFeedCharCount();
+
+    showToast(data.message || '🔥 Posted! +20 Fan Points');
+
+    await loadFanFeed();
+    await loadFanLeaderboard();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function updateFeedCharCount() {
+  const input = document.getElementById('feed-post-input');
+  const count = document.getElementById('feed-char-count');
+
+  if (!input || !count) return;
+
+  count.textContent =
+    `${input.value.length}/280`;
+}
+
+document
+  .getElementById('feed-post-btn')
+  ?.addEventListener('click', submitFanPost);
+
+document
+  .getElementById('feed-post-input')
+  ?.addEventListener('input', updateFeedCharCount);
+
+document
+  .getElementById('feed-post-input')
+  ?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      submitFanPost();
+    }
+  });
+
+/* Socket live updates */
+try {
+  if (typeof io !== 'undefined') {
+    const socket = io('https://paddox-backend.onrender.com');
+
+    socket.on('fan:new-post', post => {
+      LIVE_FEED_POSTS.unshift({
+        text: post.text,
+        userName: post.user,
+        avatar: post.avatar,
+        createdAt: new Date().toISOString()
+      });
+
+      LIVE_FEED_POSTS = LIVE_FEED_POSTS.slice(0, 20);
+      renderFanFeed();
+    });
+
+    socket.on('poll:vote-update', payload => {
+      if (!CURRENT_POLL || payload.pollId !== CURRENT_POLL._id) return;
+
+      CURRENT_POLL.options = payload.options;
+      renderRealtimePoll(CURRENT_POLL, payload.totalVotes);
+    });
+  }
+} catch (err) {
+  console.warn('Fan socket unavailable', err);
+}
+
+async function initRealtimeCommunity() {
+  await Promise.allSettled([
+    loadFanPoll(),
+    loadFanLeaderboard(),
+    loadRealtimeTrivia(),
+    loadFanFeed()
+  ]);
+
+  updateFeedCharCount();
+}
+
+initRealtimeCommunity();
+
 
 /* ══ ICON ANIMATIONS ══ */
 document.querySelectorAll('.animate-icon').forEach((icon,i)=>{
