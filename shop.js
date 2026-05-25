@@ -671,70 +671,16 @@ document.getElementById('cart-overlay')?.addEventListener('click', () => toggleC
 document.getElementById('cart-close')?.addEventListener('click', () => toggleCart(false));
 document.getElementById('continue-btn')?.addEventListener('click', () => toggleCart(false));
 
-// REPLACE placeDemoOrder() WITH THIS
 
 async function placeRealOrder() {
-
-  try {
-
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      showToast('⚠ Please login first');
-      window.location.href = 'account.html';
-      return;
-    }
-
-    if (!cart.length) {
-      showToast('⚠ Cart is empty');
-      return;
-    }
-
-    const orderPayload = {
-      items: cart.map(item => ({
-        product: item.id,
-        quantity: item.qty || 1
-      }))
-    };
-
-    const res = await fetch(
-      'https://paddox-backend.onrender.com/api/orders',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(orderPayload)
-      }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || 'Order failed');
-    }
-
-    cart = [];
-    sessionStorage.removeItem('paddox_cart');
-
-    updateCartUI();
-
-    showToast('🔥 Order placed successfully');
-
-    setTimeout(() => {
-      window.location.href = 'account.html';
-    }, 1500);
-
-  } catch(err) {
-
-    console.error(err);
-
-    showToast('❌ Failed to place order');
+  if (!cart.length) {
+    showToast('❌ Cart is empty');
+    return;
   }
-}
 
-  const token = localStorage.getItem('paddox_access_token');
+  const token =
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('token');
 
   if (!token) {
     showToast('🔐 Please login first');
@@ -756,41 +702,45 @@ async function placeRealOrder() {
       body: JSON.stringify({
         items: cart.map(item => ({
           product: item.id,
-          quantity: item.qty,
+          quantity: item.qty || 1,
           size: 'M'
         })),
         shippingAddress: {
           name: 'Paddox Fan',
-          line1: 'Test Address',
+          line1: 'Demo Address',
           city: 'Chennai',
           state: 'Tamil Nadu',
           pincode: '600001',
           phone: '9876543210',
           country: 'India'
         },
-        paymentMethod: 'razorpay',
+        paymentMethod: 'cod',
         notes: 'Demo checkout from shop page'
       })
     });
 
     const data = await res.json();
 
-    if (!res.ok || !data.success) {
+    if (!res.ok || data.success === false) {
       throw new Error(data.message || 'Order failed');
     }
 
     cart = [];
     saveCart();
     toggleCart(false);
-
     showToast('🔥 Order placed successfully');
+
+    setTimeout(() => {
+      window.location.href = 'account.html';
+    }, 1200);
 
   } catch (err) {
     console.error(err);
     showToast(`❌ ${err.message}`);
   }
 }
-document.getElementById('checkout-btn')?.addEventListener('click', placeDemoOrder);
+
+document.getElementById('checkout-btn')?.addEventListener('click', placeRealOrder);
 updateCartUI();
 
 /* ══════════════════════════════════════

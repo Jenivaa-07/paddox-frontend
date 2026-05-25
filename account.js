@@ -470,13 +470,13 @@ function showToast(msg){
 }
 
 const ACCOUNT_API =
-  'https://paddox-backend.onrender.com/api/orders/my-orders';
+  'https://paddox-backend.onrender.com/api/orders';
 
 async function loadMyOrders() {
 
   try {
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('paddox_access_token') || localStorage.getItem('token');
 
     if (!token) return;
 

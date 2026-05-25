@@ -164,9 +164,12 @@
               </div>
               <table class="mini-table">
                 <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
-                  <tbody id="products-tbody">
-                  </tbody>
-                
+                <tbody>
+                  <tr><td class="oid">#PDX-00819</td><td>Arjun Mehta</td><td>₹6,498</td><td><span class="sb s-pr">Processing</span></td></tr>
+                  <tr><td class="oid">#PDX-00818</td><td>Priya Sharma</td><td>₹2,499</td><td><span class="sb s-sh">Shipped</span></td></tr>
+                  <tr><td class="oid">#PDX-00817</td><td>Kenji Tanaka</td><td>₹14,999</td><td><span class="sb s-del">Delivered</span></td></tr>
+                  <tr><td class="oid">#PDX-00816</td><td>Rohan Das</td><td>₹3,999</td><td><span class="sb s-sh">Shipped</span></td></tr>
+                </tbody>
               </table>
             </div>
             <div class="table-card reveal-up delay-1">
@@ -236,40 +239,22 @@
 
         <!-- ── DIGITAL ASSETS ── -->
         <div class="adm-page" id="adm-assets">
-          <div class="upload-zone" id="upload-zone" onclick="openAssetModal()">
+          <div class="upload-zone" id="upload-zone">
             <div class="upload-icon animate-icon">☁️</div>
-            <div class="upload-text">
-              <strong>Click to upload wallpaper</strong><br/>
-              PNG, JPG, SVG · Max 50MB
-            </div>
+            <div class="upload-text"><strong>Drag &amp; drop files here</strong><br/>or click to browse · PNG, JPG, SVG, MP4 · Max 50MB</div>
           </div>
-
           <div class="page-toolbar" style="margin-bottom:16px">
             <div class="toolbar-filters">
-              <select class="adm-select" id="asset-category-filter">
-                <option value="all">All Assets</option>
-                <option value="cars">Cars</option>
-                <option value="drivers">Drivers</option>
-                <option value="circuits">Circuits</option>
-                <option value="art">Art</option>
-                <option value="abstract">Abstract</option>
-              </select>
-
-              <select class="adm-select" id="asset-type-filter">
-                <option value="all">All Access</option>
-                <option value="free">Free</option>
-                <option value="premium">Premium</option>
-              </select>
+              <select class="adm-select"><option>All Assets</option><option>Cars</option><option>Drivers</option><option>Circuits</option><option>Abstract</option></select>
+              <select class="adm-select"><option>All Access</option><option>Free</option><option>Premium</option></select>
             </div>
-
-            <span class="asset-meta-info" id="asset-meta-info">Realtime Cloudinary Assets</span>
+            <span class="asset-meta-info">8 assets · 240 MB used</span>
           </div>
-
           <div class="assets-grid" id="assets-grid"></div>
         </div>
 
         <!-- ── USERS ── -->
-        <div class="adm-page" id="adm-users"><div class="adm-page" id="adm-assets"></div>
+        <div class="adm-page" id="adm-users">
           <div class="page-toolbar">
             <div class="toolbar-filters">
               <select class="adm-select"><option>All Users</option><option>Pro Fan</option><option>Regular</option><option>New</option></select>
@@ -320,41 +305,6 @@
     </div><!-- /admin-main -->
   </div><!-- /admin-layout -->
 
-  <!-- ═══════════════════════════════════
-       ASSET UPLOAD MODAL
-  ═══════════════════════════════════ -->
-  <div class="asset-modal" id="asset-modal">
-    <div class="asset-modal-card">
-      <div class="asset-modal-head">
-        <h2>UPLOAD WALLPAPER</h2>
-        <button class="asset-modal-close" onclick="closeAssetModal()">✕</button>
-      </div>
-
-      <div class="asset-form">
-        <input type="text" id="asset-name" class="asset-input" placeholder="Wallpaper Name"/>
-
-        <select id="asset-category" class="asset-input">
-          <option value="cars">Cars</option>
-          <option value="drivers">Drivers</option>
-          <option value="circuits">Circuits</option>
-          <option value="art">Art</option>
-          <option value="abstract">Abstract</option>
-        </select>
-
-        <select id="asset-type" class="asset-input">
-          <option value="free">Free</option>
-          <option value="premium">Premium</option>
-        </select>
-
-        <input type="text" id="asset-resolution" class="asset-input" value="4K" placeholder="Resolution"/>
-
-        <input type="file" id="asset-file" class="asset-input" accept="image/*"/>
-
-        <button class="asset-upload-btn" onclick="submitAssetUpload()">Upload Wallpaper</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ── ADD PRODUCT MODAL ── -->
   <div class="modal-overlay" id="add-modal">
     <div class="modal-box">
@@ -380,7 +330,7 @@
       </div>
       <div class="modal-footer">
         <button class="adm-btn-ghost" onclick="closeAddModal()">Cancel</button>
-        <button class="adm-btn-red" onclick="closeAddModal();showToast('✓ Product added successfully!')">Save Product</button>
+        <button class="adm-btn-red" onclick="submitProduct()">Save Product</button>
       </div>
     </div>
   </div>
@@ -388,76 +338,9 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  
-  <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>
   <script src="admin.js"></script>
-  <!-- ═══════════════════════════════
-     EDIT WALLPAPER MODAL
-═══════════════════════════════ -->
-<div class="asset-modal" id="edit-asset-modal">
-
-  <div class="asset-modal-card">
-
-    <div class="asset-modal-head">
-      <h2>EDIT WALLPAPER</h2>
-
-      <button
-        class="asset-modal-close"
-        onclick="closeEditModal()"
-      >
-        ✕
-      </button>
-    </div>
-
-    <div class="asset-form">
-
-      <input
-        type="text"
-        id="edit-asset-name"
-        class="asset-input"
-        placeholder="Wallpaper Name"
-      />
-
-      <select
-        id="edit-asset-category"
-        class="asset-input"
-      >
-        <option value="cars">Cars</option>
-        <option value="drivers">Drivers</option>
-        <option value="circuits">Circuits</option>
-        <option value="art">Art</option>
-        <option value="abstract">Abstract</option>
-      </select>
-
-      <select
-        id="edit-asset-type"
-        class="asset-input"
-      >
-        <option value="free">Free</option>
-        <option value="premium">Premium</option>
-      </select>
-
-      <input
-        type="text"
-        id="edit-asset-resolution"
-        class="asset-input"
-        placeholder="Resolution"
-      />
-
-      <button
-        class="asset-upload-btn"
-        onclick="saveAssetEdit()"
-      >
-        Save Changes
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
+  <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
-
 </html>

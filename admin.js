@@ -139,7 +139,6 @@ if (id === 'orders') {
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
-
 // AUTO REFRESH
 setInterval(() => {
   loadOrders();
@@ -194,7 +193,7 @@ async function loadOrders() {
   try {
     const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+        Authorization: `Bearer ${localStorage.getItem('paddox_access_token') || localStorage.getItem('token') || ''}`
       }
     });
 
@@ -841,6 +840,73 @@ document.getElementById('add-modal')?.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddModal(); });
 
+
+async function submitProduct() {
+  try {
+    const modal = document.getElementById('add-modal');
+    const inputs = modal ? modal.querySelectorAll('.form-input') : [];
+
+    const name = inputs[0]?.value?.trim();
+    const team = inputs[1]?.value?.trim();
+    const category = String(inputs[2]?.value || '').toLowerCase();
+    const price = Number(inputs[3]?.value || 0);
+    const stock = Number(inputs[4]?.value || 0);
+    const badgeRaw = String(inputs[5]?.value || 'none').toLowerCase();
+    const description = inputs[6]?.value?.trim();
+    const imageUrl = inputs[7]?.value?.trim();
+
+    if (!name || !team || !category || !price || !description || !imageUrl) {
+      showToast('⚠️ Fill all product fields');
+      return;
+    }
+
+    const payload = {
+      name,
+      team,
+      category,
+      price,
+      stock,
+      description,
+      shortDesc: description.slice(0, 180),
+      badge: badgeRaw === 'none' ? null : badgeRaw === 'limited' ? 'ltd' : badgeRaw,
+      images: [{ url: imageUrl, alt: name }],
+      emoji: category === 'apparel' ? '👕' : category === 'collectibles' ? '🏆' : category === 'accessories' ? '⌚' : category === 'posters' ? '🖼️' : '🏎️',
+      isActive: true,
+      isFeatured: true,
+      isLimited: badgeRaw === 'limited',
+      onSale: badgeRaw === 'sale'
+    };
+
+    const token = localStorage.getItem('paddox_access_token') || localStorage.getItem('token') || '';
+
+    const res = await fetch(PRODUCT_API_BASE, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Product add failed');
+    }
+
+    showToast('🔥 Product added successfully');
+    closeAddModal();
+    inputs.forEach(el => {
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = '';
+    });
+    await loadProducts();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
 /* ══ ICON ANIMATIONS ══ */
 document.querySelectorAll('.animate-icon').forEach((icon, i) => {
   icon.style.animationDelay = `${i * 0.12}s`;
@@ -892,3 +958,9 @@ async function deleteProduct(id) {
 
 /* ══ INIT LOG ══ */
 console.log('%c⚙️ PADDOX — Admin Dashboard Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
+
+/* PADDOX realtime init */
+window.addEventListener('load', function paddoxAdminRealtimeInit() {
+  try { loadProducts(); } catch (e) { console.warn(e); }
+  try { loadAssets(); } catch (e) { console.warn(e); }
+});
