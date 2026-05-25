@@ -139,13 +139,6 @@ if (id === 'orders') {
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
-// AFTER SUCCESSFUL PRODUCT CREATE:
-await loadProducts();
-await renderProducts();
-await renderInventory();
-
-// AFTER SUCCESSFUL DELETE:
-await loadProducts();
 
 // AUTO REFRESH
 setInterval(() => {
