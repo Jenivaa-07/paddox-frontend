@@ -197,6 +197,9 @@ if (id === 'assets') {
 if (id === 'orders') {
   loadOrders();
 }
+if (id === 'inventory') {
+  loadProducts();
+}
 if (id === 'users') {
   loadUsers();
 }
@@ -1156,37 +1159,206 @@ function renderProducts() {
 }
 
 
-/* ══ INVENTORY TABLE ══ */
+/* ══ INVENTORY TABLE — REALTIME ══ */
+function getProductStockStatus(product) {
+  const stock = Number(product.stock || 0);
+
+  if (stock <= 0) {
+    return {
+      cls: 's-out',
+      label: 'Out of Stock',
+      bar: 'var(--red)'
+    };
+  }
+
+  if (stock <= 10) {
+    return {
+      cls: 's-low',
+      label: 'Low Stock',
+      bar: 'var(--orange)'
+    };
+  }
+
+  return {
+    cls: 's-act',
+    label: 'In Stock',
+    bar: 'var(--green)'
+  };
+}
+
+function productSku(product, index) {
+  if (product.sku) return product.sku;
+
+  const category =
+    String(product.category || 'PRD')
+      .slice(0, 3)
+      .toUpperCase();
+
+  return `PDX-${category}-${String(index + 1).padStart(3, '0')}`;
+}
+
 function renderInventory() {
   const tbody = document.getElementById('inventory-tbody');
+
   if (!tbody) return;
-  const skus = ['PDX-APP-001','PDX-APP-002','PDX-COL-001','PDX-APP-003','PDX-ART-001','PDX-COL-002','PDX-ACC-001','PDX-ACC-002'];
-  tbody.innerHTML = REAL_PRODUCTS.map((p, i) => {
-    const pct    = Math.min(100, Math.round(p.stock / 130 * 100));
-    const sc     = p.stock === 0 ? 's-out' : p.stock < 10 ? 's-low' : 's-act';
-    const sl     = p.stock === 0 ? 'Out of Stock' : p.stock < 10 ? 'Low Stock' : 'In Stock';
-    const barClr = p.stock === 0 ? 'var(--red)' : p.stock < 10 ? 'var(--orange)' : 'var(--green)';
+
+  if (!REAL_PRODUCTS.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;padding:40px;color:#777">
+          No realtime inventory yet
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = REAL_PRODUCTS.map((product, index) => {
+    const stock = Number(product.stock || 0);
+    const maxStock = Math.max(100, stock, Number(product.originalStock || 0));
+    const pct = Math.min(100, Math.round((stock / maxStock) * 100));
+    const status = getProductStockStatus(product);
+
+    const image =
+      product.images?.[0]?.url ||
+      product.image ||
+      '';
+
     return `
       <tr>
         <td>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:1.1rem">${p.icon}</span> ${p.name}
+          <div style="display:flex;align-items:center;gap:10px">
+            ${
+              image
+                ? `<img src="${image}" style="width:34px;height:34px;object-fit:cover;border-radius:8px">`
+                : `<span style="font-size:1.2rem">📦</span>`
+            }
+            <div>
+              <div style="font-weight:700;color:#fff">
+                ${product.name || 'Product'}
+              </div>
+              <div style="font-size:.72rem;color:#777">
+                ${product.category || '-'} · ${product.team || '-'}
+              </div>
+            </div>
           </div>
         </td>
-        <td style="font-family:var(--font-c);letter-spacing:1px;color:var(--muted2)">${skus[i]}</td>
-        <td style="font-weight:600;color:${p.stock===0?'var(--red)':p.stock<10?'var(--orange)':'var(--white)'}">${p.stock} units</td>
+
+        <td style="font-family:var(--font-c);letter-spacing:1px;color:var(--muted2)">
+          ${productSku(product, index)}
+        </td>
+
+        <td style="font-weight:700;color:${stock <= 0 ? 'var(--red)' : stock <= 10 ? 'var(--orange)' : 'var(--white)'}">
+          ${stock} units
+        </td>
+
         <td>
           <div class="stk-bar-wrap">
-            <div class="stk-bar" style="width:${pct}%;background:${barClr}"></div>
+            <div
+              class="stk-bar"
+              style="width:${pct}%;background:${status.bar}"
+            ></div>
           </div>
         </td>
-        <td style="color:var(--muted)">10 units</td>
-        <td><span class="sb ${sc}">${sl}</span></td>
-        <td><button class="act-btn" onclick="showToast('✓ Restock order placed for ${p.name}!')">Restock</button></td>
+
+        <td style="color:var(--muted)">
+          10 units
+        </td>
+
+        <td>
+          <span class="sb ${status.cls}">
+            ${status.label}
+          </span>
+        </td>
+
+        <td>
+          <button
+            class="act-btn"
+            onclick="openRestockPrompt('${product._id}')"
+          >
+            Restock
+          </button>
+
+          <button
+            class="act-btn"
+            onclick="quickSetStock('${product._id}', 0)"
+          >
+            Mark Out
+          </button>
+        </td>
       </tr>
     `;
   }).join('');
 }
+
+function openRestockPrompt(productId) {
+  const product = REAL_PRODUCTS.find(p => String(p._id) === String(productId));
+
+  if (!product) {
+    showToast('❌ Product not found');
+    return;
+  }
+
+  const currentStock = Number(product.stock || 0);
+
+  const amount = prompt(
+    `Enter new stock quantity for ${product.name}`,
+    String(Math.max(currentStock, 10))
+  );
+
+  if (amount === null) return;
+
+  const stock = Number(amount);
+
+  if (Number.isNaN(stock) || stock < 0) {
+    showToast('❌ Enter a valid stock number');
+    return;
+  }
+
+  updateProductStock(productId, stock);
+}
+
+async function quickSetStock(productId, stock) {
+  if (!confirm(`Set stock to ${stock}?`)) return;
+
+  await updateProductStock(productId, stock);
+}
+
+async function updateProductStock(productId, stock) {
+  try {
+    showToast('⏳ Updating stock...');
+
+    const res = await fetch(
+      `${PRODUCT_API_BASE}/${productId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAdminToken()}`
+        },
+        body: JSON.stringify({
+          stock: Number(stock)
+        })
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Stock update failed');
+    }
+
+    showToast('🔥 Stock updated');
+
+    await loadProducts();
+    updateOverviewRealtime();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
 
 /* ══ DIGITAL ASSETS GRID ══ */
 /* ═══════════════════════════════════════
