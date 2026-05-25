@@ -8,136 +8,10 @@
 /* ══════════════════════════════════════
    PRODUCTS DATA
 ══════════════════════════════════════ */
-const PRODUCTS = [
-  {
-    id:1, name:'SF-25 Podium Cap', team:'Scuderia Ferrari',
-    teamKey:'Ferrari', cat:'apparel', price:2499, rating:5,
-    badge:'new', emoji:'🧢', limited:false, sale:false, isNew:true,
-    gradient:'linear-gradient(135deg,#1a0800,#2d1200)',
-    image:'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&q=80',
-    desc:'Official replica Ferrari team cap worn on the Monaco podium. Premium embroidered logo and moisture-wicking fabric. One size fits all.'
-  },
-  {
-    id:2, name:'RB20 Team Tee', team:'Oracle Red Bull Racing',
-    teamKey:'Red Bull', cat:'apparel', price:3999, rating:5,
-    badge:'hot', emoji:'👕', limited:false, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#00071a,#00102e)',
-    image:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80',
-    desc:'Premium cotton tee featuring the Red Bull Racing livery. Lightweight and breathable, perfect for race day or everyday wear.'
-  },
-  {
-    id:3, name:'W15 Collector Diecast', team:'Mercedes-AMG Petronas',
-    teamKey:'Mercedes', cat:'collectibles', price:8999, rating:4,
-    badge:'ltd', emoji:'🏆', limited:true, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#001a14,#002d22)',
-    image:'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80',
-    desc:'1:43 scale precision die-cast model of the W15. Limited to 500 units worldwide. Hand-finished with display case included.'
-  },
-  {
-    id:4, name:'Monaco Circuit Watch', team:'Paddox Edition',
-    teamKey:'Paddox', cat:'accessories', price:18999, rating:5,
-    badge:'ltd', emoji:'⌚', limited:true, sale:false, isNew:true,
-    gradient:'linear-gradient(135deg,#0d0d0d,#1e1a00)',
-    image:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80',
-    desc:'Limited edition timepiece featuring Monaco circuit engraving on dial. Swiss quartz movement. Only 200 units — includes certificate of authenticity.'
-  },
-  {
-    id:5, name:'McLaren Papaya Tee', team:'McLaren F1 Team',
-    teamKey:'McLaren', cat:'apparel', price:3499, rating:4,
-    badge:null, emoji:'🧡', limited:false, sale:true, isNew:false,
-    gradient:'linear-gradient(135deg,#1a0d00,#2d1800)',
-    image:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80',
-    desc:'Iconic McLaren papaya orange team tee with subtle MCL38 design. Made from 100% organic cotton. Slim fit.'
-  },
-  {
-    id:6, name:'F1 Helmet Replica', team:"Collector's Edition",
-    teamKey:'Paddox', cat:'collectibles', price:14999, rating:5,
-    badge:'ltd', emoji:'🪖', limited:true, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#111,#1a1a1a)',
-    image:'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=600&q=80',
-    desc:'Full-size replica helmet in gloss red and chrome finish. Includes acrylic display stand. A true statement collector\'s piece.'
-  },
-  {
-    id:7, name:'Pit Lane Hoodie', team:'Oracle Red Bull Racing',
-    teamKey:'Red Bull', cat:'apparel', price:6499, rating:4,
-    badge:null, emoji:'🧥', limited:false, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#00071a,#00102e)',
-    image:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80',
-    desc:'Heavy-weight unisex hoodie with embroidered Red Bull Racing crest. Kangaroo pocket and drawstring hood. Premium fleece lining.'
-  },
-  {
-    id:8, name:'Aston Martin Key Ring', team:'Aston Martin F1',
-    teamKey:'Aston Martin', cat:'accessories', price:899, rating:4,
-    badge:'sale', emoji:'🔑', limited:false, sale:true, isNew:false,
-    gradient:'linear-gradient(135deg,#001a0d,#00330f)',
-    image:'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&q=80',
-    desc:'Enamel-fill team logo keyring in zinc alloy. Officially Aston Martin F1-inspired. Comes in premium gift pouch.'
-  },
-  {
-    id:9, name:'MCL38 Speed Poster', team:'McLaren F1 Team',
-    teamKey:'McLaren', cat:'posters', price:1299, rating:5,
-    badge:null, emoji:'🖼️', limited:false, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#1a0d00,#2d1800)',
-    image:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-    desc:'A2 premium art print of the MCL38 at speed. 300gsm matte paper, vibrant print quality. Ready to frame.'
-  },
-  {
-    id:10, name:'Silverstone Art Print', team:'Circuit Series',
-    teamKey:'Paddox', cat:'posters', price:1499, rating:4,
-    badge:null, emoji:'🗺️', limited:false, sale:false, isNew:true,
-    gradient:'linear-gradient(135deg,#0a0a1a,#0f0f28)',
-    image:'https://images.unsplash.com/photo-1541401138-e2e6c29c7f26?w=600&q=80',
-    desc:'Minimalist circuit map art of Silverstone in chrome on matte black. A3 size, 250gsm print. Numbered edition of 1000.'
-  },
-  {
-    id:11, name:'Custom Name Race Suit', team:'Paddox Custom',
-    teamKey:'Paddox', cat:'custom', price:9999, rating:5,
-    badge:'new', emoji:'🏎️', limited:false, sale:false, isNew:true,
-    gradient:'linear-gradient(135deg,#1a0000,#2d0000)',
-    image:'https://images.unsplash.com/photo-1571019613914-85f342c6a11e?w=600&q=80',
-    desc:'Personalised race suit inspired by F1 driver overalls. Add your name, number and team livery. Ships in 7 working days.'
-  },
-  {
-    id:12, name:'Driver Enamel Pin Set', team:'Multi-Team',
-    teamKey:'Paddox', cat:'accessories', price:799, rating:4,
-    badge:'hot', emoji:'📌', limited:false, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#111,#1e1e1e)',
-    image:'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=600&q=80',
-    desc:'Set of 10 collectible enamel pins featuring current grid drivers. Perfect for jackets, bags and lanyards. Gift-ready packaging.'
-  },
-  {
-    id:13, name:'Ferrari Scarf 2025', team:'Scuderia Ferrari',
-    teamKey:'Ferrari', cat:'accessories', price:2299, rating:5,
-    badge:null, emoji:'🧣', limited:false, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#1a0000,#2d0000)',
-    image:'https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=600&q=80',
-    desc:'Team-issue knitted scarf in Rosso Corsa red and cream. Woven Ferrari Shield crest on each end. 100% acrylic, machine washable.'
-  },
-  {
-    id:14, name:'Vettel Legacy Print', team:"Collector's Edition",
-    teamKey:'Paddox', cat:'posters', price:2199, rating:5,
-    badge:'ltd', emoji:'🎨', limited:true, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#1a1200,#2d1e00)',
-    image:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-    desc:'Limited edition fine art print celebrating Vettel\'s 4 championship years. Printed on fine art paper. Includes signed replica certificate.'
-  },
-  {
-    id:15, name:'Custom Fan Jersey', team:'Paddox Custom',
-    teamKey:'Paddox', cat:'custom', price:4999, rating:4,
-    badge:'new', emoji:'🎽', limited:false, sale:false, isNew:true,
-    gradient:'linear-gradient(135deg,#00061a,#080020)',
-    image:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-    desc:'Design your own F1-inspired jersey with driver number, name, and team livery colours. Made from performance polyester blend.'
-  },
-  {
-    id:16, name:'Grid Tote Bag', team:'Paddox Original',
-    teamKey:'Paddox', cat:'accessories', price:1199, rating:4,
-    badge:null, emoji:'👜', limited:false, sale:false, isNew:false,
-    gradient:'linear-gradient(135deg,#0a0a0a,#1a1a1a)',
-    image:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80',
-    desc:'Heavyweight canvas tote with iconic Paddox grid print. 100% organic cotton. Reinforced handles. Perfect for race day and beyond.'
-  }
-];
+let PRODUCTS = [];
+
+const PRODUCT_API_BASE =
+  'https://paddox-backend.onrender.com/api/products';
 
 /* ══════════════════════════════════════
    STATE
@@ -158,7 +32,37 @@ let state = {
 };
 
 let cart = JSON.parse(sessionStorage.getItem('paddox_cart') || '[]');
+async function loadShopProducts() {
+  try {
+    const res = await fetch(PRODUCT_API_BASE);
+    const data = await res.json();
 
+    PRODUCTS = data.data || data.products || [];
+
+    PRODUCTS = PRODUCTS.map(p => ({
+      id: p._id,
+      name: p.name,
+      team: p.team,
+      teamKey: p.team,
+      cat: p.category,
+      price: p.effectivePrice || p.price,
+      rating: Math.round(p.ratings?.average || 5),
+      badge: p.badge,
+      emoji: p.emoji || '🏎️',
+      limited: !!p.isLimited,
+      sale: !!p.onSale,
+      isNew: p.badge === 'new',
+      image: p.images?.[0]?.url || '',
+      desc: p.description || p.shortDesc || '',
+      stock: p.stock
+    }));
+
+    renderProducts();
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Failed to load products');
+  }
+}
 /* ══════════════════════════════════════
    PARTICLES
 ══════════════════════════════════════ */
@@ -908,5 +812,6 @@ function showToast(msg) {
 ══════════════════════════════════════ */
 renderProducts();
 updateActiveFilters();
+loadShopProducts();
 
 console.log('%c🛒 PADDOX — Shop Page Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
