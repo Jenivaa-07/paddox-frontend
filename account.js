@@ -469,4 +469,83 @@ function showToast(msg){
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+const ACCOUNT_API =
+  'https://paddox-backend.onrender.com/api/orders/my-orders';
+
+async function loadMyOrders() {
+
+  try {
+
+    const token = localStorage.getItem('token');
+
+    if (!token) return;
+
+    const res = await fetch(ACCOUNT_API, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+
+    const orders = data.data || [];
+
+    renderRealtimeOrders(orders);
+
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+function renderRealtimeOrders(orders) {
+
+  const tbody =
+    document.querySelector('.orders-table tbody');
+
+  if (!tbody) return;
+
+  tbody.innerHTML =
+    orders.map(order => `
+      <tr>
+        <td>
+          <span class="oid">
+            #${order.orderNumber || order._id}
+          </span>
+        </td>
+
+        <td>
+          ${(order.items || [])
+            .map(i => i.name)
+            .join(', ')}
+        </td>
+
+        <td>
+          ${new Date(order.createdAt)
+            .toLocaleDateString()}
+        </td>
+
+        <td>
+          ₹${order.pricing?.total || 0}
+        </td>
+
+        <td>
+          <span class="ostatus os-sh">
+            ${order.status}
+          </span>
+        </td>
+
+        <td>
+          <button class="trk-btn">
+            View
+          </button>
+        </td>
+      </tr>
+    `).join('');
+}
+
+window.addEventListener(
+  'DOMContentLoaded',
+  loadMyOrders
+);
+
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');

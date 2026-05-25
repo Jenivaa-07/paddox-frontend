@@ -139,6 +139,24 @@ if (id === 'orders') {
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
+// AFTER SUCCESSFUL PRODUCT CREATE:
+await loadProducts();
+await renderProducts();
+await renderInventory();
+
+// AFTER SUCCESSFUL DELETE:
+await loadProducts();
+
+// AUTO REFRESH
+setInterval(() => {
+  loadOrders();
+}, 5000);
+
+setInterval(() => {
+  loadProducts();
+}, 5000);
+
+
 document.querySelectorAll('.adm-nav-item').forEach(item => {
   item.addEventListener('click', () => {
     switchPage(item.dataset.page);

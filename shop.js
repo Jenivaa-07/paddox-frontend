@@ -670,11 +670,69 @@ function toggleCart(open) {
 document.getElementById('cart-overlay')?.addEventListener('click', () => toggleCart(false));
 document.getElementById('cart-close')?.addEventListener('click', () => toggleCart(false));
 document.getElementById('continue-btn')?.addEventListener('click', () => toggleCart(false));
-async function placeDemoOrder() {
-  if (!cart.length) {
-    showToast('❌ Cart is empty');
-    return;
+
+// REPLACE placeDemoOrder() WITH THIS
+
+async function placeRealOrder() {
+
+  try {
+
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      showToast('⚠ Please login first');
+      window.location.href = 'account.html';
+      return;
+    }
+
+    if (!cart.length) {
+      showToast('⚠ Cart is empty');
+      return;
+    }
+
+    const orderPayload = {
+      items: cart.map(item => ({
+        product: item.id,
+        quantity: item.qty || 1
+      }))
+    };
+
+    const res = await fetch(
+      'https://paddox-backend.onrender.com/api/orders',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(orderPayload)
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Order failed');
+    }
+
+    cart = [];
+    sessionStorage.removeItem('paddox_cart');
+
+    updateCartUI();
+
+    showToast('🔥 Order placed successfully');
+
+    setTimeout(() => {
+      window.location.href = 'account.html';
+    }, 1500);
+
+  } catch(err) {
+
+    console.error(err);
+
+    showToast('❌ Failed to place order');
   }
+}
 
   const token = localStorage.getItem('paddox_access_token');
 
