@@ -2,8 +2,6 @@
    PADDOX — account.js   |   User Account Logic
    ============================================================ */
 'use strict';
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 /* ══ PARTICLES ══ */
 (function(){
   const canvas=document.getElementById('particles-canvas');if(!canvas)return;
