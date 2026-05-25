@@ -202,6 +202,18 @@ async function loadOrders() {
     showToast('❌ Failed to load orders');
   }
 }
+function getAdminToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+function money(n) {
+  return `₹${Number(n || 0).toLocaleString('en-IN')}`;
+}
 
 function renderOrders() {
   const tbody = document.getElementById('orders-tbody');
@@ -218,29 +230,278 @@ function renderOrders() {
     return;
   }
 
-  tbody.innerHTML = REAL_ORDERS.map(order => `
-    <tr>
-      <td><input type="checkbox"/></td>
-      <td class="oid">#${order.orderNumber || order._id}</td>
-      <td>${order.user?.firstName || ''} ${order.user?.lastName || ''}</td>
-      <td style="color:var(--muted2);font-size:.76rem">
-        ${(order.items || []).map(i => i.name).join(', ')}
-      </td>
-      <td style="color:var(--muted2)">
-        ${new Date(order.createdAt).toLocaleDateString()}
-      </td>
-      <td style="font-family:var(--font-d);font-size:1.1rem">
-        ₹${order.pricing?.total || 0}
-      </td>
-      <td><span class="sb s-pr">${order.status}</span></td>
-      <td>
-        <button class="act-btn" onclick="openOrderDetails('${order._id}')">View</button>
-      </td>
-    </tr>
-  `).join('');
-}
-renderOrders();
+  tbody.innerHTML = REAL_ORDERS.map(order => {
+    const customer =
+      `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() ||
+      order.shippingAddress?.name ||
+      'Customer';
 
+    const products =
+      (order.items || []).map(i => i.name).join(', ') || 'No products';
+
+    const date =
+      order.createdAt
+        ? new Date(order.createdAt).toLocaleDateString()
+        : '-';
+
+    const total =
+      order.pricing?.total ||
+      order.total ||
+      0;
+
+    return `
+      <tr>
+        <td><input type="checkbox"/></td>
+
+        <td class="oid">
+          #${order.orderNumber || order._id}
+        </td>
+
+        <td>${customer}</td>
+
+        <td style="color:var(--muted2);font-size:.76rem">
+          ${products}
+        </td>
+
+        <td style="color:var(--muted2)">
+          ${date}
+        </td>
+
+        <td style="font-family:var(--font-d);font-size:1.1rem">
+          ${money(total)}
+        </td>
+
+        <td>
+          <span class="sb s-pr">
+            ${order.status || 'placed'}
+          </span>
+        </td>
+
+        <td>
+          <button
+            class="act-btn"
+            onclick="openOrderView('${order._id}')"
+          >
+            View
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openOrderView(orderId) {
+  const order = REAL_ORDERS.find(o => o._id === orderId);
+
+  if (!order) {
+    showToast('❌ Order not found');
+    return;
+  }
+
+  const customer =
+    `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() ||
+    order.shippingAddress?.name ||
+    'Customer';
+
+  const email =
+    order.user?.email || '-';
+
+  const address = order.shippingAddress || {};
+
+  const itemsHtml =
+    (order.items || []).map(item => `
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        gap:12px;
+        padding:10px 0;
+        border-bottom:1px solid rgba(255,255,255,.08);
+      ">
+        <div>
+          <div style="font-weight:700;color:#fff">
+            ${item.name}
+          </div>
+          <div style="color:#777;font-size:.82rem">
+            Qty: ${item.quantity || 1}
+          </div>
+        </div>
+        <div style="font-family:var(--font-d);color:#fff">
+          ${money((item.price || 0) * (item.quantity || 1))}
+        </div>
+      </div>
+    `).join('');
+
+  const modal = document.createElement('div');
+
+  modal.innerHTML = `
+    <div class="preview-overlay" id="order-view-overlay">
+      <div class="preview-card" style="
+        max-width:720px;
+        width:92vw;
+        padding:28px;
+        color:#fff;
+        text-align:left;
+      ">
+        <button class="preview-close" id="order-view-close">
+          ✕
+        </button>
+
+        <div style="
+          font-family:var(--font-d);
+          letter-spacing:4px;
+          font-size:1.8rem;
+          margin-bottom:10px;
+        ">
+          ORDER DETAILS
+        </div>
+
+        <div style="color:var(--red);font-family:var(--font-c);letter-spacing:2px;margin-bottom:24px">
+          #${order.orderNumber || order._id}
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:18px;
+          margin-bottom:22px;
+        ">
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">CUSTOMER</div>
+            <div style="font-weight:700">${customer}</div>
+            <div style="color:#777">${email}</div>
+          </div>
+
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">STATUS</div>
+            <select id="order-status-select" style="
+              width:100%;
+              padding:10px;
+              background:#151515;
+              color:#fff;
+              border:1px solid rgba(255,255,255,.15);
+              margin-top:6px;
+            ">
+              <option value="placed">placed</option>
+              <option value="processing">processing</option>
+              <option value="shipped">shipped</option>
+              <option value="out_for_delivery">out_for_delivery</option>
+              <option value="delivered">delivered</option>
+              <option value="cancelled">cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:22px">
+          <div style="color:#777;font-size:.75rem;letter-spacing:2px;margin-bottom:8px">
+            PRODUCTS
+          </div>
+          ${itemsHtml || '<div style="color:#777">No items</div>'}
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:18px;
+          margin-bottom:22px;
+        ">
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">SHIPPING ADDRESS</div>
+            <div style="line-height:1.6;color:#ddd">
+              ${address.name || customer}<br>
+              ${address.line1 || ''}<br>
+              ${address.city || ''}, ${address.state || ''}<br>
+              ${address.pincode || ''}<br>
+              ${address.phone || ''}
+            </div>
+          </div>
+
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">PAYMENT</div>
+            <div style="line-height:1.8;color:#ddd">
+              Subtotal: ${money(order.pricing?.subtotal)}<br>
+              Shipping: ${money(order.pricing?.shipping)}<br>
+              Tax: ${money(order.pricing?.tax)}<br>
+              <strong style="font-size:1.3rem;color:#fff">
+                Total: ${money(order.pricing?.total)}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <button
+          class="act-btn"
+          id="save-order-status"
+          style="
+            width:100%;
+            padding:14px;
+            background:var(--red);
+            color:white;
+            border:0;
+            font-weight:800;
+            letter-spacing:3px;
+          "
+        >
+          UPDATE STATUS
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const select = modal.querySelector('#order-status-select');
+  select.value = order.status || 'placed';
+
+  modal.querySelector('#order-view-close').onclick = () => modal.remove();
+
+  modal.querySelector('#order-view-overlay').onclick = e => {
+    if (e.target.id === 'order-view-overlay') {
+      modal.remove();
+    }
+  };
+
+  modal.querySelector('#save-order-status').onclick = async () => {
+    await updateOrderStatus(order._id, select.value);
+    modal.remove();
+  };
+}
+
+async function updateOrderStatus(orderId, status) {
+  try {
+    showToast('⏳ Updating order status...');
+
+    const res = await fetch(
+      `https://paddox-backend.onrender.com/api/orders/admin/${orderId}/status`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAdminToken()}`
+        },
+        body: JSON.stringify({
+          status,
+          message: `Order status changed to ${status}`
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Status update failed');
+    }
+
+    showToast('🔥 Order status updated');
+
+    await loadOrders();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+renderOrders();
 /* ══════════════════════════════════════
    ORDER DETAILS MODAL + STATUS UPDATE
 ══════════════════════════════════════ */
