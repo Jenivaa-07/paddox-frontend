@@ -183,7 +183,12 @@ async function loadOrders() {
   try {
     const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+        Authorization: `Bearer ${
+  localStorage.getItem('token') ||
+  localStorage.getItem('paddox_access_token') ||
+  localStorage.getItem('accessToken') ||
+  ''
+}`
       }
     });
 
