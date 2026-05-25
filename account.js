@@ -2,7 +2,8 @@
    PADDOX — account.js   |   User Account Logic
    ============================================================ */
 'use strict';
-
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 /* ══ PARTICLES ══ */
 (function(){
   const canvas=document.getElementById('particles-canvas');if(!canvas)return;
@@ -74,85 +75,286 @@ function initReveal(root=document){
 initReveal();
 
 /* ══ AUTH ══ */
-let currentUser=null;
+/* ══════════════════════════════════════
+   REALTIME AUTH SYSTEM
+══════════════════════════════════════ */
 
-/* Tab switching */
-document.querySelectorAll('.auth-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('on'));
-    document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('on'));
+let currentUser = null;
+
+/* TAB SWITCH */
+document.querySelectorAll('.auth-tab').forEach(tab => {
+
+  tab.addEventListener('click', () => {
+
+    document
+      .querySelectorAll('.auth-tab')
+      .forEach(t => t.classList.remove('on'));
+
+    document
+      .querySelectorAll('.auth-form')
+      .forEach(f => f.classList.remove('on'));
+
     tab.classList.add('on');
-    document.getElementById(`form-${tab.dataset.tab}`).classList.add('on');
+
+    document
+      .getElementById(`form-${tab.dataset.tab}`)
+      .classList.add('on');
   });
 });
 
-/* Login */
-document.getElementById('login-btn')?.addEventListener('click',doLogin);
-document.getElementById('li-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+/* LOGIN */
+document
+  .getElementById('login-btn')
+  ?.addEventListener('click', doLogin);
 
-function doLogin(){
-  const email=document.getElementById('li-email').value.trim();
-  const pass=document.getElementById('li-pass').value;
-  if(!email||!pass){showToast('⚠️ Please fill in all fields');return}
-  if(pass!=='paddox123'){showToast('⚠️ Wrong password. Try: paddox123');return}
-  const fname=email.split('@')[0];
-  loginUser({name:fname.charAt(0).toUpperCase()+fname.slice(1)+' Mehta',email,av:'🏎️'});
+/* REGISTER */
+document
+  .getElementById('register-btn')
+  ?.addEventListener('click', doRegister);
+
+/* ENTER KEY */
+document
+  .getElementById('li-pass')
+  ?.addEventListener('keydown', e => {
+
+    if (e.key === 'Enter')
+      doLogin();
+  });
+
+/* LOGIN FUNCTION */
+async function doLogin() {
+
+  const email =
+    document
+      .getElementById('li-email')
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById('li-pass')
+      .value;
+
+  if (!email || !password) {
+
+    showToast('⚠️ Fill all fields');
+
+    return;
+  }
+
+  try {
+
+    showToast('🏁 Signing in...');
+
+    const data =
+      await AuthAPI.login({
+        email,
+        password
+      });
+
+    if (!data.success) {
+
+      throw new Error(
+        data.message ||
+        'Login failed'
+      );
+    }
+
+    TokenManager.setAccess(data.data.accessToken);
+
+    loginUser(data.data.user);
+
+    showToast('🔥 Login successful');
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(
+      `❌ ${err.message}`
+    );
+  }
 }
 
-/* Register */
-document.getElementById('register-btn')?.addEventListener('click',doRegister);
-function doRegister(){
-  const fname=document.getElementById('ri-fname').value.trim();
-  const email=document.getElementById('ri-email').value.trim();
-  const pass=document.getElementById('ri-pass').value;
-  if(!fname||!email||!pass){showToast('⚠️ Fill in all required fields');return}
-  if(pass.length<6){showToast('⚠️ Password must be at least 6 characters');return}
-  loginUser({name:`${fname} ${document.getElementById('ri-lname').value.trim()}`.trim(),email,av:'🏎️'});
+/* REGISTER FUNCTION */
+async function doRegister() {
+
+  const firstName =
+    document
+      .getElementById('ri-fname')
+      .value
+      .trim();
+
+  const lastName =
+    document
+      .getElementById('ri-lname')
+      .value
+      .trim();
+
+  const email =
+    document
+      .getElementById('ri-email')
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById('ri-pass')
+      .value;
+
+  if (
+    !firstName ||
+    !email ||
+    !password
+  ) {
+
+    showToast('⚠️ Fill required fields');
+
+    return;
+  }
+
+  if (password.length < 6) {
+
+    showToast(
+      '⚠️ Password must be at least 6 characters'
+    );
+
+    return;
+  }
+
+  try {
+
+    showToast('🏎️ Creating account...');
+
+    const data =
+      await AuthAPI.register({
+        firstName,
+        lastName,
+        email,
+        password
+      });
+
+    if (!data.success) {
+
+      throw new Error(
+        data.message ||
+        'Registration failed'
+      );
+    }
+
+    TokenManager.setAccess(data.data.accessToken);
+
+    loginUser(data.data.user);
+
+    showToast('🔥 Account created');
+
+  } catch (err) {
+
+    console.error(err);
+
+    showToast(
+      `❌ ${err.message}`
+    );
+  }
 }
 
-/* Demo login */
-function demoLogin(){loginUser({name:'Arjun Mehta',email:'arjun@example.com',av:'🏎️'})}
+/* LOGIN USER */
+function loginUser(user) {
 
-function loginUser(user){
-  currentUser=user;
-  sessionStorage.setItem('paddox_user',JSON.stringify(user));
+  currentUser = user;
 
-  /* Hide auth, show dashboard */
-  document.getElementById('auth-screen').style.display='none';
-  const accScreen=document.getElementById('acc-screen');
-  accScreen.style.display='grid';
+  localStorage.setItem(
+    'paddox_user',
+    JSON.stringify(user)
+  );
 
-  /* Populate profile */
-  document.getElementById('prof-avatar').textContent=user.av;
-  document.getElementById('prof-name').textContent=user.name;
-  document.getElementById('prof-email').textContent=user.email;
-  document.getElementById('dash-greeting').textContent=`HEY, ${user.name.split(' ')[0].toUpperCase()}`;
-  document.getElementById('pf-fn').value=user.name.split(' ')[0]||'';
-  document.getElementById('pf-ln').value=user.name.split(' ')[1]||'';
-  document.getElementById('pf-em').value=user.email;
+  document
+    .getElementById('auth-screen')
+    .style.display = 'none';
+
+  const accScreen =
+    document.getElementById('acc-screen');
+
+  accScreen.style.display = 'grid';
+
+  const fullName =
+    `${user.firstName || ''} ${user.lastName || ''}`.trim();
+
+  document.getElementById('prof-avatar')
+    .textContent = '🏎️';
+
+  document.getElementById('prof-name')
+    .textContent = fullName;
+
+  document.getElementById('prof-email')
+    .textContent = user.email;
+
+  document.getElementById('dash-greeting')
+    .textContent =
+      `HEY, ${(user.firstName || 'FAN').toUpperCase()}`;
+
+  document.getElementById('pf-fn')
+    .value = user.firstName || '';
+
+  document.getElementById('pf-ln')
+    .value = user.lastName || '';
+
+  document.getElementById('pf-em')
+    .value = user.email || '';
 
   renderWishlist();
   renderNotifications();
   renderTeamPrefs();
+
   initReveal(accScreen);
-  showToast(`✓ Welcome back, ${user.name.split(' ')[0]}! 🏁`);
 }
 
-/* Logout */
-document.getElementById('logout-btn')?.addEventListener('click',()=>{
-  currentUser=null;
-  sessionStorage.removeItem('paddox_user');
-  document.getElementById('acc-screen').style.display='none';
-  document.getElementById('auth-screen').style.display='flex';
-  showToast('Signed out successfully');
-});
+/* LOGOUT */
+document
+  .getElementById('logout-btn')
+  ?.addEventListener('click', async () => {
 
-/* Auto-restore session */
-(function(){
-  const saved=sessionStorage.getItem('paddox_user');
-  if(saved){try{loginUser(JSON.parse(saved))}catch(e){}}
+    try {
+
+      await AuthAPI.logout();
+
+    } catch (err) {}
+
+    TokenManager.clearAccess();
+
+    localStorage.removeItem('paddox_user');
+
+    location.reload();
+  });
+
+/* AUTO LOGIN */
+(async function restoreSession() {
+
+  const token =
+    TokenManager.getAccess();
+
+  if (!token) return;
+
+  try {
+
+    const data =
+      await AuthAPI.getMe();
+
+    if (
+      data.success &&
+      data.data
+    ) {
+
+      loginUser(data.data);
+    }
+
+  } catch (err) {
+
+    console.error(err);
+
+    TokenManager.clearAccess();
+  }
 })();
-
 /* ══ ACCOUNT NAV PAGES ══ */
 document.querySelectorAll('.acc-nav-item').forEach(item=>{
   item.addEventListener('click',()=>{
