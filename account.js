@@ -312,6 +312,7 @@ function loginUser(user) {
   loadRealtimeProfile();
   loadMyOrders();
   loadWishlist();
+  loadDownloads();
 }
 
 /* LOGOUT */
@@ -369,6 +370,7 @@ document.querySelectorAll('.acc-nav-item').forEach(item=>{
     const page=document.getElementById(`page-${item.dataset.page}`);
     if(page){page.classList.add('on');initReveal(page);}
     if(item.dataset.page === 'wishlist') loadWishlist();
+    if(item.dataset.page === 'downloads') loadDownloads();
     /* Icon wiggle */
     const icon=item.querySelector('.ani-icon');
     if(icon){icon.style.transform='scale(1.3) rotate(-10deg)';setTimeout(()=>icon.style.transform='',300);}
@@ -395,6 +397,10 @@ function showTracking(id,step){
 /* ══ WISHLIST — REALTIME ══ */
 const ACCOUNT_WISHLIST_API =
   'https://paddox-backend.onrender.com/api/wishlist';
+const ACCOUNT_DOWNLOADS_API =
+  'https://paddox-backend.onrender.com/api/users/downloads';
+const ACCOUNT_ASSETS_API =
+  'https://paddox-backend.onrender.com/api/assets';
 
 let REAL_WISHLIST = [];
 
@@ -565,6 +571,180 @@ function renderWishlist(){
   updateWishlistStats();
 }
 
+
+
+/* ══ DOWNLOADS — REALTIME ══ */
+let REAL_DOWNLOADS = [];
+
+function assetImage(asset) {
+  return (
+    asset.image?.url ||
+    asset.url ||
+    ''
+  );
+}
+
+function assetDownloadedDate(asset) {
+  return (
+    asset.downloadedAt ||
+    asset.lastDownloadedAt ||
+    asset.updatedAt ||
+    asset.createdAt ||
+    null
+  );
+}
+
+async function loadDownloads() {
+  try {
+    const token = profileToken();
+
+    if (!token) return;
+
+    const res = await fetch(ACCOUNT_DOWNLOADS_API, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Downloads load failed');
+    }
+
+    REAL_DOWNLOADS =
+      data.data?.assets ||
+      data.data?.downloads ||
+      data.assets ||
+      [];
+
+    renderDownloads();
+    updateDownloadStats();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function updateDownloadStats() {
+  const statNums =
+    document.querySelectorAll('.ds-card .ds-num');
+
+  if (statNums[2]) {
+    statNums[2].textContent = REAL_DOWNLOADS.length;
+  }
+}
+
+function renderDownloads() {
+  const grid = document.getElementById('downloads-grid') || document.querySelector('.dl-grid');
+
+  if (!grid) return;
+
+  if (!REAL_DOWNLOADS.length) {
+    grid.innerHTML = `
+      <div style="
+        grid-column:1/-1;
+        padding:40px;
+        text-align:center;
+        color:#777;
+        border:1px solid rgba(255,255,255,.08);
+        background:#0d0d0d;
+      ">
+        No downloads yet. Go to Fan Hub → Digital Assets and download a wallpaper.
+      </div>
+    `;
+
+    updateDownloadStats();
+    return;
+  }
+
+  grid.innerHTML = REAL_DOWNLOADS.map(asset => {
+    const image = assetImage(asset);
+    const downloadedAt = assetDownloadedDate(asset);
+
+    return `
+      <div class="dl-card">
+        <div class="dl-thumb">
+          ${
+            image
+              ? `<img src="${image}" alt="${asset.name || 'Digital Asset'}"/>`
+              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#111;font-size:2rem">🖼️</div>`
+          }
+        </div>
+
+        <div class="dl-info">
+          <div class="dl-name">
+            ${asset.name || 'Paddox Digital Asset'}
+          </div>
+          <div class="dl-meta">
+            ${asset.resolution || 'HD'} · ${asset.fileSize || 'Digital Asset'} · ${
+              downloadedAt
+                ? 'Downloaded ' + new Date(downloadedAt).toLocaleDateString()
+                : 'Downloaded'
+            }
+          </div>
+        </div>
+
+        <button
+          class="dl-act animate-icon"
+          onclick="downloadAccountAsset('${asset._id}')"
+        >
+          ↓ Download Again
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  updateDownloadStats();
+}
+
+async function downloadAccountAsset(assetId) {
+  try {
+    const token = profileToken();
+
+    if (!token) {
+      showToast('🔐 Please login first');
+      return;
+    }
+
+    showToast('⏳ Preparing download...');
+
+    const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Download failed');
+    }
+
+    const info = data.data || data;
+    const downloadUrl =
+      info.downloadUrl ||
+      info.url ||
+      info.image?.url;
+
+    if (!downloadUrl) {
+      throw new Error('Download URL missing');
+    }
+
+    window.open(downloadUrl, '_blank');
+
+    showToast(`✅ Downloading ${info.name || 'asset'}`);
+
+    await loadDownloads();
+    await loadRealtimeProfile();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
 
 /* ══ NOTIFICATIONS ══ */
 const NOTIFS=[
@@ -1302,5 +1482,6 @@ window.addEventListener('DOMContentLoaded', () => {
   bindAvatarUpload();
   loadMyOrders();
   loadWishlist();
+  loadDownloads();
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
