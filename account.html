@@ -196,10 +196,10 @@
           <div class="page-title" id="dash-greeting">HEY, ARJUN</div>
         </div>
         <div class="dash-stats">
-          <div class="ds-card reveal-up"><span class="ds-icon animate-icon">📦</span><div class="ds-num">7</div><div class="ds-lbl">Total Orders</div></div>
-          <div class="ds-card reveal-up delay-1"><span class="ds-icon animate-icon">♡</span><div class="ds-num">3</div><div class="ds-lbl">Wishlisted</div></div>
-          <div class="ds-card reveal-up delay-2"><span class="ds-icon animate-icon">⬇️</span><div class="ds-num">3</div><div class="ds-lbl">Downloads</div></div>
-          <div class="ds-card reveal-up delay-3"><span class="ds-icon animate-icon">⭐</span><div class="ds-num">4,820</div><div class="ds-lbl">Fan Points</div></div>
+          <div class="ds-card reveal-up"><span class="ds-icon animate-icon">📦</span><div class="ds-num" id="dash-orders-count">0</div><div class="ds-lbl">Total Orders</div></div>
+          <div class="ds-card reveal-up delay-1"><span class="ds-icon animate-icon">♡</span><div class="ds-num" id="dash-wishlist-count">0</div><div class="ds-lbl">Wishlisted</div></div>
+          <div class="ds-card reveal-up delay-2"><span class="ds-icon animate-icon">⬇️</span><div class="ds-num" id="dash-downloads-count">0</div><div class="ds-lbl">Downloads</div></div>
+          <div class="ds-card reveal-up delay-3"><span class="ds-icon animate-icon">⭐</span><div class="ds-num" id="dash-fan-points">0</div><div class="ds-lbl">Fan Points</div></div>
         </div>
         <div class="dash-grid">
           <div class="dash-card reveal-up">
@@ -208,11 +208,13 @@
             <div class="r-order"><div class="r-oicon">👕</div><div><div class="r-oname">RB20 Team Tee</div><div class="r-ometa">Apr 28 · <span class="ostatus os-sh">Shipped</span></div></div><div class="r-oprice">₹3,999</div></div>
             <div class="r-order"><div class="r-oicon">🏆</div><div><div class="r-oname">W15 Collector Diecast</div><div class="r-ometa">Apr 15 · <span class="ostatus os-del">Delivered</span></div></div><div class="r-oprice">₹8,999</div></div>
           </div>
-          <div class="dash-card reveal-up delay-1">
+          <div class="dash-card reveal-up delay-1" id="dashboard-saved-card">
             <div class="dc-title">♡ Saved Items</div>
-            <div class="wi-row"><div class="wi-img">🪖</div><div class="wi-name">F1 Helmet Replica</div><span class="wi-price">₹14,999</span><button class="wi-rm" onclick="showToast('Removed from wishlist')">✕</button></div>
-            <div class="wi-row"><div class="wi-img">⌚</div><div class="wi-name">Monaco Circuit Watch</div><span class="wi-price">₹18,999</span><button class="wi-rm" onclick="showToast('Removed from wishlist')">✕</button></div>
-            <div class="wi-row"><div class="wi-img">📌</div><div class="wi-name">Driver Enamel Pin Set</div><span class="wi-price">₹799</span><button class="wi-rm" onclick="showToast('Removed from wishlist')">✕</button></div>
+            <div id="dashboard-saved-items">
+              <div style="padding:24px;text-align:center;color:#777;border-top:1px solid rgba(255,255,255,.08);">
+                No saved items yet.
+              </div>
+            </div>
           </div>
         </div>
       </div>

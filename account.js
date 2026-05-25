@@ -495,124 +495,56 @@ async function removeWishlistProduct(productId) {
 }
 
 function updateWishlistStats() {
-  const statNums =
-    document.querySelectorAll('.ds-card .ds-num');
+  const count = REAL_WISHLIST.length;
 
-  if (statNums[1]) {
-    statNums[1].textContent = REAL_WISHLIST.length;
-  }
+  const dashCount = document.getElementById('dash-wishlist-count');
+  if (dashCount) dashCount.textContent = count;
+
+  const statNums = document.querySelectorAll('.ds-card .ds-num');
+  if (statNums[1]) statNums[1].textContent = count;
 
   updateDashboardSavedItems();
 }
 
 
 function updateDashboardSavedItems() {
-  const titles = [...document.querySelectorAll('.acc-card-title, .section-title, .dash-card-title, h2, h3')]
-    .filter(el => (el.textContent || '').toLowerCase().includes('saved'));
+  const container = document.getElementById('dashboard-saved-items');
 
-  titles.forEach(title => {
-    const card =
-      title.closest('.acc-card') ||
-      title.closest('.dash-panel') ||
-      title.closest('.dash-card') ||
-      title.parentElement;
+  if (!container) return;
 
-    if (!card) return;
+  if (!REAL_WISHLIST.length) {
+    container.innerHTML = `
+      <div style="
+        padding:24px;
+        text-align:center;
+        color:#777;
+        border-top:1px solid rgba(255,255,255,.08);
+      ">
+        No saved items yet.
+      </div>
+    `;
+    return;
+  }
 
-    let container =
-      card.querySelector('.saved-list') ||
-      card.querySelector('.saved-items') ||
-      card.querySelector('.item-list') ||
-      card.querySelector('.recent-list') ||
-      card.querySelector('.wl-mini-list');
+  container.innerHTML = REAL_WISHLIST.slice(0, 3).map(product => {
+    const image = wishlistProductImage(product);
 
-    if (!container) {
-      // fallback: replace visible rows inside the card, but keep the title
-      container = [...card.children].find(child => child !== title && child.children?.length);
-    }
-
-    if (!container) return;
-
-    if (!REAL_WISHLIST.length) {
-      container.innerHTML = `
-        <div style="
-          padding:24px;
-          text-align:center;
-          color:#777;
-          border-top:1px solid rgba(255,255,255,.08);
-        ">
-          No saved items yet.
+    return `
+      <div class="wi-row">
+        <div class="wi-img" style="overflow:hidden;background:#151515">
+          ${
+            image
+              ? `<img src="${image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover">`
+              : '🏎️'
+          }
         </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = REAL_WISHLIST.slice(0, 3).map(product => {
-      const image = wishlistProductImage(product);
-
-      return `
-        <div class="mini-row" style="
-          display:flex;
-          align-items:center;
-          gap:12px;
-          padding:14px 0;
-          border-bottom:1px solid rgba(255,255,255,.06);
-        ">
-          <div style="
-            width:42px;
-            height:42px;
-            background:#151515;
-            overflow:hidden;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-shrink:0;
-          ">
-            ${
-              image
-                ? `<img src="${image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover">`
-                : '🏎️'
-            }
-          </div>
-
-          <div style="flex:1;min-width:0">
-            <div style="
-              color:#fff;
-              font-weight:700;
-              white-space:nowrap;
-              overflow:hidden;
-              text-overflow:ellipsis;
-            ">
-              ${product.name || 'Product'}
-            </div>
-            <div style="color:#777;font-size:.82rem">
-              ${product.team || product.category || 'Paddox'}
-            </div>
-          </div>
-
-          <div style="color:var(--red);font-weight:800">
-            ${formatMoney(wishlistPrice(product))}
-          </div>
-
-          <button
-            onclick="removeWishlistProduct('${product._id}')"
-            style="
-              background:transparent;
-              border:0;
-              color:#777;
-              cursor:pointer;
-              font-size:1.1rem;
-            "
-            title="Remove"
-          >
-            ×
-          </button>
-        </div>
-      `;
-    }).join('');
-  });
+        <div class="wi-name">${product.name || 'Product'}</div>
+        <span class="wi-price">${formatMoney(wishlistPrice(product))}</span>
+        <button class="wi-rm" onclick="removeWishlistProduct('${product._id}')">✕</button>
+      </div>
+    `;
+  }).join('');
 }
-
 
 function renderWishlist(){
   const grid = document.getElementById('wl-grid');
@@ -746,12 +678,13 @@ async function loadDownloads() {
 }
 
 function updateDownloadStats() {
-  const statNums =
-    document.querySelectorAll('.ds-card .ds-num');
+  const count = REAL_DOWNLOADS.length;
 
-  if (statNums[2]) {
-    statNums[2].textContent = REAL_DOWNLOADS.length;
-  }
+  const dashDownloads = document.getElementById('dash-downloads-count');
+  if (dashDownloads) dashDownloads.textContent = count;
+
+  const statNums = document.querySelectorAll('.ds-card .ds-num');
+  if (statNums[2]) statNums[2].textContent = count;
 }
 
 function renderDownloads() {
@@ -1082,8 +1015,13 @@ function hydrateProfile(user = {}) {
 
   setProfileAvatar(user);
 
+  const realFanPoints = Number(user.fanPoints || 0).toLocaleString('en-IN');
+
   const fanPts = document.getElementById('fan-pts');
-  if (fanPts) fanPts.textContent = Number(user.fanPoints || 0).toLocaleString('en-IN');
+  if (fanPts) fanPts.textContent = realFanPoints;
+
+  const dashFanPoints = document.getElementById('dash-fan-points');
+  if (dashFanPoints) dashFanPoints.textContent = realFanPoints;
 
   setFieldValue('pf-fn', user.firstName || '');
   setFieldValue('pf-ln', user.lastName || '');
@@ -1461,12 +1399,11 @@ function renderDashboardOrders(orders) {
 }
 
 function updateAccountStats(orders) {
-  const statNums =
-    document.querySelectorAll('.ds-card .ds-num');
+  const dashOrders = document.getElementById('dash-orders-count');
+  if (dashOrders) dashOrders.textContent = orders.length;
 
-  if (statNums[0]) {
-    statNums[0].textContent = orders.length;
-  }
+  const statNums = document.querySelectorAll('.ds-card .ds-num');
+  if (statNums[0]) statNums[0].textContent = orders.length;
 }
 
 function showRealtimeOrderDetails(orderId) {
@@ -1600,3 +1537,16 @@ window.addEventListener('DOMContentLoaded', () => {
   loadDownloads();
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
+
+function clearHardcodedDashboard() {
+  updateDashboardSavedItems();
+  const dashFanPoints = document.getElementById('dash-fan-points');
+  if (dashFanPoints && currentUser) {
+    dashFanPoints.textContent = Number(currentUser.fanPoints || 0).toLocaleString('en-IN');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(clearHardcodedDashboard, 300);
+  setTimeout(clearHardcodedDashboard, 1200);
+});
