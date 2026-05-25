@@ -72,6 +72,10 @@ function initReveal(root=document){
 }
 initReveal();
 
+function demoLogin() {
+  showToast('Google/Facebook sign-in coming soon. Please use email login.');
+}
+
 /* ══ AUTH ══ */
 /* ══════════════════════════════════════
    REALTIME AUTH SYSTEM
@@ -747,26 +751,23 @@ async function downloadAccountAsset(assetId) {
 }
 
 /* ══ NOTIFICATIONS ══ */
-const NOTIFS=[
-  {ic:'🚚',title:'Order #PDX-00801 shipped!',       sub:'RB20 Team Tee is on its way. Expected: May 13.',           time:'2 hours ago',  unread:true},
-  {ic:'🔥',title:'New Drop: Monaco GP Collection',  sub:'Exclusive Monaco art prints, helmets and caps just dropped.',time:'Yesterday',    unread:true},
-  {ic:'🏆',title:'You earned 500 Fan Points!',       sub:'Keep shopping to unlock Pro Fan tier.',                     time:'3 days ago',   unread:false},
-  {ic:'📊',title:'Fan Poll: Who wins Monaco 2025?',  sub:'Vote now and earn 50 fan points.',                          time:'4 days ago',   unread:false},
-  {ic:'📦',title:'Order #PDX-00812 delivered!',      sub:'Your SF-25 Podium Cap has been delivered. Rate your order.',time:'May 2, 2025', unread:false},
-];
+const NOTIFS = [];
+
 function renderNotifications(){
-  const list=document.getElementById('notif-list');if(!list)return;
-  list.innerHTML=NOTIFS.map(n=>`
-    <div class="nitem ${n.unread?'unread':''}">
-      <div class="n-ic">${n.ic}</div>
-      <div style="flex:1">
-        <div class="n-title" style="font-weight:${n.unread?600:500}">${n.title}</div>
-        <div class="n-sub">${n.sub}</div>
-        <div class="n-time">${n.time}</div>
-      </div>
-      ${n.unread?'<div class="n-dot"></div>':''}
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+
+  list.innerHTML = `
+    <div style="
+      padding:40px;
+      text-align:center;
+      color:#777;
+      border:1px solid rgba(255,255,255,.08);
+      background:#0d0d0d;
+    ">
+      No notifications yet.
     </div>
-  `).join('');
+  `;
 }
 
 /* ══ TEAM PREFS ══ */

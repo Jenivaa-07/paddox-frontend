@@ -203,6 +203,9 @@ if (id === 'inventory') {
 if (id === 'users') {
   loadUsers();
 }
+if (id === 'analytics') {
+  renderAnalyticsRealtime();
+}
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
@@ -1022,6 +1025,7 @@ function updateOverviewRealtime() {
   updateOverviewRecentOrders();
   updateOverviewLowStock();
   updateOverviewRevenueChart();
+  renderAnalyticsRealtime();
 }
 
 
@@ -2041,60 +2045,159 @@ function renderUsers() {
   }).join('');
 }
 
-/* ══ ANALYTICS METRICS ══ */
+/* ══ ANALYTICS METRICS — REALTIME CLEANUP ══ */
 function renderMetList(id, data) {
   const el = document.getElementById(id);
   if (!el) return;
+
+  if (!data.length) {
+    el.innerHTML = `
+      <div style="padding:22px;color:#777;text-align:center">
+        No realtime data yet
+      </div>
+    `;
+    return;
+  }
+
   el.innerHTML = data.map(d => `
     <div class="met-row">
       <span class="met-name">${d.name}</span>
       <div class="met-bar-wrap">
         <div class="met-bar" style="width:0%;background:${d.color}" data-w="${d.pct}%"></div>
       </div>
-      <span class="met-val">${d.val || d.pct+'%'}</span>
+      <span class="met-val">${d.val || d.pct + '%'}</span>
     </div>
   `).join('');
-  /* Animate bars */
+
   setTimeout(() => {
-    el.querySelectorAll('.met-bar').forEach(b => { b.style.transition = 'width 1s ease'; b.style.width = b.dataset.w; });
+    el.querySelectorAll('.met-bar').forEach(b => {
+      b.style.transition = 'width 1s ease';
+      b.style.width = b.dataset.w;
+    });
   }, 200);
 }
-renderMetList('traffic-list',    TRAFFIC_DATA);
-renderMetList('top-products-list', TOP_PRODUCTS);
-renderMetList('geo-list',        GEO_DATA);
-renderMetList('engagement-list', ENGAGEMENT_DATA);
 
-/* ══ MODERATION ══ */
+function renderAnalyticsRealtime() {
+  const totalOrders = REAL_ORDERS.length || 0;
+  const totalRevenue = REAL_ORDERS.reduce(
+    (sum, order) => sum + Number(order?.pricing?.total || order?.total || 0),
+    0
+  );
+
+  const productSales = {};
+  REAL_ORDERS.forEach(order => {
+    (order.items || []).forEach(item => {
+      const name = item.name || 'Product';
+      productSales[name] = (productSales[name] || 0) + Number(item.quantity || 1);
+    });
+  });
+
+  const topProducts = Object.entries(productSales)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+
+  const maxProductQty =
+    Math.max(...topProducts.map(([, qty]) => qty), 1);
+
+  renderMetList(
+    'top-products-list',
+    topProducts.map(([name, qty]) => ({
+      name,
+      val: `${qty} sold`,
+      pct: Math.max(8, Math.round((qty / maxProductQty) * 100)),
+      color: 'var(--red)'
+    }))
+  );
+
+  renderMetList(
+    'traffic-list',
+    [
+      {
+        name: 'Realtime Orders',
+        val: String(totalOrders),
+        pct: totalOrders ? 100 : 0,
+        color: 'var(--red)'
+      },
+      {
+        name: 'Revenue',
+        val: `₹${totalRevenue.toLocaleString('en-IN')}`,
+        pct: totalRevenue ? 100 : 0,
+        color: 'var(--gold)'
+      },
+      {
+        name: 'Products',
+        val: String(REAL_PRODUCTS.length || 0),
+        pct: REAL_PRODUCTS.length ? 100 : 0,
+        color: 'var(--blue)'
+      },
+      {
+        name: 'Digital Assets',
+        val: String(REAL_ASSETS.length || 0),
+        pct: REAL_ASSETS.length ? 100 : 0,
+        color: 'var(--green)'
+      }
+    ]
+  );
+
+  renderMetList(
+    'geo-list',
+    [
+      {
+        name: 'India',
+        val: 'Primary market',
+        pct: totalOrders ? 100 : 0,
+        color: 'var(--red)'
+      }
+    ]
+  );
+
+  renderMetList(
+    'engagement-list',
+    [
+      {
+        name: 'Wishlist / Downloads',
+        val: 'Realtime modules active',
+        pct: 100,
+        color: 'var(--green)'
+      },
+      {
+        name: 'Checkout Flow',
+        val: 'Live',
+        pct: 100,
+        color: 'var(--red)'
+      }
+    ]
+  );
+}
+
+
+/* ══ MODERATION — CLEAN EMPTY STATE ══ */
 function renderModeration() {
   const list = document.getElementById('mod-list');
   if (!list) return;
-  list.innerHTML = ADM_MOD.map((m, i) => `
-    <div class="mod-item" id="mod-item-${i}">
-      <div class="mod-item-head">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span class="mod-type">${m.type}</span>
-          <span class="mod-user">@${m.user} · ${m.time}</span>
-        </div>
-        <span class="mod-flag">⚑ ${m.flag}</span>
-      </div>
-      <div class="mod-content">${m.content}</div>
-      <div class="mod-actions">
-        <button class="act-btn" onclick="modAction(${i},'approve')">✓ Approve</button>
-        <button class="act-btn" onclick="modAction(${i},'remove')">✗ Remove</button>
-        <button class="act-btn" onclick="modAction(${i},'warn')">⚑ Warn User</button>
-        <button class="act-btn" onclick="modAction(${i},'ban')">Ban User</button>
-      </div>
+
+  list.innerHTML = `
+    <div style="
+      padding:40px;
+      color:#777;
+      text-align:center;
+      border:1px solid rgba(255,255,255,.08);
+      background:#0d0d0d;
+    ">
+      No moderation queue yet.
+      <br>
+      <span style="font-size:.85rem;color:#555">
+        Reviews/comments moderation can be connected later.
+      </span>
     </div>
-  `).join('');
+  `;
 }
-renderModeration();
 
 function modAction(i, action) {
-  const item = document.getElementById(`mod-item-${i}`);
-  if (item) { item.style.opacity = '.3'; item.style.pointerEvents = 'none'; }
-  const msgs = { approve:'✓ Content approved', remove:'✗ Content removed', warn:'⚑ User warned', ban:'🚫 User banned' };
-  showToast(msgs[action] || 'Action taken');
+  showToast('No moderation items right now');
 }
+
+renderModeration();
 
 
 
