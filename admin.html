@@ -312,25 +312,78 @@
         <div class="modal-title">➕ ADD NEW PRODUCT</div>
         <button class="modal-close" onclick="closeAddModal()">✕</button>
       </div>
+
       <div class="modal-body">
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Product Name</label><input class="form-input" placeholder="e.g. SF-25 Podium Cap"/></div>
-          <div class="form-group"><label class="form-label">Team</label><select class="form-input"><option>Ferrari</option><option>Red Bull</option><option>Mercedes</option><option>McLaren</option><option>Paddox</option></select></div>
+          <div class="form-group">
+            <label class="form-label">Product Name</label>
+            <input id="add-product-name" class="form-input" placeholder="e.g. SF-25 Podium Cap"/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Team</label>
+            <select id="add-product-team" class="form-input">
+              <option value="Ferrari">Ferrari</option>
+              <option value="Red Bull">Red Bull</option>
+              <option value="Mercedes">Mercedes</option>
+              <option value="McLaren">McLaren</option>
+              <option value="Paddox">Paddox</option>
+              <option value="Collector">Collector</option>
+            </select>
+          </div>
         </div>
+
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Category</label><select class="form-input"><option>Apparel</option><option>Collectibles</option><option>Accessories</option><option>Posters</option><option>Custom</option></select></div>
-          <div class="form-group"><label class="form-label">Price (₹)</label><input class="form-input" type="number" placeholder="2499"/></div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="add-product-category" class="form-input">
+              <option value="apparel">Apparel</option>
+              <option value="collectibles">Collectibles</option>
+              <option value="accessories">Accessories</option>
+              <option value="posters">Posters</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Price (₹)</label>
+            <input id="add-product-price" class="form-input" type="number" min="0" placeholder="2499"/>
+          </div>
         </div>
+
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Stock Qty</label><input class="form-input" type="number" placeholder="50"/></div>
-          <div class="form-group"><label class="form-label">Badge</label><select class="form-input"><option>None</option><option>New</option><option>Hot</option><option>Limited</option><option>Sale</option></select></div>
+          <div class="form-group">
+            <label class="form-label">Stock Qty</label>
+            <input id="add-product-stock" class="form-input" type="number" min="0" placeholder="50"/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Badge</label>
+            <select id="add-product-badge" class="form-input">
+              <option value="">None</option>
+              <option value="new">New</option>
+              <option value="hot">Hot</option>
+              <option value="ltd">Limited</option>
+              <option value="sale">Sale</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="3" style="resize:vertical" placeholder="Product description…"></textarea></div>
-        <div class="form-group"><label class="form-label">Image URL</label><input class="form-input" placeholder="https://images.unsplash.com/…"/></div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="add-product-description" class="form-input" rows="3" style="resize:vertical" placeholder="Product description…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Upload Product Image</label>
+          <input id="add-product-image" class="form-input" type="file" accept="image/*"/>
+          <small style="color:#777">JPG / PNG / WebP supported. Image will be compressed automatically.</small>
+        </div>
       </div>
+
       <div class="modal-footer">
         <button class="adm-btn-ghost" onclick="closeAddModal()">Cancel</button>
-        <button class="adm-btn-red" onclick="submitProduct()">Save Product</button>
+        <button class="adm-btn-red" type="button" onclick="saveNewProduct()">Save Product</button>
       </div>
     </div>
   </div>
@@ -338,9 +391,9 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script src="js/api.js"></script>
   <script src="admin.js"></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="js/api.js"></script>
 </body>
 </html>

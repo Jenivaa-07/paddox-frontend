@@ -2097,6 +2097,68 @@ function modAction(i, action) {
 }
 
 
+
+/* ══════════════════════════════════════
+   PRODUCT IMAGE FILE HELPERS
+   Uploads local image by converting it to compressed Data URL.
+══════════════════════════════════════ */
+
+function readImageFileAsDataUrl(file, maxWidth = 900, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve('');
+
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Please choose an image file'));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new Image();
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+
+        const scale =
+          img.width > maxWidth
+            ? maxWidth / img.width
+            : 1;
+
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+
+        const ctx = canvas.getContext('2d');
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+
+      img.onerror = () => reject(new Error('Could not read image'));
+
+      img.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error('Could not read image file'));
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function normaliseBadge(value) {
+  const v = String(value || '').toLowerCase();
+
+  if (!v || v === 'none') return null;
+  if (v === 'limited') return 'ltd';
+
+  return v;
+}
+
+function normaliseCategory(value) {
+  return String(value || 'apparel').toLowerCase();
+}
+
 /* ══════════════════════════════════════
    REALTIME PRODUCT EDIT SYSTEM
 ══════════════════════════════════════ */
@@ -2208,8 +2270,9 @@ function ensureProductEditModal() {
           gap:6px;
           margin-top:14px;
         ">
-          <span style="color:#777;font-size:.75rem;letter-spacing:2px">IMAGE URL</span>
-          <input id="edit-product-image" class="edit-product-input">
+          <span style="color:#777;font-size:.75rem;letter-spacing:2px">UPLOAD NEW IMAGE</span>
+          <input id="edit-product-image-file" type="file" accept="image/*" class="edit-product-input">
+          <small style="color:#777">Leave empty to keep current image.</small>
         </label>
 
         <label style="
@@ -2322,8 +2385,8 @@ function openProductEditModal(productId) {
   document.getElementById('edit-product-active').value =
     String(product.isActive !== false);
 
-  document.getElementById('edit-product-image').value =
-    image;
+  const editImageFile = document.getElementById('edit-product-image-file');
+  if (editImageFile) editImageFile.value = '';
 
   document.getElementById('edit-product-description').value =
     product.description || '';
@@ -2369,14 +2432,17 @@ async function saveProductEdit() {
       return;
     }
 
+    const imageFile =
+      document.getElementById('edit-product-image-file')?.files?.[0] || null;
+
     const imageUrl =
-      document.getElementById('edit-product-image').value.trim();
+      imageFile ? await readImageFileAsDataUrl(imageFile) : '';
 
     const body = {
       name: document.getElementById('edit-product-name').value.trim(),
       team: document.getElementById('edit-product-team').value.trim(),
-      category: document.getElementById('edit-product-category').value,
-      badge: document.getElementById('edit-product-badge').value,
+      category: normaliseCategory(document.getElementById('edit-product-category').value),
+      badge: normaliseBadge(document.getElementById('edit-product-badge').value),
       price,
       stock,
       isActive: document.getElementById('edit-product-active').value === 'true',
@@ -2431,6 +2497,133 @@ async function saveProductEdit() {
     console.error(err);
     showToast(`❌ ${err.message}`);
   }
+}
+
+
+/* ══════════════════════════════════════
+   REALTIME ADD PRODUCT SYSTEM
+══════════════════════════════════════ */
+
+function getAddValue(id) {
+  return document.getElementById(id)?.value?.trim() || '';
+}
+
+async function saveNewProduct() {
+  try {
+    const name = getAddValue('add-product-name');
+    const team = getAddValue('add-product-team');
+    const category = normaliseCategory(getAddValue('add-product-category'));
+    const badge = normaliseBadge(getAddValue('add-product-badge'));
+    const price = Number(getAddValue('add-product-price'));
+    const stock = Number(getAddValue('add-product-stock'));
+    const description =
+      getAddValue('add-product-description') ||
+      `${name} from Paddox store`;
+
+    const imageFile =
+      document.getElementById('add-product-image')?.files?.[0] || null;
+
+    if (!name) {
+      showToast('❌ Product name required');
+      return;
+    }
+
+    if (!team) {
+      showToast('❌ Team required');
+      return;
+    }
+
+    if (Number.isNaN(price) || price <= 0) {
+      showToast('❌ Valid price required');
+      return;
+    }
+
+    if (Number.isNaN(stock) || stock < 0) {
+      showToast('❌ Valid stock required');
+      return;
+    }
+
+    let imageUrl = '';
+
+    if (imageFile) {
+      showToast('🖼️ Preparing image...');
+      imageUrl = await readImageFileAsDataUrl(imageFile);
+    }
+
+    const productPayload = {
+      name,
+      team,
+      category,
+      badge,
+      price,
+      stock,
+      description,
+      shortDesc: description.slice(0, 180),
+      isActive: true,
+      isFeatured: false,
+      images: imageUrl
+        ? [{ url: imageUrl, alt: name }]
+        : [{
+            url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
+            alt: name
+          }]
+    };
+
+    showToast('⏳ Saving product...');
+
+    const res = await fetch(
+      PRODUCT_API_BASE,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAdminToken()}`
+        },
+        body: JSON.stringify(productPayload)
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Product create failed');
+    }
+
+    showToast('🔥 Product added successfully');
+
+    closeAddModal();
+
+    clearAddProductForm();
+
+    await loadProducts();
+    updateOverviewRealtime();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function clearAddProductForm() {
+  [
+    'add-product-name',
+    'add-product-price',
+    'add-product-stock',
+    'add-product-description',
+    'add-product-image'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  const team = document.getElementById('add-product-team');
+  if (team) team.value = 'Ferrari';
+
+  const category = document.getElementById('add-product-category');
+  if (category) category.value = 'apparel';
+
+  const badge = document.getElementById('add-product-badge');
+  if (badge) badge.value = '';
 }
 
 /* ══ ADD PRODUCT MODAL ══ */
