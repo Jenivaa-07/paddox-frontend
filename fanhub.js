@@ -276,14 +276,6 @@ const RACES = [
   { round:12, name:'British Grand Prix',       circuit:'Silverstone Circuit',        date:'Jul 6',  flag:'🇬🇧', status:'upcoming',  winner:null         },
 ];
 
-const QUOTES = [
-  { text:'I have no idea how I did that lap. Sometimes the car just talks to you and you have to listen.',    driver:'Max Verstappen',  team:'Oracle Red Bull Racing', av:'🔵' },
-  { text:'Every time I put on the helmet, I feel like I can conquer the world. That is what racing does.',  driver:'Lewis Hamilton',   team:'Scuderia Ferrari',       av:'⭐' },
-  { text:'Monaco is not just a race — it is a statement. You either belong here or you do not.',            driver:'Charles Leclerc', team:'Scuderia Ferrari',       av:'🔴' },
-  { text:'Pressure is nothing more than the shadow of great opportunity. I embrace every moment on track.', driver:'Lando Norris',    team:'McLaren F1 Team',        av:'🟠' },
-  { text:'After 20 years I am still hungry. The day you stop learning is the day you stop improving.',      driver:'Fernando Alonso', team:'Aston Martin F1',        av:'🟢' },
-  { text:'Speed is my language, the track is my canvas, every lap a sentence written in fire.',             driver:'Max Verstappen',  team:'Oracle Red Bull Racing', av:'🔵' },
-];
 
 const TRIVIA = [
   { q:'Which driver holds the most F1 World Championships?', opts:['Ayrton Senna','Michael Schumacher','Lewis Hamilton','Sebastian Vettel'], correct:2 },
@@ -716,35 +708,199 @@ function renderCalendar(){
 }
 loadRealCalendar();
 
-/* ══ QUOTES ══ */
-let qIdx=0;
-function renderQuotes(){
-  const q=QUOTES[qIdx];
-  const feat=document.getElementById('quote-featured');
-  if(feat) feat.innerHTML=`
+/* ══ QUOTES — REALTIME LIBRARY ══ */
+const QUOTES_API_BASE =
+  'https://paddox-backend.onrender.com/api/fan/quotes';
+
+let REAL_QUOTES = [];
+let quoteIdx = 0;
+let quoteEraFilter = 'all';
+let quoteSearchText = '';
+let quoteAutoTimer = null;
+
+async function loadRealtimeQuotes() {
+  const feat = document.getElementById('quote-featured');
+  const list = document.getElementById('quotes-list');
+
+  if (feat) {
+    feat.innerHTML = `
+      <div class="quote-empty">
+        Loading quotes from Paddox quote library...
+      </div>
+    `;
+  }
+
+  if (list) list.innerHTML = '';
+
+  try {
+    const params = new URLSearchParams();
+
+    params.set('limit', '120');
+
+    if (quoteEraFilter !== 'all') {
+      params.set('era', quoteEraFilter);
+    }
+
+    if (quoteSearchText) {
+      params.set('search', quoteSearchText);
+    }
+
+    const res = await fetch(`${QUOTES_API_BASE}?${params.toString()}`);
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Quotes failed');
+    }
+
+    REAL_QUOTES =
+      data.data?.quotes ||
+      data.quotes ||
+      [];
+
+    quoteIdx = 0;
+
+    renderRealtimeQuotes();
+
+  } catch (err) {
+    console.error(err);
+
+    if (feat) {
+      feat.innerHTML = `
+        <div class="quote-empty">
+          Could not load quotes right now.
+        </div>
+      `;
+    }
+
+    if (list) list.innerHTML = '';
+  }
+}
+
+function renderRealtimeQuotes() {
+  const feat = document.getElementById('quote-featured');
+  const list = document.getElementById('quotes-list');
+
+  if (!feat || !list) return;
+
+  if (!REAL_QUOTES.length) {
+    feat.innerHTML = `
+      <div class="quote-empty">
+        No quotes found. Admin can add current-grid and legendary driver quotes.
+      </div>
+    `;
+
+    list.innerHTML = '';
+    return;
+  }
+
+  const q =
+    REAL_QUOTES[quoteIdx] ||
+    REAL_QUOTES[0];
+
+  feat.innerHTML = `
     <div class="qf-bg">"</div>
     <div class="big-qm">"</div>
-    <div class="qf-text">${q.text}</div>
+
+    <div class="qf-text">
+      ${q.text}
+    </div>
+
     <div class="qf-drv">
-      <div class="qf-ava">${q.av}</div>
-      <div><div class="qf-dname">${q.driver}</div><div class="qf-dteam">${q.team}</div></div>
+      <div class="qf-ava">
+        ${q.avatar || '🏎️'}
+      </div>
+
+      <div>
+        <div class="qf-dname">
+          ${q.driver}
+        </div>
+        <div class="qf-dteam">
+          ${q.team || q.era || 'Paddox Quote Library'}
+        </div>
+      </div>
+    </div>
+
+    <div class="qm-meta">
+      ${(q.era || 'current').toUpperCase()} · ${(q.category || 'motivation').toUpperCase()}
     </div>
   `;
-  const list=document.getElementById('quotes-list');
-  if(list) list.innerHTML=QUOTES.map((qq,i)=>`
-    <div class="qmini ${i===qIdx?'on':''}" onclick="setQuote(${i})">
-      <div class="qm-text">${qq.text}</div>
-      <div class="qm-drv">
-        <span style="font-size:1.1rem">${qq.av}</span>
-        <div><div class="qm-n">${qq.driver}</div><div class="qm-t">${qq.team}</div></div>
+
+  list.innerHTML = REAL_QUOTES.map((qq, i) => `
+    <div class="qmini ${i === quoteIdx ? 'on' : ''}" onclick="setRealtimeQuote(${i})">
+      <div class="qm-text">
+        ${qq.text}
       </div>
-      <button class="qm-share" onclick="event.stopPropagation();showToast('🔗 Quote link copied!')">Share</button>
+
+      <div class="qm-drv">
+        <span style="font-size:1.1rem">
+          ${qq.avatar || '🏎️'}
+        </span>
+
+        <div>
+          <div class="qm-n">
+            ${qq.driver}
+          </div>
+          <div class="qm-t">
+            ${qq.team || qq.era || 'Quote Library'}
+          </div>
+        </div>
+      </div>
+
+      <div class="qm-meta">
+        ${(qq.era || 'current').toUpperCase()} · ${(qq.category || 'motivation').toUpperCase()}
+      </div>
+
+      <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i})">
+        Share
+      </button>
     </div>
   `).join('');
 }
-function setQuote(i){qIdx=i;renderQuotes()}
-renderQuotes();
-setInterval(()=>setQuote((qIdx+1)%QUOTES.length),7000);
+
+function setRealtimeQuote(index) {
+  quoteIdx = index;
+  renderRealtimeQuotes();
+}
+
+function copyQuoteText(index) {
+  const q = REAL_QUOTES[index];
+
+  if (!q) return;
+
+  navigator.clipboard?.writeText(`"${q.text}" — ${q.driver}`);
+
+  showToast('🔗 Quote copied!');
+}
+
+document.querySelectorAll('.quote-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.quote-filter').forEach(b => b.classList.remove('on'));
+
+    btn.classList.add('on');
+
+    quoteEraFilter = btn.dataset.era || 'all';
+
+    loadRealtimeQuotes();
+  });
+});
+
+document.getElementById('quote-search')?.addEventListener('input', e => {
+  clearTimeout(e.target._quoteTimer);
+
+  e.target._quoteTimer = setTimeout(() => {
+    quoteSearchText = e.target.value.trim();
+    loadRealtimeQuotes();
+  }, 350);
+});
+
+loadRealtimeQuotes();
+
+quoteAutoTimer = setInterval(() => {
+  if (!REAL_QUOTES.length) return;
+  quoteIdx = (quoteIdx + 1) % REAL_QUOTES.length;
+  renderRealtimeQuotes();
+}, 7000);
+
 
 /* ══ COMMUNITY — REALTIME ══ */
 const FAN_API_BASE =

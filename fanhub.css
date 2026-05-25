@@ -512,3 +512,59 @@ body.page-transition-init{opacity:0;animation:bodyReveal .4s .3s forwards}
   background: rgba(255,255,255,.025);
   border: 1px solid rgba(255,255,255,.06);
 }
+
+
+/* ══════════════════════════════════════
+   REALTIME QUOTE LIBRARY
+══════════════════════════════════════ */
+.quote-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.quote-filter {
+  background: var(--gray);
+  border: 1px solid var(--gray2);
+  color: var(--muted2);
+  padding: 7px 16px;
+  font-family: var(--font-c);
+  font-size: .72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all var(--tr);
+}
+.quote-filter:hover,
+.quote-filter.on {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+.quote-search {
+  min-width: min(320px, 100%);
+  flex: 1;
+  background: #101010;
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--white);
+  padding: 9px 13px;
+  font-size: .85rem;
+  outline: none;
+}
+.quote-search:focus {
+  border-color: var(--red);
+}
+.quote-empty {
+  padding: 40px;
+  color: var(--muted);
+  text-align: center;
+  background: rgba(255,255,255,.025);
+  border: 1px solid rgba(255,255,255,.06);
+}
+.qm-meta {
+  margin-top: 8px;
+  color: var(--muted);
+  font-family: var(--font-c);
+  font-size: .65rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}

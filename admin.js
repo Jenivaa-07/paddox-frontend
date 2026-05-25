@@ -170,6 +170,7 @@ const PAGE_META = {
   action:'+ Upload Asset',
   fn:()=>openAssetModal()
 },
+  fanquotes:  { title:'FAN QUOTES',      action:'+ Add Quote',   fn:()=>openQuoteModal() },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
   analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>showToast('📊 Report downloaded!') },
   moderation: { title:'MODERATION',      action:'Clear All',      fn:()=>showToast('✓ All items reviewed!') },
@@ -205,6 +206,9 @@ if (id === 'users') {
 }
 if (id === 'analytics') {
   renderAnalyticsRealtime();
+}
+if (id === 'fanquotes') {
+  loadAdminQuotes();
 }
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -3218,6 +3222,409 @@ function updateAdminIdentity() {
         }
       });
   } catch (err) {}
+}
+
+
+/* ══════════════════════════════════════
+   ADMIN FAN QUOTES — REALTIME
+══════════════════════════════════════ */
+const ADMIN_QUOTES_API =
+  'https://paddox-backend.onrender.com/api/fan/admin/quotes';
+
+let REAL_QUOTES_ADMIN = [];
+let EDIT_QUOTE_ID = null;
+
+function quoteAdminHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${getAdminToken()}`
+  };
+}
+
+async function loadAdminQuotes() {
+  const tbody = document.getElementById('quotes-tbody');
+
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="7" style="text-align:center;padding:30px;color:#777">
+        Loading quotes...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch(ADMIN_QUOTES_API, {
+      headers: {
+        Authorization: `Bearer ${getAdminToken()}`
+      }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      redirectToLogin('Admin session expired. Please login again.');
+      return;
+    }
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Quotes load failed');
+    }
+
+    REAL_QUOTES_ADMIN =
+      data.data?.quotes ||
+      data.quotes ||
+      [];
+
+    renderAdminQuotes();
+
+  } catch (err) {
+    console.error(err);
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;padding:30px;color:#777">
+          Failed to load quotes
+        </td>
+      </tr>
+    `;
+  }
+}
+
+function getFilteredAdminQuotes() {
+  const era =
+    document.getElementById('quote-era-filter')?.value || 'all';
+
+  const search =
+    document.getElementById('quote-search-admin')?.value?.trim()?.toLowerCase() || '';
+
+  return REAL_QUOTES_ADMIN.filter(q => {
+    const eraOk =
+      era === 'all' ||
+      q.era === era;
+
+    const searchOk =
+      !search ||
+      `${q.driver} ${q.team} ${q.text} ${q.category}`
+        .toLowerCase()
+        .includes(search);
+
+    return eraOk && searchOk;
+  });
+}
+
+function renderAdminQuotes() {
+  const tbody = document.getElementById('quotes-tbody');
+
+  if (!tbody) return;
+
+  const list = getFilteredAdminQuotes();
+
+  if (!list.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;padding:30px;color:#777">
+          No quotes found
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = list.map(q => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.4rem">${q.avatar || '🏎️'}</span>
+          <div>
+            <div style="font-weight:800;color:#fff">${q.driver}</div>
+            <div style="color:#777;font-size:.75rem">${q.team || '-'}</div>
+          </div>
+        </div>
+      </td>
+
+      <td style="max-width:380px;color:#ccc;line-height:1.45">
+        "${q.text}"
+      </td>
+
+      <td>
+        <span class="sb s-pr">
+          ${q.era || 'current'}
+        </span>
+      </td>
+
+      <td style="color:#aaa">
+        ${q.category || '-'}
+      </td>
+
+      <td>
+        ${q.isFeatured ? '⭐ Yes' : '—'}
+      </td>
+
+      <td>
+        <span class="sb ${q.isActive ? 's-act' : 's-out'}">
+          ${q.isActive ? 'Active' : 'Inactive'}
+        </span>
+      </td>
+
+      <td>
+        <button class="act-btn" onclick="openQuoteModal('${q._id}')">
+          Edit
+        </button>
+        <button class="act-btn" onclick="deleteQuote('${q._id}')">
+          Delete
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+document.addEventListener('change', e => {
+  if (e.target?.id === 'quote-era-filter') {
+    renderAdminQuotes();
+  }
+});
+
+document.addEventListener('input', e => {
+  if (e.target?.id === 'quote-search-admin') {
+    renderAdminQuotes();
+  }
+});
+
+function ensureQuoteModal() {
+  if (document.getElementById('quote-modal')) return;
+
+  const modal = document.createElement('div');
+
+  modal.id = 'quote-modal';
+
+  modal.innerHTML = `
+    <div class="preview-overlay" id="quote-overlay">
+      <div class="preview-card" style="
+        max-width:760px;
+        width:92vw;
+        padding:28px;
+        color:#fff;
+        text-align:left;
+      ">
+        <button class="preview-close" id="quote-close">✕</button>
+
+        <div style="
+          font-family:var(--font-d);
+          letter-spacing:4px;
+          font-size:1.8rem;
+          margin-bottom:8px;
+        " id="quote-modal-title">
+          ADD QUOTE
+        </div>
+
+        <div style="
+          color:var(--red);
+          font-family:var(--font-c);
+          letter-spacing:2px;
+          margin-bottom:22px;
+        ">
+          FAN HUB QUOTE LIBRARY
+        </div>
+
+        <label style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+          <span style="color:#777;font-size:.75rem;letter-spacing:2px">QUOTE TEXT</span>
+          <textarea id="quote-text" class="edit-product-input" rows="4" maxlength="500"></textarea>
+        </label>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER</span>
+            <input id="quote-driver" class="edit-product-input">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span>
+            <input id="quote-team" class="edit-product-input">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">ERA</span>
+            <select id="quote-era" class="edit-product-input">
+              <option value="current">current</option>
+              <option value="legend">legend</option>
+              <option value="principal">principal</option>
+              <option value="other">other</option>
+            </select>
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">CATEGORY</span>
+            <input id="quote-category" class="edit-product-input" placeholder="motivation, champions, racecraft">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">AVATAR / EMOJI</span>
+            <input id="quote-avatar" class="edit-product-input" placeholder="🏎️">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">SOURCE</span>
+            <input id="quote-source" class="edit-product-input" placeholder="optional">
+          </label>
+
+          <label style="display:flex;align-items:center;gap:10px;color:#aaa;margin-top:8px">
+            <input id="quote-featured" type="checkbox">
+            Featured quote
+          </label>
+
+          <label style="display:flex;align-items:center;gap:10px;color:#aaa;margin-top:8px">
+            <input id="quote-active" type="checkbox" checked>
+            Active
+          </label>
+        </div>
+
+        <button
+          class="act-btn"
+          id="quote-save"
+          style="
+            width:100%;
+            padding:14px;
+            margin-top:22px;
+            background:var(--red);
+            color:white;
+            border:0;
+            font-weight:800;
+            letter-spacing:3px;
+          "
+        >
+          SAVE QUOTE
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#quote-close').onclick = closeQuoteModal;
+
+  modal.querySelector('#quote-overlay').onclick = e => {
+    if (e.target.id === 'quote-overlay') closeQuoteModal();
+  };
+
+  modal.querySelector('#quote-save').onclick = saveQuote;
+}
+
+function openQuoteModal(id = null) {
+  ensureQuoteModal();
+
+  EDIT_QUOTE_ID = id;
+
+  const quote =
+    id
+      ? REAL_QUOTES_ADMIN.find(q => String(q._id) === String(id))
+      : null;
+
+  document.getElementById('quote-modal-title').textContent =
+    quote ? 'EDIT QUOTE' : 'ADD QUOTE';
+
+  document.getElementById('quote-text').value = quote?.text || '';
+  document.getElementById('quote-driver').value = quote?.driver || '';
+  document.getElementById('quote-team').value = quote?.team || '';
+  document.getElementById('quote-era').value = quote?.era || 'current';
+  document.getElementById('quote-category').value = quote?.category || 'motivation';
+  document.getElementById('quote-avatar').value = quote?.avatar || '🏎️';
+  document.getElementById('quote-source').value = quote?.source || '';
+  document.getElementById('quote-featured').checked = !!quote?.isFeatured;
+  document.getElementById('quote-active').checked = quote?.isActive !== false;
+
+  document.getElementById('quote-modal').classList.add('show');
+}
+
+function closeQuoteModal() {
+  document.getElementById('quote-modal')?.classList.remove('show');
+  EDIT_QUOTE_ID = null;
+}
+
+async function saveQuote() {
+  try {
+    const body = {
+      text: document.getElementById('quote-text').value.trim(),
+      driver: document.getElementById('quote-driver').value.trim(),
+      team: document.getElementById('quote-team').value.trim(),
+      era: document.getElementById('quote-era').value,
+      category: document.getElementById('quote-category').value.trim() || 'motivation',
+      avatar: document.getElementById('quote-avatar').value.trim() || '🏎️',
+      source: document.getElementById('quote-source').value.trim(),
+      isFeatured: document.getElementById('quote-featured').checked,
+      isActive: document.getElementById('quote-active').checked
+    };
+
+    if (!body.text || !body.driver) {
+      showToast('❌ Quote and driver required');
+      return;
+    }
+
+    showToast('⏳ Saving quote...');
+
+    const res = await fetch(
+      EDIT_QUOTE_ID
+        ? `${ADMIN_QUOTES_API}/${EDIT_QUOTE_ID}`
+        : ADMIN_QUOTES_API,
+      {
+        method: EDIT_QUOTE_ID ? 'PUT' : 'POST',
+        headers: quoteAdminHeaders(),
+        body: JSON.stringify(body)
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Save quote failed');
+    }
+
+    showToast('🔥 Quote saved');
+
+    closeQuoteModal();
+
+    await loadAdminQuotes();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function deleteQuote(id) {
+  try {
+    const quote =
+      REAL_QUOTES_ADMIN.find(q => String(q._id) === String(id));
+
+    if (!confirm(`Delete quote by ${quote?.driver || 'this driver'}?`)) return;
+
+    showToast('⏳ Deleting quote...');
+
+    const res = await fetch(
+      `${ADMIN_QUOTES_API}/${id}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${getAdminToken()}`
+        }
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Delete quote failed');
+    }
+
+    showToast('🔥 Quote deleted');
+
+    await loadAdminQuotes();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
 }
 
 /* ══════════════════════════════════════

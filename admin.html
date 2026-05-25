@@ -45,6 +45,9 @@
         <div class="adm-nav-item" data-page="assets">
           <span class="adm-icon animate-icon">🖼️</span> Digital Assets
         </div>
+        <div class="adm-nav-item" data-page="fanquotes">
+          <span class="adm-icon animate-icon">💬</span> Fan Quotes
+        </div>
 
         <div class="adm-nav-section">People</div>
         <div class="adm-nav-item" data-page="users">
@@ -293,6 +296,41 @@
               <div class="chart-title">🎮 Fan Engagement</div>
               <div class="met-list" id="engagement-list"></div>
             </div>
+          </div>
+        </div>
+
+
+        <!-- ── FAN QUOTES ── -->
+        <div class="adm-page" id="adm-fanquotes">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <select class="adm-select" id="quote-era-filter">
+                <option value="all">All Eras</option>
+                <option value="current">Current Grid</option>
+                <option value="legend">Legends</option>
+                <option value="principal">Principals</option>
+                <option value="other">Other</option>
+              </select>
+              <input class="adm-input" id="quote-search-admin" type="text" placeholder="Search quotes…"/>
+            </div>
+            <button class="adm-btn-red" onclick="openQuoteModal()">+ Add Quote</button>
+          </div>
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Driver</th>
+                  <th>Quote</th>
+                  <th>Era</th>
+                  <th>Category</th>
+                  <th>Featured</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="quotes-tbody"></tbody>
+            </table>
           </div>
         </div>
 
