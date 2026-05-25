@@ -281,8 +281,7 @@ function loginUser(user) {
   const fullName =
     `${user.firstName || ''} ${user.lastName || ''}`.trim();
 
-  document.getElementById('prof-avatar')
-    .textContent = '🏎️';
+  setProfileAvatar(user);
 
   document.getElementById('prof-name')
     .textContent = fullName;
@@ -307,6 +306,7 @@ function loginUser(user) {
   renderNotifications();
   renderTeamPrefs();
   hydrateProfile(user);
+  bindAvatarUpload();
 
   initReveal(accScreen);
   loadRealtimeProfile();
@@ -458,6 +458,8 @@ const USER_PROFILE_API =
   'https://paddox-backend.onrender.com/api/users/profile';
 const USER_PREF_API =
   'https://paddox-backend.onrender.com/api/users/preferences';
+const USER_AVATAR_API =
+  'https://paddox-backend.onrender.com/api/users/avatar';
 
 function profileToken() {
   return (
@@ -478,6 +480,145 @@ function getSelectedTeam() {
   return selected?.dataset?.team || selected?.textContent?.replace(/[🔴🔵⚫🟠🟢]/g, '').trim() || '';
 }
 
+
+function setProfileAvatar(user = {}) {
+  const avatarEl = document.getElementById('prof-avatar');
+
+  if (!avatarEl) return;
+
+  const avatarUrl =
+    user.avatar?.url ||
+    user.avatarUrl ||
+    '';
+
+  if (avatarUrl) {
+    avatarEl.innerHTML = `
+      <img
+        src="${avatarUrl}"
+        alt="Profile picture"
+        style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+          border-radius:50%;
+          display:block;
+        "
+      />
+    `;
+  } else {
+    avatarEl.textContent = '🏎️';
+  }
+}
+
+function openAvatarPicker() {
+  const input = document.getElementById('avatar-file-input');
+
+  if (!input) {
+    showToast('❌ Avatar input not found');
+    return;
+  }
+
+  input.click();
+}
+
+async function handleAvatarInput(input) {
+  const file = input?.files?.[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('❌ Select a valid image');
+    input.value = '';
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('❌ Image must be below 5MB');
+    input.value = '';
+    return;
+  }
+
+  await uploadProfileAvatar(file);
+  input.value = '';
+}
+
+function bindAvatarUpload() {
+  const editBtn = document.getElementById('avatar-edit-btn');
+  const input = document.getElementById('avatar-file-input');
+
+  if (editBtn) {
+    editBtn.onclick = openAvatarPicker;
+  }
+
+  if (input) {
+    input.onchange = () => handleAvatarInput(input);
+  }
+}
+
+/* Extra safety: works even if inline onclick is blocked by cache/order */
+document.addEventListener('click', e => {
+  const btn = e.target.closest?.('#avatar-edit-btn, .avatar-edit-btn');
+
+  if (!btn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  openAvatarPicker();
+});
+
+window.openAvatarPicker = openAvatarPicker;
+window.handleAvatarInput = handleAvatarInput;
+
+async function uploadProfileAvatar(file) {
+  try {
+    const token = profileToken();
+
+    if (!token) {
+      showToast('🔐 Please login first');
+      return;
+    }
+
+    showToast('🖼️ Uploading profile picture...');
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const res = await fetch(USER_AVATAR_API, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Avatar upload failed');
+    }
+
+    const avatar =
+      data.data?.avatar ||
+      data.avatar;
+
+    const updatedUser = {
+      ...(currentUser || {}),
+      avatar
+    };
+
+    hydrateProfile(updatedUser);
+
+    showToast('🔥 Profile picture updated');
+
+    await loadRealtimeProfile();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
 function hydrateProfile(user = {}) {
   currentUser = user;
 
@@ -490,6 +631,8 @@ function hydrateProfile(user = {}) {
   document.getElementById('prof-email').textContent = user.email || '';
   document.getElementById('dash-greeting').textContent =
     `HEY, ${(user.firstName || 'FAN').toUpperCase()}`;
+
+  setProfileAvatar(user);
 
   const fanPts = document.getElementById('fan-pts');
   if (fanPts) fanPts.textContent = Number(user.fanPoints || 0).toLocaleString('en-IN');
@@ -1002,5 +1145,8 @@ function showRealtimeOrderDetails(orderId) {
     () => modal.remove();
 }
 
-window.addEventListener('DOMContentLoaded', loadMyOrders);
+window.addEventListener('DOMContentLoaded', () => {
+  bindAvatarUpload();
+  loadMyOrders();
+});
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');

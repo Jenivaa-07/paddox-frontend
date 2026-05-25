@@ -6,6 +6,22 @@
   <title>Paddox — My Account</title>
   <link rel="stylesheet" href="account.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    .prof-avatar-wrap { position: relative; }
+    .avatar-edit-btn {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      z-index: 20;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    #prof-avatar img {
+      pointer-events: none;
+    }
+  </style>
+
 </head>
 <body class="page-transition-init">
 
@@ -143,7 +159,8 @@
       <div class="prof-summary">
         <div class="prof-avatar-wrap">
           <div class="prof-avatar animate-icon" id="prof-avatar">🏎️</div>
-          <button class="avatar-edit-btn">✏️</button>
+          <button class="avatar-edit-btn" id="avatar-edit-btn" type="button" onclick="openAvatarPicker()">✏️</button>
+          <input id="avatar-file-input" type="file" accept="image/*" style="display:none" onchange="handleAvatarInput(this)"/>
         </div>
         <div class="prof-name" id="prof-name">Arjun Mehta</div>
         <div class="prof-email" id="prof-email">arjun@example.com</div>
