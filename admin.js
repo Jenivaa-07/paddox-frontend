@@ -2256,6 +2256,18 @@ function ensureProductEditModal() {
           </label>
 
           <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">RATING</span>
+            <select id="edit-product-rating" class="edit-product-input">
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+              <option value="0">0 Stars</option>
+            </select>
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
             <span style="color:#777;font-size:.75rem;letter-spacing:2px">STATUS</span>
             <select id="edit-product-active" class="edit-product-input">
               <option value="true">active</option>
@@ -2382,6 +2394,9 @@ function openProductEditModal(productId) {
   document.getElementById('edit-product-stock').value =
     Number(product.stock || 0);
 
+  document.getElementById('edit-product-rating').value =
+    String(Math.round(Number(product.ratings?.average || 5)));
+
   document.getElementById('edit-product-active').value =
     String(product.isActive !== false);
 
@@ -2417,6 +2432,9 @@ async function saveProductEdit() {
     const stock =
       Number(document.getElementById('edit-product-stock').value);
 
+    const rating =
+      Number(document.getElementById('edit-product-rating').value || 5);
+
     if (!document.getElementById('edit-product-name').value.trim()) {
       showToast('❌ Product name required');
       return;
@@ -2446,7 +2464,11 @@ async function saveProductEdit() {
       price,
       stock,
       isActive: document.getElementById('edit-product-active').value === 'true',
-      description: document.getElementById('edit-product-description').value.trim()
+      description: document.getElementById('edit-product-description').value.trim(),
+      ratings: {
+        average: rating,
+        count: rating > 0 ? 1 : 0
+      }
     };
 
     if (salePriceRaw !== '') {
@@ -2545,6 +2567,7 @@ async function saveNewProduct() {
     const badge = normaliseBadge(getAddValue('add-product-badge'));
     const price = Number(getAddValue('add-product-price'));
     const stock = Number(getAddValue('add-product-stock'));
+    const rating = Number(getAddValue('add-product-rating') || 5);
     const description =
       getAddValue('add-product-description') ||
       `${name} from Paddox store`;
@@ -2573,6 +2596,11 @@ async function saveNewProduct() {
       return;
     }
 
+    if (Number.isNaN(rating) || rating < 0 || rating > 5) {
+      showToast('❌ Valid rating required');
+      return;
+    }
+
     let uploadedImages = [];
 
     if (imageFiles.length) {
@@ -2598,6 +2626,10 @@ async function saveNewProduct() {
       shortDesc: description.slice(0, 180),
       isActive: true,
       isFeatured: false,
+      ratings: {
+        average: rating,
+        count: rating > 0 ? 1 : 0
+      },
       images: uploadedImages.length
         ? uploadedImages
         : [{
@@ -2646,6 +2678,7 @@ function clearAddProductForm() {
     'add-product-name',
     'add-product-price',
     'add-product-stock',
+    'add-product-rating',
     'add-product-description',
     'add-product-image'
   ].forEach(id => {

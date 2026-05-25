@@ -46,7 +46,7 @@ async function loadShopProducts() {
       teamKey: p.team,
       cat: p.category,
       price: p.effectivePrice || p.price,
-      rating: Math.round(p.ratings?.average || 5),
+      rating: Number(p.ratings?.average || p.rating || 5),
       badge: p.badge,
       emoji: p.emoji || '🏎️',
       limited: !!p.isLimited,
@@ -450,7 +450,8 @@ function renderProducts() {
 
 /* ── Card HTML ── */
 function cardHTML(p, i) {
-  const stars = '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating);
+  const roundedRating = Math.round(Number(p.rating || 0));
+  const stars = '★'.repeat(roundedRating) + '☆'.repeat(5 - roundedRating);
   const origPrice = p.sale ? `<span class="pcard-orig">₹${Math.round(p.price * 1.2).toLocaleString('en-IN')}</span>` : '';
 
   return `
@@ -898,7 +899,12 @@ function openModal(id) {
   /* Populate */
   document.getElementById('modal-team').textContent   = p.team;
   document.getElementById('modal-name').textContent   = p.name;
-  document.getElementById('modal-rating').textContent = '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating) + `  (${p.rating}.0)`;
+  const modalRatingValue = Number(p.rating || 0);
+  const modalRoundedRating = Math.round(modalRatingValue);
+  document.getElementById('modal-rating').textContent =
+    '★'.repeat(modalRoundedRating) +
+    '☆'.repeat(5 - modalRoundedRating) +
+    `  (${modalRatingValue.toFixed(1)})`;
   document.getElementById('modal-price').textContent  = `₹${p.price.toLocaleString('en-IN')}`;
   document.getElementById('modal-desc').textContent   = p.desc;
   document.getElementById('modal-qty').textContent    = modalQty;
@@ -958,14 +964,25 @@ function openModal(id) {
   /* Size buttons — only for apparel/clothing */
   updateModalSizeUI(p);
 
-  /* Qty controls */
-  document.getElementById('modal-qty-minus')?.addEventListener('click', () => {
-    if (modalQty > 1) { modalQty--; document.getElementById('modal-qty').textContent = modalQty; }
-  });
-  document.getElementById('modal-qty-plus')?.addEventListener('click', () => {
-    modalQty++;
-    document.getElementById('modal-qty').textContent = modalQty;
-  });
+  /* Qty controls — use onclick so it does not duplicate every modal open */
+  const modalQtyMinus = document.getElementById('modal-qty-minus');
+  const modalQtyPlus = document.getElementById('modal-qty-plus');
+
+  if (modalQtyMinus) {
+    modalQtyMinus.onclick = () => {
+      if (modalQty > 1) {
+        modalQty--;
+        document.getElementById('modal-qty').textContent = modalQty;
+      }
+    };
+  }
+
+  if (modalQtyPlus) {
+    modalQtyPlus.onclick = () => {
+      modalQty++;
+      document.getElementById('modal-qty').textContent = modalQty;
+    };
+  }
 
   /* Add to cart */
   const addBtn = document.getElementById('modal-add-btn');
