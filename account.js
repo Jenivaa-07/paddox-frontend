@@ -305,6 +305,7 @@ function loginUser(user) {
   renderTeamPrefs();
 
   initReveal(accScreen);
+  loadMyOrders();
 }
 
 /* LOGOUT */
@@ -469,18 +470,43 @@ function showToast(msg){
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-const ACCOUNT_API =
+/* ══════════════════════════════════════
+   REALTIME ACCOUNT ORDERS
+══════════════════════════════════════ */
+
+const ACCOUNT_ORDERS_API =
   'https://paddox-backend.onrender.com/api/orders';
 
+function getUserToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+function formatMoney(n) {
+  return `₹${Number(n || 0).toLocaleString('en-IN')}`;
+}
+
+function statusClass(status = '') {
+  const s = status.toLowerCase();
+
+  if (s === 'delivered') return 'os-del';
+  if (s === 'shipped') return 'os-sh';
+  if (s === 'cancelled') return 'os-can';
+
+  return 'os-sh';
+}
+
 async function loadMyOrders() {
-
   try {
-
-    const token = localStorage.getItem('paddox_access_token') || localStorage.getItem('token');
+    const token = getUserToken();
 
     if (!token) return;
 
-    const res = await fetch(ACCOUNT_API, {
+    const res = await fetch(ACCOUNT_ORDERS_API, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -488,24 +514,48 @@ async function loadMyOrders() {
 
     const data = await res.json();
 
-    const orders = data.data || [];
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to load orders');
+    }
+
+    const orders =
+      data.data ||
+      data.orders ||
+      [];
 
     renderRealtimeOrders(orders);
+    renderDashboardOrders(orders);
+    updateAccountStats(orders);
 
-  } catch(err) {
+  } catch (err) {
     console.error(err);
   }
 }
 
 function renderRealtimeOrders(orders) {
-
   const tbody =
     document.querySelector('.orders-table tbody');
 
   if (!tbody) return;
 
-  tbody.innerHTML =
-    orders.map(order => `
+  if (!orders.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;padding:35px;color:#777">
+          No realtime orders yet
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(order => {
+    const products =
+      (order.items || [])
+        .map(i => i.name)
+        .join(', ') || 'No products';
+
+    return `
       <tr>
         <td>
           <span class="oid">
@@ -513,39 +563,228 @@ function renderRealtimeOrders(orders) {
           </span>
         </td>
 
+        <td>${products}</td>
+
         <td>
-          ${(order.items || [])
-            .map(i => i.name)
-            .join(', ')}
+          ${
+            order.createdAt
+              ? new Date(order.createdAt).toLocaleDateString()
+              : '-'
+          }
         </td>
 
         <td>
-          ${new Date(order.createdAt)
-            .toLocaleDateString()}
+          ${formatMoney(order.pricing?.total)}
         </td>
 
         <td>
-          ₹${order.pricing?.total || 0}
-        </td>
-
-        <td>
-          <span class="ostatus os-sh">
-            ${order.status}
+          <span class="ostatus ${statusClass(order.status)}">
+            ${order.status || 'placed'}
           </span>
         </td>
 
         <td>
-          <button class="trk-btn">
+          <button
+            class="trk-btn"
+            onclick="showRealtimeOrderDetails('${order._id}')"
+          >
             View
           </button>
         </td>
       </tr>
-    `).join('');
+    `;
+  }).join('');
+
+  window.USER_REALTIME_ORDERS = orders;
 }
 
-window.addEventListener(
-  'DOMContentLoaded',
-  loadMyOrders
-);
+function renderDashboardOrders(orders) {
+  const cards =
+    [...document.querySelectorAll('.dash-card')];
 
+  const recentCard =
+    cards.find(card =>
+      card.querySelector('.dc-title')?.textContent.includes('Recent Orders')
+    );
+
+  if (!recentCard) return;
+
+  const recent =
+    orders.slice(0, 3);
+
+  recentCard.innerHTML = `
+    <div class="dc-title">📦 Recent Orders</div>
+    ${
+      recent.length
+        ? recent.map(order => {
+            const firstItem =
+              order.items?.[0];
+
+            return `
+              <div class="r-order">
+                <div class="r-oicon">📦</div>
+
+                <div>
+                  <div class="r-oname">
+                    ${firstItem?.name || 'Order'}
+                  </div>
+
+                  <div class="r-ometa">
+                    ${
+                      order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString()
+                        : '-'
+                    }
+                    ·
+                    <span class="ostatus ${statusClass(order.status)}">
+                      ${order.status || 'placed'}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="r-oprice">
+                  ${formatMoney(order.pricing?.total)}
+                </div>
+              </div>
+            `;
+          }).join('')
+        : `<div style="color:#777;padding:20px 0">No orders yet</div>`
+    }
+  `;
+}
+
+function updateAccountStats(orders) {
+  const statNums =
+    document.querySelectorAll('.ds-card .ds-num');
+
+  if (statNums[0]) {
+    statNums[0].textContent = orders.length;
+  }
+}
+
+function showRealtimeOrderDetails(orderId) {
+  const orders =
+    window.USER_REALTIME_ORDERS || [];
+
+  const order =
+    orders.find(o => o._id === orderId);
+
+  if (!order) {
+    showToast('❌ Order not found');
+    return;
+  }
+
+  const products =
+    (order.items || [])
+      .map(item => `
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          gap:10px;
+          padding:10px 0;
+          border-bottom:1px solid rgba(255,255,255,.08);
+        ">
+          <div>
+            <div style="font-weight:700;color:#fff">
+              ${item.name}
+            </div>
+            <div style="color:#777;font-size:.85rem">
+              Qty: ${item.quantity || 1}
+            </div>
+          </div>
+
+          <div style="font-family:var(--font-d)">
+            ${formatMoney((item.price || 0) * (item.quantity || 1))}
+          </div>
+        </div>
+      `)
+      .join('');
+
+  const modal = document.createElement('div');
+
+  modal.innerHTML = `
+    <div class="trk-modal on" style="
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background:rgba(0,0,0,.82);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    ">
+      <div style="
+        width:min(650px,95vw);
+        background:#0d0d0d;
+        border:1px solid rgba(255,255,255,.14);
+        padding:28px;
+        color:white;
+        position:relative;
+      ">
+        <button
+          id="close-user-order-modal"
+          style="
+            position:absolute;
+            top:16px;
+            right:18px;
+            background:#111;
+            color:white;
+            border:0;
+            font-size:1.4rem;
+            cursor:pointer;
+          "
+        >
+          ✕
+        </button>
+
+        <div style="
+          font-family:var(--font-d);
+          letter-spacing:4px;
+          font-size:1.8rem;
+        ">
+          ORDER DETAILS
+        </div>
+
+        <div style="
+          color:var(--red);
+          margin:8px 0 20px;
+          font-family:var(--font-c);
+          letter-spacing:2px;
+        ">
+          #${order.orderNumber || order._id}
+        </div>
+
+        <div style="margin-bottom:18px">
+          <strong>Status:</strong>
+          <span class="ostatus ${statusClass(order.status)}">
+            ${order.status || 'placed'}
+          </span>
+        </div>
+
+        <div style="margin-bottom:18px">
+          <div style="color:#777;letter-spacing:2px;font-size:.8rem">
+            PRODUCTS
+          </div>
+          ${products}
+        </div>
+
+        <div style="line-height:1.8">
+          Subtotal: ${formatMoney(order.pricing?.subtotal)}<br>
+          Shipping: ${formatMoney(order.pricing?.shipping)}<br>
+          Tax: ${formatMoney(order.pricing?.tax)}<br>
+          <strong style="font-size:1.3rem">
+            Total: ${formatMoney(order.pricing?.total)}
+          </strong>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#close-user-order-modal').onclick =
+    () => modal.remove();
+}
+
+window.addEventListener('DOMContentLoaded', loadMyOrders);
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
