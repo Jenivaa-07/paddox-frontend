@@ -670,7 +670,69 @@ function toggleCart(open) {
 document.getElementById('cart-overlay')?.addEventListener('click', () => toggleCart(false));
 document.getElementById('cart-close')?.addEventListener('click', () => toggleCart(false));
 document.getElementById('continue-btn')?.addEventListener('click', () => toggleCart(false));
-document.getElementById('checkout-btn')?.addEventListener('click', () => { showToast('🏁 Redirecting to checkout…'); setTimeout(() => toggleCart(false), 1000); });
+async function placeDemoOrder() {
+  if (!cart.length) {
+    showToast('❌ Cart is empty');
+    return;
+  }
+
+  const token = localStorage.getItem('paddox_access_token');
+
+  if (!token) {
+    showToast('🔐 Please login first');
+    setTimeout(() => {
+      window.location.href = 'account.html';
+    }, 900);
+    return;
+  }
+
+  try {
+    showToast('🏁 Placing order...');
+
+    const res = await fetch('https://paddox-backend.onrender.com/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        items: cart.map(item => ({
+          product: item.id,
+          quantity: item.qty,
+          size: 'M'
+        })),
+        shippingAddress: {
+          name: 'Paddox Fan',
+          line1: 'Test Address',
+          city: 'Chennai',
+          state: 'Tamil Nadu',
+          pincode: '600001',
+          phone: '9876543210',
+          country: 'India'
+        },
+        paymentMethod: 'razorpay',
+        notes: 'Demo checkout from shop page'
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Order failed');
+    }
+
+    cart = [];
+    saveCart();
+    toggleCart(false);
+
+    showToast('🔥 Order placed successfully');
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+document.getElementById('checkout-btn')?.addEventListener('click', placeDemoOrder);
 updateCartUI();
 
 /* ══════════════════════════════════════
