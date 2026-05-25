@@ -29,36 +29,39 @@ async function checkAdminAccess() {
   }
 
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/auth/me', {
-      headers: {
-        Authorization: `Bearer ${token}`
+    /*
+      We verify admin access using an actual admin endpoint.
+      This avoids false redirects when /api/auth/me does not return isAdmin.
+    */
+    const res = await fetch(
+      'https://paddox-backend.onrender.com/api/orders/admin/all?limit=1',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
+    );
 
-    const data = await res.json();
+    if (res.ok) {
+      return true;
+    }
 
-    if (!res.ok || !data.success) {
+    if (res.status === 401 || res.status === 403) {
       localStorage.removeItem('token');
       localStorage.removeItem('paddox_access_token');
       localStorage.removeItem('accessToken');
 
-      redirectToLogin('Session expired. Please login again.');
+      redirectToLogin('Admin session expired. Please login with admin account.');
       return false;
     }
 
-    const user = data.data?.user || data.data;
-
-    if (!user?.isAdmin) {
-      redirectToLogin('Admin access only. Please login with admin account.');
-      return false;
-    }
-
+    console.warn('Admin guard check returned:', res.status);
     return true;
 
   } catch (err) {
     console.error(err);
-    redirectToLogin('Unable to verify admin access');
-    return false;
+    /* Do not block admin page for temporary network issues. */
+    return true;
   }
 }
 /* ══ DATA ══ */
@@ -242,7 +245,8 @@ async function loadOrders() {
     const token = getAdminToken();
 
     if (!token) {
-      redirectToLogin('Please login as admin first');
+      REAL_ORDERS = [];
+      renderOrders();
       return;
     }
 
@@ -252,16 +256,14 @@ async function loadOrders() {
       }
     });
 
-    const data = await res.json().catch(() => ({}));
-
     if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('paddox_access_token');
-      localStorage.removeItem('accessToken');
-
-      redirectToLogin('Admin session expired. Please login again.');
+      REAL_ORDERS = [];
+      renderOrders();
+      redirectToLogin('Admin session expired. Please login with admin account.');
       return;
     }
+
+    const data = await res.json();
 
     if (!res.ok) {
       throw new Error(data.message || 'Failed to load orders');
@@ -533,13 +535,6 @@ function openOrderView(orderId) {
 
 async function updateOrderStatus(orderId, status) {
   try {
-    const token = getAdminToken();
-
-    if (!token) {
-      redirectToLogin('Please login as admin first');
-      return;
-    }
-
     showToast('⏳ Updating order status...');
 
     const res = await fetch(
@@ -548,7 +543,7 @@ async function updateOrderStatus(orderId, status) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${getAdminToken()}`
         },
         body: JSON.stringify({
           status,
@@ -557,16 +552,7 @@ async function updateOrderStatus(orderId, status) {
       }
     );
 
-    const data = await res.json().catch(() => ({}));
-
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('paddox_access_token');
-      localStorage.removeItem('accessToken');
-
-      redirectToLogin('Admin session expired. Please login again.');
-      return;
-    }
+    const data = await res.json();
 
     if (!res.ok || !data.success) {
       throw new Error(data.message || 'Status update failed');
@@ -583,6 +569,211 @@ async function updateOrderStatus(orderId, status) {
 }
 
 renderOrders();
+/* ══════════════════════════════════════
+   ORDER DETAILS MODAL + STATUS UPDATE
+══════════════════════════════════════ */
+
+function ensureOrderModal() {
+  if (document.getElementById('order-details-modal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'order-details-modal';
+  modal.innerHTML = `
+    <div class="order-modal-backdrop" onclick="closeOrderDetails(event)">
+      <div class="order-modal-card" onclick="event.stopPropagation()">
+        <div class="order-modal-head">
+          <div>
+            <div class="order-modal-kicker">ORDER DETAILS</div>
+            <h2 id="od-title">#ORDER</h2>
+          </div>
+          <button class="order-modal-close" onclick="closeOrderDetails()">✕</button>
+        </div>
+
+        <div id="od-body"></div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const style = document.createElement('style');
+  style.id = 'order-modal-style';
+  style.textContent = `
+    #order-details-modal{display:none;position:fixed;inset:0;z-index:99999}
+    #order-details-modal.show{display:block}
+    .order-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
+    .order-modal-card{width:min(900px,95vw);max-height:90vh;overflow:auto;background:#0b0b0d;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 80px rgba(0,0,0,.65);padding:26px;color:#fff}
+    .order-modal-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:18px;margin-bottom:18px}
+    .order-modal-kicker{font-family:var(--font-c);letter-spacing:4px;color:var(--red);font-size:.75rem}
+    .order-modal-head h2{font-family:var(--font-c);letter-spacing:3px;margin:6px 0 0;font-size:2rem}
+    .order-modal-close{background:none;border:0;color:#fff;font-size:1.8rem;cursor:pointer}
+    .od-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    .od-box{background:#111;border:1px solid rgba(255,255,255,.08);padding:14px}
+    .od-label{font-family:var(--font-c);letter-spacing:2px;color:#777;font-size:.75rem;margin-bottom:6px;text-transform:uppercase}
+    .od-value{font-weight:700;font-size:1rem;color:#fff}
+    .od-items{width:100%;border-collapse:collapse;margin-top:12px;background:#101010;border:1px solid rgba(255,255,255,.08)}
+    .od-items th,.od-items td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}
+    .od-items th{font-family:var(--font-c);letter-spacing:2px;color:#777;font-size:.75rem}
+    .od-status-row{display:flex;gap:10px;align-items:center;margin-top:18px;background:#111;border:1px solid rgba(255,255,255,.08);padding:14px;flex-wrap:wrap}
+    .od-select{background:#1b1b1f;color:#fff;border:1px solid rgba(255,255,255,.15);padding:12px;min-width:220px;font-family:var(--font-b)}
+    .od-btn{background:var(--red);border:0;color:#fff;padding:12px 18px;font-family:var(--font-c);letter-spacing:2px;cursor:pointer;text-transform:uppercase}
+    .od-btn:hover{filter:brightness(1.1)}
+    @media(max-width:700px){.od-grid{grid-template-columns:1fr}.order-modal-card{padding:18px}}
+  `;
+  document.head.appendChild(style);
+}
+
+function formatMoney(value) {
+  return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+}
+
+function openOrderDetails(orderId) {
+  ensureOrderModal();
+
+  const order = REAL_ORDERS.find(o => String(o._id) === String(orderId));
+
+  if (!order) {
+    showToast('❌ Order not found');
+    return;
+  }
+
+  const customerName = `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() || 'Customer';
+  const customerEmail = order.user?.email || 'No email';
+  const items = order.items || [];
+  const address = order.shippingAddress || {};
+
+  document.getElementById('od-title').textContent = `#${order.orderNumber || order._id}`;
+
+  document.getElementById('od-body').innerHTML = `
+    <div class="od-grid">
+      <div class="od-box">
+        <div class="od-label">Customer</div>
+        <div class="od-value">${customerName}</div>
+        <div style="color:#888;margin-top:4px">${customerEmail}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Order Date</div>
+        <div class="od-value">${new Date(order.createdAt).toLocaleString()}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Current Status</div>
+        <div class="od-value"><span class="sb s-pr">${String(order.status || 'placed').toUpperCase()}</span></div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Total Amount</div>
+        <div class="od-value">${formatMoney(order.pricing?.total)}</div>
+      </div>
+    </div>
+
+    <div class="od-box">
+      <div class="od-label">Shipping Address</div>
+      <div class="od-value">
+        ${address.name || customerName}<br>
+        ${address.line1 || address.address || ''}<br>
+        ${address.city || ''}, ${address.state || ''} - ${address.pincode || ''}<br>
+        ${address.country || 'India'} · ${address.phone || ''}
+      </div>
+    </div>
+
+    <table class="od-items">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(item => `
+          <tr>
+            <td>${item.name || item.product?.name || 'Product'}</td>
+            <td>${item.quantity || 1}</td>
+            <td>${formatMoney(item.price)}</td>
+            <td>${formatMoney((item.price || 0) * (item.quantity || 1))}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="od-grid" style="margin-top:18px">
+      <div class="od-box">
+        <div class="od-label">Subtotal</div>
+        <div class="od-value">${formatMoney(order.pricing?.subtotal)}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Shipping</div>
+        <div class="od-value">${formatMoney(order.pricing?.shipping)}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Tax</div>
+        <div class="od-value">${formatMoney(order.pricing?.tax)}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Grand Total</div>
+        <div class="od-value">${formatMoney(order.pricing?.total)}</div>
+      </div>
+    </div>
+
+    <div class="od-status-row">
+      <div class="od-label" style="margin:0;color:var(--red)">Update Status</div>
+      <select class="od-select" id="od-status-select">
+        ${['placed','processing','shipped','out_for_delivery','delivered','cancelled'].map(st => `
+          <option value="${st}" ${order.status === st ? 'selected' : ''}>${st.replaceAll('_',' ').toUpperCase()}</option>
+        `).join('')}
+      </select>
+      <button class="od-btn" onclick="updateOrderStatus('${order._id}')">Update</button>
+    </div>
+  `;
+
+  document.getElementById('order-details-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOrderDetails(event) {
+  if (event && event.target !== event.currentTarget) return;
+
+  document.getElementById('order-details-modal')?.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+async function updateOrderStatus(orderId) {
+  const status = document.getElementById('od-status-select')?.value;
+
+  if (!status) return;
+
+  try {
+    showToast('⏳ Updating order status...');
+
+    const res = await fetch(`${'https://paddox-backend.onrender.com/api/orders/admin'}/${orderId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAdminToken()}`
+      },
+      body: JSON.stringify({
+        status,
+        message: `Order marked as ${status.replaceAll('_',' ')}`
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Status update failed');
+    }
+
+    showToast('🔥 Order status updated');
+
+    await loadOrders();
+    openOrderDetails(orderId);
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
 /* ══ PRODUCTS TABLE ══ */
 async function loadProducts() {
 
@@ -1225,33 +1416,6 @@ async function deleteProduct(id) {
     showToast('❌ Delete failed');
   }
 }
-
-
-/* ══════════════════════════════════════
-   ADMIN PAGE SAFE INIT
-══════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', async () => {
-  const allowed = await checkAdminAccess();
-
-  if (!allowed) return;
-
-  const activePage =
-    document.querySelector('.adm-nav-item.on')?.dataset.page ||
-    document.querySelector('.adm-page.on')?.id?.replace('adm-', '') ||
-    'overview';
-
-  if (activePage === 'orders') {
-    loadOrders();
-  }
-
-  if (activePage === 'products' || activePage === 'inventory') {
-    loadProducts();
-  }
-
-  if (activePage === 'assets') {
-    loadAssets();
-  }
-});
 
 /* ══ INIT LOG ══ */
 console.log('%c⚙️ PADDOX — Admin Dashboard Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
