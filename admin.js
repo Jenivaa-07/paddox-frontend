@@ -775,6 +775,250 @@ async function updateOrderStatus(orderId) {
   }
 }
 
+
+/* ══════════════════════════════════════
+   REALTIME OVERVIEW DASHBOARD
+   Safe patch: updates existing HTML only
+══════════════════════════════════════ */
+
+function formatOverviewMoney(value) {
+  return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+}
+
+function getOverviewTotal(order) {
+  return Number(
+    order?.pricing?.total ||
+    order?.total ||
+    order?.amount ||
+    0
+  );
+}
+
+function getOverviewCustomer(order) {
+  return (
+    `${order?.user?.firstName || ''} ${order?.user?.lastName || ''}`.trim() ||
+    order?.shippingAddress?.name ||
+    'Customer'
+  );
+}
+
+function getOverviewStatusClass(status = '') {
+  const s = String(status).toLowerCase();
+
+  if (s === 'delivered') return 's-del';
+  if (s === 'shipped') return 's-sh';
+  if (s === 'out_for_delivery') return 's-sh';
+  if (s === 'processing') return 's-pr';
+  if (s === 'cancelled') return 's-out';
+
+  return 's-pr';
+}
+
+function updateOverviewCards() {
+  const overview = document.getElementById('adm-overview');
+  if (!overview) return;
+
+  const cards = overview.querySelectorAll('.kpi-card');
+  if (!cards.length) return;
+
+  const totalRevenue = REAL_ORDERS.reduce(
+    (sum, order) => sum + getOverviewTotal(order),
+    0
+  );
+
+  const uniqueUsers = new Set(
+    REAL_ORDERS
+      .map(order => order?.user?._id || order?.user?.email || order?.shippingAddress?.phone)
+      .filter(Boolean)
+  ).size;
+
+  const lowStockCount = REAL_PRODUCTS.filter(
+    product => Number(product.stock || 0) <= 10
+  ).length;
+
+  const values = [
+    {
+      label: 'Total Revenue',
+      value: formatOverviewMoney(totalRevenue),
+      change: 'Realtime from orders'
+    },
+    {
+      label: 'Total Orders',
+      value: REAL_ORDERS.length,
+      change: 'Realtime orders'
+    },
+    {
+      label: 'Order Customers',
+      value: uniqueUsers,
+      change: 'From order users'
+    },
+    {
+      label: 'Low Stock',
+      value: lowStockCount,
+      change: 'From products'
+    }
+  ];
+
+  cards.forEach((card, index) => {
+    const data = values[index];
+    if (!data) return;
+
+    const label = card.querySelector('.kpi-label');
+    const value = card.querySelector('.kpi-value');
+    const change = card.querySelector('.kpi-change');
+
+    if (label) label.textContent = data.label;
+    if (value) value.textContent = data.value;
+    if (change) change.textContent = data.change;
+  });
+}
+
+function updateOverviewRecentOrders() {
+  const overview = document.getElementById('adm-overview');
+  if (!overview) return;
+
+  const cards = [...overview.querySelectorAll('.table-card')];
+  const recentCard = cards.find(card =>
+    card.querySelector('.table-card-title')?.textContent
+      ?.toLowerCase()
+      .includes('recent orders')
+  );
+
+  const tbody = recentCard?.querySelector('tbody');
+  if (!tbody) return;
+
+  const recentOrders = REAL_ORDERS.slice(0, 4);
+
+  if (!recentOrders.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center;padding:24px;color:#777">
+          No realtime orders yet
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = recentOrders.map(order => `
+    <tr>
+      <td class="oid">
+        #${order.orderNumber || order._id}
+      </td>
+
+      <td>
+        ${getOverviewCustomer(order)}
+      </td>
+
+      <td>
+        ${formatOverviewMoney(getOverviewTotal(order))}
+      </td>
+
+      <td>
+        <span class="sb ${getOverviewStatusClass(order.status)}">
+          ${String(order.status || 'placed').replaceAll('_', ' ')}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function updateOverviewLowStock() {
+  const overview = document.getElementById('adm-overview');
+  if (!overview) return;
+
+  const cards = [...overview.querySelectorAll('.table-card')];
+  const stockCard = cards.find(card =>
+    card.querySelector('.table-card-title')?.textContent
+      ?.toLowerCase()
+      .includes('low stock')
+  );
+
+  const tbody = stockCard?.querySelector('tbody');
+  if (!tbody) return;
+
+  const products = REAL_PRODUCTS
+    .filter(product => Number(product.stock || 0) <= 10)
+    .slice(0, 4);
+
+  if (!products.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:center;padding:24px;color:#777">
+          No low stock products
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = products.map(product => {
+    const stock = Number(product.stock || 0);
+    const isOut = stock <= 0;
+
+    return `
+      <tr>
+        <td>${product.name || 'Product'}</td>
+        <td>${stock}</td>
+        <td>
+          <span class="sb ${isOut ? 's-out' : 's-low'}">
+            ${isOut ? 'Out' : 'Low'}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateOverviewRevenueChart() {
+  const container = document.getElementById('bar-chart');
+  if (!container) return;
+
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+
+  const monthTotals = labels.map((label, index) => {
+    return REAL_ORDERS.reduce((sum, order) => {
+      if (!order.createdAt) return sum;
+
+      const d = new Date(order.createdAt);
+
+      if (d.getMonth() === index) {
+        return sum + getOverviewTotal(order);
+      }
+
+      return sum;
+    }, 0);
+  });
+
+  const max = Math.max(...monthTotals, 1);
+
+  container.innerHTML = labels.map((label, index) => {
+    const total = monthTotals[index];
+    const height = Math.max(8, (total / max) * 100);
+
+    return `
+      <div class="bc-col">
+        <div class="bc-wrap">
+          <div
+            class="bc-bar"
+            style="height:${height}%"
+            data-v="${formatOverviewMoney(total)}"
+          ></div>
+        </div>
+        <div class="bc-lbl">${label}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateOverviewRealtime() {
+  updateOverviewCards();
+  updateOverviewRecentOrders();
+  updateOverviewLowStock();
+  updateOverviewRevenueChart();
+}
+
+
 /* ══ PRODUCTS TABLE ══ */
 async function loadProducts() {
 
@@ -1421,213 +1665,22 @@ async function deleteProduct(id) {
 
 
 /* ══════════════════════════════════════
-   REALTIME OVERVIEW DASHBOARD
+   SAFE INITIAL ADMIN LOAD
 ══════════════════════════════════════ */
 
-function setTextSafe(el, value) {
-  if (el) el.textContent = value;
-}
-
-function formatCompactMoney(value) {
-  const n = Number(value || 0);
-  if (n >= 100000) return `₹${(n / 100000).toFixed(n >= 1000000 ? 1 : 2)}L`;
-  return `₹${n.toLocaleString('en-IN')}`;
-}
-
-function findPanelByText(text) {
-  const needle = String(text).toLowerCase();
-  const nodes = [...document.querySelectorAll('section, article, div, .adm-card, .dash-card, .stat-card, .metric-card, .overview-card, .panel')];
-
-  return nodes.find(el =>
-    el.textContent &&
-    el.textContent.toLowerCase().includes(needle) &&
-    el.querySelectorAll('*').length < 80
-  );
-}
-
-function updateMetricCard(labelText, valueText, subText = '') {
-  const panel = findPanelByText(labelText);
-  if (!panel) return;
-
-  const valueEl =
-    panel.querySelector('.stat-value, .metric-value, .card-value, .kpi-value, .big-num, .adm-stat-value, .ds-num') ||
-    [...panel.querySelectorAll('h1,h2,h3,.font-d,div,span')]
-      .find(el => /₹|[0-9]/.test(el.textContent || '') && !el.textContent.toLowerCase().includes(labelText.toLowerCase()));
-
-  if (valueEl) valueEl.textContent = valueText;
-
-  const subEl =
-    panel.querySelector('.stat-change, .metric-change, .card-change, .kpi-sub, .adm-stat-sub') ||
-    [...panel.querySelectorAll('small,p,span,div')]
-      .find(el => (el.textContent || '').toLowerCase().includes('month') || (el.textContent || '').includes('↑'));
-
-  if (subEl && subText) subEl.textContent = subText;
-}
-
-function renderRealtimeRevenueChart() {
-  const container = document.getElementById('bar-chart');
-  if (!container) return;
-
-  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now = new Date();
-  const buckets = [];
-
-  for (let i = 4; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    buckets.push({
-      month: d.getMonth(),
-      year: d.getFullYear(),
-      label: monthNames[d.getMonth()],
-      value: 0
-    });
-  }
-
-  (REAL_ORDERS || []).forEach(order => {
-    const d = new Date(order.createdAt || Date.now());
-    const bucket = buckets.find(b => b.month === d.getMonth() && b.year === d.getFullYear());
-    if (bucket) bucket.value += Number(order.pricing?.total || order.total || 0);
-  });
-
-  const max = Math.max(1, ...buckets.map(b => b.value));
-
-  container.innerHTML = buckets.map(b => `
-    <div class="bc-col">
-      <div class="bc-wrap">
-        <div
-          class="bc-bar"
-          style="height:0%"
-          data-v="${formatCompactMoney(b.value)}"
-          data-target="${Math.max(8, (b.value / max) * 100)}%">
-        </div>
-      </div>
-      <div class="bc-lbl">${b.label}</div>
-    </div>
-  `).join('');
-
-  setTimeout(() => {
-    container.querySelectorAll('.bc-bar').forEach(bar => {
-      bar.style.transition = 'height 1s cubic-bezier(.34,1.56,.64,1)';
-      bar.style.height = bar.dataset.target;
-    });
-  }, 120);
-}
-
-function renderRealtimeRecentOrders() {
-  const target =
-    document.getElementById('recent-orders-tbody') ||
-    document.getElementById('overview-orders-tbody') ||
-    document.querySelector('#adm-overview tbody');
-
-  if (!target) return;
-
-  const recent = (REAL_ORDERS || []).slice(0, 5);
-
-  if (!recent.length) {
-    target.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center;padding:28px;color:#777">
-          No realtime orders yet
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  target.innerHTML = recent.map(order => {
-    const customer =
-      `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() ||
-      order.shippingAddress?.name ||
-      'Customer';
-
-    return `
-      <tr>
-        <td class="oid">#${order.orderNumber || order._id}</td>
-        <td>${customer}</td>
-        <td>${formatCompactMoney(order.pricing?.total || order.total || 0)}</td>
-        <td><span class="sb s-pr">${order.status || 'placed'}</span></td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function renderRealtimeLowStock() {
-  const tbody =
-    document.getElementById('low-stock-tbody') ||
-    document.getElementById('stock-alerts-tbody');
-
-  if (!tbody) return;
-
-  const low = (REAL_PRODUCTS || [])
-    .filter(p => Number(p.stock || 0) <= 10)
-    .slice(0, 6);
-
-  if (!low.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="3" style="text-align:center;padding:24px;color:#777">
-          No low stock products
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = low.map(p => `
-    <tr>
-      <td>${p.name}</td>
-      <td>${p.stock || 0}</td>
-      <td>
-        <span class="sb ${Number(p.stock || 0) === 0 ? 's-out' : 's-low'}">
-          ${Number(p.stock || 0) === 0 ? 'OUT' : 'LOW'}
-        </span>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function updateOverviewRealtime() {
-  const orders = REAL_ORDERS || [];
-  const products = REAL_PRODUCTS || [];
-
-  const revenue = orders.reduce(
-    (sum, order) => sum + Number(order.pricing?.total || order.total || 0),
-    0
-  );
-
-  const lowStockCount = products.filter(p => Number(p.stock || 0) <= 10).length;
-
-  updateMetricCard('Total Revenue', formatCompactMoney(revenue), 'Realtime from orders');
-  updateMetricCard('Total Orders', String(orders.length), 'Realtime orders');
-  updateMetricCard('Active Users', String(new Set(orders.map(o => o.user?._id || o.user?.email || o.user)).size || 0), 'From order users');
-  updateMetricCard('Avg. Rating', products.length ? `${(products.reduce((s,p)=>s+Number(p.ratings?.average || 0),0) / products.length || 0).toFixed(1)}` : '0.0', 'From products');
-  updateMetricCard('Products', String(products.length), 'Realtime products');
-  updateMetricCard('Low Stock', String(lowStockCount), 'Realtime inventory');
-
-  renderRealtimeRevenueChart();
-  renderRealtimeRecentOrders();
-  renderRealtimeLowStock();
-}
-
-/* Safe initial realtime load */
 document.addEventListener('DOMContentLoaded', async () => {
   const allowed = await checkAdminAccess();
 
   if (!allowed) return;
 
   await Promise.allSettled([
-    loadProducts(),
     loadOrders(),
+    loadProducts(),
     loadAssets()
   ]);
 
   updateOverviewRealtime();
 });
-
-/* Keep overview fresh while admin stays open */
-setInterval(() => {
-  if (document.hidden) return;
-  updateOverviewRealtime();
-}, 10000);
 
 /* ══ INIT LOG ══ */
 console.log('%c⚙️ PADDOX — Admin Dashboard Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
