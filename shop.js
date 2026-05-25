@@ -483,10 +483,10 @@ function cardHTML(p, i) {
 /* ── Bind card events ── */
 function bindCardEvents(root) {
   root.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-    btn.addEventListener('click', e => { e.stopPropagation(); addToCart(parseInt(btn.dataset.id, 10)); });
+    btn.addEventListener('click', e => { e.stopPropagation(); addToCart(btn.dataset.id); });
   });
   root.querySelectorAll('.quick-view-btn').forEach(btn => {
-    btn.addEventListener('click', e => { e.stopPropagation(); openModal(parseInt(btn.dataset.id, 10)); });
+    btn.addEventListener('click', e => { e.stopPropagation(); openModal(btn.dataset.id); });
   });
   root.querySelectorAll('.pwish').forEach(btn => {
     btn.addEventListener('click', e => {
@@ -498,8 +498,8 @@ function bindCardEvents(root) {
     });
   });
   root.querySelectorAll('.pcard').forEach(card => {
-    card.addEventListener('click', () => openModal(parseInt(card.dataset.id, 10)));
-    card.addEventListener('keydown', e => { if (e.key === 'Enter') openModal(parseInt(card.dataset.id, 10)); });
+    card.addEventListener('click', () => openModal(card.dataset.id));
+    card.addEventListener('keydown', e => { if (e.key === 'Enter') openModal(card.dataset.id); });
   });
 }
 
@@ -648,10 +648,10 @@ function updateCartUI() {
     `).join('');
 
     itemsEl.querySelectorAll('.qty-b').forEach(btn => {
-      btn.addEventListener('click', () => changeQty(parseInt(btn.dataset.id, 10), parseInt(btn.dataset.delta, 10)));
+      btn.addEventListener('click', () => changeQty(btn.dataset.id, parseInt(btn.dataset.delta, 10)));
     });
     itemsEl.querySelectorAll('.ci-rm').forEach(btn => {
-      btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.id, 10)));
+      btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
     });
   }
 }
