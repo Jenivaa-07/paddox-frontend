@@ -1139,7 +1139,7 @@ function renderProducts() {
 
             <button
               class="act-btn"
-              onclick="showToast('✏ Edit coming next')"
+              onclick="openProductEditModal('${product._id}')"
             >
               Edit
             </button>
@@ -2094,6 +2094,343 @@ function modAction(i, action) {
   if (item) { item.style.opacity = '.3'; item.style.pointerEvents = 'none'; }
   const msgs = { approve:'✓ Content approved', remove:'✗ Content removed', warn:'⚑ User warned', ban:'🚫 User banned' };
   showToast(msgs[action] || 'Action taken');
+}
+
+
+/* ══════════════════════════════════════
+   REALTIME PRODUCT EDIT SYSTEM
+══════════════════════════════════════ */
+
+let EDIT_PRODUCT_ID = null;
+
+function ensureProductEditModal() {
+  if (document.getElementById('product-edit-modal')) return;
+
+  const modal = document.createElement('div');
+
+  modal.id = 'product-edit-modal';
+
+  modal.innerHTML = `
+    <div class="preview-overlay" id="product-edit-overlay">
+      <div class="preview-card" style="
+        max-width:720px;
+        width:92vw;
+        padding:28px;
+        color:#fff;
+        text-align:left;
+      ">
+        <button class="preview-close" id="product-edit-close">
+          ✕
+        </button>
+
+        <div style="
+          font-family:var(--font-d);
+          letter-spacing:4px;
+          font-size:1.8rem;
+          margin-bottom:8px;
+        ">
+          EDIT PRODUCT
+        </div>
+
+        <div style="
+          color:var(--red);
+          font-family:var(--font-c);
+          letter-spacing:2px;
+          margin-bottom:22px;
+        ">
+          REALTIME MONGODB PRODUCT
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:14px;
+        ">
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">NAME</span>
+            <input id="edit-product-name" class="edit-product-input">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span>
+            <input id="edit-product-team" class="edit-product-input">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">CATEGORY</span>
+            <select id="edit-product-category" class="edit-product-input">
+              <option value="apparel">apparel</option>
+              <option value="collectibles">collectibles</option>
+              <option value="accessories">accessories</option>
+              <option value="posters">posters</option>
+              <option value="custom">custom</option>
+            </select>
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">BADGE</span>
+            <select id="edit-product-badge" class="edit-product-input">
+              <option value="">none</option>
+              <option value="new">new</option>
+              <option value="hot">hot</option>
+              <option value="sale">sale</option>
+              <option value="ltd">ltd</option>
+            </select>
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">PRICE</span>
+            <input id="edit-product-price" type="number" min="0" class="edit-product-input">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">SALE PRICE</span>
+            <input id="edit-product-sale-price" type="number" min="0" class="edit-product-input">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">STOCK</span>
+            <input id="edit-product-stock" type="number" min="0" class="edit-product-input">
+          </label>
+
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">STATUS</span>
+            <select id="edit-product-active" class="edit-product-input">
+              <option value="true">active</option>
+              <option value="false">inactive</option>
+            </select>
+          </label>
+        </div>
+
+        <label style="
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+          margin-top:14px;
+        ">
+          <span style="color:#777;font-size:.75rem;letter-spacing:2px">IMAGE URL</span>
+          <input id="edit-product-image" class="edit-product-input">
+        </label>
+
+        <label style="
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+          margin-top:14px;
+        ">
+          <span style="color:#777;font-size:.75rem;letter-spacing:2px">DESCRIPTION</span>
+          <textarea id="edit-product-description" class="edit-product-input" rows="4"></textarea>
+        </label>
+
+        <button
+          class="act-btn"
+          id="save-product-edit"
+          style="
+            width:100%;
+            padding:14px;
+            margin-top:20px;
+            background:var(--red);
+            color:white;
+            border:0;
+            font-weight:800;
+            letter-spacing:3px;
+          "
+        >
+          SAVE PRODUCT
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const style = document.createElement('style');
+  style.id = 'product-edit-style';
+  style.textContent = `
+    .edit-product-input {
+      width:100%;
+      background:#151515;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.15);
+      padding:11px 12px;
+      outline:none;
+      font-family:var(--font-b);
+    }
+    .edit-product-input:focus {
+      border-color:var(--red);
+    }
+    @media(max-width:700px) {
+      #product-edit-modal .preview-card > div[style*="grid-template-columns"] {
+        grid-template-columns:1fr !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  modal.querySelector('#product-edit-close').onclick =
+    closeProductEditModal;
+
+  modal.querySelector('#product-edit-overlay').onclick = e => {
+    if (e.target.id === 'product-edit-overlay') {
+      closeProductEditModal();
+    }
+  };
+
+  modal.querySelector('#save-product-edit').onclick =
+    saveProductEdit;
+}
+
+function openProductEditModal(productId) {
+  ensureProductEditModal();
+
+  const product =
+    REAL_PRODUCTS.find(p => String(p._id) === String(productId));
+
+  if (!product) {
+    showToast('❌ Product not found');
+    return;
+  }
+
+  EDIT_PRODUCT_ID = productId;
+
+  const image =
+    product.images?.[0]?.url ||
+    product.image ||
+    '';
+
+  document.getElementById('edit-product-name').value =
+    product.name || '';
+
+  document.getElementById('edit-product-team').value =
+    product.team || '';
+
+  document.getElementById('edit-product-category').value =
+    String(product.category || 'apparel').toLowerCase();
+
+  document.getElementById('edit-product-badge').value =
+    String(product.badge || '').toLowerCase();
+
+  document.getElementById('edit-product-price').value =
+    Number(product.price || 0);
+
+  document.getElementById('edit-product-sale-price').value =
+    product.salePrice || '';
+
+  document.getElementById('edit-product-stock').value =
+    Number(product.stock || 0);
+
+  document.getElementById('edit-product-active').value =
+    String(product.isActive !== false);
+
+  document.getElementById('edit-product-image').value =
+    image;
+
+  document.getElementById('edit-product-description').value =
+    product.description || '';
+
+  document
+    .getElementById('product-edit-modal')
+    ?.classList.add('show');
+}
+
+function closeProductEditModal() {
+  document
+    .getElementById('product-edit-modal')
+    ?.classList.remove('show');
+
+  EDIT_PRODUCT_ID = null;
+}
+
+async function saveProductEdit() {
+  if (!EDIT_PRODUCT_ID) return;
+
+  try {
+    const price =
+      Number(document.getElementById('edit-product-price').value);
+
+    const salePriceRaw =
+      document.getElementById('edit-product-sale-price').value;
+
+    const stock =
+      Number(document.getElementById('edit-product-stock').value);
+
+    if (!document.getElementById('edit-product-name').value.trim()) {
+      showToast('❌ Product name required');
+      return;
+    }
+
+    if (Number.isNaN(price) || price < 0) {
+      showToast('❌ Valid price required');
+      return;
+    }
+
+    if (Number.isNaN(stock) || stock < 0) {
+      showToast('❌ Valid stock required');
+      return;
+    }
+
+    const imageUrl =
+      document.getElementById('edit-product-image').value.trim();
+
+    const body = {
+      name: document.getElementById('edit-product-name').value.trim(),
+      team: document.getElementById('edit-product-team').value.trim(),
+      category: document.getElementById('edit-product-category').value,
+      badge: document.getElementById('edit-product-badge').value,
+      price,
+      stock,
+      isActive: document.getElementById('edit-product-active').value === 'true',
+      description: document.getElementById('edit-product-description').value.trim()
+    };
+
+    if (salePriceRaw !== '') {
+      body.salePrice = Number(salePriceRaw);
+      body.onSale = Number(salePriceRaw) > 0 && Number(salePriceRaw) < price;
+    } else {
+      body.salePrice = null;
+      body.onSale = false;
+    }
+
+    if (imageUrl) {
+      body.images = [
+        {
+          url: imageUrl,
+          alt: body.name
+        }
+      ];
+    }
+
+    showToast('⏳ Saving product...');
+
+    const res = await fetch(
+      `${PRODUCT_API_BASE}/${EDIT_PRODUCT_ID}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAdminToken()}`
+        },
+        body: JSON.stringify(body)
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Product update failed');
+    }
+
+    showToast('🔥 Product updated');
+
+    closeProductEditModal();
+
+    await loadProducts();
+    updateOverviewRealtime();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
 }
 
 /* ══ ADD PRODUCT MODAL ══ */
