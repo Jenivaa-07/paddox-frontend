@@ -197,6 +197,9 @@ if (id === 'assets') {
 if (id === 'orders') {
   loadOrders();
 }
+if (id === 'users') {
+  loadUsers();
+}
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
@@ -1515,35 +1518,356 @@ async function submitAssetUpload() {
 }
 /* INIT */
 loadAssets();
+
+/* ══════════════════════════════════════
+   REALTIME USERS SYSTEM
+══════════════════════════════════════ */
+
+const ADMIN_USERS_API =
+  'https://paddox-backend.onrender.com/api/admin/users';
+
+let REAL_USERS = [];
+
+function getUserName(user) {
+  return (
+    `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+    user.name ||
+    'Paddox User'
+  );
+}
+
+function getUserTier(user) {
+  if (user.fanTier) return user.fanTier;
+  if (user.role === 'admin' || user.isAdmin) return 'Admin';
+  if ((user.fanPoints || 0) >= 4000) return 'Pro Fan';
+  if ((user.fanPoints || 0) >= 1000) return 'Regular';
+  return 'New';
+}
+
+function getUserStatus(user) {
+  if (user.isBanned) {
+    return {
+      cls: 's-out',
+      text: 'Banned'
+    };
+  }
+
+  return {
+    cls: 's-act',
+    text: 'Active'
+  };
+}
+
+async function loadUsers() {
+  try {
+    const res = await fetch(
+      `${ADMIN_USERS_API}?limit=100`,
+      {
+        headers: {
+          Authorization: `Bearer ${getAdminToken()}`
+        }
+      }
+    );
+
+    if (res.status === 401 || res.status === 403) {
+      redirectToLogin('Admin session expired. Please login with admin account.');
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to load users');
+    }
+
+    REAL_USERS =
+      data.data ||
+      data.users ||
+      [];
+
+    renderUsers();
+
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Failed to load users');
+  }
+}
+
+async function toggleUserBan(userId) {
+  try {
+    showToast('⏳ Updating user...');
+
+    const res = await fetch(
+      `${ADMIN_USERS_API}/${userId}/ban`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${getAdminToken()}`
+        }
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || 'User update failed');
+    }
+
+    showToast('🔥 User status updated');
+
+    await loadUsers();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function makeUserAdmin(userId) {
+  try {
+    if (!confirm('Make this user admin?')) return;
+
+    showToast('⏳ Updating role...');
+
+    const res = await fetch(
+      `${ADMIN_USERS_API}/${userId}/role`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAdminToken()}`
+        },
+        body: JSON.stringify({
+          role: 'admin'
+        })
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Role update failed');
+    }
+
+    showToast('🔥 User promoted to admin');
+
+    await loadUsers();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function openUserView(userId) {
+  const user = REAL_USERS.find(u => String(u._id) === String(userId));
+
+  if (!user) {
+    showToast('❌ User not found');
+    return;
+  }
+
+  const modal = document.createElement('div');
+
+  modal.innerHTML = `
+    <div class="preview-overlay" id="user-view-overlay">
+      <div class="preview-card" style="
+        max-width:620px;
+        width:92vw;
+        padding:28px;
+        color:#fff;
+        text-align:left;
+      ">
+        <button class="preview-close" id="user-view-close">✕</button>
+
+        <div style="
+          font-family:var(--font-d);
+          letter-spacing:4px;
+          font-size:1.8rem;
+          margin-bottom:8px;
+        ">
+          USER DETAILS
+        </div>
+
+        <div style="
+          color:var(--red);
+          font-family:var(--font-c);
+          letter-spacing:2px;
+          margin-bottom:22px;
+        ">
+          ${getUserName(user)}
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:14px;
+        ">
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">EMAIL</div>
+            <div style="font-weight:700">${user.email || '-'}</div>
+          </div>
+
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">ROLE</div>
+            <div style="font-weight:700">${user.role || (user.isAdmin ? 'admin' : 'user')}</div>
+          </div>
+
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">FAN POINTS</div>
+            <div style="font-family:var(--font-d);font-size:1.3rem;color:var(--red)">
+              ${(user.fanPoints || 0).toLocaleString()}
+            </div>
+          </div>
+
+          <div>
+            <div style="color:#777;font-size:.75rem;letter-spacing:2px">JOINED</div>
+            <div style="font-weight:700">
+              ${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+            </div>
+          </div>
+        </div>
+
+        <div style="
+          margin-top:22px;
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
+        ">
+          <button
+            class="act-btn"
+            onclick="toggleUserBan('${user._id}'); document.getElementById('user-view-overlay')?.remove();"
+          >
+            ${user.isBanned ? 'Unban User' : 'Ban User'}
+          </button>
+
+          <button
+            class="act-btn"
+            onclick="makeUserAdmin('${user._id}'); document.getElementById('user-view-overlay')?.remove();"
+          >
+            Make Admin
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#user-view-close').onclick = () => modal.remove();
+
+  modal.querySelector('#user-view-overlay').onclick = e => {
+    if (e.target.id === 'user-view-overlay') {
+      modal.remove();
+    }
+  };
+}
+
 /* ══ USERS TABLE ══ */
 function renderUsers() {
   const tbody = document.getElementById('users-tbody');
+
   if (!tbody) return;
-  tbody.innerHTML = ADM_USERS.map(u => `
-    <tr>
-      <td><input type="checkbox"/></td>
-      <td>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red),#800016);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">👤</div>
-          ${u.name}
-        </div>
-      </td>
-      <td style="color:var(--muted2);font-size:.76rem">${u.email}</td>
-      <td>
-        <span style="font-family:var(--font-c);font-size:.6rem;padding:2px 8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--gold)">${u.tier}</span>
-      </td>
-      <td style="text-align:center">${u.orders}</td>
-      <td style="font-family:var(--font-d);font-size:1.1rem;color:var(--red)">${u.pts.toLocaleString()}</td>
-      <td style="color:var(--muted2);font-size:.76rem">${u.joined}</td>
-      <td><span class="sb ${u.status}">${u.stxt}</span></td>
-      <td>
-        <button class="act-btn" onclick="showToast('Viewing ${u.name} profile')">View</button>
-        <button class="act-btn" onclick="showToast('${u.name} suspended')">Suspend</button>
-      </td>
-    </tr>
-  `).join('');
+
+  if (!REAL_USERS.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align:center;padding:40px;color:#777">
+          No realtime users yet
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = REAL_USERS.map(user => {
+    const status = getUserStatus(user);
+    const name = getUserName(user);
+    const tier = getUserTier(user);
+    const orders =
+      user.ordersCount ||
+      user.totalOrders ||
+      0;
+
+    return `
+      <tr>
+        <td>
+          <input type="checkbox"/>
+        </td>
+
+        <td>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="
+              width:30px;
+              height:30px;
+              border-radius:50%;
+              background:linear-gradient(135deg,var(--red),#800016);
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              font-size:.8rem;
+              flex-shrink:0;
+            ">
+              👤
+            </div>
+            ${name}
+          </div>
+        </td>
+
+        <td style="color:var(--muted2);font-size:.76rem">
+          ${user.email || '-'}
+        </td>
+
+        <td>
+          <span style="
+            font-family:var(--font-c);
+            font-size:.6rem;
+            padding:2px 8px;
+            background:rgba(201,168,76,.1);
+            border:1px solid rgba(201,168,76,.2);
+            color:var(--gold);
+          ">
+            ${tier}
+          </span>
+        </td>
+
+        <td style="text-align:center">
+          ${orders}
+        </td>
+
+        <td style="font-family:var(--font-d);font-size:1.1rem;color:var(--red)">
+          ${(user.fanPoints || 0).toLocaleString()}
+        </td>
+
+        <td style="color:var(--muted2);font-size:.76rem">
+          ${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+        </td>
+
+        <td>
+          <span class="sb ${status.cls}">
+            ${status.text}
+          </span>
+        </td>
+
+        <td>
+          <button
+            class="act-btn"
+            onclick="openUserView('${user._id}')"
+          >
+            View
+          </button>
+
+          <button
+            class="act-btn"
+            onclick="toggleUserBan('${user._id}')"
+          >
+            ${user.isBanned ? 'Unban' : 'Ban'}
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
-renderUsers();
 
 /* ══ ANALYTICS METRICS ══ */
 function renderMetList(id, data) {
@@ -1676,7 +2000,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await Promise.allSettled([
     loadOrders(),
     loadProducts(),
-    loadAssets()
+    loadAssets(),
+    loadUsers()
   ]);
 
   updateOverviewRealtime();
