@@ -2838,30 +2838,210 @@ function showToast(msg) {
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), 3000);
 }
-async function deleteProduct(id) {
+function getProductById(productId) {
+  return REAL_PRODUCTS.find(product => String(product._id) === String(productId));
+}
 
+function deleteProduct(productId) {
+  const product = getProductById(productId);
+
+  if (!product) {
+    showToast('❌ Product not found');
+    return;
+  }
+
+  openDeleteProductModal(product);
+}
+
+function openDeleteProductModal(product) {
+  const oldModal = document.getElementById('delete-product-modal');
+  if (oldModal) oldModal.remove();
+
+  const image =
+    product.images?.[0]?.url ||
+    product.image ||
+    '';
+
+  const modal = document.createElement('div');
+  modal.id = 'delete-product-modal';
+
+  modal.innerHTML = `
+    <div class="preview-overlay" id="delete-product-overlay">
+      <div class="preview-card" style="
+        max-width:560px;
+        width:92vw;
+        padding:28px;
+        color:#fff;
+        text-align:left;
+      ">
+        <button class="preview-close" id="delete-product-close">
+          ✕
+        </button>
+
+        <div style="
+          font-family:var(--font-d);
+          letter-spacing:4px;
+          font-size:1.8rem;
+          margin-bottom:8px;
+        ">
+          DELETE PRODUCT
+        </div>
+
+        <div style="
+          color:var(--red);
+          font-family:var(--font-c);
+          letter-spacing:2px;
+          margin-bottom:22px;
+        ">
+          THIS ACTION CANNOT BE UNDONE
+        </div>
+
+        <div style="
+          display:flex;
+          gap:14px;
+          align-items:center;
+          padding:14px;
+          background:#111;
+          border:1px solid rgba(255,255,255,.08);
+          margin-bottom:20px;
+        ">
+          ${
+            image
+              ? `<img src="${image}" style="width:76px;height:60px;object-fit:cover;border-radius:8px">`
+              : `<div style="width:76px;height:60px;display:flex;align-items:center;justify-content:center;background:#191919;font-size:1.8rem">📦</div>`
+          }
+
+          <div>
+            <div style="font-weight:800;color:#fff">
+              ${product.name || 'Product'}
+            </div>
+
+            <div style="color:#777;font-size:.85rem">
+              ${product.category || '-'} · ${product.team || '-'}
+            </div>
+
+            <div style="color:var(--red);font-family:var(--font-d);font-size:1.1rem;margin-top:4px">
+              ₹${Number(product.price || 0).toLocaleString('en-IN')}
+            </div>
+          </div>
+        </div>
+
+        <p style="color:#aaa;line-height:1.6;margin-bottom:18px">
+          This product will be removed from:
+          <br>• Admin Products
+          <br>• Inventory
+          <br>• Shop page
+          <br>• Overview calculations
+        </p>
+
+        <label style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+          <span style="color:#777;font-size:.75rem;letter-spacing:2px">
+            TYPE DELETE TO CONFIRM
+          </span>
+          <input
+            id="delete-confirm-input"
+            class="edit-product-input"
+            placeholder="DELETE"
+            style="
+              background:#151515;
+              color:#fff;
+              border:1px solid rgba(255,255,255,.15);
+              padding:12px;
+            "
+          >
+        </label>
+
+        <div style="display:flex;gap:12px">
+          <button
+            class="act-btn"
+            id="cancel-delete-product"
+            style="flex:1;padding:14px"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="act-btn"
+            id="confirm-delete-product"
+            style="
+              flex:1;
+              padding:14px;
+              background:var(--red);
+              color:#fff;
+              border-color:var(--red);
+              opacity:.45;
+              pointer-events:none;
+            "
+          >
+            Delete Product
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const input = modal.querySelector('#delete-confirm-input');
+  const confirmBtn = modal.querySelector('#confirm-delete-product');
+
+  input?.addEventListener('input', () => {
+    const ok = input.value.trim().toUpperCase() === 'DELETE';
+
+    confirmBtn.style.opacity = ok ? '1' : '.45';
+    confirmBtn.style.pointerEvents = ok ? 'auto' : 'none';
+  });
+
+  modal.querySelector('#delete-product-close').onclick = () => modal.remove();
+  modal.querySelector('#cancel-delete-product').onclick = () => modal.remove();
+
+  modal.querySelector('#delete-product-overlay').onclick = e => {
+    if (e.target.id === 'delete-product-overlay') {
+      modal.remove();
+    }
+  };
+
+  confirmBtn.onclick = async () => {
+    await confirmDeleteProduct(product._id);
+    modal.remove();
+  };
+
+  setTimeout(() => input?.focus(), 80);
+}
+
+async function confirmDeleteProduct(id) {
   try {
+    showToast('⏳ Deleting product...');
 
-    const res =
-      await fetch(
-        `${PRODUCT_API_BASE}/${id}`,
-        {
-          method:'DELETE'
+    const res = await fetch(
+      `${PRODUCT_API_BASE}/${id}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${getAdminToken()}`
         }
-      );
+      }
+    );
 
-    if (!res.ok)
-      throw new Error();
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Delete failed');
+    }
 
     showToast('🔥 Product deleted');
 
-    loadProducts();
+    REAL_PRODUCTS = REAL_PRODUCTS.filter(product => String(product._id) !== String(id));
+
+    renderProducts();
+    renderInventory();
+    updateOverviewRealtime();
+
+    await loadProducts();
 
   } catch(err) {
-
     console.error(err);
-
-    showToast('❌ Delete failed');
+    showToast(`❌ ${err.message || 'Delete failed'}`);
   }
 }
 
