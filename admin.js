@@ -282,6 +282,7 @@ async function loadOrders() {
 
     renderOrders();
     updateOverviewRealtime();
+    updateAdminSidebarBadges();
   } catch (err) {
     console.error(err);
     showToast('❌ Failed to load orders');
@@ -1020,12 +1021,43 @@ function updateOverviewRevenueChart() {
   }).join('');
 }
 
+
+function updateAdminSidebarBadges() {
+  const navItems = document.querySelectorAll('.adm-nav-item');
+
+  navItems.forEach(item => {
+    const label =
+      (item.textContent || '')
+        .replace(/\d+/g, '')
+        .trim()
+        .toLowerCase();
+
+    const badge = item.querySelector('.adm-badge');
+
+    if (!badge) return;
+
+    let count = 0;
+
+    if (label.includes('orders')) {
+      count = REAL_ORDERS.length;
+    } else if (label.includes('moderation')) {
+      count = 0;
+    } else {
+      count = 0;
+    }
+
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-flex' : 'none';
+  });
+}
+
 function updateOverviewRealtime() {
   updateOverviewCards();
   updateOverviewRecentOrders();
   updateOverviewLowStock();
   updateOverviewRevenueChart();
   renderAnalyticsRealtime();
+  updateAdminSidebarBadges();
 }
 
 
@@ -1048,6 +1080,7 @@ async function loadProducts() {
     renderProducts();
     renderInventory();
     updateOverviewRealtime();
+    updateAdminSidebarBadges();
 
   } catch(err) {
 
@@ -2198,6 +2231,7 @@ function modAction(i, action) {
 }
 
 renderModeration();
+updateAdminSidebarBadges();
 
 
 
@@ -3139,6 +3173,7 @@ async function confirmDeleteProduct(id) {
     renderProducts();
     renderInventory();
     updateOverviewRealtime();
+    updateAdminSidebarBadges();
 
     await loadProducts();
 
@@ -3148,6 +3183,42 @@ async function confirmDeleteProduct(id) {
   }
 }
 
+
+
+function updateAdminIdentity() {
+  try {
+    const saved =
+      JSON.parse(localStorage.getItem('paddox_user') || '{}') ||
+      {};
+
+    const name =
+      `${saved.firstName || ''} ${saved.lastName || ''}`.trim() ||
+      saved.name ||
+      'Admin';
+
+    const email =
+      saved.email ||
+      'admin@paddox.com';
+
+    document.querySelectorAll('.admin-profile-name, .adm-profile-name, .super-admin-name')
+      .forEach(el => el.textContent = name);
+
+    document.querySelectorAll('.admin-profile-email, .adm-profile-email, .super-admin-email')
+      .forEach(el => el.textContent = email);
+
+    document.querySelectorAll('.adm-user-box, .admin-user, .super-admin')
+      .forEach(box => {
+        const text = box.textContent || '';
+        if (text.includes('Super Admin')) {
+          box.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.includes('Super Admin')) {
+              node.textContent = node.textContent.replace('Super Admin', name);
+            }
+          });
+        }
+      });
+  } catch (err) {}
+}
 
 /* ══════════════════════════════════════
    SAFE INITIAL ADMIN LOAD
@@ -3166,6 +3237,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   ]);
 
   updateOverviewRealtime();
+  updateAdminSidebarBadges();
+  updateAdminIdentity();
 });
 
 /* ══ INIT LOG ══ */

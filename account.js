@@ -316,6 +316,7 @@ function loginUser(user) {
   loadRealtimeProfile();
   loadMyOrders();
   loadWishlist();
+  setTimeout(updateDashboardSavedItems, 500);
   loadDownloads();
 }
 
@@ -500,7 +501,118 @@ function updateWishlistStats() {
   if (statNums[1]) {
     statNums[1].textContent = REAL_WISHLIST.length;
   }
+
+  updateDashboardSavedItems();
 }
+
+
+function updateDashboardSavedItems() {
+  const titles = [...document.querySelectorAll('.acc-card-title, .section-title, .dash-card-title, h2, h3')]
+    .filter(el => (el.textContent || '').toLowerCase().includes('saved'));
+
+  titles.forEach(title => {
+    const card =
+      title.closest('.acc-card') ||
+      title.closest('.dash-panel') ||
+      title.closest('.dash-card') ||
+      title.parentElement;
+
+    if (!card) return;
+
+    let container =
+      card.querySelector('.saved-list') ||
+      card.querySelector('.saved-items') ||
+      card.querySelector('.item-list') ||
+      card.querySelector('.recent-list') ||
+      card.querySelector('.wl-mini-list');
+
+    if (!container) {
+      // fallback: replace visible rows inside the card, but keep the title
+      container = [...card.children].find(child => child !== title && child.children?.length);
+    }
+
+    if (!container) return;
+
+    if (!REAL_WISHLIST.length) {
+      container.innerHTML = `
+        <div style="
+          padding:24px;
+          text-align:center;
+          color:#777;
+          border-top:1px solid rgba(255,255,255,.08);
+        ">
+          No saved items yet.
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = REAL_WISHLIST.slice(0, 3).map(product => {
+      const image = wishlistProductImage(product);
+
+      return `
+        <div class="mini-row" style="
+          display:flex;
+          align-items:center;
+          gap:12px;
+          padding:14px 0;
+          border-bottom:1px solid rgba(255,255,255,.06);
+        ">
+          <div style="
+            width:42px;
+            height:42px;
+            background:#151515;
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+          ">
+            ${
+              image
+                ? `<img src="${image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover">`
+                : '🏎️'
+            }
+          </div>
+
+          <div style="flex:1;min-width:0">
+            <div style="
+              color:#fff;
+              font-weight:700;
+              white-space:nowrap;
+              overflow:hidden;
+              text-overflow:ellipsis;
+            ">
+              ${product.name || 'Product'}
+            </div>
+            <div style="color:#777;font-size:.82rem">
+              ${product.team || product.category || 'Paddox'}
+            </div>
+          </div>
+
+          <div style="color:var(--red);font-weight:800">
+            ${formatMoney(wishlistPrice(product))}
+          </div>
+
+          <button
+            onclick="removeWishlistProduct('${product._id}')"
+            style="
+              background:transparent;
+              border:0;
+              color:#777;
+              cursor:pointer;
+              font-size:1.1rem;
+            "
+            title="Remove"
+          >
+            ×
+          </button>
+        </div>
+      `;
+    }).join('');
+  });
+}
+
 
 function renderWishlist(){
   const grid = document.getElementById('wl-grid');
@@ -522,6 +634,7 @@ function renderWishlist(){
     `;
 
     updateWishlistStats();
+    updateDashboardSavedItems();
     return;
   }
 
@@ -573,6 +686,7 @@ function renderWishlist(){
   }).join('');
 
   updateWishlistStats();
+  updateDashboardSavedItems();
 }
 
 
