@@ -133,6 +133,9 @@ function switchPage(id) {
 if (id === 'assets') {
   loadAssets();
 }
+if (id === 'orders') {
+  loadOrders();
+}
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
