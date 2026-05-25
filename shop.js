@@ -54,7 +54,11 @@ async function loadShopProducts() {
       isNew: p.badge === 'new',
       image: p.images?.[0]?.url || '',
       desc: p.description || p.shortDesc || '',
-      stock: p.stock
+      stock: p.stock,
+      sizes: Array.isArray(p.sizes) ? p.sizes : [],
+      isSizedProduct:
+        ['apparel', 'clothing', 'shirts', 'tshirts', 't-shirts', 'hoodies', 'pants', 'jackets']
+          .includes(String(p.category || '').toLowerCase())
     }));
 
     renderProducts();
@@ -565,22 +569,55 @@ function renderPagination(total) {
 ══════════════════════════════════════ */
 function saveCart() { sessionStorage.setItem('paddox_cart', JSON.stringify(cart)); updateCartUI(); }
 
-function addToCart(id) {
+function addToCart(id, selectedSize = null) {
   const p = PRODUCTS.find(x => x.id === id);
+
   if (!p) return;
-  const ex = cart.find(x => x.id === id);
-  if (ex) ex.qty++;
-  else cart.push({ id, name: p.name, team: p.team, price: p.price, emoji: p.emoji, gradient: p.gradient, image: p.image, qty: 1 });
+
+  const size = needsSize(p)
+    ? (selectedSize || 'M')
+    : '';
+
+  const cartKey = size
+    ? `${id}-${size}`
+    : id;
+
+  const ex = cart.find(x => x.cartKey === cartKey || (!x.cartKey && x.id === id && !size));
+
+  if (ex) {
+    ex.qty++;
+  } else {
+    cart.push({
+      cartKey,
+      id,
+      name: p.name,
+      team: p.team,
+      price: p.price,
+      emoji: p.emoji,
+      gradient: p.gradient,
+      image: p.image,
+      size,
+      qty: 1
+    });
+  }
+
   saveCart();
-  showToast(`✓ ${p.name} added to cart!`);
+
+  showToast(`✓ ${p.name}${size ? ' · ' + size : ''} added to cart!`);
 
   /* Badge pulse */
   const badge = document.getElementById('cart-badge');
-  if (badge) { badge.style.transform = 'scale(1.5)'; setTimeout(() => badge.style.transform = '', 350); }
+  if (badge) {
+    badge.style.transform = 'scale(1.5)';
+    setTimeout(() => badge.style.transform = '', 350);
+  }
 
   /* Cart icon wiggle */
   const icon = document.querySelector('.cart-icon-anim');
-  if (icon) { icon.style.transform = 'scale(1.4) rotate(-12deg)'; setTimeout(() => icon.style.transform = '', 400); }
+  if (icon) {
+    icon.style.transform = 'scale(1.4) rotate(-12deg)';
+    setTimeout(() => icon.style.transform = '', 400);
+  }
 }
 
 function removeFromCart(id) {
@@ -634,7 +671,7 @@ function updateCartUI() {
             style="width:100%;height:100%;object-fit:cover"/>
         </div>
         <div class="ci-info">
-          <div class="ci-team">${item.team}</div>
+          <div class="ci-team">${item.team}${item.size ? ' · Size ' + item.size : ''}</div>
           <div class="ci-name">${item.name}</div>
           <div class="ci-price">₹${(item.price * item.qty).toLocaleString('en-IN')}</div>
           <div class="ci-qty">
@@ -703,7 +740,7 @@ async function placeRealOrder() {
         items: cart.map(item => ({
           product: item.id,
           quantity: item.qty || 1,
-          size: 'M'
+          size: item.size || ''
         })),
         shippingAddress: {
           name: 'Paddox Fan',
@@ -742,6 +779,104 @@ async function placeRealOrder() {
 
 document.getElementById('checkout-btn')?.addEventListener('click', placeRealOrder);
 updateCartUI();
+
+
+/* ══════════════════════════════════════
+   PRODUCT SIZE RULES
+   Show size only for apparel/clothing
+══════════════════════════════════════ */
+
+function needsSize(product) {
+  const cat = String(product?.cat || '').toLowerCase();
+
+  return (
+    product?.isSizedProduct ||
+    ['apparel', 'clothing', 'shirts', 'tshirts', 't-shirts', 'hoodies', 'pants', 'jackets']
+      .includes(cat)
+  );
+}
+
+function getProductSizes(product) {
+  if (!needsSize(product)) return [];
+
+  if (Array.isArray(product?.sizes) && product.sizes.length) {
+    return product.sizes;
+  }
+
+  return ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+}
+
+function getSelectedModalSize() {
+  const selected = document.querySelector('.sz.on');
+  return selected?.dataset?.size || selected?.textContent?.trim() || 'M';
+}
+
+function findSizeSection() {
+  const firstSizeButton = document.querySelector('.sz');
+  if (!firstSizeButton) return null;
+
+  let el = firstSizeButton.parentElement;
+
+  while (el && el !== document.body) {
+    const text = el.textContent || '';
+    const sizeButtonCount = el.querySelectorAll('.sz').length;
+
+    if (
+      sizeButtonCount >= 2 &&
+      text.toLowerCase().includes('size')
+    ) {
+      return el;
+    }
+
+    el = el.parentElement;
+  }
+
+  return firstSizeButton.parentElement;
+}
+
+function updateModalSizeUI(product) {
+  const sizeSection = findSizeSection();
+
+  if (!sizeSection) return;
+
+  const sizes = getProductSizes(product);
+
+  if (!sizes.length) {
+    sizeSection.style.display = 'none';
+    return;
+  }
+
+  sizeSection.style.display = '';
+
+  const sizeButtonsWrap =
+    sizeSection.querySelector('.size-options') ||
+    sizeSection.querySelector('.sizes') ||
+    sizeSection.querySelector('.modal-sizes') ||
+    sizeSection.querySelector('.sz')?.parentElement ||
+    sizeSection;
+
+  const oldButtons = sizeButtonsWrap.querySelectorAll('.sz');
+
+  if (oldButtons.length) {
+    oldButtons.forEach(btn => btn.remove());
+  }
+
+  sizes.forEach((size, index) => {
+    const btn = document.createElement('button');
+
+    btn.className = `sz ${index === 2 || (sizes.length < 3 && index === 0) ? 'on' : ''}`;
+    btn.type = 'button';
+    btn.dataset.size = size;
+    btn.textContent = size;
+
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sz').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+    });
+
+    sizeButtonsWrap.appendChild(btn);
+  });
+}
 
 /* ══════════════════════════════════════
    QUICK VIEW MODAL
@@ -800,10 +935,8 @@ function openModal(id) {
   const badgesEl = document.getElementById('modal-badges');
   if (badgesEl && p.badge) badgesEl.innerHTML = `<span class="pbadge b-${p.badge}">${p.badge.toUpperCase()}</span>`;
 
-  /* Size buttons */
-  document.querySelectorAll('.sz').forEach(btn => {
-    btn.addEventListener('click', () => { document.querySelectorAll('.sz').forEach(b => b.classList.remove('on')); btn.classList.add('on'); });
-  });
+  /* Size buttons — only for apparel/clothing */
+  updateModalSizeUI(p);
 
   /* Qty controls */
   document.getElementById('modal-qty-minus')?.addEventListener('click', () => {
@@ -818,7 +951,12 @@ function openModal(id) {
   const addBtn = document.getElementById('modal-add-btn');
   if (addBtn) {
     addBtn.onclick = () => {
-      for (let i = 0; i < modalQty; i++) addToCart(p.id);
+      const selectedSize = needsSize(p) ? getSelectedModalSize() : '';
+
+      for (let i = 0; i < modalQty; i++) {
+        addToCart(p.id, selectedSize);
+      }
+
       closeModal();
     };
   }
