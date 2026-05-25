@@ -259,15 +259,15 @@
             <div class="set-title">👤 Personal Information</div>
             <div class="form-row"><div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="pf-fn" value="Arjun"/></div><div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="pf-ln" value="Mehta"/></div></div>
             <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="pf-em" value="arjun@example.com"/></div>
-            <div class="form-group"><label class="form-label">Phone</label><input class="form-input" placeholder="+91 98765 43210"/></div>
+            <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="pf-phone" placeholder="+91 98765 43210"/></div>
             <button class="save-btn" onclick="saveProfile()">Save Changes ✓</button>
           </div>
           <div class="set-card reveal-up delay-1">
             <div class="set-title">📍 Shipping Address</div>
-            <div class="form-group"><label class="form-label">Address</label><input class="form-input" value="12, Mylapore Main Road"/></div>
-            <div class="form-row"><div class="form-group"><label class="form-label">City</label><input class="form-input" value="Chennai"/></div><div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" value="600004"/></div></div>
-            <div class="form-group"><label class="form-label">State</label><input class="form-input" value="Tamil Nadu"/></div>
-            <button class="save-btn" onclick="showToast('✓ Address saved!')">Save Address ✓</button>
+            <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="pf-address" placeholder="12, Mylapore Main Road"/></div>
+            <div class="form-row"><div class="form-group"><label class="form-label">City</label><input class="form-input" id="pf-city" placeholder="Chennai"/></div><div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" id="pf-pin" placeholder="600004"/></div></div>
+            <div class="form-group"><label class="form-label">State</label><input class="form-input" id="pf-state" placeholder="Tamil Nadu"/></div>
+            <button class="save-btn" onclick="saveAddress()">Save Address ✓</button>
           </div>
           <div class="set-card reveal-up delay-2">
             <div class="set-title">🏎️ Fan Preferences</div>
@@ -277,9 +277,9 @@
             </div>
             <div class="form-group">
               <label class="form-label">Favourite Driver</label>
-              <select class="form-input"><option>Max Verstappen</option><option selected>Charles Leclerc</option><option>Lewis Hamilton</option><option>Lando Norris</option></select>
+              <select class="form-input" id="pf-driver"><option>Max Verstappen</option><option>Charles Leclerc</option><option>Lewis Hamilton</option><option>Lando Norris</option><option>Oscar Piastri</option><option>Carlos Sainz</option></select>
             </div>
-            <button class="save-btn" onclick="showToast('✓ Fan preferences saved!')">Save Preferences ✓</button>
+            <button class="save-btn" onclick="savePreferences()">Save Preferences ✓</button>
           </div>
           <div class="set-card reveal-up delay-3">
             <div class="set-title">🔔 Notifications</div>

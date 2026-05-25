@@ -229,7 +229,10 @@ async function doRegister() {
         firstName,
         lastName,
         email,
-        password
+        password,
+        preferences: {
+          favouriteTeam: document.getElementById('ri-team')?.value || ''
+        }
       });
 
     if (!data.success) {
@@ -303,8 +306,10 @@ function loginUser(user) {
   renderWishlist();
   renderNotifications();
   renderTeamPrefs();
+  hydrateProfile(user);
 
   initReveal(accScreen);
+  loadRealtimeProfile();
   loadMyOrders();
 }
 
@@ -435,8 +440,9 @@ function renderNotifications(){
 const TEAMS=[{emoji:'🔴',name:'Ferrari'},{emoji:'🔵',name:'Red Bull'},{emoji:'⚫',name:'Mercedes'},{emoji:'🟠',name:'McLaren'},{emoji:'🟢',name:'Aston'},{emoji:'🔵',name:'Alpine'}];
 function renderTeamPrefs(){
   const grid=document.getElementById('team-pref');if(!grid)return;
+  const fav = currentUser?.preferences?.favouriteTeam || '';
   grid.innerHTML=TEAMS.map((t,i)=>`
-    <button class="team-pref-btn ${i===0?'on':''}" onclick="selectTeam(this)">${t.emoji} ${t.name}</button>
+    <button class="team-pref-btn ${(fav ? fav === t.name : i===0)?'on':''}" data-team="${t.name}" onclick="selectTeam(this)">${t.emoji} ${t.name}</button>
   `).join('');
 }
 function selectTeam(el){
@@ -444,16 +450,226 @@ function selectTeam(el){
   el.classList.add('on');
 }
 
-/* ══ PROFILE SAVE ══ */
-function saveProfile(){
-  const fn=document.getElementById('pf-fn').value.trim();
-  const ln=document.getElementById('pf-ln').value.trim();
-  if(fn){
-    document.getElementById('prof-name').textContent=`${fn} ${ln}`.trim();
-    document.getElementById('dash-greeting').textContent=`HEY, ${fn.toUpperCase()}`;
-    if(currentUser){currentUser.name=`${fn} ${ln}`.trim();sessionStorage.setItem('paddox_user',JSON.stringify(currentUser));}
+/* ══════════════════════════════════════
+   REALTIME PROFILE + ADDRESS + PREFERENCES
+══════════════════════════════════════ */
+
+const USER_PROFILE_API =
+  'https://paddox-backend.onrender.com/api/users/profile';
+const USER_PREF_API =
+  'https://paddox-backend.onrender.com/api/users/preferences';
+
+function profileToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+function setFieldValue(id, value = '') {
+  const el = document.getElementById(id);
+  if (el) el.value = value || '';
+}
+
+function getSelectedTeam() {
+  const selected = document.querySelector('.team-pref-btn.on');
+  return selected?.dataset?.team || selected?.textContent?.replace(/[🔴🔵⚫🟠🟢]/g, '').trim() || '';
+}
+
+function hydrateProfile(user = {}) {
+  currentUser = user;
+
+  const fullName =
+    `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+    user.name ||
+    'Paddox Fan';
+
+  document.getElementById('prof-name').textContent = fullName;
+  document.getElementById('prof-email').textContent = user.email || '';
+  document.getElementById('dash-greeting').textContent =
+    `HEY, ${(user.firstName || 'FAN').toUpperCase()}`;
+
+  const fanPts = document.getElementById('fan-pts');
+  if (fanPts) fanPts.textContent = Number(user.fanPoints || 0).toLocaleString('en-IN');
+
+  setFieldValue('pf-fn', user.firstName || '');
+  setFieldValue('pf-ln', user.lastName || '');
+  setFieldValue('pf-em', user.email || '');
+  setFieldValue('pf-phone', user.phone || '');
+
+  setFieldValue('pf-address', user.address?.line1 || '');
+  setFieldValue('pf-city', user.address?.city || '');
+  setFieldValue('pf-pin', user.address?.pincode || '');
+  setFieldValue('pf-state', user.address?.state || '');
+
+  const driver = document.getElementById('pf-driver');
+  if (driver && user.preferences?.favouriteDriver) {
+    driver.value = user.preferences.favouriteDriver;
   }
-  showToast('✓ Profile updated successfully!');
+
+  if (user.preferences?.favouriteTeam) {
+    document.querySelectorAll('.team-pref-btn').forEach(btn => {
+      btn.classList.toggle(
+        'on',
+        btn.dataset.team === user.preferences.favouriteTeam
+      );
+    });
+  }
+
+  localStorage.setItem('paddox_user', JSON.stringify(user));
+}
+
+async function loadRealtimeProfile() {
+  try {
+    const token = profileToken();
+
+    if (!token) return;
+
+    const res = await fetch(USER_PROFILE_API, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Failed to load profile');
+    }
+
+    const user = data.data?.user || data.data;
+
+    hydrateProfile(user);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function saveProfile(){
+  const firstName = document.getElementById('pf-fn').value.trim();
+  const lastName  = document.getElementById('pf-ln').value.trim();
+  const phone     = document.getElementById('pf-phone')?.value?.trim() || '';
+
+  if (!firstName) {
+    showToast('❌ First name required');
+    return;
+  }
+
+  try {
+    showToast('⏳ Saving profile...');
+
+    const res = await fetch(USER_PROFILE_API, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${profileToken()}`
+      },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        phone
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Profile save failed');
+    }
+
+    const user = data.data?.user || data.data;
+
+    hydrateProfile(user);
+
+    showToast('🔥 Profile updated');
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function saveAddress() {
+  try {
+    showToast('⏳ Saving address...');
+
+    const body = {
+      address: {
+        line1: document.getElementById('pf-address')?.value?.trim() || '',
+        city: document.getElementById('pf-city')?.value?.trim() || '',
+        state: document.getElementById('pf-state')?.value?.trim() || '',
+        pincode: document.getElementById('pf-pin')?.value?.trim() || '',
+        country: 'India'
+      }
+    };
+
+    const res = await fetch(USER_PROFILE_API, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${profileToken()}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Address save failed');
+    }
+
+    hydrateProfile(data.data?.user || data.data);
+
+    showToast('🔥 Address saved');
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function savePreferences() {
+  try {
+    showToast('⏳ Saving preferences...');
+
+    const favouriteTeam = getSelectedTeam();
+    const favouriteDriver = document.getElementById('pf-driver')?.value || '';
+
+    const res = await fetch(USER_PREF_API, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${profileToken()}`
+      },
+      body: JSON.stringify({
+        favouriteTeam,
+        favouriteDriver,
+        newsletter: true
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Preferences save failed');
+    }
+
+    if (currentUser) {
+      currentUser.preferences = data.data?.preferences || currentUser.preferences || {};
+      currentUser.preferences.favouriteTeam = favouriteTeam;
+      currentUser.preferences.favouriteDriver = favouriteDriver;
+      hydrateProfile(currentUser);
+    }
+
+    showToast('🔥 Fan preferences saved');
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
 }
 
 /* ══ ICON ANIMATIONS ══ */
