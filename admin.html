@@ -375,9 +375,10 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Upload Product Image</label>
-          <input id="add-product-image" class="form-input" type="file" accept="image/*"/>
-          <small style="color:#777">JPG / PNG / WebP supported. Image will be compressed automatically.</small>
+          <label class="form-label">Upload Product Images</label>
+          <input id="add-product-image" class="form-input" type="file" accept="image/*" multiple/>
+          <small style="color:#777">You can upload 1 to 3 images. JPG / PNG / WebP supported.</small>
+          <div id="add-product-image-count" style="color:var(--red);font-size:.8rem;margin-top:8px;font-family:var(--font-c);letter-spacing:1px">No images selected</div>
         </div>
       </div>
 

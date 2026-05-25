@@ -52,7 +52,12 @@ async function loadShopProducts() {
       limited: !!p.isLimited,
       sale: !!p.onSale,
       isNew: p.badge === 'new',
-      image: p.images?.[0]?.url || '',
+      images: Array.isArray(p.images)
+        ? p.images.map(img => img.url || img).filter(Boolean)
+        : [],
+      image: (Array.isArray(p.images)
+        ? (p.images[0]?.url || p.images[0] || '')
+        : ''),
       desc: p.description || p.shortDesc || '',
       stock: p.stock,
       sizes: Array.isArray(p.sizes) ? p.sizes : [],
@@ -905,28 +910,43 @@ function openModal(id) {
   /* Main image */
   const imgMain = document.getElementById('modal-img-main');
   imgMain.style.background = p.gradient;
+  const firstModalImage =
+    (Array.isArray(p.images) && p.images.length)
+      ? p.images[0]
+      : p.image;
+
   imgMain.innerHTML = `
-    <img src="${p.image}" alt="${p.name}"
+    <img src="${firstModalImage}" alt="${p.name}"
       style="width:100%;height:100%;object-fit:cover;filter:brightness(.88)"
       onerror="this.outerHTML='<span style=font-size:7rem>${p.emoji}</span>'"/>
   `;
 
-  /* Thumbs */
+  /* Thumbs — show exactly how many images were uploaded */
   const thumbsEl = document.getElementById('modal-img-thumbs');
   if (thumbsEl) {
-    thumbsEl.innerHTML = [p.image, p.image, p.image].map((src, i) => `
+    const modalImages =
+      (Array.isArray(p.images) && p.images.length)
+        ? p.images
+        : [p.image];
+
+    thumbsEl.innerHTML = modalImages.map((src, i) => `
       <div class="modal-thumb ${i === 0 ? 'on' : ''}" data-src="${src}">
         <img src="${src}" alt="View ${i + 1}"
           onerror="this.outerHTML='<span>${p.emoji}</span>'"
           style="width:100%;height:100%;object-fit:cover"/>
       </div>
     `).join('');
+
     thumbsEl.querySelectorAll('.modal-thumb').forEach(thumb => {
       thumb.addEventListener('click', () => {
         thumbsEl.querySelectorAll('.modal-thumb').forEach(t => t.classList.remove('on'));
         thumb.classList.add('on');
+
         const img = imgMain.querySelector('img');
-        if (img) img.src = thumb.dataset.src;
+
+        if (img) {
+          img.src = thumb.dataset.src;
+        }
       });
     });
   }

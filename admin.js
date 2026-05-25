@@ -2508,6 +2508,35 @@ function getAddValue(id) {
   return document.getElementById(id)?.value?.trim() || '';
 }
 
+
+function updateAddProductImageCount() {
+  const input = document.getElementById('add-product-image');
+  const countEl = document.getElementById('add-product-image-count');
+
+  if (!input || !countEl) return;
+
+  const files = Array.from(input.files || []);
+
+  if (!files.length) {
+    countEl.textContent = 'No images selected';
+    return;
+  }
+
+  if (files.length > 3) {
+    countEl.textContent = `Selected ${files.length} images. Only first 3 will be saved.`;
+    return;
+  }
+
+  countEl.textContent =
+    `${files.length} image${files.length > 1 ? 's' : ''} selected`;
+}
+
+document.addEventListener('change', e => {
+  if (e.target?.id === 'add-product-image') {
+    updateAddProductImageCount();
+  }
+});
+
 async function saveNewProduct() {
   try {
     const name = getAddValue('add-product-name');
@@ -2520,8 +2549,9 @@ async function saveNewProduct() {
       getAddValue('add-product-description') ||
       `${name} from Paddox store`;
 
-    const imageFile =
-      document.getElementById('add-product-image')?.files?.[0] || null;
+    const imageFiles =
+      Array.from(document.getElementById('add-product-image')?.files || [])
+        .slice(0, 3);
 
     if (!name) {
       showToast('❌ Product name required');
@@ -2543,11 +2573,18 @@ async function saveNewProduct() {
       return;
     }
 
-    let imageUrl = '';
+    let uploadedImages = [];
 
-    if (imageFile) {
-      showToast('🖼️ Preparing image...');
-      imageUrl = await readImageFileAsDataUrl(imageFile);
+    if (imageFiles.length) {
+      showToast(`🖼️ Preparing ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}...`);
+
+      uploadedImages =
+        await Promise.all(
+          imageFiles.map(async (file, index) => ({
+            url: await readImageFileAsDataUrl(file),
+            alt: `${name} image ${index + 1}`
+          }))
+        );
     }
 
     const productPayload = {
@@ -2561,8 +2598,8 @@ async function saveNewProduct() {
       shortDesc: description.slice(0, 180),
       isActive: true,
       isFeatured: false,
-      images: imageUrl
-        ? [{ url: imageUrl, alt: name }]
+      images: uploadedImages.length
+        ? uploadedImages
         : [{
             url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
             alt: name
@@ -2615,6 +2652,8 @@ function clearAddProductForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+
+  updateAddProductImageCount();
 
   const team = document.getElementById('add-product-team');
   if (team) team.value = 'Ferrari';
