@@ -311,6 +311,7 @@ function loginUser(user) {
   initReveal(accScreen);
   loadRealtimeProfile();
   loadMyOrders();
+  loadWishlist();
 }
 
 /* LOGOUT */
@@ -367,6 +368,7 @@ document.querySelectorAll('.acc-nav-item').forEach(item=>{
     item.classList.add('on');
     const page=document.getElementById(`page-${item.dataset.page}`);
     if(page){page.classList.add('on');initReveal(page);}
+    if(item.dataset.page === 'wishlist') loadWishlist();
     /* Icon wiggle */
     const icon=item.querySelector('.ani-icon');
     if(icon){icon.style.transform='scale(1.3) rotate(-10deg)';setTimeout(()=>icon.style.transform='',300);}
@@ -390,28 +392,179 @@ function showTracking(id,step){
   modal.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-/* ══ WISHLIST ══ */
-const WL_ITEMS=[
-  {icon:'🪖',name:'F1 Helmet Replica',  team:"Collector's Edition", price:'₹14,999', bg:'linear-gradient(135deg,#111,#1e1e1e)'},
-  {icon:'⌚',name:'Monaco Circuit Watch',team:'Paddox Edition',       price:'₹18,999', bg:'linear-gradient(135deg,#0d0d0d,#1e1a00)'},
-  {icon:'📌',name:'Driver Enamel Pin Set',team:'Multi-Team',          price:'₹799',    bg:'linear-gradient(135deg,#111,#1e1e1e)'},
-];
+/* ══ WISHLIST — REALTIME ══ */
+const ACCOUNT_WISHLIST_API =
+  'https://paddox-backend.onrender.com/api/wishlist';
+
+let REAL_WISHLIST = [];
+
+function wishlistProductImage(product) {
+  return (
+    product.images?.[0]?.url ||
+    product.image ||
+    ''
+  );
+}
+
+function wishlistPrice(product) {
+  return Number(
+    product.effectivePrice ||
+    product.salePrice ||
+    product.price ||
+    0
+  );
+}
+
+async function loadWishlist() {
+  try {
+    const token = profileToken();
+
+    if (!token) return;
+
+    const res = await fetch(ACCOUNT_WISHLIST_API, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Wishlist load failed');
+    }
+
+    REAL_WISHLIST =
+      data.data?.products ||
+      data.products ||
+      [];
+
+    renderWishlist();
+    updateWishlistStats();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function removeWishlistProduct(productId) {
+  try {
+    const token = profileToken();
+
+    if (!token) return;
+
+    const res = await fetch(
+      `${ACCOUNT_WISHLIST_API}/remove/${productId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Remove failed');
+    }
+
+    REAL_WISHLIST =
+      REAL_WISHLIST.filter(product => String(product._id) !== String(productId));
+
+    renderWishlist();
+    updateWishlistStats();
+
+    showToast('♡ Removed from wishlist');
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function updateWishlistStats() {
+  const statNums =
+    document.querySelectorAll('.ds-card .ds-num');
+
+  if (statNums[1]) {
+    statNums[1].textContent = REAL_WISHLIST.length;
+  }
+}
+
 function renderWishlist(){
-  const grid=document.getElementById('wl-grid');if(!grid)return;
-  grid.innerHTML=WL_ITEMS.map(item=>`
-    <div class="wl-card">
-      <div class="wl-card-img" style="background:${item.bg}">${item.icon}</div>
-      <div class="wl-card-info">
-        <div class="wl-card-team">${item.team}</div>
-        <div class="wl-card-name">${item.name}</div>
-        <div class="wl-card-foot">
-          <span class="wl-card-price">${item.price}</span>
-          <button class="wl-card-btn" onclick="showToast('✓ Added to cart!')">Add to Cart</button>
+  const grid = document.getElementById('wl-grid');
+
+  if (!grid) return;
+
+  if (!REAL_WISHLIST.length) {
+    grid.innerHTML = `
+      <div style="
+        grid-column:1/-1;
+        padding:40px;
+        text-align:center;
+        color:#777;
+        border:1px solid rgba(255,255,255,.08);
+        background:#0d0d0d;
+      ">
+        No wishlist items yet. Go to Shop and click ♥ on any product.
+      </div>
+    `;
+
+    updateWishlistStats();
+    return;
+  }
+
+  grid.innerHTML = REAL_WISHLIST.map(product => {
+    const image = wishlistProductImage(product);
+
+    return `
+      <div class="wl-card">
+        <div class="wl-card-img" style="background:#111">
+          ${
+            image
+              ? `<img src="${image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover">`
+              : '🏎️'
+          }
+        </div>
+
+        <div class="wl-card-info">
+          <div class="wl-card-team">
+            ${product.team || product.category || 'Paddox'}
+          </div>
+
+          <div class="wl-card-name">
+            ${product.name || 'Product'}
+          </div>
+
+          <div class="wl-card-foot">
+            <span class="wl-card-price">
+              ${formatMoney(wishlistPrice(product))}
+            </span>
+
+            <button
+              class="wl-card-btn"
+              onclick="window.location.href='shop.html'"
+            >
+              View in Shop
+            </button>
+
+            <button
+              class="wi-rm"
+              onclick="removeWishlistProduct('${product._id}')"
+              title="Remove"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+
+  updateWishlistStats();
 }
+
 
 /* ══ NOTIFICATIONS ══ */
 const NOTIFS=[
@@ -1148,5 +1301,6 @@ function showRealtimeOrderDetails(orderId) {
 window.addEventListener('DOMContentLoaded', () => {
   bindAvatarUpload();
   loadMyOrders();
+  loadWishlist();
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');

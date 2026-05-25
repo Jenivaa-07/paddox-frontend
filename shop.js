@@ -13,6 +13,20 @@ let PRODUCTS = [];
 const PRODUCT_API_BASE =
   'https://paddox-backend.onrender.com/api/products';
 
+const WISHLIST_API_BASE =
+  'https://paddox-backend.onrender.com/api/wishlist';
+
+let USER_WISHLIST_IDS = new Set();
+
+function shopToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
 /* ══════════════════════════════════════
    STATE
 ══════════════════════════════════════ */
@@ -67,11 +81,126 @@ async function loadShopProducts() {
     }));
 
     renderProducts();
+    syncWishlistButtons();
   } catch (err) {
     console.error(err);
     showToast('❌ Failed to load products');
   }
 }
+
+async function loadShopWishlist() {
+  try {
+    const token = shopToken();
+
+    if (!token) {
+      USER_WISHLIST_IDS = new Set();
+      return;
+    }
+
+    const res = await fetch(WISHLIST_API_BASE, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      USER_WISHLIST_IDS = new Set();
+      return;
+    }
+
+    const products =
+      data.data?.products ||
+      data.products ||
+      [];
+
+    USER_WISHLIST_IDS =
+      new Set(products.map(product => String(product._id || product.id)));
+
+  } catch (err) {
+    console.error(err);
+    USER_WISHLIST_IDS = new Set();
+  }
+}
+
+async function toggleWishlist(productId) {
+  try {
+    const token = shopToken();
+
+    if (!token) {
+      showToast('🔐 Please login to use wishlist');
+      setTimeout(() => {
+        window.location.href = 'account.html';
+      }, 700);
+      return;
+    }
+
+    const isInWishlist = USER_WISHLIST_IDS.has(String(productId));
+
+    const res = await fetch(
+      isInWishlist
+        ? `${WISHLIST_API_BASE}/remove/${productId}`
+        : `${WISHLIST_API_BASE}/add/${productId}`,
+      {
+        method: isInWishlist ? 'DELETE' : 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Wishlist update failed');
+    }
+
+    if (isInWishlist) {
+      USER_WISHLIST_IDS.delete(String(productId));
+      showToast('♡ Removed from wishlist');
+    } else {
+      USER_WISHLIST_IDS.add(String(productId));
+      showToast('♥ Added to wishlist');
+    }
+
+    syncWishlistButtons(productId);
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function syncWishlistButtons(productId = null) {
+  const buttons =
+    productId
+      ? document.querySelectorAll(`[data-id="${productId}"].pwish, #modal-wish-btn`)
+      : document.querySelectorAll('.pwish, #modal-wish-btn');
+
+  buttons.forEach(btn => {
+    const id =
+      btn.dataset?.id ||
+      state.modalProduct?.id;
+
+    if (!id) return;
+
+    const active =
+      USER_WISHLIST_IDS.has(String(id));
+
+    btn.classList.toggle('on', active);
+
+    const icon =
+      btn.querySelector('.wish-icon-wrap') ||
+      btn.querySelector('#wish-icon') ||
+      document.getElementById('wish-icon');
+
+    if (icon) {
+      icon.textContent = active ? '♥' : '♡';
+    }
+  });
+}
+
 /* ══════════════════════════════════════
    PARTICLES
 ══════════════════════════════════════ */
@@ -472,8 +601,8 @@ function cardHTML(p, i) {
         </div>
       </div>
       ${p.badge ? `<span class="pbadge b-${p.badge}">${p.badge.toUpperCase()}</span>` : ''}
-      <button class="pwish" data-id="${p.id}" aria-label="Add to wishlist">
-        <span class="wish-icon-wrap">♡</span>
+      <button class="pwish ${USER_WISHLIST_IDS.has(String(p.id)) ? 'on' : ''}" data-id="${p.id}" aria-label="Add to wishlist">
+        <span class="wish-icon-wrap">${USER_WISHLIST_IDS.has(String(p.id)) ? '♥' : '♡'}</span>
       </button>
       <div class="pcard-info">
         <div class="pcard-team">${p.team}</div>
@@ -499,12 +628,9 @@ function bindCardEvents(root) {
     btn.addEventListener('click', e => { e.stopPropagation(); openModal(btn.dataset.id); });
   });
   root.querySelectorAll('.pwish').forEach(btn => {
-    btn.addEventListener('click', e => {
+    btn.addEventListener('click', async e => {
       e.stopPropagation();
-      btn.classList.toggle('on');
-      const icon = btn.querySelector('.wish-icon-wrap');
-      if (icon) icon.textContent = btn.classList.contains('on') ? '♥' : '♡';
-      showToast(btn.classList.contains('on') ? '♥ Added to wishlist' : 'Removed from wishlist');
+      await toggleWishlist(btn.dataset.id);
     });
   });
   root.querySelectorAll('.pcard').forEach(card => {
@@ -1001,12 +1127,11 @@ function openModal(id) {
   /* Wishlist */
   const wishBtn = document.getElementById('modal-wish-btn');
   if (wishBtn) {
-    wishBtn.classList.remove('on');
-    document.getElementById('wish-icon').textContent = '♡';
-    wishBtn.onclick = () => {
-      wishBtn.classList.toggle('on');
-      document.getElementById('wish-icon').textContent = wishBtn.classList.contains('on') ? '♥' : '♡';
-      showToast(wishBtn.classList.contains('on') ? '♥ Added to wishlist!' : 'Removed from wishlist');
+    wishBtn.dataset.id = p.id;
+    syncWishlistButtons(p.id);
+
+    wishBtn.onclick = async () => {
+      await toggleWishlist(p.id);
     };
   }
 
@@ -1055,8 +1180,11 @@ function showToast(msg) {
 /* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
-renderProducts();
 updateActiveFilters();
-loadShopProducts();
+
+(async function initShopRealtime() {
+  await loadShopWishlist();
+  await loadShopProducts();
+})();
 
 console.log('%c🛒 PADDOX — Shop Page Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
