@@ -2355,6 +2355,105 @@ function ensureProductEditModal() {
     saveProductEdit;
 }
 
+
+function getProductImageList(product) {
+  if (!product) return [];
+
+  if (Array.isArray(product.images)) {
+    return product.images
+      .map(img => img?.url || img)
+      .filter(Boolean);
+  }
+
+  return product.image ? [product.image] : [];
+}
+
+function renderEditProductCurrentImages(product) {
+  const wrap = document.getElementById('edit-product-current-images');
+
+  if (!wrap) return;
+
+  const images = getProductImageList(product);
+
+  if (!images.length) {
+    wrap.innerHTML = `<div style="color:#777">No images</div>`;
+    return;
+  }
+
+  wrap.innerHTML = images.map((src, index) => `
+    <div style="
+      width:74px;
+      height:54px;
+      border:1px solid rgba(255,255,255,.12);
+      background:#191919;
+      position:relative;
+      overflow:hidden;
+    ">
+      <img
+        src="${src}"
+        alt="Image ${index + 1}"
+        style="width:100%;height:100%;object-fit:cover"
+      >
+      <span style="
+        position:absolute;
+        top:3px;
+        left:3px;
+        background:var(--red);
+        color:white;
+        font-size:.65rem;
+        padding:1px 5px;
+      ">
+        ${index + 1}
+      </span>
+    </div>
+  `).join('');
+}
+
+function updateEditProductImageCount() {
+  const input = document.getElementById('edit-product-images');
+  const countEl = document.getElementById('edit-product-image-count');
+
+  if (!input || !countEl) return;
+
+  const files = Array.from(input.files || []);
+
+  if (!files.length) {
+    countEl.textContent = 'No new images selected';
+    return;
+  }
+
+  if (files.length > 3) {
+    countEl.textContent = `Selected ${files.length} images. Only first 3 will be saved.`;
+    return;
+  }
+
+  countEl.textContent =
+    `${files.length} new image${files.length > 1 ? 's' : ''} selected`;
+}
+
+async function readMultipleImagesFromInput(inputId) {
+  const files =
+    Array.from(document.getElementById(inputId)?.files || [])
+      .slice(0, 3);
+
+  if (!files.length) return [];
+
+  showToast(`🖼️ Preparing ${files.length} image${files.length > 1 ? 's' : ''}...`);
+
+  return Promise.all(
+    files.map(async (file, index) => ({
+      url: await readImageFileAsDataUrl(file),
+      alt: `Product image ${index + 1}`
+    }))
+  );
+}
+
+document.addEventListener('change', e => {
+  if (e.target?.id === 'edit-product-images') {
+    updateEditProductImageCount();
+  }
+});
+
 function openProductEditModal(productId) {
   ensureProductEditModal();
 
@@ -2417,6 +2516,13 @@ function closeProductEditModal() {
     ?.classList.remove('show');
 
   EDIT_PRODUCT_ID = null;
+
+  const editImageInput = document.getElementById('edit-product-images');
+  if (editImageInput) {
+    editImageInput.value = '';
+  }
+
+  updateEditProductImageCount();
 }
 
 async function saveProductEdit() {
@@ -2479,13 +2585,11 @@ async function saveProductEdit() {
       body.onSale = false;
     }
 
-    if (imageUrl) {
-      body.images = [
-        {
-          url: imageUrl,
-          alt: body.name
-        }
-      ];
+    if (uploadedEditImages.length) {
+      body.images = uploadedEditImages.map(img => ({
+        ...img,
+        alt: body.name
+      }));
     }
 
     showToast('⏳ Saving product...');
