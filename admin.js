@@ -2508,7 +2508,7 @@ function getAddValue(id) {
   return document.getElementById(id)?.value?.trim() || '';
 }
 
-async function saveNewProduct() {
+async async function saveNewProduct() {
   try {
     const name = getAddValue('add-product-name');
     const team = getAddValue('add-product-team');
