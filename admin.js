@@ -4404,6 +4404,7 @@ console.log('%c⚙️ PADDOX — Admin Dashboard Loaded', 'color:#e8002d;font-si
    Real orders only · clean admin controls · no fake analytics
 ══════════════════════════════════════ */
 const ADMIN_PHASE9_STATUS_FLOW = ['placed','processing','shipped','out_for_delivery','delivered'];
+const ADMIN_PHASE9_STATUS_OPTIONS = ['placed','processing','shipped','out_for_delivery','delivered','cancelled','refunded'];
 
 function adminPhase9Text(value, fallback = '-') {
   return String(value ?? fallback).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
@@ -4450,6 +4451,13 @@ function adminPhase9StatusClass(status = '') {
   if (s === 'cancelled' || s === 'failed') return 's-out';
   if (s === 'placed' || s === 'processing') return 's-pr';
   return 's-pr';
+}
+
+function adminPhase9StatusOptions(current = 'placed') {
+  const active = String(current || 'placed').toLowerCase();
+  return ADMIN_PHASE9_STATUS_OPTIONS.map(status => `
+    <option value="${status}" ${active === status ? 'selected' : ''}>${status.replaceAll('_', ' ').toUpperCase()}</option>
+  `).join('');
 }
 
 function adminPhase9FilteredOrders() {
@@ -4540,9 +4548,15 @@ function renderOrders() {
         <td style="font-family:var(--font-d);font-size:1.12rem">${money(adminPhase9OrderTotal(order))}</td>
         <td><span class="sb ${adminPhase9StatusClass(order.status)}">${adminPhase9Text(statusLabel)}</span></td>
         <td>
-          <div class="admin-order-actions">
+          <div class="admin-order-actions admin-order-actions-wide">
             <button class="admin-mini-btn red" onclick="openOrderDetails('${order._id}')">View</button>
             <button class="admin-mini-btn" onclick="adminPhase9OpenReceipt('${order._id}')">Receipt</button>
+            <div class="admin-inline-status-wrap">
+              <select class="admin-inline-status" id="admin-status-${order._id}">
+                ${adminPhase9StatusOptions(order.status)}
+              </select>
+              <button class="admin-mini-btn" onclick="updateOrderStatus('${order._id}', document.getElementById('admin-status-${order._id}')?.value, false)">Update</button>
+            </div>
           </div>
         </td>
       </tr>
@@ -4680,9 +4694,7 @@ function openOrderDetails(orderId) {
     <div class="od-status-row">
       <div class="od-label" style="margin:0;color:var(--red)">Update Status</div>
       <select class="od-select" id="od-status-select">
-        ${['placed','processing','shipped','out_for_delivery','delivered','cancelled'].map(st => `
-          <option value="${st}" ${String(order.status || 'placed') === st ? 'selected' : ''}>${st.replaceAll('_',' ').toUpperCase()}</option>
-        `).join('')}
+        ${adminPhase9StatusOptions(order.status)}
       </select>
       <button class="od-btn" onclick="updateOrderStatus('${order._id}')">Update</button>
     </div>
@@ -4697,25 +4709,45 @@ function openOrderDetails(orderId) {
   document.body.style.overflow = 'hidden';
 }
 
-async function updateOrderStatus(orderId) {
-  const status = document.getElementById('od-status-select')?.value;
-  if (!status) return;
+async function updateOrderStatus(orderId, selectedStatus = null, reopenModal = true) {
+  const status =
+    selectedStatus ||
+    document.getElementById('od-status-select')?.value ||
+    document.getElementById('order-status-select')?.value ||
+    document.getElementById(`admin-status-${orderId}`)?.value;
+
+  if (!status) {
+    showToast('Select an order status first');
+    return;
+  }
 
   try {
     showToast('⏳ Updating order status...');
+
     const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getAdminToken()}`
       },
-      body: JSON.stringify({ status, message: `Order marked as ${status.replaceAll('_',' ')}` })
+      body: JSON.stringify({
+        status,
+        message: `Order marked as ${status.replaceAll('_',' ')}`
+      })
     });
+
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Status update failed');
-    showToast('🔥 Order status updated');
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Status update failed');
+    }
+
+    showToast(`🔥 Order moved to ${status.replaceAll('_',' ')}`);
     await loadOrders();
-    openOrderDetails(orderId);
+
+    const modalIsOpen = document.getElementById('order-details-modal')?.classList.contains('show');
+    if (reopenModal && modalIsOpen) {
+      openOrderDetails(orderId);
+    }
   } catch (err) {
     console.error(err);
     showToast(`❌ ${err.message}`);

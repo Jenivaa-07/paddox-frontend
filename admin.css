@@ -480,3 +480,43 @@ select.form-input option{background:var(--dark2)}
   .data-table-wrap{overflow-x:auto}
   .admin-order-actions{min-width:150px}
 }
+
+
+/* Phase 9.1 — Admin order status quick update */
+.admin-order-actions-wide{
+  align-items:flex-start;
+  gap:8px;
+  flex-wrap:wrap;
+  min-width:170px;
+}
+.admin-inline-status-wrap{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-basis:100%;
+  margin-top:4px;
+}
+.admin-inline-status{
+  min-width:138px;
+  height:34px;
+  padding:0 10px;
+  background:#111;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.14);
+  font-family:var(--font-c);
+  letter-spacing:1.3px;
+  text-transform:uppercase;
+  outline:none;
+}
+.admin-inline-status:focus,
+.od-select:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 2px rgba(232,0,45,.15);
+}
+.admin-order-actions-wide .admin-mini-btn{
+  white-space:nowrap;
+}
+@media(max-width:760px){
+  .admin-inline-status-wrap{flex-direction:column;align-items:stretch}
+  .admin-inline-status{width:100%}
+}
