@@ -52,9 +52,9 @@
         <div class="breadcrumb animate-fade-up"><a href="index.html">Paddox</a><span>／</span><a href="fanhub.html">Fan Hub</a><span>／</span><b>Pit Wall</b></div>
         <div class="pit-hero-layout">
           <div>
-            <div class="pit-kicker"><span class="live-pulse"></span> API Session Center</div>
+            <div class="pit-kicker"><span class="live-pulse"></span> Live Session Center</div>
             <h1 class="pit-title">PIT WALL <span>DATA</span></h1>
-            <p class="pit-sub">Loads only backend/OpenF1 session data. No fake fallback timing, tyre, driver, race, weather or result data is displayed.</p>
+            <p class="pit-sub">Choose a Grand Prix session and view available timing, weather, driver and race-control data.</p>
             <div class="pit-hero-actions">
               <button class="pit-primary" id="refresh-btn">↻ Refresh Session Data</button>
               <a href="fanhub.html" class="pit-secondary">← Back to Fan Hub</a>
@@ -70,7 +70,7 @@
               <div class="radar-core">F1</div>
             </div>
             <div class="command-bottom">
-              <span id="last-sync">Waiting for API</span>
+              <span id="last-sync">Waiting for data</span>
               <span id="socket-state">Backend pending</span>
             </div>
           </div>
@@ -83,7 +83,7 @@
         <div>
           <span class="strip-label">Next Race</span>
           <strong id="next-race-name">Loading calendar…</strong>
-          <small id="next-race-meta">Waiting for backend schedule</small>
+          <small id="next-race-meta">Waiting for schedule</small>
         </div>
         <div class="strip-countdown">
           <div><b id="cd-d">--</b><span>DAYS</span></div>
@@ -111,19 +111,19 @@
         <button class="pit-primary mini-load" id="load-session-btn">Load Session</button>
       </div>
 
-      <div class="live-notice" id="live-notice">Waiting for backend/OpenF1 data…</div>
+      <div class="live-notice" id="live-notice">Select a session to view available Pit Wall data.</div>
 
       <div class="session-tabs" id="session-tabs"></div>
 
       <div class="pit-kpi-grid">
         <article class="pit-kpi">
-          <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">Waiting for API metadata</small>
+          <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">Waiting for data metadata</small>
         </article>
         <article class="pit-kpi">
           <span>🌡️</span><p>Track Weather</p><b id="kpi-weather">--°C</b><small id="kpi-weather-sub">No weather returned yet</small>
         </article>
         <article class="pit-kpi">
-          <span>🏆</span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Waiting for backend result</small>
+          <span>🏆</span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Waiting for latest result</small>
         </article>
         <article class="pit-kpi">
           <span>⚡</span><p>Grid Size</p><b id="kpi-grid">--</b><small>Rows returned</small>
@@ -133,11 +133,11 @@
       <div class="pit-layout">
         <section class="pit-panel timing-panel">
           <div class="panel-head">
-            <div><span class="panel-tag" id="timing-panel-tag">API Timing Feed</span><h2 id="timing-title">Session Lap, Sector & Tyre Feed</h2></div>
+            <div><span class="panel-tag" id="timing-panel-tag">Timing Feed</span><h2 id="timing-title">Session Lap, Sector & Tyre Feed</h2></div>
             <button class="mini-btn" id="sort-standings">Sort: Position</button>
           </div>
           <div class="timing-table" id="timing-table">
-            <div class="loading-row">Loading API timing feed…</div>
+            <div class="loading-row">Loading timing feed…</div>
           </div>
         </section>
 
@@ -155,8 +155,8 @@
 
       <section class="pit-panel session-panel">
         <div class="panel-head">
-          <div><span class="panel-tag">Weekend Board</span><h2>API Weekend Sessions</h2></div>
-          <span class="auto-refresh">Auto refresh runs only after a real API session is loaded</span>
+          <div><span class="panel-tag">Weekend Board</span><h2>Weekend Sessions</h2></div>
+          <span class="auto-refresh">Auto refresh starts after a session is loaded</span>
         </div>
         <div class="session-grid" id="session-grid"></div>
       </section>

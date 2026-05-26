@@ -1,7 +1,6 @@
 /* ============================================================
-   PADDOX — pitwall.js | Phase 4.4 Pure API State Upgrade
+   PADDOX — pitwall.js | Clean user-facing Pit Wall states
    Practice 1/2/3, Qualifying, Sprint Qualifying, Sprint, Race
-   Backend proxy: /api/f1/pitwall/* so browser does not hit OpenF1 directly
    ============================================================ */
 'use strict';
 
@@ -146,7 +145,7 @@ async function loadSeason(){
   const roundSel = $('#round-select'); if(roundSel) roundSel.innerHTML = '<option>Loading rounds…</option>';
   try{
     const data = await api(`/f1/schedule?year=${currentYear}`);
-    if (data._stale) setLiveNotice('Backend is waking up or OpenF1 is slow — showing last saved schedule until fresh data returns.', 'warn');
+    if (data._stale) setLiveNotice('Refreshing race schedule. Showing the latest saved schedule for now.', 'warn');
     seasonRaces = data.races || [];
     const now = new Date();
     const latestCompleted = [...seasonRaces].reverse().find(r => new Date(`${r.date}T${r.time || '23:59:00Z'}`) <= now);
@@ -157,19 +156,19 @@ async function loadSeason(){
     await loadWeekend();
   }catch(err){
     console.warn(err); showToast('Could not load season schedule');
-    seasonRaces = []; renderRoundSelect(); clearPitWallData('Season schedule is unavailable from the backend right now. No fallback rounds are shown.');
+    seasonRaces = []; renderRoundSelect(); clearPitWallData('Race schedule is temporarily unavailable. Please try again shortly.');
   }
 }
 function renderRoundSelect(){
   const el = $('#round-select'); if(!el) return;
-  if(!seasonRaces.length){ el.innerHTML = '<option value="" disabled selected>No API rounds available</option>'; return; }
+  if(!seasonRaces.length){ el.innerHTML = '<option value="" disabled selected>No rounds available</option>'; return; }
   el.innerHTML = seasonRaces.map(r => `<option value="${r.round}" ${Number(r.round)===currentRound?'selected':''}>R${r.round} · ${esc(r.name || r.raceName || 'Grand Prix')}</option>`).join('');
   el.onchange = () => { currentRound = Number(el.value); loadWeekend(); };
 }
 async function loadWeekend(){
   try{
     const data = await api(`/f1/pitwall/weekend?year=${currentYear}&round=${currentRound}`);
-    if (data._stale) setLiveNotice('Using cached weekend/session list while backend reconnects. Fresh data will retry automatically.', 'warn');
+    if (data._stale) setLiveNotice('Refreshing weekend sessions. Showing the latest saved sessions for now.', 'warn');
     const race = data.race || seasonRaces.find(r => Number(r.round) === currentRound) || {};
     weekendSessions = data.sessions || [];
     currentRaceMeta = race;
@@ -178,7 +177,7 @@ async function loadWeekend(){
     currentSession = data.defaultSession || weekendSessions.find(s=>s.hasTiming)?.key || weekendSessions.find(s=>s.available)?.key || weekendSessions[0]?.key || 'Race';
     setText('kpi-session-sub', `${race.flag || '🏁'} ${race.name || race.raceName || 'Grand Prix'}`);
     setText('timing-panel-tag', `Round ${currentRound || '--'} · ${currentYear}`);
-    setLiveNotice(latestWeekendNote, latestWeekendNote.includes('No OpenF1 token') ? 'warn' : 'ok');
+    setLiveNotice('', 'info');
     renderSessionControls();
     renderWeekendBoard(race);
     await loadSelectedSession(true);
@@ -187,19 +186,19 @@ async function loadWeekend(){
     weekendSessions = [];
     renderSessionControls();
     renderWeekendBoard({});
-    clearPitWallData('Weekend/session list is unavailable from the backend right now. No hardcoded session tabs are shown.');
+    clearPitWallData('Weekend sessions are temporarily unavailable. Please try again shortly.');
   }
 }
 function renderSessionControls(){
   const select = $('#session-select'); const tabs = $('#session-tabs');
   if(!weekendSessions.length){
     if(select) {
-      select.innerHTML = '<option value="" disabled selected>No API sessions available</option>';
+      select.innerHTML = '<option value="" disabled selected>No sessions available</option>';
       select.onchange = null;
     }
-    if(tabs) tabs.innerHTML = '<div class="session-state-row">No session list returned by the backend.</div>';
+    if(tabs) tabs.innerHTML = '<div class="session-state-row">No sessions are available for this round yet.</div>';
     const loadBtn = $('#load-session-btn');
-    if(loadBtn) loadBtn.onclick = () => clearPitWallData('No backend session is selected. Load a season/round that has API sessions.');
+    if(loadBtn) loadBtn.onclick = () => clearPitWallData('Select a race weekend and session to continue.');
     return;
   }
   if(select){
@@ -215,7 +214,7 @@ function renderSessionControls(){
 function highlightTabs(){ $$('.session-tab').forEach(b => b.classList.toggle('on', b.dataset.session === currentSession)); }
 function renderWeekendBoard(race){
   const box = $('#session-grid'); if(!box) return;
-  if(!weekendSessions.length){ box.innerHTML = '<div class="empty-row">No practice/qualifying/sprint/race sessions returned from API.</div>'; return; }
+  if(!weekendSessions.length){ box.innerHTML = '<div class="empty-row">No practice, qualifying, sprint, or race sessions are available yet.</div>'; return; }
   const now = new Date();
   box.innerHTML = weekendSessions.map(s => {
     const dt = s.date || s.date_start || '';
@@ -233,7 +232,7 @@ function renderWeekendBoard(race){
 
 async function loadSelectedSession(silent=false){
   if (sessionLoading && silent) return;
-  if (!currentSession || !weekendSessions.length) { clearPitWallData('No backend session is selected. Nothing hardcoded is displayed.'); return; }
+  if (!currentSession || !weekendSessions.length) { clearPitWallData('Select a race weekend and session to continue.'); return; }
   const requestId = ++activeSessionRequest;
   sessionLoading = true;
   clearInterval(refreshTimer);
@@ -244,7 +243,7 @@ async function loadSelectedSession(silent=false){
   setText('kpi-session', sessionLabel(currentSession));
 
   const box = $('#timing-table');
-  if(box && !latestRows.length) box.innerHTML = '<div class="loading-row">Loading real F1 lap times, tyres and driver images…</div>';
+  if(box && !latestRows.length) box.innerHTML = '<div class="loading-row">Loading session timing data…</div>';
   if(box && latestRows.length && !silent) {
     box.insertAdjacentHTML('afterbegin', '<div class="loading-row slim">Refreshing session data…</div>');
   }
@@ -259,15 +258,15 @@ async function loadSelectedSession(silent=false){
     latestDataQuality = data.dataQuality || '';
 
     setText('signal-status', data._stale ? 'CACHED' : data.dataQuality === 'REAL_TIMING_DATA' ? 'REAL DATA' : data.live ? 'LIVE LINK' : 'WAITING');
-    setText('socket-state', data._stale ? 'Cached fallback active' : (data.source || 'PADDOX backend proxy'));
+    setText('socket-state', data._stale ? 'Latest saved data' : (data.source || 'Connected'));
     setText('last-sync', data._stale && data._cachedAt ? `Cached ${fmtTime(data._cachedAt)}` : `Last sync ${fmtTime(data.fetchedAt || new Date())}`);
 
     if (data._stale) {
-      setLiveNotice('Fresh request failed once, so Pit Wall is showing the last saved real session data. It will keep retrying automatically.', 'warn');
+      setLiveNotice('Connection is slow. Showing the latest available session data.', 'warn');
     } else if (data.dataQuality === 'REAL_TIMING_DATA') {
-      setLiveNotice(`${sessionLabel(currentSession)} is showing real lap/sector/tyre data from OpenF1 through your backend.`, 'ok');
+      setLiveNotice(`${sessionLabel(currentSession)} timing data is live.`, 'ok');
     } else {
-      setLiveNotice(data.message || `${sessionLabel(currentSession)} has no lap/tyre timing records yet. Choose another completed session, or add OPENF1_API_KEY for authenticated live access.`, 'warn');
+      setLiveNotice(`${sessionLabel(currentSession)} timing data is not available yet.`, 'warn');
     }
 
     setText('kpi-grid', String(latestRows.length || '--'));
@@ -281,14 +280,14 @@ async function loadSelectedSession(silent=false){
     if (lastGoodSessionData?.rows?.length) {
       latestRows = lastGoodSessionData.rows;
       latestDataQuality = lastGoodSessionData.dataQuality || 'REAL_TIMING_DATA';
-      setLiveNotice('Backend/OpenF1 did not respond this time. Keeping the last loaded real data on screen and retrying automatically.', 'warn');
+      setLiveNotice('Connection is slow. Keeping the latest available session data on screen.', 'warn');
       setText('signal-status', 'RETRYING');
       setText('socket-state', 'Last good data preserved');
       renderTimingRows();
       renderRaceControl(lastGoodSessionData.raceControl || [], lastGoodSessionData);
     } else {
       latestRows = [];
-      setLiveNotice('Could not reach backend/OpenF1 for this session. No fake timing data is shown. Try Refresh or select another completed session.', 'warn');
+      setLiveNotice('Session data is temporarily unavailable. Try refresh or select another session.', 'warn');
       renderTimingRows();
       renderRaceControl([], {source:'Error'});
     }
@@ -305,7 +304,7 @@ function renderTimingRows(){
   if(standingsSort === 'best') rows.sort((a,b)=>(a.bestSec||9999)-(b.bestSec||9999));
   else if(standingsSort === 'last') rows.sort((a,b)=>(a.lastSec||9999)-(b.lastSec||9999));
   else rows.sort((a,b)=>(Number(a.position)||999)-(Number(b.position)||999));
-  if(!rows.length){ box.innerHTML = '<div class="empty-row">No real lap/tyre timing data available for this session yet. Select a completed API session from the tabs.</div>'; return; }
+  if(!rows.length){ box.innerHTML = '<div class="empty-row">Timing data is not available for this session yet.</div>'; return; }
   const hasAnyTiming = rows.some(r => !r.noTiming && (r.bestLap !== '—' || r.lastLap !== '—' || r.tyre));
   const header = `<div class="timing-header"><span>POS</span><span>DRIVER</span><span>GAP</span><span>BEST</span><span>LAST</span><span>S1</span><span>S2</span><span>TYRE</span><span>LAPS</span></div>`;
   const body = rows.map((r,i)=>{
@@ -323,13 +322,13 @@ function renderTimingRows(){
       <div class="laps">${esc(r.laps ?? '—')} L</div>
     </div>`;
   }).join('');
-  const note = hasAnyTiming ? '' : '<div class="empty-row slim">Driver images are real, but this selected session has no OpenF1 lap/stint/interval rows yet. This is not fake timing data.</div>';
+  const note = hasAnyTiming ? '' : '<div class="empty-row slim">Timing details are not available for this session yet.</div>';
   box.innerHTML = header + body + note;
 }
 function renderRaceControl(messages=[], data={}){
   const box = $('#race-control'); if(!box) return;
   if(!messages.length){
-    box.innerHTML = '<div class="empty-row">No race-control messages returned by the selected API session.</div>';
+    box.innerHTML = '<div class="empty-row">No race-control messages for this session yet.</div>';
     return;
   }
   const base = messages.slice(-8).reverse().map(m => [fmtTime(m.date || m.created_at || new Date()), m.message || m.text || m.flag || 'Race control update', m.flag || m.category || '']);
@@ -343,7 +342,7 @@ function renderPodium(top3) {
 }
 async function loadLastResult() {
   try { const data = await api('/f1/last-result'); const race = data.race; if (!race) throw new Error('No result'); setText('kpi-winner', race.winner?.name || 'Winner TBA'); setText('kpi-winner-sub', `${race.flag || '🏁'} ${race.name || 'Latest GP'}`); renderPodium(race.top3 || []); }
-  catch (err) { console.warn(err); setText('kpi-winner', 'Unavailable'); setText('kpi-winner-sub', 'No result returned by backend'); renderPodium([]); }
+  catch (err) { console.warn(err); setText('kpi-winner', 'Unavailable'); setText('kpi-winner-sub', 'Latest result unavailable'); renderPodium([]); }
 }
 function initNav() {
   const navbar = $('#navbar'); window.addEventListener('scroll', () => navbar?.classList.toggle('scrolled', scrollY > 20));
@@ -361,21 +360,21 @@ function initParticles() {
   for(let i=0;i<70;i++) p.push(new P()); (function loop(){ctx.clearRect(0,0,W,H);p.forEach(x=>{x.u();x.d()});requestAnimationFrame(loop)})();
 }
 function initSocket() {
-  try { if (typeof io !== 'function') return; const socket = io('https://paddox-backend.onrender.com', { transports: ['websocket', 'polling'] }); socket.on('connect', () => setText('socket-state', 'Socket connected')); socket.on('disconnect', () => setText('socket-state', 'Socket standby')); } catch (err) { console.warn('Socket unavailable', err); }
+  try { if (typeof io !== 'function') return; const socket = io('https://paddox-backend.onrender.com', { transports: ['websocket', 'polling'] }); socket.on('connect', () => setText('socket-state', 'Live link connected')); socket.on('disconnect', () => setText('socket-state', 'Live link standby')); } catch (err) { console.warn('Socket unavailable', err); }
 }
 
 function clearPitWallData(message){
   latestRows = [];
-  setLiveNotice(message || 'No API data available for the selected state.', 'warn');
-  setText('signal-status', 'NO API DATA');
+  setLiveNotice(message || 'Session data is unavailable right now.', 'warn');
+  setText('signal-status', 'NO DATA');
   setText('socket-state', 'No fallback data used');
-  setText('last-sync', 'Waiting for real backend data');
+  setText('last-sync', 'Waiting for data');
   setText('kpi-session', currentSession ? sessionLabel(currentSession) : 'No session');
-  setText('kpi-session-sub', 'No API metadata');
+  setText('kpi-session-sub', 'Waiting for session details');
   setText('kpi-weather', '--°C');
-  setText('kpi-weather-sub', 'No weather returned');
+  setText('kpi-weather-sub', 'Weather data waiting');
   setText('kpi-grid', '--');
-  const timing = $('#timing-table'); if(timing) timing.innerHTML = '<div class="empty-row">' + esc(message || 'No API data available.') + '</div>';
+  const timing = $('#timing-table'); if(timing) timing.innerHTML = '<div class="empty-row">' + esc(message || 'Session data is unavailable right now.') + '</div>';
   renderRaceControl([], {});
 }
 
