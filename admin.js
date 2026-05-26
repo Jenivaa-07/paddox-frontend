@@ -171,6 +171,7 @@ const PAGE_META = {
   fn:()=>openAssetModal()
 },
   fanquotes:  { title:'FAN QUOTES',      action:'+ Add Quote',   fn:()=>openQuoteModal() },
+  fandrivers: { title:'FAN DRIVERS',     action:'+ Add Image',   fn:()=>openDriverProfileModal() },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
   analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>showToast('📊 Report downloaded!') },
   moderation: { title:'MODERATION',      action:'Clear All',      fn:()=>showToast('✓ All items reviewed!') },
@@ -209,6 +210,9 @@ if (id === 'analytics') {
 }
 if (id === 'fanquotes') {
   loadAdminQuotes();
+}
+if (id === 'fandrivers') {
+  loadAdminDriverProfiles();
 }
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -3842,6 +3846,280 @@ async function deleteQuote(id) {
     showToast(`❌ ${err.message}`);
   }
 }
+
+
+/* ══════════════════════════════════════
+   ADMIN FAN DRIVERS — IMAGE OVERRIDES
+══════════════════════════════════════ */
+const ADMIN_DRIVER_PROFILES_API =
+  'https://paddox-backend.onrender.com/api/fan/admin/driver-profiles';
+
+let REAL_DRIVER_PROFILES_ADMIN = [];
+let EDIT_DRIVER_PROFILE_ID = null;
+
+function driverProfileHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${getAdminToken()}`
+  };
+}
+
+function driverProfileImageHTML(profile) {
+  if (profile.image && (profile.image.startsWith('http://') || profile.image.startsWith('https://') || profile.image.startsWith('data:image/'))) {
+    return `<img src="${profile.image}" style="width:36px;height:36px;border-radius:50%;object-fit:cover"/>`;
+  }
+  return profile.flagEmoji || '🏎️';
+}
+
+async function loadAdminDriverProfiles() {
+  const tbody = document.getElementById('driver-profiles-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#777">Loading driver profiles...</td></tr>`;
+
+  try {
+    const res = await fetch(ADMIN_DRIVER_PROFILES_API, {
+      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      redirectToLogin('Admin session expired. Please login again.');
+      return;
+    }
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Driver profiles load failed');
+
+    REAL_DRIVER_PROFILES_ADMIN = data.data?.profiles || data.profiles || [];
+    renderAdminDriverProfiles();
+
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#777">Failed to load driver profiles</td></tr>`;
+  }
+}
+
+function renderAdminDriverProfiles() {
+  const tbody = document.getElementById('driver-profiles-tbody');
+  if (!tbody) return;
+
+  const search = document.getElementById('driver-profile-search')?.value?.trim()?.toLowerCase() || '';
+  const list = REAL_DRIVER_PROFILES_ADMIN.filter(profile =>
+    !search || `${profile.name} ${profile.code} ${profile.team} ${profile.country}`.toLowerCase().includes(search)
+  );
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#777">No driver images added yet. Add driver profile images here.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(profile => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="width:38px;height:38px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#151515;border:1px solid rgba(255,255,255,.12)">
+            ${driverProfileImageHTML(profile)}
+          </span>
+          <div>
+            <div style="font-weight:800;color:#fff">${profile.name}</div>
+            <div style="color:#777;font-size:.75rem">${profile.driverKey}</div>
+          </div>
+        </div>
+      </td>
+      <td>${profile.code || '-'}</td>
+      <td>${profile.team || '-'}</td>
+      <td>${profile.flagEmoji || ''} ${profile.country || '-'}</td>
+      <td><span class="sb ${profile.isActive ? 's-act' : 's-out'}">${profile.isActive ? 'Active' : 'Inactive'}</span></td>
+      <td>
+        <button class="act-btn" onclick="openDriverProfileModal('${profile._id}')">Edit</button>
+        <button class="act-btn" onclick="deleteDriverProfile('${profile._id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+document.addEventListener('input', e => {
+  if (e.target?.id === 'driver-profile-search') renderAdminDriverProfiles();
+});
+
+function ensureDriverProfileModal() {
+  if (document.getElementById('driver-profile-modal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'driver-profile-modal';
+
+  modal.innerHTML = `
+    <div class="preview-overlay" id="driver-profile-overlay">
+      <div class="preview-card" style="max-width:760px;width:92vw;padding:28px;color:#fff;text-align:left">
+        <button class="preview-close" type="button" onclick="closeDriverProfileModal()">✕</button>
+        <div style="font-family:var(--font-d);letter-spacing:4px;font-size:1.8rem;margin-bottom:8px" id="driver-profile-title">ADD DRIVER IMAGE</div>
+        <div style="color:var(--red);font-family:var(--font-c);letter-spacing:2px;margin-bottom:22px">FAN HUB DRIVER STATS IMAGE OVERRIDE</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER NAME</span><input id="dp-name" class="edit-product-input" placeholder="George Russell"></label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER CODE</span><input id="dp-code" class="edit-product-input" placeholder="RUS"></label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span><input id="dp-team" class="edit-product-input" placeholder="Mercedes"></label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">COUNTRY</span><input id="dp-country" class="edit-product-input" placeholder="British"></label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">FLAG EMOJI</span><input id="dp-flag" class="edit-product-input" placeholder="🇬🇧"></label>
+          <label style="display:flex;align-items:center;gap:10px;color:#aaa;margin-top:26px"><input id="dp-active" type="checkbox" checked> Active</label>
+        </div>
+
+        <div style="margin-top:16px">
+          <span style="display:block;color:#777;font-size:.75rem;letter-spacing:2px;margin-bottom:8px">DRIVER IMAGE</span>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div id="dp-preview" style="width:72px;height:72px;border-radius:50%;background:#151515;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.6rem;flex-shrink:0">🏎️</div>
+            <div style="flex:1">
+              <input id="dp-file" type="file" accept="image/*" style="display:none">
+              <button type="button" class="act-btn" id="dp-upload" style="width:100%;padding:12px">Upload Driver Image</button>
+              <input id="dp-image" class="edit-product-input" placeholder="or paste image URL" style="margin-top:8px">
+            </div>
+          </div>
+        </div>
+
+        <button class="act-btn" id="dp-save" style="width:100%;padding:14px;margin-top:22px;background:var(--red);color:white;border:0;font-weight:800;letter-spacing:3px">SAVE DRIVER IMAGE</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#driver-profile-overlay').onclick = e => {
+    if (e.target.id === 'driver-profile-overlay') closeDriverProfileModal();
+  };
+
+  modal.querySelector('#dp-save').onclick = saveDriverProfile;
+  modal.querySelector('#dp-upload').onclick = () => modal.querySelector('#dp-file').click();
+
+  modal.querySelector('#dp-file').onchange = async () => {
+    try {
+      const file = modal.querySelector('#dp-file').files?.[0];
+      if (!file) return;
+      const dataUrl = await readQuoteImageAsDataUrl(file);
+      modal.querySelector('#dp-image').value = dataUrl;
+      renderDriverProfilePreview(dataUrl);
+      showToast('✅ Driver image ready');
+    } catch (err) {
+      showToast(`❌ ${err.message}`);
+    } finally {
+      modal.querySelector('#dp-file').value = '';
+    }
+  };
+
+  modal.querySelector('#dp-image').oninput = e => renderDriverProfilePreview(e.target.value.trim());
+}
+
+function renderDriverProfilePreview(value = '') {
+  const box = document.getElementById('dp-preview');
+  if (!box) return;
+
+  if (value && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/'))) {
+    box.innerHTML = `<img src="${value}" style="width:100%;height:100%;object-fit:cover">`;
+  } else {
+    box.textContent = '🏎️';
+  }
+}
+
+function openDriverProfileModal(id = null) {
+  ensureDriverProfileModal();
+  EDIT_DRIVER_PROFILE_ID = id;
+
+  const profile = id ? REAL_DRIVER_PROFILES_ADMIN.find(p => String(p._id) === String(id)) : null;
+
+  document.getElementById('driver-profile-title').textContent = profile ? 'EDIT DRIVER IMAGE' : 'ADD DRIVER IMAGE';
+  document.getElementById('dp-name').value = profile?.name || '';
+  document.getElementById('dp-code').value = profile?.code || '';
+  document.getElementById('dp-team').value = profile?.team || '';
+  document.getElementById('dp-country').value = profile?.country || '';
+  document.getElementById('dp-flag').value = profile?.flagEmoji || '';
+  document.getElementById('dp-image').value = profile?.image || '';
+  document.getElementById('dp-active').checked = profile?.isActive !== false;
+
+  renderDriverProfilePreview(profile?.image || '');
+
+  const modal = document.getElementById('driver-profile-modal');
+  modal.style.display = 'block';
+  modal.classList.add('show');
+}
+
+function closeDriverProfileModal() {
+  const modal = document.getElementById('driver-profile-modal');
+  if (modal) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
+  EDIT_DRIVER_PROFILE_ID = null;
+}
+
+window.closeDriverProfileModal = closeDriverProfileModal;
+
+async function saveDriverProfile() {
+  try {
+    const body = {
+      name: document.getElementById('dp-name').value.trim(),
+      code: document.getElementById('dp-code').value.trim().toUpperCase(),
+      team: document.getElementById('dp-team').value.trim(),
+      country: document.getElementById('dp-country').value.trim(),
+      flagEmoji: document.getElementById('dp-flag').value.trim(),
+      image: document.getElementById('dp-image').value.trim(),
+      isActive: document.getElementById('dp-active').checked
+    };
+
+    if (!body.name) {
+      showToast('❌ Driver name required');
+      return;
+    }
+
+    showToast('⏳ Saving driver image...');
+
+    const res = await fetch(
+      EDIT_DRIVER_PROFILE_ID ? `${ADMIN_DRIVER_PROFILES_API}/${EDIT_DRIVER_PROFILE_ID}` : ADMIN_DRIVER_PROFILES_API,
+      {
+        method: EDIT_DRIVER_PROFILE_ID ? 'PUT' : 'POST',
+        headers: driverProfileHeaders(),
+        body: JSON.stringify(body)
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Save failed');
+
+    showToast('🔥 Driver image saved');
+    closeDriverProfileModal();
+    await loadAdminDriverProfiles();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function deleteDriverProfile(id) {
+  try {
+    const profile = REAL_DRIVER_PROFILES_ADMIN.find(p => String(p._id) === String(id));
+    if (!confirm(`Delete image/profile for ${profile?.name || 'this driver'}?`)) return;
+
+    const res = await fetch(`${ADMIN_DRIVER_PROFILES_API}/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
+
+    showToast('🔥 Driver profile deleted');
+    await loadAdminDriverProfiles();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('driver-profile-modal')?.classList.contains('show')) {
+    closeDriverProfileModal();
+  }
+});
 
 /* ══════════════════════════════════════
    SAFE INITIAL ADMIN LOAD

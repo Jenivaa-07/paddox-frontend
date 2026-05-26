@@ -122,9 +122,11 @@ async function loadRealCalendar() {
 }
 
 /* ── Load real driver standings ── */
+const FAN_DRIVER_PROFILE_API =
+  'https://paddox-backend.onrender.com/api/fan/driver-profiles';
+
 function teamEmojiFromName(name = '') {
   const n = String(name || '').toLowerCase();
-
   if (n.includes('red bull')) return '🔵';
   if (n.includes('ferrari')) return '🔴';
   if (n.includes('mclaren')) return '🟠';
@@ -136,13 +138,11 @@ function teamEmojiFromName(name = '') {
   if (n.includes('racing bulls') || n.includes('rb')) return '🟣';
   if (n.includes('sauber') || n.includes('kick') || n.includes('audi')) return '🟢';
   if (n.includes('cadillac')) return '🟡';
-
   return '🏎️';
 }
 
 function teamColorFromName(name = '') {
   const n = String(name || '').toLowerCase();
-
   if (n.includes('red bull')) return '#1e5bff';
   if (n.includes('ferrari')) return '#e8002d';
   if (n.includes('mclaren')) return '#ff8700';
@@ -154,175 +154,147 @@ function teamColorFromName(name = '') {
   if (n.includes('racing bulls') || n.includes('rb')) return '#6c4cff';
   if (n.includes('sauber') || n.includes('kick') || n.includes('audi')) return '#00e701';
   if (n.includes('cadillac')) return '#d4af37';
-
   return '#e8002d';
 }
 
-function safeText(value, fallback = '') {
-  if (!value) return fallback;
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
-  return fallback;
+const NATIONALITY_FLAGS = {
+  dutch:'🇳🇱', british:'🇬🇧', english:'🇬🇧',
+  monégasque:'🇲🇨', monegasque:'🇲🇨',
+  australian:'🇦🇺', spanish:'🇪🇸', mexican:'🇲🇽',
+  canadian:'🇨🇦', french:'🇫🇷', german:'🇩🇪',
+  italian:'🇮🇹', japanese:'🇯🇵', thai:'🇹🇭',
+  danish:'🇩🇰', finnish:'🇫🇮', chinese:'🇨🇳',
+  brazilian:'🇧🇷', american:'🇺🇸', argentine:'🇦🇷',
+  newzealander:'🇳🇿', 'new zealander':'🇳🇿'
+};
+
+function flagFromNationality(value = '') {
+  const key = String(value || '').toLowerCase().trim();
+  return NATIONALITY_FLAGS[key] || '';
+}
+
+function bestString(value, keys = []) {
+  if (!value) return '';
+  if (typeof value === 'string') {
+    if (value === '[object Object]' || value.toLowerCase() === 'object') return '';
+    return value;
+  }
+  if (typeof value === 'number') return String(value);
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = bestString(item, keys);
+      if (found) return found;
+    }
+    return '';
+  }
+
+  if (typeof value === 'object') {
+    for (const key of keys) {
+      const found = bestString(value[key], keys);
+      if (found) return found;
+    }
+    for (const child of Object.values(value)) {
+      const found = bestString(child, keys);
+      if (found) return found;
+    }
+  }
+  return '';
 }
 
 function extractTeamName(raw = {}) {
-  const possible =
-    raw.team ||
-    raw.constructor ||
-    raw.constructorInfo ||
-    raw.teamName ||
-    raw.Constructors?.[0] ||
-    raw.Constructor ||
-    raw.constructors?.[0] ||
-    {};
-
-  if (typeof possible === 'string') return possible;
-
   return (
-    possible.name ||
-    possible.constructorName ||
-    possible.teamName ||
-    possible.fullName ||
-    raw.teamName ||
+    bestString(raw.team, ['name','constructorName','teamName','fullName']) ||
+    bestString(raw.constructor, ['name','constructorName','teamName','fullName']) ||
+    bestString(raw.Constructors, ['name','constructorName','teamName','fullName']) ||
+    bestString(raw.Constructor, ['name','constructorName','teamName','fullName']) ||
+    bestString(raw.teamName, ['name','constructorName','teamName','fullName']) ||
     'Team TBA'
   );
 }
 
 function normalizeDriverName(driver = {}) {
   return (
-    driver.fullName ||
-    driver.name ||
-    `${driver.givenName || driver.firstName || ''} ${driver.familyName || driver.lastName || ''}`.trim() ||
-    driver.driverId ||
+    bestString(driver.fullName) ||
+    bestString(driver.name) ||
+    `${bestString(driver.givenName || driver.firstName)} ${bestString(driver.familyName || driver.lastName)}`.trim() ||
+    bestString(driver.driverId) ||
     'F1 Driver'
   );
 }
 
 function normalizeDriverCode(driver = {}, name = '') {
-  const code =
-    driver.code ||
-    driver.abbreviation;
-
-  if (code && code !== 'Object') return code;
-
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map(part => part[0])
-    .join('')
-    .slice(0, 3)
-    .toUpperCase();
+  const code = bestString(driver.code) || bestString(driver.abbreviation);
+  if (code) return code.toUpperCase();
+  return name.split(' ').filter(Boolean).map(part => part[0]).join('').slice(0, 3).toUpperCase();
 }
 
 function extractDriverImage(driver = {}, raw = {}) {
   return (
-    driver.image ||
-    driver.imageUrl ||
-    driver.headshot ||
-    driver.headshotUrl ||
-    driver.profileImage ||
-    driver.photo ||
-    raw.image ||
-    raw.imageUrl ||
-    raw.headshot ||
-    raw.profileImage ||
-    ''
+    bestString(driver.image) || bestString(driver.imageUrl) ||
+    bestString(driver.headshot) || bestString(driver.headshotUrl) ||
+    bestString(driver.profileImage) || bestString(driver.photo) ||
+    bestString(raw.image) || bestString(raw.imageUrl) ||
+    bestString(raw.headshot) || bestString(raw.profileImage) || ''
   );
 }
 
+function makeDriverKey(name = '', code = '') {
+  return String(code || name || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
 function driverInitials(name = '') {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map(part => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() || 'F1';
+  return name.split(' ').filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase() || 'F1';
 }
 
 function driverAvatarHTML(driver, size = 'small') {
   const image = driver.image || '';
-
-  if (
-    image &&
-    (
-      image.startsWith('http://') ||
-      image.startsWith('https://') ||
-      image.startsWith('data:image/')
-    )
-  ) {
-    return `
-      <img
-        src="${image}"
-        alt="${driver.name}"
-        class="drv-img-${size}"
-        onerror="this.outerHTML='<span>${driverInitials(driver.name)}</span>'"
-      />
-    `;
+  if (image && (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:image/'))) {
+    return `<img src="${image}" alt="${driver.name}" class="drv-img-${size}" onerror="this.outerHTML='<span class=&quot;drv-initials&quot;>${driverInitials(driver.name)}</span>'"/>`;
   }
-
-  return `
-    <span class="drv-initials">
-      ${driverInitials(driver.name)}
-    </span>
-  `;
+  return `<span class="drv-initials">${driverInitials(driver.name)}</span>`;
 }
 
 function isLikelyReserveOrPracticeDriver(raw = {}) {
-  const text =
-    JSON.stringify(raw || {})
-      .toLowerCase();
-
-  return (
-    text.includes('reserve') ||
-    text.includes('third driver') ||
-    text.includes('test driver') ||
-    text.includes('practice driver') ||
-    text.includes('fp1') ||
-    text.includes('free practice')
-  );
+  const text = JSON.stringify(raw || {}).toLowerCase();
+  return text.includes('reserve') || text.includes('third driver') || text.includes('test driver') || text.includes('practice driver') || text.includes('fp1') || text.includes('free practice');
 }
 
 function normalizeGridDriver(raw = {}, standingsMap = new Map()) {
   const driver = raw.driver || raw.Driver || raw;
   const name = normalizeDriverName(driver);
   const code = normalizeDriverCode(driver, name);
-
   const teamName = extractTeamName(raw);
-
   const standing =
     standingsMap.get(String(driver.driverId || '').toLowerCase()) ||
     standingsMap.get(name.toLowerCase()) ||
     standingsMap.get(code.toLowerCase()) ||
     raw;
 
-  const position =
-    Number(standing.position || standing.positionText || raw.position || 0) || 0;
-
-  const points =
-    Number(standing.points || raw.points || 0) || 0;
-
-  const wins =
-    Number(standing.wins || raw.wins || 0) || 0;
+  const position = Number(standing.position || standing.positionText || raw.position || 0) || 0;
+  const points = Number(standing.points || raw.points || 0) || 0;
+  const wins = Number(standing.wins || raw.wins || 0) || 0;
+  const nationality = bestString(driver.nationality || raw.nationality, ['name']) || '';
 
   return {
-    id: driver.driverId || driver._id || name,
+    id: bestString(driver.driverId) || bestString(driver._id) || name,
     name,
     code,
-    number: driver.permanentNumber || driver.number || raw.number || raw.permanentNumber || '',
-    nationality: driver.nationality || raw.nationality || '',
-    flag: driver.flag || raw.flag || '',
+    number: bestString(driver.permanentNumber) || bestString(driver.number) || bestString(raw.number) || bestString(raw.permanentNumber) || '',
+    nationality,
+    flag: bestString(driver.flag || raw.flag) || flagFromNationality(nationality),
     team: teamName,
-    teamEmoji: raw.teamEmoji || teamEmojiFromName(teamName),
-    teamColor: raw.teamColor || teamColorFromName(teamName),
+    teamEmoji: teamEmojiFromName(teamName),
+    teamColor: teamColorFromName(teamName),
     position,
     points,
     wins,
     image: extractDriverImage(driver, raw),
-    isRaceDriver:
-      !!position ||
-      raw.isRaceDriver === true ||
-      raw.role === 'race' ||
-      raw.type === 'race',
+    isRaceDriver: !!position || raw.isRaceDriver === true || raw.role === 'race' || raw.type === 'race',
     isReserve: isLikelyReserveOrPracticeDriver(raw),
     raw
   };
@@ -330,48 +302,35 @@ function normalizeGridDriver(raw = {}, standingsMap = new Map()) {
 
 function buildStandingsMap(standings = []) {
   const map = new Map();
-
   standings.forEach(item => {
     const driver = item.driver || item.Driver || item;
     const name = normalizeDriverName(driver);
     const code = normalizeDriverCode(driver, name);
-
     if (driver.driverId) map.set(String(driver.driverId).toLowerCase(), item);
     if (name) map.set(name.toLowerCase(), item);
     if (code) map.set(code.toLowerCase(), item);
   });
-
   return map;
 }
 
 function uniqueDriversByName(drivers = []) {
   const seen = new Set();
-
   return drivers.filter(driver => {
     const key = `${driver.name}-${driver.team}`.toLowerCase();
-
     if (seen.has(key)) return false;
-
     seen.add(key);
     return true;
   });
 }
 
 function cleanRaceDriverList(drivers = []) {
-  let list =
-    drivers
-      .filter(driver => driver.name && driver.name !== 'F1 Driver')
-      .filter(driver => !driver.isReserve)
-      .filter(driver => driver.team && driver.team !== 'Team TBA');
+  let list = drivers
+    .filter(driver => driver.name && driver.name !== 'F1 Driver')
+    .filter(driver => !driver.isReserve)
+    .filter(driver => driver.team && driver.team !== 'Team TBA');
 
-  const withStanding =
-    list.filter(driver => Number(driver.position || 0) > 0);
-
-  // Championship standings are the safest source for race drivers.
-  // This removes reserve / FP1 / third drivers like Jak Crawford.
-  if (withStanding.length >= 20) {
-    list = withStanding;
-  }
+  const withStanding = list.filter(driver => Number(driver.position || 0) > 0);
+  if (withStanding.length >= 20) list = withStanding;
 
   list = uniqueDriversByName(list);
 
@@ -385,33 +344,63 @@ function cleanRaceDriverList(drivers = []) {
   return list;
 }
 
+async function loadDriverProfileOverrides() {
+  try {
+    const res = await fetch(FAN_DRIVER_PROFILE_API);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) return new Map();
+
+    const profiles = data.data?.profiles || data.profiles || [];
+    const map = new Map();
+
+    profiles.forEach(profile => {
+      const keys = [
+        profile.driverKey,
+        makeDriverKey(profile.name, profile.code),
+        String(profile.code || '').toLowerCase(),
+        String(profile.name || '').toLowerCase()
+      ].filter(Boolean);
+
+      keys.forEach(key => map.set(key, profile));
+    });
+
+    return map;
+  } catch (err) {
+    console.warn('Driver profile overrides unavailable', err);
+    return new Map();
+  }
+}
+
+function applyDriverProfileOverrides(drivers, profiles) {
+  return drivers.map(driver => {
+    const profile =
+      profiles.get(makeDriverKey(driver.name, driver.code)) ||
+      profiles.get(String(driver.code || '').toLowerCase()) ||
+      profiles.get(String(driver.name || '').toLowerCase());
+
+    if (!profile) return driver;
+
+    return {
+      ...driver,
+      image: profile.image || driver.image,
+      flag: profile.flagEmoji || driver.flag,
+      nationality: profile.country || driver.nationality,
+      team: profile.team || driver.team
+    };
+  });
+}
+
 async function getRealtimeDriverGrid() {
-  const standingsRes =
-    await PaddoxAPI.f1.driverStands().catch(() => null);
+  const standingsRes = await PaddoxAPI.f1.driverStands().catch(() => null);
+  const standings = standingsRes?.data?.standings || standingsRes?.standings || [];
+  const standingsMap = buildStandingsMap(standings);
 
-  const standings =
-    standingsRes?.data?.standings ||
-    standingsRes?.standings ||
-    [];
+  let drivers = Array.isArray(standings) && standings.length
+    ? standings.map(raw => normalizeGridDriver(raw, standingsMap))
+    : [];
 
-  const standingsMap =
-    buildStandingsMap(standings);
-
-  // Prefer championship standings because it contains race drivers only.
-  let drivers =
-    Array.isArray(standings) && standings.length
-      ? standings.map(raw => normalizeGridDriver(raw, standingsMap))
-      : [];
-
-  // Use /drivers/all only to fill missing images/details, not to add reserve drivers.
-  const driversRes =
-    await PaddoxAPI.f1.drivers().catch(() => null);
-
-  const rawDrivers =
-    driversRes?.data?.drivers ||
-    driversRes?.drivers ||
-    driversRes?.data ||
-    [];
+  const driversRes = await PaddoxAPI.f1.drivers().catch(() => null);
+  const rawDrivers = driversRes?.data?.drivers || driversRes?.drivers || driversRes?.data || [];
 
   if (!drivers.length && Array.isArray(rawDrivers) && rawDrivers.length) {
     drivers = rawDrivers.map(raw => normalizeGridDriver(raw, standingsMap));
@@ -419,7 +408,6 @@ async function getRealtimeDriverGrid() {
 
   if (drivers.length && Array.isArray(rawDrivers) && rawDrivers.length) {
     const detailMap = new Map();
-
     rawDrivers.forEach(raw => {
       const d = normalizeGridDriver(raw, standingsMap);
       detailMap.set(d.name.toLowerCase(), d);
@@ -427,10 +415,7 @@ async function getRealtimeDriverGrid() {
     });
 
     drivers = drivers.map(driver => {
-      const details =
-        detailMap.get(driver.name.toLowerCase()) ||
-        detailMap.get(driver.code.toLowerCase());
-
+      const details = detailMap.get(driver.name.toLowerCase()) || detailMap.get(driver.code.toLowerCase());
       return {
         ...driver,
         image: details?.image || driver.image,
@@ -440,6 +425,10 @@ async function getRealtimeDriverGrid() {
       };
     });
   }
+
+  drivers = cleanRaceDriverList(drivers);
+  const profiles = await loadDriverProfileOverrides();
+  drivers = applyDriverProfileOverrides(drivers, profiles);
 
   return cleanRaceDriverList(drivers);
 }
@@ -456,55 +445,28 @@ async function loadRealDriverStandings() {
   if (!sel) return;
 
   try {
-    sel.innerHTML = `
-      <div class="drv-loading">
-        Loading current race-driver grid from live F1 API...
-      </div>
-    `;
+    sel.innerHTML = `<div class="drv-loading">Loading current race-driver grid...</div>`;
 
     const drivers = await getRealtimeDriverGrid();
+    if (!drivers.length) throw new Error('No live race drivers returned');
 
-    if (!drivers.length) {
-      throw new Error('No live race drivers returned');
-    }
+    const teamCount = new Set(drivers.map(driver => driver.team)).size;
 
-    const teamCount =
-      new Set(drivers.map(driver => driver.team)).size;
-
-    if (countEl) {
-      countEl.textContent =
-        `${drivers.length} race drivers • ${teamCount} teams`;
-    }
-
+    if (countEl) countEl.textContent = `${drivers.length} race drivers • ${teamCount} teams`;
     if (sourceEl) {
-      sourceEl.textContent =
-        'Realtime race-driver grid — reserve/FP1 drivers are filtered out';
+      sourceEl.textContent = '';
+      sourceEl.style.display = 'none';
     }
-
-    let active = 0;
 
     function renderDriver(index) {
-      active = index;
-
       const d = drivers[index];
-      const topPoints =
-        Math.max(...drivers.map(driver => Number(driver.points || 0)), 1);
-      const topWins =
-        Math.max(...drivers.map(driver => Number(driver.wins || 0)), 1);
-      const maxPosition =
-        Math.max(...drivers.map(driver => Number(driver.position || 0)), drivers.length);
-
-      const positionScore =
-        d.position
-          ? Math.max(5, Math.round(((maxPosition - d.position + 1) / maxPosition) * 100))
-          : 0;
+      const topPoints = Math.max(...drivers.map(driver => Number(driver.points || 0)), 1);
+      const topWins = Math.max(...drivers.map(driver => Number(driver.wins || 0)), 1);
+      const maxPosition = Math.max(...drivers.map(driver => Number(driver.position || 0)), drivers.length);
+      const positionScore = d.position ? Math.max(5, Math.round(((maxPosition - d.position + 1) / maxPosition) * 100)) : 0;
 
       sel.innerHTML = drivers.map((driver, idx) => `
-        <div
-          class="drv-pill ${idx === index ? 'on' : ''}"
-          onclick="selectRealDriver(${idx})"
-          style="--team-color:${driver.teamColor}"
-        >
+        <div class="drv-pill ${idx === index ? 'on' : ''}" onclick="selectRealDriver(${idx})" style="--team-color:${driver.teamColor}">
           <div class="dp-av" style="background:${driver.teamColor}22;border-color:${driver.teamColor}">
             ${driverAvatarHTML(driver, 'small')}
           </div>
@@ -517,56 +479,29 @@ async function loadRealDriverStandings() {
 
       if (card) {
         card.innerHTML = `
-          <div class="drv-num-bg">${d.number || d.position || active + 1}</div>
-
+          <div class="drv-num-bg">${d.number || d.position || index + 1}</div>
           <div class="drv-big-av" style="border-color:${d.teamColor};box-shadow:0 0 32px ${d.teamColor}44">
             ${driverAvatarHTML(d, 'large')}
           </div>
-
           <div class="drv-name">${d.name}</div>
-
-          <div class="drv-team" style="color:${d.teamColor}">
-            ${d.team}
+          <div class="drv-team" style="color:${d.teamColor}">${d.team}</div>
+          <div class="drv-country">
+            <span>${d.flag || '🌍'}</span>
+            <span>${d.nationality || 'Country TBA'}</span>
           </div>
-
-          <div style="font-size:.8rem;color:#ccc;margin-bottom:14px">
-            ${d.flag || '🌍'} ${d.nationality || 'Nationality TBA'}
-          </div>
-
           <div class="drv-tags">
             <span class="drv-tag">#${d.number || '?'}</span>
             <span class="drv-tag">${d.position ? `P${d.position}` : 'Grid'}</span>
             <span class="drv-tag">${Number(d.points || 0).toLocaleString('en-IN')} PTS</span>
           </div>
-
-          <div class="drv-live-note">
-            Race drivers are generated from current championship standings.
-            If next season changes the official race-driver grid, this updates automatically from the API.
-          </div>
         `;
       }
 
       const statMap = [
-        {
-          label: 'Championship Points',
-          val: Math.round((Number(d.points || 0) / topPoints) * 100),
-          raw: `${Number(d.points || 0).toLocaleString('en-IN')} pts`
-        },
-        {
-          label: 'Race Wins',
-          val: Math.round((Number(d.wins || 0) / topWins) * 100),
-          raw: `${Number(d.wins || 0)} wins`
-        },
-        {
-          label: 'Championship Position',
-          val: positionScore,
-          raw: d.position ? `P${d.position}` : 'TBA'
-        },
-        {
-          label: 'Grid Coverage',
-          val: 100,
-          raw: `${drivers.length} race drivers`
-        }
+        { label:'Championship Points', val:Math.round((Number(d.points || 0) / topPoints) * 100), raw:`${Number(d.points || 0).toLocaleString('en-IN')} pts` },
+        { label:'Race Wins', val:Math.round((Number(d.wins || 0) / topWins) * 100), raw:`${Number(d.wins || 0)} wins` },
+        { label:'Championship Position', val:positionScore, raw:d.position ? `P${d.position}` : 'TBA' },
+        { label:'Race Grid', val:100, raw:`${drivers.length} drivers` }
       ];
 
       if (bars) {
@@ -576,13 +511,8 @@ async function loadRealDriverStandings() {
               <span class="sb-lbl">${st.label}</span>
               <span class="sb-val">${st.raw}</span>
             </div>
-
             <div class="sb-track">
-              <div
-                class="sb-fill"
-                data-w="${Math.max(0, Math.min(100, st.val))}%"
-                style="width:0%;background:${d.teamColor}"
-              ></div>
+              <div class="sb-fill" data-w="${Math.max(0, Math.min(100, st.val))}%" style="width:0%;background:${d.teamColor}"></div>
             </div>
           </div>
         `).join('');
@@ -596,25 +526,10 @@ async function loadRealDriverStandings() {
 
       if (cmp) {
         cmp.innerHTML = `
-          <div class="cmp-c">
-            <div class="cmp-v">${d.position ? `P${d.position}` : '—'}</div>
-            <div class="cmp-l">Standing</div>
-          </div>
-
-          <div class="cmp-c">
-            <div class="cmp-v">${Number(d.points || 0).toLocaleString('en-IN')}</div>
-            <div class="cmp-l">Points</div>
-          </div>
-
-          <div class="cmp-c">
-            <div class="cmp-v">${Number(d.wins || 0)}</div>
-            <div class="cmp-l">Wins</div>
-          </div>
-
-          <div class="cmp-c">
-            <div class="cmp-v">${d.number || '—'}</div>
-            <div class="cmp-l">Car No.</div>
-          </div>
+          <div class="cmp-c"><div class="cmp-v">${d.position ? `P${d.position}` : '—'}</div><div class="cmp-l">Standing</div></div>
+          <div class="cmp-c"><div class="cmp-v">${Number(d.points || 0).toLocaleString('en-IN')}</div><div class="cmp-l">Points</div></div>
+          <div class="cmp-c"><div class="cmp-v">${Number(d.wins || 0)}</div><div class="cmp-l">Wins</div></div>
+          <div class="cmp-c"><div class="cmp-v">${d.number || '—'}</div><div class="cmp-l">Car No.</div></div>
         `;
       }
     }
@@ -624,29 +539,13 @@ async function loadRealDriverStandings() {
 
   } catch (err) {
     console.warn('Driver grid load failed', err);
-
-    if (countEl) {
-      countEl.textContent = 'Live race-driver grid unavailable';
-    }
-
+    if (countEl) countEl.textContent = 'Driver grid unavailable';
     if (sourceEl) {
-      sourceEl.textContent = 'Please try again after backend/API refresh';
+      sourceEl.textContent = '';
+      sourceEl.style.display = 'none';
     }
-
-    sel.innerHTML = `
-      <div class="drv-empty">
-        ⚠️ Could not load current F1 race-driver grid right now.
-      </div>
-    `;
-
-    if (card) {
-      card.innerHTML = `
-        <div class="drv-empty">
-          No cached driver data shown, to avoid hardcoded/outdated grid.
-        </div>
-      `;
-    }
-
+    sel.innerHTML = `<div class="drv-empty">⚠️ Could not load current F1 race-driver grid right now.</div>`;
+    if (card) card.innerHTML = `<div class="drv-empty">No cached driver data shown, to avoid hardcoded/outdated grid.</div>`;
     if (bars) bars.innerHTML = '';
     if (cmp) cmp.innerHTML = '';
   }
