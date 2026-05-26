@@ -52,9 +52,9 @@
         <div class="breadcrumb animate-fade-up"><a href="index.html">Paddox</a><span>／</span><a href="fanhub.html">Fan Hub</a><span>／</span><b>Pit Wall</b></div>
         <div class="pit-hero-layout">
           <div>
-            <div class="pit-kicker"><span class="live-pulse"></span> Race Command Center</div>
-            <h1 class="pit-title">PIT WALL <span>LIVE</span></h1>
-            <p class="pit-sub">Real F1 session center with Practice 1/2/3, Qualifying, Sprint Qualifying, Sprint Race and Race data — lap times, sectors, tyres, gaps, weather and driver images.</p>
+            <div class="pit-kicker"><span class="live-pulse"></span> API Session Center</div>
+            <h1 class="pit-title">PIT WALL <span>DATA</span></h1>
+            <p class="pit-sub">Loads only backend/OpenF1 session data. No fake fallback timing, tyre, driver, race, weather or result data is displayed.</p>
             <div class="pit-hero-actions">
               <button class="pit-primary" id="refresh-btn">↻ Refresh Session Data</button>
               <a href="fanhub.html" class="pit-secondary">← Back to Fan Hub</a>
@@ -63,15 +63,15 @@
           <div class="command-card">
             <div class="command-top">
               <span>Session Signal</span>
-              <b id="signal-status">CONNECTING</b>
+              <b id="signal-status">LOADING</b>
             </div>
             <div class="radar-wrap">
               <div class="radar"></div>
               <div class="radar-core">F1</div>
             </div>
             <div class="command-bottom">
-              <span id="last-sync">Syncing…</span>
-              <span id="socket-state">Socket standby</span>
+              <span id="last-sync">Waiting for API</span>
+              <span id="socket-state">Backend pending</span>
             </div>
           </div>
         </div>
@@ -82,8 +82,8 @@
       <div class="pit-top-strip">
         <div>
           <span class="strip-label">Next Race</span>
-          <strong id="next-race-name">Loading race…</strong>
-          <small id="next-race-meta">Fetching calendar</small>
+          <strong id="next-race-name">Loading calendar…</strong>
+          <small id="next-race-meta">Waiting for backend schedule</small>
         </div>
         <div class="strip-countdown">
           <div><b id="cd-d">--</b><span>DAYS</span></div>
@@ -111,33 +111,33 @@
         <button class="pit-primary mini-load" id="load-session-btn">Load Session</button>
       </div>
 
-      <div class="live-notice" id="live-notice">Connecting to PADDOX F1 backend…</div>
+      <div class="live-notice" id="live-notice">Waiting for backend/OpenF1 data…</div>
 
       <div class="session-tabs" id="session-tabs"></div>
 
       <div class="pit-kpi-grid">
         <article class="pit-kpi">
-          <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">OpenF1 feed</small>
+          <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">Waiting for API metadata</small>
         </article>
         <article class="pit-kpi">
-          <span>🌡️</span><p>Track Weather</p><b id="kpi-weather">--°C</b><small id="kpi-weather-sub">Air / track waiting</small>
+          <span>🌡️</span><p>Track Weather</p><b id="kpi-weather">--°C</b><small id="kpi-weather-sub">No weather returned yet</small>
         </article>
         <article class="pit-kpi">
-          <span>🏆</span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Latest classified race</small>
+          <span>🏆</span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Waiting for backend result</small>
         </article>
         <article class="pit-kpi">
-          <span>⚡</span><p>Grid Size</p><b id="kpi-grid">--</b><small>Drivers loaded</small>
+          <span>⚡</span><p>Grid Size</p><b id="kpi-grid">--</b><small>Rows returned</small>
         </article>
       </div>
 
       <div class="pit-layout">
         <section class="pit-panel timing-panel">
           <div class="panel-head">
-            <div><span class="panel-tag" id="timing-panel-tag">Timing Tower</span><h2 id="timing-title">Session Lap & Tyre Feed</h2></div>
+            <div><span class="panel-tag" id="timing-panel-tag">API Timing Feed</span><h2 id="timing-title">Session Lap, Sector & Tyre Feed</h2></div>
             <button class="mini-btn" id="sort-standings">Sort: Position</button>
           </div>
           <div class="timing-table" id="timing-table">
-            <div class="loading-row">Loading timing tower…</div>
+            <div class="loading-row">Loading API timing feed…</div>
           </div>
         </section>
 
@@ -155,17 +155,10 @@
 
       <section class="pit-panel session-panel">
         <div class="panel-head">
-          <div><span class="panel-tag">Weekend Board</span><h2>Practice / Qualifying / Sprint / Race</h2></div>
-          <span class="auto-refresh">Auto refresh: 5s when real timing data is available</span>
+          <div><span class="panel-tag">Weekend Board</span><h2>API Weekend Sessions</h2></div>
+          <span class="auto-refresh">Auto refresh runs only after a real API session is loaded</span>
         </div>
         <div class="session-grid" id="session-grid"></div>
-      </section>
-
-      <section class="pit-panel weekend-guide-panel">
-        <div class="panel-head">
-          <div><span class="panel-tag">F1 Weekend Format</span><h2>Standard GP / Sprint / Points</h2></div>
-        </div>
-        <div class="weekend-guide" id="weekend-guide"></div>
       </section>
     </section>
   </main>
