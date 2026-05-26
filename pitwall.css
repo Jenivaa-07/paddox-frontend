@@ -33,3 +33,28 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
 .loading-row.slim{padding:10px 14px;margin-bottom:10px;border:1px solid rgba(201,168,76,.25);background:rgba(201,168,76,.06);color:#c9a84c;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;border-radius:14px}
 .live-notice.warn{border-color:rgba(201,168,76,.45)!important;background:rgba(201,168,76,.08)!important;color:#f0d477!important}
 .live-notice.ok{border-color:rgba(0,180,80,.45)!important;background:rgba(0,180,80,.08)!important;color:#c9ffd8!important}
+
+
+/* ============================================================
+   Phase 4.6 — Pit Wall UI Polish
+   Premium context strip, cleaner empty states, responsive timing feed
+   ============================================================ */
+.pit-context-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin:18px 0 14px}
+.context-card{position:relative;overflow:hidden;padding:18px 20px;border:1px solid rgba(255,255,255,.09);border-radius:20px;background:linear-gradient(145deg,rgba(24,24,24,.86),rgba(8,8,8,.92));box-shadow:0 16px 50px rgba(0,0,0,.24)}
+.context-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--red),transparent)}
+.context-card.primary-context{border-color:rgba(232,0,45,.26);background:linear-gradient(135deg,rgba(232,0,45,.13),rgba(10,10,10,.88) 55%,rgba(201,168,76,.055))}
+.context-label{display:block;margin-bottom:8px;font-family:var(--font-c);font-size:.74rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--red)}
+.context-card strong{display:block;font-family:var(--font-d);font-size:1.75rem;letter-spacing:1.8px;line-height:1;color:#fff;text-transform:uppercase}
+.context-card small{display:block;margin-top:8px;color:var(--muted2);line-height:1.45}
+.live-notice{border-radius:18px!important;padding:16px 18px!important;line-height:1.55!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}
+.session-tabs{gap:10px!important;flex-wrap:wrap}.session-tab{min-width:96px;transition:transform var(--tr),border-color var(--tr),background var(--tr)}.session-tab:hover{transform:translateY(-2px)}.session-tab small{display:inline-block;margin-left:6px;font-size:.58rem;letter-spacing:1.5px;opacity:.72}
+.pit-kpi{min-height:150px;display:flex;flex-direction:column;justify-content:flex-end}.pit-kpi span{filter:drop-shadow(0 0 14px rgba(232,0,45,.28))}.pit-kpi b{max-width:100%;overflow-wrap:anywhere}
+.panel-head{align-items:flex-start}.panel-tag{display:inline-flex;align-items:center;gap:8px}.panel-tag::before{content:'';width:6px;height:6px;border-radius:999px;background:var(--red);box-shadow:0 0 14px var(--red-glow)}
+.timing-table{overflow-x:auto;padding-bottom:4px}.timing-header,.timing-row{min-width:980px}.timing-row{transition:transform var(--tr),background var(--tr),border-color var(--tr)}.timing-row:hover{transform:translateX(4px);background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.12)}
+.driver-head,.driver-avatar-mini{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 12px 24px rgba(0,0,0,.35)}.driver-name{letter-spacing:.2px}.lap-time.best{color:#fff;text-shadow:0 0 18px rgba(255,255,255,.12)}.sector{font-variant-numeric:tabular-nums}.tyre-pill{min-width:50px;text-align:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.pit-empty-state{display:flex;align-items:center;justify-content:center;gap:18px;min-height:128px;padding:26px;border:1px dashed rgba(255,255,255,.13);border-radius:22px;background:radial-gradient(circle at center,rgba(232,0,45,.055),rgba(255,255,255,.018));color:var(--muted2);text-align:left}.pit-empty-icon{display:flex;align-items:center;justify-content:center;flex:0 0 54px;width:54px;height:54px;border-radius:18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);font-size:1.35rem}.pit-empty-state b{display:block;color:#fff;font-family:var(--font-c);font-size:1rem;letter-spacing:1.4px;text-transform:uppercase}.pit-empty-state p{max-width:620px;margin-top:6px;line-height:1.55;color:var(--muted2)}
+.race-control .pit-empty-state,.podium-card .pit-empty-state{min-height:118px;padding:22px;align-items:flex-start}.rc-msg{transition:transform var(--tr),border-color var(--tr)}.rc-msg:hover{transform:translateX(4px);border-color:rgba(232,0,45,.28)}.podium-row{border-radius:16px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.025);padding:12px;margin-bottom:10px}
+.session-card{cursor:pointer;transition:transform var(--tr),border-color var(--tr),background var(--tr)}.session-card:hover{transform:translateY(-4px);border-color:rgba(232,0,45,.35);background:rgba(232,0,45,.045)}.session-card.active-session{box-shadow:0 0 0 1px rgba(232,0,45,.38),0 18px 50px rgba(232,0,45,.08)}
+.toast{border-radius:999px!important;box-shadow:0 18px 50px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.08)!important}
+@media(max-width:1100px){.pit-context-row{grid-template-columns:1fr}.context-card strong{font-size:1.45rem}.pit-layout{grid-template-columns:1fr!important}.pit-side-stack{display:grid;grid-template-columns:1fr 1fr;gap:18px}}
+@media(max-width:760px){.pit-context-row{margin-top:14px}.context-card{padding:16px}.pit-empty-state{flex-direction:column;text-align:center;align-items:center}.pit-side-stack{grid-template-columns:1fr}.session-tab{flex:1;min-width:120px}.timing-header,.timing-row{min-width:900px}.panel-head{gap:12px}.pit-top-strip{gap:18px}.strip-countdown{grid-template-columns:repeat(2,1fr)!important}}

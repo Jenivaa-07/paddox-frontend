@@ -111,6 +111,24 @@
         <button class="pit-primary mini-load" id="load-session-btn">Load Session</button>
       </div>
 
+      <div class="pit-context-row" id="pit-context-row">
+        <div class="context-card primary-context">
+          <span class="context-label">Selected Session</span>
+          <strong id="selected-session-title">Select a session</strong>
+          <small id="selected-session-meta">Choose a race weekend to load timing details.</small>
+        </div>
+        <div class="context-card">
+          <span class="context-label">Timing Feed</span>
+          <strong id="selected-session-state">Waiting</strong>
+          <small id="selected-session-note">No session loaded yet.</small>
+        </div>
+        <div class="context-card">
+          <span class="context-label">Auto Refresh</span>
+          <strong id="refresh-rate-label">Standby</strong>
+          <small id="refresh-note">Starts after data is loaded.</small>
+        </div>
+      </div>
+
       <div class="live-notice" id="live-notice">Select a session to view available Pit Wall data.</div>
 
       <div class="session-tabs" id="session-tabs"></div>

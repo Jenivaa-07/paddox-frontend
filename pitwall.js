@@ -175,6 +175,7 @@ async function loadWeekend(){
     latestWeekendNote = data.dataNote || '';
     if (data.race?.round && Number(data.race.round) !== currentRound) currentRound = Number(data.race.round);
     currentSession = data.defaultSession || weekendSessions.find(s=>s.hasTiming)?.key || weekendSessions.find(s=>s.available)?.key || weekendSessions[0]?.key || 'Race';
+    updateSelectedContext();
     setText('kpi-session-sub', `${race.flag || '🏁'} ${race.name || race.raceName || 'Grand Prix'}`);
     setText('timing-panel-tag', `Round ${currentRound || '--'} · ${currentYear}`);
     setLiveNotice('', 'info');
@@ -203,7 +204,7 @@ function renderSessionControls(){
   }
   if(select){
     select.innerHTML = weekendSessions.map(s => `<option value="${esc(s.key)}" ${s.key===currentSession?'selected':''}>${esc(s.label || sessionLabel(s.key))}${s.available===false?' (TBA)':''}</option>`).join('');
-    select.onchange = () => { currentSession = select.value; highlightTabs(); };
+    select.onchange = () => { currentSession = select.value; highlightTabs(); updateSelectedContext(); };
   }
   if(tabs){
     tabs.innerHTML = weekendSessions.map(s => `<button class="session-tab ${s.key===currentSession?'on':''} ${s.hasTiming?'has-data':s.available?'meta-only':'no-data'}" data-session="${esc(s.key)}">${esc(sessionShort(s.key))}<small>${esc(s.status || '')}</small></button>`).join('');
@@ -228,6 +229,37 @@ function renderWeekendBoard(race){
     </article>`;
   }).join('');
   $$('[data-session-card]', box).forEach(card => card.addEventListener('click', () => { currentSession = card.dataset.sessionCard; const select=$('#session-select'); if(select) select.value=currentSession; loadSelectedSession(false); }));
+}
+
+function getCurrentSessionMeta(){
+  return weekendSessions.find(s => s.key === currentSession) || {};
+}
+function updateSelectedContext(data = null){
+  const session = getCurrentSessionMeta();
+  const race = currentRaceMeta || {};
+  const label = session.label || sessionLabel(currentSession || 'Session');
+  const circuit = race.circuit || race.Circuit?.circuitName || 'Circuit details pending';
+  const gpName = race.name || race.raceName || 'Grand Prix';
+  const dateText = session.date || session.date_start ? `${fmtDate(session.date || session.date_start)} · ${fmtTime(session.date || session.date_start)}` : 'Date/time TBA';
+  setText('selected-session-title', label);
+  setText('selected-session-meta', `${gpName} · ${circuit} · ${dateText}`);
+
+  const hasRows = Array.isArray(data?.rows) && data.rows.length > 0;
+  const hasTiming = data?.dataQuality === 'REAL_TIMING_DATA' || hasRows;
+  const stale = Boolean(data?._stale);
+  const state = stale ? 'Latest saved data' : hasTiming ? 'Timing available' : session.available === false ? 'Session TBA' : 'Waiting for timing';
+  const note = hasTiming ? `${data.rows.length} driver rows returned` : 'No timing rows returned for this session.';
+  setText('selected-session-state', state);
+  setText('selected-session-note', note);
+}
+function renderPremiumEmpty(title, body, icon='📡'){
+  return `<div class="pit-empty-state">
+    <div class="pit-empty-icon">${esc(icon)}</div>
+    <div>
+      <b>${esc(title)}</b>
+      <p>${esc(body)}</p>
+    </div>
+  </div>`;
 }
 
 async function loadSelectedSession(silent=false){
@@ -256,6 +288,7 @@ async function loadSelectedSession(silent=false){
     latestRows = data.rows || [];
     lastGoodSessionData = data;
     latestDataQuality = data.dataQuality || '';
+    updateSelectedContext(data);
 
     setText('signal-status', data._stale ? 'CACHED' : data.dataQuality === 'REAL_TIMING_DATA' ? 'REAL DATA' : data.live ? 'LIVE LINK' : 'WAITING');
     setText('socket-state', data._stale ? 'Latest saved data' : (data.source || 'Connected'));
@@ -295,7 +328,10 @@ async function loadSelectedSession(silent=false){
   } finally {
     sessionLoading = false;
     const fast = latestDataQuality === 'REAL_TIMING_DATA';
-    refreshTimer = setInterval(() => loadSelectedSession(true), fast ? 12000 : 30000);
+    const ms = fast ? 12000 : 30000;
+    setText('refresh-rate-label', fast ? 'Every 12 sec' : 'Every 30 sec');
+    setText('refresh-note', fast ? 'Fast refresh while timing rows are available.' : 'Slower refresh while waiting for timing rows.');
+    refreshTimer = setInterval(() => loadSelectedSession(true), ms);
   }
 }
 function renderTimingRows(){
@@ -304,7 +340,7 @@ function renderTimingRows(){
   if(standingsSort === 'best') rows.sort((a,b)=>(a.bestSec||9999)-(b.bestSec||9999));
   else if(standingsSort === 'last') rows.sort((a,b)=>(a.lastSec||9999)-(b.lastSec||9999));
   else rows.sort((a,b)=>(Number(a.position)||999)-(Number(b.position)||999));
-  if(!rows.length){ box.innerHTML = '<div class="empty-row">Timing data is not available for this session yet.</div>'; return; }
+  if(!rows.length){ box.innerHTML = renderPremiumEmpty('Timing data is not available yet', 'Try another available session from this race weekend, or check again later after official timing data is returned.', '⏱️'); return; }
   const hasAnyTiming = rows.some(r => !r.noTiming && (r.bestLap !== '—' || r.lastLap !== '—' || r.tyre));
   const header = `<div class="timing-header"><span>POS</span><span>DRIVER</span><span>GAP</span><span>BEST</span><span>LAST</span><span>S1</span><span>S2</span><span>TYRE</span><span>LAPS</span></div>`;
   const body = rows.map((r,i)=>{
@@ -322,13 +358,13 @@ function renderTimingRows(){
       <div class="laps">${esc(r.laps ?? '—')} L</div>
     </div>`;
   }).join('');
-  const note = hasAnyTiming ? '' : '<div class="empty-row slim">Timing details are not available for this session yet.</div>';
+  const note = hasAnyTiming ? '' : '<div class="empty-row slim">Timing rows loaded, but lap/sector/tyre details are not available yet.</div>';
   box.innerHTML = header + body + note;
 }
 function renderRaceControl(messages=[], data={}){
   const box = $('#race-control'); if(!box) return;
   if(!messages.length){
-    box.innerHTML = '<div class="empty-row">No race-control messages for this session yet.</div>';
+    box.innerHTML = renderPremiumEmpty('No race-control messages yet', 'Messages will appear here when they are returned for the selected session.', '📢');
     return;
   }
   const base = messages.slice(-8).reverse().map(m => [fmtTime(m.date || m.created_at || new Date()), m.message || m.text || m.flag || 'Race control update', m.flag || m.category || '']);
@@ -336,7 +372,7 @@ function renderRaceControl(messages=[], data={}){
 }
 function renderPodium(top3) {
   const box = $('#podium-card'); if (!box) return;
-  if (!top3?.length) { box.innerHTML = '<div class="empty-row">Podium will load from latest result.</div>'; return; }
+  if (!top3?.length) { box.innerHTML = renderPremiumEmpty('Latest result unavailable', 'The latest podium will appear once result data is returned.', '🏆'); return; }
   const medals = ['🥇','🥈','🥉'];
   box.innerHTML = top3.slice(0,3).map((r, i) => `<div class="podium-row"><div class="podium-medal">${medals[i]}</div><div><b>${esc(r.flag || '')} ${esc(r.name || 'Driver')}</b><small>${esc(r.team || 'Team')} · ${esc(r.points || 0)} pts</small></div></div>`).join('');
 }
@@ -374,7 +410,10 @@ function clearPitWallData(message){
   setText('kpi-weather', '--°C');
   setText('kpi-weather-sub', 'Weather data waiting');
   setText('kpi-grid', '--');
-  const timing = $('#timing-table'); if(timing) timing.innerHTML = '<div class="empty-row">' + esc(message || 'Session data is unavailable right now.') + '</div>';
+  updateSelectedContext();
+  setText('refresh-rate-label', 'Standby');
+  setText('refresh-note', 'Refresh resumes when a session loads.');
+  const timing = $('#timing-table'); if(timing) timing.innerHTML = renderPremiumEmpty('Session data unavailable', message || 'Try refresh or choose another session.', '📡');
   renderRaceControl([], {});
 }
 
