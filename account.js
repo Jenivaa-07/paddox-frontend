@@ -1584,3 +1584,274 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(clearHardcodedDashboard, 300);
   setTimeout(clearHardcodedDashboard, 1200);
 });
+
+
+/* ══════════════════════════════════════
+   PHASE 8 — PREMIUM ACCOUNT ORDERS POLISH
+   Uses only real order data returned by /api/orders.
+══════════════════════════════════════ */
+
+function orderDateLabel(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleDateString('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric'
+  });
+}
+
+function orderTimeLabel(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleTimeString('en-IN', {
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function orderProductThumb(item = {}) {
+  const img = item.image || item.product?.images?.[0]?.url || item.product?.image || '';
+  if (img) return `<img src="${img}" alt="${item.name || 'Product'}" loading="lazy"/>`;
+  return `<span>🏎️</span>`;
+}
+
+function normalizePaymentStatus(order = {}) {
+  return String(order.payment?.status || order.paymentStatus || 'paid').toLowerCase();
+}
+
+function paymentStatusClass(order = {}) {
+  const s = normalizePaymentStatus(order);
+  if (s.includes('paid')) return 'pay-paid';
+  if (s.includes('refund')) return 'pay-refund';
+  if (s.includes('fail') || s.includes('cancel')) return 'pay-failed';
+  return 'pay-pending';
+}
+
+function paymentStatusLabel(order = {}) {
+  const s = normalizePaymentStatus(order);
+  if (s.includes('paid')) return 'Paid';
+  if (s.includes('refund')) return 'Refunded';
+  if (s.includes('fail')) return 'Failed';
+  if (s.includes('cancel')) return 'Cancelled';
+  return 'Pending';
+}
+
+function paymentMethodLabel(order = {}) {
+  const raw = String(order.payment?.method || order.paymentMethod || order.payment?.paymentMethod || '').trim();
+  if (!raw) return 'Payment method';
+  return raw
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, ch => ch.toUpperCase());
+}
+
+function orderStepIndex(status = '') {
+  const s = String(status || 'placed').toLowerCase();
+  if (s.includes('cancel') || s.includes('refund')) return -1;
+  if (s.includes('deliver')) return 3;
+  if (s.includes('ship') || s.includes('out')) return 2;
+  if (s.includes('process') || s.includes('pack') || s.includes('confirm')) return 1;
+  return 0;
+}
+
+function renderOrderTimeline(order = {}) {
+  const steps = [
+    { key: 'placed', label: 'Placed' },
+    { key: 'processing', label: 'Processing' },
+    { key: 'shipped', label: 'Shipped' },
+    { key: 'delivered', label: 'Delivered' }
+  ];
+  const idx = orderStepIndex(order.status);
+  if (idx < 0) {
+    return `<div class="order-timeline cancelled"><span></span><b>${order.status || 'Cancelled'}</b></div>`;
+  }
+  return `
+    <div class="order-timeline">
+      ${steps.map((step, i) => `
+        <div class="order-step ${i < idx ? 'done' : i === idx ? 'active' : ''}">
+          <span></span>
+          <b>${step.label}</b>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderOrderItemsMini(order = {}) {
+  const items = order.items || [];
+  if (!items.length) return `<div class="order-mini-empty">No products returned for this order.</div>`;
+  return items.slice(0, 3).map(item => `
+    <div class="order-mini-item">
+      <div class="order-mini-img">${orderProductThumb(item)}</div>
+      <div class="order-mini-info">
+        <div class="order-mini-name">${item.name || 'Product'}</div>
+        <div class="order-mini-meta">
+          Qty ${item.quantity || 1}
+          ${item.size ? ` · Size ${item.size}` : ''}
+          ${item.color ? ` · ${item.color}` : ''}
+        </div>
+      </div>
+      <div class="order-mini-price">${formatMoney((item.price || 0) * (item.quantity || 1))}</div>
+    </div>
+  `).join('') + (items.length > 3 ? `<div class="order-more-items">+${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}</div>` : '');
+}
+
+function renderRealtimeOrders(orders) {
+  const grid = document.getElementById('orders-grid-premium');
+  const tbody = document.querySelector('.orders-table tbody');
+
+  window.USER_REALTIME_ORDERS = orders || [];
+
+  if (tbody) tbody.innerHTML = '';
+  if (!grid) return;
+
+  if (!orders || !orders.length) {
+    grid.innerHTML = `
+      <div class="orders-empty-card">
+        <div class="orders-empty-icon">🏎️</div>
+        <h3>No orders yet</h3>
+        <p>Your PADDOX purchases will appear here after checkout.</p>
+        <a href="shop.html" class="orders-shop-link">Start Shopping</a>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = orders.map(order => {
+    const firstItem = order.items?.[0] || {};
+    const orderNo = order.orderNumber || order._id;
+    const status = order.status || 'placed';
+    const total = order.pricing?.total || 0;
+    const itemCount = (order.items || []).reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+
+    return `
+      <article class="order-premium-card">
+        <div class="order-card-head">
+          <div class="order-id-block">
+            <span>Order ID</span>
+            <strong>#${orderNo}</strong>
+          </div>
+          <div class="order-status-stack">
+            <span class="ostatus ${statusClass(status)}">${status}</span>
+            <span class="payment-pill ${paymentStatusClass(order)}">${paymentStatusLabel(order)}</span>
+          </div>
+        </div>
+
+        <div class="order-card-main">
+          <div class="order-primary-product">
+            <div class="order-main-img">${orderProductThumb(firstItem)}</div>
+            <div>
+              <div class="order-main-name">${firstItem.name || 'PADDOX Order'}</div>
+              <div class="order-main-meta">
+                ${itemCount} item${itemCount === 1 ? '' : 's'} · ${orderDateLabel(order.createdAt)} · ${orderTimeLabel(order.createdAt)}
+              </div>
+              <div class="order-pay-method">${paymentMethodLabel(order)}</div>
+            </div>
+          </div>
+          <div class="order-total-block">
+            <span>Total</span>
+            <strong>${formatMoney(total)}</strong>
+          </div>
+        </div>
+
+        ${renderOrderTimeline(order)}
+
+        <div class="order-items-preview">
+          ${renderOrderItemsMini(order)}
+        </div>
+
+        <div class="order-card-actions">
+          <button class="trk-btn order-action-main" onclick="showRealtimeOrderDetails('${order._id}')">View Details</button>
+          <button class="trk-btn receipt-mini-btn" onclick="openOrderReceipt('${order._id}')">View Receipt</button>
+          <button class="trk-btn" onclick="showTracking('${orderNo}', ${Math.max(orderStepIndex(status), 0)})">Track</button>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function showRealtimeOrderDetails(orderId) {
+  const orders = window.USER_REALTIME_ORDERS || [];
+  const order = orders.find(o => String(o._id) === String(orderId));
+
+  if (!order) {
+    showToast('❌ Order not found');
+    return;
+  }
+
+  const address = order.shippingAddress || {};
+  const products = (order.items || []).map(item => `
+    <div class="order-detail-item">
+      <div class="order-detail-img">${orderProductThumb(item)}</div>
+      <div>
+        <div class="order-detail-name">${item.name || 'Product'}</div>
+        <div class="order-detail-meta">
+          Qty ${item.quantity || 1}
+          ${item.size ? ` · Size ${item.size}` : ''}
+          ${item.color ? ` · ${item.color}` : ''}
+        </div>
+      </div>
+      <strong>${formatMoney((item.price || 0) * (item.quantity || 1))}</strong>
+    </div>
+  `).join('');
+
+  const modal = document.createElement('div');
+  modal.innerHTML = `
+    <div class="order-detail-overlay">
+      <div class="order-detail-modal">
+        <button class="order-detail-close" type="button">✕</button>
+
+        <div class="order-detail-top">
+          <div>
+            <div class="orders-kicker">Order garage</div>
+            <h2>ORDER DETAILS</h2>
+            <p>#${order.orderNumber || order._id} · ${orderDateLabel(order.createdAt)}</p>
+          </div>
+          <div class="order-status-stack">
+            <span class="ostatus ${statusClass(order.status)}">${order.status || 'placed'}</span>
+            <span class="payment-pill ${paymentStatusClass(order)}">${paymentStatusLabel(order)}</span>
+          </div>
+        </div>
+
+        ${renderOrderTimeline(order)}
+
+        <div class="order-detail-grid">
+          <section>
+            <h3>Items</h3>
+            ${products || '<p class="order-muted">No items returned.</p>'}
+          </section>
+          <section>
+            <h3>Delivery</h3>
+            <p class="order-address-line"><b>${address.name || '-'}</b></p>
+            <p class="order-address-line">${address.line1 || ''}</p>
+            ${address.line2 ? `<p class="order-address-line">${address.line2}</p>` : ''}
+            <p class="order-address-line">${[address.city, address.state, address.pincode].filter(Boolean).join(', ')}</p>
+            <p class="order-address-line">${address.country || 'India'}</p>
+            <p class="order-address-line">Phone: ${address.phone || '-'}</p>
+          </section>
+        </div>
+
+        <div class="order-detail-summary">
+          <div><span>Subtotal</span><b>${formatMoney(order.pricing?.subtotal)}</b></div>
+          <div><span>Shipping</span><b>${formatMoney(order.pricing?.shipping)}</b></div>
+          <div><span>Tax</span><b>${formatMoney(order.pricing?.tax)}</b></div>
+          <div class="grand"><span>Total</span><b>${formatMoney(order.pricing?.total)}</b></div>
+        </div>
+
+        <div class="order-detail-actions">
+          <button class="trk-btn" onclick="openOrderReceipt('${order._id}')">Open Receipt</button>
+          <button class="trk-btn" onclick="showTracking('${order.orderNumber || order._id}', ${Math.max(orderStepIndex(order.status), 0)})">Track Order</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  modal.querySelector('.order-detail-close').onclick = () => modal.remove();
+  modal.querySelector('.order-detail-overlay').onclick = e => {
+    if (e.target.classList.contains('order-detail-overlay')) modal.remove();
+  };
+}
+
+function openOrderReceipt(orderId) {
+  if (!orderId) {
+    showToast('❌ Order not found');
+    return;
+  }
+  window.location.href = `receipt.html?orderId=${encodeURIComponent(orderId)}`;
+}

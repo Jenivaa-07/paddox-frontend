@@ -221,19 +221,28 @@
 
       <!-- ORDERS -->
       <div class="acc-page" id="page-orders">
-        <div class="page-header"><div class="page-label">Purchase History</div><div class="page-title">MY <span class="accent">ORDERS</span></div></div>
-        <div class="orders-table-wrap">
-          <table class="orders-table">
-            <thead><tr><th>Order ID</th><th>Product</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr><td><span class="oid">#PDX-00812</span></td><td>SF-25 Podium Cap</td><td>May 2, 2025</td><td>₹2,499</td><td><span class="ostatus os-del">Delivered</span></td><td><button class="trk-btn" onclick="showTracking('PDX-00812',3)">Track</button></td></tr>
-              <tr><td><span class="oid">#PDX-00801</span></td><td>RB20 Team Tee</td><td>Apr 28</td><td>₹3,999</td><td><span class="ostatus os-sh">Shipped</span></td><td><button class="trk-btn" onclick="showTracking('PDX-00801',2)">Track</button></td></tr>
-              <tr><td><span class="oid">#PDX-00788</span></td><td>W15 Diecast</td><td>Apr 15</td><td>₹8,999</td><td><span class="ostatus os-del">Delivered</span></td><td><button class="trk-btn" onclick="showTracking('PDX-00788',3)">Track</button></td></tr>
-              <tr><td><span class="oid">#PDX-00754</span></td><td>Fan Polo Jacket</td><td>Apr 3</td><td>₹5,499</td><td><span class="ostatus os-del">Delivered</span></td><td><button class="trk-btn" onclick="showTracking('PDX-00754',3)">Track</button></td></tr>
-              <tr><td><span class="oid">#PDX-00741</span></td><td>MCL38 Poster</td><td>Mar 22</td><td>₹1,299</td><td><span class="ostatus os-del">Delivered</span></td><td><button class="trk-btn" onclick="showTracking('PDX-00741',3)">Track</button></td></tr>
-            </tbody>
-          </table>
+        <div class="page-header">
+          <div class="page-label">Purchase History</div>
+          <div class="page-title">MY <span class="accent">ORDERS</span></div>
         </div>
+
+        <div class="orders-premium-shell">
+          <div class="orders-premium-top">
+            <div>
+              <div class="orders-kicker">Realtime order garage</div>
+              <div class="orders-title-small">Track every PADDOX purchase in one clean place.</div>
+            </div>
+            <button class="orders-refresh-btn" type="button" onclick="loadMyOrders()">Refresh</button>
+          </div>
+
+          <div class="orders-grid-premium" id="orders-grid-premium">
+            <div class="orders-empty-card">
+              <div class="orders-empty-icon">📦</div>
+              <div>Loading your orders...</div>
+            </div>
+          </div>
+        </div>
+
         <div class="trk-modal" id="trk-modal">
           <div class="trk-modal-label">Order Tracking</div>
           <div class="trk-modal-id" id="trk-id"></div>
