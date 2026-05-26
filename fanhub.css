@@ -568,3 +568,308 @@ body.page-transition-init{opacity:0;animation:bodyReveal .4s .3s forwards}
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
+
+
+.qf-ava img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:50%;
+  display:block;
+}
+.qm-drv span img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:50%;
+  display:block;
+}
+
+
+/* ══════════════════════════════════════
+   FAN HUB QUOTES — PREMIUM LAYOUT FIX
+══════════════════════════════════════ */
+.quote-controls {
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(255,255,255,.025);
+  border: 1px solid rgba(255,255,255,.06);
+  border-top: 1px solid rgba(232,0,45,.35);
+}
+.quote-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.quote-search-wrap {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #101010;
+  border: 1px solid rgba(255,255,255,.10);
+  padding: 0 12px;
+}
+.quote-search-wrap:focus-within {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px rgba(232,0,45,.25);
+}
+.quote-search-wrap .quote-search {
+  border: 0 !important;
+  background: transparent !important;
+  padding: 11px 0;
+}
+.quote-count {
+  color: var(--muted);
+  font-family: var(--font-c);
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  font-size: .68rem;
+  white-space: nowrap;
+}
+.quotes-layout {
+  align-items: stretch;
+}
+.quote-featured {
+  position: relative;
+  min-height: 430px;
+  padding: clamp(30px, 4vw, 56px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(232,0,45,.12), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+  border: 1px solid rgba(255,255,255,.08);
+  border-top: 2px solid var(--red);
+}
+.quote-featured::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(232,0,45,.08);
+  filter: blur(10px);
+  pointer-events: none;
+}
+.qf-topline {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--red);
+  font-family: var(--font-c);
+  font-size: .72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 38px;
+}
+.qf-pill {
+  padding: 5px 10px;
+  background: rgba(232,0,45,.12);
+  border: 1px solid rgba(232,0,45,.35);
+}
+.qf-dot {
+  color: rgba(255,255,255,.35);
+}
+.big-qm {
+  position: relative;
+  z-index: 2;
+  color: var(--red);
+  font-family: Georgia, serif;
+  font-size: 5rem;
+  line-height: .6;
+  opacity: .9;
+  margin-bottom: 12px;
+}
+.qf-bg {
+  position: absolute;
+  right: 9%;
+  bottom: 18%;
+  font-family: Georgia, serif;
+  font-size: 12rem;
+  color: rgba(232,0,45,.045);
+  line-height: 1;
+  pointer-events: none;
+}
+.qf-text {
+  position: relative;
+  z-index: 2;
+  max-width: 920px;
+  color: #f5f5f5;
+  font-size: clamp(1.65rem, 3.2vw, 3.1rem);
+  line-height: 1.28;
+  letter-spacing: .4px;
+  margin-bottom: 44px;
+}
+.qf-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: auto;
+}
+.qf-drv {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.qf-ava {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #171717;
+  border: 1px solid rgba(232,0,45,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 1.75rem;
+  box-shadow: 0 0 28px rgba(232,0,45,.16);
+}
+.qf-dname {
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.02rem;
+}
+.qf-dteam {
+  color: var(--muted);
+  margin-top: 3px;
+  font-size: .86rem;
+}
+.qf-share {
+  background: var(--red);
+  color: #fff;
+  border: 0;
+  padding: 12px 20px;
+  font-family: var(--font-c);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 800;
+  transition: all var(--tr);
+  white-space: nowrap;
+}
+.qf-share:hover {
+  background: var(--red2);
+  transform: translateY(-2px);
+}
+.quotes-list {
+  max-height: 560px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.quotes-list::-webkit-scrollbar {
+  width: 4px;
+}
+.quotes-list::-webkit-scrollbar-thumb {
+  background: var(--red);
+}
+.qmini {
+  position: relative;
+  padding: 20px;
+  background: rgba(255,255,255,.025);
+  border: 1px solid rgba(255,255,255,.075);
+  border-left: 3px solid transparent;
+  transition: all var(--tr);
+  cursor: pointer;
+}
+.qmini + .qmini {
+  margin-top: 12px;
+}
+.qmini:hover,
+.qmini.on {
+  background: rgba(232,0,45,.06);
+  border-color: rgba(232,0,45,.25);
+  border-left-color: var(--red);
+  transform: translateX(-2px);
+}
+.qmini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.qmini-era {
+  color: var(--red);
+  font-family: var(--font-c);
+  font-size: .62rem;
+  letter-spacing: 2px;
+}
+.qm-share {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--muted);
+  padding: 5px 10px;
+  font-size: .68rem;
+  transition: all var(--tr);
+}
+.qm-share:hover {
+  color: #fff;
+  border-color: var(--red);
+  background: rgba(232,0,45,.12);
+}
+.qm-text {
+  color: #dedede;
+  font-size: .98rem;
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+.qm-drv {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.qm-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #151515;
+  border: 1px solid rgba(255,255,255,.1);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.qm-n {
+  color: #fff;
+  font-weight: 800;
+  font-size: .9rem;
+}
+.qm-t {
+  color: #777;
+  font-size: .78rem;
+  margin-top: 2px;
+}
+.qm-meta {
+  margin-top: 12px;
+  color: var(--muted);
+  font-family: var(--font-c);
+  font-size: .62rem;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+@media (max-width: 900px) {
+  .quote-controls {
+    align-items: stretch;
+  }
+  .quote-search-wrap {
+    min-width: 100%;
+  }
+  .qf-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .qf-share {
+    width: 100%;
+  }
+}

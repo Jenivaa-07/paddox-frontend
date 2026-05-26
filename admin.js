@@ -3336,7 +3336,18 @@ function renderAdminQuotes() {
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:1.4rem">${q.avatar || '🏎️'}</span>
+          <span style="
+            width:32px;
+            height:32px;
+            border-radius:50%;
+            overflow:hidden;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            background:#151515;
+            font-size:1.4rem;
+            flex-shrink:0;
+          ">${adminQuoteAvatarHTML(q.avatar)}</span>
           <div>
             <div style="font-weight:800;color:#fff">${q.driver}</div>
             <div style="color:#777;font-size:.75rem">${q.team || '-'}</div>
@@ -3391,6 +3402,140 @@ document.addEventListener('input', e => {
     renderAdminQuotes();
   }
 });
+
+
+function isQuoteAvatarImage(value) {
+  return (
+    typeof value === 'string' &&
+    (
+      value.startsWith('http://') ||
+      value.startsWith('https://') ||
+      value.startsWith('data:image/')
+    )
+  );
+}
+
+function renderQuoteAvatarPreview(value = '🏎️') {
+  const preview = document.getElementById('quote-avatar-preview');
+
+  if (!preview) return;
+
+  if (isQuoteAvatarImage(value)) {
+    preview.innerHTML = `
+      <img
+        src="${value}"
+        alt="Driver avatar"
+        style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+          display:block;
+        "
+      />
+    `;
+  } else {
+    preview.textContent = value || '🏎️';
+  }
+}
+
+function readQuoteImageAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      reject(new Error('Select a valid image'));
+      return;
+    }
+
+    if (file.size > 6 * 1024 * 1024) {
+      reject(new Error('Image must be below 6MB'));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new Image();
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+
+        const maxSize = 360;
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+
+      img.onerror = () => reject(new Error('Could not read image'));
+      img.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function bindQuoteAvatarUpload() {
+  const uploadBtn = document.getElementById('quote-avatar-upload');
+  const fileInput = document.getElementById('quote-avatar-file');
+  const avatarInput = document.getElementById('quote-avatar');
+
+  if (uploadBtn && fileInput) {
+    uploadBtn.onclick = () => fileInput.click();
+
+    fileInput.onchange = async () => {
+      try {
+        const file = fileInput.files?.[0];
+
+        if (!file) return;
+
+        showToast('🖼️ Processing driver image...');
+
+        const dataUrl = await readQuoteImageAsDataUrl(file);
+
+        avatarInput.value = dataUrl;
+        renderQuoteAvatarPreview(dataUrl);
+
+        showToast('✅ Driver image ready');
+
+      } catch (err) {
+        showToast(`❌ ${err.message}`);
+      } finally {
+        fileInput.value = '';
+      }
+    };
+  }
+
+  if (avatarInput) {
+    avatarInput.oninput = () => {
+      renderQuoteAvatarPreview(avatarInput.value.trim() || '🏎️');
+    };
+  }
+}
+
+function adminQuoteAvatarHTML(value) {
+  if (isQuoteAvatarImage(value)) {
+    return `
+      <img
+        src="${value}"
+        style="
+          width:28px;
+          height:28px;
+          object-fit:cover;
+          border-radius:50%;
+          display:block;
+        "
+      />
+    `;
+  }
+
+  return value || '🏎️';
+}
+
 
 function ensureQuoteModal() {
   if (document.getElementById('quote-modal')) return;
@@ -3460,8 +3605,35 @@ function ensureQuoteModal() {
           </label>
 
           <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">AVATAR / EMOJI</span>
-            <input id="quote-avatar" class="edit-product-input" placeholder="🏎️">
+            <span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER IMAGE / EMOJI</span>
+
+            <div style="display:flex;gap:10px;align-items:center">
+              <div id="quote-avatar-preview" style="
+                width:54px;
+                height:54px;
+                border-radius:50%;
+                background:#151515;
+                border:1px solid rgba(255,255,255,.12);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                overflow:hidden;
+                font-size:1.45rem;
+                flex-shrink:0;
+              ">🏎️</div>
+
+              <div style="flex:1">
+                <input id="quote-avatar-file" type="file" accept="image/*" style="display:none">
+                <button type="button" class="act-btn" id="quote-avatar-upload" style="width:100%;padding:10px">
+                  Upload Driver Image
+                </button>
+                <input id="quote-avatar" class="edit-product-input" placeholder="or emoji like 🏎️" style="margin-top:8px">
+              </div>
+            </div>
+
+            <span style="color:#777;font-size:.72rem">
+              JPG / PNG supported. Image will be compressed automatically.
+            </span>
           </label>
 
           <label style="display:flex;flex-direction:column;gap:6px">
@@ -3509,6 +3681,8 @@ function ensureQuoteModal() {
   };
 
   modal.querySelector('#quote-save').onclick = saveQuote;
+
+  bindQuoteAvatarUpload();
 }
 
 function openQuoteModal(id = null) {
@@ -3530,6 +3704,7 @@ function openQuoteModal(id = null) {
   document.getElementById('quote-era').value = quote?.era || 'current';
   document.getElementById('quote-category').value = quote?.category || 'motivation';
   document.getElementById('quote-avatar').value = quote?.avatar || '🏎️';
+  renderQuoteAvatarPreview(quote?.avatar || '🏎️');
   document.getElementById('quote-source').value = quote?.source || '';
   document.getElementById('quote-featured').checked = !!quote?.isFeatured;
   document.getElementById('quote-active').checked = quote?.isActive !== false;

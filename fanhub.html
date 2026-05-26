@@ -132,11 +132,19 @@
         <h2 class="section-title">DRIVER <span class="accent">QUOTES</span></h2>
       </div>
       <div class="quote-controls reveal-up delay-1">
-        <button class="quote-filter on" data-era="all">All Quotes</button>
-        <button class="quote-filter" data-era="current">Current Grid</button>
-        <button class="quote-filter" data-era="legend">Legends</button>
-        <button class="quote-filter" data-era="principal">Principals</button>
-        <input id="quote-search" class="quote-search" placeholder="Search driver, team, quote..."/>
+        <div class="quote-filter-row">
+          <button class="quote-filter on" data-era="all">All Quotes</button>
+          <button class="quote-filter" data-era="current">Current Grid</button>
+          <button class="quote-filter" data-era="legend">Legends</button>
+          <button class="quote-filter" data-era="principal">Principals</button>
+        </div>
+
+        <div class="quote-search-wrap">
+          <span>🔎</span>
+          <input id="quote-search" class="quote-search" placeholder="Search driver, team, quote..."/>
+        </div>
+
+        <div class="quote-count" id="quote-count">Loading quotes...</div>
       </div>
       <div class="quotes-layout">
         <div class="quote-featured reveal-left" id="quote-featured"></div>

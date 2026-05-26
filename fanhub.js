@@ -718,6 +718,37 @@ let quoteEraFilter = 'all';
 let quoteSearchText = '';
 let quoteAutoTimer = null;
 
+
+function quoteAvatarHTML(avatar, className = '') {
+  const value = avatar || '🏎️';
+
+  if (
+    typeof value === 'string' &&
+    (
+      value.startsWith('http://') ||
+      value.startsWith('https://') ||
+      value.startsWith('data:image/')
+    )
+  ) {
+    return `
+      <img
+        src="${value}"
+        alt="Quote avatar"
+        class="${className}"
+        style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+          border-radius:50%;
+          display:block;
+        "
+      />
+    `;
+  }
+
+  return value;
+}
+
 async function loadRealtimeQuotes() {
   const feat = document.getElementById('quote-featured');
   const list = document.getElementById('quotes-list');
@@ -779,12 +810,19 @@ async function loadRealtimeQuotes() {
 function renderRealtimeQuotes() {
   const feat = document.getElementById('quote-featured');
   const list = document.getElementById('quotes-list');
+  const countEl = document.getElementById('quote-count');
 
   if (!feat || !list) return;
+
+  if (countEl) {
+    countEl.textContent =
+      `${REAL_QUOTES.length} quote${REAL_QUOTES.length === 1 ? '' : 's'} loaded`;
+  }
 
   if (!REAL_QUOTES.length) {
     feat.innerHTML = `
       <div class="quote-empty">
+        <div style="font-size:2rem;margin-bottom:10px">💬</div>
         No quotes found. Admin can add current-grid and legendary driver quotes.
       </div>
     `;
@@ -798,6 +836,12 @@ function renderRealtimeQuotes() {
     REAL_QUOTES[0];
 
   feat.innerHTML = `
+    <div class="qf-topline">
+      <span class="qf-pill">${(q.era || 'current').toUpperCase()}</span>
+      <span class="qf-dot">•</span>
+      <span>${(q.category || 'motivation').toUpperCase()}</span>
+    </div>
+
     <div class="qf-bg">"</div>
     <div class="big-qm">"</div>
 
@@ -805,35 +849,44 @@ function renderRealtimeQuotes() {
       ${q.text}
     </div>
 
-    <div class="qf-drv">
-      <div class="qf-ava">
-        ${q.avatar || '🏎️'}
+    <div class="qf-footer">
+      <div class="qf-drv">
+        <div class="qf-ava">
+          ${quoteAvatarHTML(q.avatar)}
+        </div>
+
+        <div>
+          <div class="qf-dname">
+            ${q.driver}
+          </div>
+          <div class="qf-dteam">
+            ${q.team || q.era || 'Paddox Quote Library'}
+          </div>
+        </div>
       </div>
 
-      <div>
-        <div class="qf-dname">
-          ${q.driver}
-        </div>
-        <div class="qf-dteam">
-          ${q.team || q.era || 'Paddox Quote Library'}
-        </div>
-      </div>
-    </div>
-
-    <div class="qm-meta">
-      ${(q.era || 'current').toUpperCase()} · ${(q.category || 'motivation').toUpperCase()}
+      <button class="qf-share" onclick="copyQuoteText(${quoteIdx})">
+        🔗 Share Quote
+      </button>
     </div>
   `;
 
   list.innerHTML = REAL_QUOTES.map((qq, i) => `
     <div class="qmini ${i === quoteIdx ? 'on' : ''}" onclick="setRealtimeQuote(${i})">
+      <div class="qmini-head">
+        <span class="qmini-era">${(qq.era || 'current').toUpperCase()}</span>
+        <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i})">
+          Share
+        </button>
+      </div>
+
       <div class="qm-text">
         ${qq.text}
       </div>
 
       <div class="qm-drv">
-        <span style="font-size:1.1rem">
-          ${qq.avatar || '🏎️'}
+        <span class="qm-avatar">
+          ${quoteAvatarHTML(qq.avatar)}
         </span>
 
         <div>
@@ -847,12 +900,8 @@ function renderRealtimeQuotes() {
       </div>
 
       <div class="qm-meta">
-        ${(qq.era || 'current').toUpperCase()} · ${(qq.category || 'motivation').toUpperCase()}
+        ${(qq.category || 'motivation').toUpperCase()}
       </div>
-
-      <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i})">
-        Share
-      </button>
     </div>
   `).join('');
 }
@@ -862,14 +911,33 @@ function setRealtimeQuote(index) {
   renderRealtimeQuotes();
 }
 
-function copyQuoteText(index) {
+async function copyQuoteText(index) {
   const q = REAL_QUOTES[index];
 
   if (!q) return;
 
-  navigator.clipboard?.writeText(`"${q.text}" — ${q.driver}`);
+  const text = `"${q.text}" — ${q.driver}`;
 
-  showToast('🔗 Quote copied!');
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: `PADDOX Quote — ${q.driver}`,
+        text
+      });
+      showToast('🔥 Quote shared!');
+      return;
+    }
+
+    await navigator.clipboard?.writeText(text);
+    showToast('🔗 Quote copied!');
+  } catch (err) {
+    try {
+      await navigator.clipboard?.writeText(text);
+      showToast('🔗 Quote copied!');
+    } catch {
+      showToast('Copy not supported on this browser');
+    }
+  }
 }
 
 document.querySelectorAll('.quote-filter').forEach(btn => {
