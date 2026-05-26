@@ -27,3 +27,9 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
 .weekend-guide-panel{margin-top:22px}.weekend-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.guide-card,.points-card{padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.09);background:rgba(0,0,0,.24);min-height:130px}.guide-card span,.points-card span{display:block;color:var(--red);font-family:var(--font-c);font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:.72rem;margin-bottom:8px}.guide-card b{display:block;font-family:var(--font-d);font-size:1.55rem;letter-spacing:1.5px;margin-bottom:8px}.guide-card p,.points-card div{color:var(--muted2);font-size:.88rem;line-height:1.65}.points-card{grid-column:span 1;border-color:rgba(201,168,76,.16)}.points-card span{color:var(--gold)}
 @media(max-width:1180px){.timing-header{grid-template-columns:44px 1fr 80px 82px 66px}.timing-header span:nth-child(6),.timing-header span:nth-child(7),.timing-header span:nth-child(9){display:none}.weekend-guide{grid-template-columns:1fr 1fr}.points-card{grid-column:span 1}}
 @media(max-width:760px){.timing-header{grid-template-columns:38px 1fr 74px}.timing-header span:nth-child(3),.timing-header span:nth-child(5),.timing-header span:nth-child(6),.timing-header span:nth-child(7),.timing-header span:nth-child(8),.timing-header span:nth-child(9){display:none}.weekend-guide{grid-template-columns:1fr}.live-notice{font-size:.82rem}}
+
+
+/* Phase 4.3 stability states */
+.loading-row.slim{padding:10px 14px;margin-bottom:10px;border:1px solid rgba(201,168,76,.25);background:rgba(201,168,76,.06);color:#c9a84c;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;border-radius:14px}
+.live-notice.warn{border-color:rgba(201,168,76,.45)!important;background:rgba(201,168,76,.08)!important;color:#f0d477!important}
+.live-notice.ok{border-color:rgba(0,180,80,.45)!important;background:rgba(0,180,80,.08)!important;color:#c9ffd8!important}

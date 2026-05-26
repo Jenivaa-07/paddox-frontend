@@ -18,6 +18,9 @@ let refreshTimer = null;
 let latestWeekendNote = '';
 let latestDataQuality = '';
 let currentRaceMeta = null;
+let sessionLoading = false;
+let activeSessionRequest = 0;
+let lastGoodSessionData = null;
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -36,11 +39,50 @@ function showToast(message) {
   toast.textContent = message; toast.classList.add('show');
   clearTimeout(showToast.t); showToast.t = setTimeout(() => toast.classList.remove('show'), 2600);
 }
-async function api(path) {
-  const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.success === false) throw new Error(json.message || `Request failed: ${path}`);
-  return json.data || json;
+function cacheKey(path) { return `paddox_pitwall_cache_${path}`; }
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+function readCachedApi(path) {
+  try {
+    const raw = localStorage.getItem(cacheKey(path));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.data) return null;
+    return { ...parsed.data, _stale: true, _cachedAt: parsed.ts };
+  } catch (_) { return null; }
+}
+function saveCachedApi(path, data) {
+  try { localStorage.setItem(cacheKey(path), JSON.stringify({ ts: Date.now(), data })); } catch (_) {}
+}
+async function api(path, options = {}) {
+  const retries = options.retries ?? 3;
+  const timeout = options.timeout ?? 14000;
+  let lastErr = null;
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(`${API_BASE}${path}`, {
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
+      clearTimeout(timer);
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.success === false) throw new Error(json.message || `Request failed: ${path}`);
+      const data = json.data || json;
+      saveCachedApi(path, data);
+      return data;
+    } catch (err) {
+      clearTimeout(timer);
+      lastErr = err;
+      await sleep(700 * (attempt + 1));
+    }
+  }
+
+  const cached = readCachedApi(path);
+  if (cached) return cached;
+  throw lastErr || new Error(`Request failed: ${path}`);
 }
 function fmtDate(dateValue) {
   if (!dateValue) return 'Date TBA'; const d = new Date(dateValue);
@@ -104,6 +146,7 @@ async function loadSeason(){
   const roundSel = $('#round-select'); if(roundSel) roundSel.innerHTML = '<option>Loading rounds…</option>';
   try{
     const data = await api(`/f1/schedule?year=${currentYear}`);
+    if (data._stale) setLiveNotice('Backend is waking up or OpenF1 is slow — showing last saved schedule until fresh data returns.', 'warn');
     seasonRaces = data.races || [];
     const now = new Date();
     const latestCompleted = [...seasonRaces].reverse().find(r => new Date(`${r.date}T${r.time || '23:59:00Z'}`) <= now);
@@ -126,6 +169,7 @@ function renderRoundSelect(){
 async function loadWeekend(){
   try{
     const data = await api(`/f1/pitwall/weekend?year=${currentYear}&round=${currentRound}`);
+    if (data._stale) setLiveNotice('Using cached weekend/session list while backend reconnects. Fresh data will retry automatically.', 'warn');
     const race = data.race || seasonRaces.find(r => Number(r.round) === currentRound) || {};
     weekendSessions = data.sessions || [];
     currentRaceMeta = race;
@@ -176,34 +220,71 @@ function renderWeekendBoard(race){
 }
 
 async function loadSelectedSession(silent=false){
+  if (sessionLoading && silent) return;
+  const requestId = ++activeSessionRequest;
+  sessionLoading = true;
   clearInterval(refreshTimer);
+
   if(!silent) showToast(`Loading ${sessionLabel(currentSession)} data…`);
   highlightTabs();
   setText('timing-title', `${sessionLabel(currentSession)} Lap, Sector & Tyre Feed`);
   setText('kpi-session', sessionLabel(currentSession));
-  const box = $('#timing-table'); if(box) box.innerHTML = '<div class="loading-row">Loading real F1 lap times, tyres and driver images…</div>';
+
+  const box = $('#timing-table');
+  if(box && !latestRows.length) box.innerHTML = '<div class="loading-row">Loading real F1 lap times, tyres and driver images…</div>';
+  if(box && latestRows.length && !silent) {
+    box.insertAdjacentHTML('afterbegin', '<div class="loading-row slim">Refreshing session data…</div>');
+  }
+
   try{
-    const data = await api(`/f1/pitwall/session?year=${currentYear}&round=${currentRound}&session=${encodeURIComponent(currentSession)}`);
+    const path = `/f1/pitwall/session?year=${currentYear}&round=${currentRound}&session=${encodeURIComponent(currentSession)}`;
+    const data = await api(path, { retries: 3, timeout: 16000 });
+    if (requestId !== activeSessionRequest) return;
+
     latestRows = data.rows || [];
+    lastGoodSessionData = data;
     latestDataQuality = data.dataQuality || '';
-    setText('signal-status', data.dataQuality === 'REAL_TIMING_DATA' ? 'REAL DATA' : data.live ? 'LIVE LINK' : 'WAITING');
-    setText('socket-state', data.source || 'PADDOX backend proxy');
-    setText('last-sync', `Last sync ${fmtTime(data.fetchedAt || new Date())}`);
-    if (data.dataQuality === 'REAL_TIMING_DATA') {
+
+    setText('signal-status', data._stale ? 'CACHED' : data.dataQuality === 'REAL_TIMING_DATA' ? 'REAL DATA' : data.live ? 'LIVE LINK' : 'WAITING');
+    setText('socket-state', data._stale ? 'Cached fallback active' : (data.source || 'PADDOX backend proxy'));
+    setText('last-sync', data._stale && data._cachedAt ? `Cached ${fmtTime(data._cachedAt)}` : `Last sync ${fmtTime(data.fetchedAt || new Date())}`);
+
+    if (data._stale) {
+      setLiveNotice('Fresh request failed once, so Pit Wall is showing the last saved real session data. It will keep retrying automatically.', 'warn');
+    } else if (data.dataQuality === 'REAL_TIMING_DATA') {
       setLiveNotice(`${sessionLabel(currentSession)} is showing real lap/sector/tyre data from OpenF1 through your backend.`, 'ok');
     } else {
       setLiveNotice(data.message || `${sessionLabel(currentSession)} has no lap/tyre timing records yet. Choose another completed session, or add OPENF1_API_KEY for authenticated live access.`, 'warn');
     }
+
     setText('kpi-grid', String(latestRows.length || '--'));
     setText('kpi-weather', data.weather?.trackTemp ? `${Math.round(data.weather.trackTemp)}°C` : (data.weather?.airTemp ? `${Math.round(data.weather.airTemp)}°C` : '--°C'));
     setText('kpi-weather-sub', data.weather?.summary || 'Weather data waiting');
     renderTimingRows();
     renderRaceControl(data.raceControl || [], data);
-    if(!silent) showToast(`${sessionLabel(currentSession)} updated`);
+    if(!silent) showToast(data._stale ? 'Showing cached session data' : `${sessionLabel(currentSession)} updated`);
   }catch(err){
-    console.warn(err); latestRows = []; setLiveNotice('Could not reach backend/OpenF1 for this session. No fake timing data is shown.', 'warn'); renderTimingRows(); renderRaceControl([], {source:'Error'}); showToast('Session data unavailable');
+    console.warn(err);
+    if (lastGoodSessionData?.rows?.length) {
+      latestRows = lastGoodSessionData.rows;
+      latestDataQuality = lastGoodSessionData.dataQuality || 'REAL_TIMING_DATA';
+      setLiveNotice('Backend/OpenF1 did not respond this time. Keeping the last loaded real data on screen and retrying automatically.', 'warn');
+      setText('signal-status', 'RETRYING');
+      setText('socket-state', 'Last good data preserved');
+      renderTimingRows();
+      renderRaceControl(lastGoodSessionData.raceControl || [], lastGoodSessionData);
+    } else {
+      latestRows = [];
+      setLiveNotice('Could not reach backend/OpenF1 for this session. No fake timing data is shown. Try Refresh or select another completed session.', 'warn');
+      renderTimingRows();
+      renderRaceControl([], {source:'Error'});
+    }
+    if(!silent) showToast('Session data retrying…');
+  } finally {
+    sessionLoading = false;
+    const fast = latestDataQuality === 'REAL_TIMING_DATA';
+    refreshTimer = setInterval(() => loadSelectedSession(true), fast ? 12000 : 30000);
   }
-  refreshTimer = setInterval(() => loadSelectedSession(true), latestDataQuality === 'REAL_TIMING_DATA' ? 5000 : 15000);
 }
 function renderTimingRows(){
   const box = $('#timing-table'); if(!box) return;
@@ -291,6 +372,8 @@ function renderWeekendGuide(){
 async function boot(){
   initNav(); initParticles(); initSocket(); buildSeasonSelect();
   $('#refresh-btn')?.addEventListener('click', () => loadSelectedSession(false));
+  window.addEventListener('online', () => { showToast('Connection back — refreshing Pit Wall'); loadSelectedSession(false); });
+  window.addEventListener('offline', () => setLiveNotice('You are offline. Pit Wall will keep the last loaded data on screen.', 'warn'));
   $('#sort-standings')?.addEventListener('click', e => { standingsSort = standingsSort === 'position' ? 'best' : standingsSort === 'best' ? 'last' : 'position'; e.currentTarget.textContent = `Sort: ${standingsSort === 'position' ? 'Position' : standingsSort === 'best' ? 'Best Lap' : 'Last Lap'}`; renderTimingRows(); });
   renderWeekendGuide();
   await Promise.allSettled([loadNextRace(), loadLastResult(), loadSeason()]);
