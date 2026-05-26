@@ -4551,6 +4551,7 @@ function renderOrders() {
           <div class="admin-order-actions admin-order-actions-wide">
             <button class="admin-mini-btn red" onclick="openOrderDetails('${order._id}')">View</button>
             <button class="admin-mini-btn" onclick="adminPhase9OpenReceipt('${order._id}')">Receipt</button>
+            <button class="admin-mini-btn danger" onclick="deleteAdminOrder('${order._id}', '${(order.orderNumber || order._id)}')">Delete</button>
             <div class="admin-inline-status-wrap">
               <select class="admin-inline-status" id="admin-status-${order._id}">
                 ${adminPhase9StatusOptions(order.status)}
@@ -4701,12 +4702,58 @@ function openOrderDetails(orderId) {
 
     <div class="admin-order-modal-actions">
       <button class="admin-mini-btn red" onclick="adminPhase9OpenReceipt('${order._id}')">Open Receipt</button>
+      <button class="admin-mini-btn danger" onclick="deleteAdminOrder('${order._id}', '${(order.orderNumber || order._id)}')">Delete Order</button>
       <button class="admin-mini-btn" onclick="window.print()">Print Admin View</button>
     </div>
   `;
 
   document.getElementById('order-details-modal').classList.add('show');
   document.body.style.overflow = 'hidden';
+}
+
+
+async function deleteAdminOrder(orderId, orderLabel = '') {
+  if (!orderId) return;
+
+  const label = orderLabel || orderId;
+  const ok = confirm(
+    `Delete order #${label}?\n\nThis will permanently remove the order from PADDOX admin, customer orders, analytics, and receipt access. This action cannot be undone.`
+  );
+
+  if (!ok) return;
+
+  try {
+    showToast('⏳ Deleting order...');
+
+    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${getAdminToken()}`
+      }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Delete order failed');
+    }
+
+    document.getElementById('order-details-modal')?.classList.remove('show');
+    document.body.style.overflow = '';
+
+    REAL_ORDERS = (REAL_ORDERS || []).filter(order => String(order._id) !== String(orderId));
+    renderOrders();
+    updateOverviewRealtime?.();
+    updateAdminSidebarBadges?.();
+    renderAnalyticsRealtime?.();
+
+    showToast('🗑️ Order deleted permanently');
+
+    await loadOrders();
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
 }
 
 async function updateOrderStatus(orderId, selectedStatus = null, reopenModal = true) {
