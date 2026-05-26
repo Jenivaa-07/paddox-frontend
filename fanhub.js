@@ -1469,6 +1469,73 @@ function timeAgo(dateValue) {
   return `${days}d ago`;
 }
 
+
+/* Community polish helpers */
+const FAN_TIER_LEVELS = [
+  { name:'Rookie Fan', min:0, next:500, emoji:'🏁' },
+  { name:'Pro Fan', min:500, next:2000, emoji:'🔥' },
+  { name:'Elite Fan', min:2000, next:5000, emoji:'⚡' },
+  { name:'Paddox Legend', min:5000, next:10000, emoji:'👑' }
+];
+
+function escapeHTML(value = '') {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function getFanTier(points = 0) {
+  const score = Number(points || 0);
+  let tier = FAN_TIER_LEVELS[0];
+  for (const level of FAN_TIER_LEVELS) {
+    if (score >= level.min) tier = level;
+  }
+  const progress = tier.next
+    ? Math.min(100, Math.round(((score - tier.min) / (tier.next - tier.min)) * 100))
+    : 100;
+  return { ...tier, progress, score };
+}
+
+function updateFanPointsDock({ votes, posts, topScore, userScore } = {}) {
+  const voteEl = document.getElementById('fan-total-votes');
+  const postEl = document.getElementById('fan-total-posts');
+  const topEl = document.getElementById('fan-top-score');
+  const tierTitle = document.getElementById('fan-tier-title');
+  const tierSub = document.getElementById('fan-tier-sub');
+  const tierProgress = document.getElementById('fan-tier-progress');
+
+  if (voteEl && votes !== undefined) voteEl.textContent = Number(votes || 0).toLocaleString('en-IN');
+  if (postEl && posts !== undefined) postEl.textContent = Number(posts || 0).toLocaleString('en-IN');
+  if (topEl && topScore !== undefined) topEl.textContent = Number(topScore || 0).toLocaleString('en-IN');
+
+  if (tierTitle || tierSub || tierProgress) {
+    const tier = getFanTier(userScore || topScore || 0);
+    if (tierTitle) tierTitle.textContent = `${tier.emoji} ${tier.name}`;
+    if (tierSub) {
+      tierSub.textContent = tier.next
+        ? `${tier.score.toLocaleString('en-IN')} pts · ${Math.max(0, tier.next - tier.score).toLocaleString('en-IN')} pts to next tier`
+        : `${tier.score.toLocaleString('en-IN')} pts · Maximum tier unlocked`;
+    }
+    if (tierProgress) tierProgress.style.width = `${tier.progress}%`;
+  }
+}
+
+function showPointsBurst(text = '+20 pts') {
+  const burst = document.createElement('div');
+  burst.className = 'points-burst';
+  burst.textContent = text;
+  document.body.appendChild(burst);
+  requestAnimationFrame(() => burst.classList.add('show'));
+  setTimeout(() => burst.remove(), 1500);
+}
+
+function initialsFromName(name = '') {
+  return String(name || 'PF').split(/\s+/).filter(Boolean).map(x => x[0]).slice(0,2).join('').toUpperCase() || 'PF';
+}
+
 /* Poll */
 async function loadFanPoll() {
   const qEl = document.getElementById('poll-q');
@@ -1532,6 +1599,8 @@ function renderRealtimePoll(poll, totalVotes = 0) {
     metaEl.textContent =
       `${Number(totalVotes || 0).toLocaleString('en-IN')} votes · Realtime MongoDB poll`;
   }
+
+  updateFanPointsDock({ votes: totalVotes });
 }
 
 async function voteRealtimePoll(optionIndex) {
@@ -1568,6 +1637,7 @@ async function voteRealtimePoll(optionIndex) {
     );
 
     showToast(data.message || '🔥 Vote recorded! +50 Fan Points');
+    showPointsBurst('+50 pts');
 
     loadFanLeaderboard();
 
@@ -1610,49 +1680,50 @@ async function loadFanLeaderboard() {
       return;
     }
 
-    lbEl.innerHTML = leaderboard.slice(0, 8).map(user => {
-      const medal =
-        user.rank === 1 ? '🥇' :
-        user.rank === 2 ? '🥈' :
-        user.rank === 3 ? '🥉' :
-        user.rank;
+    const topThree = leaderboard.slice(0, 3);
+    const remaining = leaderboard.slice(3, 8);
+    const topScore = Number(leaderboard[0]?.fanPoints || 0);
+    const userScore = Number(leaderboard.find(u => String(u.name || '').toLowerCase().includes('jenivaa'))?.fanPoints || topScore || 0);
+
+    updateFanPointsDock({ topScore, userScore });
+
+    const podiumHtml = topThree.length ? `
+      <div class="lb-podium">
+        ${topThree.map(user => {
+          const tier = getFanTier(user.fanPoints);
+          const name = escapeHTML(user.name || 'Paddox Fan');
+          const avatar = user.avatar;
+          return `
+            <div class="lb-podium-card rank-${user.rank || 0}">
+              <div class="lb-podium-medal">${user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉'}</div>
+              <div class="lb-podium-avatar">
+                ${avatar ? `<img src="${escapeHTML(avatar)}" alt="${name}">` : `<span>${initialsFromName(name)}</span>`}
+              </div>
+              <div class="lb-podium-name">${name}</div>
+              <div class="lb-podium-tier">${tier.emoji} ${escapeHTML(user.fanTier || tier.name)}</div>
+              <div class="lb-podium-points">${Number(user.fanPoints || 0).toLocaleString('en-IN')} pts</div>
+            </div>`;
+        }).join('')}
+      </div>` : '';
+
+    const rowsHtml = remaining.map(user => {
+      const tier = getFanTier(user.fanPoints);
+      const name = escapeHTML(user.name || 'Paddox Fan');
+      const avatar = user.avatar;
 
       return `
-        <div class="lb-row">
-          <span class="lb-rank ${user.rank === 1 ? 'g' : user.rank === 2 ? 's' : user.rank === 3 ? 'b' : ''}">
-            ${medal}
+        <div class="lb-row premium">
+          <span class="lb-rank">${user.rank || '-'}</span>
+          <span class="lb-avatar">
+            ${avatar ? `<img src="${escapeHTML(avatar)}" alt="${name}">` : initialsFromName(name)}
           </span>
-
-          <span style="
-            width:28px;
-            height:28px;
-            border-radius:50%;
-            overflow:hidden;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            background:#151515;
-            font-size:1.1rem;
-          ">
-            ${
-              user.avatar
-                ? `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover">`
-                : '👤'
-            }
-          </span>
-
-          <span class="lb-n">${user.name || 'Paddox Fan'}</span>
-
-          ${
-            user.fanTier
-              ? `<span class="lb-badge">${user.fanTier}</span>`
-              : ''
-          }
-
+          <span class="lb-n">${name}</span>
+          <span class="lb-badge">${tier.emoji} ${escapeHTML(user.fanTier || tier.name)}</span>
           <span class="lb-p">${Number(user.fanPoints || 0).toLocaleString('en-IN')} pts</span>
-        </div>
-      `;
+        </div>`;
     }).join('');
+
+    lbEl.innerHTML = podiumHtml + rowsHtml;
 
   } catch (err) {
     console.error(err);
@@ -1785,6 +1856,7 @@ async function answerRealtimeTrivia(answerIndex) {
     if (nextBtn) nextBtn.style.display = 'block';
 
     if (result.correct) {
+      showPointsBurst(`+${result.pointsEarned || 0} pts`);
       loadFanLeaderboard();
     }
 
@@ -1806,6 +1878,7 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
   if (!feedEl) return;
 
   if (!posts.length) {
+    updateFanPointsDock({ posts: 0 });
     feedEl.innerHTML = `
       <div class="feed-empty">
         No fan posts yet. Be the first on the grid.
@@ -1814,6 +1887,8 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
     return;
   }
 
+  updateFanPointsDock({ posts: posts.length });
+
   feedEl.innerHTML = posts.map(post => {
     const user = post.user || {};
     const name =
@@ -1821,25 +1896,34 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
       post.userName ||
       'Paddox Fan';
 
-    const avatar =
-      user.avatar?.url ||
-      post.avatar ||
-      '';
+    const safeName = escapeHTML(name);
+    const safeText = escapeHTML(post.text || '');
+    const avatar = user.avatar?.url || post.avatar || '';
+    const handle = safeName.replace(/\s+/g, '').toLowerCase();
+    const likes = Number(post.likesCount || post.likes?.length || post.likes || 0);
 
     return `
-      <div class="feed-item">
+      <div class="feed-item premium">
         <div class="feed-av">
-          ${
-            avatar && avatar.startsWith('http')
-              ? `<img src="${avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-              : '👤'
-          }
+          ${avatar && avatar.startsWith('http')
+            ? `<img src="${escapeHTML(avatar)}" alt="${safeName}">`
+            : `<span>${initialsFromName(name)}</span>`}
         </div>
 
-        <div>
-          <div class="feed-user">@${name.replace(/\s+/g, '')}</div>
-          <div class="feed-txt">${post.text || ''}</div>
-          <div class="feed-time">${timeAgo(post.createdAt)}</div>
+        <div class="feed-main">
+          <div class="feed-head">
+            <div>
+              <div class="feed-user">@${handle || 'paddoxfan'}</div>
+              <div class="feed-role">Grid Member</div>
+            </div>
+            <div class="feed-time">${timeAgo(post.createdAt)}</div>
+          </div>
+          <div class="feed-txt">${safeText}</div>
+          <div class="feed-actions">
+            <button type="button" onclick="showToast('❤️ Like action coming in backend phase')">❤️ ${likes}</button>
+            <button type="button" onclick="showToast('💬 Comments coming in backend phase')">💬 Comment</button>
+            <button type="button" onclick="navigator.clipboard?.writeText(this.closest('.feed-item').querySelector('.feed-txt')?.textContent || ''); showToast('📋 Post copied')">↗ Share</button>
+          </div>
         </div>
       </div>
     `;
@@ -1897,6 +1981,7 @@ async function submitFanPost() {
     updateFeedCharCount();
 
     showToast(data.message || '🔥 Posted! +20 Fan Points');
+    showPointsBurst('+20 pts');
 
     await loadFanFeed();
     await loadFanLeaderboard();
