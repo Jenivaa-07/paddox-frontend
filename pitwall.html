@@ -54,9 +54,9 @@
           <div>
             <div class="pit-kicker"><span class="live-pulse"></span> Race Command Center</div>
             <h1 class="pit-title">PIT WALL <span>LIVE</span></h1>
-            <p class="pit-sub">Live-style F1 command center with next race countdown, session board, standings, timing table and race-control updates.</p>
+            <p class="pit-sub">Real F1 session center with Practice 1/2/3, Qualifying, Sprint Qualifying, Sprint Race and Race data — lap times, sectors, tyres, gaps, weather and driver images.</p>
             <div class="pit-hero-actions">
-              <button class="pit-primary" id="refresh-btn">↻ Refresh Live Data</button>
+              <button class="pit-primary" id="refresh-btn">↻ Refresh Session Data</button>
               <a href="fanhub.html" class="pit-secondary">← Back to Fan Hub</a>
             </div>
           </div>
@@ -93,12 +93,32 @@
         </div>
       </div>
 
+
+
+      <div class="pit-selector-strip">
+        <div class="selector-block">
+          <span>Season</span>
+          <select id="season-select"></select>
+        </div>
+        <div class="selector-block grow">
+          <span>Round / Grand Prix</span>
+          <select id="round-select"></select>
+        </div>
+        <div class="selector-block grow">
+          <span>Session</span>
+          <select id="session-select"></select>
+        </div>
+        <button class="pit-primary mini-load" id="load-session-btn">Load Session</button>
+      </div>
+
+      <div class="session-tabs" id="session-tabs"></div>
+
       <div class="pit-kpi-grid">
         <article class="pit-kpi">
           <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">OpenF1 feed</small>
         </article>
         <article class="pit-kpi">
-          <span>🌡️</span><p>Track Status</p><b id="kpi-weather">Synced</b><small>Weather panel ready</small>
+          <span>🌡️</span><p>Track Weather</p><b id="kpi-weather">--°C</b><small id="kpi-weather-sub">Air / track waiting</small>
         </article>
         <article class="pit-kpi">
           <span>🏆</span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Latest classified race</small>
@@ -111,8 +131,8 @@
       <div class="pit-layout">
         <section class="pit-panel timing-panel">
           <div class="panel-head">
-            <div><span class="panel-tag">Timing Tower</span><h2>Driver Standings Feed</h2></div>
-            <button class="mini-btn" id="sort-standings">Sort: Rank</button>
+            <div><span class="panel-tag" id="timing-panel-tag">Timing Tower</span><h2 id="timing-title">Session Lap & Tyre Feed</h2></div>
+            <button class="mini-btn" id="sort-standings">Sort: Position</button>
           </div>
           <div class="timing-table" id="timing-table">
             <div class="loading-row">Loading timing tower…</div>
@@ -133,8 +153,8 @@
 
       <section class="pit-panel session-panel">
         <div class="panel-head">
-          <div><span class="panel-tag">Session Board</span><h2>Recent / Upcoming Sessions</h2></div>
-          <span class="auto-refresh">Auto refresh: 30s</span>
+          <div><span class="panel-tag">Weekend Board</span><h2>Practice / Qualifying / Sprint / Race</h2></div>
+          <span class="auto-refresh">Auto refresh: 15s during session view</span>
         </div>
         <div class="session-grid" id="session-grid"></div>
       </section>
