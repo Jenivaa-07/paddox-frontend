@@ -123,7 +123,7 @@ async function loadRealCalendar() {
 
 /* ── Load real driver standings ── */
 function teamEmojiFromName(name = '') {
-  const n = name.toLowerCase();
+  const n = String(name || '').toLowerCase();
 
   if (n.includes('red bull')) return '🔵';
   if (n.includes('ferrari')) return '🔴';
@@ -134,14 +134,14 @@ function teamEmojiFromName(name = '') {
   if (n.includes('williams')) return '🔵';
   if (n.includes('haas')) return '⚪';
   if (n.includes('racing bulls') || n.includes('rb')) return '🟣';
-  if (n.includes('sauber') || n.includes('kick')) return '🟢';
+  if (n.includes('sauber') || n.includes('kick') || n.includes('audi')) return '🟢';
   if (n.includes('cadillac')) return '🟡';
 
   return '🏎️';
 }
 
 function teamColorFromName(name = '') {
-  const n = name.toLowerCase();
+  const n = String(name || '').toLowerCase();
 
   if (n.includes('red bull')) return '#1e5bff';
   if (n.includes('ferrari')) return '#e8002d';
@@ -152,10 +152,39 @@ function teamColorFromName(name = '') {
   if (n.includes('williams')) return '#64c4ff';
   if (n.includes('haas')) return '#ffffff';
   if (n.includes('racing bulls') || n.includes('rb')) return '#6c4cff';
-  if (n.includes('sauber') || n.includes('kick')) return '#00e701';
+  if (n.includes('sauber') || n.includes('kick') || n.includes('audi')) return '#00e701';
   if (n.includes('cadillac')) return '#d4af37';
 
   return '#e8002d';
+}
+
+function safeText(value, fallback = '') {
+  if (!value) return fallback;
+  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  return fallback;
+}
+
+function extractTeamName(raw = {}) {
+  const possible =
+    raw.team ||
+    raw.constructor ||
+    raw.constructorInfo ||
+    raw.teamName ||
+    raw.Constructors?.[0] ||
+    raw.Constructor ||
+    raw.constructors?.[0] ||
+    {};
+
+  if (typeof possible === 'string') return possible;
+
+  return (
+    possible.name ||
+    possible.constructorName ||
+    possible.teamName ||
+    possible.fullName ||
+    raw.teamName ||
+    'Team TBA'
+  );
 }
 
 function normalizeDriverName(driver = {}) {
@@ -169,40 +198,99 @@ function normalizeDriverName(driver = {}) {
 }
 
 function normalizeDriverCode(driver = {}, name = '') {
-  return (
+  const code =
     driver.code ||
-    driver.abbreviation ||
-    driver.permanentNumber ||
-    name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .slice(0, 3)
-      .toUpperCase()
+    driver.abbreviation;
+
+  if (code && code !== 'Object') return code;
+
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part[0])
+    .join('')
+    .slice(0, 3)
+    .toUpperCase();
+}
+
+function extractDriverImage(driver = {}, raw = {}) {
+  return (
+    driver.image ||
+    driver.imageUrl ||
+    driver.headshot ||
+    driver.headshotUrl ||
+    driver.profileImage ||
+    driver.photo ||
+    raw.image ||
+    raw.imageUrl ||
+    raw.headshot ||
+    raw.profileImage ||
+    ''
+  );
+}
+
+function driverInitials(name = '') {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'F1';
+}
+
+function driverAvatarHTML(driver, size = 'small') {
+  const image = driver.image || '';
+
+  if (
+    image &&
+    (
+      image.startsWith('http://') ||
+      image.startsWith('https://') ||
+      image.startsWith('data:image/')
+    )
+  ) {
+    return `
+      <img
+        src="${image}"
+        alt="${driver.name}"
+        class="drv-img-${size}"
+        onerror="this.outerHTML='<span>${driverInitials(driver.name)}</span>'"
+      />
+    `;
+  }
+
+  return `
+    <span class="drv-initials">
+      ${driverInitials(driver.name)}
+    </span>
+  `;
+}
+
+function isLikelyReserveOrPracticeDriver(raw = {}) {
+  const text =
+    JSON.stringify(raw || {})
+      .toLowerCase();
+
+  return (
+    text.includes('reserve') ||
+    text.includes('third driver') ||
+    text.includes('test driver') ||
+    text.includes('practice driver') ||
+    text.includes('fp1') ||
+    text.includes('free practice')
   );
 }
 
 function normalizeGridDriver(raw = {}, standingsMap = new Map()) {
   const driver = raw.driver || raw.Driver || raw;
-  const constructor =
-    raw.team ||
-    raw.constructor ||
-    raw.Constructors?.[0] ||
-    raw.constructorInfo ||
-    {};
-
   const name = normalizeDriverName(driver);
   const code = normalizeDriverCode(driver, name);
 
-  const teamName =
-    constructor.name ||
-    constructor.constructorName ||
-    raw.teamName ||
-    raw.team ||
-    'Team TBA';
+  const teamName = extractTeamName(raw);
 
   const standing =
-    standingsMap.get((driver.driverId || name).toLowerCase()) ||
+    standingsMap.get(String(driver.driverId || '').toLowerCase()) ||
     standingsMap.get(name.toLowerCase()) ||
     standingsMap.get(code.toLowerCase()) ||
     raw;
@@ -220,15 +308,22 @@ function normalizeGridDriver(raw = {}, standingsMap = new Map()) {
     id: driver.driverId || driver._id || name,
     name,
     code,
-    number: driver.permanentNumber || driver.number || raw.number || '',
+    number: driver.permanentNumber || driver.number || raw.number || raw.permanentNumber || '',
     nationality: driver.nationality || raw.nationality || '',
     flag: driver.flag || raw.flag || '',
     team: teamName,
-    teamEmoji: constructor.emoji || raw.teamEmoji || teamEmojiFromName(teamName),
-    teamColor: constructor.color || raw.teamColor || teamColorFromName(teamName),
+    teamEmoji: raw.teamEmoji || teamEmojiFromName(teamName),
+    teamColor: raw.teamColor || teamColorFromName(teamName),
     position,
     points,
     wins,
+    image: extractDriverImage(driver, raw),
+    isRaceDriver:
+      !!position ||
+      raw.isRaceDriver === true ||
+      raw.role === 'race' ||
+      raw.type === 'race',
+    isReserve: isLikelyReserveOrPracticeDriver(raw),
     raw
   };
 }
@@ -262,6 +357,34 @@ function uniqueDriversByName(drivers = []) {
   });
 }
 
+function cleanRaceDriverList(drivers = []) {
+  let list =
+    drivers
+      .filter(driver => driver.name && driver.name !== 'F1 Driver')
+      .filter(driver => !driver.isReserve)
+      .filter(driver => driver.team && driver.team !== 'Team TBA');
+
+  const withStanding =
+    list.filter(driver => Number(driver.position || 0) > 0);
+
+  // Championship standings are the safest source for race drivers.
+  // This removes reserve / FP1 / third drivers like Jak Crawford.
+  if (withStanding.length >= 20) {
+    list = withStanding;
+  }
+
+  list = uniqueDriversByName(list);
+
+  list.sort((a, b) => {
+    if (a.position && b.position) return a.position - b.position;
+    if (a.position) return -1;
+    if (b.position) return 1;
+    return b.points - a.points;
+  });
+
+  return list;
+}
+
 async function getRealtimeDriverGrid() {
   const standingsRes =
     await PaddoxAPI.f1.driverStands().catch(() => null);
@@ -274,6 +397,13 @@ async function getRealtimeDriverGrid() {
   const standingsMap =
     buildStandingsMap(standings);
 
+  // Prefer championship standings because it contains race drivers only.
+  let drivers =
+    Array.isArray(standings) && standings.length
+      ? standings.map(raw => normalizeGridDriver(raw, standingsMap))
+      : [];
+
+  // Use /drivers/all only to fill missing images/details, not to add reserve drivers.
   const driversRes =
     await PaddoxAPI.f1.drivers().catch(() => null);
 
@@ -283,26 +413,35 @@ async function getRealtimeDriverGrid() {
     driversRes?.data ||
     [];
 
-  let drivers = [];
-
-  if (Array.isArray(rawDrivers) && rawDrivers.length) {
+  if (!drivers.length && Array.isArray(rawDrivers) && rawDrivers.length) {
     drivers = rawDrivers.map(raw => normalizeGridDriver(raw, standingsMap));
   }
 
-  if (!drivers.length && Array.isArray(standings) && standings.length) {
-    drivers = standings.map(raw => normalizeGridDriver(raw, standingsMap));
+  if (drivers.length && Array.isArray(rawDrivers) && rawDrivers.length) {
+    const detailMap = new Map();
+
+    rawDrivers.forEach(raw => {
+      const d = normalizeGridDriver(raw, standingsMap);
+      detailMap.set(d.name.toLowerCase(), d);
+      detailMap.set(d.code.toLowerCase(), d);
+    });
+
+    drivers = drivers.map(driver => {
+      const details =
+        detailMap.get(driver.name.toLowerCase()) ||
+        detailMap.get(driver.code.toLowerCase());
+
+      return {
+        ...driver,
+        image: details?.image || driver.image,
+        number: driver.number || details?.number,
+        nationality: driver.nationality || details?.nationality,
+        flag: driver.flag || details?.flag
+      };
+    });
   }
 
-  drivers = uniqueDriversByName(drivers);
-
-  drivers.sort((a, b) => {
-    if (a.position && b.position) return a.position - b.position;
-    if (a.position) return -1;
-    if (b.position) return 1;
-    return b.points - a.points;
-  });
-
-  return drivers;
+  return cleanRaceDriverList(drivers);
 }
 
 /* ── Load real full driver grid ── */
@@ -319,14 +458,14 @@ async function loadRealDriverStandings() {
   try {
     sel.innerHTML = `
       <div class="drv-loading">
-        Loading full current grid from live F1 API...
+        Loading current race-driver grid from live F1 API...
       </div>
     `;
 
     const drivers = await getRealtimeDriverGrid();
 
     if (!drivers.length) {
-      throw new Error('No live drivers returned');
+      throw new Error('No live race drivers returned');
     }
 
     const teamCount =
@@ -334,12 +473,12 @@ async function loadRealDriverStandings() {
 
     if (countEl) {
       countEl.textContent =
-        `${drivers.length} drivers • ${teamCount} teams`;
+        `${drivers.length} race drivers • ${teamCount} teams`;
     }
 
     if (sourceEl) {
       sourceEl.textContent =
-        'Realtime grid — updates automatically when API season/team list changes';
+        'Realtime race-driver grid — reserve/FP1 drivers are filtered out';
     }
 
     let active = 0;
@@ -367,7 +506,7 @@ async function loadRealDriverStandings() {
           style="--team-color:${driver.teamColor}"
         >
           <div class="dp-av" style="background:${driver.teamColor}22;border-color:${driver.teamColor}">
-            ${driver.teamEmoji}
+            ${driverAvatarHTML(driver, 'small')}
           </div>
           <div>
             <div class="dp-name">${driver.code || driver.name}</div>
@@ -381,7 +520,7 @@ async function loadRealDriverStandings() {
           <div class="drv-num-bg">${d.number || d.position || active + 1}</div>
 
           <div class="drv-big-av" style="border-color:${d.teamColor};box-shadow:0 0 32px ${d.teamColor}44">
-            ${d.teamEmoji}
+            ${driverAvatarHTML(d, 'large')}
           </div>
 
           <div class="drv-name">${d.name}</div>
@@ -401,8 +540,8 @@ async function loadRealDriverStandings() {
           </div>
 
           <div class="drv-live-note">
-            This card is generated from the live F1 driver grid/standings API.
-            If a new driver or team is added next season, it will appear automatically.
+            Race drivers are generated from current championship standings.
+            If next season changes the official race-driver grid, this updates automatically from the API.
           </div>
         `;
       }
@@ -426,7 +565,7 @@ async function loadRealDriverStandings() {
         {
           label: 'Grid Coverage',
           val: 100,
-          raw: `${drivers.length} live drivers`
+          raw: `${drivers.length} race drivers`
         }
       ];
 
@@ -487,7 +626,7 @@ async function loadRealDriverStandings() {
     console.warn('Driver grid load failed', err);
 
     if (countEl) {
-      countEl.textContent = 'Live driver grid unavailable';
+      countEl.textContent = 'Live race-driver grid unavailable';
     }
 
     if (sourceEl) {
@@ -496,7 +635,7 @@ async function loadRealDriverStandings() {
 
     sel.innerHTML = `
       <div class="drv-empty">
-        ⚠️ Could not load live F1 driver grid right now.
+        ⚠️ Could not load current F1 race-driver grid right now.
       </div>
     `;
 
