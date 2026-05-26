@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Paddox — Pit Wall Live</title>
+  <link rel="stylesheet" href="pitwall.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="page-transition-init">
+  <canvas id="particles-canvas"></canvas>
+  <div id="page-overlay"></div>
+
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="helmet-wrap"><span class="helmet-icon">🏎️</span></span>
+        <span class="logo-text">PADDO<span class="logo-x">X</span></span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link"><span class="nl-icon">🏠</span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
+        <li><a href="shop.html" class="nav-link"><span class="nl-icon">🛒</span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
+        <li><a href="fanhub.html" class="nav-link"><span class="nl-icon">🎮</span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
+        <li><a href="pitwall.html" class="nav-link active"><span class="nl-icon">📡</span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
+        <li><a href="account.html" class="nav-link"><span class="nl-icon">👤</span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
+      </ul>
+      <div class="nav-right">
+        <button class="nav-search-btn" id="nav-search-btn">🔍</button>
+        <a href="shop.html" class="nav-cart-btn"><span class="cart-icon-anim">🛒</span><span class="cart-badge" id="cart-badge">0</span></a>
+        <a href="account.html" class="nav-cta-btn">Sign Up <span class="cta-flag">🏁</span></a>
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+    <div class="nav-search-drawer" id="search-drawer">
+      <input type="text" class="search-input" placeholder="Search Pit Wall telemetry…"/>
+      <button class="search-close" id="search-close">✕</button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="index.html" class="mob-link">🏠 Home</a>
+      <a href="shop.html" class="mob-link">🛒 Shop</a>
+      <a href="fanhub.html" class="mob-link">🎮 Fan Hub</a>
+      <a href="pitwall.html" class="mob-link active">📡 Pit Wall</a>
+      <a href="account.html" class="mob-link">👤 Account</a>
+    </div>
+  </nav>
+
+  <main class="pit-page">
+    <section class="pit-hero">
+      <div class="pit-grid-bg"></div>
+      <div class="pit-scanline"></div>
+      <div class="pit-hero-content">
+        <div class="breadcrumb animate-fade-up"><a href="index.html">Paddox</a><span>／</span><a href="fanhub.html">Fan Hub</a><span>／</span><b>Pit Wall</b></div>
+        <div class="pit-hero-layout">
+          <div>
+            <div class="pit-kicker"><span class="live-pulse"></span> Race Command Center</div>
+            <h1 class="pit-title">PIT WALL <span>LIVE</span></h1>
+            <p class="pit-sub">Live-style F1 command center with next race countdown, session board, standings, timing table and race-control updates.</p>
+            <div class="pit-hero-actions">
+              <button class="pit-primary" id="refresh-btn">↻ Refresh Live Data</button>
+              <a href="fanhub.html" class="pit-secondary">← Back to Fan Hub</a>
+            </div>
+          </div>
+          <div class="command-card">
+            <div class="command-top">
+              <span>Session Signal</span>
+              <b id="signal-status">CONNECTING</b>
+            </div>
+            <div class="radar-wrap">
+              <div class="radar"></div>
+              <div class="radar-core">F1</div>
+            </div>
+            <div class="command-bottom">
+              <span id="last-sync">Syncing…</span>
+              <span id="socket-state">Socket standby</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pit-dashboard">
+      <div class="pit-top-strip">
+        <div>
+          <span class="strip-label">Next Race</span>
+          <strong id="next-race-name">Loading race…</strong>
+          <small id="next-race-meta">Fetching calendar</small>
+        </div>
+        <div class="strip-countdown">
+          <div><b id="cd-d">--</b><span>DAYS</span></div>
+          <div><b id="cd-h">--</b><span>HRS</span></div>
+          <div><b id="cd-m">--</b><span>MIN</span></div>
+          <div><b id="cd-s">--</b><span>SEC</span></div>
+        </div>
+      </div>
+
+      <div class="pit-kpi-grid">
+        <article class="pit-kpi">
+          <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">OpenF1 feed</small>
+        </article>
+        <article class="pit-kpi">
+          <span>🌡️</span><p>Track Status</p><b id="kpi-weather">Synced</b><small>Weather panel ready</small>
+        </article>
+        <article class="pit-kpi">
+          <span>🏆</span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Latest classified race</small>
+        </article>
+        <article class="pit-kpi">
+          <span>⚡</span><p>Grid Size</p><b id="kpi-grid">--</b><small>Drivers loaded</small>
+        </article>
+      </div>
+
+      <div class="pit-layout">
+        <section class="pit-panel timing-panel">
+          <div class="panel-head">
+            <div><span class="panel-tag">Timing Tower</span><h2>Driver Standings Feed</h2></div>
+            <button class="mini-btn" id="sort-standings">Sort: Rank</button>
+          </div>
+          <div class="timing-table" id="timing-table">
+            <div class="loading-row">Loading timing tower…</div>
+          </div>
+        </section>
+
+        <aside class="pit-side-stack">
+          <section class="pit-panel">
+            <div class="panel-head compact"><div><span class="panel-tag">Race Control</span><h2>Messages</h2></div></div>
+            <div class="race-control" id="race-control"></div>
+          </section>
+          <section class="pit-panel">
+            <div class="panel-head compact"><div><span class="panel-tag">Podium</span><h2>Last Result</h2></div></div>
+            <div class="podium-card" id="podium-card"></div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="pit-panel session-panel">
+        <div class="panel-head">
+          <div><span class="panel-tag">Session Board</span><h2>Recent / Upcoming Sessions</h2></div>
+          <span class="auto-refresh">Auto refresh: 30s</span>
+        </div>
+        <div class="session-grid" id="session-grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
+  <script src="pitwall.js"></script>
+</body>
+</html>
