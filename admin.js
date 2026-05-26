@@ -3443,186 +3443,56 @@ function renderQuoteAvatarPreview(value = '🏎️') {
 }
 
 
-/* Premium image cropper used by Fan Quotes and Fan Drivers.
-   Admin can upload a full image, drag/zoom it, and save a clean square headshot. */
-function openPremiumImageCropper(file, options = {}) {
-  return new Promise((resolve, reject) => {
-    if (!file || !file.type || !file.type.startsWith('image/')) {
-      reject(new Error('Select a valid image'));
-      return;
-    }
+function renderAdminQuoteCardPreview() {
+  const preview = document.getElementById('quote-card-live-preview');
+  if (!preview) return;
 
-    if (file.size > 8 * 1024 * 1024) {
-      reject(new Error('Image must be below 8MB'));
-      return;
-    }
+  const text = document.getElementById('quote-text')?.value?.trim() || 'Your quote preview will appear here as you type.';
+  const driver = document.getElementById('quote-driver')?.value?.trim() || 'Driver Name';
+  const team = document.getElementById('quote-team')?.value?.trim() || 'Team / Era';
+  const era = document.getElementById('quote-era')?.value || 'current';
+  const category = document.getElementById('quote-category')?.value?.trim() || 'motivation';
+  const avatar = document.getElementById('quote-avatar')?.value?.trim() || '🏎️';
+  const avatarHtml = isQuoteAvatarImage(avatar)
+    ? `<img src="${avatar}" alt="${driver}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`
+    : avatar;
 
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const img = new Image();
-
-      img.onload = () => {
-        const outputSize = options.outputSize || 520;
-        const cropSize = 320;
-        let scale = Math.max(cropSize / img.width, cropSize / img.height);
-        let minScale = scale;
-        let maxScale = scale * 3.2;
-        let offsetX = 0;
-        let offsetY = 0;
-        let dragging = false;
-        let lastX = 0;
-        let lastY = 0;
-        let finished = false;
-
-        const modal = document.createElement('div');
-        modal.id = 'premium-image-cropper-modal';
-        modal.innerHTML = `
-          <div style="position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(16px)">
-            <div style="width:min(94vw,720px);background:linear-gradient(145deg,#111,#080808);border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 90px rgba(0,0,0,.65);padding:24px;color:#fff">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px">
-                <div>
-                  <div style="font-family:var(--font-d);letter-spacing:4px;font-size:1.75rem">${options.title || 'CROP DRIVER HEADSHOT'}</div>
-                  <div style="color:#999;font-family:var(--font-c);letter-spacing:2px;font-size:.78rem;margin-top:4px">Drag to position • Zoom to keep only the face/headshot</div>
-                </div>
-                <button type="button" id="crop-cancel-x" style="width:38px;height:38px;color:#fff;border:1px solid rgba(255,255,255,.14);background:#171717">✕</button>
-              </div>
-
-              <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:center">
-                <div style="display:flex;justify-content:center">
-                  <canvas id="premium-crop-canvas" width="320" height="320" style="width:320px;height:320px;border-radius:50%;background:transparent;border:1px solid rgba(255,255,255,.18);cursor:grab;box-shadow:inset 0 0 0 9999px rgba(0,0,0,.02)"></canvas>
-                </div>
-                <div>
-                  <div style="color:#bbb;font-size:.86rem;line-height:1.65;margin-bottom:18px">
-                    This removes the unwanted background area from your uploaded full image by saving only the cropped square headshot. The Fan Hub card will show it in a premium clean avatar without the old black block/neon glow.
-                  </div>
-                  <label style="display:block;color:#777;font-size:.72rem;letter-spacing:2px;margin-bottom:8px">ZOOM</label>
-                  <input id="crop-zoom" type="range" min="0" max="100" value="0" style="width:100%;accent-color:var(--red)">
-                  <button type="button" id="crop-reset" class="act-btn" style="width:100%;padding:10px;margin-top:14px">Reset Position</button>
-                </div>
-              </div>
-
-              <div style="display:flex;gap:12px;margin-top:22px">
-                <button type="button" id="crop-cancel" class="act-btn" style="flex:1;padding:13px;background:#171717;color:#fff;border:1px solid rgba(255,255,255,.12)">Cancel</button>
-                <button type="button" id="crop-save" class="act-btn" style="flex:1;padding:13px;background:var(--red);color:#fff;border:0;font-weight:900;letter-spacing:2px">Save Cropped Headshot</button>
-              </div>
-            </div>
+  preview.innerHTML = `
+    <div style="
+      margin-top:18px;
+      padding:18px;
+      border-radius:22px;
+      background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+      border:1px solid rgba(255,255,255,.1);
+      border-top:2px solid var(--red);
+      box-shadow:0 18px 45px rgba(0,0,0,.28);
+    ">
+      <div style="display:flex;align-items:center;gap:8px;color:var(--red);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-size:.72rem;margin-bottom:12px">
+        <span>${era}</span><span style="color:#555">•</span><span>${category}</span>
+      </div>
+      <div style="font-size:1.35rem;line-height:1.45;color:#fff;margin-bottom:18px">“${text}”</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          <div style="width:48px;height:48px;border-radius:50%;overflow:hidden;background:#151515;border:1px solid rgba(232,0,45,.45);display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0">${avatarHtml}</div>
+          <div style="min-width:0">
+            <div style="font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${driver}</div>
+            <div style="color:#999;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${team}</div>
           </div>
-        `;
-        document.body.appendChild(modal);
+        </div>
+        <button type="button" class="act-btn" style="padding:9px 12px;white-space:nowrap">Share</button>
+      </div>
+    </div>
+  `;
+}
 
-        const canvas = modal.querySelector('#premium-crop-canvas');
-        const ctx = canvas.getContext('2d');
-        const zoom = modal.querySelector('#crop-zoom');
-
-        function draw() {
-          ctx.clearRect(0, 0, cropSize, cropSize);
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(cropSize / 2, cropSize / 2, cropSize / 2 - 1, 0, Math.PI * 2);
-          ctx.clip();
-          const drawW = img.width * scale;
-          const drawH = img.height * scale;
-          const x = (cropSize - drawW) / 2 + offsetX;
-          const y = (cropSize - drawH) / 2 + offsetY;
-          ctx.drawImage(img, x, y, drawW, drawH);
-          ctx.restore();
-          ctx.beginPath();
-          ctx.arc(cropSize / 2, cropSize / 2, cropSize / 2 - 1, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(255,255,255,.35)';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        }
-
-        function clampOffsets() {
-          const drawW = img.width * scale;
-          const drawH = img.height * scale;
-          const maxX = Math.max(0, (drawW - cropSize) / 2);
-          const maxY = Math.max(0, (drawH - cropSize) / 2);
-          offsetX = Math.max(-maxX, Math.min(maxX, offsetX));
-          offsetY = Math.max(-maxY, Math.min(maxY, offsetY));
-        }
-
-        function closeWithCancel() {
-          if (finished) return;
-          finished = true;
-          modal.remove();
-          reject(new Error('Image crop cancelled'));
-        }
-
-        zoom.oninput = () => {
-          const pct = Number(zoom.value || 0) / 100;
-          scale = minScale + (maxScale - minScale) * pct;
-          clampOffsets();
-          draw();
-        };
-
-        canvas.addEventListener('pointerdown', e => {
-          dragging = true;
-          lastX = e.clientX;
-          lastY = e.clientY;
-          canvas.setPointerCapture(e.pointerId);
-          canvas.style.cursor = 'grabbing';
-        });
-
-        canvas.addEventListener('pointermove', e => {
-          if (!dragging) return;
-          offsetX += e.clientX - lastX;
-          offsetY += e.clientY - lastY;
-          lastX = e.clientX;
-          lastY = e.clientY;
-          clampOffsets();
-          draw();
-        });
-
-        canvas.addEventListener('pointerup', e => {
-          dragging = false;
-          canvas.releasePointerCapture(e.pointerId);
-          canvas.style.cursor = 'grab';
-        });
-
-        modal.querySelector('#crop-reset').onclick = () => {
-          offsetX = 0;
-          offsetY = 0;
-          zoom.value = 0;
-          scale = minScale;
-          draw();
-        };
-
-        modal.querySelector('#crop-cancel').onclick = closeWithCancel;
-        modal.querySelector('#crop-cancel-x').onclick = closeWithCancel;
-
-        modal.querySelector('#crop-save').onclick = () => {
-          const out = document.createElement('canvas');
-          out.width = outputSize;
-          out.height = outputSize;
-          const octx = out.getContext('2d');
-          octx.clearRect(0, 0, outputSize, outputSize);
-          octx.save();
-          octx.beginPath();
-          octx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
-          octx.clip();
-          const ratio = outputSize / cropSize;
-          const drawW = img.width * scale * ratio;
-          const drawH = img.height * scale * ratio;
-          const x = (outputSize - drawW) / 2 + offsetX * ratio;
-          const y = (outputSize - drawH) / 2 + offsetY * ratio;
-          octx.drawImage(img, x, y, drawW, drawH);
-          octx.restore();
-          finished = true;
-          modal.remove();
-          resolve(out.toDataURL('image/jpeg', options.quality || 0.82));
-        };
-
-        draw();
-      };
-
-      img.onerror = () => reject(new Error('Could not read image'));
-      img.src = reader.result;
-    };
-
-    reader.onerror = () => reject(new Error('Could not read file'));
-    reader.readAsDataURL(file);
+function bindQuoteLivePreview() {
+  ['quote-text','quote-driver','quote-team','quote-era','quote-category','quote-avatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.previewBound) {
+      el.dataset.previewBound = '1';
+      el.addEventListener('input', renderAdminQuoteCardPreview);
+      el.addEventListener('change', renderAdminQuoteCardPreview);
+    }
   });
 }
 
@@ -3683,16 +3553,12 @@ function bindQuoteAvatarUpload() {
 
         showToast('🖼️ Processing driver image...');
 
-        const dataUrl = await openPremiumImageCropper(file, {
-          title: 'CROP QUOTE DRIVER IMAGE',
-          outputSize: 420,
-          quality: 0.8
-        });
+        const dataUrl = await readQuoteImageAsDataUrl(file);
 
         avatarInput.value = dataUrl;
         renderQuoteAvatarPreview(dataUrl);
 
-        showToast('✅ Cropped quote driver image ready');
+        showToast('✅ Driver image ready');
 
       } catch (err) {
         showToast(`❌ ${err.message}`);
@@ -3705,6 +3571,7 @@ function bindQuoteAvatarUpload() {
   if (avatarInput) {
     avatarInput.oninput = () => {
       renderQuoteAvatarPreview(avatarInput.value.trim() || '🏎️');
+    renderAdminQuoteCardPreview();
     };
   }
 }
@@ -3867,6 +3734,8 @@ function ensureQuoteModal() {
           </label>
         </div>
 
+        <div id="quote-card-live-preview"></div>
+
         <button
           class="act-btn"
           id="quote-save"
@@ -3898,7 +3767,9 @@ function ensureQuoteModal() {
   modal.querySelector('#quote-save').onclick = saveQuote;
 
   bindQuoteAvatarUpload();
+  bindQuoteLivePreview();
 }
+
 
 function openQuoteModal(id = null) {
   ensureQuoteModal();
@@ -3923,6 +3794,8 @@ function openQuoteModal(id = null) {
   document.getElementById('quote-source').value = quote?.source || '';
   document.getElementById('quote-featured').checked = !!quote?.isFeatured;
   document.getElementById('quote-active').checked = quote?.isActive !== false;
+  bindQuoteLivePreview();
+  renderAdminQuoteCardPreview();
 
   const quoteModal = document.getElementById('quote-modal');
   quoteModal.style.display = 'block';
@@ -4138,10 +4011,10 @@ function ensureDriverProfileModal() {
 
   modal.innerHTML = `
     <div class="preview-overlay" id="driver-profile-overlay">
-      <div class="preview-card" style="max-width:860px;width:94vw;padding:28px;color:#fff;text-align:left">
+      <div class="preview-card" style="max-width:760px;width:92vw;padding:28px;color:#fff;text-align:left">
         <button class="preview-close" type="button" onclick="closeDriverProfileModal()">✕</button>
         <div style="font-family:var(--font-d);letter-spacing:4px;font-size:1.8rem;margin-bottom:8px" id="driver-profile-title">ADD DRIVER IMAGE</div>
-        <div style="color:var(--red);font-family:var(--font-c);letter-spacing:2px;margin-bottom:22px">FAN HUB DRIVER HEADSHOT CROP + IMAGE OVERRIDE</div>
+        <div style="color:var(--red);font-family:var(--font-c);letter-spacing:2px;margin-bottom:22px">FAN HUB DRIVER STATS IMAGE OVERRIDE</div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER NAME</span><input id="dp-name" class="edit-product-input" placeholder="George Russell"></label>
@@ -4153,13 +4026,13 @@ function ensureDriverProfileModal() {
         </div>
 
         <div style="margin-top:16px">
-          <span style="display:block;color:#777;font-size:.75rem;letter-spacing:2px;margin-bottom:8px">DRIVER HEADSHOT IMAGE</span>
+          <span style="display:block;color:#777;font-size:.75rem;letter-spacing:2px;margin-bottom:8px">DRIVER IMAGE</span>
           <div style="display:flex;gap:12px;align-items:center">
             <div id="dp-preview" style="width:72px;height:72px;border-radius:50%;background:#151515;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.6rem;flex-shrink:0">🏎️</div>
             <div style="flex:1">
               <input id="dp-file" type="file" accept="image/*" style="display:none">
-              <button type="button" class="act-btn" id="dp-upload" style="width:100%;padding:12px">Upload & Crop Headshot</button>
-              <input id="dp-image" class="edit-product-input" placeholder="or paste image URL / cropped image data" style="margin-top:8px">
+              <button type="button" class="act-btn" id="dp-upload" style="width:100%;padding:12px">Upload Driver Image</button>
+              <input id="dp-image" class="edit-product-input" placeholder="or paste image URL" style="margin-top:8px">
             </div>
           </div>
         </div>
@@ -4182,15 +4055,10 @@ function ensureDriverProfileModal() {
     try {
       const file = modal.querySelector('#dp-file').files?.[0];
       if (!file) return;
-      showToast('🖼️ Opening headshot cropper...');
-      const dataUrl = await openPremiumImageCropper(file, {
-        title: 'CROP DRIVER HEADSHOT',
-        outputSize: 520,
-        quality: 0.84
-      });
+      const dataUrl = await readQuoteImageAsDataUrl(file);
       modal.querySelector('#dp-image').value = dataUrl;
       renderDriverProfilePreview(dataUrl);
-      showToast('✅ Cropped driver headshot ready');
+      showToast('✅ Driver image ready');
     } catch (err) {
       showToast(`❌ ${err.message}`);
     } finally {
@@ -4206,7 +4074,7 @@ function renderDriverProfilePreview(value = '') {
   if (!box) return;
 
   if (value && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/'))) {
-    box.innerHTML = `<img src="${value}" style="width:100%;height:100%;object-fit:cover;object-position:center top">`;
+    box.innerHTML = `<img src="${value}" style="width:100%;height:100%;object-fit:cover">`;
   } else {
     box.textContent = '🏎️';
   }
@@ -4245,18 +4113,6 @@ function closeDriverProfileModal() {
 
 window.closeDriverProfileModal = closeDriverProfileModal;
 
-
-function flagEmojiFromAdminCountry(value = '') {
-  const key = String(value || '').toLowerCase().trim();
-  const map = {
-    dutch:'🇳🇱', british:'🇬🇧', english:'🇬🇧', monégasque:'🇲🇨', monegasque:'🇲🇨',
-    australian:'🇦🇺', spanish:'🇪🇸', mexican:'🇲🇽', canadian:'🇨🇦', french:'🇫🇷',
-    german:'🇩🇪', italian:'🇮🇹', japanese:'🇯🇵', thai:'🇹🇭', danish:'🇩🇰', finnish:'🇫🇮',
-    chinese:'🇨🇳', brazilian:'🇧🇷', american:'🇺🇸', argentine:'🇦🇷', 'new zealander':'🇳🇿', newzealander:'🇳🇿'
-  };
-  return map[key] || '';
-}
-
 async function saveDriverProfile() {
   try {
     const body = {
@@ -4264,7 +4120,7 @@ async function saveDriverProfile() {
       code: document.getElementById('dp-code').value.trim().toUpperCase(),
       team: document.getElementById('dp-team').value.trim(),
       country: document.getElementById('dp-country').value.trim(),
-      flagEmoji: document.getElementById('dp-flag').value.trim() || flagEmojiFromAdminCountry(document.getElementById('dp-country').value.trim()),
+      flagEmoji: document.getElementById('dp-flag').value.trim(),
       image: document.getElementById('dp-image').value.trim(),
       isActive: document.getElementById('dp-active').checked
     };

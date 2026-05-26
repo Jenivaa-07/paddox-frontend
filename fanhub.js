@@ -450,6 +450,8 @@ async function loadRealDriverStandings() {
     const drivers = await getRealtimeDriverGrid();
     if (!drivers.length) throw new Error('No live race drivers returned');
 
+    REAL_DRIVER_GRID_CACHE = drivers;
+
     const teamCount = new Set(drivers.map(driver => driver.team)).size;
 
     if (countEl) countEl.textContent = `${drivers.length} race drivers • ${teamCount} teams`;
@@ -459,6 +461,7 @@ async function loadRealDriverStandings() {
     }
 
     function renderDriver(index) {
+      activeRealDriverIndex = index;
       const d = drivers[index];
       const topPoints = Math.max(...drivers.map(driver => Number(driver.points || 0)), 1);
       const topWins = Math.max(...drivers.map(driver => Number(driver.wins || 0)), 1);
@@ -480,7 +483,8 @@ async function loadRealDriverStandings() {
       if (card) {
         card.innerHTML = `
           <div class="drv-num-bg">${d.number || d.position || index + 1}</div>
-          <div class="drv-big-av" style="border-color:${d.teamColor}">
+          <div class="drv-card-shine"></div>
+          <div class="drv-big-av premium-driver-avatar" style="border-color:${d.teamColor};--team-color:${d.teamColor}">
             ${driverAvatarHTML(d, 'large')}
           </div>
           <div class="drv-name">${d.name}</div>
@@ -494,6 +498,9 @@ async function loadRealDriverStandings() {
             <span class="drv-tag">${d.position ? `P${d.position}` : 'Grid'}</span>
             <span class="drv-tag">${Number(d.points || 0).toLocaleString('en-IN')} PTS</span>
           </div>
+          <button class="drv-detail-btn" type="button" onclick="openDriverDetailModal(${index})">
+            View Driver Details
+          </button>
         `;
       }
 
@@ -1057,7 +1064,28 @@ let quoteIdx = 0;
 let quoteEraFilter = 'all';
 let quoteSearchText = '';
 let quoteAutoTimer = null;
+let REAL_DRIVER_GRID_CACHE = [];
+let activeRealDriverIndex = 0;
 
+function safeText(value = '') {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function quoteTeamClass(team = '') {
+  return String(team || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'paddox';
+}
+
+function findDriverQuote(driverName = '') {
+  const key = String(driverName || '').toLowerCase();
+  return REAL_QUOTES.find(q => String(q.driver || '').toLowerCase() === key) ||
+         REAL_QUOTES.find(q => key && String(q.driver || '').toLowerCase().includes(key.split(' ').pop())) ||
+         null;
+}
 
 function quoteAvatarHTML(avatar, className = '') {
   const value = avatar || '🏎️';
@@ -1079,7 +1107,6 @@ function quoteAvatarHTML(avatar, className = '') {
           width:100%;
           height:100%;
           object-fit:cover;
-          object-position:center top;
           border-radius:50%;
           display:block;
         "
@@ -1177,17 +1204,20 @@ function renderRealtimeQuotes() {
     REAL_QUOTES[0];
 
   feat.innerHTML = `
+    <div class="quote-progress"><span style="width:${((quoteIdx + 1) / REAL_QUOTES.length) * 100}%"></span></div>
+
     <div class="qf-topline">
       <span class="qf-pill">${(q.era || 'current').toUpperCase()}</span>
       <span class="qf-dot">•</span>
       <span>${(q.category || 'motivation').toUpperCase()}</span>
+      ${q.isFeatured ? '<span class="qf-featured-badge">FEATURED</span>' : ''}
     </div>
 
     <div class="qf-bg">"</div>
     <div class="big-qm">"</div>
 
     <div class="qf-text">
-      ${q.text}
+      ${safeText(q.text)}
     </div>
 
     <div class="qf-footer">
@@ -1198,17 +1228,22 @@ function renderRealtimeQuotes() {
 
         <div>
           <div class="qf-dname">
-            ${q.driver}
+            ${safeText(q.driver)}
           </div>
-          <div class="qf-dteam">
-            ${q.team || q.era || 'Paddox Quote Library'}
+          <div class="qf-dteam team-${quoteTeamClass(q.team)}">
+            ${safeText(q.team || q.era || 'Paddox Quote Library')}
           </div>
         </div>
       </div>
 
-      <button class="qf-share" onclick="copyQuoteText(${quoteIdx})">
-        🔗 Share Quote
-      </button>
+      <div class="qf-actions">
+        <button class="qf-share qf-copy" onclick="copyQuoteText(${quoteIdx}, true)">
+          Copy
+        </button>
+        <button class="qf-share" onclick="copyQuoteText(${quoteIdx})">
+          🔗 Share
+        </button>
+      </div>
     </div>
   `;
 
@@ -1216,13 +1251,14 @@ function renderRealtimeQuotes() {
     <div class="qmini ${i === quoteIdx ? 'on' : ''}" onclick="setRealtimeQuote(${i})">
       <div class="qmini-head">
         <span class="qmini-era">${(qq.era || 'current').toUpperCase()}</span>
-        <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i})">
-          Share
-        </button>
+        <div class="qm-actions">
+          <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i}, true)">Copy</button>
+          <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i})">Share</button>
+        </div>
       </div>
 
       <div class="qm-text">
-        ${qq.text}
+        ${safeText(qq.text)}
       </div>
 
       <div class="qm-drv">
@@ -1232,10 +1268,10 @@ function renderRealtimeQuotes() {
 
         <div>
           <div class="qm-n">
-            ${qq.driver}
+            ${safeText(qq.driver)}
           </div>
           <div class="qm-t">
-            ${qq.team || qq.era || 'Quote Library'}
+            ${safeText(qq.team || qq.era || 'Quote Library')}
           </div>
         </div>
       </div>
@@ -1252,7 +1288,7 @@ function setRealtimeQuote(index) {
   renderRealtimeQuotes();
 }
 
-async function copyQuoteText(index) {
+async function copyQuoteText(index, forceCopy = false) {
   const q = REAL_QUOTES[index];
 
   if (!q) return;
@@ -1260,7 +1296,7 @@ async function copyQuoteText(index) {
   const text = `"${q.text}" — ${q.driver}`;
 
   try {
-    if (navigator.share) {
+    if (!forceCopy && navigator.share) {
       await navigator.share({
         title: `PADDOX Quote — ${q.driver}`,
         text
@@ -1309,6 +1345,76 @@ quoteAutoTimer = setInterval(() => {
   quoteIdx = (quoteIdx + 1) % REAL_QUOTES.length;
   renderRealtimeQuotes();
 }, 7000);
+
+
+function driverModalMarkup(driver, index) {
+  const q = findDriverQuote(driver.name);
+  const teamColor = driver.teamColor || '#e8002d';
+  const position = driver.position ? `P${driver.position}` : 'Grid TBA';
+  const profileLine = `${driver.name} represents ${driver.team || 'Team TBA'} in the current PADDOX race-driver grid. ${driver.points ? `Current championship points: ${Number(driver.points).toLocaleString('en-IN')}.` : 'Stats will update from the live F1 source when available.'}`;
+
+  return `
+    <div class="driver-detail-backdrop" id="driver-detail-backdrop" onclick="if(event.target.id==='driver-detail-backdrop') closeDriverDetailModal()">
+      <div class="driver-detail-modal" style="--team-color:${teamColor}">
+        <button class="driver-detail-close" type="button" onclick="closeDriverDetailModal()">✕</button>
+
+        <div class="driver-detail-hero">
+          <div class="driver-detail-image">
+            ${driverAvatarHTML(driver, 'large')}
+          </div>
+
+          <div class="driver-detail-info">
+            <div class="driver-detail-kicker">${driver.flag || '🌍'} ${safeText(driver.nationality || 'Country TBA')}</div>
+            <h3>${safeText(driver.name)}</h3>
+            <div class="driver-detail-team">${safeText(driver.team || 'Team TBA')}</div>
+            <p>${safeText(profileLine)}</p>
+
+            <div class="driver-detail-tags">
+              <span>${safeText(driver.code || 'F1')}</span>
+              <span>#${safeText(driver.number || '?')}</span>
+              <span>${position}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="driver-detail-stats">
+          <div><b>${position}</b><span>Standing</span></div>
+          <div><b>${Number(driver.points || 0).toLocaleString('en-IN')}</b><span>Points</span></div>
+          <div><b>${Number(driver.wins || 0)}</b><span>Wins</span></div>
+          <div><b>${safeText(driver.flag || '🌍')}</b><span>Flag</span></div>
+        </div>
+
+        <div class="driver-detail-quote">
+          <div class="driver-detail-quote-label">Driver Quote</div>
+          <p>${q ? safeText(q.text) : 'No dedicated quote added for this driver yet. Add one from Admin → Fan Quotes.'}</p>
+          <span>${q ? `— ${safeText(q.driver)}` : 'PADDOX Quote Library'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openDriverDetailModal(index = activeRealDriverIndex) {
+  const driver = REAL_DRIVER_GRID_CACHE[index];
+  if (!driver) {
+    showToast('Driver details are still loading');
+    return;
+  }
+
+  document.getElementById('driver-detail-backdrop')?.remove();
+  const wrap = document.createElement('div');
+  wrap.innerHTML = driverModalMarkup(driver, index);
+  document.body.appendChild(wrap.firstElementChild);
+  document.body.classList.add('modal-open');
+}
+
+function closeDriverDetailModal() {
+  document.getElementById('driver-detail-backdrop')?.remove();
+  document.body.classList.remove('modal-open');
+}
+
+window.openDriverDetailModal = openDriverDetailModal;
+window.closeDriverDetailModal = closeDriverDetailModal;
 
 
 /* ══ COMMUNITY — REALTIME ══ */
