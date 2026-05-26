@@ -73,12 +73,12 @@ function initReveal(root=document){
 initReveal();
 
 function demoLogin() {
-  showToast('Google/Facebook sign-in coming soon. Please use email login.');
+  showToast('Social sign-in will be available soon. Please use email login.');
 }
 
 /* ══ AUTH ══ */
 /* ══════════════════════════════════════
-   REALTIME AUTH SYSTEM
+   AUTH SYSTEM
 ══════════════════════════════════════ */
 
 let currentUser = null;
@@ -313,7 +313,7 @@ function loginUser(user) {
   bindAvatarUpload();
 
   initReveal(accScreen);
-  loadRealtimeProfile();
+  loadAccountProfile();
   loadMyOrders();
   loadWishlist();
   setTimeout(updateDashboardSavedItems, 500);
@@ -399,7 +399,7 @@ function showTracking(id,step){
   modal.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-/* ══ WISHLIST — REALTIME ══ */
+/* ══ WISHLIST ══ */
 const ACCOUNT_WISHLIST_API =
   'https://paddox-backend.onrender.com/api/wishlist';
 const ACCOUNT_DOWNLOADS_API =
@@ -623,7 +623,7 @@ function renderWishlist(){
 
 
 
-/* ══ DOWNLOADS — REALTIME ══ */
+/* ══ DOWNLOADS ══ */
 let REAL_DOWNLOADS = [];
 
 function assetImage(asset) {
@@ -789,7 +789,7 @@ async function downloadAccountAsset(assetId) {
     showToast(`✅ Downloading ${info.name || 'asset'}`);
 
     await loadDownloads();
-    await loadRealtimeProfile();
+    await loadAccountProfile();
 
   } catch (err) {
     console.error(err);
@@ -832,7 +832,7 @@ function selectTeam(el){
 }
 
 /* ══════════════════════════════════════
-   REALTIME PROFILE + ADDRESS + PREFERENCES
+   PROFILE + ADDRESS + PREFERENCES
 ══════════════════════════════════════ */
 
 const USER_PROFILE_API =
@@ -992,7 +992,7 @@ async function uploadProfileAvatar(file) {
 
     showToast('🔥 Profile picture updated');
 
-    await loadRealtimeProfile();
+    await loadAccountProfile();
 
   } catch (err) {
     console.error(err);
@@ -1050,7 +1050,7 @@ function hydrateProfile(user = {}) {
   localStorage.setItem('paddox_user', JSON.stringify(user));
 }
 
-async function loadRealtimeProfile() {
+async function loadAccountProfile() {
   try {
     const token = profileToken();
 
@@ -1216,7 +1216,7 @@ function showToast(msg){
 }
 
 /* ══════════════════════════════════════
-   REALTIME ACCOUNT ORDERS
+   ACCOUNT ORDERS
 ══════════════════════════════════════ */
 
 const ACCOUNT_ORDERS_API =
@@ -1268,7 +1268,7 @@ async function loadMyOrders() {
       data.orders ||
       [];
 
-    renderRealtimeOrders(orders);
+    renderAccountOrders(orders);
     renderDashboardOrders(orders);
     updateAccountStats(orders);
 
@@ -1277,7 +1277,7 @@ async function loadMyOrders() {
   }
 }
 
-function renderRealtimeOrders(orders) {
+function renderAccountOrders(orders) {
   const tbody =
     document.querySelector('.orders-table tbody');
 
@@ -1287,7 +1287,7 @@ function renderRealtimeOrders(orders) {
     tbody.innerHTML = `
       <tr>
         <td colspan="6" style="text-align:center;padding:35px;color:#777">
-          No realtime orders yet
+          No orders yet
         </td>
       </tr>
     `;
@@ -1332,7 +1332,7 @@ function renderRealtimeOrders(orders) {
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button
               class="trk-btn"
-              onclick="showRealtimeOrderDetails('${order._id}')"
+              onclick="showAccountOrderDetails('${order._id}')"
             >
               View
             </button>
@@ -1348,7 +1348,7 @@ function renderRealtimeOrders(orders) {
     `;
   }).join('');
 
-  window.USER_REALTIME_ORDERS = orders;
+  window.USER_ACCOUNT_ORDERS = orders;
 }
 
 function renderDashboardOrders(orders) {
@@ -1414,9 +1414,9 @@ function updateAccountStats(orders) {
   if (statNums[0]) statNums[0].textContent = orders.length;
 }
 
-function showRealtimeOrderDetails(orderId) {
+function showAccountOrderDetails(orderId) {
   const orders =
-    window.USER_REALTIME_ORDERS || [];
+    window.USER_ACCOUNT_ORDERS || [];
 
   const order =
     orders.find(o => o._id === orderId);
@@ -1563,7 +1563,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
 
-function clearHardcodedDashboard() {
+function clearStarterDashboard() {
   updateDashboardSavedItems();
   const dashFanPoints = document.getElementById('dash-fan-points');
   if (dashFanPoints && currentUser) {
@@ -1581,8 +1581,8 @@ function openOrderReceipt(orderId) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(clearHardcodedDashboard, 300);
-  setTimeout(clearHardcodedDashboard, 1200);
+  setTimeout(clearStarterDashboard, 300);
+  setTimeout(clearStarterDashboard, 1200);
 });
 
 
@@ -1691,11 +1691,11 @@ function renderOrderItemsMini(order = {}) {
   `).join('') + (items.length > 3 ? `<div class="order-more-items">+${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}</div>` : '');
 }
 
-function renderRealtimeOrders(orders) {
+function renderAccountOrders(orders) {
   const grid = document.getElementById('orders-grid-premium');
   const tbody = document.querySelector('.orders-table tbody');
 
-  window.USER_REALTIME_ORDERS = orders || [];
+  window.USER_ACCOUNT_ORDERS = orders || [];
 
   if (tbody) tbody.innerHTML = '';
   if (!grid) return;
@@ -1756,7 +1756,7 @@ function renderRealtimeOrders(orders) {
         </div>
 
         <div class="order-card-actions">
-          <button class="trk-btn order-action-main" onclick="showRealtimeOrderDetails('${order._id}')">View Details</button>
+          <button class="trk-btn order-action-main" onclick="showAccountOrderDetails('${order._id}')">View Details</button>
           <button class="trk-btn receipt-mini-btn" onclick="openOrderReceipt('${order._id}')">View Receipt</button>
           <button class="trk-btn" onclick="showTracking('${orderNo}', ${Math.max(orderStepIndex(status), 0)})">Track</button>
         </div>
@@ -1765,8 +1765,8 @@ function renderRealtimeOrders(orders) {
   }).join('');
 }
 
-function showRealtimeOrderDetails(orderId) {
-  const orders = window.USER_REALTIME_ORDERS || [];
+function showAccountOrderDetails(orderId) {
+  const orders = window.USER_ACCOUNT_ORDERS || [];
   const order = orders.find(o => String(o._id) === String(orderId));
 
   if (!order) {

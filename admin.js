@@ -67,28 +67,16 @@ async function checkAdminAccess() {
 /* ══ DATA ══ */
 
 
-const ADM_USERS = [
-  { name:'Arjun Mehta',   email:'arjun@example.com',   tier:'Pro Fan', orders:7, pts:4820, joined:'Jan 2025', status:'s-act', stxt:'Active'   },
-  { name:'Priya Sharma',  email:'priya@example.com',   tier:'Pro Fan', orders:5, pts:4210, joined:'Feb 2025', status:'s-act', stxt:'Active'   },
-  { name:'Rohan Das',     email:'rohan@example.com',   tier:'Regular', orders:3, pts:3980, joined:'Mar 2025', status:'s-act', stxt:'Active'   },
-  { name:'Kenji Tanaka',  email:'kenji@example.com',   tier:'Regular', orders:4, pts:3450, joined:'Mar 2025', status:'s-act', stxt:'Active'   },
-  { name:'Sofia García',  email:'sofia@example.com',   tier:'Regular', orders:2, pts:3120, joined:'Apr 2025', status:'s-act', stxt:'Active'   },
-  { name:'Liam Chen',     email:'liam@example.com',    tier:'New',     orders:1, pts:500,  joined:'May 2025', status:'s-act', stxt:'Active'   },
-  { name:'Nadia Roy',     email:'nadia@example.com',   tier:'Regular', orders:2, pts:1800, joined:'Apr 2025', status:'s-ina', stxt:'Inactive' },
-];
+const ADM_USERS = [];
 
 
 
-const ADM_MOD = [
-  { type:'Review',      user:'anonymous_fan_99',  content:'"Absolute trash, never buying again. Service is terrible and product is fake."', flag:'Spam / Hostile',   time:'2 hours ago' },
-  { type:'Poll Comment',user:'racer_dude_21',     content:'"Leclerc only wins because Ferrari cheats lol"',                                  flag:'Misinformation',   time:'5 hours ago' },
-  { type:'Review',      user:'deleted_user_4821', content:'"Good product but took 3 weeks to arrive"',                                       flag:'Flagged by user',  time:'1 day ago'   },
-];
+const ADM_MOD = [];
 
-const TRAFFIC_DATA    = [{ name:'Organic Search', pct:72, color:'var(--red)' },{ name:'Social Media', pct:54, color:'var(--blue)' },{ name:'Direct', pct:38, color:'var(--gold)' },{ name:'Referral', pct:22, color:'var(--green)' },{ name:'Email', pct:14, color:'var(--orange)' }];
-const TOP_PRODUCTS    = [{ name:'Monaco Watch', val:'₹3.2L', pct:88, color:'var(--red)' },{ name:'F1 Helmet', val:'₹2.8L', pct:74, color:'var(--gold)' },{ name:'RB20 Tee', val:'₹1.9L', pct:60, color:'var(--blue)' },{ name:'SF-25 Cap', val:'₹1.4L', pct:48, color:'var(--green)' }];
-const GEO_DATA        = [{ name:'🇮🇳 India', val:'65%', pct:65, color:'var(--red)' },{ name:'🇬🇧 United Kingdom', val:'12%', pct:12, color:'var(--blue)' },{ name:'🇯🇵 Japan', val:'8%', pct:8, color:'var(--gold)' },{ name:'🇩🇪 Germany', val:'6%', pct:6, color:'var(--green)' },{ name:'🌍 Others', val:'9%', pct:9, color:'var(--muted)' }];
-const ENGAGEMENT_DATA = [{ name:'Poll Participation', val:'84%', pct:84, color:'var(--red)' },{ name:'Trivia Completion', val:'61%', pct:61, color:'var(--blue)' },{ name:'Wallpaper Downloads', val:'78%', pct:78, color:'var(--green)' },{ name:'Newsletter Open Rate', val:'42%', pct:42, color:'var(--gold)' }];
+const TRAFFIC_DATA = [];
+const TOP_PRODUCTS = [];
+const GEO_DATA = [];
+const ENGAGEMENT_DATA = [];
 
 /* ══ PARTICLES ══ */
 (function(){
@@ -309,7 +297,7 @@ function renderOrders() {
     tbody.innerHTML = `
       <tr>
         <td colspan="8" style="text-align:center;padding:40px;color:#777">
-          No realtime orders yet
+          No orders yet
         </td>
       </tr>
     `;
@@ -795,7 +783,7 @@ async function updateOrderStatus(orderId) {
 
 
 /* ══════════════════════════════════════
-   REALTIME OVERVIEW DASHBOARD
+   LIVE OVERVIEW DASHBOARD
    Safe patch: updates existing HTML only
 ══════════════════════════════════════ */
 
@@ -858,12 +846,12 @@ function updateOverviewCards() {
     {
       label: 'Total Revenue',
       value: formatOverviewMoney(totalRevenue),
-      change: 'Realtime from orders'
+      change: 'Based on orders'
     },
     {
       label: 'Total Orders',
       value: REAL_ORDERS.length,
-      change: 'Realtime orders'
+      change: 'Live orders'
     },
     {
       label: 'Order Customers',
@@ -911,7 +899,7 @@ function updateOverviewRecentOrders() {
     tbody.innerHTML = `
       <tr>
         <td colspan="4" style="text-align:center;padding:24px;color:#777">
-          No realtime orders yet
+          No orders yet
         </td>
       </tr>
     `;
@@ -1115,7 +1103,7 @@ function renderProducts() {
             padding:40px;
             color:#777;
           ">
-          No realtime products yet
+          No products yet
         </td>
       </tr>
     `;
@@ -1251,7 +1239,7 @@ function renderInventory() {
     tbody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align:center;padding:40px;color:#777">
-          No realtime inventory yet
+          No inventory records yet
         </td>
       </tr>
     `;
@@ -1737,7 +1725,7 @@ async function submitAssetUpload() {
 loadAssets();
 
 /* ══════════════════════════════════════
-   REALTIME USERS SYSTEM
+   LIVE USERS SYSTEM
 ══════════════════════════════════════ */
 
 const ADMIN_USERS_API =
@@ -1990,7 +1978,7 @@ function renderUsers() {
     tbody.innerHTML = `
       <tr>
         <td colspan="9" style="text-align:center;padding:40px;color:#777">
-          No realtime users yet
+          No users yet
         </td>
       </tr>
     `;
@@ -2094,7 +2082,7 @@ function renderMetList(id, data) {
   if (!data.length) {
     el.innerHTML = `
       <div style="padding:22px;color:#777;text-align:center">
-        No realtime data yet
+        No data yet
       </div>
     `;
     return;
@@ -2154,7 +2142,7 @@ function renderAnalyticsRealtime() {
     'traffic-list',
     [
       {
-        name: 'Realtime Orders',
+        name: 'Orders',
         val: String(totalOrders),
         pct: totalOrders ? 100 : 0,
         color: 'var(--red)'
@@ -2197,7 +2185,7 @@ function renderAnalyticsRealtime() {
     [
       {
         name: 'Wishlist / Downloads',
-        val: 'Realtime modules active',
+        val: 'Active modules',
         pct: 100,
         color: 'var(--green)'
       },
@@ -2305,7 +2293,7 @@ function normaliseCategory(value) {
 }
 
 /* ══════════════════════════════════════
-   REALTIME PRODUCT EDIT SYSTEM
+   LIVE PRODUCT EDIT SYSTEM
 ══════════════════════════════════════ */
 
 let EDIT_PRODUCT_ID = null;
@@ -2345,7 +2333,7 @@ function ensureProductEditModal() {
           letter-spacing:2px;
           margin-bottom:22px;
         ">
-          REALTIME MONGODB PRODUCT
+          MONGODB PRODUCT
         </div>
 
         <div style="
@@ -2772,7 +2760,7 @@ async function saveProductEdit() {
 
 
 /* ══════════════════════════════════════
-   REALTIME ADD PRODUCT SYSTEM
+   LIVE ADD PRODUCT SYSTEM
 ══════════════════════════════════════ */
 
 function getAddValue(id) {
@@ -3230,7 +3218,7 @@ function updateAdminIdentity() {
 
 
 /* ══════════════════════════════════════
-   ADMIN FAN QUOTES — REALTIME
+   ADMIN FAN QUOTES
 ══════════════════════════════════════ */
 const ADMIN_QUOTES_API =
   'https://paddox-backend.onrender.com/api/fan/admin/quotes';
@@ -4398,10 +4386,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ══ INIT LOG ══ */
-console.log('%c⚙️ PADDOX — Admin Dashboard Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%c⚙️ PADDOX — Admin Dashboard Ready', 'color:#e8002d;font-size:14px;font-weight:bold;');
 /* ══════════════════════════════════════
    PHASE 9 — ADMIN ORDERS + ANALYTICS POLISH
-   Real orders only · clean admin controls · no fake analytics
+   Real orders only · clean admin controls
 ══════════════════════════════════════ */
 const ADMIN_PHASE9_STATUS_FLOW = ['placed','processing','shipped','out_for_delivery','delivered'];
 const ADMIN_PHASE9_STATUS_OPTIONS = ['placed','processing','shipped','out_for_delivery','delivered','cancelled','refunded'];

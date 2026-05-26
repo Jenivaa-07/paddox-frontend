@@ -110,11 +110,11 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">First Name</label>
-            <input class="form-input" type="text" id="ri-fname" placeholder="Arjun"/>
+            <input class="form-input" type="text" id="ri-fname" placeholder="First name"/>
           </div>
           <div class="form-group">
             <label class="form-label">Last Name</label>
-            <input class="form-input" type="text" id="ri-lname" placeholder="Mehta"/>
+            <input class="form-input" type="text" id="ri-lname" placeholder="Last name"/>
           </div>
         </div>
         <div class="form-group">
@@ -162,11 +162,11 @@
           <button class="avatar-edit-btn" id="avatar-edit-btn" type="button" onclick="openAvatarPicker()">✏️</button>
           <input id="avatar-file-input" type="file" accept="image/*" style="display:none" onchange="handleAvatarInput(this)"/>
         </div>
-        <div class="prof-name" id="prof-name">Arjun Mehta</div>
-        <div class="prof-email" id="prof-email">arjun@example.com</div>
-        <div class="prof-tier-badge">🏆 Paddox Pro Fan</div>
+        <div class="prof-name" id="prof-name">Loading profile</div>
+        <div class="prof-email" id="prof-email">Sign in to view your account</div>
+        <div class="prof-tier-badge">🏁 Paddox Member</div>
         <div class="fan-pts-box">
-          <div class="fan-pts-num" id="fan-pts">4,820</div>
+          <div class="fan-pts-num" id="fan-pts">0</div>
           <div class="fan-pts-lbl">Fan Points</div>
         </div>
       </div>
@@ -193,7 +193,7 @@
       <div class="acc-page on" id="page-dashboard">
         <div class="page-header">
           <div class="page-label">Welcome Back 👋</div>
-          <div class="page-title" id="dash-greeting">HEY, ARJUN</div>
+          <div class="page-title" id="dash-greeting">WELCOME BACK</div>
         </div>
         <div class="dash-stats">
           <div class="ds-card reveal-up"><span class="ds-icon animate-icon">📦</span><div class="ds-num" id="dash-orders-count">0</div><div class="ds-lbl">Total Orders</div></div>
@@ -229,7 +229,7 @@
         <div class="orders-premium-shell">
           <div class="orders-premium-top">
             <div>
-              <div class="orders-kicker">Realtime order garage</div>
+              <div class="orders-kicker">Order garage</div>
               <div class="orders-title-small">Track every PADDOX purchase in one clean place.</div>
             </div>
             <button class="orders-refresh-btn" type="button" onclick="loadMyOrders()">Refresh</button>
@@ -262,7 +262,7 @@
         <div class="page-header"><div class="page-label">Digital Assets</div><div class="page-title">MY <span class="accent">DOWNLOADS</span></div></div>
         <div class="dl-grid" id="downloads-grid">
           <div style="grid-column:1/-1;text-align:center;padding:40px;color:#777">
-            Realtime downloads will appear here after you download digital assets from Fan Hub.
+            Downloads will appear here after you save digital assets from Fan Hub.
           </div>
         </div>
       </div>
@@ -273,8 +273,8 @@
         <div class="settings-grid">
           <div class="set-card reveal-up">
             <div class="set-title">👤 Personal Information</div>
-            <div class="form-row"><div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="pf-fn" value="Arjun"/></div><div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="pf-ln" value="Mehta"/></div></div>
-            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="pf-em" value="arjun@example.com"/></div>
+            <div class="form-row"><div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="pf-fn" placeholder="First name" value=""/></div><div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="pf-ln" placeholder="Last name" value=""/></div></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="pf-em" placeholder="you@example.com" value=""/></div>
             <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="pf-phone" placeholder="+91 98765 43210"/></div>
             <button class="save-btn" onclick="saveProfile()">Save Changes ✓</button>
           </div>

@@ -81,8 +81,8 @@ body.page-transition-init{opacity:0;animation:bodyReveal .4s .3s forwards}
 .auth-form.on{display:block}
 .auth-logo{font-family:var(--font-d);font-size:2rem;letter-spacing:4px;text-align:center;margin-bottom:6px}
 .auth-sub{font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:22px}
-.demo-hint{background:rgba(232,0,45,.07);border:1px solid rgba(232,0,45,.18);padding:11px;margin-bottom:18px;font-size:.72rem;color:#bbb;text-align:center;line-height:1.5}
-.demo-hint strong{color:var(--red)}
+.notice-hint{background:rgba(232,0,45,.07);border:1px solid rgba(232,0,45,.18);padding:11px;margin-bottom:18px;font-size:.72rem;color:#bbb;text-align:center;line-height:1.5}
+.notice-hint strong{color:var(--red)}
 .form-group{margin-bottom:16px}
 .form-label{font-family:var(--font-c);font-size:.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:7px;font-weight:500}
 .form-input{width:100%;background:var(--gray);border:1px solid var(--gray2);color:var(--white);padding:11px 14px;font-family:var(--font-b);font-size:.83rem;outline:none;transition:border-color var(--tr)}
