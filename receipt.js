@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — receipt.js | Demo payment order receipt
+   PADDOX — receipt.js | Order payment receipt
    ============================================================ */
 'use strict';
 
@@ -79,14 +79,33 @@ async function loadReceipt() {
   }
 }
 
+function paymentMethodLabel(method = '') {
+  const key = String(method || '').toLowerCase();
+  const labels = {
+    upi: 'UPI',
+    card: 'Credit / Debit Card',
+    netbanking: 'Net Banking',
+    wallet: 'Wallet',
+    cod: 'Cash on Delivery',
+    razorpay: 'Online Payment'
+  };
+  return labels[key] || (method ? String(method).toUpperCase() : '-');
+}
+
+function paymentStatusLabel(status = '') {
+  const key = String(status || 'pending').toLowerCase();
+  const labels = { paid: 'Paid', pending: 'Pending', failed: 'Failed', refunded: 'Refunded' };
+  return labels[key] || 'Pending';
+}
+
 function renderReceipt(order) {
   const card = document.getElementById('receipt-card');
   const address = order.shippingAddress || {};
   const payment = order.payment || {};
   const pricing = order.pricing || {};
   const status = String(payment.status || 'pending').toLowerCase();
-  const isDemo = String(payment.method || '').toLowerCase() === 'demo';
-  const paymentLabel = isDemo && status === 'paid' ? 'Demo Paid' : status === 'paid' ? 'Paid' : status === 'failed' ? 'Failed' : status === 'refunded' ? 'Refunded' : 'Pending';
+  const paymentLabel = paymentStatusLabel(status);
+  const methodLabel = paymentMethodLabel(payment.method);
 
   const itemsHtml = (order.items || []).map(item => {
     const meta = [
@@ -121,7 +140,7 @@ function renderReceipt(order) {
       <div class="receipt-status ${status}">
         <span>Payment Status</span>
         <strong>${paymentLabel}</strong>
-        ${isDemo ? '<em>Demo checkout</em>' : ''}
+        <em>${methodLabel}</em>
       </div>
     </div>
 
@@ -130,9 +149,9 @@ function renderReceipt(order) {
         <h3>ORDER DETAILS</h3>
         <div class="receipt-line"><span>Order ID</span><strong>#${esc(order.orderNumber || order._id)}</strong></div>
         <div class="receipt-line"><span>Order Status</span><strong>${esc(order.status || 'placed')}</strong></div>
-        <div class="receipt-line"><span>Payment Method</span><strong>${isDemo ? 'Demo Payment' : esc(payment.method || '-')}</strong></div>
-        <div class="receipt-line"><span>Payment Reference</span><strong>${esc(payment.razorpayPaymentId || '-')}</strong></div>
-        <div class="receipt-line"><span>Confirmed At</span><strong>${payment.paidAt ? new Date(payment.paidAt).toLocaleString('en-IN') : '-'}</strong></div>
+        <div class="receipt-line"><span>Payment Method</span><strong>${esc(methodLabel)}</strong></div>
+        <div class="receipt-line"><span>Transaction ID</span><strong>${esc(payment.razorpayPaymentId || '-')}</strong></div>
+        <div class="receipt-line"><span>Payment Date</span><strong>${payment.paidAt ? new Date(payment.paidAt).toLocaleString('en-IN') : '-'}</strong></div>
       </div>
 
       <div class="receipt-box">

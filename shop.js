@@ -874,9 +874,9 @@ function ensureCheckoutModal() {
     <div class="pdx-checkout-backdrop" data-close-checkout="true"></div>
     <div class="pdx-checkout-card">
       <button class="pdx-checkout-close" type="button" data-close-checkout="true">✕</button>
-      <div class="pdx-checkout-kicker">DEMO CHECKOUT</div>
+      <div class="pdx-checkout-kicker">SECURE CHECKOUT</div>
       <div class="pdx-checkout-title">DELIVERY DETAILS</div>
-      <p class="pdx-checkout-sub">Enter your delivery details. This project uses demo payment success — no real money is charged.</p>
+      <p class="pdx-checkout-sub">Enter your delivery details and choose your preferred payment method to place the order.</p>
 
       <form id="paddox-checkout-form" class="pdx-checkout-form">
         <div class="pdx-checkout-grid">
@@ -892,10 +892,14 @@ function ensureCheckoutModal() {
         </div>
         <label>Payment Method
           <select id="co-payment-method" required>
-            <option value="demo">Demo Payment Success</option>
+            <option value="upi">UPI</option>
+            <option value="card">Credit / Debit Card</option>
+            <option value="netbanking">Net Banking</option>
+            <option value="wallet">Wallet</option>
+            <option value="cod">Cash on Delivery</option>
           </select>
         </label>
-        <div class="pdx-demo-note">This will create a real PADDOX order with demo payment marked successful. No Razorpay popup and no real transaction.</div>
+        <div class="pdx-payment-note">Choose a payment mode to complete your PADDOX order.</div>
 
         <div class="pdx-checkout-summary" id="pdx-checkout-summary"></div>
 
@@ -993,7 +997,7 @@ function getCheckoutFormData() {
 
   return {
     shippingAddress,
-    paymentMethod: 'demo'
+    paymentMethod: field('co-payment-method') || 'upi'
   };
 }
 
@@ -1012,7 +1016,7 @@ async function submitCheckoutForm(e) {
     const { shippingAddress, paymentMethod } = getCheckoutFormData();
 
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span>Confirming demo payment...</span><span>⏳</span>';
+    submitBtn.innerHTML = '<span>Processing order...</span><span>⏳</span>';
 
     const orderRes = await fetch(ORDER_API_BASE, {
       method: 'POST',
@@ -1029,7 +1033,7 @@ async function submitCheckoutForm(e) {
         })),
         shippingAddress,
         paymentMethod,
-        notes: 'Demo payment checkout from shop page'
+        notes: 'Checkout from shop page'
       })
     });
 
@@ -1046,7 +1050,7 @@ async function submitCheckoutForm(e) {
     saveCart();
     closeCheckoutModal();
     toggleCart(false);
-    showToast('🔥 Demo payment successful');
+    showToast('🔥 Order placed successfully');
 
     setTimeout(() => {
       window.location.href = `receipt.html?orderId=${encodeURIComponent(order._id)}`;

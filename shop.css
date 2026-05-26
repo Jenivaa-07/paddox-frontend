@@ -772,7 +772,7 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
 }
 
 /* ══════════════════════════════════════
-   REAL CHECKOUT MODAL — Razorpay Flow
+   CHECKOUT MODAL
 ══════════════════════════════════════ */
 .pdx-checkout-modal{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:18px}
 .pdx-checkout-modal.show{display:flex}
@@ -799,4 +799,4 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
 .pdx-checkout-pay:disabled{opacity:.65;cursor:not-allowed;transform:none}
 @media(max-width:720px){.pdx-checkout-card{padding:22px}.pdx-checkout-grid,.pdx-checkout-grid-3{grid-template-columns:1fr}.pdx-checkout-title{font-size:1.8rem}.pdx-checkout-sub{margin-right:0}.pdx-checkout-close{top:12px;right:12px}}
 
-.pdx-demo-note{padding:12px 14px;border:1px solid rgba(201,168,76,.28);background:rgba(201,168,76,.08);color:#d8c37d;border-radius:14px;font-size:.82rem;line-height:1.5}
+.pdx-payment-note{padding:12px 14px;border:1px solid rgba(201,168,76,.28);background:rgba(201,168,76,.08);color:#d8c37d;border-radius:14px;font-size:.82rem;line-height:1.5}
