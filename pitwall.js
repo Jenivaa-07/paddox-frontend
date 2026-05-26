@@ -15,11 +15,21 @@ let latestRows = [];
 let standingsSort = 'position';
 let countdownTimer = null;
 let refreshTimer = null;
+let latestWeekendNote = '';
+let latestDataQuality = '';
+let currentRaceMeta = null;
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 function esc(v='') { return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+function setLiveNotice(message, kind = 'info') {
+  const el = document.getElementById('live-notice');
+  if (!el) return;
+  el.className = `live-notice ${kind}`;
+  el.textContent = message || '';
+}
 
 function showToast(message) {
   const toast = $('#toast'); if (!toast) return;
@@ -96,8 +106,10 @@ async function loadSeason(){
     const data = await api(`/f1/schedule?year=${currentYear}`);
     seasonRaces = data.races || [];
     const now = new Date();
-    const next = seasonRaces.find(r => new Date(`${r.date}T${r.time || '13:00:00Z'}`) >= now) || seasonRaces[seasonRaces.length - 1];
-    if(!currentRound) currentRound = Number(next?.round || seasonRaces[0]?.round || 1);
+    const latestCompleted = [...seasonRaces].reverse().find(r => new Date(`${r.date}T${r.time || '23:59:00Z'}`) <= now);
+    const nextRace = seasonRaces.find(r => new Date(`${r.date}T${r.time || '13:00:00Z'}`) >= now);
+    const defaultRace = latestCompleted || nextRace || seasonRaces[seasonRaces.length - 1];
+    if(!currentRound) currentRound = Number(defaultRace?.round || seasonRaces[0]?.round || 1);
     renderRoundSelect();
     await loadWeekend();
   }catch(err){
@@ -116,9 +128,13 @@ async function loadWeekend(){
     const data = await api(`/f1/pitwall/weekend?year=${currentYear}&round=${currentRound}`);
     const race = data.race || seasonRaces.find(r => Number(r.round) === currentRound) || {};
     weekendSessions = data.sessions || [];
-    currentSession = data.defaultSession || weekendSessions.find(s=>s.available)?.key || weekendSessions[0]?.key || 'Race';
+    currentRaceMeta = race;
+    latestWeekendNote = data.dataNote || '';
+    if (data.race?.round && Number(data.race.round) !== currentRound) currentRound = Number(data.race.round);
+    currentSession = data.defaultSession || weekendSessions.find(s=>s.hasTiming)?.key || weekendSessions.find(s=>s.available)?.key || weekendSessions[0]?.key || 'Race';
     setText('kpi-session-sub', `${race.flag || '🏁'} ${race.name || race.raceName || 'Grand Prix'}`);
-    setText('timing-panel-tag', `Round ${currentRound} · ${currentYear}`);
+    setText('timing-panel-tag', `Round ${currentRound || '--'} · ${currentYear}`);
+    setLiveNotice(latestWeekendNote, latestWeekendNote.includes('No OpenF1 token') ? 'warn' : 'ok');
     renderSessionControls();
     renderWeekendBoard(race);
     await loadSelectedSession(true);
@@ -135,7 +151,7 @@ function renderSessionControls(){
     select.onchange = () => { currentSession = select.value; highlightTabs(); };
   }
   if(tabs){
-    tabs.innerHTML = weekendSessions.map(s => `<button class="session-tab ${s.key===currentSession?'on':''}" data-session="${esc(s.key)}">${esc(sessionShort(s.key))}<small>${esc(s.status || '')}</small></button>`).join('');
+    tabs.innerHTML = weekendSessions.map(s => `<button class="session-tab ${s.key===currentSession?'on':''} ${s.hasTiming?'has-data':s.available?'meta-only':'no-data'}" data-session="${esc(s.key)}">${esc(sessionShort(s.key))}<small>${esc(s.status || '')}</small></button>`).join('');
     $$('.session-tab', tabs).forEach(btn => btn.addEventListener('click', () => { currentSession = btn.dataset.session; if(select) select.value = currentSession; loadSelectedSession(false); }));
   }
   $('#load-session-btn')?.addEventListener('click', () => loadSelectedSession(false), {once:true});
@@ -149,11 +165,11 @@ function renderWeekendBoard(race){
     const dt = s.date || s.date_start || '';
     const isActive = s.key === currentSession;
     const past = dt && new Date(dt) < now;
-    const cls = isActive ? 'active-session' : past ? 'done-session' : 'upcoming-session';
+    const cls = `${isActive ? 'active-session' : past ? 'done-session' : 'upcoming-session'} ${s.hasTiming ? 'has-timing' : s.available ? 'meta-only' : 'no-openf1'}`;
     return `<article class="session-card ${cls}" data-session-card="${esc(s.key)}">
       <div class="session-name">${esc(s.label || sessionLabel(s.key))}</div>
       <div class="session-type">${esc(race.name || race.raceName || 'Grand Prix')}</div>
-      <div class="session-meta">${esc(race.circuit || race.Circuit?.circuitName || 'Circuit TBA')}<br>${dt ? `${fmtDate(dt)} · ${fmtTime(dt)}` : 'Date/time TBA'}</div>
+      <div class="session-meta">${esc(race.circuit || race.Circuit?.circuitName || 'Circuit TBA')}<br>${dt ? `${fmtDate(dt)} · ${fmtTime(dt)}` : 'Date/time TBA'}<br><b>${esc(s.status || (s.hasTiming ? 'DATA' : 'WAITING'))}</b></div>
     </article>`;
   }).join('');
   $$('[data-session-card]', box).forEach(card => card.addEventListener('click', () => { currentSession = card.dataset.sessionCard; const select=$('#session-select'); if(select) select.value=currentSession; loadSelectedSession(false); }));
@@ -169,9 +185,15 @@ async function loadSelectedSession(silent=false){
   try{
     const data = await api(`/f1/pitwall/session?year=${currentYear}&round=${currentRound}&session=${encodeURIComponent(currentSession)}`);
     latestRows = data.rows || [];
-    setText('signal-status', data.live ? 'LIVE LINK' : 'SESSION DATA');
+    latestDataQuality = data.dataQuality || '';
+    setText('signal-status', data.dataQuality === 'REAL_TIMING_DATA' ? 'REAL DATA' : data.live ? 'LIVE LINK' : 'WAITING');
     setText('socket-state', data.source || 'PADDOX backend proxy');
     setText('last-sync', `Last sync ${fmtTime(data.fetchedAt || new Date())}`);
+    if (data.dataQuality === 'REAL_TIMING_DATA') {
+      setLiveNotice(`${sessionLabel(currentSession)} is showing real lap/sector/tyre data from OpenF1 through your backend.`, 'ok');
+    } else {
+      setLiveNotice(data.message || `${sessionLabel(currentSession)} has no lap/tyre timing records yet. Choose another completed session, or add OPENF1_API_KEY for authenticated live access.`, 'warn');
+    }
     setText('kpi-grid', String(latestRows.length || '--'));
     setText('kpi-weather', data.weather?.trackTemp ? `${Math.round(data.weather.trackTemp)}°C` : (data.weather?.airTemp ? `${Math.round(data.weather.airTemp)}°C` : '--°C'));
     setText('kpi-weather-sub', data.weather?.summary || 'Weather data waiting');
@@ -179,9 +201,9 @@ async function loadSelectedSession(silent=false){
     renderRaceControl(data.raceControl || [], data);
     if(!silent) showToast(`${sessionLabel(currentSession)} updated`);
   }catch(err){
-    console.warn(err); latestRows = fallbackRows(); renderTimingRows(); renderRaceControl([], {source:'Fallback'}); showToast('Session data waiting — using safe fallback');
+    console.warn(err); latestRows = []; setLiveNotice('Could not reach backend/OpenF1 for this session. No fake timing data is shown.', 'warn'); renderTimingRows(); renderRaceControl([], {source:'Error'}); showToast('Session data unavailable');
   }
-  refreshTimer = setInterval(() => loadSelectedSession(true), 15000);
+  refreshTimer = setInterval(() => loadSelectedSession(true), latestDataQuality === 'REAL_TIMING_DATA' ? 5000 : 15000);
 }
 function renderTimingRows(){
   const box = $('#timing-table'); if(!box) return;
@@ -189,11 +211,13 @@ function renderTimingRows(){
   if(standingsSort === 'best') rows.sort((a,b)=>(a.bestSec||9999)-(b.bestSec||9999));
   else if(standingsSort === 'last') rows.sort((a,b)=>(a.lastSec||9999)-(b.lastSec||9999));
   else rows.sort((a,b)=>(Number(a.position)||999)-(Number(b.position)||999));
-  if(!rows.length){ box.innerHTML = '<div class="empty-row">No driver data available for this session yet.</div>'; return; }
-  box.innerHTML = rows.map((r,i)=>{
+  if(!rows.length){ box.innerHTML = '<div class="empty-row">No real lap/tyre timing data available for this session yet. Select a completed FP/Qualifying/Sprint/Race session from the tabs.</div>'; return; }
+  const hasAnyTiming = rows.some(r => !r.noTiming && (r.bestLap !== '—' || r.lastLap !== '—' || r.tyre));
+  const header = `<div class="timing-header"><span>POS</span><span>DRIVER</span><span>GAP</span><span>BEST</span><span>LAST</span><span>S1</span><span>S2</span><span>TYRE</span><span>LAPS</span></div>`;
+  const body = rows.map((r,i)=>{
     const pos = r.position || i + 1;
     const color = r.teamColor || '#e8002d';
-    return `<div class="timing-row session-row" style="--team-color:${esc(color)}">
+    return `<div class="timing-row session-row ${r.noTiming ? 'waiting-row' : ''}" style="--team-color:${esc(color)}">
       <div class="pos">P${esc(pos)}</div>
       <div class="driver-cell with-photo">${driverImage(r)}<div><div class="driver-name">${esc(r.flag || '')} ${esc(driverName(r))}</div><div class="driver-team">${esc(r.code || '')} · ${esc(r.team || 'Team TBA')}</div></div></div>
       <div class="gap">${esc(r.gap || (pos===1?'LEADER':'—'))}</div>
@@ -205,13 +229,15 @@ function renderTimingRows(){
       <div class="laps">${esc(r.laps ?? '—')} L</div>
     </div>`;
   }).join('');
+  const note = hasAnyTiming ? '' : '<div class="empty-row slim">Driver images are real, but this selected session has no OpenF1 lap/stint/interval rows yet. This is not fake timing data.</div>';
+  box.innerHTML = header + body + note;
 }
 function renderRaceControl(messages=[], data={}){
   const box = $('#race-control'); if(!box) return;
   const base = messages.length ? messages.slice(-8).reverse().map(m => [fmtTime(m.date || m.created_at || new Date()), m.message || m.text || m.flag || 'Race control update', m.flag || m.category || '']) : [
     ['NOW', `${sessionLabel(currentSession)} dashboard online. Data is served through PADDOX backend proxy.`],
     [fmtTime(new Date()), 'Lap times, sectors and tyre compounds come from OpenF1 when the session exists.'],
-    ['INFO', 'Driver photos are matched from Fan Hub driver image overrides first, then OpenF1 headshots.']
+    ['INFO', 'Driver photos are matched from Fan Hub driver image overrides first, then OpenF1 headshots.'], ['FORMAT', 'Weekend rules and points tables are shown below the timing tower.']
   ];
   box.innerHTML = base.map(([time,text,flag]) => `<div class="rc-msg ${String(flag).toLowerCase().includes('yellow')?'flag-yellow':''} ${String(flag).toLowerCase().includes('green')?'flag-green':''}"><div class="rc-time">${esc(time)}</div><div class="rc-text">${esc(text)}</div></div>`).join('');
 }
@@ -250,10 +276,23 @@ function initParticles() {
 function initSocket() {
   try { if (typeof io !== 'function') return; const socket = io('https://paddox-backend.onrender.com', { transports: ['websocket', 'polling'] }); socket.on('connect', () => setText('socket-state', 'Socket connected')); socket.on('disconnect', () => setText('socket-state', 'Socket standby')); } catch (err) { console.warn('Socket unavailable', err); }
 }
+
+function renderWeekendGuide(){
+  const box = document.getElementById('weekend-guide');
+  if(!box) return;
+  box.innerHTML = `
+    <div class="guide-card"><span>Standard GP</span><b>FP1 + FP2 on Friday</b><p>Two one-hour practice sessions help teams test setup and tyres.</p></div>
+    <div class="guide-card"><span>Saturday</span><b>FP3 + Qualifying</b><p>Q1, Q2 and Q3 decide the Grand Prix starting grid.</p></div>
+    <div class="guide-card"><span>Sprint Weekend</span><b>FP1 + Sprint Qualifying + Sprint</b><p>Sprint Qualifying sets the Sprint grid; Sprint Race awards points before the main GP.</p></div>
+    <div class="points-card"><span>Grand Prix Points</span><div>1st 25 · 2nd 18 · 3rd 15 · 4th 12 · 5th 10 · 6th 8 · 7th 6 · 8th 4 · 9th 2 · 10th 1</div></div>
+    <div class="points-card"><span>Sprint Points</span><div>1st 8 · 2nd 7 · 3rd 6 · 4th 5 · 5th 4 · 6th 3 · 7th 2 · 8th 1</div></div>`;
+}
+
 async function boot(){
   initNav(); initParticles(); initSocket(); buildSeasonSelect();
   $('#refresh-btn')?.addEventListener('click', () => loadSelectedSession(false));
   $('#sort-standings')?.addEventListener('click', e => { standingsSort = standingsSort === 'position' ? 'best' : standingsSort === 'best' ? 'last' : 'position'; e.currentTarget.textContent = `Sort: ${standingsSort === 'position' ? 'Position' : standingsSort === 'best' ? 'Best Lap' : 'Last Lap'}`; renderTimingRows(); });
+  renderWeekendGuide();
   await Promise.allSettled([loadNextRace(), loadLastResult(), loadSeason()]);
 }
 document.addEventListener('DOMContentLoaded', boot);

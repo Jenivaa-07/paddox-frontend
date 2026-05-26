@@ -21,7 +21,7 @@
         <li><a href="index.html" class="nav-link"><span class="nl-icon">🏠</span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
         <li><a href="shop.html" class="nav-link"><span class="nl-icon">🛒</span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
         <li><a href="fanhub.html" class="nav-link"><span class="nl-icon">🎮</span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
-        <li><a href="pitwall.html" class="nav-link active"><span class="nl-icon">⏱️</span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
+        <li><a href="pitwall.html" class="nav-link active"><span class="nl-icon">📡</span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
         <li><a href="account.html" class="nav-link"><span class="nl-icon">👤</span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
       </ul>
       <div class="nav-right">
@@ -39,7 +39,7 @@
       <a href="index.html" class="mob-link">🏠 Home</a>
       <a href="shop.html" class="mob-link">🛒 Shop</a>
       <a href="fanhub.html" class="mob-link">🎮 Fan Hub</a>
-      <a href="pitwall.html" class="mob-link active">⏱️ Pit Wall</a>
+      <a href="pitwall.html" class="mob-link active">📡 Pit Wall</a>
       <a href="account.html" class="mob-link">👤 Account</a>
     </div>
   </nav>
@@ -111,11 +111,13 @@
         <button class="pit-primary mini-load" id="load-session-btn">Load Session</button>
       </div>
 
+      <div class="live-notice" id="live-notice">Connecting to PADDOX F1 backend…</div>
+
       <div class="session-tabs" id="session-tabs"></div>
 
       <div class="pit-kpi-grid">
         <article class="pit-kpi">
-          <span>⏱️</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">OpenF1 feed</small>
+          <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">OpenF1 feed</small>
         </article>
         <article class="pit-kpi">
           <span>🌡️</span><p>Track Weather</p><b id="kpi-weather">--°C</b><small id="kpi-weather-sub">Air / track waiting</small>
@@ -154,9 +156,16 @@
       <section class="pit-panel session-panel">
         <div class="panel-head">
           <div><span class="panel-tag">Weekend Board</span><h2>Practice / Qualifying / Sprint / Race</h2></div>
-          <span class="auto-refresh">Auto refresh: 15s during session view</span>
+          <span class="auto-refresh">Auto refresh: 5s when real timing data is available</span>
         </div>
         <div class="session-grid" id="session-grid"></div>
+      </section>
+
+      <section class="pit-panel weekend-guide-panel">
+        <div class="panel-head">
+          <div><span class="panel-tag">F1 Weekend Format</span><h2>Standard GP / Sprint / Points</h2></div>
+        </div>
+        <div class="weekend-guide" id="weekend-guide"></div>
       </section>
     </section>
   </main>
