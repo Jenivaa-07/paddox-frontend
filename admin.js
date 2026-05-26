@@ -3496,6 +3496,190 @@ function bindQuoteLivePreview() {
   });
 }
 
+/* Premium image cropper used by Fan Quotes and Fan Drivers.
+   Admin can upload a full image, drag/zoom it, and save a clean square headshot. */
+function openPremiumImageCropper(file, options = {}) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      reject(new Error('Select a valid image'));
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      reject(new Error('Image must be below 8MB'));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new Image();
+
+      img.onload = () => {
+        const outputSize = options.outputSize || 520;
+        const cropSize = 320;
+        let scale = Math.max(cropSize / img.width, cropSize / img.height);
+        let minScale = scale;
+        let maxScale = scale * 3.2;
+        let offsetX = 0;
+        let offsetY = 0;
+        let dragging = false;
+        let lastX = 0;
+        let lastY = 0;
+        let finished = false;
+
+        const modal = document.createElement('div');
+        modal.id = 'premium-image-cropper-modal';
+        modal.innerHTML = `
+          <div style="position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(16px)">
+            <div style="width:min(94vw,720px);background:linear-gradient(145deg,#111,#080808);border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 90px rgba(0,0,0,.65);padding:24px;color:#fff">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px">
+                <div>
+                  <div style="font-family:var(--font-d);letter-spacing:4px;font-size:1.75rem">${options.title || 'CROP DRIVER HEADSHOT'}</div>
+                  <div style="color:#999;font-family:var(--font-c);letter-spacing:2px;font-size:.78rem;margin-top:4px">Drag to position • Zoom to keep only the face/headshot</div>
+                </div>
+                <button type="button" id="crop-cancel-x" style="width:38px;height:38px;color:#fff;border:1px solid rgba(255,255,255,.14);background:#171717">✕</button>
+              </div>
+
+              <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:center">
+                <div style="display:flex;justify-content:center">
+                  <canvas id="premium-crop-canvas" width="320" height="320" style="width:320px;height:320px;border-radius:50%;background:transparent;border:1px solid rgba(255,255,255,.18);cursor:grab;box-shadow:inset 0 0 0 9999px rgba(0,0,0,.02)"></canvas>
+                </div>
+                <div>
+                  <div style="color:#bbb;font-size:.86rem;line-height:1.65;margin-bottom:18px">
+                    This removes the unwanted background area from your uploaded full image by saving only the cropped square headshot. The Fan Hub card will show it in a premium clean avatar without the old black block/neon glow.
+                  </div>
+                  <label style="display:block;color:#777;font-size:.72rem;letter-spacing:2px;margin-bottom:8px">ZOOM</label>
+                  <input id="crop-zoom" type="range" min="0" max="100" value="0" style="width:100%;accent-color:var(--red)">
+                  <button type="button" id="crop-reset" class="act-btn" style="width:100%;padding:10px;margin-top:14px">Reset Position</button>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:12px;margin-top:22px">
+                <button type="button" id="crop-cancel" class="act-btn" style="flex:1;padding:13px;background:#171717;color:#fff;border:1px solid rgba(255,255,255,.12)">Cancel</button>
+                <button type="button" id="crop-save" class="act-btn" style="flex:1;padding:13px;background:var(--red);color:#fff;border:0;font-weight:900;letter-spacing:2px">Save Cropped Headshot</button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const canvas = modal.querySelector('#premium-crop-canvas');
+        const ctx = canvas.getContext('2d');
+        const zoom = modal.querySelector('#crop-zoom');
+
+        function draw() {
+          ctx.clearRect(0, 0, cropSize, cropSize);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(cropSize / 2, cropSize / 2, cropSize / 2 - 1, 0, Math.PI * 2);
+          ctx.clip();
+          const drawW = img.width * scale;
+          const drawH = img.height * scale;
+          const x = (cropSize - drawW) / 2 + offsetX;
+          const y = (cropSize - drawH) / 2 + offsetY;
+          ctx.drawImage(img, x, y, drawW, drawH);
+          ctx.restore();
+          ctx.beginPath();
+          ctx.arc(cropSize / 2, cropSize / 2, cropSize / 2 - 1, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255,255,255,.35)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        function clampOffsets() {
+          const drawW = img.width * scale;
+          const drawH = img.height * scale;
+          const maxX = Math.max(0, (drawW - cropSize) / 2);
+          const maxY = Math.max(0, (drawH - cropSize) / 2);
+          offsetX = Math.max(-maxX, Math.min(maxX, offsetX));
+          offsetY = Math.max(-maxY, Math.min(maxY, offsetY));
+        }
+
+        function closeWithCancel() {
+          if (finished) return;
+          finished = true;
+          modal.remove();
+          reject(new Error('Image crop cancelled'));
+        }
+
+        zoom.oninput = () => {
+          const pct = Number(zoom.value || 0) / 100;
+          scale = minScale + (maxScale - minScale) * pct;
+          clampOffsets();
+          draw();
+        };
+
+        canvas.addEventListener('pointerdown', e => {
+          dragging = true;
+          lastX = e.clientX;
+          lastY = e.clientY;
+          canvas.setPointerCapture(e.pointerId);
+          canvas.style.cursor = 'grabbing';
+        });
+
+        canvas.addEventListener('pointermove', e => {
+          if (!dragging) return;
+          offsetX += e.clientX - lastX;
+          offsetY += e.clientY - lastY;
+          lastX = e.clientX;
+          lastY = e.clientY;
+          clampOffsets();
+          draw();
+        });
+
+        canvas.addEventListener('pointerup', e => {
+          dragging = false;
+          canvas.releasePointerCapture(e.pointerId);
+          canvas.style.cursor = 'grab';
+        });
+
+        modal.querySelector('#crop-reset').onclick = () => {
+          offsetX = 0;
+          offsetY = 0;
+          zoom.value = 0;
+          scale = minScale;
+          draw();
+        };
+
+        modal.querySelector('#crop-cancel').onclick = closeWithCancel;
+        modal.querySelector('#crop-cancel-x').onclick = closeWithCancel;
+
+        modal.querySelector('#crop-save').onclick = () => {
+          const out = document.createElement('canvas');
+          out.width = outputSize;
+          out.height = outputSize;
+          const octx = out.getContext('2d');
+          octx.clearRect(0, 0, outputSize, outputSize);
+          octx.save();
+          octx.beginPath();
+          octx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
+          octx.clip();
+          const ratio = outputSize / cropSize;
+          const drawW = img.width * scale * ratio;
+          const drawH = img.height * scale * ratio;
+          const x = (outputSize - drawW) / 2 + offsetX * ratio;
+          const y = (outputSize - drawH) / 2 + offsetY * ratio;
+          octx.drawImage(img, x, y, drawW, drawH);
+          octx.restore();
+          finished = true;
+          modal.remove();
+          resolve(out.toDataURL('image/jpeg', options.quality || 0.82));
+        };
+
+        draw();
+      };
+
+      img.onerror = () => reject(new Error('Could not read image'));
+      img.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+
 function readQuoteImageAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     if (!file || !file.type.startsWith('image/')) {
@@ -3551,14 +3735,19 @@ function bindQuoteAvatarUpload() {
 
         if (!file) return;
 
-        showToast('🖼️ Processing driver image...');
+        showToast('🖼️ Opening quote driver image cropper...');
 
-        const dataUrl = await readQuoteImageAsDataUrl(file);
+        const dataUrl = await openPremiumImageCropper(file, {
+          title: 'CROP QUOTE DRIVER IMAGE',
+          outputSize: 520,
+          quality: 0.82
+        });
 
         avatarInput.value = dataUrl;
         renderQuoteAvatarPreview(dataUrl);
+        renderAdminQuoteCardPreview();
 
-        showToast('✅ Driver image ready');
+        showToast('✅ Cropped quote driver image ready');
 
       } catch (err) {
         showToast(`❌ ${err.message}`);
@@ -4031,8 +4220,8 @@ function ensureDriverProfileModal() {
             <div id="dp-preview" style="width:72px;height:72px;border-radius:50%;background:#151515;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.6rem;flex-shrink:0">🏎️</div>
             <div style="flex:1">
               <input id="dp-file" type="file" accept="image/*" style="display:none">
-              <button type="button" class="act-btn" id="dp-upload" style="width:100%;padding:12px">Upload Driver Image</button>
-              <input id="dp-image" class="edit-product-input" placeholder="or paste image URL" style="margin-top:8px">
+              <button type="button" class="act-btn" id="dp-upload" style="width:100%;padding:12px">Upload & Crop Headshot</button>
+              <input id="dp-image" class="edit-product-input" placeholder="or paste image URL / cropped image data" style="margin-top:8px">
             </div>
           </div>
         </div>
@@ -4055,10 +4244,15 @@ function ensureDriverProfileModal() {
     try {
       const file = modal.querySelector('#dp-file').files?.[0];
       if (!file) return;
-      const dataUrl = await readQuoteImageAsDataUrl(file);
+      showToast('🖼️ Opening headshot cropper...');
+      const dataUrl = await openPremiumImageCropper(file, {
+        title: 'CROP DRIVER HEADSHOT',
+        outputSize: 520,
+        quality: 0.82
+      });
       modal.querySelector('#dp-image').value = dataUrl;
       renderDriverProfilePreview(dataUrl);
-      showToast('✅ Driver image ready');
+      showToast('✅ Cropped driver headshot ready');
     } catch (err) {
       showToast(`❌ ${err.message}`);
     } finally {
