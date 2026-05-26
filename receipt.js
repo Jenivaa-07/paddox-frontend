@@ -1,9 +1,10 @@
 /* ============================================================
-   PADDOX — receipt.js | Order payment receipt
+   PADDOX — receipt.js | Professional single-page receipt
    ============================================================ */
 'use strict';
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
+const BRAND_LOGO_PATH = localStorage.getItem('paddox_brand_logo') || 'assets/logo.png';
 
 function receiptToken() {
   return (
@@ -98,6 +99,28 @@ function paymentStatusLabel(status = '') {
   return labels[key] || 'Pending';
 }
 
+function paymentReference(payment = {}) {
+  return (
+    payment.razorpayPaymentId ||
+    payment.transactionId ||
+    payment.reference ||
+    '-'
+  );
+}
+
+function brandBlock() {
+  return `
+    <div class="receipt-brand">
+      <img class="receipt-brand-img" src="${esc(BRAND_LOGO_PATH)}" alt="PADDOX logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
+      <div class="receipt-brand-fallback" style="display:none">PADDO<span>X</span></div>
+      <div>
+        <div class="receipt-brand-fallback">PADDO<span>X</span></div>
+        <div class="receipt-company">Premium motorsport merchandise<br>Official order payment receipt</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderReceipt(order) {
   const card = document.getElementById('receipt-card');
   const address = order.shippingAddress || {};
@@ -106,13 +129,15 @@ function renderReceipt(order) {
   const status = String(payment.status || 'pending').toLowerCase();
   const paymentLabel = paymentStatusLabel(status);
   const methodLabel = paymentMethodLabel(payment.method);
+  const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : '-';
+  const paidAt = payment.paidAt ? new Date(payment.paidAt).toLocaleString('en-IN') : '-';
+  const orderNo = order.orderNumber || order._id;
 
   const itemsHtml = (order.items || []).map(item => {
     const meta = [
-      `Qty: ${item.quantity || 1}`,
       item.size ? `Size: ${esc(item.size)}` : '',
       item.color ? `Color: ${esc(item.color)}` : ''
-    ].filter(Boolean).join(' · ');
+    ].filter(Boolean).join(' · ') || 'Standard item';
 
     return `
       <div class="receipt-item">
@@ -123,35 +148,37 @@ function renderReceipt(order) {
           <div class="receipt-item-name">${esc(item.name)}</div>
           <div class="receipt-item-meta">${meta}</div>
         </div>
+        <div class="receipt-qty">${Number(item.quantity || 1)}</div>
         <div class="receipt-item-price">${money(Number(item.price || 0) * Number(item.quantity || 1))}</div>
       </div>
     `;
   }).join('');
 
   card.innerHTML = `
-    <div class="receipt-top">
-      <div>
+    <div class="receipt-head">
+      ${brandBlock()}
+      <div class="receipt-title-wrap">
         <div class="receipt-title">ORDER RECEIPT</div>
         <div class="receipt-sub">
-          Receipt for order <strong>#${esc(order.orderNumber || order._id)}</strong><br>
-          ${order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : ''}
+          Receipt No: <strong>#${esc(orderNo)}</strong><br>
+          Issued: ${esc(createdAt)}
         </div>
-      </div>
-      <div class="receipt-status ${status}">
-        <span>Payment Status</span>
-        <strong>${paymentLabel}</strong>
-        <em>${methodLabel}</em>
+        <div class="receipt-status ${status}">
+          <span>Payment Status</span>
+          <strong>${paymentLabel}</strong>
+          <em>${methodLabel}</em>
+        </div>
       </div>
     </div>
 
     <div class="receipt-grid">
       <div class="receipt-box">
         <h3>ORDER DETAILS</h3>
-        <div class="receipt-line"><span>Order ID</span><strong>#${esc(order.orderNumber || order._id)}</strong></div>
+        <div class="receipt-line"><span>Order ID</span><strong>#${esc(orderNo)}</strong></div>
         <div class="receipt-line"><span>Order Status</span><strong>${esc(order.status || 'placed')}</strong></div>
         <div class="receipt-line"><span>Payment Method</span><strong>${esc(methodLabel)}</strong></div>
-        <div class="receipt-line"><span>Transaction ID</span><strong>${esc(payment.razorpayPaymentId || '-')}</strong></div>
-        <div class="receipt-line"><span>Payment Date</span><strong>${payment.paidAt ? new Date(payment.paidAt).toLocaleString('en-IN') : '-'}</strong></div>
+        <div class="receipt-line"><span>Transaction ID</span><strong>${esc(paymentReference(payment))}</strong></div>
+        <div class="receipt-line"><span>Payment Date</span><strong>${esc(paidAt)}</strong></div>
       </div>
 
       <div class="receipt-box">
@@ -167,15 +194,31 @@ function renderReceipt(order) {
     </div>
 
     <div class="receipt-items">
-      ${itemsHtml || '<div class="receipt-item"><div>No items found</div></div>'}
+      <div class="receipt-items-head">
+        <div></div>
+        <div>Item</div>
+        <div>Qty</div>
+        <div>Amount</div>
+      </div>
+      ${itemsHtml || '<div class="receipt-item"><div></div><div>No items found</div><div></div><div></div></div>'}
     </div>
 
-    <div class="receipt-total-box">
-      <div class="receipt-total-row"><span>Subtotal</span><strong>${money(pricing.subtotal)}</strong></div>
-      <div class="receipt-total-row"><span>Shipping</span><strong>${money(pricing.shipping)}</strong></div>
-      <div class="receipt-total-row"><span>Discount</span><strong>${money(pricing.discount)}</strong></div>
-      <div class="receipt-total-row"><span>Tax</span><strong>${money(pricing.tax)}</strong></div>
-      <div class="receipt-total-row receipt-grand"><span>Total</span><strong>${money(pricing.total)}</strong></div>
+    <div class="receipt-bottom">
+      <div class="receipt-note">
+        Thank you for shopping with PADDOX. This receipt confirms that your order has been recorded successfully. Keep this receipt for order reference and support.
+      </div>
+      <div class="receipt-total-box">
+        <div class="receipt-total-row"><span>Subtotal</span><strong>${money(pricing.subtotal)}</strong></div>
+        <div class="receipt-total-row"><span>Shipping</span><strong>${money(pricing.shipping)}</strong></div>
+        <div class="receipt-total-row"><span>Discount</span><strong>${money(pricing.discount)}</strong></div>
+        <div class="receipt-total-row"><span>Tax</span><strong>${money(pricing.tax)}</strong></div>
+        <div class="receipt-total-row receipt-grand"><span>Total Paid</span><strong>${money(pricing.total)}</strong></div>
+      </div>
+    </div>
+
+    <div class="receipt-footer">
+      <div>PADDOX • Motorsport merchandise store</div>
+      <div>Generated from order details • ${esc(createdAt)}</div>
     </div>
   `;
 }
