@@ -13,19 +13,57 @@ let HOME_MARQUEE_LOGOS = [];
 
 const HOME_MARKETING_STATS = { races: 24, products: 50, fans: 250 };
 
+const USE_OFFICIAL_F1_LOGO_LIBRARY = true;
+
 const PADDOX_HOME_TEAMS = [
-  { name: 'PADDOX', slug: 'paddox', color: '#e8002d' },
-  { name: 'Ferrari', slug: 'ferrari', color: '#e8002d' },
-  { name: 'Mercedes', slug: 'mercedes', color: '#00d2be' },
-  { name: 'Red Bull', slug: 'red-bull', color: '#1e5bff' },
-  { name: 'McLaren', slug: 'mclaren', color: '#ff8700' },
-  { name: 'Aston Martin', slug: 'aston-martin', color: '#006f62' },
-  { name: 'Alpine F1 Team', slug: 'alpine', color: '#2293d1' },
-  { name: 'Williams', slug: 'williams', color: '#64c4ff' },
-  { name: 'Haas F1 Team', slug: 'haas', color: '#ffffff' },
-  { name: 'RB F1 Team', slug: 'racing-bulls', color: '#6c4cff' },
-  { name: 'Audi', slug: 'audi', color: '#00e701' },
-  { name: 'Cadillac F1 Team', slug: 'cadillac', color: '#d4af37' },
+  {
+    name: 'PADDOX', slug: 'paddox', color: '#e8002d', type: 'brand',
+    image: 'assets/teams/paddox.svg'
+  },
+  {
+    name: 'Ferrari', slug: 'ferrari', color: '#e8002d',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/ferrari/2025ferrarilogolight.webp'
+  },
+  {
+    name: 'Mercedes', slug: 'mercedes', color: '#00d2be',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mercedes/2025mercedeslogowhite.webp'
+  },
+  {
+    name: 'Red Bull Racing', slug: 'red-bull', color: '#1e5bff',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/redbullracing/2025redbullracinglogowhite.webp'
+  },
+  {
+    name: 'McLaren', slug: 'mclaren', color: '#ff8700',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mclaren/2025mclarenlogowhite.webp'
+  },
+  {
+    name: 'Aston Martin', slug: 'aston-martin', color: '#006f62',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/astonmartin/2025astonmartinlogowhite.webp'
+  },
+  {
+    name: 'Alpine', slug: 'alpine', color: '#2293d1',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/alpine/2025alpinelogowhite.webp'
+  },
+  {
+    name: 'Williams', slug: 'williams', color: '#64c4ff',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/williams/2025williamslogowhite.webp'
+  },
+  {
+    name: 'Haas F1 Team', slug: 'haas', color: '#ffffff',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/haas/2025haaslogowhite.webp'
+  },
+  {
+    name: 'Racing Bulls', slug: 'racing-bulls', color: '#6c4cff',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/racingbulls/2025racingbullslogowhite.webp'
+  },
+  {
+    name: 'Audi', slug: 'audi', color: '#00e701',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/audi/2026audilogowhite.webp'
+  },
+  {
+    name: 'Cadillac', slug: 'cadillac', color: '#d4af37',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/cadillac/2026cadillaclogowhite.webp'
+  },
 ];
 
 function setHomeMarketingStats() {
@@ -1051,23 +1089,23 @@ function renderHomeMarquee() {
   const track = document.getElementById('marquee-track');
   if (!track) return;
 
-  let teams = HOME_MARQUEE_LOGOS.length ? [...HOME_MARQUEE_LOGOS] : [];
+  let teams = [];
 
-  if (!teams.length) {
+  if (USE_OFFICIAL_F1_LOGO_LIBRARY) {
     const apiTeamNames = uniqueCleanNames((HOME_F1.constructors || []).map(normalizeConstructorName));
     const byName = new Map(apiTeamNames.map(name => [name.toLowerCase().replace(/[^a-z0-9]+/g, ''), name]));
     teams = PADDOX_HOME_TEAMS.map(team => {
       const key = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '');
-      const liveName = byName.get(key) || team.name;
+      const liveName = team.type === 'brand' ? team.name : (byName.get(key) || team.name);
       return { ...team, name: liveName };
     });
+  } else {
+    teams = HOME_MARQUEE_LOGOS.length ? [...HOME_MARQUEE_LOGOS] : [...PADDOX_HOME_TEAMS];
   }
 
   const renderLogo = team => {
-    if (team.image) {
-      return `<img class="team-badge-img" src="${escapeHTML(team.image)}" alt="${escapeHTML(team.name)} badge" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"/>`;
-    }
-    return `<img class="team-badge-img" src="${escapeHTML(homeTeamLogoSrc(team.slug))}" data-base="${escapeHTML(`assets/teams/${team.slug}`)}" data-try="0" alt="${escapeHTML(team.name)} badge" loading="lazy" onerror="window.homeLogoFallback && window.homeLogoFallback(this)"/>`;
+    const primary = team.image || homeTeamLogoSrc(team.slug);
+    return `<img class="team-badge-img" src="${escapeHTML(primary)}" data-base="${escapeHTML(`assets/teams/${team.slug}`)}" data-try="0" alt="${escapeHTML(team.name)} badge" loading="lazy" referrerpolicy="no-referrer" onerror="window.homeLogoFallback && window.homeLogoFallback(this)"/>`;
   };
 
   const renderItem = team => `
