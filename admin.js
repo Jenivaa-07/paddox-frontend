@@ -3537,6 +3537,29 @@ function adminQuoteAvatarHTML(value) {
 }
 
 
+
+/* Quote modal close safety */
+document.addEventListener('click', e => {
+  const closeBtn = e.target.closest?.('#quote-close, .quote-close, [data-quote-close]');
+
+  if (closeBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeQuoteModal();
+    return;
+  }
+
+  if (e.target?.id === 'quote-overlay') {
+    closeQuoteModal();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('quote-modal')?.classList.contains('show')) {
+    closeQuoteModal();
+  }
+});
+
 function ensureQuoteModal() {
   if (document.getElementById('quote-modal')) return;
 
@@ -3553,7 +3576,7 @@ function ensureQuoteModal() {
         color:#fff;
         text-align:left;
       ">
-        <button class="preview-close" id="quote-close">✕</button>
+        <button class="preview-close" id="quote-close" type="button" onclick="closeQuoteModal()">✕</button>
 
         <div style="
           font-family:var(--font-d);
@@ -3709,13 +3732,31 @@ function openQuoteModal(id = null) {
   document.getElementById('quote-featured').checked = !!quote?.isFeatured;
   document.getElementById('quote-active').checked = quote?.isActive !== false;
 
-  document.getElementById('quote-modal').classList.add('show');
+  const quoteModal = document.getElementById('quote-modal');
+  quoteModal.style.display = 'block';
+  quoteModal.removeAttribute('aria-hidden');
+  quoteModal.classList.add('show');
 }
 
 function closeQuoteModal() {
-  document.getElementById('quote-modal')?.classList.remove('show');
+  const modal = document.getElementById('quote-modal');
+  const overlay = document.getElementById('quote-overlay');
+
+  if (modal) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (overlay) {
+    overlay.classList.remove('show');
+  }
+
+  document.body.classList.remove('modal-open');
   EDIT_QUOTE_ID = null;
 }
+
+window.closeQuoteModal = closeQuoteModal;
 
 async function saveQuote() {
   try {
