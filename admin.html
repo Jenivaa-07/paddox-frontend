@@ -341,20 +341,24 @@
               <div class="hb-upload-row">
                 <input id="home-logo-upload" type="file" accept="image/*" hidden/>
                 <button class="adm-btn-ghost" onclick="document.getElementById('home-logo-upload').click()">Upload Logo / Logo Sheet</button>
-                <button class="adm-btn-ghost" onclick="cropHomeLogoPreview()">Crop Preview</button>
+                <button class="adm-btn-ghost" onclick="resetHomeLogoCrop()">Reset Crop</button>
+                <button class="adm-btn-ghost" onclick="cropHomeLogoPreview()">Preview Crop</button>
                 <button class="adm-btn-red" onclick="saveHomeMarqueeLogo()">Save Logo</button>
               </div>
 
-              <div class="hb-crop-grid">
+              <div class="hb-crop-grid hb-crop-grid-easy">
                 <div class="hb-crop-panel">
-                  <canvas id="home-logo-canvas" width="760" height="360"></canvas>
+                  <canvas id="home-logo-canvas" width="880" height="430"></canvas>
+                  <div class="hb-crop-help">
+                    Drag to move the crop box · Pull corners to resize · Drag outside to create a new crop
+                  </div>
                 </div>
-                <div class="hb-controls">
-                  <label>Crop X <input id="home-crop-x" type="range" min="0" max="100" value="0"/></label>
-                  <label>Crop Y <input id="home-crop-y" type="range" min="0" max="100" value="0"/></label>
-                  <label>Crop Width <input id="home-crop-w" type="range" min="10" max="100" value="45"/></label>
-                  <label>Crop Height <input id="home-crop-h" type="range" min="10" max="100" value="32"/></label>
-                  <label>Output Zoom <input id="home-crop-zoom" type="range" min="80" max="180" value="110"/></label>
+                <div class="hb-controls hb-controls-easy">
+                  <label>Image Zoom <input id="home-crop-zoom" type="range" min="70" max="220" value="100"/></label>
+                  <div class="hb-crop-tip">
+                    <strong>Easy crop mode</strong>
+                    <span>Upload your full logo sheet, then select only one logo visually. No crop X/Y values needed.</span>
+                  </div>
                   <div class="hb-logo-preview" id="home-logo-preview">Preview</div>
                 </div>
               </div>

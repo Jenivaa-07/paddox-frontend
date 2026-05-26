@@ -4976,6 +4976,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ══════════════════════════════════════
    HOME BRANDING — MARQUEE LOGO MANAGER
+   Easy freestyle visual cropper
 ══════════════════════════════════════ */
 const HOME_MARQUEE_API = 'https://paddox-backend.onrender.com/api/fan/admin/home-marquee-logos';
 let ADMIN_HOME_LOGOS = [];
@@ -4983,6 +4984,24 @@ let HOME_LOGO_EDIT_ID = null;
 let HOME_LOGO_SOURCE = '';
 let HOME_LOGO_CROPPED = '';
 let HOME_LOGO_IMG = null;
+let HOME_LOGO_BIND_DONE = false;
+
+let HOME_CROP = {
+  x: 90,
+  y: 90,
+  w: 360,
+  h: 150,
+  zoom: 1,
+  dragging: false,
+  mode: '',
+  startX: 0,
+  startY: 0,
+  ox: 0,
+  oy: 0,
+  ow: 0,
+  oh: 0,
+  imgBox: null
+};
 
 function homeLogoTokenHeaders() {
   const token = typeof getAdminToken === 'function' ? getAdminToken() : '';
@@ -4992,26 +5011,52 @@ function homeLogoTokenHeaders() {
   };
 }
 
+function resetHomeLogoCrop() {
+  const canvas = document.getElementById('home-logo-canvas');
+  const w = canvas?.width || 880;
+  const h = canvas?.height || 430;
+  HOME_CROP = {
+    ...HOME_CROP,
+    x: Math.round(w * .30),
+    y: Math.round(h * .30),
+    w: Math.round(w * .40),
+    h: Math.round(h * .22),
+    zoom: Number(document.getElementById('home-crop-zoom')?.value || 100) / 100,
+    dragging: false,
+    mode: '',
+    imgBox: null
+  };
+  drawHomeLogoCropCanvas();
+}
+
 function resetHomeLogoForm() {
   HOME_LOGO_EDIT_ID = null;
   HOME_LOGO_SOURCE = '';
   HOME_LOGO_CROPPED = '';
   HOME_LOGO_IMG = null;
-  const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value; };
+
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  };
+
   set('home-logo-name', '');
   set('home-logo-order', String((ADMIN_HOME_LOGOS || []).length + 1));
   set('home-logo-color', '#e8002d');
+  set('home-crop-zoom', '100');
+
   const active = document.getElementById('home-logo-active');
   if (active) active.checked = true;
+
   const file = document.getElementById('home-logo-upload');
   if (file) file.value = '';
-  ['home-crop-x','home-crop-y'].forEach(id => set(id, '0'));
-  set('home-crop-w', '45');
-  set('home-crop-h', '32');
-  set('home-crop-zoom', '110');
+
   const preview = document.getElementById('home-logo-preview');
   if (preview) preview.textContent = 'Preview';
-  drawHomeLogoCropCanvas();
+
+  resetHomeLogoCrop();
+  bindHomeLogoCropper();
+
   if (typeof switchPage === 'function') {
     document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('on'));
     document.querySelectorAll('.adm-nav-item').forEach(n=>n.classList.remove('on'));
@@ -5025,12 +5070,16 @@ function resetHomeLogoForm() {
 async function loadHomeMarqueeLogosAdmin() {
   const tbody = document.getElementById('home-logos-tbody');
   if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading marquee logos…</td></tr>';
+
   try {
     const res = await fetch(HOME_MARQUEE_API, { headers: homeLogoTokenHeaders() });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'Failed to load logos');
+
     ADMIN_HOME_LOGOS = data.data?.logos || data.logos || [];
     renderHomeLogosAdmin();
+    bindHomeLogoCropper();
+
   } catch (err) {
     console.error(err);
     if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Could not load marquee logos</td></tr>';
@@ -5041,14 +5090,17 @@ async function loadHomeMarqueeLogosAdmin() {
 function renderHomeLogosAdmin() {
   const tbody = document.getElementById('home-logos-tbody');
   if (!tbody) return;
+
   const q = String(document.getElementById('home-logo-search')?.value || '').toLowerCase().trim();
   const list = (ADMIN_HOME_LOGOS || [])
     .filter(item => !q || String(item.name || '').toLowerCase().includes(q))
     .sort((a,b) => Number(a.order || 0) - Number(b.order || 0));
+
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No marquee logos added yet</td></tr>';
     return;
   }
+
   tbody.innerHTML = list.map(item => `
     <tr>
       <td><div class="hb-mini-logo"><img src="${item.image || ''}" alt="${item.name || 'Logo'}"/></div></td>
@@ -5068,115 +5120,334 @@ function renderHomeLogosAdmin() {
 function editHomeMarqueeLogo(id) {
   const item = (ADMIN_HOME_LOGOS || []).find(x => String(x._id) === String(id));
   if (!item) return;
+
   HOME_LOGO_EDIT_ID = item._id;
   HOME_LOGO_SOURCE = item.image || '';
   HOME_LOGO_CROPPED = item.image || '';
-  const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value; };
+
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  };
+
   set('home-logo-name', item.name || '');
   set('home-logo-order', Number(item.order || 0));
   set('home-logo-color', item.color || '#e8002d');
+  set('home-crop-zoom', '100');
+
   const active = document.getElementById('home-logo-active');
   if (active) active.checked = item.isActive !== false;
+
   const preview = document.getElementById('home-logo-preview');
   if (preview) preview.innerHTML = item.image ? `<img src="${item.image}" alt="${item.name || 'Logo'}"/>` : 'Preview';
+
   loadHomeLogoImage(item.image || '');
   if (typeof showToast === 'function') showToast('✏️ Logo loaded for editing');
 }
 
 function loadHomeLogoImage(src) {
-  if (!src) { drawHomeLogoCropCanvas(); return; }
+  if (!src) {
+    HOME_LOGO_IMG = null;
+    drawHomeLogoCropCanvas();
+    return;
+  }
+
   const img = new Image();
-  img.onload = () => { HOME_LOGO_IMG = img; drawHomeLogoCropCanvas(); };
-  img.onerror = () => { HOME_LOGO_IMG = null; drawHomeLogoCropCanvas(); };
+  img.onload = () => {
+    HOME_LOGO_IMG = img;
+    resetHomeLogoCrop();
+    cropHomeLogoPreview(false);
+  };
+  img.onerror = () => {
+    HOME_LOGO_IMG = null;
+    drawHomeLogoCropCanvas();
+  };
   img.src = src;
+}
+
+function getHomeCropCanvasPoint(event) {
+  const canvas = document.getElementById('home-logo-canvas');
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * (canvas.width / rect.width),
+    y: (event.clientY - rect.top) * (canvas.height / rect.height)
+  };
+}
+
+function homeCropHitMode(px, py) {
+  const { x, y, w, h } = HOME_CROP;
+  const handle = 18;
+  const nearLeft = Math.abs(px - x) <= handle;
+  const nearRight = Math.abs(px - (x + w)) <= handle;
+  const nearTop = Math.abs(py - y) <= handle;
+  const nearBottom = Math.abs(py - (y + h)) <= handle;
+
+  if (nearLeft && nearTop) return 'nw';
+  if (nearRight && nearTop) return 'ne';
+  if (nearLeft && nearBottom) return 'sw';
+  if (nearRight && nearBottom) return 'se';
+  if (px >= x && px <= x + w && py >= y && py <= y + h) return 'move';
+  return 'new';
+}
+
+function bindHomeLogoCropper() {
+  const canvas = document.getElementById('home-logo-canvas');
+  if (!canvas || HOME_LOGO_BIND_DONE) return;
+  HOME_LOGO_BIND_DONE = true;
+
+  canvas.addEventListener('pointerdown', event => {
+    if (!HOME_LOGO_IMG) return;
+    canvas.setPointerCapture(event.pointerId);
+    const p = getHomeCropCanvasPoint(event);
+    HOME_CROP.dragging = true;
+    HOME_CROP.mode = homeCropHitMode(p.x, p.y);
+    HOME_CROP.startX = p.x;
+    HOME_CROP.startY = p.y;
+    HOME_CROP.ox = HOME_CROP.x;
+    HOME_CROP.oy = HOME_CROP.y;
+    HOME_CROP.ow = HOME_CROP.w;
+    HOME_CROP.oh = HOME_CROP.h;
+
+    if (HOME_CROP.mode === 'new') {
+      HOME_CROP.x = p.x;
+      HOME_CROP.y = p.y;
+      HOME_CROP.w = 1;
+      HOME_CROP.h = 1;
+    }
+    drawHomeLogoCropCanvas();
+  });
+
+  canvas.addEventListener('pointermove', event => {
+    if (!HOME_LOGO_IMG) return;
+    const p = getHomeCropCanvasPoint(event);
+
+    if (!HOME_CROP.dragging) {
+      canvas.style.cursor =
+        homeCropHitMode(p.x, p.y) === 'move' ? 'move' :
+        ['nw','se'].includes(homeCropHitMode(p.x, p.y)) ? 'nwse-resize' :
+        ['ne','sw'].includes(homeCropHitMode(p.x, p.y)) ? 'nesw-resize' :
+        'crosshair';
+      return;
+    }
+
+    const dx = p.x - HOME_CROP.startX;
+    const dy = p.y - HOME_CROP.startY;
+    const minW = 60;
+    const minH = 40;
+    const maxW = canvas.width;
+    const maxH = canvas.height;
+
+    if (HOME_CROP.mode === 'move') {
+      HOME_CROP.x = Math.max(0, Math.min(maxW - HOME_CROP.ow, HOME_CROP.ox + dx));
+      HOME_CROP.y = Math.max(0, Math.min(maxH - HOME_CROP.oh, HOME_CROP.oy + dy));
+    } else if (HOME_CROP.mode === 'new') {
+      HOME_CROP.x = Math.min(HOME_CROP.startX, p.x);
+      HOME_CROP.y = Math.min(HOME_CROP.startY, p.y);
+      HOME_CROP.w = Math.abs(p.x - HOME_CROP.startX);
+      HOME_CROP.h = Math.abs(p.y - HOME_CROP.startY);
+    } else {
+      let x = HOME_CROP.ox;
+      let y = HOME_CROP.oy;
+      let w = HOME_CROP.ow;
+      let h = HOME_CROP.oh;
+
+      if (HOME_CROP.mode.includes('e')) w = HOME_CROP.ow + dx;
+      if (HOME_CROP.mode.includes('s')) h = HOME_CROP.oh + dy;
+      if (HOME_CROP.mode.includes('w')) { x = HOME_CROP.ox + dx; w = HOME_CROP.ow - dx; }
+      if (HOME_CROP.mode.includes('n')) { y = HOME_CROP.oy + dy; h = HOME_CROP.oh - dy; }
+
+      if (w < minW) { if (HOME_CROP.mode.includes('w')) x -= minW - w; w = minW; }
+      if (h < minH) { if (HOME_CROP.mode.includes('n')) y -= minH - h; h = minH; }
+
+      HOME_CROP.x = Math.max(0, Math.min(maxW - minW, x));
+      HOME_CROP.y = Math.max(0, Math.min(maxH - minH, y));
+      HOME_CROP.w = Math.max(minW, Math.min(maxW - HOME_CROP.x, w));
+      HOME_CROP.h = Math.max(minH, Math.min(maxH - HOME_CROP.y, h));
+    }
+
+    drawHomeLogoCropCanvas();
+  });
+
+  const endDrag = () => {
+    if (!HOME_CROP.dragging) return;
+    HOME_CROP.dragging = false;
+    cropHomeLogoPreview(false);
+    drawHomeLogoCropCanvas();
+  };
+
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('pointerleave', () => {
+    if (HOME_CROP.dragging) return;
+    canvas.style.cursor = 'crosshair';
+  });
 }
 
 function drawHomeLogoCropCanvas() {
   const canvas = document.getElementById('home-logo-canvas');
   if (!canvas) return;
+
+  bindHomeLogoCropper();
+
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle = '#050505';
+
+  const bg = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+  bg.addColorStop(0, '#050505');
+  bg.addColorStop(1, '#111');
+  ctx.fillStyle = bg;
   ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.strokeStyle = 'rgba(232,0,45,.35)';
-  ctx.strokeRect(18,18,canvas.width-36,canvas.height-36);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.06)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvas.width; x += 44) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += 44) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
   if (!HOME_LOGO_IMG) {
-    ctx.fillStyle = '#777';
-    ctx.font = '24px sans-serif';
+    ctx.fillStyle = '#999';
+    ctx.font = '26px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Upload a logo sheet or logo image', canvas.width/2, canvas.height/2);
+    ctx.fillText('Upload a logo sheet or single logo', canvas.width/2, canvas.height/2 - 8);
+    ctx.fillStyle = '#666';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('Then drag and resize the red crop box visually', canvas.width/2, canvas.height/2 + 24);
     return;
   }
+
   const img = HOME_LOGO_IMG;
-  const fit = Math.min(canvas.width / img.width, canvas.height / img.height);
+  const zoom = Number(document.getElementById('home-crop-zoom')?.value || 100) / 100;
+  HOME_CROP.zoom = zoom;
+
+  const fit = Math.min(canvas.width / img.width, canvas.height / img.height) * zoom;
   const dw = img.width * fit;
   const dh = img.height * fit;
   const dx = (canvas.width - dw) / 2;
   const dy = (canvas.height - dh) / 2;
+  HOME_CROP.imgBox = { dx, dy, dw, dh, fit };
+
   ctx.drawImage(img, dx, dy, dw, dh);
 
-  const x = Number(document.getElementById('home-crop-x')?.value || 0) / 100;
-  const y = Number(document.getElementById('home-crop-y')?.value || 0) / 100;
-  const w = Number(document.getElementById('home-crop-w')?.value || 45) / 100;
-  const h = Number(document.getElementById('home-crop-h')?.value || 32) / 100;
-  const cw = Math.max(40, Math.min(canvas.width * w, canvas.width - 24));
-  const ch = Math.max(40, Math.min(canvas.height * h, canvas.height - 24));
-  const cx = 12 + x * Math.max(1, canvas.width - cw - 24);
-  const cy = 12 + y * Math.max(1, canvas.height - ch - 24);
-  ctx.fillStyle = 'rgba(0,0,0,.45)';
-  ctx.fillRect(0,0,canvas.width,cy);
-  ctx.fillRect(0,cy,cx,ch);
-  ctx.fillRect(cx+cw,cy,canvas.width-(cx+cw),ch);
-  ctx.fillRect(0,cy+ch,canvas.width,canvas.height-(cy+ch));
+  const { x, y, w, h } = HOME_CROP;
+
+  ctx.fillStyle = 'rgba(0,0,0,.56)';
+  ctx.fillRect(0,0,canvas.width,y);
+  ctx.fillRect(0,y,x,h);
+  ctx.fillRect(x+w,y,canvas.width-(x+w),h);
+  ctx.fillRect(0,y+h,canvas.width,canvas.height-(y+h));
+
   ctx.strokeStyle = '#e8002d';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(cx, cy, cw, ch);
-  ctx.fillStyle = '#e8002d';
-  ctx.fillRect(cx, cy-24, 94, 24);
+  ctx.lineWidth = 4;
+  ctx.strokeRect(x, y, w, h);
+
+  ctx.fillStyle = 'rgba(232,0,45,.98)';
+  ctx.fillRect(x, Math.max(0, y-30), 158, 30);
   ctx.fillStyle = '#fff';
-  ctx.font = '12px sans-serif';
+  ctx.font = '700 13px sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('CROP AREA', cx+8, cy-8);
+  ctx.fillText('SELECTED LOGO', x+12, Math.max(20, y-10));
+
+  const handles = [
+    [x,y], [x+w,y], [x,y+h], [x+w,y+h]
+  ];
+  handles.forEach(([hx, hy]) => {
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#e8002d';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  });
 }
 
-function cropHomeLogoPreview() {
+function cropHomeLogoPreview(showToastMessage = true) {
   if (!HOME_LOGO_IMG) {
-    if (typeof showToast === 'function') showToast('Upload an image first');
+    if (showToastMessage && typeof showToast === 'function') showToast('Upload an image first');
     return;
   }
-  const img = HOME_LOGO_IMG;
-  const x = Number(document.getElementById('home-crop-x')?.value || 0) / 100;
-  const y = Number(document.getElementById('home-crop-y')?.value || 0) / 100;
-  const w = Number(document.getElementById('home-crop-w')?.value || 45) / 100;
-  const h = Number(document.getElementById('home-crop-h')?.value || 32) / 100;
-  const zoom = Number(document.getElementById('home-crop-zoom')?.value || 110) / 100;
 
-  const sw = Math.max(10, Math.min(img.width * w / zoom, img.width));
-  const sh = Math.max(10, Math.min(img.height * h / zoom, img.height));
-  const sx = x * Math.max(1, img.width - sw);
-  const sy = y * Math.max(1, img.height - sh);
+  const img = HOME_LOGO_IMG;
+  const canvas = document.getElementById('home-logo-canvas');
+  if (!canvas) return;
+
+  const box = HOME_CROP.imgBox;
+  if (!box) {
+    drawHomeLogoCropCanvas();
+    return;
+  }
+
+  const crop = {
+    x: Math.max(HOME_CROP.x, box.dx),
+    y: Math.max(HOME_CROP.y, box.dy),
+    r: Math.min(HOME_CROP.x + HOME_CROP.w, box.dx + box.dw),
+    b: Math.min(HOME_CROP.y + HOME_CROP.h, box.dy + box.dh)
+  };
+
+  const visibleW = crop.r - crop.x;
+  const visibleH = crop.b - crop.y;
+
+  if (visibleW < 8 || visibleH < 8) {
+    if (showToastMessage && typeof showToast === 'function') showToast('Move crop box over the logo');
+    return;
+  }
+
+  const sx = (crop.x - box.dx) / box.fit;
+  const sy = (crop.y - box.dy) / box.fit;
+  const sw = visibleW / box.fit;
+  const sh = visibleH / box.fit;
 
   const out = document.createElement('canvas');
-  out.width = 720;
+  out.width = 760;
   out.height = 280;
+
   const octx = out.getContext('2d');
   octx.clearRect(0,0,out.width,out.height);
   octx.fillStyle = '#050505';
   octx.fillRect(0,0,out.width,out.height);
-  octx.drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
-  HOME_LOGO_CROPPED = out.toDataURL('image/png', .92);
+
+  const outFit = Math.min(out.width / sw, out.height / sh) * .88;
+  const dw = sw * outFit;
+  const dh = sh * outFit;
+  const dx = (out.width - dw) / 2;
+  const dy = (out.height - dh) / 2;
+
+  octx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+
+  HOME_LOGO_CROPPED = out.toDataURL('image/png', .94);
+
   const preview = document.getElementById('home-logo-preview');
   if (preview) preview.innerHTML = `<img src="${HOME_LOGO_CROPPED}" alt="Logo preview"/>`;
-  if (typeof showToast === 'function') showToast('✓ Logo crop preview ready');
+
+  if (showToastMessage && typeof showToast === 'function') showToast('✓ Crop preview ready');
 }
 
 async function saveHomeMarqueeLogo() {
   const name = String(document.getElementById('home-logo-name')?.value || '').trim();
-  if (!name) { if (typeof showToast === 'function') showToast('Enter team/brand name'); return; }
+  if (!name) {
+    if (typeof showToast === 'function') showToast('Enter team/brand name');
+    return;
+  }
+
+  if (HOME_LOGO_IMG) cropHomeLogoPreview(false);
+
   if (!HOME_LOGO_CROPPED) {
     if (HOME_LOGO_SOURCE) HOME_LOGO_CROPPED = HOME_LOGO_SOURCE;
-    else { if (typeof showToast === 'function') showToast('Upload and crop logo first'); return; }
+    else {
+      if (typeof showToast === 'function') showToast('Upload and crop logo first');
+      return;
+    }
   }
+
   const payload = {
     name,
     image: HOME_LOGO_CROPPED,
@@ -5184,17 +5455,21 @@ async function saveHomeMarqueeLogo() {
     color: String(document.getElementById('home-logo-color')?.value || '#e8002d').trim(),
     isActive: !!document.getElementById('home-logo-active')?.checked,
   };
+
   try {
     const res = await fetch(HOME_LOGO_EDIT_ID ? `${HOME_MARQUEE_API}/${HOME_LOGO_EDIT_ID}` : HOME_MARQUEE_API, {
       method: HOME_LOGO_EDIT_ID ? 'PUT' : 'POST',
       headers: homeLogoTokenHeaders(),
       body: JSON.stringify(payload)
     });
+
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'Save failed');
+
     if (typeof showToast === 'function') showToast('✓ Marquee logo saved');
     resetHomeLogoForm();
     loadHomeMarqueeLogosAdmin();
+
   } catch (err) {
     console.error(err);
     if (typeof showToast === 'function') showToast(`❌ ${err.message}`);
@@ -5203,12 +5478,15 @@ async function saveHomeMarqueeLogo() {
 
 async function deleteHomeMarqueeLogo(id, name = 'logo') {
   if (!confirm(`Delete ${name} from home marquee?`)) return;
+
   try {
     const res = await fetch(`${HOME_MARQUEE_API}/${id}`, { method:'DELETE', headers: homeLogoTokenHeaders() });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
+
     if (typeof showToast === 'function') showToast('✓ Marquee logo deleted');
     loadHomeMarqueeLogosAdmin();
+
   } catch (err) {
     console.error(err);
     if (typeof showToast === 'function') showToast(`❌ ${err.message}`);
@@ -5216,16 +5494,19 @@ async function deleteHomeMarqueeLogo(id, name = 'logo') {
 }
 
 document.addEventListener('input', e => {
-  if (['home-crop-x','home-crop-y','home-crop-w','home-crop-h','home-crop-zoom'].includes(e.target?.id)) {
+  if (e.target?.id === 'home-crop-zoom') {
     drawHomeLogoCropCanvas();
+    cropHomeLogoPreview(false);
   }
   if (e.target?.id === 'home-logo-search') renderHomeLogosAdmin();
 });
 
 document.addEventListener('change', e => {
   if (e.target?.id !== 'home-logo-upload') return;
+
   const file = e.target.files?.[0];
   if (!file) return;
+
   const reader = new FileReader();
   reader.onload = () => {
     HOME_LOGO_SOURCE = String(reader.result || '');
@@ -5234,3 +5515,4 @@ document.addEventListener('change', e => {
   };
   reader.readAsDataURL(file);
 });
+

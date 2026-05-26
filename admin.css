@@ -552,13 +552,18 @@ select.form-input option{background:var(--dark2)}
 .hb-upload-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;position:relative}
 .adm-btn-ghost{padding:11px 18px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#fff;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-weight:700;transition:all var(--tr)}
 .adm-btn-ghost:hover{border-color:var(--red);background:rgba(232,0,45,.08)}
-.hb-crop-grid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px;position:relative}
-.hb-crop-panel{background:#050505;border:1px solid rgba(255,255,255,.08);min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-#home-logo-canvas{width:100%;height:auto;display:block;background:#050505}
-.hb-controls{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);padding:14px;display:flex;flex-direction:column;gap:12px}
+.hb-crop-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;position:relative}
+.hb-crop-panel{background:#050505;border:1px solid rgba(255,255,255,.08);min-height:300px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;flex-direction:column}
+#home-logo-canvas{width:100%;height:auto;display:block;background:#050505;cursor:crosshair;touch-action:none;user-select:none}
+.hb-controls{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);padding:14px;display:flex;flex-direction:column;gap:14px}
 .hb-controls input[type=range]{width:100%;accent-color:var(--red)}
-.hb-logo-preview{min-height:82px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:var(--muted2);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;padding:10px;overflow:hidden}
-.hb-logo-preview img{max-width:100%;max-height:70px;object-fit:contain}
+.hb-crop-help{width:100%;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.55);color:var(--muted2);font-size:.78rem;line-height:1.4;text-align:center}
+.hb-controls-easy label{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);padding:12px}
+.hb-crop-tip{border:1px solid rgba(232,0,45,.22);background:rgba(232,0,45,.06);padding:13px;color:var(--muted2);font-size:.8rem;line-height:1.45}
+.hb-crop-tip strong{display:block;color:#fff;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.hb-crop-tip span{display:block}
+.hb-logo-preview{min-height:104px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:var(--muted2);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;padding:10px;overflow:hidden}
+.hb-logo-preview img{max-width:100%;max-height:92px;object-fit:contain}
 .hb-mini-logo{width:84px;height:44px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:5px}
 .hb-mini-logo img{max-width:100%;max-height:100%;object-fit:contain}
 .hb-status{display:inline-flex;padding:4px 9px;border:1px solid rgba(255,255,255,.12);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-size:.65rem;color:#fff}
