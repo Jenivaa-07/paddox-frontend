@@ -10,6 +10,34 @@ let PRODUCTS = [];
 let QUOTES = [];
 let HOME_F1 = { schedule: [], drivers: [], standings: [], constructors: [], nextRace: null };
 
+const HOME_MARKETING_STATS = { races: 24, products: 50, fans: 250 };
+
+const PADDOX_HOME_TEAMS = [
+  { name: 'PADDOX', slug: 'paddox', color: '#e8002d' },
+  { name: 'Ferrari', slug: 'ferrari', color: '#e8002d' },
+  { name: 'Mercedes', slug: 'mercedes', color: '#00d2be' },
+  { name: 'Red Bull', slug: 'red-bull', color: '#1e5bff' },
+  { name: 'McLaren', slug: 'mclaren', color: '#ff8700' },
+  { name: 'Aston Martin', slug: 'aston-martin', color: '#006f62' },
+  { name: 'Alpine F1 Team', slug: 'alpine', color: '#2293d1' },
+  { name: 'Williams', slug: 'williams', color: '#64c4ff' },
+  { name: 'Haas F1 Team', slug: 'haas', color: '#ffffff' },
+  { name: 'RB F1 Team', slug: 'racing-bulls', color: '#6c4cff' },
+  { name: 'Audi', slug: 'audi', color: '#00e701' },
+  { name: 'Cadillac F1 Team', slug: 'cadillac', color: '#d4af37' },
+];
+
+function setHomeMarketingStats() {
+  setCounter(document.getElementById('home-race-count'), HOME_MARKETING_STATS.races);
+  setCounter(document.getElementById('home-product-count'), HOME_MARKETING_STATS.products);
+  setCounter(document.getElementById('home-fan-count'), HOME_MARKETING_STATS.fans);
+}
+
+function homeTeamLogoSrc(slug = '') {
+  return `assets/teams/${slug}.svg`;
+}
+
+
 function safeText(value, fallback = '') {
   const text = String(value ?? '').trim();
   return text && text !== '[object Object]' ? text : fallback;
@@ -171,7 +199,7 @@ async function loadHomeProducts() {
     });
     PRODUCTS = ordered.slice(0, 4).map(normalizeHomeProduct).filter(p => p.id);
     renderHomeProducts();
-    updateHomeProductStat(PRODUCTS.length);
+    /* Home hero stats stay as brand milestones, not raw API counts. */
   } catch (err) {
     console.warn('Home products unavailable', err);
     PRODUCTS = [];
@@ -214,7 +242,7 @@ async function loadHomeF1Data() {
     HOME_F1.standings = standingsData.value?.data?.standings || standingsData.value?.data?.drivers || standingsData.value?.data || [];
     HOME_F1.constructors = constructorData.value?.data?.standings || constructorData.value?.data?.constructors || constructorData.value?.data || [];
     renderHomeMarquee();
-    updateHomeRaceStat(HOME_F1.drivers.length || HOME_F1.standings.length || 0);
+    /* Current grid count can include reserve/test drivers in APIs, so hero keeps brand milestones. */
     updateTickerFromAPI();
   } catch (err) {
     console.warn('Home F1 data unavailable', err);
@@ -232,7 +260,7 @@ async function loadHomeFanStories() {
     ]);
     const posts = feedData.value?.data?.posts || feedData.value?.data?.feed || feedData.value?.posts || [];
     const leaders = leaderboardData.value?.data?.leaderboard || leaderboardData.value?.data || [];
-    updateHomeFanStat(leaders.length || 0);
+    /* Fan count is shown as a brand/community milestone on the landing hero. */
     const stories = posts.slice(0, 3);
     if (!stories.length) {
       grid.innerHTML = '<div class="home-empty-card">Fan stories will appear here after community posts are added.</div>';
@@ -982,20 +1010,24 @@ function renderHomeMarquee() {
   const track = document.getElementById('marquee-track');
   if (!track) return;
 
-  const constructorTeams = (HOME_F1.constructors || []).map(normalizeConstructorName);
-  const standingTeams = (HOME_F1.standings || []).map(raw => normalizeDriverFromAny(raw).team);
-  const driverTeams = (HOME_F1.drivers || []).map(raw => normalizeDriverFromAny(raw).team);
-  const teams = uniqueCleanNames([...constructorTeams, ...standingTeams, ...driverTeams]).slice(0, 11);
+  const apiTeamNames = uniqueCleanNames((HOME_F1.constructors || []).map(normalizeConstructorName));
+  const byName = new Map(apiTeamNames.map(name => [name.toLowerCase().replace(/[^a-z0-9]+/g, ''), name]));
 
-  const items = ['🏁 PADDOX', ...teams.map(t => `${teamEmojiFromName(t)} ${t}`)];
+  const teams = PADDOX_HOME_TEAMS.map(team => {
+    const key = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const liveName = byName.get(key) || team.name;
+    return { ...team, name: liveName };
+  });
 
-  if (items.length <= 1) {
-    track.innerHTML = '<span>🏁 PADDOX</span><span>🏎️ Team list loading...</span>';
-    return;
-  }
+  const renderItem = team => `
+    <span class="marquee-team" title="${escapeHTML(team.name)}">
+      <img class="team-badge-img" src="${escapeHTML(homeTeamLogoSrc(team.slug))}" alt="${escapeHTML(team.name)} badge" loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"/>
+      <i class="team-badge-dot" style="--team-color:${escapeHTML(team.color)}"></i>
+      ${escapeHTML(team.name)}
+    </span>`;
 
-  const doubled = [...items, ...items, ...items];
-  track.innerHTML = doubled.map(item => `<span>${escapeHTML(item)}</span>`).join('');
+  track.innerHTML = [...teams, ...teams, ...teams].map(renderItem).join('');
 }
 
 function updateTickerFromAPI() {
@@ -1054,6 +1086,7 @@ document.querySelectorAll('.size-btn').forEach(btn => {
    HOME DATA INIT
 ══════════════════════════════════════ */
 (function initHomeData() {
+  setHomeMarketingStats();
   if (!window.PaddoxAPI) {
     console.warn('Paddox API not available on home page');
     renderHomeProducts();

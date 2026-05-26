@@ -1011,19 +1011,40 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   border-bottom: 1px solid rgba(255,255,255,.1);
 }
 .marquee-track {
-  display: inline-block;
-  animation: marqueeRoll 72s linear infinite;
+  display: inline-flex;
+  align-items: center;
+  animation: marqueeRoll 118s linear infinite;
+  will-change: transform;
 }
-.marquee-track span {
+.marquee-track:hover { animation-play-state: paused; }
+.marquee-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-condensed);
   font-size: .82rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: rgba(255,255,255,.85);
-  margin: 0 28px;
+  color: rgba(255,255,255,.9);
+  margin: 0 32px;
 }
-@keyframes marqueeRoll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.team-badge-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: rgba(7,7,7,.18);
+}
+.team-badge-dot {
+  width: 12px;
+  height: 12px;
+  display: none;
+  border-radius: 999px;
+  background: var(--team-color, #fff);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--team-color, #fff), transparent 45%);
+}
+@keyframes marqueeRoll { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
 
 /* ══════════════════════════════════════
    QUOTE SECTION
@@ -1156,16 +1177,16 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 .exp-card:hover .exp-card-img { transform: scale(1.06); filter: brightness(.4); }
 
 .exp-img-1 {
-  background-image: url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80');
+  background-image: linear-gradient(135deg, rgba(232,0,45,.12), rgba(7,7,7,.25)), url('assets/home/wallpapers.svg');
 }
 .exp-img-2 {
-  background-image: url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80');
+  background-image: linear-gradient(135deg, rgba(0,210,190,.12), rgba(7,7,7,.25)), url('assets/home/driver-stats.svg');
 }
 .exp-img-3 {
-  background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80');
+  background-image: linear-gradient(135deg, rgba(201,168,76,.14), rgba(7,7,7,.25)), url('assets/home/race-calendar.svg');
 }
 .exp-img-4 {
-  background-image: url('https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1200&q=80');
+  background-image: linear-gradient(135deg, rgba(108,76,255,.14), rgba(7,7,7,.28)), url('assets/home/fan-community.svg');
 }
 
 .exp-card-overlay {
@@ -1414,17 +1435,23 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 }
 .footer-socials { display: flex; gap: 10px; }
 .soc-link {
-  width: 36px; height: 36px;
+  width: 38px; height: 38px;
   border: 1px solid var(--gray2);
   display: flex; align-items: center; justify-content: center;
-  font-size: .8rem;
   color: var(--muted2);
   transition: all var(--transition);
+  background: rgba(255,255,255,.02);
+}
+.soc-link svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
 }
 .soc-link:hover {
   border-color: var(--red);
   color: var(--white);
-  background: rgba(232,0,45,.1);
+  background: rgba(232,0,45,.12);
+  box-shadow: 0 0 18px rgba(232,0,45,.18);
   transform: translateY(-2px);
 }
 .footer-col-title {
