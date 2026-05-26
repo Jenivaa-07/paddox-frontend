@@ -54,6 +54,13 @@
           </a>
         </li>
         <li>
+          <a href="pitwall.html" class="nav-link">
+            <span class="nl-icon">📡</span>
+            <span class="nl-label">Pit Wall</span>
+            <span class="nl-underline"></span>
+          </a>
+        </li>
+        <li>
           <a href="account.html" class="nav-link">
             <span class="nl-icon">👤</span>
             <span class="nl-label">Account</span>
@@ -98,6 +105,7 @@
       <a href="index.html" class="mob-link active">🏠 Home</a>
       <a href="shop.html" class="mob-link">🛒 Shop</a>
       <a href="fanhub.html" class="mob-link">🎮 Fan Hub</a>
+      <a href="pitwall.html" class="mob-link">📡 Pit Wall</a>
       <a href="account.html" class="mob-link">👤 Account</a>
     </div>
   </nav>
@@ -153,21 +161,21 @@
     <!-- Stats -->
     <div class="hero-stats animate-fade-up delay-6">
       <div class="stat-item">
-        <div class="stat-num" data-count="24">0</div>
+        <div class="stat-num" id="home-race-count" data-count="0">0</div>
         <div class="stat-sep">GP</div>
-        <div class="stat-label">Circuits</div>
+        <div class="stat-label">Races</div>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
-        <div class="stat-num" data-count="500">0</div>
+        <div class="stat-num" id="home-product-count" data-count="0">0</div>
         <div class="stat-sep">+</div>
         <div class="stat-label">Products</div>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
-        <div class="stat-num" data-count="120">0</div>
-        <div class="stat-sep">K</div>
-        <div class="stat-label">Fans</div>
+        <div class="stat-num" id="home-fan-count" data-count="0">0</div>
+        <div class="stat-sep">+</div>
+        <div class="stat-label">Fan Ranks</div>
       </div>
     </div>
 
@@ -239,18 +247,9 @@
 
   <!-- ░░ MARQUEE STRIP ░░ -->
   <div class="marquee-strip" aria-hidden="true">
-    <div class="marquee-track">
-      <span>🏎️ FORMULA 1</span><span>⚡ SPEED</span>
-      <span>🏆 CHAMPIONS</span><span>🔴 FERRARI</span>
-      <span>🔵 RED BULL</span><span>⚫ MERCEDES</span>
-      <span>🟠 MCLAREN</span><span>🟢 ASTON MARTIN</span>
-      <span>🏁 PADDOX</span><span>🎯 FAN UNIVERSE</span>
-      <!-- repeated for seamless loop -->
-      <span>🏎️ FORMULA 1</span><span>⚡ SPEED</span>
-      <span>🏆 CHAMPIONS</span><span>🔴 FERRARI</span>
-      <span>🔵 RED BULL</span><span>⚫ MERCEDES</span>
-      <span>🟠 MCLAREN</span><span>🟢 ASTON MARTIN</span>
-      <span>🏁 PADDOX</span><span>🎯 FAN UNIVERSE</span>
+    <div class="marquee-track" id="marquee-track">
+      <span>🏁 PADDOX</span>
+      <span>🏎️ Loading current grid...</span>
     </div>
   </div>
 
@@ -263,14 +262,13 @@
         <div class="section-label" style="text-align:center;margin-bottom:16px">💬 Driver of the Day</div>
         <div class="quote-mark">"</div>
         <p class="quote-text" id="quote-text">
-          I have no idea how I did that lap. Sometimes the car just talks to
-          you and you have to listen.
+          Loading latest fan quote...
         </p>
         <div class="quote-driver">
-          <div class="quote-avatar" id="quote-avatar">🔵</div>
+          <div class="quote-avatar" id="quote-avatar">🏁</div>
           <div>
-            <div class="quote-name" id="quote-name">Max Verstappen</div>
-            <div class="quote-team" id="quote-team">Oracle Red Bull Racing</div>
+            <div class="quote-name" id="quote-name">PADDOX</div>
+            <div class="quote-team" id="quote-team">Fan Quote Library</div>
           </div>
         </div>
         <div class="quote-dots" id="quote-dots"></div>
@@ -314,7 +312,7 @@
           <div class="exp-card-content">
             <div class="exp-icon animate-icon">📅</div>
             <h3 class="exp-title">Race Calendar</h3>
-            <p class="exp-desc">Full 2025 season calendar with live countdowns &amp; results.</p>
+            <p class="exp-desc">Live season calendar with countdowns, sessions &amp; results.</p>
             <a href="fanhub.html" class="exp-link">View Calendar →</a>
           </div>
         </div>
@@ -341,52 +339,8 @@
           <h2 class="section-title">WHAT FANS <span class="accent">SAY</span></h2>
         </div>
       </div>
-      <div class="testi-grid">
-        <div class="testi-card reveal-up delay-1">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">
-            "The quality of the merch is insane. My Verstappen cap arrived in
-            3 days and it looks exactly like what the team wears on the grid."
-          </p>
-          <div class="testi-author">
-            <div class="testi-avatar">AM</div>
-            <div>
-              <div class="testi-name">Arjun Mehta</div>
-              <div class="testi-loc">📍 Mumbai, India</div>
-            </div>
-          </div>
-          <div class="testi-badge">Verified Purchase ✓</div>
-        </div>
-        <div class="testi-card reveal-up delay-2">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">
-            "The digital wallpaper packs are absolutely stunning. My entire
-            setup is now full Paddox F1 art. Worth every rupee."
-          </p>
-          <div class="testi-author">
-            <div class="testi-avatar">PS</div>
-            <div>
-              <div class="testi-name">Priya Sharma</div>
-              <div class="testi-loc">📍 Bengaluru, India</div>
-            </div>
-          </div>
-          <div class="testi-badge">Verified Purchase ✓</div>
-        </div>
-        <div class="testi-card reveal-up delay-3">
-          <div class="testi-stars">★★★★☆</div>
-          <p class="testi-text">
-            "Been collecting F1 diecasts for 10 years. Paddox has the best
-            curated selection I've found anywhere in India. Incredible."
-          </p>
-          <div class="testi-author">
-            <div class="testi-avatar">RD</div>
-            <div>
-              <div class="testi-name">Rohan Das</div>
-              <div class="testi-loc">📍 Chennai, India</div>
-            </div>
-          </div>
-          <div class="testi-badge">Verified Purchase ✓</div>
-        </div>
+      <div class="testi-grid" id="testi-grid">
+        <div class="home-empty-card reveal-up">Loading fan stories...</div>
       </div>
     </div>
   </section>
@@ -485,7 +439,7 @@
 
     <div class="footer-bottom">
       <p class="footer-copy">
-        © 2025 Paddox. All rights reserved. Not affiliated with Formula 1® or FOM.
+        © <span id="footer-year">2026</span> Paddox. All rights reserved. Not affiliated with Formula 1® or FOM.
       </p>
       <div class="footer-links">
         <a href="#">Privacy Policy</a>

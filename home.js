@@ -5,89 +5,246 @@
 
 'use strict';
 
-/* ── PRODUCTS DATA ── */
-const PRODUCTS = [
-  {
-    id: 1,
-    name: 'SF-25 Podium Cap',
-    team: 'Scuderia Ferrari',
-    cat: 'apparel',
-    price: 2499,
-    rating: 5,
-    badge: 'new',
-    emoji: '🧢',
-    gradient: 'linear-gradient(135deg,#1a0800,#2d1200)',
-    image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&q=80',
-    desc: 'Official replica Ferrari team cap. Premium embroidered logo, moisture-wicking fabric. Worn on the Monaco podium.'
-  },
-  {
-    id: 2,
-    name: 'RB20 Team Tee',
-    team: 'Oracle Red Bull Racing',
-    cat: 'apparel',
-    price: 3999,
-    rating: 5,
-    badge: 'hot',
-    emoji: '👕',
-    gradient: 'linear-gradient(135deg,#00071a,#00102e)',
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80',
-    desc: 'Premium cotton tee featuring the Red Bull Racing livery. Lightweight and breathable for everyday wear.'
-  },
-  {
-    id: 3,
-    name: 'W15 Collector Diecast',
-    team: 'Mercedes-AMG Petronas',
-    cat: 'collectibles',
-    price: 8999,
-    rating: 4,
-    badge: 'ltd',
-    emoji: '🏆',
-    gradient: 'linear-gradient(135deg,#001a14,#002d22)',
-    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80',
-    desc: '1:43 scale die-cast model of the W15. Limited to 500 units worldwide. Comes in collector display box.'
-  },
-  {
-    id: 4,
-    name: 'Monaco Circuit Watch',
-    team: 'Paddox Edition',
-    cat: 'accessories',
-    price: 18999,
-    rating: 5,
-    badge: 'ltd',
-    emoji: '⌚',
-    gradient: 'linear-gradient(135deg,#0d0d0d,#1a1a1a)',
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80',
-    desc: 'Limited edition timepiece featuring Monaco circuit etching on dial. Swiss quartz movement. Only 200 units.'
-  }
-];
+/* ── HOME DATA STATE: loaded from backend only ── */
+let PRODUCTS = [];
+let QUOTES = [];
+let HOME_F1 = { schedule: [], drivers: [], standings: [], nextRace: null };
 
-/* ── QUOTES DATA ── */
-const QUOTES = [
-  {
-    text: 'I have no idea how I did that lap. Sometimes the car just talks to you and you have to listen.',
-    driver: 'Max Verstappen',
-    team: 'Oracle Red Bull Racing',
-    av: '🔵'
-  },
-  {
-    text: 'Every time I put on the helmet, I feel like I can conquer the world. That is what racing does to you.',
-    driver: 'Lewis Hamilton',
-    team: 'Scuderia Ferrari',
-    av: '⭐'
-  },
-  {
-    text: 'Monaco is not just a race — it is a statement. You either belong here or you do not.',
-    driver: 'Charles Leclerc',
-    team: 'Scuderia Ferrari',
-    av: '🔴'
-  },
-  {
-    text: 'Pressure is nothing more than the shadow of great opportunity. I embrace every moment on track.',
-    driver: 'Lando Norris',
-    team: 'McLaren F1 Team',
-    av: '🟠'
+function safeText(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text && text !== '[object Object]' ? text : fallback;
+}
+
+function escapeHTML(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function homeMoney(value) {
+  return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+}
+
+function productEmoji(category = '') {
+  const c = String(category || '').toLowerCase();
+  if (c.includes('apparel') || c.includes('shirt') || c.includes('hoodie')) return '👕';
+  if (c.includes('collect')) return '🏆';
+  if (c.includes('access')) return '⌚';
+  if (c.includes('poster')) return '🖼️';
+  return '🏎️';
+}
+
+function teamEmojiFromName(name = '') {
+  const n = String(name || '').toLowerCase();
+  if (n.includes('ferrari')) return '🔴';
+  if (n.includes('red bull')) return '🔵';
+  if (n.includes('mclaren')) return '🟠';
+  if (n.includes('mercedes')) return '⚫';
+  if (n.includes('aston')) return '🟢';
+  if (n.includes('alpine')) return '🔷';
+  if (n.includes('williams')) return '🔵';
+  if (n.includes('haas')) return '⚪';
+  if (n.includes('racing bulls') || n === 'rb') return '🟣';
+  if (n.includes('sauber') || n.includes('kick') || n.includes('audi')) return '🟢';
+  if (n.includes('cadillac')) return '🟡';
+  return '🏁';
+}
+
+function normalizeHomeProduct(p = {}) {
+  const image = Array.isArray(p.images)
+    ? (p.images[0]?.url || p.images[0] || '')
+    : (p.image || '');
+  const price = Number(p.effectivePrice || p.salePrice || p.price || 0);
+  return {
+    id: p._id || p.id,
+    name: safeText(p.name, 'Paddox Product'),
+    team: safeText(p.team, 'PADDOX'),
+    cat: safeText(p.category, 'merch'),
+    price,
+    rating: Math.max(0, Math.min(5, Math.round(Number(p.ratings?.average || p.rating || 0)))) || 5,
+    badge: safeText(p.badge || (p.onSale ? 'sale' : ''), ''),
+    emoji: safeText(p.emoji, productEmoji(p.category)),
+    image,
+    gradient: 'linear-gradient(135deg,#111,#1a1a1a)',
+    desc: safeText(p.shortDesc || p.description, 'Premium PADDOX merchandise.'),
+  };
+}
+
+function getNestedString(obj = {}, keys = []) {
+  for (const key of keys) {
+    const value = obj?.[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (value && typeof value === 'object') {
+      const nested = getNestedString(value, keys);
+      if (nested) return nested;
+    }
   }
-];
+  return '';
+}
+
+function extractHomeTeamName(raw = {}) {
+  const candidates = [
+    raw.team,
+    raw.constructor,
+    raw.Constructor,
+    raw.Constructors,
+    raw.teamName,
+    raw.constructorName,
+  ];
+  for (const item of candidates) {
+    if (typeof item === 'string' && item.trim()) return item.trim();
+    if (item && typeof item === 'object') {
+      const found = getNestedString(item, ['name','constructorName','teamName','fullName']);
+      if (found) return found;
+    }
+    if (Array.isArray(item)) {
+      for (const child of item) {
+        const found = extractHomeTeamName({ team: child });
+        if (found) return found;
+      }
+    }
+  }
+  return '';
+}
+
+function normalizeDriverFromAny(raw = {}) {
+  const driver = raw.driver || raw.Driver || raw;
+  const given = safeText(driver.givenName || driver.firstName, '');
+  const family = safeText(driver.familyName || driver.lastName, '');
+  const name = safeText(driver.fullName || driver.name || `${given} ${family}`.trim() || raw.name, 'F1 Driver');
+  const code = safeText(driver.code || driver.abbreviation || raw.code, name.split(' ').map(x => x[0]).join('').slice(0, 3).toUpperCase());
+  const team = safeText(extractHomeTeamName(raw), 'Team');
+  return { name, code, team };
+}
+
+async function loadHomeProducts() {
+  const grid = document.getElementById('products-grid');
+  if (grid) grid.innerHTML = '<div class="home-empty-card">Loading featured products...</div>';
+  try {
+    const data = await PaddoxAPI.product.getAll({ limit: 4, featured: true });
+    const list = data?.data?.products || data?.data || data?.products || [];
+    PRODUCTS = list.slice(0, 4).map(normalizeHomeProduct).filter(p => p.id);
+    renderHomeProducts();
+    updateHomeProductStat(list.length || PRODUCTS.length);
+  } catch (err) {
+    console.warn('Home products unavailable', err);
+    PRODUCTS = [];
+    renderHomeProducts();
+  }
+}
+
+async function loadHomeQuotes() {
+  try {
+    const res = await fetch('https://paddox-backend.onrender.com/api/fan/quotes');
+    const data = await res.json();
+    const list = data?.data?.quotes || data?.quotes || data?.data || [];
+    QUOTES = list
+      .filter(q => q && q.text)
+      .slice(0, 6)
+      .map(q => ({
+        text: safeText(q.text),
+        driver: safeText(q.driver || q.name, 'PADDOX Fan'),
+        team: safeText(q.team || q.category, 'Fan Quote'),
+        av: q.avatar && String(q.avatar).startsWith('data:image') ? '🏁' : safeText(q.avatar, teamEmojiFromName(q.team)),
+      }));
+    renderHomeQuotes();
+  } catch (err) {
+    console.warn('Home quotes unavailable', err);
+    QUOTES = [];
+    renderHomeQuotes();
+  }
+}
+
+async function loadHomeF1Data() {
+  try {
+    const [scheduleData, driverData, standingsData] = await Promise.allSettled([
+      PaddoxAPI.f1.schedule(),
+      PaddoxAPI.f1.drivers(),
+      PaddoxAPI.f1.driverStands(),
+    ]);
+    HOME_F1.schedule = scheduleData.value?.data?.races || scheduleData.value?.data || [];
+    HOME_F1.drivers = driverData.value?.data?.drivers || driverData.value?.data || [];
+    HOME_F1.standings = standingsData.value?.data?.standings || standingsData.value?.data?.drivers || standingsData.value?.data || [];
+    renderHomeMarquee();
+    updateHomeRaceStat(HOME_F1.schedule.length || 0);
+    updateTickerFromAPI();
+  } catch (err) {
+    console.warn('Home F1 data unavailable', err);
+    renderHomeMarquee();
+  }
+}
+
+async function loadHomeFanStories() {
+  const grid = document.getElementById('testi-grid');
+  if (!grid) return;
+  try {
+    const [feedData, leaderboardData] = await Promise.allSettled([
+      PaddoxAPI.fan.getFeed(),
+      PaddoxAPI.fan.leaderboard(),
+    ]);
+    const posts = feedData.value?.data?.posts || feedData.value?.data?.feed || feedData.value?.posts || [];
+    const leaders = leaderboardData.value?.data?.leaderboard || leaderboardData.value?.data || [];
+    updateHomeFanStat(leaders.length || 0);
+    const stories = posts.slice(0, 3);
+    if (!stories.length) {
+      grid.innerHTML = '<div class="home-empty-card">Fan stories will appear here after community posts are added.</div>';
+      return;
+    }
+    grid.innerHTML = stories.map((post, i) => {
+      const user = post.user || post.author || {};
+      const name = safeText(`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || post.username, 'PADDOX Fan');
+      const initials = name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
+      const text = safeText(post.text || post.content || post.message, '');
+      const date = post.createdAt ? new Date(post.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : 'Community post';
+      return `
+        <div class="testi-card reveal-up delay-${i + 1}">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"${escapeHTML(text)}"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">${escapeHTML(initials || 'PF')}</div>
+            <div>
+              <div class="testi-name">${escapeHTML(name)}</div>
+              <div class="testi-loc">🏁 ${escapeHTML(date)}</div>
+            </div>
+          </div>
+          <div class="testi-badge">Fan Community</div>
+        </div>`;
+    }).join('');
+    initRevealObserver(grid.querySelectorAll('.reveal-up'));
+  } catch (err) {
+    console.warn('Fan stories unavailable', err);
+    grid.innerHTML = '<div class="home-empty-card">Fan stories are unavailable right now.</div>';
+  }
+}
+
+function setCounter(el, value) {
+  if (!el) return;
+  el.dataset.count = String(value || 0);
+  el.textContent = '0';
+  animateSingleCounter(el);
+}
+
+function updateHomeRaceStat(count) { setCounter(document.getElementById('home-race-count'), count); }
+function updateHomeProductStat(count) { setCounter(document.getElementById('home-product-count'), count); }
+function updateHomeFanStat(count) { setCounter(document.getElementById('home-fan-count'), count); }
+
+function animateSingleCounter(el) {
+  const target = parseInt(el.dataset.count || '0', 10);
+  if (!target) { el.textContent = '0'; return; }
+  let current = 0;
+  const dur = 900;
+  const step = 20;
+  const inc = Math.max(1, target / (dur / step));
+  clearInterval(el._counterTimer);
+  el._counterTimer = setInterval(() => {
+    current = Math.min(current + inc, target);
+    el.textContent = String(Math.floor(current));
+    if (current >= target) clearInterval(el._counterTimer);
+  }, step);
+}
 
 /* ══════════════════════════════════════
    PARTICLES
@@ -275,67 +432,50 @@ const QUOTES = [
 
 /* Real F1 countdown — auto-detects next race */
 async function initRealCountdown() {
+  const nameEl = document.querySelector('.cs-name');
+  const circEl = document.querySelector('.cs-circuit');
+  const chipEl = document.querySelector('.cs-chip');
+  const flagEl = document.querySelector('.cs-flag');
+
   try {
     const data = await PaddoxAPI.f1.nextRace();
-    if (!data.success || !data.data.race) return;
+    if (!data.success || !data.data?.race) throw new Error('No next race data');
 
     const raceDate = new Date(data.data.raceDate);
-    const race     = data.data.race;
+    const race = data.data.race;
+    HOME_F1.nextRace = race;
 
-    /* Update race name if element exists */
- const flagEl = document.querySelector('.cs-flag');
-if (flagEl) flagEl.textContent = race.flag;
-
-const nameEl = document.querySelector('.cs-name');
-if (nameEl) nameEl.textContent = race.name;
-
-const circEl = document.querySelector('.cs-circuit');
-if (circEl) circEl.textContent = `${race.circuit} · ${race.location}, ${race.country}`;
-
-const chipEl = document.querySelector('.cs-chip');
-if (chipEl) chipEl.textContent = `Round ${race.round} · Season ${race.season}`;
+    if (flagEl) flagEl.textContent = race.flag || '🏁';
+    if (nameEl) nameEl.textContent = race.name || 'Next Grand Prix';
+    if (circEl) circEl.textContent = [race.circuit, race.location, race.country].filter(Boolean).join(' · ');
+    if (chipEl) chipEl.textContent = `Round ${race.round || '—'} · Season ${race.season || new Date().getFullYear()}`;
 
     function tick() {
       const diff = raceDate - new Date();
-      if (diff <= 0) return;
-      const d = Math.floor(diff / 864e5);
-      const h = Math.floor((diff % 864e5) / 36e5);
-      const m = Math.floor((diff % 36e5) / 6e4);
-      const s = Math.floor((diff % 6e4) / 1e3);
-      const cdD = document.getElementById('cd-d');
-      const cdH = document.getElementById('cd-h');
-      const cdM = document.getElementById('cd-m');
-      const cdS = document.getElementById('cd-s');
-      if (cdD) cdD.textContent = String(d).padStart(2,'0');
-      if (cdH) cdH.textContent = String(h).padStart(2,'0');
-      if (cdM) cdM.textContent = String(m).padStart(2,'0');
-      if (cdS) cdS.textContent = String(s).padStart(2,'0');
+      const values = diff > 0
+        ? [
+            Math.floor(diff / 864e5),
+            Math.floor((diff % 864e5) / 36e5),
+            Math.floor((diff % 36e5) / 6e4),
+            Math.floor((diff % 6e4) / 1e3),
+          ]
+        : [0, 0, 0, 0];
+      ['d','h','m','s'].forEach((key, i) => {
+        const el = document.getElementById(`cd-${key}`);
+        if (el) el.textContent = String(values[i]).padStart(2, '0');
+      });
     }
     tick();
     setInterval(tick, 1000);
-
   } catch (err) {
-    console.warn('Countdown API failed — using fallback');
-    /* Original hardcoded fallback */
-    function fallbackTick() {
-      const race = new Date('2026-12-31T13:00:00Z');
-      const diff = race - new Date();
-      if (diff <= 0) return;
-      const cdD = document.getElementById('cd-d');
-      const cdH = document.getElementById('cd-h');
-      const cdM = document.getElementById('cd-m');
-      const cdS = document.getElementById('cd-s');
-      if (cdD) cdD.textContent = String(Math.floor(diff/864e5)).padStart(2,'0');
-      if (cdH) cdH.textContent = String(Math.floor((diff%864e5)/36e5)).padStart(2,'0');
-      if (cdM) cdM.textContent = String(Math.floor((diff%36e5)/6e4)).padStart(2,'0');
-      if (cdS) cdS.textContent = String(Math.floor((diff%6e4)/1e3)).padStart(2,'0');
-    }
-    fallbackTick();
-    setInterval(fallbackTick, 1000);
+    console.warn('Countdown unavailable', err);
+    if (flagEl) flagEl.textContent = '🏁';
+    if (nameEl) nameEl.textContent = 'Race schedule unavailable';
+    if (circEl) circEl.textContent = 'Please check again shortly.';
+    if (chipEl) chipEl.textContent = 'F1 schedule data unavailable';
   }
 }
 
-/* Replace old updateCD() call with this */
 initRealCountdown();
 
 /* ══════════════════════════════════════
@@ -430,68 +570,68 @@ initRealCountdown();
 })();
 
 /* ══════════════════════════════════════
-   PRODUCTS RENDER
+   PRODUCTS RENDER — API backed
 ══════════════════════════════════════ */
-(function initProducts() {
+function renderHomeProducts() {
   const grid = document.getElementById('products-grid');
   if (!grid) return;
 
+  if (!PRODUCTS.length) {
+    grid.innerHTML = '<div class="home-empty-card">Featured products are unavailable right now.</div>';
+    return;
+  }
+
   grid.innerHTML = PRODUCTS.map((p, i) => `
-    <div class="pcard reveal-up delay-${i + 1}" data-id="${p.id}">
+    <div class="pcard reveal-up delay-${i + 1}" data-id="${escapeHTML(p.id)}">
       <div class="pcard-img-wrap">
-        <img
-          class="pcard-img"
-          src="${p.image}"
-          alt="${p.name}"
-          loading="lazy"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-        />
-        <div class="pcard-gradient" style="background:${p.gradient};display:none">
-          ${p.emoji}
+        ${p.image ? `
+          <img
+            class="pcard-img"
+            src="${escapeHTML(p.image)}"
+            alt="${escapeHTML(p.name)}"
+            loading="lazy"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+          />` : ''}
+        <div class="pcard-gradient" style="background:${p.gradient};${p.image ? 'display:none' : 'display:flex'}">
+          ${escapeHTML(p.emoji)}
         </div>
         <div class="pcard-img-overlay"></div>
         <div class="pcard-overlay">
-          <button class="ov-btn add-to-cart" data-id="${p.id}">Add to Cart 🛒</button>
-          <button class="ov-btn outline quick-view" data-id="${p.id}">Quick View 👁️</button>
+          <button class="ov-btn add-to-cart" data-id="${escapeHTML(p.id)}">Add to Cart 🛒</button>
+          <button class="ov-btn outline quick-view" data-id="${escapeHTML(p.id)}">Quick View 👁️</button>
         </div>
       </div>
-      ${p.badge ? `<span class="pbadge b-${p.badge}">${p.badge.toUpperCase()}</span>` : ''}
-      <button class="pwish" data-id="${p.id}" aria-label="Wishlist">
+      ${p.badge ? `<span class="pbadge b-${escapeHTML(p.badge)}">${escapeHTML(String(p.badge).toUpperCase())}</span>` : ''}
+      <button class="pwish" data-id="${escapeHTML(p.id)}" aria-label="Wishlist">
         <span class="icon-anim">♡</span>
       </button>
       <div class="pcard-info">
-        <div class="pcard-team">${p.team}</div>
-        <div class="pcard-name">${p.name}</div>
+        <div class="pcard-team">${escapeHTML(p.team)}</div>
+        <div class="pcard-name">${escapeHTML(p.name)}</div>
         <div class="pcard-foot">
-          <div class="pcard-price">₹${p.price.toLocaleString('en-IN')}</div>
+          <div class="pcard-price">${homeMoney(p.price)}</div>
           <div class="pcard-rating">${'★'.repeat(p.rating)}${'☆'.repeat(5 - p.rating)}</div>
         </div>
       </div>
     </div>
   `).join('');
 
-  /* Trigger reveal observer for newly injected cards */
   initRevealObserver(grid.querySelectorAll('.reveal-up'));
 
-  /* Add to cart */
   grid.querySelectorAll('.add-to-cart').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const id = parseInt(btn.dataset.id, 10);
-      addToCart(id);
+      addToCart(btn.dataset.id);
     });
   });
 
-  /* Quick view */
   grid.querySelectorAll('.quick-view').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const id = parseInt(btn.dataset.id, 10);
-      openModal(id);
+      openModal(btn.dataset.id);
     });
   });
 
-  /* Wishlist */
   grid.querySelectorAll('.pwish').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -502,14 +642,10 @@ initRealCountdown();
     });
   });
 
-  /* Card click → modal */
   grid.querySelectorAll('.pcard').forEach(card => {
-    card.addEventListener('click', () => {
-      const id = parseInt(card.dataset.id, 10);
-      openModal(id);
-    });
+    card.addEventListener('click', () => openModal(card.dataset.id));
   });
-})();
+}
 
 /* shared reveal observer helper */
 function initRevealObserver(elements) {
@@ -544,13 +680,13 @@ function updateCartBadge() {
 }
 
 function addToCart(id) {
-  const product = PRODUCTS.find(p => p.id === id);
+  const product = PRODUCTS.find(p => String(p.id) === String(id));
   if (!product) return;
-  const existing = cart.find(x => x.id === id);
+  const existing = cart.find(x => String(x.id) === String(id));
   if (existing) {
     existing.qty++;
   } else {
-    cart.push({ id, name: product.name, price: product.price, qty: 1, emoji: product.emoji });
+    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, emoji: product.emoji, image: product.image });
   }
   saveCart();
   showToast(`✓ ${product.name} added to cart!`);
@@ -565,7 +701,7 @@ const modalOverlay = document.getElementById('modal-overlay');
 const modalClose   = document.getElementById('modal-close');
 
 function openModal(id) {
-  const p = PRODUCTS.find(x => x.id === id);
+  const p = PRODUCTS.find(x => String(x.id) === String(id));
   if (!p || !modalOverlay) return;
 
   /* Populate */
@@ -577,7 +713,7 @@ function openModal(id) {
 
   /* Image */
   const wrap = document.getElementById('modal-img-wrap');
-  wrap.style.background = p.gradient;
+  wrap.style.background = p.gradient || 'linear-gradient(135deg,#111,#1a1a1a)';
   wrap.innerHTML = `
     <img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85)"
       onerror="this.outerHTML='<span style=font-size:6rem>${p.emoji}</span>'"/>
@@ -626,9 +762,9 @@ document.addEventListener('keydown', e => {
 });
 
 /* ══════════════════════════════════════
-   DRIVER QUOTES
+   DRIVER QUOTES — API backed
 ══════════════════════════════════════ */
-(function initQuotes() {
+function renderHomeQuotes() {
   let current = 0;
   const textEl = document.getElementById('quote-text');
   const avEl   = document.getElementById('quote-avatar');
@@ -636,6 +772,15 @@ document.addEventListener('keydown', e => {
   const teamEl = document.getElementById('quote-team');
   const dotsEl = document.getElementById('quote-dots');
   if (!textEl) return;
+
+  if (!QUOTES.length) {
+    textEl.textContent = 'Fan quotes are unavailable right now.';
+    if (avEl) avEl.textContent = '🏁';
+    if (nameEl) nameEl.textContent = 'PADDOX';
+    if (teamEl) teamEl.textContent = 'Quote Library';
+    if (dotsEl) dotsEl.innerHTML = '';
+    return;
+  }
 
   function renderDots() {
     if (!dotsEl) return;
@@ -650,38 +795,38 @@ document.addEventListener('keydown', e => {
   function setQuote(i, animate = true) {
     current = i;
     const q = QUOTES[i];
+    const apply = () => {
+      textEl.textContent = q.text;
+      if (avEl) avEl.textContent = q.av || '🏁';
+      if (nameEl) nameEl.textContent = q.driver;
+      if (teamEl) teamEl.textContent = q.team;
+      renderDots();
+    };
 
-    if (animate && textEl) {
+    if (animate) {
       textEl.style.opacity = '0';
       textEl.style.transform = 'translateY(10px)';
       setTimeout(() => {
-        textEl.textContent        = q.text;
-        if (avEl)   avEl.textContent   = q.av;
-        if (nameEl) nameEl.textContent = q.driver;
-        if (teamEl) teamEl.textContent = q.team;
-        textEl.style.opacity   = '1';
+        apply();
+        textEl.style.opacity = '1';
         textEl.style.transform = 'translateY(0)';
         textEl.style.transition = 'opacity .4s, transform .4s';
-        renderDots();
       }, 250);
     } else {
-      if (textEl) textEl.textContent  = q.text;
-      if (avEl)   avEl.textContent    = q.av;
-      if (nameEl) nameEl.textContent  = q.driver;
-      if (teamEl) teamEl.textContent  = q.team;
-      renderDots();
+      apply();
     }
   }
 
   setQuote(0, false);
-  const autoplay = setInterval(() => setQuote((current + 1) % QUOTES.length), 6500);
-
-  /* Pause autoplay on hover */
+  let autoplay = setInterval(() => setQuote((current + 1) % QUOTES.length), 6500);
   const section = document.getElementById('quote-section');
   if (section) {
     section.addEventListener('mouseenter', () => clearInterval(autoplay));
+    section.addEventListener('mouseleave', () => {
+      autoplay = setInterval(() => setQuote((current + 1) % QUOTES.length), 6500);
+    });
   }
-})();
+}
 
 /* ══════════════════════════════════════
    NEWSLETTER
@@ -786,30 +931,73 @@ function showToast(msg) {
 }
 
 /* ══════════════════════════════════════
-   TICKER ROTATION
+   MARQUEE + TICKER — API backed
 ══════════════════════════════════════ */
-(function initTicker() {
+function renderHomeMarquee() {
+  const track = document.getElementById('marquee-track');
+  if (!track) return;
+
+  const source = HOME_F1.standings.length ? HOME_F1.standings : HOME_F1.drivers;
+  const teams = [];
+  const drivers = [];
+
+  source.forEach(raw => {
+    const d = normalizeDriverFromAny(raw);
+    if (d.team && !teams.some(t => t.toLowerCase() === d.team.toLowerCase())) teams.push(d.team);
+    if (d.name && !drivers.some(x => x.toLowerCase() === d.name.toLowerCase())) drivers.push(d.name);
+  });
+
+  const items = ['🏁 PADDOX', '🏎️ FORMULA 1', ...teams.map(t => `${teamEmojiFromName(t)} ${t}`), ...drivers.slice(0, 22).map(d => `🏎️ ${d}`)];
+
+  if (items.length <= 2) {
+    track.innerHTML = '<span>🏁 PADDOX</span><span>🏎️ Current grid loading...</span>';
+    return;
+  }
+
+  const doubled = [...items, ...items];
+  track.innerHTML = doubled.map(item => `<span>${escapeHTML(item)}</span>`).join('');
+}
+
+function updateTickerFromAPI() {
   const tickerEl = document.getElementById('ticker-text');
   if (!tickerEl) return;
-  const tickers = [
-  '🏁 Live F1 data connected',
-  '🏎️ Next race loading from API',
-  '📅 2026 race calendar active',
-  '🔥 Paddox live deployment working'
-];
+
+  const messages = [];
+  if (HOME_F1.nextRace) {
+    messages.push(`🏁 Next race: ${HOME_F1.nextRace.name || 'Grand Prix'}`);
+  }
+  if (HOME_F1.schedule.length) {
+    messages.push(`📅 ${HOME_F1.schedule.length} races loaded from the season calendar`);
+  }
+  if (HOME_F1.standings.length) {
+    const leader = normalizeDriverFromAny(HOME_F1.standings[0]);
+    messages.push(`🏆 Current standings leader: ${leader.name}`);
+  }
+  if (PRODUCTS.length) {
+    messages.push(`🛒 ${PRODUCTS.length} featured products available now`);
+  }
+
+  if (!messages.length) {
+    tickerEl.textContent = '🏁 PADDOX data loading...';
+    return;
+  }
+
   let ti = 0;
-  setInterval(() => {
-    ti = (ti + 1) % tickers.length;
+  tickerEl.textContent = messages[0];
+  clearInterval(tickerEl._tickerTimer);
+  tickerEl._tickerTimer = setInterval(() => {
+    ti = (ti + 1) % messages.length;
     tickerEl.style.opacity = '0';
     tickerEl.style.transform = 'translateY(6px)';
     setTimeout(() => {
-      tickerEl.textContent = tickers[ti];
+      tickerEl.textContent = messages[ti];
       tickerEl.style.opacity = '1';
       tickerEl.style.transform = 'translateY(0)';
       tickerEl.style.transition = 'opacity .4s, transform .4s';
     }, 300);
   }, 4000);
-})();
+}
+
 
 /* ══════════════════════════════════════
    SIZE BUTTON INTERACTION
@@ -820,6 +1008,26 @@ document.querySelectorAll('.size-btn').forEach(btn => {
     btn.classList.add('active');
   });
 });
+
+
+/* ══════════════════════════════════════
+   HOME DATA INIT
+══════════════════════════════════════ */
+(function initHomeData() {
+  if (!window.PaddoxAPI) {
+    console.warn('Paddox API not available on home page');
+    renderHomeProducts();
+    renderHomeQuotes();
+    renderHomeMarquee();
+    return;
+  }
+  loadHomeProducts().then(updateTickerFromAPI);
+  loadHomeQuotes();
+  loadHomeF1Data();
+  loadHomeFanStories();
+  const yearEl = document.getElementById('footer-year');
+  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+})();
 
 /* ══════════════════════════════════════
    GLOBAL INIT LOG

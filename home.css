@@ -1656,3 +1656,47 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   .nl-form       { flex-direction: column; }
   .nl-btn        { width: 100%; justify-content: center; }
 }
+/* ══════════════════════════════════════
+   HOME API EMPTY STATES + DYNAMIC MARQUEE POLISH
+══════════════════════════════════════ */
+.home-empty-card {
+  grid-column: 1 / -1;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  color: var(--muted2);
+  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(232,0,45,.035));
+  border: 1px solid rgba(255,255,255,.08);
+  font-family: var(--font-condensed);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.marquee-track {
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-track span {
+  white-space: nowrap;
+}
+
+.pcard-gradient {
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  height: 100%;
+}
+
+@media print {
+  .marquee-strip,
+  #particles-canvas,
+  #page-overlay,
+  #navbar,
+  .scroll-cue {
+    display: none !important;
+  }
+}
