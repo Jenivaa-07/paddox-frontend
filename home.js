@@ -8,7 +8,7 @@
 /* ── HOME DATA STATE: loaded from backend only ── */
 let PRODUCTS = [];
 let QUOTES = [];
-let HOME_F1 = { schedule: [], drivers: [], standings: [], nextRace: null };
+let HOME_F1 = { schedule: [], drivers: [], standings: [], constructors: [], nextRace: null };
 
 function safeText(value, fallback = '') {
   const text = String(value ?? '').trim();
@@ -120,15 +120,58 @@ function normalizeDriverFromAny(raw = {}) {
   return { name, code, team };
 }
 
+function normalizeConstructorName(raw = {}) {
+  return (
+    safeText(raw.name || raw.constructorName || raw.teamName || raw.fullName, '') ||
+    safeText(raw.constructor?.name || raw.Constructor?.name, '') ||
+    safeText(raw.Constructor?.constructorName || raw.constructor?.constructorName, '') ||
+    extractHomeTeamName(raw)
+  );
+}
+
+function uniqueCleanNames(values = []) {
+  const seen = new Set();
+  const out = [];
+  values.forEach(value => {
+    const name = safeText(value, '');
+    if (!name) return;
+    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    out.push(name);
+  });
+  return out;
+}
+
+function renderQuoteAvatar(el, avatar, driver = 'PADDOX') {
+  if (!el) return;
+  const av = safeText(avatar, '🏁');
+  const isImage = av.startsWith('http://') || av.startsWith('https://') || av.startsWith('data:image/');
+  if (isImage) {
+    el.classList.add('has-image');
+    el.innerHTML = `<img src="${escapeHTML(av)}" alt="${escapeHTML(driver)}" loading="lazy"/>`;
+  } else {
+    el.classList.remove('has-image');
+    el.textContent = av || '🏁';
+  }
+}
+
 async function loadHomeProducts() {
   const grid = document.getElementById('products-grid');
-  if (grid) grid.innerHTML = '<div class="home-empty-card">Loading featured products...</div>';
+  if (grid) grid.innerHTML = '<div class="home-empty-card">Loading shop products...</div>';
   try {
-    const data = await PaddoxAPI.product.getAll({ limit: 4, featured: true });
+    const data = await PaddoxAPI.product.getAll({ limit: 12 });
     const list = data?.data?.products || data?.data || data?.products || [];
-    PRODUCTS = list.slice(0, 4).map(normalizeHomeProduct).filter(p => p.id);
+    const active = list.filter(p => p && p.isActive !== false);
+    const ordered = [...active].sort((a, b) => {
+      const fa = a.isFeatured ? 1 : 0;
+      const fb = b.isFeatured ? 1 : 0;
+      if (fb !== fa) return fb - fa;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+    PRODUCTS = ordered.slice(0, 4).map(normalizeHomeProduct).filter(p => p.id);
     renderHomeProducts();
-    updateHomeProductStat(list.length || PRODUCTS.length);
+    updateHomeProductStat(PRODUCTS.length);
   } catch (err) {
     console.warn('Home products unavailable', err);
     PRODUCTS = [];
@@ -148,7 +191,7 @@ async function loadHomeQuotes() {
         text: safeText(q.text),
         driver: safeText(q.driver || q.name, 'PADDOX Fan'),
         team: safeText(q.team || q.category, 'Fan Quote'),
-        av: q.avatar && String(q.avatar).startsWith('data:image') ? '🏁' : safeText(q.avatar, teamEmojiFromName(q.team)),
+        av: safeText(q.avatar || q.image || q.driverImage, teamEmojiFromName(q.team)),
       }));
     renderHomeQuotes();
   } catch (err) {
@@ -160,16 +203,18 @@ async function loadHomeQuotes() {
 
 async function loadHomeF1Data() {
   try {
-    const [scheduleData, driverData, standingsData] = await Promise.allSettled([
+    const [scheduleData, driverData, standingsData, constructorData] = await Promise.allSettled([
       PaddoxAPI.f1.schedule(),
       PaddoxAPI.f1.drivers(),
       PaddoxAPI.f1.driverStands(),
+      PaddoxAPI.f1.consStands(),
     ]);
     HOME_F1.schedule = scheduleData.value?.data?.races || scheduleData.value?.data || [];
     HOME_F1.drivers = driverData.value?.data?.drivers || driverData.value?.data || [];
     HOME_F1.standings = standingsData.value?.data?.standings || standingsData.value?.data?.drivers || standingsData.value?.data || [];
+    HOME_F1.constructors = constructorData.value?.data?.standings || constructorData.value?.data?.constructors || constructorData.value?.data || [];
     renderHomeMarquee();
-    updateHomeRaceStat(HOME_F1.schedule.length || 0);
+    updateHomeRaceStat(HOME_F1.drivers.length || HOME_F1.standings.length || 0);
     updateTickerFromAPI();
   } catch (err) {
     console.warn('Home F1 data unavailable', err);
@@ -775,7 +820,7 @@ function renderHomeQuotes() {
 
   if (!QUOTES.length) {
     textEl.textContent = 'Fan quotes are unavailable right now.';
-    if (avEl) avEl.textContent = '🏁';
+    renderQuoteAvatar(avEl, '🏁', 'PADDOX');
     if (nameEl) nameEl.textContent = 'PADDOX';
     if (teamEl) teamEl.textContent = 'Quote Library';
     if (dotsEl) dotsEl.innerHTML = '';
@@ -797,7 +842,7 @@ function renderHomeQuotes() {
     const q = QUOTES[i];
     const apply = () => {
       textEl.textContent = q.text;
-      if (avEl) avEl.textContent = q.av || '🏁';
+      renderQuoteAvatar(avEl, q.av || '🏁', q.driver);
       if (nameEl) nameEl.textContent = q.driver;
       if (teamEl) teamEl.textContent = q.team;
       renderDots();
@@ -937,24 +982,19 @@ function renderHomeMarquee() {
   const track = document.getElementById('marquee-track');
   if (!track) return;
 
-  const source = HOME_F1.standings.length ? HOME_F1.standings : HOME_F1.drivers;
-  const teams = [];
-  const drivers = [];
+  const constructorTeams = (HOME_F1.constructors || []).map(normalizeConstructorName);
+  const standingTeams = (HOME_F1.standings || []).map(raw => normalizeDriverFromAny(raw).team);
+  const driverTeams = (HOME_F1.drivers || []).map(raw => normalizeDriverFromAny(raw).team);
+  const teams = uniqueCleanNames([...constructorTeams, ...standingTeams, ...driverTeams]).slice(0, 11);
 
-  source.forEach(raw => {
-    const d = normalizeDriverFromAny(raw);
-    if (d.team && !teams.some(t => t.toLowerCase() === d.team.toLowerCase())) teams.push(d.team);
-    if (d.name && !drivers.some(x => x.toLowerCase() === d.name.toLowerCase())) drivers.push(d.name);
-  });
+  const items = ['🏁 PADDOX', ...teams.map(t => `${teamEmojiFromName(t)} ${t}`)];
 
-  const items = ['🏁 PADDOX', '🏎️ FORMULA 1', ...teams.map(t => `${teamEmojiFromName(t)} ${t}`), ...drivers.slice(0, 22).map(d => `🏎️ ${d}`)];
-
-  if (items.length <= 2) {
-    track.innerHTML = '<span>🏁 PADDOX</span><span>🏎️ Current grid loading...</span>';
+  if (items.length <= 1) {
+    track.innerHTML = '<span>🏁 PADDOX</span><span>🏎️ Team list loading...</span>';
     return;
   }
 
-  const doubled = [...items, ...items];
+  const doubled = [...items, ...items, ...items];
   track.innerHTML = doubled.map(item => `<span>${escapeHTML(item)}</span>`).join('');
 }
 
@@ -967,14 +1007,14 @@ function updateTickerFromAPI() {
     messages.push(`🏁 Next race: ${HOME_F1.nextRace.name || 'Grand Prix'}`);
   }
   if (HOME_F1.schedule.length) {
-    messages.push(`📅 ${HOME_F1.schedule.length} races loaded from the season calendar`);
+    messages.push(`📅 ${HOME_F1.schedule.length} Grand Prix rounds this season`);
   }
   if (HOME_F1.standings.length) {
     const leader = normalizeDriverFromAny(HOME_F1.standings[0]);
     messages.push(`🏆 Current standings leader: ${leader.name}`);
   }
   if (PRODUCTS.length) {
-    messages.push(`🛒 ${PRODUCTS.length} featured products available now`);
+    messages.push(`🛒 Latest shop drops are live now`);
   }
 
   if (!messages.length) {
