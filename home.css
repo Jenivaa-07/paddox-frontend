@@ -1004,93 +1004,123 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 ══════════════════════════════════════ */
 .marquee-strip {
   position: relative;
-  background: rgba(10,10,10,.58);
-  backdrop-filter: blur(18px) saturate(1.25);
-  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  min-height: 94px;
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(circle at 18% 50%, rgba(232,0,45,.16), transparent 34%),
+    linear-gradient(180deg, rgba(18,18,18,.78), rgba(5,5,5,.72));
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
   padding: 18px 0;
   overflow: hidden;
   white-space: nowrap;
-  border-top: 1px solid rgba(255,255,255,.08);
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), inset 0 -1px 0 rgba(255,255,255,.04);
+  border-top: 1px solid rgba(255,255,255,.09);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 26px 70px rgba(0,0,0,.36);
 }
-.marquee-strip::before {
+.marquee-strip::before,
+.marquee-strip::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(255,255,255,.04), transparent 18%, transparent 82%, rgba(255,255,255,.04));
+  top: 0;
+  bottom: 0;
+  width: 180px;
+  z-index: 3;
   pointer-events: none;
+}
+.marquee-strip::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(7,7,7,.96), transparent);
+}
+.marquee-strip::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(7,7,7,.96), transparent);
 }
 .marquee-track {
   display: inline-flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 18px;
-  animation: marqueeRoll 160s linear infinite;
+  gap: 22px;
+  padding: 0 90px;
+  animation: marqueeRoll 185s linear infinite;
   will-change: transform;
 }
 .marquee-track:hover { animation-play-state: paused; }
 .marquee-team {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  min-height: 58px;
-  padding: 10px 18px;
+  gap: 16px;
+  min-height: 70px;
+  padding: 11px 24px 11px 12px;
   border-radius: 999px;
   font-family: var(--font-condensed);
-  font-size: .9rem;
+  font-size: 1rem;
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 3.2px;
   text-transform: uppercase;
-  color: rgba(255,255,255,.96);
-  background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.03));
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow: 0 10px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.06);
+  color: rgba(255,255,255,.98);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.032));
+  border: 1px solid rgba(255,255,255,.105);
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.085);
 }
 .marquee-team-name {
   display: inline-block;
   transform: translateY(1px);
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
 }
 .team-logo-wrap {
-  width: 38px;
-  height: 38px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.12);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 14px rgba(0,0,0,.24);
+  background:
+    radial-gradient(circle at 42% 32%, rgba(255,255,255,.96), rgba(238,238,238,.76) 54%, rgba(190,190,190,.42));
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    0 7px 18px rgba(0,0,0,.38),
+    0 0 18px rgba(255,255,255,.08);
   flex-shrink: 0;
 }
 .team-badge-img {
-  width: 28px;
-  height: 28px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
   display: block;
   background: transparent;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,.4)) brightness(1.08) contrast(1.05);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.42)) contrast(1.08) saturate(1.06);
 }
 .team-badge-dot {
-  width: 14px;
-  height: 14px;
+  width: 22px;
+  height: 22px;
   display: none;
   border-radius: 999px;
   background: var(--team-color, #fff);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--team-color, #fff), transparent 45%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--team-color, #fff), transparent 35%);
 }
 @keyframes marqueeRoll { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
 @media (max-width: 768px) {
-  .marquee-strip { padding: 14px 0; }
-  .marquee-track { gap: 12px; animation-duration: 132s; }
+  .marquee-strip { min-height: 78px; padding: 14px 0; }
+  .marquee-strip::before,
+  .marquee-strip::after { width: 70px; }
+  .marquee-track { gap: 14px; padding: 0 44px; animation-duration: 150s; }
   .marquee-team {
-    min-height: 50px;
-    padding: 8px 14px;
-    font-size: .78rem;
+    min-height: 58px;
+    padding: 9px 18px 9px 10px;
+    font-size: .82rem;
     letter-spacing: 2px;
+    gap: 12px;
   }
-  .team-logo-wrap { width: 32px; height: 32px; }
-  .team-badge-img { width: 22px; height: 22px; }
+  .team-logo-wrap { width: 44px; height: 44px; }
+  .team-badge-img { width: 32px; height: 32px; }
 }
 
 /* ══════════════════════════════════════
