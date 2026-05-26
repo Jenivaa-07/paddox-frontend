@@ -283,3 +283,7 @@ input:checked+.tgl-sl::before{background:var(--red);transform:translateX(20px)}
   .auth-screen{padding:calc(var(--nav-h) + 20px) 16px 40px}
 }
 @media(max-width:520px){.dash-stats{grid-template-columns:1fr 1fr}.wl-grid,.dl-grid{grid-template-columns:1fr 1fr}}
+
+/* Receipt buttons inside account orders */
+.receipt-mini-btn{border-color:rgba(232,0,45,.45)!important;color:#fff!important;background:rgba(232,0,45,.12)!important}
+.receipt-open-btn:hover,.receipt-mini-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}

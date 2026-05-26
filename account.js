@@ -1329,12 +1329,20 @@ function renderRealtimeOrders(orders) {
         </td>
 
         <td>
-          <button
-            class="trk-btn"
-            onclick="showRealtimeOrderDetails('${order._id}')"
-          >
-            View
-          </button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button
+              class="trk-btn"
+              onclick="showRealtimeOrderDetails('${order._id}')"
+            >
+              View
+            </button>
+            <button
+              class="trk-btn receipt-mini-btn"
+              onclick="openOrderReceipt('${order._id}')"
+            >
+              Receipt
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -1520,6 +1528,14 @@ function showRealtimeOrderDetails(orderId) {
             Total: ${formatMoney(order.pricing?.total)}
           </strong>
         </div>
+
+        <button
+          class="trk-btn receipt-open-btn"
+          onclick="openOrderReceipt('${order._id}')"
+          style="margin-top:20px;width:100%;padding:13px;background:var(--red);color:#fff;border:0;font-weight:800;letter-spacing:2px"
+        >
+          View Receipt
+        </button>
       </div>
     </div>
   `;
@@ -1528,6 +1544,15 @@ function showRealtimeOrderDetails(orderId) {
 
   modal.querySelector('#close-user-order-modal').onclick =
     () => modal.remove();
+}
+
+
+function openOrderReceipt(orderId) {
+  if (!orderId) {
+    showToast('❌ Order not found');
+    return;
+  }
+  window.location.href = `receipt.html?orderId=${encodeURIComponent(orderId)}`;
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -1544,6 +1569,15 @@ function clearHardcodedDashboard() {
   if (dashFanPoints && currentUser) {
     dashFanPoints.textContent = Number(currentUser.fanPoints || 0).toLocaleString('en-IN');
   }
+}
+
+
+function openOrderReceipt(orderId) {
+  if (!orderId) {
+    showToast('❌ Order not found');
+    return;
+  }
+  window.location.href = `receipt.html?orderId=${encodeURIComponent(orderId)}`;
 }
 
 window.addEventListener('DOMContentLoaded', () => {

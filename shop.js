@@ -16,6 +16,9 @@ const PRODUCT_API_BASE =
 const WISHLIST_API_BASE =
   'https://paddox-backend.onrender.com/api/wishlist';
 
+const ORDER_API_BASE =
+  'https://paddox-backend.onrender.com/api/orders';
+
 let USER_WISHLIST_IDS = new Set();
 
 function shopToken() {
@@ -841,15 +844,86 @@ document.getElementById('cart-close')?.addEventListener('click', () => toggleCar
 document.getElementById('continue-btn')?.addEventListener('click', () => toggleCart(false));
 
 
-async function placeRealOrder() {
+
+function getCheckoutToken() {
+  return (
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+function escapeCheckoutText(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function ensureCheckoutModal() {
+  let modal = document.getElementById('paddox-checkout-modal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'paddox-checkout-modal';
+  modal.className = 'pdx-checkout-modal';
+  modal.innerHTML = `
+    <div class="pdx-checkout-backdrop" data-close-checkout="true"></div>
+    <div class="pdx-checkout-card">
+      <button class="pdx-checkout-close" type="button" data-close-checkout="true">✕</button>
+      <div class="pdx-checkout-kicker">DEMO CHECKOUT</div>
+      <div class="pdx-checkout-title">DELIVERY DETAILS</div>
+      <p class="pdx-checkout-sub">Enter your delivery details. This project uses demo payment success — no real money is charged.</p>
+
+      <form id="paddox-checkout-form" class="pdx-checkout-form">
+        <div class="pdx-checkout-grid">
+          <label>Full Name<input id="co-name" required maxlength="80" autocomplete="name" placeholder="Receiver name"></label>
+          <label>Phone<input id="co-phone" required maxlength="15" inputmode="tel" autocomplete="tel" placeholder="10 digit mobile number"></label>
+        </div>
+        <label>Address Line 1<input id="co-line1" required maxlength="160" autocomplete="address-line1" placeholder="House no, street, area"></label>
+        <label>Address Line 2 <span>Optional</span><input id="co-line2" maxlength="160" autocomplete="address-line2" placeholder="Landmark / apartment"></label>
+        <div class="pdx-checkout-grid pdx-checkout-grid-3">
+          <label>City<input id="co-city" required maxlength="60" autocomplete="address-level2" placeholder="City"></label>
+          <label>State<input id="co-state" required maxlength="60" autocomplete="address-level1" placeholder="State"></label>
+          <label>Pincode<input id="co-pincode" required maxlength="10" inputmode="numeric" autocomplete="postal-code" placeholder="Pincode"></label>
+        </div>
+        <label>Payment Method
+          <select id="co-payment-method" required>
+            <option value="demo">Demo Payment Success</option>
+          </select>
+        </label>
+        <div class="pdx-demo-note">This will create a real PADDOX order with demo payment marked successful. No Razorpay popup and no real transaction.</div>
+
+        <div class="pdx-checkout-summary" id="pdx-checkout-summary"></div>
+
+        <button class="pdx-checkout-pay" type="submit">
+          <span>Place Order</span><span>🏁</span>
+        </button>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.addEventListener('click', e => {
+    if (e.target?.dataset?.closeCheckout === 'true') closeCheckoutModal();
+  });
+
+  modal.querySelector('#paddox-checkout-form')?.addEventListener('submit', submitCheckoutForm);
+
+  return modal;
+}
+
+function openCheckoutModal() {
   if (!cart.length) {
     showToast('❌ Cart is empty');
     return;
   }
 
-  const token =
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('token');
+  const token = getCheckoutToken();
 
   if (!token) {
     showToast('🔐 Please login first');
@@ -859,10 +933,88 @@ async function placeRealOrder() {
     return;
   }
 
-  try {
-    showToast('🏁 Placing order...');
+  const modal = ensureCheckoutModal();
+  const subtotal = cart.reduce((s, item) => s + Number(item.price || 0) * Number(item.qty || 1), 0);
+  const shipping = subtotal >= 999 ? 0 : 99;
+  const tax = Math.round(subtotal * 0.05);
+  const total = subtotal + shipping + tax;
 
-    const res = await fetch('https://paddox-backend.onrender.com/api/orders', {
+  const summary = modal.querySelector('#pdx-checkout-summary');
+  if (summary) {
+    summary.innerHTML = `
+      <div><span>Items</span><strong>${cart.reduce((s, item) => s + Number(item.qty || 1), 0)}</strong></div>
+      <div><span>Subtotal</span><strong>₹${subtotal.toLocaleString('en-IN')}</strong></div>
+      <div><span>Shipping</span><strong>${shipping ? `₹${shipping.toLocaleString('en-IN')}` : 'FREE'}</strong></div>
+      <div><span>Tax</span><strong>₹${tax.toLocaleString('en-IN')}</strong></div>
+      <div class="pdx-checkout-total"><span>Total</span><strong>₹${total.toLocaleString('en-IN')}</strong></div>
+    `;
+  }
+
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => modal.querySelector('#co-name')?.focus(), 80);
+}
+
+function closeCheckoutModal() {
+  const modal = document.getElementById('paddox-checkout-modal');
+  modal?.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function getCheckoutFormData() {
+  const field = id => document.getElementById(id)?.value?.trim() || '';
+
+  const shippingAddress = {
+    name: field('co-name'),
+    phone: field('co-phone'),
+    line1: field('co-line1'),
+    line2: field('co-line2'),
+    city: field('co-city'),
+    state: field('co-state'),
+    pincode: field('co-pincode'),
+    country: 'India'
+  };
+
+  const missing = Object.entries(shippingAddress)
+    .filter(([key, value]) => !value && !['line2'].includes(key))
+    .map(([key]) => key);
+
+  if (missing.length) {
+    throw new Error('Please fill all required delivery fields');
+  }
+
+  if (!/^\d{6}$/.test(shippingAddress.pincode)) {
+    throw new Error('Please enter a valid 6 digit pincode');
+  }
+
+  if (!/^\d{10}$/.test(shippingAddress.phone.replace(/\D/g, ''))) {
+    throw new Error('Please enter a valid 10 digit phone number');
+  }
+
+  return {
+    shippingAddress,
+    paymentMethod: 'demo'
+  };
+}
+
+async function submitCheckoutForm(e) {
+  e.preventDefault();
+
+  const token = getCheckoutToken();
+  if (!token) {
+    showToast('🔐 Please login first');
+    return;
+  }
+
+  const submitBtn = document.querySelector('.pdx-checkout-pay');
+
+  try {
+    const { shippingAddress, paymentMethod } = getCheckoutFormData();
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>Confirming demo payment...</span><span>⏳</span>';
+
+    const orderRes = await fetch(ORDER_API_BASE, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -872,44 +1024,43 @@ async function placeRealOrder() {
         items: cart.map(item => ({
           product: item.id,
           quantity: item.qty || 1,
-          size: item.size || ''
+          size: item.size || '',
+          color: item.color || ''
         })),
-        shippingAddress: {
-          name: 'Paddox Fan',
-          line1: 'Demo Address',
-          city: 'Chennai',
-          state: 'Tamil Nadu',
-          pincode: '600001',
-          phone: '9876543210',
-          country: 'India'
-        },
-        paymentMethod: 'cod',
-        notes: 'Demo checkout from shop page'
+        shippingAddress,
+        paymentMethod,
+        notes: 'Demo payment checkout from shop page'
       })
     });
 
-    const data = await res.json();
+    const orderData = await orderRes.json().catch(() => ({}));
 
-    if (!res.ok || data.success === false) {
-      throw new Error(data.message || 'Order failed');
+    if (!orderRes.ok || orderData.success === false) {
+      throw new Error(orderData.message || 'Order could not be created');
     }
+
+    const order = orderData.data?.order || orderData.order;
+    if (!order?._id) throw new Error('Order created but order id was not returned');
 
     cart = [];
     saveCart();
+    closeCheckoutModal();
     toggleCart(false);
-    showToast('🔥 Order placed successfully');
+    showToast('🔥 Demo payment successful');
 
     setTimeout(() => {
-      window.location.href = 'account.html';
-    }, 1200);
+      window.location.href = `receipt.html?orderId=${encodeURIComponent(order._id)}`;
+    }, 500);
 
   } catch (err) {
     console.error(err);
     showToast(`❌ ${err.message}`);
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>Place Order</span><span>🏁</span>';
   }
 }
 
-document.getElementById('checkout-btn')?.addEventListener('click', placeRealOrder);
+document.getElementById('checkout-btn')?.addEventListener('click', openCheckoutModal);
 updateCartUI();
 
 
