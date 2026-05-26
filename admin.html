@@ -88,6 +88,9 @@
         <div class="adm-nav-item" data-page="assets">
           <span class="adm-icon animate-icon">🖼️</span> Digital Assets
         </div>
+        <div class="adm-nav-item" data-page="homebranding">
+          <span class="adm-icon animate-icon">🏷️</span> Home Branding
+        </div>
         <div class="adm-nav-item" data-page="fanquotes">
           <span class="adm-icon animate-icon">💬</span> Fan Quotes
         </div>
@@ -243,14 +246,14 @@
         <div class="adm-page" id="adm-orders">
           <div class="page-toolbar">
             <div class="toolbar-filters">
-              <select class="adm-select" id="admin-order-status-filter"><option value="all">All Statuses</option><option value="placed">Placed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="out_for_delivery">Out for Delivery</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
-              <select class="adm-select" id="admin-order-time-filter"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option><option value="month">This Month</option></select>
-              <input class="adm-input" id="admin-order-search" type="text" placeholder="Search order ID, customer, phone…"/>
+              <select class="adm-select"><option>All Statuses</option><option>Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select>
+              <select class="adm-select"><option>All Time</option><option>Today</option><option>This Week</option><option>This Month</option></select>
+              <input class="adm-input" type="text" placeholder="Search order ID or customer…"/>
             </div>
-            <button class="adm-btn-red" onclick="exportAdminOrdersCSV()">Export CSV</button>
+            <button class="adm-btn-red" onclick="showToast('📥 Exporting orders to CSV…')">Export CSV</button>
           </div>
           <div class="data-table-wrap"><table class="data-table" id="orders-table">
-            <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Date</th><th>Payment</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th><input type="checkbox"/></th><th>Order ID</th><th>Customer</th><th>Products</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="orders-tbody"></tbody>
           </table></div>
         </div>
@@ -302,6 +305,75 @@
           <div class="assets-grid" id="assets-grid"></div>
         </div>
 
+        <!-- ── HOME BRANDING ── -->
+        <div class="adm-page" id="adm-homebranding">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <input class="adm-input" id="home-logo-search" type="text" placeholder="Search marquee logos…"/>
+            </div>
+            <button class="adm-btn-red" onclick="resetHomeLogoForm()">+ Add Marquee Logo</button>
+          </div>
+
+          <div class="home-branding-grid">
+            <div class="home-branding-card">
+              <div class="hb-title">Home Marquee Logo Manager</div>
+              <p class="hb-help">Upload a team/brand logo sheet, crop the logo you need, name it, and it will update on the home marquee automatically.</p>
+
+              <div class="hb-form-grid">
+                <label>
+                  <span>Team / Brand Name</span>
+                  <input class="adm-input" id="home-logo-name" type="text" placeholder="Ferrari, Mercedes, PADDOX…"/>
+                </label>
+                <label>
+                  <span>Display Order</span>
+                  <input class="adm-input" id="home-logo-order" type="number" value="1" min="0"/>
+                </label>
+                <label>
+                  <span>Accent Color</span>
+                  <input class="adm-input" id="home-logo-color" type="text" value="#e8002d" placeholder="#e8002d"/>
+                </label>
+                <label class="hb-check-row">
+                  <input id="home-logo-active" type="checkbox" checked/>
+                  <span>Active on home marquee</span>
+                </label>
+              </div>
+
+              <div class="hb-upload-row">
+                <input id="home-logo-upload" type="file" accept="image/*" hidden/>
+                <button class="adm-btn-ghost" onclick="document.getElementById('home-logo-upload').click()">Upload Logo / Logo Sheet</button>
+                <button class="adm-btn-ghost" onclick="cropHomeLogoPreview()">Crop Preview</button>
+                <button class="adm-btn-red" onclick="saveHomeMarqueeLogo()">Save Logo</button>
+              </div>
+
+              <div class="hb-crop-grid">
+                <div class="hb-crop-panel">
+                  <canvas id="home-logo-canvas" width="760" height="360"></canvas>
+                </div>
+                <div class="hb-controls">
+                  <label>Crop X <input id="home-crop-x" type="range" min="0" max="100" value="0"/></label>
+                  <label>Crop Y <input id="home-crop-y" type="range" min="0" max="100" value="0"/></label>
+                  <label>Crop Width <input id="home-crop-w" type="range" min="10" max="100" value="45"/></label>
+                  <label>Crop Height <input id="home-crop-h" type="range" min="10" max="100" value="32"/></label>
+                  <label>Output Zoom <input id="home-crop-zoom" type="range" min="80" max="180" value="110"/></label>
+                  <div class="hb-logo-preview" id="home-logo-preview">Preview</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="home-branding-card">
+              <div class="hb-title">Saved Marquee Logos</div>
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Logo</th><th>Name</th><th>Order</th><th>Status</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody id="home-logos-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── USERS ── -->
         <div class="adm-page" id="adm-users">
           <div class="page-toolbar">
@@ -321,9 +393,9 @@
         <!-- ── ANALYTICS ── -->
         <div class="adm-page" id="adm-analytics">
           <div class="analytics-kpis">
-            <div class="kpi-card kpi-red reveal-up"><div class="kpi-label">Paid Revenue</div><div class="kpi-value" id="analytics-paid-revenue" style="font-size:2rem">₹0</div><div class="kpi-change kpi-up" id="analytics-paid-revenue-sub">From paid orders</div></div>
-            <div class="kpi-card kpi-blue reveal-up delay-1"><div class="kpi-label">Avg. Order Value</div><div class="kpi-value" id="analytics-aov" style="font-size:2rem">₹0</div><div class="kpi-change kpi-up" id="analytics-aov-sub">Realtime average</div></div>
-            <div class="kpi-card kpi-green reveal-up delay-2"><div class="kpi-label">Fulfilment Rate</div><div class="kpi-value" id="analytics-fulfilment" style="font-size:2rem">0%</div><div class="kpi-change kpi-up" id="analytics-fulfilment-sub">Delivered / total orders</div></div>
+            <div class="kpi-card kpi-red reveal-up"><div class="kpi-label">Conversion Rate</div><div class="kpi-value" style="font-size:2rem">3.84%</div><div class="kpi-change kpi-up">↑ 0.4% this month</div></div>
+            <div class="kpi-card kpi-blue reveal-up delay-1"><div class="kpi-label">Avg. Order Value</div><div class="kpi-value" style="font-size:2rem">₹4,820</div><div class="kpi-change kpi-up">↑ ₹320 this month</div></div>
+            <div class="kpi-card kpi-green reveal-up delay-2"><div class="kpi-label">Customer Retention</div><div class="kpi-value" style="font-size:2rem">68.2%</div><div class="kpi-change kpi-up">↑ 3.1% this month</div></div>
           </div>
           <div class="analytics-charts">
             <div class="chart-card reveal-up">

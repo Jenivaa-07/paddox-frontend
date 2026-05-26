@@ -158,6 +158,7 @@ const PAGE_META = {
   action:'+ Upload Asset',
   fn:()=>openAssetModal()
 },
+  homebranding: { title:'HOME BRANDING', action:'+ Add Logo', fn:()=>resetHomeLogoForm() },
   fanquotes:  { title:'FAN QUOTES',      action:'+ Add Quote',   fn:()=>openQuoteModal() },
   fandrivers: { title:'FAN DRIVERS',     action:'+ Add Image',   fn:()=>openDriverProfileModal() },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
@@ -183,6 +184,10 @@ function switchPage(id) {
 
 if (id === 'assets') {
   loadAssets();
+}
+if (id === 'homebranding') {
+  loadHomeMarqueeLogosAdmin();
+  setTimeout(drawHomeLogoCropCanvas, 50);
 }
 if (id === 'orders') {
   loadOrders();
@@ -4967,4 +4972,265 @@ function adminPhase9BindOrderFilters() {
 
 document.addEventListener('DOMContentLoaded', () => {
   adminPhase9BindOrderFilters();
+});
+
+/* ══════════════════════════════════════
+   HOME BRANDING — MARQUEE LOGO MANAGER
+══════════════════════════════════════ */
+const HOME_MARQUEE_API = 'https://paddox-backend.onrender.com/api/fan/admin/home-marquee-logos';
+let ADMIN_HOME_LOGOS = [];
+let HOME_LOGO_EDIT_ID = null;
+let HOME_LOGO_SOURCE = '';
+let HOME_LOGO_CROPPED = '';
+let HOME_LOGO_IMG = null;
+
+function homeLogoTokenHeaders() {
+  const token = typeof getAdminToken === 'function' ? getAdminToken() : '';
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  };
+}
+
+function resetHomeLogoForm() {
+  HOME_LOGO_EDIT_ID = null;
+  HOME_LOGO_SOURCE = '';
+  HOME_LOGO_CROPPED = '';
+  HOME_LOGO_IMG = null;
+  const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value; };
+  set('home-logo-name', '');
+  set('home-logo-order', String((ADMIN_HOME_LOGOS || []).length + 1));
+  set('home-logo-color', '#e8002d');
+  const active = document.getElementById('home-logo-active');
+  if (active) active.checked = true;
+  const file = document.getElementById('home-logo-upload');
+  if (file) file.value = '';
+  ['home-crop-x','home-crop-y'].forEach(id => set(id, '0'));
+  set('home-crop-w', '45');
+  set('home-crop-h', '32');
+  set('home-crop-zoom', '110');
+  const preview = document.getElementById('home-logo-preview');
+  if (preview) preview.textContent = 'Preview';
+  drawHomeLogoCropCanvas();
+  if (typeof switchPage === 'function') {
+    document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('on'));
+    document.querySelectorAll('.adm-nav-item').forEach(n=>n.classList.remove('on'));
+    document.getElementById('adm-homebranding')?.classList.add('on');
+    document.querySelector('.adm-nav-item[data-page="homebranding"]')?.classList.add('on');
+    const titleEl = document.getElementById('adm-topbar-title');
+    if (titleEl) titleEl.textContent = 'HOME BRANDING';
+  }
+}
+
+async function loadHomeMarqueeLogosAdmin() {
+  const tbody = document.getElementById('home-logos-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading marquee logos…</td></tr>';
+  try {
+    const res = await fetch(HOME_MARQUEE_API, { headers: homeLogoTokenHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Failed to load logos');
+    ADMIN_HOME_LOGOS = data.data?.logos || data.logos || [];
+    renderHomeLogosAdmin();
+  } catch (err) {
+    console.error(err);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Could not load marquee logos</td></tr>';
+    if (typeof showToast === 'function') showToast('❌ Failed to load marquee logos');
+  }
+}
+
+function renderHomeLogosAdmin() {
+  const tbody = document.getElementById('home-logos-tbody');
+  if (!tbody) return;
+  const q = String(document.getElementById('home-logo-search')?.value || '').toLowerCase().trim();
+  const list = (ADMIN_HOME_LOGOS || [])
+    .filter(item => !q || String(item.name || '').toLowerCase().includes(q))
+    .sort((a,b) => Number(a.order || 0) - Number(b.order || 0));
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No marquee logos added yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(item => `
+    <tr>
+      <td><div class="hb-mini-logo"><img src="${item.image || ''}" alt="${item.name || 'Logo'}"/></div></td>
+      <td><strong>${item.name || 'Logo'}</strong><div style="color:#777;font-size:.75rem">${item.slug || ''}</div></td>
+      <td>${Number(item.order || 0)}</td>
+      <td><span class="hb-status ${item.isActive === false ? 'off' : 'on'}">${item.isActive === false ? 'Hidden' : 'Active'}</span></td>
+      <td>
+        <div class="hb-actions">
+          <button onclick="editHomeMarqueeLogo('${item._id}')">Edit</button>
+          <button class="danger" onclick="deleteHomeMarqueeLogo('${item._id}', '${String(item.name || 'logo').replace(/'/g, '')}')">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function editHomeMarqueeLogo(id) {
+  const item = (ADMIN_HOME_LOGOS || []).find(x => String(x._id) === String(id));
+  if (!item) return;
+  HOME_LOGO_EDIT_ID = item._id;
+  HOME_LOGO_SOURCE = item.image || '';
+  HOME_LOGO_CROPPED = item.image || '';
+  const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value; };
+  set('home-logo-name', item.name || '');
+  set('home-logo-order', Number(item.order || 0));
+  set('home-logo-color', item.color || '#e8002d');
+  const active = document.getElementById('home-logo-active');
+  if (active) active.checked = item.isActive !== false;
+  const preview = document.getElementById('home-logo-preview');
+  if (preview) preview.innerHTML = item.image ? `<img src="${item.image}" alt="${item.name || 'Logo'}"/>` : 'Preview';
+  loadHomeLogoImage(item.image || '');
+  if (typeof showToast === 'function') showToast('✏️ Logo loaded for editing');
+}
+
+function loadHomeLogoImage(src) {
+  if (!src) { drawHomeLogoCropCanvas(); return; }
+  const img = new Image();
+  img.onload = () => { HOME_LOGO_IMG = img; drawHomeLogoCropCanvas(); };
+  img.onerror = () => { HOME_LOGO_IMG = null; drawHomeLogoCropCanvas(); };
+  img.src = src;
+}
+
+function drawHomeLogoCropCanvas() {
+  const canvas = document.getElementById('home-logo-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#050505';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle = 'rgba(232,0,45,.35)';
+  ctx.strokeRect(18,18,canvas.width-36,canvas.height-36);
+  if (!HOME_LOGO_IMG) {
+    ctx.fillStyle = '#777';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Upload a logo sheet or logo image', canvas.width/2, canvas.height/2);
+    return;
+  }
+  const img = HOME_LOGO_IMG;
+  const fit = Math.min(canvas.width / img.width, canvas.height / img.height);
+  const dw = img.width * fit;
+  const dh = img.height * fit;
+  const dx = (canvas.width - dw) / 2;
+  const dy = (canvas.height - dh) / 2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+
+  const x = Number(document.getElementById('home-crop-x')?.value || 0) / 100;
+  const y = Number(document.getElementById('home-crop-y')?.value || 0) / 100;
+  const w = Number(document.getElementById('home-crop-w')?.value || 45) / 100;
+  const h = Number(document.getElementById('home-crop-h')?.value || 32) / 100;
+  const cw = Math.max(40, Math.min(canvas.width * w, canvas.width - 24));
+  const ch = Math.max(40, Math.min(canvas.height * h, canvas.height - 24));
+  const cx = 12 + x * Math.max(1, canvas.width - cw - 24);
+  const cy = 12 + y * Math.max(1, canvas.height - ch - 24);
+  ctx.fillStyle = 'rgba(0,0,0,.45)';
+  ctx.fillRect(0,0,canvas.width,cy);
+  ctx.fillRect(0,cy,cx,ch);
+  ctx.fillRect(cx+cw,cy,canvas.width-(cx+cw),ch);
+  ctx.fillRect(0,cy+ch,canvas.width,canvas.height-(cy+ch));
+  ctx.strokeStyle = '#e8002d';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(cx, cy, cw, ch);
+  ctx.fillStyle = '#e8002d';
+  ctx.fillRect(cx, cy-24, 94, 24);
+  ctx.fillStyle = '#fff';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('CROP AREA', cx+8, cy-8);
+}
+
+function cropHomeLogoPreview() {
+  if (!HOME_LOGO_IMG) {
+    if (typeof showToast === 'function') showToast('Upload an image first');
+    return;
+  }
+  const img = HOME_LOGO_IMG;
+  const x = Number(document.getElementById('home-crop-x')?.value || 0) / 100;
+  const y = Number(document.getElementById('home-crop-y')?.value || 0) / 100;
+  const w = Number(document.getElementById('home-crop-w')?.value || 45) / 100;
+  const h = Number(document.getElementById('home-crop-h')?.value || 32) / 100;
+  const zoom = Number(document.getElementById('home-crop-zoom')?.value || 110) / 100;
+
+  const sw = Math.max(10, Math.min(img.width * w / zoom, img.width));
+  const sh = Math.max(10, Math.min(img.height * h / zoom, img.height));
+  const sx = x * Math.max(1, img.width - sw);
+  const sy = y * Math.max(1, img.height - sh);
+
+  const out = document.createElement('canvas');
+  out.width = 720;
+  out.height = 280;
+  const octx = out.getContext('2d');
+  octx.clearRect(0,0,out.width,out.height);
+  octx.fillStyle = '#050505';
+  octx.fillRect(0,0,out.width,out.height);
+  octx.drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
+  HOME_LOGO_CROPPED = out.toDataURL('image/png', .92);
+  const preview = document.getElementById('home-logo-preview');
+  if (preview) preview.innerHTML = `<img src="${HOME_LOGO_CROPPED}" alt="Logo preview"/>`;
+  if (typeof showToast === 'function') showToast('✓ Logo crop preview ready');
+}
+
+async function saveHomeMarqueeLogo() {
+  const name = String(document.getElementById('home-logo-name')?.value || '').trim();
+  if (!name) { if (typeof showToast === 'function') showToast('Enter team/brand name'); return; }
+  if (!HOME_LOGO_CROPPED) {
+    if (HOME_LOGO_SOURCE) HOME_LOGO_CROPPED = HOME_LOGO_SOURCE;
+    else { if (typeof showToast === 'function') showToast('Upload and crop logo first'); return; }
+  }
+  const payload = {
+    name,
+    image: HOME_LOGO_CROPPED,
+    order: Number(document.getElementById('home-logo-order')?.value || 0),
+    color: String(document.getElementById('home-logo-color')?.value || '#e8002d').trim(),
+    isActive: !!document.getElementById('home-logo-active')?.checked,
+  };
+  try {
+    const res = await fetch(HOME_LOGO_EDIT_ID ? `${HOME_MARQUEE_API}/${HOME_LOGO_EDIT_ID}` : HOME_MARQUEE_API, {
+      method: HOME_LOGO_EDIT_ID ? 'PUT' : 'POST',
+      headers: homeLogoTokenHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Save failed');
+    if (typeof showToast === 'function') showToast('✓ Marquee logo saved');
+    resetHomeLogoForm();
+    loadHomeMarqueeLogosAdmin();
+  } catch (err) {
+    console.error(err);
+    if (typeof showToast === 'function') showToast(`❌ ${err.message}`);
+  }
+}
+
+async function deleteHomeMarqueeLogo(id, name = 'logo') {
+  if (!confirm(`Delete ${name} from home marquee?`)) return;
+  try {
+    const res = await fetch(`${HOME_MARQUEE_API}/${id}`, { method:'DELETE', headers: homeLogoTokenHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
+    if (typeof showToast === 'function') showToast('✓ Marquee logo deleted');
+    loadHomeMarqueeLogosAdmin();
+  } catch (err) {
+    console.error(err);
+    if (typeof showToast === 'function') showToast(`❌ ${err.message}`);
+  }
+}
+
+document.addEventListener('input', e => {
+  if (['home-crop-x','home-crop-y','home-crop-w','home-crop-h','home-crop-zoom'].includes(e.target?.id)) {
+    drawHomeLogoCropCanvas();
+  }
+  if (e.target?.id === 'home-logo-search') renderHomeLogosAdmin();
+});
+
+document.addEventListener('change', e => {
+  if (e.target?.id !== 'home-logo-upload') return;
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    HOME_LOGO_SOURCE = String(reader.result || '');
+    HOME_LOGO_CROPPED = '';
+    loadHomeLogoImage(HOME_LOGO_SOURCE);
+  };
+  reader.readAsDataURL(file);
 });

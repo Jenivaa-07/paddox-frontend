@@ -123,6 +123,7 @@ const FanAPI = {
   answerTrivia  : (triviaId, answerIndex) => apiRequest('/fan/trivia/answer', { method:'POST', body:{ triviaId, answerIndex } }),
   getFeed       : ()          => apiRequest('/fan/feed'),
   postFeed      : (text)      => apiRequest('/fan/feed', { method:'POST', body:{ text } }),
+  marqueeLogos  : ()          => apiRequest('/fan/home-marquee-logos'),
 };
 
 /* ── User API ── */

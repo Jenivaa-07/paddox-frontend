@@ -9,6 +9,7 @@
 let PRODUCTS = [];
 let QUOTES = [];
 let HOME_F1 = { schedule: [], drivers: [], standings: [], constructors: [], nextRace: null };
+let HOME_MARQUEE_LOGOS = [];
 
 const HOME_MARKETING_STATS = { races: 24, products: 50, fans: 250 };
 
@@ -241,6 +242,31 @@ async function loadHomeQuotes() {
     console.warn('Home quotes unavailable', err);
     QUOTES = [];
     renderHomeQuotes();
+  }
+}
+
+
+async function loadHomeMarqueeLogos() {
+  try {
+    const data = window.PaddoxAPI?.fan?.marqueeLogos
+      ? await PaddoxAPI.fan.marqueeLogos()
+      : await fetch('https://paddox-backend.onrender.com/api/fan/home-marquee-logos').then(r => r.json());
+
+    const list = data?.data?.logos || data?.logos || data?.data || [];
+    HOME_MARQUEE_LOGOS = list
+      .filter(item => item && item.name && item.image)
+      .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+      .map(item => ({
+        name: safeText(item.name, 'PADDOX'),
+        slug: safeText(item.slug || item.name, 'paddox').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        image: safeText(item.image),
+        color: safeText(item.color, '#e8002d'),
+      }));
+    renderHomeMarquee();
+  } catch (err) {
+    console.warn('Home marquee logos unavailable', err);
+    HOME_MARQUEE_LOGOS = [];
+    renderHomeMarquee();
   }
 }
 
@@ -1025,21 +1051,30 @@ function renderHomeMarquee() {
   const track = document.getElementById('marquee-track');
   if (!track) return;
 
-  const apiTeamNames = uniqueCleanNames((HOME_F1.constructors || []).map(normalizeConstructorName));
-  const byName = new Map(apiTeamNames.map(name => [name.toLowerCase().replace(/[^a-z0-9]+/g, ''), name]));
+  let teams = HOME_MARQUEE_LOGOS.length ? [...HOME_MARQUEE_LOGOS] : [];
 
-  const teams = PADDOX_HOME_TEAMS.map(team => {
-    const key = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '');
-    const liveName = byName.get(key) || team.name;
-    return { ...team, name: liveName };
-  });
+  if (!teams.length) {
+    const apiTeamNames = uniqueCleanNames((HOME_F1.constructors || []).map(normalizeConstructorName));
+    const byName = new Map(apiTeamNames.map(name => [name.toLowerCase().replace(/[^a-z0-9]+/g, ''), name]));
+    teams = PADDOX_HOME_TEAMS.map(team => {
+      const key = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '');
+      const liveName = byName.get(key) || team.name;
+      return { ...team, name: liveName };
+    });
+  }
+
+  const renderLogo = team => {
+    if (team.image) {
+      return `<img class="team-badge-img" src="${escapeHTML(team.image)}" alt="${escapeHTML(team.name)} badge" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"/>`;
+    }
+    return `<img class="team-badge-img" src="${escapeHTML(homeTeamLogoSrc(team.slug))}" data-base="${escapeHTML(`assets/teams/${team.slug}`)}" data-try="0" alt="${escapeHTML(team.name)} badge" loading="lazy" onerror="window.homeLogoFallback && window.homeLogoFallback(this)"/>`;
+  };
 
   const renderItem = team => `
     <span class="marquee-team" title="${escapeHTML(team.name)}">
       <span class="team-logo-wrap">
-        <img class="team-badge-img" src="${escapeHTML(homeTeamLogoSrc(team.slug))}" data-base="${escapeHTML(`assets/teams/${team.slug}`)}" data-try="0" alt="${escapeHTML(team.name)} badge" loading="lazy"
-          onerror="window.homeLogoFallback && window.homeLogoFallback(this)"/>
-        <i class="team-badge-dot" style="--team-color:${escapeHTML(team.color)}"></i>
+        ${renderLogo(team)}
+        <i class="team-badge-dot" style="--team-color:${escapeHTML(team.color || '#e8002d')}"></i>
       </span>
       <span class="marquee-team-name">${escapeHTML(team.name)}</span>
     </span>`;
@@ -1113,6 +1148,7 @@ document.querySelectorAll('.size-btn').forEach(btn => {
   }
   loadHomeProducts().then(updateTickerFromAPI);
   loadHomeQuotes();
+  loadHomeMarqueeLogos();
   loadHomeF1Data();
   loadHomeFanStories();
   const yearEl = document.getElementById('footer-year');
