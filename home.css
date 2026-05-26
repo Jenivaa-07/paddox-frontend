@@ -1004,15 +1004,15 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 ══════════════════════════════════════ */
 .marquee-strip {
   position: relative;
-  min-height: 94px;
+  min-height: 108px;
   display: flex;
   align-items: center;
   background:
-    radial-gradient(circle at 18% 50%, rgba(232,0,45,.16), transparent 34%),
-    linear-gradient(180deg, rgba(18,18,18,.78), rgba(5,5,5,.72));
-  backdrop-filter: blur(22px) saturate(1.35);
-  -webkit-backdrop-filter: blur(22px) saturate(1.35);
-  padding: 18px 0;
+    radial-gradient(circle at 18% 50%, rgba(232,0,45,.14), transparent 34%),
+    linear-gradient(180deg, rgba(16,16,18,.86), rgba(6,6,7,.78));
+  backdrop-filter: blur(24px) saturate(1.38);
+  -webkit-backdrop-filter: blur(24px) saturate(1.38);
+  padding: 20px 0;
   overflow: hidden;
   white-space: nowrap;
   border-top: 1px solid rgba(255,255,255,.09);
@@ -1020,7 +1020,7 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.06),
     inset 0 -1px 0 rgba(255,255,255,.05),
-    0 26px 70px rgba(0,0,0,.36);
+    0 28px 74px rgba(0,0,0,.42);
 }
 .marquee-strip::before,
 .marquee-strip::after {
@@ -1028,79 +1028,90 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 180px;
+  width: 190px;
   z-index: 3;
   pointer-events: none;
 }
 .marquee-strip::before {
   left: 0;
-  background: linear-gradient(90deg, rgba(7,7,7,.96), transparent);
+  background: linear-gradient(90deg, rgba(7,7,7,.98), rgba(7,7,7,.68), transparent);
 }
 .marquee-strip::after {
   right: 0;
-  background: linear-gradient(270deg, rgba(7,7,7,.96), transparent);
+  background: linear-gradient(270deg, rgba(7,7,7,.98), rgba(7,7,7,.68), transparent);
 }
 .marquee-track {
   display: inline-flex;
   align-items: center;
-  gap: 22px;
-  padding: 0 90px;
-  animation: marqueeRoll 185s linear infinite;
+  gap: 26px;
+  padding: 0 96px;
+  animation: marqueeRoll 195s linear infinite;
   will-change: transform;
 }
 .marquee-track:hover { animation-play-state: paused; }
 .marquee-team {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: 86px max-content;
   align-items: center;
-  gap: 16px;
-  min-height: 70px;
-  padding: 11px 24px 11px 12px;
-  border-radius: 999px;
+  gap: 18px;
+  min-height: 82px;
+  padding: 10px 30px 10px 12px;
+  border-radius: 26px;
   font-family: var(--font-condensed);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  letter-spacing: 3.2px;
+  letter-spacing: 3.4px;
   text-transform: uppercase;
   color: rgba(255,255,255,.98);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.032));
-  border: 1px solid rgba(255,255,255,.105);
+    linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.034));
+  border: 1px solid rgba(255,255,255,.12);
   box-shadow:
-    0 12px 34px rgba(0,0,0,.34),
-    inset 0 1px 0 rgba(255,255,255,.085);
+    0 14px 38px rgba(0,0,0,.36),
+    inset 0 1px 0 rgba(255,255,255,.09);
+  overflow: visible;
 }
 .marquee-team-name {
-  display: inline-block;
-  transform: translateY(1px);
-  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  line-height: 1;
+  padding-top: 2px;
+  text-shadow: 0 1px 12px rgba(0,0,0,.48);
 }
 .team-logo-wrap {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 86px;
+  height: 62px;
+  border-radius: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 8px 10px;
   background:
-    radial-gradient(circle at 42% 32%, rgba(255,255,255,.96), rgba(238,238,238,.76) 54%, rgba(190,190,190,.42));
-  border: 1px solid rgba(255,255,255,.35);
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(228,228,228,.84));
+  border: 1px solid rgba(255,255,255,.48);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.75),
-    0 7px 18px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 8px 20px rgba(0,0,0,.42),
     0 0 18px rgba(255,255,255,.08);
   flex-shrink: 0;
+  overflow: hidden;
 }
 .team-badge-img {
-  width: 42px;
-  height: 42px;
+  width: 100%;
+  height: 100%;
+  max-width: 68px;
+  max-height: 44px;
   object-fit: contain;
+  object-position: center;
   display: block;
+  margin: auto;
   background: transparent;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,.42)) contrast(1.08) saturate(1.06);
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.28)) contrast(1.12) saturate(1.08);
 }
 .team-badge-dot {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   display: none;
   border-radius: 999px;
   background: var(--team-color, #fff);
@@ -1108,19 +1119,29 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 }
 @keyframes marqueeRoll { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
 @media (max-width: 768px) {
-  .marquee-strip { min-height: 78px; padding: 14px 0; }
+  .marquee-strip { min-height: 88px; padding: 16px 0; }
   .marquee-strip::before,
-  .marquee-strip::after { width: 70px; }
-  .marquee-track { gap: 14px; padding: 0 44px; animation-duration: 150s; }
+  .marquee-strip::after { width: 72px; }
+  .marquee-track { gap: 16px; padding: 0 44px; animation-duration: 158s; }
   .marquee-team {
-    min-height: 58px;
-    padding: 9px 18px 9px 10px;
-    font-size: .82rem;
-    letter-spacing: 2px;
+    grid-template-columns: 62px max-content;
+    min-height: 64px;
+    padding: 8px 18px 8px 8px;
+    font-size: .84rem;
+    letter-spacing: 2.2px;
     gap: 12px;
+    border-radius: 22px;
   }
-  .team-logo-wrap { width: 44px; height: 44px; }
-  .team-badge-img { width: 32px; height: 32px; }
+  .team-logo-wrap {
+    width: 62px;
+    height: 46px;
+    border-radius: 14px;
+    padding: 6px 8px;
+  }
+  .team-badge-img {
+    max-width: 48px;
+    max-height: 32px;
+  }
 }
 
 /* ══════════════════════════════════════
