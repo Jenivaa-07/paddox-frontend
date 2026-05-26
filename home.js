@@ -37,6 +37,21 @@ function homeTeamLogoSrc(slug = '') {
   return `assets/teams/${slug}.svg`;
 }
 
+window.homeLogoFallback = function homeLogoFallback(img) {
+  if (!img) return;
+  const base = img.dataset.base || '';
+  const exts = ['.svg', '.png', '.webp', '.jpg', '.jpeg'];
+  let attempt = Number(img.dataset.try || 0);
+  attempt += 1;
+  if (base && attempt < exts.length) {
+    img.dataset.try = String(attempt);
+    img.src = `${base}${exts[attempt]}`;
+    return;
+  }
+  img.style.display = 'none';
+  if (img.nextElementSibling) img.nextElementSibling.style.display = 'inline-block';
+};
+
 
 function safeText(value, fallback = '') {
   const text = String(value ?? '').trim();
@@ -1021,10 +1036,12 @@ function renderHomeMarquee() {
 
   const renderItem = team => `
     <span class="marquee-team" title="${escapeHTML(team.name)}">
-      <img class="team-badge-img" src="${escapeHTML(homeTeamLogoSrc(team.slug))}" alt="${escapeHTML(team.name)} badge" loading="lazy"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"/>
-      <i class="team-badge-dot" style="--team-color:${escapeHTML(team.color)}"></i>
-      ${escapeHTML(team.name)}
+      <span class="team-logo-wrap">
+        <img class="team-badge-img" src="${escapeHTML(homeTeamLogoSrc(team.slug))}" data-base="${escapeHTML(`assets/teams/${team.slug}`)}" data-try="0" alt="${escapeHTML(team.name)} badge" loading="lazy"
+          onerror="window.homeLogoFallback && window.homeLogoFallback(this)"/>
+        <i class="team-badge-dot" style="--team-color:${escapeHTML(team.color)}"></i>
+      </span>
+      <span class="marquee-team-name">${escapeHTML(team.name)}</span>
     </span>`;
 
   track.innerHTML = [...teams, ...teams, ...teams].map(renderItem).join('');
