@@ -480,7 +480,7 @@ async function loadRealDriverStandings() {
       if (card) {
         card.innerHTML = `
           <div class="drv-num-bg">${d.number || d.position || index + 1}</div>
-          <div class="drv-big-av" style="border-color:${d.teamColor};box-shadow:0 0 32px ${d.teamColor}44">
+          <div class="drv-big-av" style="border-color:${d.teamColor}">
             ${driverAvatarHTML(d, 'large')}
           </div>
           <div class="drv-name">${d.name}</div>
@@ -1079,6 +1079,7 @@ function quoteAvatarHTML(avatar, className = '') {
           width:100%;
           height:100%;
           object-fit:cover;
+          object-position:center top;
           border-radius:50%;
           display:block;
         "

@@ -1023,3 +1023,126 @@ body.page-transition-init{opacity:0;animation:bodyReveal .4s .3s forwards}
   font-size:.78rem;
 }
 .drv-big-av .drv-initials { font-size:1.9rem; }
+
+
+/* ══════════════════════════════════════
+   PADDOX PREMIUM HEADSHOT + QUOTE POLISH
+   - removes old black avatar block / heavy neon glow
+   - keeps uploaded admin-cropped headshots clean and premium
+══════════════════════════════════════ */
+.dp-av,
+.drv-big-av,
+.qf-ava,
+.qm-avatar {
+  background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.025)) !important;
+  box-shadow: none !important;
+}
+.dp-av,
+.drv-big-av {
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+.drv-big-av {
+  width: 156px;
+  height: 156px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  padding: 0;
+  isolation: isolate;
+}
+.drv-big-av::before,
+.drv-big-av::after {
+  display: none !important;
+}
+.dp-av img,
+.drv-big-av img,
+.drv-img-small,
+.drv-img-large,
+.qf-ava img,
+.qm-avatar img {
+  object-position: center top;
+  background: transparent !important;
+  filter: none !important;
+}
+.drv-card {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018)) !important;
+  border: 1px solid rgba(255,255,255,.085) !important;
+  border-top: 2px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.32) !important;
+}
+.drv-card:hover {
+  box-shadow: 0 30px 80px rgba(0,0,0,.42) !important;
+}
+.drv-num-bg {
+  color: rgba(255,255,255,.045) !important;
+}
+.drv-country span:first-child {
+  font-size: 1.1rem;
+}
+
+.quote-featured {
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 16% 16%, rgba(255,255,255,.06), transparent 28%),
+    linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.018)) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  border-top: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 26px 90px rgba(0,0,0,.34);
+}
+.quote-featured::after {
+  background: rgba(255,255,255,.045) !important;
+  filter: blur(22px) !important;
+}
+.qf-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+}
+.qf-footer {
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.075);
+}
+.qf-drv {
+  min-width: 0;
+}
+.qf-ava {
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: none !important;
+}
+.qf-share,
+.qm-share {
+  border-radius: 999px;
+}
+.qf-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 158px;
+}
+.qmini {
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.018)) !important;
+}
+.qmini:hover,
+.qmini.on {
+  transform: translateY(-2px);
+}
+.qmini-head,
+.qm-drv {
+  align-items: center;
+}
+.qm-avatar {
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+@media (max-width: 900px) {
+  .drv-big-av {
+    width: 132px;
+    height: 132px;
+  }
+  .qf-footer {
+    gap: 14px;
+  }
+}
