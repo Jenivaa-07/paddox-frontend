@@ -4399,3 +4399,505 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ══ INIT LOG ══ */
 console.log('%c⚙️ PADDOX — Admin Dashboard Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
+/* ══════════════════════════════════════
+   PHASE 9 — ADMIN ORDERS + ANALYTICS POLISH
+   Real orders only · clean admin controls · no fake analytics
+══════════════════════════════════════ */
+const ADMIN_PHASE9_STATUS_FLOW = ['placed','processing','shipped','out_for_delivery','delivered'];
+
+function adminPhase9Text(value, fallback = '-') {
+  return String(value ?? fallback).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+
+function adminPhase9Date(value) {
+  if (!value) return '-';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function adminPhase9DateTime(value) {
+  if (!value) return '-';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function adminPhase9OrderTotal(order = {}) {
+  return Number(order?.pricing?.total || order?.total || 0);
+}
+
+function adminPhase9PaymentStatus(order = {}) {
+  return String(order?.payment?.status || order?.paymentStatus || (adminPhase9OrderTotal(order) ? 'paid' : 'pending')).toLowerCase();
+}
+
+function adminPhase9PaymentMethod(order = {}) {
+  const raw = order?.payment?.method || order?.paymentMethod || order?.payment?.gateway || 'Payment';
+  return String(raw).replaceAll('_', ' ').toUpperCase();
+}
+
+function adminPhase9Customer(order = {}) {
+  const name = `${order?.user?.firstName || ''} ${order?.user?.lastName || ''}`.trim() || order?.shippingAddress?.name || 'Customer';
+  const email = order?.user?.email || order?.shippingAddress?.email || '';
+  const phone = order?.shippingAddress?.phone || '';
+  return { name, email, phone };
+}
+
+function adminPhase9StatusClass(status = '') {
+  const s = String(status || '').toLowerCase();
+  if (s === 'delivered') return 's-del';
+  if (s === 'shipped' || s === 'out_for_delivery') return 's-sh';
+  if (s === 'cancelled' || s === 'failed') return 's-out';
+  if (s === 'placed' || s === 'processing') return 's-pr';
+  return 's-pr';
+}
+
+function adminPhase9FilteredOrders() {
+  const status = document.getElementById('admin-order-status-filter')?.value || 'all';
+  const range = document.getElementById('admin-order-time-filter')?.value || 'all';
+  const query = (document.getElementById('admin-order-search')?.value || '').trim().toLowerCase();
+  const now = new Date();
+
+  return (REAL_ORDERS || []).filter(order => {
+    const orderStatus = String(order.status || 'placed').toLowerCase();
+    if (status !== 'all' && orderStatus !== status) return false;
+
+    if (range !== 'all') {
+      const d = new Date(order.createdAt || order.updatedAt || 0);
+      if (Number.isNaN(d.getTime())) return false;
+      const diff = now - d;
+      if (range === 'today' && d.toDateString() !== now.toDateString()) return false;
+      if (range === 'week' && diff > 7 * 864e5) return false;
+      if (range === 'month' && !(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear())) return false;
+    }
+
+    if (query) {
+      const c = adminPhase9Customer(order);
+      const haystack = [
+        order.orderNumber,
+        order._id,
+        c.name,
+        c.email,
+        c.phone,
+        order.shippingAddress?.city,
+        order.shippingAddress?.pincode,
+        ...(order.items || []).map(item => item.name)
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+
+    return true;
+  });
+}
+
+function renderOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  if (!tbody) return;
+
+  const orders = adminPhase9FilteredOrders();
+  adminPhase9RenderOrderSummaryChips(orders);
+
+  if (!orders.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          <div class="admin-empty-state">
+            <strong>No matching orders</strong>
+            Change the filter/search or wait for new orders.
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(order => {
+    const c = adminPhase9Customer(order);
+    const items = order.items || [];
+    const itemLabel = items.length
+      ? `${items.length} item${items.length > 1 ? 's' : ''} · ${items.slice(0, 2).map(i => i.name || 'Product').join(', ')}${items.length > 2 ? ' +' + (items.length - 2) : ''}`
+      : 'No items';
+    const payStatus = adminPhase9PaymentStatus(order);
+    const statusLabel = String(order.status || 'placed').replaceAll('_', ' ');
+
+    return `
+      <tr class="admin-order-row">
+        <td>
+          <div class="admin-order-code">#${adminPhase9Text(order.orderNumber || order._id)}</div>
+          <div class="admin-order-sub">${adminPhase9Text(order._id || '')}</div>
+        </td>
+        <td>
+          <div class="admin-customer-name">${adminPhase9Text(c.name)}</div>
+          <div class="admin-customer-meta">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
+        </td>
+        <td><span class="admin-items-pill">📦 ${adminPhase9Text(itemLabel)}</span></td>
+        <td style="color:var(--muted2)">${adminPhase9Date(order.createdAt)}</td>
+        <td>
+          <span class="admin-pay-badge admin-pay-${adminPhase9Text(payStatus)}">
+            ${payStatus === 'paid' ? '✓' : '•'} ${adminPhase9Text(adminPhase9PaymentMethod(order))}
+          </span>
+        </td>
+        <td style="font-family:var(--font-d);font-size:1.12rem">${money(adminPhase9OrderTotal(order))}</td>
+        <td><span class="sb ${adminPhase9StatusClass(order.status)}">${adminPhase9Text(statusLabel)}</span></td>
+        <td>
+          <div class="admin-order-actions">
+            <button class="admin-mini-btn red" onclick="openOrderDetails('${order._id}')">View</button>
+            <button class="admin-mini-btn" onclick="adminPhase9OpenReceipt('${order._id}')">Receipt</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function adminPhase9RenderOrderSummaryChips(orders = []) {
+  const page = document.getElementById('adm-orders');
+  if (!page) return;
+  let strip = document.getElementById('admin-order-summary-chips');
+  if (!strip) {
+    strip = document.createElement('div');
+    strip.id = 'admin-order-summary-chips';
+    strip.className = 'admin-kpi-inline';
+    const toolbar = page.querySelector('.page-toolbar');
+    toolbar?.insertAdjacentElement('afterend', strip);
+  }
+
+  const total = orders.length;
+  const revenue = orders.reduce((sum, order) => sum + adminPhase9OrderTotal(order), 0);
+  const paid = orders.filter(order => adminPhase9PaymentStatus(order) === 'paid').length;
+  const pending = orders.filter(order => !['delivered','cancelled'].includes(String(order.status || '').toLowerCase())).length;
+
+  strip.innerHTML = `
+    <div class="admin-kpi-chip">Orders <strong>${total}</strong></div>
+    <div class="admin-kpi-chip">Revenue <strong>${money(revenue)}</strong></div>
+    <div class="admin-kpi-chip">Paid <strong>${paid}</strong></div>
+    <div class="admin-kpi-chip">Active Fulfilment <strong>${pending}</strong></div>
+  `;
+}
+
+function adminPhase9OpenReceipt(orderId) {
+  if (!orderId) return;
+  window.open(`receipt.html?orderId=${encodeURIComponent(orderId)}`, '_blank');
+}
+
+function adminPhase9StatusTimeline(status = '') {
+  const current = String(status || 'placed').toLowerCase();
+  const isCancelled = current === 'cancelled';
+  let currentIndex = ADMIN_PHASE9_STATUS_FLOW.indexOf(current);
+  if (currentIndex < 0) currentIndex = 0;
+
+  if (isCancelled) {
+    return `<div class="admin-status-flow"><div class="admin-status-step now" style="grid-column:1/-1">Cancelled</div></div>`;
+  }
+
+  return `<div class="admin-status-flow">${ADMIN_PHASE9_STATUS_FLOW.map((step, index) => `
+    <div class="admin-status-step ${index < currentIndex ? 'done' : index === currentIndex ? 'now' : ''}">
+      ${step.replaceAll('_', ' ')}
+    </div>
+  `).join('')}</div>`;
+}
+
+function openOrderDetails(orderId) {
+  ensureOrderModal();
+  const order = (REAL_ORDERS || []).find(o => String(o._id) === String(orderId));
+  if (!order) {
+    showToast('❌ Order not found');
+    return;
+  }
+
+  const c = adminPhase9Customer(order);
+  const items = order.items || [];
+  const address = order.shippingAddress || {};
+  const payStatus = adminPhase9PaymentStatus(order);
+  const payMethod = adminPhase9PaymentMethod(order);
+  const transactionId = order.payment?.transactionId || order.payment?.razorpayPaymentId || order.payment?.paymentId || order.payment?.reference || order.payment?.demoPaymentId || '-';
+
+  document.getElementById('od-title').textContent = `#${order.orderNumber || order._id}`;
+  document.getElementById('od-body').innerHTML = `
+    <div class="od-grid">
+      <div class="od-box">
+        <div class="od-label">Customer</div>
+        <div class="od-value">${adminPhase9Text(c.name)}</div>
+        <div style="color:#888;margin-top:4px">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Order Date</div>
+        <div class="od-value">${adminPhase9DateTime(order.createdAt)}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Order Status</div>
+        <div class="od-value"><span class="sb ${adminPhase9StatusClass(order.status)}">${adminPhase9Text(String(order.status || 'placed').replaceAll('_',' '))}</span></div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Payment</div>
+        <div class="od-value"><span class="admin-pay-badge admin-pay-${adminPhase9Text(payStatus)}">${adminPhase9Text(payStatus.toUpperCase())}</span></div>
+        <div style="color:#888;margin-top:6px">${adminPhase9Text(payMethod)} · ${adminPhase9Text(transactionId)}</div>
+      </div>
+    </div>
+
+    <div class="od-box">
+      <div class="od-label">Fulfilment Timeline</div>
+      ${adminPhase9StatusTimeline(order.status)}
+    </div>
+
+    <div class="od-grid" style="margin-top:14px">
+      <div class="od-box">
+        <div class="od-label">Shipping Address</div>
+        <div class="od-value" style="line-height:1.65">
+          ${adminPhase9Text(address.name || c.name)}<br>
+          ${adminPhase9Text(address.line1 || address.address || '')}<br>
+          ${adminPhase9Text(address.city || '')}, ${adminPhase9Text(address.state || '')} - ${adminPhase9Text(address.pincode || '')}<br>
+          ${adminPhase9Text(address.country || 'India')} · ${adminPhase9Text(address.phone || '')}
+        </div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Amount Summary</div>
+        <div class="od-value" style="line-height:1.85">
+          Subtotal: ${money(order.pricing?.subtotal)}<br>
+          Shipping: ${money(order.pricing?.shipping)}<br>
+          Discount: ${money(order.pricing?.discount)}<br>
+          Tax: ${money(order.pricing?.tax)}<br>
+          <span style="font-size:1.35rem;color:#fff">Total: ${money(order.pricing?.total)}</span>
+        </div>
+      </div>
+    </div>
+
+    <table class="od-items">
+      <thead><tr><th>Product</th><th>Size/Color</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        ${items.map(item => `
+          <tr>
+            <td>${adminPhase9Text(item.name || item.product?.name || 'Product')}</td>
+            <td>${adminPhase9Text([item.size, item.color].filter(Boolean).join(' / ') || '-')}</td>
+            <td>${Number(item.quantity || 1)}</td>
+            <td>${money(item.price)}</td>
+            <td>${money((item.price || 0) * (item.quantity || 1))}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="5" style="color:#777;text-align:center">No items</td></tr>'}
+      </tbody>
+    </table>
+
+    <div class="od-status-row">
+      <div class="od-label" style="margin:0;color:var(--red)">Update Status</div>
+      <select class="od-select" id="od-status-select">
+        ${['placed','processing','shipped','out_for_delivery','delivered','cancelled'].map(st => `
+          <option value="${st}" ${String(order.status || 'placed') === st ? 'selected' : ''}>${st.replaceAll('_',' ').toUpperCase()}</option>
+        `).join('')}
+      </select>
+      <button class="od-btn" onclick="updateOrderStatus('${order._id}')">Update</button>
+    </div>
+
+    <div class="admin-order-modal-actions">
+      <button class="admin-mini-btn red" onclick="adminPhase9OpenReceipt('${order._id}')">Open Receipt</button>
+      <button class="admin-mini-btn" onclick="window.print()">Print Admin View</button>
+    </div>
+  `;
+
+  document.getElementById('order-details-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+async function updateOrderStatus(orderId) {
+  const status = document.getElementById('od-status-select')?.value;
+  if (!status) return;
+
+  try {
+    showToast('⏳ Updating order status...');
+    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAdminToken()}`
+      },
+      body: JSON.stringify({ status, message: `Order marked as ${status.replaceAll('_',' ')}` })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Status update failed');
+    showToast('🔥 Order status updated');
+    await loadOrders();
+    openOrderDetails(orderId);
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function exportAdminOrdersCSV() {
+  const orders = adminPhase9FilteredOrders();
+  if (!orders.length) {
+    showToast('No orders to export');
+    return;
+  }
+
+  const rows = [[
+    'Order Number','Order ID','Customer','Email','Phone','Date','Payment Method','Payment Status','Order Status','Subtotal','Shipping','Tax','Discount','Total','Items'
+  ]];
+
+  orders.forEach(order => {
+    const c = adminPhase9Customer(order);
+    rows.push([
+      order.orderNumber || '',
+      order._id || '',
+      c.name,
+      c.email,
+      c.phone,
+      adminPhase9DateTime(order.createdAt),
+      adminPhase9PaymentMethod(order),
+      adminPhase9PaymentStatus(order),
+      order.status || 'placed',
+      order.pricing?.subtotal || 0,
+      order.pricing?.shipping || 0,
+      order.pricing?.tax || 0,
+      order.pricing?.discount || 0,
+      order.pricing?.total || adminPhase9OrderTotal(order),
+      (order.items || []).map(item => `${item.name || 'Product'} x ${item.quantity || 1}`).join(' | ')
+    ]);
+  });
+
+  const csv = rows.map(row => row.map(cell => `"${String(cell ?? '').replaceAll('"','""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `paddox-orders-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('📥 Orders CSV exported');
+}
+
+function updateOverviewCards() {
+  const overview = document.getElementById('adm-overview');
+  if (!overview) return;
+  const cards = overview.querySelectorAll('.kpi-card');
+  if (!cards.length) return;
+
+  const totalRevenue = (REAL_ORDERS || []).reduce((sum, order) => sum + adminPhase9OrderTotal(order), 0);
+  const paidOrders = (REAL_ORDERS || []).filter(order => adminPhase9PaymentStatus(order) === 'paid').length;
+  const lowStockCount = (REAL_PRODUCTS || []).filter(product => Number(product.stock || 0) <= 10).length;
+  const pendingFulfilment = (REAL_ORDERS || []).filter(order => !['delivered','cancelled'].includes(String(order.status || '').toLowerCase())).length;
+
+  const values = [
+    { label:'Total Revenue', value:money(totalRevenue), change:'From real orders' },
+    { label:'Total Orders', value:REAL_ORDERS.length, change:'Live admin order list' },
+    { label:'Paid Orders', value:paidOrders, change:'Payment marked paid' },
+    { label:'Low Stock', value:lowStockCount, change:`${pendingFulfilment} orders need fulfilment` }
+  ];
+
+  cards.forEach((card, index) => {
+    const data = values[index];
+    if (!data) return;
+    card.querySelector('.kpi-label').textContent = data.label;
+    card.querySelector('.kpi-value').textContent = data.value;
+    card.querySelector('.kpi-change').textContent = data.change;
+  });
+}
+
+function updateOverviewRevenueChart() {
+  const container = document.getElementById('bar-chart');
+  if (!container) return;
+
+  const now = new Date();
+  const labels = [];
+  for (let i = 4; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    labels.push({ month:d.getMonth(), year:d.getFullYear(), label:d.toLocaleString('en-IN', { month:'short' }) });
+  }
+
+  const monthTotals = labels.map(meta => (REAL_ORDERS || []).reduce((sum, order) => {
+    if (!order.createdAt) return sum;
+    const d = new Date(order.createdAt);
+    return d.getMonth() === meta.month && d.getFullYear() === meta.year
+      ? sum + adminPhase9OrderTotal(order)
+      : sum;
+  }, 0));
+
+  const max = Math.max(...monthTotals, 1);
+  container.innerHTML = labels.map((meta, index) => {
+    const total = monthTotals[index];
+    const height = total > 0 ? Math.max(8, (total / max) * 100) : 3;
+    return `
+      <div class="bc-col">
+        <div class="bc-wrap">
+          <div class="bc-bar" style="height:${height}%" data-v="${money(total)}"></div>
+        </div>
+        <div class="bc-lbl">${meta.label}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAnalyticsRealtime() {
+  const orders = REAL_ORDERS || [];
+  const totalOrders = orders.length;
+  const totalRevenue = orders.reduce((sum, order) => sum + adminPhase9OrderTotal(order), 0);
+  const paidOrders = orders.filter(order => adminPhase9PaymentStatus(order) === 'paid');
+  const paidRevenue = paidOrders.reduce((sum, order) => sum + adminPhase9OrderTotal(order), 0);
+  const delivered = orders.filter(order => String(order.status || '').toLowerCase() === 'delivered').length;
+  const aov = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
+  const fulfilmentRate = totalOrders ? Math.round((delivered / totalOrders) * 100) : 0;
+
+  const paidRevenueEl = document.getElementById('analytics-paid-revenue');
+  const aovEl = document.getElementById('analytics-aov');
+  const fulfilEl = document.getElementById('analytics-fulfilment');
+  if (paidRevenueEl) paidRevenueEl.textContent = money(paidRevenue);
+  if (aovEl) aovEl.textContent = money(aov);
+  if (fulfilEl) fulfilEl.textContent = `${fulfilmentRate}%`;
+
+  const statusCounts = orders.reduce((acc, order) => {
+    const s = String(order.status || 'placed').replaceAll('_', ' ');
+    acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, {});
+  const maxStatus = Math.max(...Object.values(statusCounts), 1);
+
+  renderMetList('traffic-list', Object.entries(statusCounts).map(([name, count]) => ({
+    name: name.replace(/\b\w/g, ch => ch.toUpperCase()),
+    val: `${count} orders`,
+    pct: Math.max(8, Math.round((count / maxStatus) * 100)),
+    color: 'var(--red)'
+  })));
+
+  const productSales = {};
+  orders.forEach(order => (order.items || []).forEach(item => {
+    const name = item.name || 'Product';
+    productSales[name] = (productSales[name] || 0) + Number(item.quantity || 1);
+  }));
+  const topProducts = Object.entries(productSales).sort((a,b) => b[1]-a[1]).slice(0,4);
+  const maxQty = Math.max(...topProducts.map(([, qty]) => qty), 1);
+  renderMetList('top-products-list', topProducts.length ? topProducts.map(([name, qty]) => ({
+    name, val:`${qty} sold`, pct:Math.max(8, Math.round((qty / maxQty) * 100)), color:'var(--gold)'
+  })) : [{ name:'No product sales yet', val:'Waiting for orders', pct:0, color:'var(--muted)' }]);
+
+  const cityCounts = {};
+  orders.forEach(order => {
+    const city = order.shippingAddress?.city || order.shippingAddress?.state || 'Unknown';
+    cityCounts[city] = (cityCounts[city] || 0) + 1;
+  });
+  const cities = Object.entries(cityCounts).sort((a,b) => b[1]-a[1]).slice(0,4);
+  const maxCity = Math.max(...cities.map(([, count]) => count), 1);
+  renderMetList('geo-list', cities.length ? cities.map(([city, count]) => ({
+    name: city, val:`${count} orders`, pct:Math.max(8, Math.round((count / maxCity) * 100)), color:'var(--blue)'
+  })) : [{ name:'No geography yet', val:'Waiting for orders', pct:0, color:'var(--muted)' }]);
+
+  renderMetList('engagement-list', [
+    { name:'Paid Orders', val:String(paidOrders.length), pct: totalOrders ? Math.round((paidOrders.length / totalOrders) * 100) : 0, color:'var(--green)' },
+    { name:'Fulfilled Orders', val:String(delivered), pct:fulfilmentRate, color:'var(--gold)' },
+    { name:'Products Listed', val:String((REAL_PRODUCTS || []).length), pct:(REAL_PRODUCTS || []).length ? 100 : 0, color:'var(--red)' },
+    { name:'Low Stock Alerts', val:String((REAL_PRODUCTS || []).filter(p => Number(p.stock || 0) <= 10).length), pct:100, color:'var(--blue)' }
+  ]);
+}
+
+function adminPhase9BindOrderFilters() {
+  ['admin-order-status-filter','admin-order-time-filter','admin-order-search'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.phase9Bound) return;
+    el.dataset.phase9Bound = '1';
+    el.addEventListener(id === 'admin-order-search' ? 'input' : 'change', () => renderOrders());
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  adminPhase9BindOrderFilters();
+});
