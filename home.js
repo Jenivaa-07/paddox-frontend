@@ -604,7 +604,11 @@ async function initRealCountdown() {
     const race = data.data.race;
     HOME_F1.nextRace = race;
 
-    if (flagEl) flagEl.textContent = race.flag || '🏁';
+    if (flagEl) {
+      flagEl.textContent = '';
+      flagEl.title = race.country || race.name || 'Next Grand Prix';
+      flagEl.setAttribute('aria-label', race.country || 'Grand Prix');
+    }
     if (nameEl) nameEl.textContent = race.name || 'Next Grand Prix';
     if (circEl) circEl.textContent = [race.circuit, race.location, race.country].filter(Boolean).join(' · ');
     if (chipEl) chipEl.textContent = `Round ${race.round || '—'} · Season ${race.season || new Date().getFullYear()}`;
@@ -628,7 +632,11 @@ async function initRealCountdown() {
     setInterval(tick, 1000);
   } catch (err) {
     console.warn('Countdown unavailable', err);
-    if (flagEl) flagEl.textContent = '🏁';
+    if (flagEl) {
+      flagEl.textContent = '';
+      flagEl.title = 'Grand Prix';
+      flagEl.setAttribute('aria-label', 'Grand Prix');
+    }
     if (nameEl) nameEl.textContent = 'Race schedule unavailable';
     if (circEl) circEl.textContent = 'Please check again shortly.';
     if (chipEl) chipEl.textContent = 'F1 schedule data unavailable';
