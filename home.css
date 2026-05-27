@@ -2135,3 +2135,193 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   .nl-form       { flex-direction: column; }
   .nl-btn        { width: 100%; justify-content: center; }
 }
+
+/* ============================================================
+   PHASE 12 V5 — Brand, Flag Image, Featured Merch Final Polish
+   ============================================================ */
+
+/* Real flag image chip for countdown */
+.cs-flag {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 12px 28px rgba(0,0,0,.28);
+  position: relative;
+  overflow: hidden;
+}
+.cs-flag::before,
+.cs-flag::after { display: none !important; }
+.cs-flag-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cs-flag-fallback {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.cs-flag.flag-fallback {
+  border-color: rgba(232,0,45,.35);
+  background: rgba(232,0,45,.12);
+}
+.countdown-strip {
+  background:
+    linear-gradient(90deg, rgba(232,0,45,.045), transparent 46%, rgba(255,255,255,.018)),
+    rgba(232,0,45,.035);
+}
+.cs-name { font-size: clamp(1.9rem, 3vw, 2.65rem); }
+.cs-circuit { color: rgba(255,255,255,.58); }
+
+/* Featured Merch: cleaner premium product showcase */
+.featured-section {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(232,0,45,.08), transparent 32%),
+    linear-gradient(180deg, #070707 0%, #090909 100%);
+}
+.featured-section .section-head {
+  align-items: center;
+  margin-bottom: 46px;
+}
+.featured-section .section-label {
+  color: rgba(232,0,45,.95);
+}
+.products-grid {
+  gap: 24px;
+}
+.pcard {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.014)),
+    #0e0e0f;
+  border: 1px solid rgba(255,255,255,.075);
+  box-shadow: 0 18px 44px rgba(0,0,0,.24);
+}
+.pcard::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), transparent 72%);
+  opacity: .7;
+  z-index: 5;
+}
+.pcard:hover {
+  transform: translateY(-8px);
+  border-color: rgba(232,0,45,.28);
+  box-shadow: 0 28px 60px rgba(0,0,0,.44), 0 0 0 1px rgba(232,0,45,.08);
+}
+.pcard-img-wrap {
+  height: clamp(230px, 20vw, 300px);
+  background: #0a0a0b;
+}
+.pcard-img {
+  object-fit: cover;
+  filter: brightness(.9) contrast(1.02);
+}
+.pcard:hover .pcard-img { filter: brightness(1) contrast(1.04); }
+.pcard-img-overlay {
+  background: linear-gradient(to top, rgba(14,14,15,.98) 0%, rgba(14,14,15,.38) 55%, rgba(0,0,0,.05) 100%);
+}
+.pcard-overlay {
+  background: linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.76));
+  backdrop-filter: blur(2px);
+}
+.pbadge {
+  border-radius: 0;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+  padding: 5px 12px;
+}
+.pwish {
+  background: rgba(8,8,8,.78);
+  backdrop-filter: blur(8px);
+}
+.pcard-info { padding: 20px 18px 18px; }
+.pcard-team { color: rgba(232,0,45,.8); }
+.pcard-name { font-size: 1.28rem; letter-spacing: .8px; }
+.pcard-foot { gap: 12px; }
+.pcard-price { font-size: 1.58rem; }
+.pcard-rating { white-space: nowrap; }
+
+/* Fan stories: make the real-time nature clearer */
+.testi-section {
+  background:
+    radial-gradient(circle at 72% 0%, rgba(232,0,45,.06), transparent 30%),
+    linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+}
+.testi-card {
+  border-top: 2px solid rgba(232,0,45,.45);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.04), rgba(255,255,255,.014)),
+    rgba(15,15,16,.92);
+}
+.testi-badge {
+  color: #00d2be;
+  border-color: rgba(0,210,190,.25);
+  background: rgba(0,210,190,.07);
+}
+.fan-empty-card,
+.merch-empty-card {
+  border-top: 2px solid rgba(232,0,45,.55);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.04), rgba(255,255,255,.014)),
+    rgba(14,14,15,.92);
+}
+.empty-cta {
+  display: inline-flex;
+  margin-top: 12px;
+  font-family: var(--font-condensed);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  border-bottom: 1px solid rgba(232,0,45,.45);
+  padding-bottom: 3px;
+}
+
+/* Newsletter brand lock: PADDOX with red X, no confusing PADDOX PADDOCK copy */
+.newsletter-section {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(232,0,45,.08), transparent 34%),
+    linear-gradient(180deg, #090909 0%, #050505 100%);
+}
+.nl-title .logo-x { color: var(--red); }
+.nl-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.nl-sub { max-width: 560px; }
+
+@media (max-width: 900px) {
+  .featured-section .section-head { align-items: flex-start; }
+  .products-grid { gap: 18px; }
+  .pcard-img-wrap { height: 240px; }
+}
+
+@media (max-width: 620px) {
+  .cs-flag {
+    width: 58px;
+    height: 42px;
+    border-radius: 10px;
+  }
+  .cs-race { gap: 12px; }
+  .cs-name { font-size: clamp(2rem, 8vw, 2.7rem); }
+  .featured-section .section-head {
+    margin-bottom: 30px;
+  }
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+  .pcard {
+    max-width: 390px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .pcard-img-wrap { height: 250px; }
+  .newsletter-section { padding: 84px 0; }
+  .nl-title { font-size: clamp(2.3rem, 12vw, 3.6rem); }
+}

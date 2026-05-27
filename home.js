@@ -232,6 +232,57 @@ function uniqueCleanNames(values = []) {
   return out;
 }
 
+
+const COUNTRY_FLAG_CODES = {
+  australia: 'au', bahrain: 'bh', china: 'cn', japan: 'jp', 'saudi arabia': 'sa',
+  usa: 'us', 'united states': 'us', 'united states of america': 'us', miami: 'us', lasvegas: 'us', 'las vegas': 'us',
+  italy: 'it', 'emilia romagna': 'it', monaco: 'mc', spain: 'es', canada: 'ca', austria: 'at',
+  'united kingdom': 'gb', britain: 'gb', 'great britain': 'gb', silverstone: 'gb', belgium: 'be',
+  hungary: 'hu', netherlands: 'nl', holland: 'nl', azerbaijan: 'az', singapore: 'sg', mexico: 'mx',
+  brazil: 'br', qatar: 'qa', 'united arab emirates': 'ae', 'abu dhabi': 'ae', uae: 'ae'
+};
+
+function normalizeCountryKey(value = '') {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/grand prix|gp|circuit|autodromo|autodrome|street circuit/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function countryCodeFromRace(race = {}) {
+  const fields = [race.country, race.location, race.locality, race.name, race.raceName, race.circuit];
+  for (const field of fields) {
+    const key = normalizeCountryKey(field);
+    if (!key) continue;
+    if (COUNTRY_FLAG_CODES[key]) return COUNTRY_FLAG_CODES[key];
+    for (const [country, code] of Object.entries(COUNTRY_FLAG_CODES)) {
+      if (key.includes(country) || country.includes(key)) return code;
+    }
+  }
+  return '';
+}
+
+function setCountdownFlag(flagEl, race = {}) {
+  if (!flagEl) return;
+  const code = countryCodeFromRace(race);
+  const label = safeText(race.country || race.location || race.name, 'Race flag');
+  flagEl.classList.remove('flag-fallback');
+  if (!code) {
+    flagEl.innerHTML = '<span class="cs-flag-fallback">🏁</span>';
+    flagEl.classList.add('flag-fallback');
+    return;
+  }
+  flagEl.innerHTML = `
+    <img
+      class="cs-flag-img"
+      src="https://flagcdn.com/${code}.svg"
+      alt="${escapeHTML(label)} flag"
+      loading="lazy"
+      onerror="this.parentElement.classList.add('flag-fallback');this.outerHTML='<span class=&quot;cs-flag-fallback&quot;>🏁</span>'"
+    />`;
+}
+
 function renderQuoteAvatar(el, avatar, driver = 'PADDOX') {
   if (!el) return;
   const av = safeText(avatar, '🏁');
@@ -369,7 +420,7 @@ async function loadHomeFanStories() {
               <div class="testi-loc">🏁 ${escapeHTML(date)}</div>
             </div>
           </div>
-          <div class="testi-badge">Fan Community</div>
+          <div class="testi-badge">Live Fan Hub</div>
         </div>`;
     }).join('');
     initRevealObserver(grid.querySelectorAll('.reveal-up'));
@@ -744,7 +795,7 @@ function renderHomeProducts() {
   if (!grid) return;
 
   if (!PRODUCTS.length) {
-    grid.innerHTML = '<div class="home-empty-card">Featured products are unavailable right now.</div>';
+    grid.innerHTML = '<div class="home-empty-card merch-empty-card reveal-up"><div class="empty-icon">🛒</div><div><h3>Featured drops are loading</h3><p>Open the shop to browse every PADDOX product.</p><a href="shop.html" class="empty-cta">Open Shop →</a></div></div>'; initRevealObserver(grid.querySelectorAll('.reveal-up'));
     return;
   }
 
