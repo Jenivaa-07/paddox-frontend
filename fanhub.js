@@ -126,20 +126,9 @@ const FAN_DRIVER_PROFILE_API =
   'https://paddox-backend.onrender.com/api/fan/driver-profiles';
 
 function teamEmojiFromName(name = '') {
-  const n = String(name || '').toLowerCase();
-  if (n.includes('red bull')) return '🔵';
-  if (n.includes('ferrari')) return '🔴';
-  if (n.includes('mclaren')) return '🟠';
-  if (n.includes('mercedes')) return '⚫';
-  if (n.includes('aston')) return '🟢';
-  if (n.includes('alpine')) return '🔷';
-  if (n.includes('williams')) return '🔵';
-  if (n.includes('haas')) return '⚪';
-  if (n.includes('racing bulls') || n.includes('rb')) return '🟣';
-  if (n.includes('sauber') || n.includes('kick') || n.includes('audi')) return '🟢';
-  if (n.includes('cadillac')) return '🟡';
-  return '🏎️';
+  return '';
 }
+
 
 function teamColorFromName(name = '') {
   const n = String(name || '').toLowerCase();
@@ -158,14 +147,14 @@ function teamColorFromName(name = '') {
 }
 
 const NATIONALITY_FLAGS = {
-  dutch:'🇳🇱', british:'🇬🇧', english:'🇬🇧',
-  monégasque:'🇲🇨', monegasque:'🇲🇨',
-  australian:'🇦🇺', spanish:'🇪🇸', mexican:'🇲🇽',
-  canadian:'🇨🇦', french:'🇫🇷', german:'🇩🇪',
-  italian:'🇮🇹', japanese:'🇯🇵', thai:'🇹🇭',
-  danish:'🇩🇰', finnish:'🇫🇮', chinese:'🇨🇳',
-  brazilian:'🇧🇷', american:'🇺🇸', argentine:'🇦🇷',
-  newzealander:'🇳🇿', 'new zealander':'🇳🇿'
+  dutch:'nl', british:'gb', english:'gb',
+  monégasque:'mc', monegasque:'mc',
+  australian:'au', spanish:'es', mexican:'mx',
+  canadian:'ca', french:'fr', german:'de',
+  italian:'it', japanese:'jp', thai:'th',
+  danish:'dk', finnish:'fi', chinese:'cn',
+  brazilian:'br', american:'us', argentine:'ar',
+  newzealander:'nz', 'new zealander':'nz'
 };
 
 function flagFromNationality(value = '') {
@@ -708,52 +697,52 @@ async function loadLastResult() {
 }
 /* ══ DATA ══ */
 const WALLPAPERS = [
-  { name:'Ferrari SF-25 Dawn',  cat:'cars',     type:'free',    img:'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&q=80',     res:'4K · 3840×2160', emoji:'🏎️' },
-  { name:'Max Attack Mode',     cat:'drivers',  type:'premium', img:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=80',     res:'4K · 3840×2160', emoji:'👤' },
-  { name:'Silverstone Aerial',  cat:'circuits', type:'free',    img:'https://images.unsplash.com/photo-1504197832061-98658c95b13e?w=800&q=80',     res:'2K · 2560×1440', emoji:'🗺️' },
-  { name:'McLaren Papaya Burst',cat:'cars',     type:'premium', img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',        res:'4K · 3840×2160', emoji:'🏎️' },
-  { name:'Scuderia Fire Art',   cat:'art',      type:'free',    img:'https://images.unsplash.com/photo-1541005329-22a78da1b5f0?w=800&q=80',         res:'HD · 1920×1080', emoji:'🎨' },
-  { name:'Hamilton Era',        cat:'drivers',  type:'premium', img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80',     res:'4K · 3840×2160', emoji:'⭐' },
-  { name:'Monaco Neon Circuit', cat:'circuits', type:'free',    img:'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80',         res:'2K · 2560×1440', emoji:'🏙️' },
-  { name:'Golden Lap Abstract', cat:'art',      type:'premium', img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80',     res:'4K · 3840×2160', emoji:'✨' },
+  { name:'Ferrari SF-25 Dawn',  cat:'cars',     type:'free',    img:'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&q=80',     res:'4K · 3840×2160', emoji:'' },
+  { name:'Max Attack Mode',     cat:'drivers',  type:'premium', img:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=80',     res:'4K · 3840×2160', emoji:'' },
+  { name:'Silverstone Aerial',  cat:'circuits', type:'free',    img:'https://images.unsplash.com/photo-1504197832061-98658c95b13e?w=800&q=80',     res:'2K · 2560×1440', emoji:'' },
+  { name:'McLaren Papaya Burst',cat:'cars',     type:'premium', img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',        res:'4K · 3840×2160', emoji:'' },
+  { name:'Scuderia Fire Art',   cat:'art',      type:'free',    img:'https://images.unsplash.com/photo-1541005329-22a78da1b5f0?w=800&q=80',         res:'HD · 1920×1080', emoji:'' },
+  { name:'Hamilton Era',        cat:'drivers',  type:'premium', img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80',     res:'4K · 3840×2160', emoji:'' },
+  { name:'Monaco Neon Circuit', cat:'circuits', type:'free',    img:'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80',         res:'2K · 2560×1440', emoji:'' },
+  { name:'Golden Lap Abstract', cat:'art',      type:'premium', img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80',     res:'4K · 3840×2160', emoji:'' },
 ];
 
 const DRIVERS = [
-  { num:1,  name:'Max Verstappen', team:'Red Bull Racing',   nat:'🇳🇱 Netherlands', av:'🔵',
+  { num:1,  name:'Max Verstappen', team:'Red Bull Racing',   nat:'Netherlands', flagCode:'nl', av:'',
     stats:{ pace:98, racecraft:97, overtaking:95, defending:88, wetweather:96, consistency:92 },
     season:{ wins:6, podiums:10, poles:5, pts:195, pos:'1st' },
     img:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80' },
-  { num:16, name:'Charles Leclerc', team:'Scuderia Ferrari', nat:'🇲🇨 Monaco',      av:'🔴',
+  { num:16, name:'Charles Leclerc', team:'Scuderia Ferrari', nat:'Monaco', flagCode:'mc',      av:'',
     stats:{ pace:96, racecraft:90, overtaking:88, defending:84, wetweather:89, consistency:85 },
     season:{ wins:4, podiums:9,  poles:7, pts:168, pos:'2nd' },
     img:'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400&q=80' },
-  { num:44, name:'Lewis Hamilton',  team:'Scuderia Ferrari', nat:'🇬🇧 United Kingdom', av:'⭐',
+  { num:44, name:'Lewis Hamilton',  team:'Scuderia Ferrari', nat:'United Kingdom', flagCode:'gb', av:'',
     stats:{ pace:94, racecraft:96, overtaking:96, defending:90, wetweather:98, consistency:90 },
     season:{ wins:2, podiums:7,  poles:3, pts:140, pos:'3rd' },
     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80' },
-  { num:4,  name:'Lando Norris',    team:'McLaren F1 Team',  nat:'🇬🇧 United Kingdom', av:'🟠',
+  { num:4,  name:'Lando Norris',    team:'McLaren F1 Team',  nat:'United Kingdom', flagCode:'gb', av:'',
     stats:{ pace:95, racecraft:89, overtaking:91, defending:83, wetweather:87, consistency:88 },
     season:{ wins:3, podiums:8,  poles:4, pts:155, pos:'4th' },
     img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
-  { num:14, name:'Fernando Alonso', team:'Aston Martin F1',  nat:'🇪🇸 Spain',      av:'🟢',
+  { num:14, name:'Fernando Alonso', team:'Aston Martin F1',  nat:'Spain', flagCode:'es',      av:'',
     stats:{ pace:90, racecraft:99, overtaking:94, defending:96, wetweather:95, consistency:89 },
     season:{ wins:0, podiums:3,  poles:1, pts:72,  pos:'7th' },
     img:'https://images.unsplash.com/photo-1504197832061-98658c95b13e?w=400&q=80' },
 ];
 
 const RACES = [
-  { round:1,  name:'Bahrain Grand Prix',       circuit:"Bahrain Int'l Circuit",       date:'Mar 2',  flag:'🇧🇭', status:'completed', winner:'Verstappen' },
-  { round:2,  name:'Saudi Arabian GP',         circuit:'Jeddah Corniche Circuit',     date:'Mar 9',  flag:'🇸🇦', status:'completed', winner:'Leclerc'    },
-  { round:3,  name:'Australian Grand Prix',    circuit:'Albert Park Circuit',         date:'Mar 23', flag:'🇦🇺', status:'completed', winner:'Norris'     },
-  { round:4,  name:'Japanese Grand Prix',      circuit:'Suzuka Circuit',             date:'Apr 6',  flag:'🇯🇵', status:'completed', winner:'Verstappen' },
-  { round:5,  name:'Chinese Grand Prix',       circuit:'Shanghai Int\'l Circuit',    date:'Apr 20', flag:'🇨🇳', status:'completed', winner:'Hamilton'   },
-  { round:6,  name:'Miami Grand Prix',         circuit:'Miami Int\'l Autodrome',     date:'May 4',  flag:'🇺🇸', status:'completed', winner:'Verstappen' },
-  { round:7,  name:'Emilia Romagna GP',        circuit:'Autodromo Enzo Ferrari',     date:'May 18', flag:'🇮🇹', status:'completed', winner:'Leclerc'    },
-  { round:8,  name:'Monaco Grand Prix',        circuit:'Circuit de Monaco',          date:'May 25', flag:'🇲🇨', status:'next',      winner:null         },
-  { round:9,  name:'Spanish Grand Prix',       circuit:'Circuit de Barcelona',       date:'Jun 1',  flag:'🇪🇸', status:'upcoming',  winner:null         },
-  { round:10, name:'Canadian Grand Prix',      circuit:'Circuit Gilles Villeneuve',  date:'Jun 15', flag:'🇨🇦', status:'upcoming',  winner:null         },
-  { round:11, name:'Austrian Grand Prix',      circuit:'Red Bull Ring',              date:'Jun 29', flag:'🇦🇹', status:'upcoming',  winner:null         },
-  { round:12, name:'British Grand Prix',       circuit:'Silverstone Circuit',        date:'Jul 6',  flag:'🇬🇧', status:'upcoming',  winner:null         },
+  { round:1,  name:'Bahrain Grand Prix',       circuit:"Bahrain Int'l Circuit",       date:'Mar 2',  flagCode:'bh', status:'completed', winner:'Verstappen' },
+  { round:2,  name:'Saudi Arabian GP',         circuit:'Jeddah Corniche Circuit',     date:'Mar 9',  flagCode:'sa', status:'completed', winner:'Leclerc'    },
+  { round:3,  name:'Australian Grand Prix',    circuit:'Albert Park Circuit',         date:'Mar 23', flagCode:'au', status:'completed', winner:'Norris'     },
+  { round:4,  name:'Japanese Grand Prix',      circuit:'Suzuka Circuit',             date:'Apr 6',  flagCode:'jp', status:'completed', winner:'Verstappen' },
+  { round:5,  name:'Chinese Grand Prix',       circuit:'Shanghai Int\'l Circuit',    date:'Apr 20', flagCode:'cn', status:'completed', winner:'Hamilton'   },
+  { round:6,  name:'Miami Grand Prix',         circuit:'Miami Int\'l Autodrome',     date:'May 4',  flagCode:'us', status:'completed', winner:'Verstappen' },
+  { round:7,  name:'Emilia Romagna GP',        circuit:'Autodromo Enzo Ferrari',     date:'May 18', flagCode:'it', status:'completed', winner:'Leclerc'    },
+  { round:8,  name:'Monaco Grand Prix',        circuit:'Circuit de Monaco',          date:'May 25', flagCode:'mc', status:'next',      winner:null         },
+  { round:9,  name:'Spanish Grand Prix',       circuit:'Circuit de Barcelona',       date:'Jun 1',  flagCode:'es', status:'upcoming',  winner:null         },
+  { round:10, name:'Canadian Grand Prix',      circuit:'Circuit Gilles Villeneuve',  date:'Jun 15', flagCode:'ca', status:'upcoming',  winner:null         },
+  { round:11, name:'Austrian Grand Prix',      circuit:'Red Bull Ring',              date:'Jun 29', flagCode:'at', status:'upcoming',  winner:null         },
+  { round:12, name:'British Grand Prix',       circuit:'Silverstone Circuit',        date:'Jul 6',  flagCode:'gb', status:'upcoming',  winner:null         },
 ];
 
 
@@ -1287,8 +1276,8 @@ function quoteImageValue(q = {}) {
   );
 }
 
-function quoteAvatarHTML(avatar, className = '') {
-  const value = avatar || 'PX';
+function quoteAvatarHTML(avatar, className = '', driverName = '') {
+  const value = avatar || '';
 
   if (
     typeof value === 'string' &&
@@ -1304,12 +1293,12 @@ function quoteAvatarHTML(avatar, className = '') {
         alt="Quote driver image"
         class="${className}"
         loading="lazy"
-        onerror="this.outerHTML='<span class=&quot;quote-avatar-fallback&quot;>PX</span>'"
+        onerror="this.outerHTML='<span class=&quot;quote-avatar-fallback&quot;>${driverInitials(driverName || 'PADDOX')}</span>'"
       />
     `;
   }
 
-  return `<span class="quote-avatar-fallback">${safeText(value)}</span>`;
+  return `<span class="quote-avatar-fallback">${driverInitials(driverName || 'PADDOX')}</span>`;
 }
 
 async function loadRealtimeQuotes() {
@@ -1413,7 +1402,7 @@ function renderRealtimeQuotes() {
       <div class="qf-media">
         <div class="qf-image-ring">
           <div class="qf-driver-image">
-            ${quoteAvatarHTML(avatarValue, 'qf-driver-img')}
+            ${quoteAvatarHTML(avatarValue, 'qf-driver-img', q.driver)}
           </div>
         </div>
         <div class="qf-team-strip"></div>
@@ -1437,7 +1426,7 @@ function renderRealtimeQuotes() {
         <div class="qf-footer">
           <div class="qf-drv">
             <div class="qf-ava">
-              ${quoteAvatarHTML(avatarValue)}
+              ${quoteAvatarHTML(avatarValue, '', q.driver)}
             </div>
 
             <div>
@@ -1851,7 +1840,7 @@ async function copyQuoteText(index, forceCopy = false) {
         title: `PADDOX Quote — ${q.driver}`,
         text
       });
-      showToast('🔥 Quote shared!');
+      showToast('Quote shared!');
       return;
     }
 
@@ -2015,7 +2004,7 @@ function fanAuthHeaders(json = false) {
 }
 
 function fanLoginRequired() {
-  showToast('🔐 Please login to use Fan Hub actions');
+  showToast('Please login to use Fan Hub actions');
 
   setTimeout(() => {
     window.location.href = 'account.html';
@@ -2042,10 +2031,10 @@ function timeAgo(dateValue) {
 
 /* Community polish helpers */
 const FAN_TIER_LEVELS = [
-  { name:'Rookie Fan', min:0, next:500, emoji:'🏁' },
-  { name:'Pro Fan', min:500, next:2000, emoji:'🔥' },
-  { name:'Elite Fan', min:2000, next:5000, emoji:'⚡' },
-  { name:'Paddox Legend', min:5000, next:10000, emoji:'👑' }
+  { name:'Rookie Fan', min:0, next:500 },
+  { name:'Pro Fan', min:500, next:2000 },
+  { name:'Elite Fan', min:2000, next:5000 },
+  { name:'Paddox Legend', min:5000, next:10000 }
 ];
 
 function escapeHTML(value = '') {
@@ -2172,7 +2161,6 @@ function storeFanPollVote(poll = CURRENT_POLL, optionIndex = 0) {
 function cleanPollOptionLabel(value = '', index = 0) {
   return String(value || `Option ${index + 1}`)
     .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
-    .replace(/[🔵🔴🟠⭐]/g, '')
     .replace(/\s+/g, ' ')
     .trim() || `Option ${index + 1}`;
 }
@@ -2224,7 +2212,7 @@ async function voteRealtimePoll(optionIndex) {
     }
 
     if (!CURRENT_POLL?._id) {
-      showToast('❌ Poll not ready');
+      showToast('Poll not ready');
       return;
     }
 
@@ -2234,7 +2222,7 @@ async function voteRealtimePoll(optionIndex) {
       return;
     }
 
-    showToast('⏳ Recording vote...');
+    showToast('Recording vote...');
 
     const data = await PaddoxAPI.fan.vote(
       CURRENT_POLL._id,
@@ -2264,7 +2252,7 @@ async function voteRealtimePoll(optionIndex) {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
   }
 }
 
@@ -2488,7 +2476,7 @@ async function answerRealtimeTrivia(answerIndex) {
   } catch (err) {
     console.error(err);
     TRIVIA_ANSWERED = false;
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
   }
 }
 
@@ -2547,9 +2535,9 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
           </div>
           <div class="feed-txt">${safeText}</div>
           <div class="feed-actions">
-            <button type="button" onclick="showToast('❤️ Like action coming in backend phase')">❤️ ${likes}</button>
-            <button type="button" onclick="showToast('💬 Comments coming in backend phase')">💬 Comment</button>
-            <button type="button" onclick="navigator.clipboard?.writeText(this.closest('.feed-item').querySelector('.feed-txt')?.textContent || ''); showToast('📋 Post copied')">↗ Share</button>
+            <button type="button" onclick="showToast('Like action coming in backend phase')">Like ${likes}</button>
+            <button type="button" onclick="showToast('Comments coming in backend phase')">Comment</button>
+            <button type="button" onclick="navigator.clipboard?.writeText(this.closest('.feed-item').querySelector('.feed-txt')?.textContent || ''); showToast('Post copied')">↗ Share</button>
           </div>
         </div>
       </div>
@@ -2586,7 +2574,7 @@ async function submitFanPost() {
   const text = input.value.trim();
 
   if (!text) {
-    showToast('⚠️ Write something first');
+    showToast('Write something first');
     return;
   }
 
@@ -2596,7 +2584,7 @@ async function submitFanPost() {
   }
 
   try {
-    showToast('⏳ Posting to live feed...');
+    showToast('Posting to live feed...');
 
     const data = await (PaddoxAPI.fan.post || PaddoxAPI.fan.postFeed)(text);
 
@@ -2607,7 +2595,7 @@ async function submitFanPost() {
     input.value = '';
     updateFeedCharCount();
 
-    showToast(data.message || '🔥 Posted! +20 Fan Points');
+    showToast(data.message || 'Posted! +20 Fan Points');
     showPointsBurst('+20 pts');
 
     await loadFanFeed();
@@ -2615,7 +2603,7 @@ async function submitFanPost() {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
   }
 }
 

@@ -2909,3 +2909,55 @@ body.modal-open { overflow: hidden; }
   width: 0 !important;
   opacity: 0 !important;
 }
+
+/* ============================================================
+   Phase 17.6 — Recovery: clean Shop-style Fan Hub icons only
+   Keeps navbar/hero layout intact; removes emojis from premium UI.
+   ============================================================ */
+:root{
+  --fh-ico-wallpapers:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 5h16v14H4zm2 2v10h12V7zm2 8 3-4 2 3 1.5-2L17 15z'/%3E%3C/svg%3E");
+  --fh-ico-drivers:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 8h10a5 5 0 0 1 5 5v4a3 3 0 0 1-5.4 1.8L15 17H9l-1.6 1.8A3 3 0 0 1 2 17v-4a5 5 0 0 1 5-5m1 4H6v2h2v2h2v-2h2v-2h-2v-2H8zm8 1.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3m3 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3'/%3E%3C/svg%3E");
+  --fh-ico-calendar:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M6 2h2v3h8V2h2v3h3v17H3V5h3zm-1 8v10h14V10zm2 2h3v3H7zm5 0h3v3h-3z'/%3E%3C/svg%3E");
+  --fh-ico-quotes:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M5 5h6v6H8v2h3v6H5v-8a6 6 0 0 1 6-6v3a3 3 0 0 0-3 3h3V8H5zm8 0h6v6h-3v2h3v6h-6v-8a6 6 0 0 1 6-6v3a3 3 0 0 0-3 3h3V8h-6z'/%3E%3C/svg%3E");
+  --fh-ico-community:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0zm14-9a3 3 0 1 0 0-6v2a1 1 0 1 1 0 2zM2 21a6 6 0 0 1 5-5.9V17a4 4 0 0 0-3 4z'/%3E%3C/svg%3E");
+  --fh-ico-pitwall:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 20V9h4v11zm6 0V4h4v16zm6 0v-8h4v8z'/%3E%3C/svg%3E");
+  --fh-ico-poll:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 19h16v2H4zm2-4h3v3H6zm5-6h3v9h-3zm5-5h3v14h-3z'/%3E%3C/svg%3E");
+  --fh-ico-leaderboard:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 3h10v3h3v3a5 5 0 0 1-5 5h-1v3h4v4H6v-4h4v-3H9a5 5 0 0 1-5-5V6h3zm-1 5v1a3 3 0 0 0 3 3V8zm9 4a3 3 0 0 0 3-3V8h-3z'/%3E%3C/svg%3E");
+  --fh-ico-trivia:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M11 18h2v2h-2zm1-16a7 7 0 0 1 4.9 12l-1.4 1.3A4.7 4.7 0 0 0 14 18h-2a6 6 0 0 1 2-4.2l1.4-1.3A5 5 0 1 0 7 9H5a7 7 0 0 1 7-7'/%3E%3C/svg%3E");
+  --fh-ico-feed:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 4h16v12H7l-3 4zm3 4h10v2H7zm0 4h7v2H7z'/%3E%3C/svg%3E");
+}
+.fh-chip-icon,.fh-tab-icon,.comm-title-icon{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 auto!important;
+  color:var(--red)!important;
+  background:currentColor!important;
+  -webkit-mask:var(--fh-icon) center/contain no-repeat!important;
+  mask:var(--fh-icon) center/contain no-repeat!important;
+  transform:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  font-size:0!important;
+  line-height:0!important;
+}
+.fh-chip-icon{width:18px!important;height:18px!important;opacity:.95!important}
+.fh-tab-icon{width:20px!important;height:20px!important;opacity:.92!important}
+.comm-title-icon{width:22px!important;height:22px!important;margin-right:12px!important}
+.fh-ico-wallpapers{--fh-icon:var(--fh-ico-wallpapers)}
+.fh-ico-drivers{--fh-icon:var(--fh-ico-drivers)}
+.fh-ico-calendar{--fh-icon:var(--fh-ico-calendar)}
+.fh-ico-quotes{--fh-icon:var(--fh-ico-quotes)}
+.fh-ico-community{--fh-icon:var(--fh-ico-community)}
+.fh-ico-pitwall{--fh-icon:var(--fh-ico-pitwall)}
+.fh-ico-poll{--fh-icon:var(--fh-ico-poll)}
+.fh-ico-leaderboard{--fh-icon:var(--fh-ico-leaderboard)}
+.fh-ico-trivia{--fh-icon:var(--fh-ico-trivia)}
+.fh-ico-feed{--fh-icon:var(--fh-ico-feed)}
+.hero-chip .animate-icon,.hub-tab .ht-icon{display:none!important}
+.hero-chip,.hub-tab,.comm-card-title{display:flex!important;align-items:center!important;gap:12px!important}
+.hero-chip:hover .fh-chip-icon,.hub-tab:hover .fh-tab-icon,.hub-tab.on .fh-tab-icon{transform:scale(1.08)!important;filter:drop-shadow(0 0 8px rgba(232,0,45,.28))}
+.comm-card-title::before{display:none!important;content:none!important}
+.fpd-title::before{display:inline-block!important}
+/* Remove old Phase 17.3 box marks if stale markup is cached */
+.chip-mark,.ht-mark{display:none!important}

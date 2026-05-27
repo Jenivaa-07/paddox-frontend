@@ -63,11 +63,11 @@
         Wallpapers, driver stats, race calendar, live quotes, trivia &amp; community — your ultimate F1 digital universe.
       </p>
       <div class="hub-hero-chips animate-fade-up delay-4">
-        <span class="hero-chip"><span class="animate-icon">🖼️</span> Wallpapers</span>
-        <span class="hero-chip"><span class="animate-icon">📊</span> Driver Stats</span>
-        <span class="hero-chip"><span class="animate-icon">📅</span> Calendar</span>
-        <span class="hero-chip"><span class="animate-icon">🏆</span> Community</span>
-        <a class="hero-chip" href="pitwall.html"><span class="animate-icon">📡</span> Pit Wall Live</a>
+        <span class="hero-chip"><span class="fh-chip-icon fh-ico-wallpapers" aria-hidden="true"></span> Wallpapers</span>
+        <span class="hero-chip"><span class="fh-chip-icon fh-ico-drivers" aria-hidden="true"></span> Driver Stats</span>
+        <span class="hero-chip"><span class="fh-chip-icon fh-ico-calendar" aria-hidden="true"></span> Calendar</span>
+        <span class="hero-chip"><span class="fh-chip-icon fh-ico-community" aria-hidden="true"></span> Community</span>
+        <a class="hero-chip" href="pitwall.html"><span class="fh-chip-icon fh-ico-pitwall" aria-hidden="true"></span> Pit Wall Live</a>
       </div>
     </div>
   </section>
@@ -75,11 +75,11 @@
   <!-- ░░ HUB TABS ░░ -->
   <div class="hub-tabs-bar" id="hub-tabs-bar">
     <div class="hub-tabs-inner">
-      <button class="hub-tab on" data-tab="wallpapers"><span class="ht-icon animate-icon">🖼️</span> Wallpapers</button>
-      <button class="hub-tab" data-tab="drivers"><span class="ht-icon animate-icon">🏎️</span> Driver Stats</button>
-      <button class="hub-tab" data-tab="calendar"><span class="ht-icon animate-icon">📅</span> Race Calendar</button>
-      <button class="hub-tab" data-tab="quotes"><span class="ht-icon animate-icon">💬</span> Quotes</button>
-      <button class="hub-tab" data-tab="community"><span class="ht-icon animate-icon">🏆</span> Community</button>
+      <button class="hub-tab on" data-tab="wallpapers"><span class="fh-tab-icon fh-ico-wallpapers" aria-hidden="true"></span> Wallpapers</button>
+      <button class="hub-tab" data-tab="drivers"><span class="fh-tab-icon fh-ico-drivers" aria-hidden="true"></span> Driver Stats</button>
+      <button class="hub-tab" data-tab="calendar"><span class="fh-tab-icon fh-ico-calendar" aria-hidden="true"></span> Race Calendar</button>
+      <button class="hub-tab" data-tab="quotes"><span class="fh-tab-icon fh-ico-quotes" aria-hidden="true"></span> Quotes</button>
+      <button class="hub-tab" data-tab="community"><span class="fh-tab-icon fh-ico-community" aria-hidden="true"></span> Community</button>
     </div>
   </div>
 
@@ -193,19 +193,19 @@
       <div class="comm-grid">
         <!-- Poll -->
         <div class="comm-card reveal-up delay-1">
-          <div class="comm-card-title">Fan Poll</div>
+          <div class="comm-card-title"><span class="comm-title-icon fh-ico-poll" aria-hidden="true"></span>Fan Poll</div>
           <div class="poll-q" id="poll-q"></div>
           <div class="poll-opts" id="poll-opts"></div>
           <div class="poll-meta" id="poll-meta"></div>
         </div>
         <!-- Leaderboard -->
         <div class="comm-card reveal-up delay-2">
-          <div class="comm-card-title">Fan Leaderboard</div>
+          <div class="comm-card-title"><span class="comm-title-icon fh-ico-leaderboard" aria-hidden="true"></span>Fan Leaderboard</div>
           <div class="lb-list" id="lb-list"></div>
         </div>
         <!-- Trivia -->
         <div class="comm-card reveal-up delay-3">
-          <div class="comm-card-title">F1 Trivia</div>
+          <div class="comm-card-title"><span class="comm-title-icon fh-ico-trivia" aria-hidden="true"></span>F1 Trivia</div>
           <div class="triv-q" id="triv-q"></div>
           <div class="triv-opts" id="triv-opts"></div>
           <div class="triv-res" id="triv-res"></div>
@@ -213,10 +213,7 @@
         </div>
         <!-- Live Feed -->
         <div class="comm-card reveal-up delay-4">
-          <div class="comm-card-title">
-            <span class="live-dot"></span>
-            Fan Live Feed
-          </div>
+          <div class="comm-card-title"><span class="comm-title-icon fh-ico-feed" aria-hidden="true"></span>Fan Live Feed</div>
           <div class="feed-compose" id="feed-compose">
             <textarea id="feed-post-input" maxlength="280" placeholder="Share your race thought with the Paddox grid..."></textarea>
             <div class="feed-compose-bottom">
