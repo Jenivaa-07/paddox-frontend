@@ -18,47 +18,58 @@ const USE_OFFICIAL_F1_LOGO_LIBRARY = true;
 const PADDOX_HOME_TEAMS = [
   {
     name: 'Ferrari', slug: 'ferrari', color: '#e8002d',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/ferrari/2025ferrarilogolight.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/ferrari/2025ferrarilogolight.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/ferrari/2026ferraricarright.webp'
   },
   {
     name: 'Mercedes', slug: 'mercedes', color: '#00d2be',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mercedes/2025mercedeslogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mercedes/2025mercedeslogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/mercedes/2026mercedescarright.webp'
   },
   {
     name: 'Red Bull Racing', slug: 'red-bull', color: '#1e5bff',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/redbullracing/2025redbullracinglogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/redbullracing/2025redbullracinglogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/redbullracing/2026redbullracingcarright.webp'
   },
   {
     name: 'McLaren', slug: 'mclaren', color: '#ff8700',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mclaren/2025mclarenlogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mclaren/2025mclarenlogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/mclaren/2026mclarencarright.webp'
   },
   {
     name: 'Aston Martin', slug: 'aston-martin', color: '#006f62',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/astonmartin/2025astonmartinlogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/astonmartin/2025astonmartinlogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/astonmartin/2026astonmartincarright.webp'
   },
   {
     name: 'Alpine', slug: 'alpine', color: '#2293d1',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/alpine/2025alpinelogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/alpine/2025alpinelogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/alpine/2026alpinecarright.webp'
   },
   {
     name: 'Williams', slug: 'williams', color: '#64c4ff',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/williams/2025williamslogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/williams/2025williamslogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/williams/2026williamscarright.webp'
   },
   {
     name: 'Haas F1 Team', slug: 'haas', color: '#b6b9bc',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/haas/2025haaslogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/haas/2025haaslogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/haas/2026haascarright.webp'
   },
   {
     name: 'Racing Bulls', slug: 'racing-bulls', color: '#315dff',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/racingbulls/2025racingbullslogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/racingbulls/2025racingbullslogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/racingbulls/2026racingbullscarright.webp'
   },
   {
     name: 'Audi', slug: 'audi', color: '#d60000',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/audi/2026audilogowhite.webp'
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/audi/2026audilogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/audi/2026audicarright.webp'
   },
   {
-    name: 'Cadillac', slug: 'cadillac', color: '#d4af37',
-    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/cadillac/2026cadillaclogowhite.webp'
+    name: 'Cadillac', slug: 'cadillac', color: '#8c939c',
+    image: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/cadillac/2026cadillaclogowhite.webp',
+    carImage: 'https://media.formula1.com/image/upload/c_lfill%2Cw_3392/q_auto/v1740000001/common/f1/2026/cadillac/2026cadillaccarright.webp'
   },
 ];
 
@@ -1104,16 +1115,21 @@ function renderHomeMarquee() {
     return `<img class="team-badge-img" src="${escapeHTML(primary)}" data-base="${escapeHTML(`assets/teams/${team.slug}`)}" data-try="0" alt="${escapeHTML(team.name)} badge" loading="lazy" referrerpolicy="no-referrer" onerror="window.homeLogoFallback && window.homeLogoFallback(this)"/>`;
   };
 
+  const renderCar = team => {
+    if (!team.carImage) return '';
+    return `<img class="team-car-img" src="${escapeHTML(team.carImage)}" alt="${escapeHTML(team.name)} car" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>`;
+  };
+
   const renderItem = team => `
     <span class="marquee-team" style="--team-color:${escapeHTML(team.color || '#e8002d')}" title="${escapeHTML(team.name)}">
-      <span class="team-logo-wrap">
-        ${renderLogo(team)}
-        <i class="team-badge-dot" style="--team-color:${escapeHTML(team.color || '#e8002d')}"></i>
+      <span class="marquee-team-head">
+        <span class="team-logo-orb">${renderLogo(team)}</span>
+        <span class="marquee-team-name">${escapeHTML(team.name)}</span>
       </span>
-      <span class="marquee-team-name">${escapeHTML(team.name)}</span>
+      <span class="marquee-team-car-wrap">${renderCar(team)}</span>
     </span>`;
 
-  track.innerHTML = [...teams, ...teams, ...teams].map(renderItem).join('');
+  track.innerHTML = [...teams, ...teams].map(renderItem).join('');
 }
 
 function updateTickerFromAPI() {
