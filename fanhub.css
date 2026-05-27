@@ -1769,3 +1769,218 @@ body.modal-open { overflow: hidden; }
 /* Fan stories empty state logo — real PADDOX logo, controlled size */
 .brand-empty-icon{width:92px!important;height:92px!important;min-width:92px!important;border-radius:50%!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;background:radial-gradient(circle at 35% 28%,rgba(232,0,45,.18),rgba(7,7,7,.94) 62%)!important;border:1px solid rgba(232,0,45,.3)!important}
 .brand-empty-icon img{display:block!important;width:82px!important;height:82px!important;object-fit:cover!important;object-position:center!important;border-radius:50%!important}
+
+/* ============================================================
+   PADDOX Phase 17 — Fan Hub full final polish
+   Safe polish only: hero/nav/logo/quotes logic untouched.
+   ============================================================ */
+.hub-body{
+  position:relative;
+  z-index:1;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(232,0,45,.055),transparent 30%),
+    linear-gradient(180deg,rgba(7,7,7,.96),rgba(9,9,9,1));
+}
+.hub-section{
+  max-width:1440px;
+  margin:0 auto;
+}
+.sec-header{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:28px;
+  padding-bottom:18px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  position:relative;
+}
+.sec-header::after{
+  content:'';
+  position:absolute;
+  left:0;
+  bottom:-1px;
+  width:92px;
+  height:2px;
+  background:linear-gradient(90deg,var(--red),transparent);
+}
+.section-label{
+  letter-spacing:3.5px;
+  color:var(--red);
+}
+.section-title{
+  text-shadow:0 10px 40px rgba(0,0,0,.45);
+}
+.hub-tabs-bar{
+  backdrop-filter:blur(18px) saturate(1.35);
+  -webkit-backdrop-filter:blur(18px) saturate(1.35);
+  box-shadow:0 14px 38px rgba(0,0,0,.32);
+}
+.hub-tab{
+  min-height:62px;
+  border-right:1px solid rgba(255,255,255,.035);
+}
+.hub-tab.on{
+  background:linear-gradient(180deg,rgba(232,0,45,.105),rgba(232,0,45,.025));
+}
+.wp-filters{
+  padding:10px;
+  border:1px solid rgba(255,255,255,.055);
+  background:rgba(255,255,255,.018);
+}
+.wpf{
+  border-radius:0;
+}
+.wpf.on{
+  box-shadow:0 0 0 1px rgba(232,0,45,.22),0 14px 30px rgba(232,0,45,.08);
+}
+.wp-card,.rcard,.comm-card,.drv-card,.quote-featured{
+  background:linear-gradient(145deg,rgba(18,18,18,.96),rgba(8,8,8,.98));
+  box-shadow:0 18px 45px rgba(0,0,0,.28);
+}
+.wp-card::after,.rcard::after,.comm-card::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(120deg,transparent 20%,rgba(255,255,255,.035) 42%,transparent 62%);
+  transform:translateX(-120%);
+  transition:transform .75s ease;
+}
+.wp-card:hover::after,.rcard:hover::after,.comm-card:hover::after{
+  transform:translateX(120%);
+}
+.wp-grid,.race-grid{
+  align-items:stretch;
+}
+.wp-card{
+  min-height:220px;
+}
+.wp-overlay{
+  background:linear-gradient(180deg,rgba(7,7,7,.18),rgba(7,7,7,.92));
+}
+.drv-live-meta{
+  border-left:3px solid var(--red);
+  box-shadow:0 14px 36px rgba(0,0,0,.22);
+}
+.drv-panel{
+  align-items:stretch;
+}
+.drv-card,.drv-stats-right{
+  min-height:100%;
+}
+.drv-pill{
+  min-width:190px;
+}
+.rcard{
+  min-height:230px;
+}
+.rc-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.quote-controls{
+  border-left:3px solid rgba(232,0,45,.9);
+}
+.qf-premium-card,.qm-card{
+  isolation:isolate;
+}
+.comm-grid{
+  gap:20px;
+}
+.comm-card{
+  position:relative;
+  overflow:hidden;
+  border-top:2px solid rgba(232,0,45,.5);
+}
+.fan-points-dock{
+  border:1px solid rgba(255,255,255,.055);
+  padding:10px;
+  background:rgba(255,255,255,.018);
+}
+.fpd-card{
+  box-shadow:0 14px 35px rgba(0,0,0,.22);
+}
+.feed-compose textarea{
+  min-height:116px;
+  resize:vertical;
+}
+.fh-empty-state{
+  grid-column:1/-1;
+  min-height:240px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-align:center;
+  padding:38px 20px;
+  color:var(--muted2);
+  background:linear-gradient(145deg,rgba(18,18,18,.9),rgba(8,8,8,.96));
+  border:1px solid rgba(255,255,255,.07);
+  border-left:3px solid var(--red);
+}
+.fh-empty-state h3,.fh-action-empty strong{
+  font-family:var(--font-d);
+  color:#fff;
+  letter-spacing:2px;
+  font-size:1.55rem;
+  line-height:1;
+}
+.fh-empty-state p,.fh-action-empty span{
+  max-width:520px;
+  color:var(--muted2);
+  line-height:1.65;
+}
+.fh-empty-mark{
+  width:46px;
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(232,0,45,.1);
+  border:1px solid rgba(232,0,45,.28);
+  box-shadow:0 0 28px rgba(232,0,45,.09);
+  margin-bottom:4px;
+}
+.fh-action-empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:150px;
+  border-left:2px solid var(--red);
+}
+.preview-card{
+  border-top:2px solid var(--red);
+}
+.preview-image-wrap{
+  background:#050505;
+}
+@media(max-width:980px){
+  .hub-section{padding:52px 28px}
+  .hub-tab{min-height:58px}
+  .drv-panel{gap:18px}
+  .comm-grid{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .sec-header{align-items:flex-start;flex-direction:column;margin-bottom:22px}
+  .section-title{font-size:clamp(2.2rem,12vw,3.4rem)}
+  .hub-tabs-inner{padding:0 10px}
+  .hub-tab{min-width:max-content;padding:0 16px;font-size:.72rem}
+  .wp-filters{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  .wp-filters::-webkit-scrollbar{display:none}
+  .wpf{white-space:nowrap;flex:0 0 auto}
+  .drv-selector{flex-wrap:nowrap;overflow-x:auto;padding-bottom:10px}
+  .drv-pill{min-width:210px}
+  .quote-controls{padding:12px}
+  .quote-filter-row{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:4px;scrollbar-width:none}
+  .quote-filter-row::-webkit-scrollbar{display:none}
+  .quote-filter{white-space:nowrap;flex:0 0 auto}
+  .quote-search-wrap{min-width:100%}
+  .fan-points-dock{grid-template-columns:1fr 1fr}
+  .fpd-main{grid-column:1/-1}
+}

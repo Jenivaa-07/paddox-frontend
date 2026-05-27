@@ -700,17 +700,46 @@ function initReveal(root=document){
 }
 initReveal();
 
-/* ══ TAB SWITCHING ══ */
-document.querySelectorAll('.hub-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.hub-tab').forEach(t=>t.classList.remove('on'));
-    document.querySelectorAll('.hub-section').forEach(s=>s.classList.remove('on'));
-    tab.classList.add('on');
-    const sec=document.getElementById(`sec-${tab.dataset.tab}`);
-    if(sec){sec.classList.add('on');initReveal(sec);}
-    const icon=tab.querySelector('.ht-icon');
-    if(icon){icon.style.transform='scale(1.4)';setTimeout(()=>icon.style.transform='',300);}
-  });
+/* ══ TAB SWITCHING — Phase 17 polish ══ */
+function activateHubTab(tabName = 'wallpapers', shouldScroll = false) {
+  const tab = document.querySelector(`.hub-tab[data-tab="${tabName}"]`) ||
+              document.querySelector('.hub-tab[data-tab="wallpapers"]');
+  if (!tab) return;
+
+  document.querySelectorAll('.hub-tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.hub-section').forEach(s => s.classList.remove('on'));
+
+  tab.classList.add('on');
+  const sec = document.getElementById(`sec-${tab.dataset.tab}`);
+  if (sec) {
+    sec.classList.add('on');
+    initReveal(sec);
+  }
+
+  try { localStorage.setItem('paddox_fanhub_tab', tab.dataset.tab); } catch (_) {}
+
+  const icon = tab.querySelector('.ht-icon');
+  if (icon) {
+    icon.style.transform = 'scale(1.28)';
+    setTimeout(() => icon.style.transform = '', 260);
+  }
+
+  if (shouldScroll) {
+    document.getElementById('hub-tabs-bar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+}
+
+document.querySelectorAll('.hub-tab').forEach(tab => {
+  tab.addEventListener('click', () => activateHubTab(tab.dataset.tab, true));
+});
+
+window.addEventListener('load', () => {
+  const fromHash = (location.hash || '').replace('#', '').replace('sec-', '');
+  const saved = localStorage.getItem('paddox_fanhub_tab');
+  const nextTab = fromHash || saved || 'wallpapers';
+  if (document.querySelector(`.hub-tab[data-tab="${nextTab}"]`)) {
+    activateHubTab(nextTab, false);
+  }
 });
 
 /* ══ WALLPAPERS ══ */
@@ -740,6 +769,17 @@ async function renderWallpapers() {
       wpCat === 'all' ||
       (wpCat === 'free' ? w.type === 'free' : w.category === wpCat)
     );
+
+    if (!list.length) {
+      grid.innerHTML = `
+        <div class="fh-empty-state">
+          <div class="fh-empty-mark">🖼️</div>
+          <h3>No wallpapers in this filter yet</h3>
+          <p>Switch to All or add more digital assets from Admin → Digital Assets.</p>
+        </div>
+      `;
+      return;
+    }
 
     window.__PADDOX_ASSETS__ = {};
     list.forEach(w => {
@@ -944,6 +984,17 @@ function renderWallpapersFallback() {
     wpCat === 'all' ||
     (wpCat === 'free' ? w.type === 'free' : w.cat === wpCat)
   );
+
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="fh-empty-state">
+        <div class="fh-empty-mark">🖼️</div>
+        <h3>No wallpapers in this filter yet</h3>
+        <p>Try another category or upload new wallpapers from Admin.</p>
+      </div>
+    `;
+    return;
+  }
 
   grid.innerHTML = list.map((w, i) => `
     <div class="wp-card" style="animation-delay:${i * 0.06}s">
@@ -1845,8 +1896,10 @@ async function loadFanPoll() {
 
     qEl.textContent = 'No active poll right now';
     optsEl.innerHTML = `
-      <div class="poll-empty">
-        Admin can create a poll later.
+      <div class="poll-empty fh-action-empty">
+        <div class="fh-empty-mark">📊</div>
+        <strong>No active poll right now</strong>
+        <span>Admin can create a poll later from the Fan Hub controls.</span>
       </div>
     `;
     if (metaEl) metaEl.textContent = 'Realtime poll inactive';
@@ -1954,8 +2007,10 @@ async function loadFanLeaderboard() {
 
     if (!leaderboard.length) {
       lbEl.innerHTML = `
-        <div class="lb-empty">
-          No fan points yet.
+        <div class="lb-empty fh-action-empty">
+          <div class="fh-empty-mark">🏆</div>
+          <strong>No fan points yet</strong>
+          <span>Votes, trivia, and fan posts will start the leaderboard.</span>
         </div>
       `;
       return;
@@ -2055,8 +2110,10 @@ async function loadRealtimeTrivia() {
 
     qEl.textContent = 'No trivia question available';
     optsEl.innerHTML = `
-      <div class="triv-empty">
-        Admin can add trivia questions later.
+      <div class="triv-empty fh-action-empty">
+        <div class="fh-empty-mark">🧠</div>
+        <strong>No trivia question available</strong>
+        <span>Admin can add more F1 trivia questions later.</span>
       </div>
     `;
   }
@@ -2161,8 +2218,10 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
   if (!posts.length) {
     updateFanPointsDock({ posts: 0 });
     feedEl.innerHTML = `
-      <div class="feed-empty">
-        No fan posts yet. Be the first on the grid.
+      <div class="feed-empty fh-action-empty">
+        <div class="fh-empty-mark">🏁</div>
+        <strong>No fan posts yet</strong>
+        <span>Be the first on the PADDOX grid. Share a race thought above.</span>
       </div>
     `;
     return;
