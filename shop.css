@@ -2077,3 +2077,24 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   .nav-cta-btn { padding: 10px 20px !important; }
   .hamburger { display: flex !important; }
 }
+
+
+/* Phase 13 V7 — final shop audit polish */
+.cart-drawer.open { box-shadow: -32px 0 80px rgba(0,0,0,.55); }
+.cart-empty-icon::before { content: ''; display:block; width:32px; height:18px; border-top:2px solid var(--red); border-bottom:2px solid rgba(255,255,255,.55); transform:skewX(-18deg); }
+.pcard-img { object-position:center; }
+.pcard-name, .ci-name { word-break: break-word; }
+.modal-box { max-height: min(86vh, 760px); }
+.modal-right { min-width: 0; }
+@media (max-width: 900px) {
+  .shop-sidebar.mobile-open { box-shadow: 26px 0 60px rgba(0,0,0,.7); }
+  .products-toolbar { gap: 14px; }
+  .sort-view { width: 100%; justify-content: space-between; }
+}
+@media (max-width: 560px) {
+  .shop-hero-content { padding-left: 24px; padding-right: 24px; }
+  .shop-hero-title { font-size: clamp(3.2rem, 17vw, 5.4rem); }
+  .cat-bar-inner { padding-inline: 16px; }
+  .products-grid { grid-template-columns: 1fr; }
+  .modal-box { width: calc(100vw - 22px); }
+}

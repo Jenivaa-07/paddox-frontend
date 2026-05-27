@@ -569,7 +569,7 @@ function getFiltered() {
     case 'pl'     : list.sort((a, b) => a.price - b.price);   break;
     case 'ph'     : list.sort((a, b) => b.price - a.price);   break;
     case 'rating' : list.sort((a, b) => b.rating - a.rating); break;
-    case 'newest' : list.sort((a, b) => b.id - a.id);         break;
+    case 'newest' : list.sort((a, b) => String(b.id).localeCompare(String(a.id))); break;
   }
 
   return list;
@@ -806,7 +806,7 @@ function changeQty(key, delta) {
   const item = cart.find(x => String(x.cartKey || x.id) === String(key));
   if (!item) return;
   item.qty += delta;
-  if (item.qty <= 0) removeFromCart(id);
+  if (item.qty <= 0) removeFromCart(key);
   else saveCart();
 }
 
