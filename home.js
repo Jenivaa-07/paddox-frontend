@@ -162,43 +162,6 @@ function normalizeHomeProduct(p = {}) {
   };
 }
 
-function isHomeApparelProduct(product = {}) {
-  const text = `${product.cat || ''} ${product.name || ''}`.toLowerCase();
-  const nonSized = ['poster', 'wallpaper', 'print', 'collectible', 'model', 'diecast', 'sticker', 'mug', 'keychain', 'cap'];
-  if (nonSized.some(word => text.includes(word))) return false;
-  return ['apparel', 'shirt', 't-shirt', 'tee', 'hoodie', 'jacket', 'jersey', 'polo', 'sweatshirt'].some(word => text.includes(word));
-}
-
-function renderHomeModalOptions(product = {}) {
-  const box = document.getElementById('modal-options');
-  if (!box) return;
-
-  if (!isHomeApparelProduct(product)) {
-    box.innerHTML = '';
-    box.style.display = 'none';
-    return;
-  }
-
-  box.style.display = '';
-  box.innerHTML = `
-    <div class="modal-size-label">Size</div>
-    <div class="size-opts">
-      <button class="size-btn active" type="button">XS</button>
-      <button class="size-btn" type="button">S</button>
-      <button class="size-btn" type="button">M</button>
-      <button class="size-btn" type="button">L</button>
-      <button class="size-btn" type="button">XL</button>
-      <button class="size-btn" type="button">XXL</button>
-    </div>`;
-
-  box.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      box.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
-  });
-}
-
 function getNestedString(obj = {}, keys = []) {
   for (const key of keys) {
     const value = obj?.[key];
@@ -386,7 +349,7 @@ async function loadHomeFanStories() {
     /* Fan count is shown as a brand/community milestone on the landing hero. */
     const stories = posts.slice(0, 3);
     if (!stories.length) {
-      grid.innerHTML = '<div class="home-empty-card">Fan stories will appear here after community posts are added.</div>';
+      renderFanEmptyState(grid, 'No fan stories yet', 'Community posts from Fan Hub will appear here once fans start sharing.');
       return;
     }
     grid.innerHTML = stories.map((post, i) => {
@@ -412,7 +375,7 @@ async function loadHomeFanStories() {
     initRevealObserver(grid.querySelectorAll('.reveal-up'));
   } catch (err) {
     console.warn('Fan stories unavailable', err);
-    grid.innerHTML = '<div class="home-empty-card">Fan stories are unavailable right now.</div>';
+    renderFanEmptyState(grid, 'Fan stories are loading slowly', 'Open Fan Hub to explore posts, polls, trivia and community activity.');
   }
 }
 
@@ -856,6 +819,29 @@ function initRevealObserver(elements) {
   elements.forEach(el => obs.observe(el));
 }
 
+
+function isApparelProduct(product = {}) {
+  const text = `${product.name || ''} ${product.cat || ''} ${product.category || ''}`.toLowerCase();
+  const nonApparelTerms = ['poster', 'collectible', 'collectibles', 'model', 'diecast', 'wallpaper', 'print', 'mug', 'keychain', 'sticker', 'cap', 'hat'];
+  if (nonApparelTerms.some(term => text.includes(term))) return false;
+  const apparelTerms = ['apparel', 'shirt', 't-shirt', 'tee', 'hoodie', 'jacket', 'jersey', 'polo', 'sweatshirt'];
+  return apparelTerms.some(term => text.includes(term));
+}
+
+function renderFanEmptyState(grid, title, message) {
+  if (!grid) return;
+  grid.innerHTML = `
+    <div class="home-empty-card fan-empty-card reveal-up">
+      <div class="empty-icon">🏁</div>
+      <div>
+        <h3>${escapeHTML(title)}</h3>
+        <p>${escapeHTML(message)}</p>
+        <a href="fanhub.html" class="empty-cta">Open Fan Hub →</a>
+      </div>
+    </div>`;
+  initRevealObserver(grid.querySelectorAll('.reveal-up'));
+}
+
 /* ══════════════════════════════════════
    CART STATE
 ══════════════════════════════════════ */
@@ -875,17 +861,28 @@ function updateCartBadge() {
   setTimeout(() => badge.style.transform = '', 300);
 }
 
-function addToCart(id) {
+function addToCart(id, qty = 1, size = '') {
   const product = PRODUCTS.find(p => String(p.id) === String(id));
   if (!product) return;
-  const existing = cart.find(x => String(x.id) === String(id));
+  const amount = Math.max(1, Number(qty) || 1);
+  const sizeLabel = safeText(size, '');
+  const existing = cart.find(x => String(x.id) === String(id) && safeText(x.size, '') === sizeLabel);
   if (existing) {
-    existing.qty++;
+    existing.qty += amount;
   } else {
-    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, emoji: product.emoji, image: product.image });
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      qty: amount,
+      emoji: product.emoji,
+      image: product.image,
+      size: sizeLabel,
+    });
   }
   saveCart();
-  showToast(`✓ ${product.name} added to cart!`);
+  const optionText = sizeLabel ? ` (${sizeLabel})` : amount > 1 ? ` x${amount}` : '';
+  showToast(`✓ ${product.name}${optionText} added to cart!`);
 }
 
 updateCartBadge();
@@ -910,18 +907,56 @@ function openModal(id) {
   /* Image */
   const wrap = document.getElementById('modal-img-wrap');
   wrap.style.background = p.gradient || 'linear-gradient(135deg,#111,#1a1a1a)';
-  wrap.innerHTML = p.image
-    ? `<img src="${escapeHTML(p.image)}" alt="${escapeHTML(p.name)}" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85)"
-      onerror="this.outerHTML='<span style=font-size:6rem>${escapeHTML(p.emoji)}</span>'"/>`
-    : `<span style="font-size:6rem">${escapeHTML(p.emoji)}</span>`;
+  wrap.innerHTML = `
+    <img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85)"
+      onerror="this.outerHTML='<span style=font-size:6rem>${p.emoji}</span>'"/>
+  `;
 
-  /* Product options: show sizes only for real apparel */
-  renderHomeModalOptions(p);
+  /* Product options: sizes only for apparel, quantity for all other categories */
+  let modalQty = 1;
+  let selectedSize = '';
+  const optionsEl = document.getElementById('modal-options');
+  if (optionsEl) {
+    if (isApparelProduct(p)) {
+      selectedSize = 'M';
+      optionsEl.innerHTML = `
+        <div class="modal-sizes">
+          <div class="modal-size-label">Size</div>
+          <div class="size-opts">
+            ${['XS','S','M','L','XL','XXL'].map(size => `<button class="size-btn ${size === selectedSize ? 'active' : ''}" data-size="${size}">${size}</button>`).join('')}
+          </div>
+        </div>`;
+      optionsEl.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedSize = btn.dataset.size || btn.textContent.trim();
+          optionsEl.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+    } else {
+      optionsEl.innerHTML = `
+        <div class="modal-qty-block">
+          <div class="modal-size-label">Quantity</div>
+          <div class="modal-qty-control">
+            <button class="qty-btn" type="button" data-step="-1">−</button>
+            <span class="qty-value">1</span>
+            <button class="qty-btn" type="button" data-step="1">+</button>
+          </div>
+        </div>`;
+      const qtyValue = optionsEl.querySelector('.qty-value');
+      optionsEl.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          modalQty = Math.max(1, modalQty + Number(btn.dataset.step || 0));
+          if (qtyValue) qtyValue.textContent = String(modalQty);
+        });
+      });
+    }
+  }
 
   /* Add btn */
   const addBtn = document.getElementById('modal-add-btn');
   addBtn.onclick = () => {
-    addToCart(p.id);
+    addToCart(p.id, modalQty, selectedSize);
     closeModal();
   };
 
@@ -1203,6 +1238,17 @@ function updateTickerFromAPI() {
     }, 300);
   }, 4000);
 }
+
+
+/* ══════════════════════════════════════
+   SIZE BUTTON INTERACTION
+══════════════════════════════════════ */
+document.querySelectorAll('.size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
 
 
 /* ══════════════════════════════════════
