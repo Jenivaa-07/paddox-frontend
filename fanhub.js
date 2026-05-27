@@ -1971,6 +1971,26 @@ window.closeDriverDetailModal = closeDriverDetailModal;
 const FAN_API_BASE =
   'https://paddox-backend.onrender.com/api/fan';
 
+/* Phase 17.5 — API alias safety
+   Current js/api.js exposes getFeed/postFeed, while older Fan Hub code calls
+   feed/post. Keep both names working without touching backend flow. */
+(function ensureFanApiAliases(){
+  const fan = window.PaddoxAPI?.fan;
+  if (!fan) return;
+  if (!fan.feed && fan.getFeed) fan.feed = fan.getFeed;
+  if (!fan.post && fan.postFeed) fan.post = fan.postFeed;
+  if (!fan.feed) {
+    fan.feed = () => fetch(`${FAN_API_BASE}/feed`).then(r => r.json());
+  }
+  if (!fan.post) {
+    fan.post = (text) => fetch(`${FAN_API_BASE}/feed`, {
+      method:'POST',
+      headers: fanAuthHeaders(true),
+      body: JSON.stringify({ text })
+    }).then(r => r.json());
+  }
+})();
+
 let CURRENT_POLL = null;
 let CURRENT_TRIVIA = null;
 let TRIVIA_ANSWERED = false;
@@ -2578,7 +2598,7 @@ async function submitFanPost() {
   try {
     showToast('⏳ Posting to live feed...');
 
-    const data = await PaddoxAPI.fan.post(text);
+    const data = await (PaddoxAPI.fan.post || PaddoxAPI.fan.postFeed)(text);
 
     if (!data.success) {
       throw new Error(data.message || 'Post failed');

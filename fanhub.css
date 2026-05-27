@@ -2835,3 +2835,77 @@ body.modal-open { overflow: hidden; }
 .fan-team-logo img{width:100%;height:100%;object-fit:contain;padding:3px;display:block}
 .fan-team-logo.mini{width:22px;height:22px;margin-right:7px;vertical-align:middle}.dp-team{display:flex!important;align-items:center!important;gap:0!important}.dp-team span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fan-team-logo.card{width:30px;height:30px;margin-right:9px}.drv-team{display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important}
+
+
+/* ============================================================
+   PHASE 17.5 — RESTORE APPROVED FAN HUB ICON STYLE
+   Keeps the good, meaningful Fan Hub icons and removes the weak
+   box-icon system from community card titles.
+   ============================================================ */
+.hero-chip .chip-mark,
+.hub-tab .ht-mark,
+.comm-title-icon {
+  display: none !important;
+}
+
+.hero-chip .animate-icon,
+.hub-tab .ht-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin-right: 7px !important;
+  font-size: .95rem !important;
+  line-height: 1 !important;
+  filter: grayscale(.25) saturate(1.2) drop-shadow(0 0 8px rgba(232,0,45,.16));
+  transform: none !important;
+}
+
+.hero-chip:hover .animate-icon,
+.hub-tab:hover .ht-icon,
+.hub-tab.on .ht-icon {
+  transform: translateY(-1px) scale(1.08) !important;
+  filter: saturate(1.45) drop-shadow(0 0 12px rgba(232,0,45,.24));
+}
+
+.hub-tab {
+  gap: 7px !important;
+}
+
+.comm-card-title {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.comm-card-title::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 24px !important;
+  height: 2px !important;
+  background: var(--red) !important;
+  box-shadow: 0 0 12px rgba(232,0,45,.35) !important;
+  flex: 0 0 24px !important;
+}
+.comm-card-title .live-dot {
+  width: 7px !important;
+  height: 7px !important;
+  flex: 0 0 7px !important;
+  background: var(--red) !important;
+  box-shadow: 0 0 12px rgba(232,0,45,.65) !important;
+}
+
+.feed-empty .fh-empty-mark,
+.poll-empty .fh-empty-mark,
+.fh-action-empty .fh-empty-mark {
+  display: none !important;
+}
+
+.popt .popt-pct {
+  letter-spacing: 1.5px !important;
+}
+.popt:not(.show-results) .popt-fill {
+  width: 0 !important;
+  opacity: 0 !important;
+}
