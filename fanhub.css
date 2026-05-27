@@ -2176,3 +2176,151 @@ body.modal-open { overflow: hidden; }
   .brand-logo-icon{width:30px!important;height:30px!important}
   .nav-cta-btn{display:none!important}
 }
+
+/* ============================================================
+   Phase 17 — Fan Hub section polish + premium UI emoji cleanup
+   Scope: Fan Hub sections only. Navbar/logo/hero/quote logic untouched.
+   ============================================================ */
+.mobile-menu .mob-link{
+  letter-spacing:2.5px!important;
+}
+.hero-chip .animate-icon,.hub-tab .ht-icon,.comm-card-title .animate-icon{
+  display:none!important;
+}
+.chip-mark,.ht-mark,.section-mark,.comm-mark,.search-mini-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  position:relative;
+}
+.chip-mark{
+  width:18px;
+  height:10px;
+  border-left:2px solid var(--red);
+  border-right:2px solid rgba(255,255,255,.18);
+  transform:skewX(-18deg);
+  background:linear-gradient(90deg,rgba(232,0,45,.28),rgba(255,255,255,.04));
+  box-shadow:0 0 16px rgba(232,0,45,.13);
+}
+.ht-mark{
+  width:18px;
+  height:18px;
+  border:1px solid rgba(232,0,45,.45);
+  background:rgba(232,0,45,.08);
+  transform:skewX(-12deg);
+  transition:transform var(--tr),background var(--tr),border-color var(--tr),box-shadow var(--tr);
+}
+.ht-mark::after{
+  content:'';
+  width:7px;
+  height:7px;
+  background:var(--red);
+  box-shadow:0 0 14px rgba(232,0,45,.45);
+}
+.hub-tab:hover .ht-mark,.hub-tab.on .ht-mark{
+  transform:translateY(-1px) skewX(-12deg) scale(1.06);
+  background:rgba(232,0,45,.16);
+  border-color:rgba(232,0,45,.78);
+  box-shadow:0 0 22px rgba(232,0,45,.12);
+}
+.section-label{
+  display:inline-flex!important;
+  align-items:center;
+  gap:10px;
+}
+.section-mark{
+  width:34px;
+  height:2px;
+  background:linear-gradient(90deg,var(--red),rgba(232,0,45,.08));
+  box-shadow:0 0 14px rgba(232,0,45,.24);
+}
+.search-mini-icon{
+  width:16px;
+  height:16px;
+  border:2px solid rgba(255,255,255,.55);
+  border-radius:50%;
+  opacity:.85;
+}
+.search-mini-icon::after{
+  content:'';
+  width:7px;
+  height:2px;
+  background:rgba(255,255,255,.55);
+  position:absolute;
+  right:-5px;
+  bottom:0;
+  transform:rotate(45deg);
+  transform-origin:left center;
+}
+.comm-mark{
+  width:20px;
+  height:12px;
+  border-left:3px solid var(--red);
+  border-bottom:2px solid rgba(255,255,255,.22);
+  transform:skewX(-18deg);
+  background:linear-gradient(90deg,rgba(232,0,45,.18),transparent);
+}
+.hub-body{
+  position:relative;
+  z-index:2;
+}
+.hub-section{
+  scroll-margin-top:calc(var(--nav-h) + 80px);
+}
+.sec-header{
+  margin-bottom:28px!important;
+}
+.wp-filters{
+  margin-top:-4px;
+  margin-bottom:34px!important;
+}
+.wp-grid,.race-grid,.comm-grid{
+  gap:22px!important;
+}
+.wp-card,.rcard,.comm-card{
+  border-color:rgba(255,255,255,.085)!important;
+}
+.wp-card:hover,.rcard:hover,.comm-card:hover{
+  border-color:rgba(232,0,45,.35)!important;
+  box-shadow:0 28px 70px rgba(0,0,0,.42),0 0 0 1px rgba(232,0,45,.08)!important;
+}
+.quote-search-wrap > span:not(.search-mini-icon){
+  display:none!important;
+}
+.fh-empty-mark{
+  font-size:0!important;
+  color:transparent!important;
+  position:relative;
+  overflow:hidden;
+}
+.fh-empty-mark::before{
+  content:'';
+  width:22px;
+  height:14px;
+  border-left:3px solid var(--red);
+  border-bottom:2px solid rgba(255,255,255,.28);
+  background:linear-gradient(90deg,rgba(232,0,45,.2),transparent);
+  transform:skewX(-18deg);
+  box-shadow:0 0 18px rgba(232,0,45,.18);
+}
+.rc-date::before,.rc-winner::before{
+  content:'';
+  display:inline-block;
+  width:18px;
+  height:2px;
+  margin-right:8px;
+  vertical-align:middle;
+  background:linear-gradient(90deg,var(--red),transparent);
+}
+.qf-actions button,.qf-share-btn,.qf-save-btn{
+  letter-spacing:2px;
+}
+@media(max-width:680px){
+  .section-label{gap:8px;font-size:.64rem!important}
+  .section-mark{width:26px}
+  .hero-chip{padding:8px 13px!important}
+  .chip-mark{width:15px}
+  .ht-mark{width:16px;height:16px}
+  .comm-card-title{font-size:1.18rem!important}
+}

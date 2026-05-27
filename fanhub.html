@@ -38,11 +38,11 @@
       <button class="search-close" id="search-close">✕</button>
     </div>
     <div class="mobile-menu" id="mobile-menu">
-      <a href="index.html"   class="mob-link">🏠 Home</a>
-      <a href="shop.html"    class="mob-link">🛒 Shop</a>
-      <a href="fanhub.html"  class="mob-link active">🎮 Fan Hub</a>
-      <a href="pitwall.html" class="mob-link">📡 Pit Wall</a>
-      <a href="account.html" class="mob-link">👤 Account</a>
+      <a href="index.html"   class="mob-link">Home</a>
+      <a href="shop.html"    class="mob-link">Shop</a>
+      <a href="fanhub.html"  class="mob-link active">Fan Hub</a>
+      <a href="pitwall.html" class="mob-link">Pit Wall</a>
+      <a href="account.html" class="mob-link">Account</a>
     </div>
   </nav>
 
@@ -63,11 +63,11 @@
         Wallpapers, driver stats, race calendar, live quotes, trivia &amp; community — your ultimate F1 digital universe.
       </p>
       <div class="hub-hero-chips animate-fade-up delay-4">
-        <span class="hero-chip"><span class="animate-icon">🖼️</span> Wallpapers</span>
-        <span class="hero-chip"><span class="animate-icon">📊</span> Driver Stats</span>
-        <span class="hero-chip"><span class="animate-icon">📅</span> Calendar</span>
-        <span class="hero-chip"><span class="animate-icon">🏆</span> Community</span>
-        <a class="hero-chip" href="pitwall.html"><span class="animate-icon">📡</span> Pit Wall Live</a>
+        <span class="hero-chip"><span class="chip-mark chip-wallpapers"></span> Wallpapers</span>
+        <span class="hero-chip"><span class="chip-mark chip-drivers"></span> Driver Stats</span>
+        <span class="hero-chip"><span class="chip-mark chip-calendar"></span> Calendar</span>
+        <span class="hero-chip"><span class="chip-mark chip-community"></span> Community</span>
+        <a class="hero-chip" href="pitwall.html"><span class="chip-mark chip-pitwall"></span> Pit Wall Live</a>
       </div>
     </div>
   </section>
@@ -75,11 +75,11 @@
   <!-- ░░ HUB TABS ░░ -->
   <div class="hub-tabs-bar" id="hub-tabs-bar">
     <div class="hub-tabs-inner">
-      <button class="hub-tab on" data-tab="wallpapers"><span class="ht-icon animate-icon">🖼️</span> Wallpapers</button>
-      <button class="hub-tab" data-tab="drivers"><span class="ht-icon animate-icon">🏎️</span> Driver Stats</button>
-      <button class="hub-tab" data-tab="calendar"><span class="ht-icon animate-icon">📅</span> Race Calendar</button>
-      <button class="hub-tab" data-tab="quotes"><span class="ht-icon animate-icon">💬</span> Quotes</button>
-      <button class="hub-tab" data-tab="community"><span class="ht-icon animate-icon">🏆</span> Community</button>
+      <button class="hub-tab on" data-tab="wallpapers"><span class="ht-mark ht-wallpapers"></span> Wallpapers</button>
+      <button class="hub-tab" data-tab="drivers"><span class="ht-mark ht-drivers"></span> Driver Stats</button>
+      <button class="hub-tab" data-tab="calendar"><span class="ht-mark ht-calendar"></span> Race Calendar</button>
+      <button class="hub-tab" data-tab="quotes"><span class="ht-mark ht-quotes"></span> Quotes</button>
+      <button class="hub-tab" data-tab="community"><span class="ht-mark ht-community"></span> Community</button>
     </div>
   </div>
 
@@ -89,7 +89,7 @@
     <!-- WALLPAPERS -->
     <section class="hub-section on" id="sec-wallpapers">
       <div class="sec-header reveal-up">
-        <div class="section-label">🖼️ Digital Art Gallery</div>
+        <div class="section-label"><span class="section-mark"></span> Digital Art Gallery</div>
         <h2 class="section-title">F1 <span class="accent">WALLPAPERS</span></h2>
       </div>
       <div class="wp-filters reveal-up delay-1" id="wp-filters">
@@ -106,7 +106,7 @@
     <!-- DRIVER STATS -->
     <section class="hub-section" id="sec-drivers">
       <div class="sec-header reveal-up">
-        <div class="section-label">🏎️ Live Driver Standings</div>
+        <div class="section-label"><span class="section-mark"></span> Live Driver Standings</div>
         <h2 class="section-title">DRIVER <span class="accent">STATISTICS</span></h2>
       </div>
       <div class="drv-live-meta reveal-up delay-1">
@@ -129,7 +129,7 @@
     <!-- RACE CALENDAR -->
     <section class="hub-section" id="sec-calendar">
       <div class="sec-header reveal-up">
-        <div class="section-label">📅 Live Formula 1 Calendar</div>
+        <div class="section-label"><span class="section-mark"></span> Live Formula 1 Calendar</div>
         <h2 class="section-title">RACE <span class="accent">CALENDAR</span></h2>
       </div>
       <div class="race-grid" id="race-grid"></div>
@@ -138,7 +138,7 @@
     <!-- QUOTES -->
     <section class="hub-section" id="sec-quotes">
       <div class="sec-header reveal-up">
-        <div class="section-label">💬 Words from the Grid</div>
+        <div class="section-label"><span class="section-mark"></span> Words from the Grid</div>
         <h2 class="section-title">DRIVER <span class="accent">QUOTES</span></h2>
       </div>
       <div class="quote-controls reveal-up delay-1">
@@ -150,7 +150,7 @@
         </div>
 
         <div class="quote-search-wrap">
-          <span>🔎</span>
+          <span class="search-mini-icon" aria-hidden="true"></span>
           <input id="quote-search" class="quote-search" placeholder="Search driver, team, quote..."/>
         </div>
 
@@ -165,7 +165,7 @@
     <!-- COMMUNITY -->
     <section class="hub-section" id="sec-community">
       <div class="sec-header reveal-up">
-        <div class="section-label">🏆 Fan Zone</div>
+        <div class="section-label"><span class="section-mark"></span> Fan Zone</div>
         <h2 class="section-title">FAN <span class="accent">ENGAGEMENT</span></h2>
       </div>
 
@@ -193,19 +193,19 @@
       <div class="comm-grid">
         <!-- Poll -->
         <div class="comm-card reveal-up delay-1">
-          <div class="comm-card-title"><span class="animate-icon">📊</span> Fan Poll</div>
+          <div class="comm-card-title"><span class="comm-mark"></span> Fan Poll</div>
           <div class="poll-q" id="poll-q"></div>
           <div class="poll-opts" id="poll-opts"></div>
           <div class="poll-meta" id="poll-meta"></div>
         </div>
         <!-- Leaderboard -->
         <div class="comm-card reveal-up delay-2">
-          <div class="comm-card-title"><span class="animate-icon">🏆</span> Fan Leaderboard</div>
+          <div class="comm-card-title"><span class="comm-mark"></span> Fan Leaderboard</div>
           <div class="lb-list" id="lb-list"></div>
         </div>
         <!-- Trivia -->
         <div class="comm-card reveal-up delay-3">
-          <div class="comm-card-title"><span class="animate-icon">🧠</span> F1 Trivia</div>
+          <div class="comm-card-title"><span class="comm-mark"></span> F1 Trivia</div>
           <div class="triv-q" id="triv-q"></div>
           <div class="triv-opts" id="triv-opts"></div>
           <div class="triv-res" id="triv-res"></div>
@@ -215,7 +215,7 @@
         <div class="comm-card reveal-up delay-4">
           <div class="comm-card-title">
             <span class="live-dot"></span>
-            <span class="animate-icon">⚡</span> Fan Live Feed
+            <span class="comm-mark"></span> Fan Live Feed
           </div>
           <div class="feed-compose" id="feed-compose">
             <textarea id="feed-post-input" maxlength="280" placeholder="Share your race thought with the Paddox grid..."></textarea>

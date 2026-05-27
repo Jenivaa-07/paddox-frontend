@@ -63,7 +63,7 @@ async function loadRealCalendar() {
     /* Show loading state */
     grid.innerHTML = `
       <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">
-        <div style="font-size:2rem;margin-bottom:12px">🏎️</div>
+        <div class="fh-empty-mark fh-mark-loading"></div>
         <p>Loading 2026 Race Calendar...</p>
       </div>`;
 
@@ -97,7 +97,7 @@ async function loadRealCalendar() {
           <div class="rc-round">Round ${r.round}</div>
           <div class="rc-name">${r.name}</div>
           <div class="rc-circuit">${r.circuit} · ${r.location}</div>
-          <div class="rc-date">📅 ${new Date(r.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</div>
+          <div class="rc-date">${new Date(r.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</div>
           <span class="rc-status rs-${r.status === 'next' ? 'next' : r.status === 'completed' ? 'done' : 'up'}">
             ${r.status === 'next' ? '▶ Next Race' : r.status === 'completed' ? '✓ Completed' : 'Upcoming'}
           </span>
@@ -551,7 +551,7 @@ async function loadRealDriverStandings() {
       sourceEl.textContent = '';
       sourceEl.style.display = 'none';
     }
-    sel.innerHTML = `<div class="drv-empty">⚠️ Could not load current F1 race-driver grid right now.</div>`;
+    sel.innerHTML = `<div class="drv-empty">Could not load current F1 race-driver grid right now.</div>`;
     if (card) card.innerHTML = `<div class="drv-empty">No cached driver data shown, to avoid hardcoded/outdated grid.</div>`;
     if (bars) bars.innerHTML = '';
     if (cmp) cmp.innerHTML = '';
@@ -567,7 +567,7 @@ async function loadLastResult() {
     const race = data.data.race;
     const ticker = document.getElementById('ticker-text');
     if (ticker && race.winner) {
-      ticker.textContent = `🏆 ${race.name} Winner: ${race.winner.name} (${race.winner.team})`;
+      ticker.textContent = `${race.name} Winner: ${race.winner.name} (${race.winner.team})`;
     }
   } catch (err) {
     console.warn('Last result load failed:', err);
@@ -751,7 +751,7 @@ async function renderWallpapers() {
 
   grid.innerHTML = `
     <div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted)">
-      🖼️ Loading wallpapers...
+      Loading wallpapers...
     </div>
   `;
 
@@ -773,7 +773,7 @@ async function renderWallpapers() {
     if (!list.length) {
       grid.innerHTML = `
         <div class="fh-empty-state">
-          <div class="fh-empty-mark">🖼️</div>
+          <div class="fh-empty-mark fh-mark-wallpapers"></div>
           <h3>No wallpapers in this filter yet</h3>
           <p>Switch to All or add more digital assets from Admin → Digital Assets.</p>
         </div>
@@ -800,7 +800,7 @@ async function renderWallpapers() {
           loading="lazy"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
         />
-        <div class="wp-thumb" style="display:none">🖼️</div>
+        <div class="wp-thumb" style="display:none"></div>
 
         <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">
           ${w.type === 'free' ? 'Free' : 'Premium'}
@@ -813,7 +813,7 @@ async function renderWallpapers() {
 
           <button class="wp-dl-btn"
             onclick="event.stopPropagation();handleWpDownload('${w._id}')">
-            ${w.type === 'free' ? '↓ Download' : '🔒 Unlock Premium'}
+            ${w.type === 'free' ? 'Download' : 'Unlock Premium'}
           </button>
 
           <button class="wp-prev-btn"
@@ -988,7 +988,7 @@ function renderWallpapersFallback() {
   if (!list.length) {
     grid.innerHTML = `
       <div class="fh-empty-state">
-        <div class="fh-empty-mark">🖼️</div>
+        <div class="fh-empty-mark fh-mark-wallpapers"></div>
         <h3>No wallpapers in this filter yet</h3>
         <p>Try another category or upload new wallpapers from Admin.</p>
       </div>
@@ -1011,8 +1011,8 @@ function renderWallpapersFallback() {
       <div class="wp-overlay">
         <div class="wp-name">${w.name}</div>
         <button class="wp-dl-btn"
-          onclick="event.stopPropagation();showToast('${w.type === 'free' ? '↓ Downloading...' : '🔒 Sign in for premium'}')">
-          ${w.type === 'free' ? '↓ Download' : '🔒 Unlock'}
+          onclick="event.stopPropagation();showToast('${w.type === 'free' ? 'Downloading...' : 'Sign in for premium'}')">
+          ${w.type === 'free' ? 'Download' : 'Unlock'}
         </button>
       </div>
     </div>
@@ -1091,11 +1091,11 @@ function renderCalendar(){
       <div class="rc-round">Round ${r.round}</div>
       <div class="rc-name">${r.name}</div>
       <div class="rc-circuit">${r.circuit}</div>
-      <div class="rc-date">📅 ${r.date}, 2025</div>
+      <div class="rc-date">${r.date}, 2025</div>
       <span class="rc-status rs-${r.status==='next'?'next':r.status==='completed'?'done':'up'}">
         ${r.status==='next'?'▶ Next Race':r.status==='completed'?'✓ Completed':'Upcoming'}
       </span>
-      ${r.winner?`<div class="rc-winner">🏆 Winner: ${r.winner}</div>`:''}
+      ${r.winner?`<div class="rc-winner">Winner: ${r.winner}</div>`:''}
       ${r.status==='next'?`<div class="rc-mini-cd">
         <div class="rcb"><div class="rcb-n">${String(d).padStart(2,'0')}</div><div class="rcb-l">Days</div></div>
         <div class="rcb"><div class="rcb-n">${String(h).padStart(2,'0')}</div><div class="rcb-l">Hrs</div></div>
@@ -1145,12 +1145,12 @@ function quoteImageValue(q = {}) {
     q.imageUrl ||
     q.headshot ||
     q.avatar ||
-    '🏎️'
+    'PX'
   );
 }
 
 function quoteAvatarHTML(avatar, className = '') {
-  const value = avatar || '🏎️';
+  const value = avatar || 'PX';
 
   if (
     typeof value === 'string' &&
@@ -1166,7 +1166,7 @@ function quoteAvatarHTML(avatar, className = '') {
         alt="Quote driver image"
         class="${className}"
         loading="lazy"
-        onerror="this.outerHTML='<span class=&quot;quote-avatar-fallback&quot;>🏎️</span>'"
+        onerror="this.outerHTML='<span class=&quot;quote-avatar-fallback&quot;>PX</span>'"
       />
     `;
   }
@@ -1247,7 +1247,7 @@ function renderRealtimeQuotes() {
   if (!REAL_QUOTES.length) {
     feat.innerHTML = `
       <div class="quote-empty">
-        <div style="font-size:2rem;margin-bottom:10px">💬</div>
+        <div class="fh-empty-mark fh-mark-quotes"></div>
         No quotes found. Admin can add current-grid and legendary driver quotes.
       </div>
     `;
@@ -1324,10 +1324,10 @@ function renderRealtimeQuotes() {
         Copy Text
       </button>
       <button class="qf-share" onclick="copyQuoteText(${quoteIdx})">
-        🔗 Share Text
+        Share Text
       </button>
       <button class="qf-share qf-download" onclick="shareQuoteImage(${quoteIdx})">
-        🖼️ Save / Share Image
+        Save / Share Image
       </button>
     </div>
   `;
@@ -1527,7 +1527,7 @@ async function buildQuoteShareCanvas(q = {}) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('🏎️', 810, 255);
+    ctx.fillText('PX', 810, 255);
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
   }
@@ -1609,7 +1609,7 @@ async function shareQuoteImage(index) {
       }
 
       downloadDataUrl(canvas.toDataURL('image/png'), fileName);
-      showToast('🖼️ Quote image saved!');
+      showToast('Quote image saved!');
     }, 'image/png', 0.95);
 
   } catch (err) {
@@ -1897,7 +1897,7 @@ async function loadFanPoll() {
     qEl.textContent = 'No active poll right now';
     optsEl.innerHTML = `
       <div class="poll-empty fh-action-empty">
-        <div class="fh-empty-mark">📊</div>
+        <div class="fh-empty-mark fh-mark-poll"></div>
         <strong>No active poll right now</strong>
         <span>Admin can create a poll later from the Fan Hub controls.</span>
       </div>
@@ -2008,7 +2008,7 @@ async function loadFanLeaderboard() {
     if (!leaderboard.length) {
       lbEl.innerHTML = `
         <div class="lb-empty fh-action-empty">
-          <div class="fh-empty-mark">🏆</div>
+          <div class="fh-empty-mark fh-mark-leaderboard"></div>
           <strong>No fan points yet</strong>
           <span>Votes, trivia, and fan posts will start the leaderboard.</span>
         </div>
@@ -2111,7 +2111,7 @@ async function loadRealtimeTrivia() {
     qEl.textContent = 'No trivia question available';
     optsEl.innerHTML = `
       <div class="triv-empty fh-action-empty">
-        <div class="fh-empty-mark">🧠</div>
+        <div class="fh-empty-mark fh-mark-trivia"></div>
         <strong>No trivia question available</strong>
         <span>Admin can add more F1 trivia questions later.</span>
       </div>
@@ -2219,7 +2219,7 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
     updateFanPointsDock({ posts: 0 });
     feedEl.innerHTML = `
       <div class="feed-empty fh-action-empty">
-        <div class="fh-empty-mark">🏁</div>
+        <div class="fh-empty-mark fh-mark-feed"></div>
         <strong>No fan posts yet</strong>
         <span>Be the first on the PADDOX grid. Share a race thought above.</span>
       </div>
@@ -2422,4 +2422,4 @@ function showToast(msg){
 loadNextRaceCountdown();
 loadLastResult();
 
-console.log('%c🎮 PADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%cPADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
