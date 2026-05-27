@@ -1235,6 +1235,19 @@ function formatMoney(n) {
   return `₹${Number(n || 0).toLocaleString('en-IN')}`;
 }
 
+function accountEsc(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function orderSafeId(order = {}) {
+  return order._id || order.id || order.orderId || order.orderNumber || '';
+}
+
 function statusClass(status = '') {
   const s = status.toLowerCase();
 
@@ -1263,10 +1276,13 @@ async function loadMyOrders() {
       throw new Error(data.message || 'Failed to load orders');
     }
 
-    const orders =
-      data.data ||
-      data.orders ||
-      [];
+    const orders = Array.isArray(data.data)
+      ? data.data
+      : Array.isArray(data.data?.orders)
+        ? data.data.orders
+        : Array.isArray(data.orders)
+          ? data.orders
+          : [];
 
     renderAccountOrders(orders);
     renderDashboardOrders(orders);
@@ -1297,8 +1313,9 @@ function renderAccountOrders(orders) {
   tbody.innerHTML = orders.map(order => {
     const products =
       (order.items || [])
-        .map(i => i.name)
+        .map(i => accountEsc(i.name || 'Product'))
         .join(', ') || 'No products';
+    const safeOrderId = accountEsc(orderSafeId(order));
 
     return `
       <tr>
@@ -1332,13 +1349,13 @@ function renderAccountOrders(orders) {
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button
               class="trk-btn"
-              onclick="showAccountOrderDetails('${order._id}')"
+              onclick="showAccountOrderDetails('${safeOrderId}')"
             >
               View
             </button>
             <button
               class="trk-btn receipt-mini-btn"
-              onclick="openOrderReceipt('${order._id}')"
+              onclick="openOrderReceipt('${safeOrderId}')"
             >
               Receipt
             </button>
@@ -1425,6 +1442,8 @@ function showAccountOrderDetails(orderId) {
     showToast('❌ Order not found');
     return;
   }
+
+  const safeOrderId = accountEsc(orderSafeId(order));
 
   const products =
     (order.items || [])
@@ -1531,7 +1550,7 @@ function showAccountOrderDetails(orderId) {
 
         <button
           class="trk-btn receipt-open-btn"
-          onclick="openOrderReceipt('${order._id}')"
+          onclick="openOrderReceipt('${safeOrderId}')"
           style="margin-top:20px;width:100%;padding:13px;background:var(--red);color:#fff;border:0;font-weight:800;letter-spacing:2px"
         >
           View Receipt
@@ -1607,12 +1626,14 @@ function orderTimeLabel(value) {
 
 function orderProductThumb(item = {}) {
   const img = item.image || item.product?.images?.[0]?.url || item.product?.image || '';
-  if (img) return `<img src="${img}" alt="${item.name || 'Product'}" loading="lazy"/>`;
+  if (img) {
+    return `<img src="${accountEsc(img)}" alt="${accountEsc(item.name || 'Product')}" loading="lazy"/>`;
+  }
   return `<span>🏎️</span>`;
 }
 
 function normalizePaymentStatus(order = {}) {
-  return String(order.payment?.status || order.paymentStatus || 'paid').toLowerCase();
+  return String(order.payment?.status || order.paymentStatus || 'pending').toLowerCase();
 }
 
 function paymentStatusClass(order = {}) {
@@ -1665,7 +1686,7 @@ function renderOrderTimeline(order = {}) {
       ${steps.map((step, i) => `
         <div class="order-step ${i < idx ? 'done' : i === idx ? 'active' : ''}">
           <span></span>
-          <b>${step.label}</b>
+          <b>${accountEsc(step.label)}</b>
         </div>
       `).join('')}
     </div>
@@ -1679,11 +1700,11 @@ function renderOrderItemsMini(order = {}) {
     <div class="order-mini-item">
       <div class="order-mini-img">${orderProductThumb(item)}</div>
       <div class="order-mini-info">
-        <div class="order-mini-name">${item.name || 'Product'}</div>
+        <div class="order-mini-name">${accountEsc(item.name || 'Product')}</div>
         <div class="order-mini-meta">
           Qty ${item.quantity || 1}
-          ${item.size ? ` · Size ${item.size}` : ''}
-          ${item.color ? ` · ${item.color}` : ''}
+          ${item.size ? ` · Size ${accountEsc(item.size)}` : ''}
+          ${item.color ? ` · ${accountEsc(item.color)}` : ''}
         </div>
       </div>
       <div class="order-mini-price">${formatMoney((item.price || 0) * (item.quantity || 1))}</div>
@@ -1715,6 +1736,7 @@ function renderAccountOrders(orders) {
   grid.innerHTML = orders.map(order => {
     const firstItem = order.items?.[0] || {};
     const orderNo = order.orderNumber || order._id;
+    const safeOrderId = accountEsc(orderSafeId(order));
     const status = order.status || 'placed';
     const total = order.pricing?.total || 0;
     const itemCount = (order.items || []).reduce((sum, item) => sum + Number(item.quantity || 1), 0);
@@ -1724,10 +1746,10 @@ function renderAccountOrders(orders) {
         <div class="order-card-head">
           <div class="order-id-block">
             <span>Order ID</span>
-            <strong>#${orderNo}</strong>
+            <strong>#${accountEsc(orderNo)}</strong>
           </div>
           <div class="order-status-stack">
-            <span class="ostatus ${statusClass(status)}">${status}</span>
+            <span class="ostatus ${statusClass(status)}">${accountEsc(status)}</span>
             <span class="payment-pill ${paymentStatusClass(order)}">${paymentStatusLabel(order)}</span>
           </div>
         </div>
@@ -1736,11 +1758,11 @@ function renderAccountOrders(orders) {
           <div class="order-primary-product">
             <div class="order-main-img">${orderProductThumb(firstItem)}</div>
             <div>
-              <div class="order-main-name">${firstItem.name || 'PADDOX Order'}</div>
+              <div class="order-main-name">${accountEsc(firstItem.name || 'PADDOX Order')}</div>
               <div class="order-main-meta">
                 ${itemCount} item${itemCount === 1 ? '' : 's'} · ${orderDateLabel(order.createdAt)} · ${orderTimeLabel(order.createdAt)}
               </div>
-              <div class="order-pay-method">${paymentMethodLabel(order)}</div>
+              <div class="order-pay-method">${accountEsc(paymentMethodLabel(order))}</div>
             </div>
           </div>
           <div class="order-total-block">
@@ -1756,9 +1778,9 @@ function renderAccountOrders(orders) {
         </div>
 
         <div class="order-card-actions">
-          <button class="trk-btn order-action-main" onclick="showAccountOrderDetails('${order._id}')">View Details</button>
-          <button class="trk-btn receipt-mini-btn" onclick="openOrderReceipt('${order._id}')">View Receipt</button>
-          <button class="trk-btn" onclick="showTracking('${orderNo}', ${Math.max(orderStepIndex(status), 0)})">Track</button>
+          <button class="trk-btn order-action-main" onclick="showAccountOrderDetails('${safeOrderId}')">View Details</button>
+          <button class="trk-btn receipt-mini-btn" onclick="openOrderReceipt('${safeOrderId}')">View Receipt</button>
+          <button class="trk-btn" onclick="showTracking('${accountEsc(orderNo)}', ${Math.max(orderStepIndex(status), 0)})">Track</button>
         </div>
       </article>
     `;
@@ -1767,23 +1789,24 @@ function renderAccountOrders(orders) {
 
 function showAccountOrderDetails(orderId) {
   const orders = window.USER_ACCOUNT_ORDERS || [];
-  const order = orders.find(o => String(o._id) === String(orderId));
+  const order = orders.find(o => String(orderSafeId(o)) === String(orderId) || String(o._id) === String(orderId));
 
   if (!order) {
     showToast('❌ Order not found');
     return;
   }
 
+  const safeOrderId = accountEsc(orderSafeId(order));
   const address = order.shippingAddress || {};
   const products = (order.items || []).map(item => `
     <div class="order-detail-item">
       <div class="order-detail-img">${orderProductThumb(item)}</div>
       <div>
-        <div class="order-detail-name">${item.name || 'Product'}</div>
+        <div class="order-detail-name">${accountEsc(item.name || 'Product')}</div>
         <div class="order-detail-meta">
           Qty ${item.quantity || 1}
-          ${item.size ? ` · Size ${item.size}` : ''}
-          ${item.color ? ` · ${item.color}` : ''}
+          ${item.size ? ` · Size ${accountEsc(item.size)}` : ''}
+          ${item.color ? ` · ${accountEsc(item.color)}` : ''}
         </div>
       </div>
       <strong>${formatMoney((item.price || 0) * (item.quantity || 1))}</strong>
@@ -1800,10 +1823,10 @@ function showAccountOrderDetails(orderId) {
           <div>
             <div class="orders-kicker">Order garage</div>
             <h2>ORDER DETAILS</h2>
-            <p>#${order.orderNumber || order._id} · ${orderDateLabel(order.createdAt)}</p>
+            <p>#${accountEsc(order.orderNumber || order._id)} · ${orderDateLabel(order.createdAt)}</p>
           </div>
           <div class="order-status-stack">
-            <span class="ostatus ${statusClass(order.status)}">${order.status || 'placed'}</span>
+            <span class="ostatus ${statusClass(order.status)}">${accountEsc(order.status || 'placed')}</span>
             <span class="payment-pill ${paymentStatusClass(order)}">${paymentStatusLabel(order)}</span>
           </div>
         </div>
@@ -1817,12 +1840,12 @@ function showAccountOrderDetails(orderId) {
           </section>
           <section>
             <h3>Delivery</h3>
-            <p class="order-address-line"><b>${address.name || '-'}</b></p>
-            <p class="order-address-line">${address.line1 || ''}</p>
-            ${address.line2 ? `<p class="order-address-line">${address.line2}</p>` : ''}
-            <p class="order-address-line">${[address.city, address.state, address.pincode].filter(Boolean).join(', ')}</p>
-            <p class="order-address-line">${address.country || 'India'}</p>
-            <p class="order-address-line">Phone: ${address.phone || '-'}</p>
+            <p class="order-address-line"><b>${accountEsc(address.name || '-')}</b></p>
+            <p class="order-address-line">${accountEsc(address.line1 || '')}</p>
+            ${address.line2 ? `<p class="order-address-line">${accountEsc(address.line2)}</p>` : ''}
+            <p class="order-address-line">${accountEsc([address.city, address.state, address.pincode].filter(Boolean).join(', '))}</p>
+            <p class="order-address-line">${accountEsc(address.country || 'India')}</p>
+            <p class="order-address-line">Phone: ${accountEsc(address.phone || '-')}</p>
           </section>
         </div>
 
@@ -1834,8 +1857,8 @@ function showAccountOrderDetails(orderId) {
         </div>
 
         <div class="order-detail-actions">
-          <button class="trk-btn" onclick="openOrderReceipt('${order._id}')">Open Receipt</button>
-          <button class="trk-btn" onclick="showTracking('${order.orderNumber || order._id}', ${Math.max(orderStepIndex(order.status), 0)})">Track Order</button>
+          <button class="trk-btn" onclick="openOrderReceipt('${safeOrderId}')">Open Receipt</button>
+          <button class="trk-btn" onclick="showTracking('${accountEsc(order.orderNumber || order._id)}', ${Math.max(orderStepIndex(order.status), 0)})">Track Order</button>
         </div>
       </div>
     </div>

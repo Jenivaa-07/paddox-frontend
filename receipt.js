@@ -69,7 +69,7 @@ async function loadReceipt() {
       throw new Error(data.message || 'Receipt could not be loaded');
     }
 
-    const order = data.data?.order || data.order;
+    const order = data.data?.order || data.data || data.order;
     if (!order) throw new Error('Order not found');
 
     renderReceipt(order);
@@ -126,12 +126,12 @@ function renderReceipt(order) {
   const address = order.shippingAddress || {};
   const payment = order.payment || {};
   const pricing = order.pricing || {};
-  const status = String(payment.status || 'pending').toLowerCase();
+  const status = String(payment.status || order.paymentStatus || 'pending').toLowerCase();
   const paymentLabel = paymentStatusLabel(status);
-  const methodLabel = paymentMethodLabel(payment.method);
+  const methodLabel = paymentMethodLabel(payment.method || order.paymentMethod);
   const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : '-';
   const paidAt = payment.paidAt ? new Date(payment.paidAt).toLocaleString('en-IN') : '-';
-  const orderNo = order.orderNumber || order._id;
+  const orderNo = order.orderNumber || order._id || order.id || order.orderId;
 
   const itemsHtml = (order.items || []).map(item => {
     const meta = [
@@ -142,10 +142,10 @@ function renderReceipt(order) {
     return `
       <div class="receipt-item">
         <div class="receipt-img">
-          ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}">` : '🏁'}
+          ${(item.image || item.product?.images?.[0]?.url || item.product?.image) ? `<img src="${esc(item.image || item.product?.images?.[0]?.url || item.product?.image)}" alt="${esc(item.name || 'Product')}">` : '🏁'}
         </div>
         <div>
-          <div class="receipt-item-name">${esc(item.name)}</div>
+          <div class="receipt-item-name">${esc(item.name || 'Product')}</div>
           <div class="receipt-item-meta">${meta}</div>
         </div>
         <div class="receipt-qty">${Number(item.quantity || 1)}</div>
@@ -184,11 +184,11 @@ function renderReceipt(order) {
       <div class="receipt-box">
         <h3>DELIVERY DETAILS</h3>
         <div class="receipt-address">
-          <strong>${esc(address.name || '')}</strong><br>
-          ${esc(address.line1 || '')}${address.line2 ? `<br>${esc(address.line2)}` : ''}<br>
-          ${esc(address.city || '')}, ${esc(address.state || '')} - ${esc(address.pincode || '')}<br>
-          ${esc(address.country || '')}<br>
-          Phone: ${esc(address.phone || '')}
+          <strong>${esc(address.name || '-')}</strong><br>
+          ${esc(address.line1 || '-')} ${address.line2 ? `<br>${esc(address.line2)}` : ''}<br>
+          ${esc([address.city, address.state, address.pincode].filter(Boolean).join(', ') || '-')}<br>
+          ${esc(address.country || 'India')}<br>
+          Phone: ${esc(address.phone || '-')}
         </div>
       </div>
     </div>
@@ -212,7 +212,7 @@ function renderReceipt(order) {
         <div class="receipt-total-row"><span>Shipping</span><strong>${money(pricing.shipping)}</strong></div>
         <div class="receipt-total-row"><span>Discount</span><strong>${money(pricing.discount)}</strong></div>
         <div class="receipt-total-row"><span>Tax</span><strong>${money(pricing.tax)}</strong></div>
-        <div class="receipt-total-row receipt-grand"><span>Total Paid</span><strong>${money(pricing.total)}</strong></div>
+        <div class="receipt-total-row receipt-grand"><span>${status === 'paid' ? 'Total Paid' : 'Order Total'}</span><strong>${money(pricing.total)}</strong></div>
       </div>
     </div>
 
