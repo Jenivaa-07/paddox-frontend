@@ -1086,3 +1086,302 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   .team-fopt { padding-right: 4px; }
   .team-filter-logo { width: 34px; height: 26px; flex-basis: 34px; }
 }
+
+
+/* ══════════════════════════════════════
+   PHASE 13 V3 — PREMIUM ICON SYSTEM FIX
+   Clean animated icons instead of empty dots / hidden symbols
+══════════════════════════════════════ */
+.nav-link .nl-icon,
+.search-icon-anim,
+.cart-icon-anim,
+.ct-icon,
+.filter-mark,
+.filter-btn-icon {
+  color: var(--muted2);
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  font-size: 0;
+  line-height: 0;
+  transition: transform var(--transition), color var(--transition), opacity var(--transition), border-color var(--transition), background var(--transition);
+}
+.nav-link:hover .nl-icon,
+.nav-link.active .nl-icon,
+.nav-search-btn:hover .search-icon-anim,
+.nav-cart-btn:hover .cart-icon-anim,
+.cat-tab:hover .ct-icon,
+.cat-tab.on .ct-icon,
+.filter-toggle-btn:hover .filter-btn-icon,
+.filter-group-title:hover .filter-mark {
+  color: var(--red);
+}
+
+/* Navbar mini-icons */
+.nav-link .nl-icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: .72;
+}
+.nav-link:hover .nl-icon,
+.nav-link.active .nl-icon { opacity: 1; transform: translateY(-1px); }
+.nav-home-icon::before {
+  content: '';
+  width: 12px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-top: 0;
+  transform: translateY(2px);
+}
+.nav-home-icon::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-left: 1.5px solid currentColor;
+  border-top: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-1px, 1px);
+}
+.nav-shop-icon::before {
+  content: '';
+  width: 13px;
+  height: 10px;
+  border: 1.5px solid currentColor;
+  border-top: 0;
+  border-radius: 1px 1px 4px 4px;
+}
+.nav-shop-icon::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  width: 7px;
+  height: 5px;
+  border: 1.5px solid currentColor;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+.nav-fanhub-icon::before {
+  content: '';
+  width: 14px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 4px 4px 6px 6px;
+}
+.nav-fanhub-icon::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  left: 4px;
+  top: 6px;
+  box-shadow: 7px 0 0 currentColor, 3.5px -2.5px 0 currentColor;
+  border-radius: 50%;
+}
+.nav-pitwall-icon::before {
+  content: '';
+  width: 13px;
+  height: 10px;
+  background:
+    linear-gradient(currentColor, currentColor) left 1px top 2px / 2px 8px no-repeat,
+    linear-gradient(currentColor, currentColor) left 6px top 0 / 2px 10px no-repeat,
+    linear-gradient(currentColor, currentColor) right 1px top 4px / 2px 6px no-repeat;
+  border-bottom: 1.5px solid currentColor;
+}
+.nav-account-icon::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  position: absolute;
+  top: 1px;
+}
+.nav-account-icon::after {
+  content: '';
+  width: 13px;
+  height: 7px;
+  border: 1.5px solid currentColor;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  position: absolute;
+  bottom: 1px;
+}
+
+/* Search + cart controls: make them visible */
+.search-icon-anim,
+.cart-icon-anim {
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+}
+.nav-search-btn .search-icon-anim,
+.nav-cart-btn .cart-icon-anim { color: var(--muted2); }
+.nav-search-btn:hover .search-icon-anim,
+.nav-cart-btn:hover .cart-icon-anim { color: var(--red); }
+.search-icon-anim::before {
+  border-color: currentColor;
+  width: 13px;
+  height: 13px;
+}
+.search-icon-anim::after { background: currentColor; }
+.cart-icon-anim::before { border-color: currentColor; }
+.cart-icon-anim::after { border-color: currentColor; }
+
+/* Category bar icons: specific premium line icons */
+.ct-icon {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ct-icon::before,
+.ct-icon::after { content: ''; position: absolute; display: block; }
+.ct-all::before {
+  width: 5px; height: 5px; background: currentColor;
+  box-shadow: 8px 0 0 currentColor, 0 8px 0 currentColor, 8px 8px 0 currentColor;
+}
+.ct-all::after {
+  width: 17px; height: 17px; border: 1px solid currentColor; opacity: .18;
+}
+.ct-apparel::before {
+  width: 15px; height: 13px;
+  border: 1.5px solid currentColor;
+  border-top: 0;
+  clip-path: polygon(0 16%, 27% 0, 37% 18%, 63% 18%, 73% 0, 100% 16%, 84% 44%, 78% 100%, 22% 100%, 16% 44%);
+}
+.ct-apparel::after {
+  width: 6px; height: 1.5px; background: currentColor; top: 6px;
+}
+.ct-collectibles::before {
+  width: 13px; height: 9px;
+  border: 1.5px solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+}
+.ct-collectibles::after {
+  width: 10px; height: 8px;
+  border-left: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  bottom: 1px;
+  box-shadow: 0 7px 0 -2px currentColor;
+}
+.ct-accessories::before {
+  width: 13px; height: 13px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+.ct-accessories::after {
+  width: 6px; height: 6px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  right: 1px;
+  bottom: 1px;
+}
+.ct-posters::before {
+  width: 15px; height: 12px;
+  border: 1.5px solid currentColor;
+}
+.ct-posters::after {
+  width: 10px; height: 6px;
+  border-left: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: skewX(-18deg);
+  bottom: 4px;
+}
+.ct-custom::before {
+  width: 15px; height: 3px;
+  background: currentColor;
+  border-radius: 999px;
+  transform: rotate(-35deg);
+}
+.ct-custom::after {
+  width: 4px; height: 7px;
+  background: currentColor;
+  border-radius: 0 0 5px 5px;
+  transform: rotate(-35deg) translate(9px, 0);
+}
+.cat-tab:hover .ct-icon,
+.cat-tab.on .ct-icon { transform: translateY(-1px) scale(1.06); }
+.cat-tab.on .ct-icon { color: var(--red); }
+
+/* Sidebar/mobile filter icons */
+.filter-mark,
+.filter-btn-icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+}
+.filter-mark::before,
+.filter-mark::after,
+.filter-btn-icon::before,
+.filter-btn-icon::after { content: ''; position: absolute; display: block; }
+.fm-teams::before {
+  width: 13px; height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 8px 8px 3px 3px;
+}
+.fm-teams::after {
+  width: 4px; height: 4px; background: currentColor; border-radius: 50%; top: 3px;
+  box-shadow: -6px 4px 0 currentColor, 6px 4px 0 currentColor;
+}
+.fm-price::before {
+  width: 14px; height: 14px; border: 1.5px solid currentColor; border-radius: 50%;
+}
+.fm-price::after {
+  content: '₹';
+  color: currentColor;
+  font-family: var(--font-condensed);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+.fm-rating::before {
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 11px solid currentColor;
+  transform: rotate(35deg);
+}
+.fm-availability::before {
+  width: 14px; height: 10px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+.fm-availability::after {
+  width: 7px; height: 1.5px; background: currentColor;
+  transform: rotate(-45deg);
+  box-shadow: 3px 3px 0 currentColor;
+}
+.filter-btn-icon::before {
+  width: 15px; height: 11px;
+  background:
+    linear-gradient(currentColor,currentColor) 0 1px/15px 1.5px no-repeat,
+    linear-gradient(currentColor,currentColor) 0 5px/15px 1.5px no-repeat,
+    linear-gradient(currentColor,currentColor) 0 9px/15px 1.5px no-repeat;
+}
+.filter-btn-icon::after {
+  width: 4px; height: 4px; border-radius: 50%; background: currentColor;
+  top: 0; left: 3px;
+  box-shadow: 7px 4px 0 currentColor, -1px 8px 0 currentColor;
+}
+.filter-group-title:hover .filter-mark { transform: translateX(2px); }
+
+@media (max-width: 768px) {
+  .nav-link .nl-icon { display: none; }
+  .ct-icon { width: 17px; height: 17px; flex-basis: 17px; }
+}
