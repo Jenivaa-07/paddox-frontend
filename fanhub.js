@@ -23,7 +23,7 @@ async function loadNextRaceCountdown() {
     if (circEl) circEl.textContent = `${race.circuit} · ${race.location}`;
 
     const flagEl = document.querySelector('.cs-flag');
-    if (flagEl) flagEl.textContent = race.flag;
+    if (flagEl) flagEl.innerHTML = raceFlagHTML(race, 'cs-flag-img');
 
     const chipEl = document.querySelector('.cs-chip');
     if (chipEl) chipEl.textContent = `Round ${race.round} · Season ${race.season}`;
@@ -93,7 +93,7 @@ async function loadRealCalendar() {
 
       return `
         <div class="rcard" style="animation-delay:${i * 0.05}s">
-          <div class="rc-flag">${r.flag}</div>
+          <div class="rc-flag">${raceFlagHTML(r)}</div>
           <div class="rc-round">Round ${r.round}</div>
           <div class="rc-name">${r.name}</div>
           <div class="rc-circuit">${r.circuit} · ${r.location}</div>
@@ -171,6 +171,86 @@ const NATIONALITY_FLAGS = {
 function flagFromNationality(value = '') {
   const key = String(value || '').toLowerCase().trim();
   return NATIONALITY_FLAGS[key] || '';
+}
+
+/* Phase 17 — FlagCDN helpers: match Home page flag image method */
+const FAN_FLAG_CODES = {
+  australia:'au', australian:'au', melbourne:'au', 'albert park':'au', au:'au',
+  china:'cn', chinese:'cn', shanghai:'cn', cn:'cn',
+  japan:'jp', japanese:'jp', suzuka:'jp', jp:'jp',
+  usa:'us', us:'us', america:'us', american:'us', miami:'us', lasvegas:'us', 'las vegas':'us', austin:'us', unitedstates:'us', 'united states':'us',
+  canada:'ca', canadian:'ca', montreal:'ca', ca:'ca',
+  monaco:'mc', monégasque:'mc', monegasque:'mc', montecarlo:'mc', 'monte carlo':'mc', mc:'mc',
+  spain:'es', spanish:'es', barcelona:'es', es:'es',
+  austria:'at', austrian:'at', spielberg:'at', at:'at',
+  britain:'gb', british:'gb', english:'gb', silverstone:'gb', uk:'gb', 'united kingdom':'gb', gb:'gb',
+  italy:'it', italian:'it', imola:'it', monza:'it', 'emilia romagna':'it', it:'it',
+  netherlands:'nl', dutch:'nl', zandvoort:'nl', nl:'nl',
+  germany:'de', german:'de', de:'de',
+  france:'fr', french:'fr', fr:'fr',
+  brazil:'br', brazilian:'br', sao:'br', 'são paulo':'br', 'sao paulo':'br', br:'br',
+  mexico:'mx', mexican:'mx', mx:'mx',
+  belgium:'be', belgian:'be', spa:'be', be:'be',
+  hungary:'hu', hungarian:'hu', hungaroring:'hu', hu:'hu',
+  singapore:'sg', sg:'sg',
+  qatar:'qa', qa:'qa',
+  bahrain:'bh', bh:'bh',
+  saudi:'sa', 'saudi arabia':'sa', jeddah:'sa', sa:'sa',
+  abu:'ae', 'abu dhabi':'ae', uae:'ae', 'united arab emirates':'ae', ae:'ae',
+  thailand:'th', thai:'th', th:'th', denmark:'dk', danish:'dk', dk:'dk',
+  finland:'fi', finnish:'fi', fi:'fi', argentina:'ar', argentine:'ar', argentinian:'ar', ar:'ar',
+  newzealand:'nz', 'new zealand':'nz', newzealander:'nz', nz:'nz'
+};
+
+function fanFlagKey(value = '') {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function flagCodeFromText(value = '') {
+  const key = fanFlagKey(value);
+  if (!key) return '';
+  if (FAN_FLAG_CODES[key]) return FAN_FLAG_CODES[key];
+  const compact = key.replace(/\s+/g, '');
+  if (FAN_FLAG_CODES[compact]) return FAN_FLAG_CODES[compact];
+  for (const [name, code] of Object.entries(FAN_FLAG_CODES)) {
+    const n = fanFlagKey(name);
+    if (key.includes(n) || n.includes(key) || compact.includes(n.replace(/\s+/g, ''))) return code;
+  }
+  return '';
+}
+
+function flagCodeFromRace(race = {}) {
+  const fields = [race.country, race.location, race.locality, race.name, race.raceName, race.circuit, race.flagCode, race.flag];
+  for (const field of fields) {
+    const code = flagCodeFromText(field);
+    if (code) return code;
+  }
+  return '';
+}
+
+function flagCodeFromNationality(value = '') {
+  return flagCodeFromText(value);
+}
+
+function fanFlagImgHTML(code = '', label = 'flag', className = 'fan-flag-img') {
+  const cleanCode = String(code || '').toLowerCase().replace(/[^a-z]/g, '');
+  const cleanLabel = String(label || 'flag').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  if (!cleanCode) return `<span class="fan-flag-fallback">F1</span>`;
+  return `<img class="${className}" src="https://flagcdn.com/w80/${cleanCode}.png" srcset="https://flagcdn.com/w40/${cleanCode}.png 1x, https://flagcdn.com/w80/${cleanCode}.png 2x" alt="${cleanLabel} flag" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;fan-flag-fallback&quot;>F1</span>'">`;
+}
+
+function driverFlagHTML(driver = {}, className = 'driver-flag-img') {
+  const code = driver.flagCode || flagCodeFromNationality(driver.nationality || driver.country || driver.flag || '');
+  return fanFlagImgHTML(code, driver.nationality || driver.country || driver.name || 'Driver', className);
+}
+
+function raceFlagHTML(race = {}, className = 'race-flag-img') {
+  const code = race.flagCode || flagCodeFromRace(race);
+  return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
 }
 
 function bestString(value, keys = []) {
@@ -287,6 +367,7 @@ function normalizeGridDriver(raw = {}, standingsMap = new Map()) {
     number: bestString(driver.permanentNumber) || bestString(driver.number) || bestString(raw.number) || bestString(raw.permanentNumber) || '',
     nationality,
     flag: bestString(driver.flag || raw.flag) || flagFromNationality(nationality),
+    flagCode: flagCodeFromNationality(nationality) || flagCodeFromText(bestString(driver.flag || raw.flag)),
     team: teamName,
     teamEmoji: teamEmojiFromName(teamName),
     teamColor: teamColorFromName(teamName),
@@ -385,6 +466,7 @@ function applyDriverProfileOverrides(drivers, profiles) {
       image: profile.image || driver.image,
       flag: profile.flagEmoji || driver.flag,
       nationality: profile.country || driver.nationality,
+      flagCode: flagCodeFromNationality(profile.country || driver.nationality) || driver.flagCode,
       team: profile.team || driver.team
     };
   });
@@ -490,7 +572,7 @@ async function loadRealDriverStandings() {
           <div class="drv-name">${d.name}</div>
           <div class="drv-team" style="color:${d.teamColor}">${d.team}</div>
           <div class="drv-country">
-            <span>${d.flag || '🌍'}</span>
+            <span class="driver-flag-shell">${driverFlagHTML(d)}</span>
             <span>${d.nationality || 'Country TBA'}</span>
           </div>
           <div class="drv-tags">
@@ -1087,7 +1169,7 @@ function renderCalendar(){
   const d=Math.max(0,Math.floor(diff/864e5)),h=Math.max(0,Math.floor((diff%864e5)/36e5)),m=Math.max(0,Math.floor((diff%36e5)/6e4));
   grid.innerHTML=RACES.map((r,i)=>`
     <div class="rcard" style="animation-delay:${i*.05}s">
-      <div class="rc-flag">${r.flag}</div>
+      <div class="rc-flag">${raceFlagHTML(r)}</div>
       <div class="rc-round">Round ${r.round}</div>
       <div class="rc-name">${r.name}</div>
       <div class="rc-circuit">${r.circuit}</div>
@@ -1313,7 +1395,8 @@ function renderRealtimeQuotes() {
           </div>
 
           <div class="qf-brand">
-            PADDO<span>X</span>
+            <img src="assets/paddox-logo-icon.png" alt="PADDOX logo" class="qf-brand-logo" loading="lazy">
+            <span class="qf-brand-word">PADDO<span>X</span></span>
           </div>
         </div>
       </div>
@@ -1327,7 +1410,7 @@ function renderRealtimeQuotes() {
         Share Text
       </button>
       <button class="qf-share qf-download" onclick="shareQuoteImage(${quoteIdx})">
-        Save / Share Image
+        Preview / Share Image
       </button>
     </div>
   `;
@@ -1494,11 +1577,21 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = teamColor;
   ctx.fillRect(70, 70, W - 140, 12);
 
+  const brandLogo = await loadQuoteImageForCanvas('assets/paddox-logo-icon.png');
+  if (brandLogo) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(144, 145, 44, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(brandLogo, 100, 101, 88, 88);
+    ctx.restore();
+  }
+
   ctx.font = '76px Bebas Neue, Arial Black, sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText('PADDO', 110, 175);
+  ctx.fillText('PADDO', brandLogo ? 214 : 110, 175);
   ctx.fillStyle = '#e8002d';
-  ctx.fillText('X', 294, 175);
+  ctx.fillText('X', brandLogo ? 398 : 294, 175);
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
@@ -1575,50 +1668,108 @@ async function buildQuoteShareCanvas(q = {}) {
   return canvas;
 }
 
-async function shareQuoteImage(index) {
-  const q = REAL_QUOTES[index];
+let quotePreviewState = { index: null, canvas: null, dataUrl: '', fileName: '' };
 
+function ensureQuotePreviewModal() {
+  let modal = document.getElementById('quote-image-preview-modal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'quote-image-preview-modal';
+  modal.className = 'quote-preview-modal';
+  modal.innerHTML = `
+    <div class="quote-preview-backdrop" onclick="closeQuoteImagePreview(event)">
+      <div class="quote-preview-card" onclick="event.stopPropagation()">
+        <button class="quote-preview-close" type="button" onclick="closeQuoteImagePreview()">✕</button>
+        <div class="quote-preview-kicker">PADDOX SHARE PREVIEW</div>
+        <h3>Preview Quote Image</h3>
+        <p>Check the final image before downloading or sharing.</p>
+        <div class="quote-preview-frame">
+          <img id="quote-preview-img" alt="PADDOX quote preview">
+        </div>
+        <div class="quote-preview-actions">
+          <button type="button" onclick="downloadQuotePreviewImage()">Download Image</button>
+          <button type="button" class="primary" onclick="nativeShareQuotePreviewImage()">Share Image</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function closeQuoteImagePreview(event) {
+  if (event && event.target && !event.target.classList.contains('quote-preview-backdrop')) return;
+  const modal = document.getElementById('quote-image-preview-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+async function openQuoteImagePreview(index) {
+  const q = REAL_QUOTES[index];
   if (!q) return;
 
   try {
-    showToast('🏁 Building quote image...');
-
+    showToast('Building quote preview...');
     const canvas = await buildQuoteShareCanvas(q);
+    const dataUrl = canvas.toDataURL('image/png');
+    const fileName = `paddox-${String(q.driver || 'quote').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-quote.png`;
 
-    canvas.toBlob(async blob => {
-      if (!blob) {
-        showToast('❌ Could not build image');
-        return;
-      }
-
-      const fileName = `paddox-${String(q.driver || 'quote').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-quote.png`;
-      const file = new File([blob], fileName, { type: 'image/png' });
-
-      try {
-        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-          await navigator.share({
-            title: `PADDOX Quote — ${q.driver}`,
-            text: `"${q.text}" — ${q.driver}`,
-            files: [file]
-          });
-          showToast('🔥 Quote image shared!');
-          return;
-        }
-      } catch (err) {
-        console.warn('Native image share failed, downloading instead:', err);
-      }
-
-      downloadDataUrl(canvas.toDataURL('image/png'), fileName);
-      showToast('Quote image saved!');
-    }, 'image/png', 0.95);
-
+    quotePreviewState = { index, canvas, dataUrl, fileName };
+    const modal = ensureQuotePreviewModal();
+    const img = modal.querySelector('#quote-preview-img');
+    if (img) img.src = dataUrl;
+    modal.classList.add('show');
+    showToast('Preview ready');
   } catch (err) {
     console.error(err);
-    showToast('❌ Could not create quote image');
+    showToast('Could not create quote preview');
   }
 }
 
+function downloadQuotePreviewImage() {
+  if (!quotePreviewState.dataUrl) return;
+  downloadDataUrl(quotePreviewState.dataUrl, quotePreviewState.fileName || 'paddox-quote.png');
+  showToast('Quote image saved!');
+}
+
+async function nativeShareQuotePreviewImage() {
+  if (!quotePreviewState.canvas) return;
+  const q = REAL_QUOTES[quotePreviewState.index] || {};
+
+  quotePreviewState.canvas.toBlob(async blob => {
+    if (!blob) {
+      showToast('Could not build image');
+      return;
+    }
+
+    const file = new File([blob], quotePreviewState.fileName || 'paddox-quote.png', { type: 'image/png' });
+
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        await navigator.share({
+          title: `PADDOX Quote — ${q.driver || 'F1'}`,
+          text: `"${q.text || ''}" — ${q.driver || 'PADDOX'}`,
+          files: [file]
+        });
+        showToast('Quote image shared!');
+        closeQuoteImagePreview();
+        return;
+      }
+    } catch (err) {
+      console.warn('Native share unavailable, downloading instead:', err);
+    }
+
+    downloadQuotePreviewImage();
+  }, 'image/png', 0.95);
+}
+
+async function shareQuoteImage(index) {
+  await openQuoteImagePreview(index);
+}
+
 window.shareQuoteImage = shareQuoteImage;
+window.closeQuoteImagePreview = closeQuoteImagePreview;
+window.downloadQuotePreviewImage = downloadQuotePreviewImage;
+window.nativeShareQuotePreviewImage = nativeShareQuotePreviewImage;
 
 async function copyQuoteText(index, forceCopy = false) {
   const q = REAL_QUOTES[index];
@@ -1696,7 +1847,7 @@ function driverModalMarkup(driver, index) {
           </div>
 
           <div class="driver-detail-info">
-            <div class="driver-detail-kicker">${driver.flag || '🌍'} ${safeText(driver.nationality || 'Country TBA')}</div>
+            <div class="driver-detail-kicker"><span class="driver-detail-flag">${driverFlagHTML(driver, 'driver-detail-flag-img')}</span> ${safeText(driver.nationality || 'Country TBA')}</div>
             <h3>${safeText(driver.name)}</h3>
             <div class="driver-detail-team">${safeText(driver.team || 'Team TBA')}</div>
             <p>${safeText(profileLine)}</p>
@@ -1713,7 +1864,7 @@ function driverModalMarkup(driver, index) {
           <div><b>${position}</b><span>Standing</span></div>
           <div><b>${Number(driver.points || 0).toLocaleString('en-IN')}</b><span>Points</span></div>
           <div><b>${Number(driver.wins || 0)}</b><span>Wins</span></div>
-          <div><b>${safeText(driver.flag || '🌍')}</b><span>Flag</span></div>
+          <div><b class="driver-detail-flag-stat">${driverFlagHTML(driver, 'driver-detail-flag-img')}</b><span>Flag</span></div>
         </div>
 
         <div class="driver-detail-quote">
