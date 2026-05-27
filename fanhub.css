@@ -2506,3 +2506,77 @@ body.modal-open { overflow: hidden; }
 .quote-preview-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 .quote-preview-actions button{padding:11px 18px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-weight:800}
 .quote-preview-actions button.primary{background:var(--red);border-color:var(--red)}
+
+
+/* ══════════════════════════════════════
+   Phase 17.2 — Shop-style Fan Hub icons + quote brand lock
+   Approved: replace weak tab/chip boxes with premium mask icons.
+══════════════════════════════════════ */
+:root{
+  --fh-ico-wallpapers:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 5h16v14H4zm2.5 2.5v9h11v-9zm1.4 7.5 3-3.4 2.1 2.4 1.6-1.9 2.5 2.4zM14.8 9.2a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8'/%3E%3C/svg%3E");
+  --fh-ico-driver:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M6 9h12a4 4 0 0 1 4 4v3a3 3 0 0 1-5.3 1.9L15.2 16H8.8l-1.5 1.9A3 3 0 0 1 2 16v-3a4 4 0 0 1 4-4m1 3H5v2h2v2h2v-2h2v-2H9v-2H7zm9.5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m3 3a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3'/%3E%3C/svg%3E");
+  --fh-ico-calendar:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M5 3h3v2h8V3h3v2h2v16H3V5h2zm0 7v9h14v-9zm2 2h3v3H7zm5 0h3v3h-3z'/%3E%3C/svg%3E");
+  --fh-ico-quotes:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M6 5h6v6H9.8c0 2.7 1.2 4.3 3.2 5.4L11.5 19C8.2 17.4 6 14.8 6 10.8zm10 0h6v6h-2.2c0 2.7 1.2 4.3 3.2 5.4L21.5 19C18.2 17.4 16 14.8 16 10.8z'/%3E%3C/svg%3E");
+  --fh-ico-community:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8m6.5 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M2 21a7 7 0 0 1 14 0zm11.5 0a8.6 8.6 0 0 0-1.9-5.4A6 6 0 0 1 22 21z'/%3E%3C/svg%3E");
+  --fh-ico-pitwall:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 20V9h4v11zm6 0V4h4v16zm6 0v-8h4v8z'/%3E%3C/svg%3E");
+}
+.hero-chip .chip-mark,
+.hub-tab .ht-mark{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 30px!important;
+  width:30px!important;
+  height:30px!important;
+  border-radius:10px!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018))!important;
+  color:rgba(255,255,255,.78)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+  transform:none!important;
+  overflow:hidden!important;
+}
+.hero-chip .chip-mark::before,
+.hub-tab .ht-mark::before{
+  content:''!important;
+  position:absolute!important;
+  inset:0!important;
+  margin:auto!important;
+  width:17px!important;
+  height:17px!important;
+  background:currentColor!important;
+  border:0!important;
+  border-radius:0!important;
+  opacity:1!important;
+  box-shadow:none!important;
+  transform:none!important;
+  -webkit-mask:var(--fh-mask) center/contain no-repeat!important;
+  mask:var(--fh-mask) center/contain no-repeat!important;
+}
+.hero-chip .chip-mark::after,
+.hub-tab .ht-mark::after{display:none!important;content:none!important;}
+.hero-chip:hover .chip-mark,
+.hub-tab:hover .ht-mark,
+.hub-tab.on .ht-mark{
+  color:#fff!important;
+  border-color:rgba(232,0,45,.55)!important;
+  background:linear-gradient(180deg,rgba(232,0,45,.28),rgba(232,0,45,.08))!important;
+  box-shadow:0 12px 28px rgba(232,0,45,.12),inset 0 1px 0 rgba(255,255,255,.10)!important;
+  transform:translateY(-1px)!important;
+}
+.chip-wallpapers,.ht-wallpapers{--fh-mask:var(--fh-ico-wallpapers)}
+.chip-drivers,.ht-drivers{--fh-mask:var(--fh-ico-driver)}
+.chip-calendar,.ht-calendar{--fh-mask:var(--fh-ico-calendar)}
+.chip-quotes,.ht-quotes{--fh-mask:var(--fh-ico-quotes)}
+.chip-community,.ht-community{--fh-mask:var(--fh-ico-community)}
+.chip-pitwall{--fh-mask:var(--fh-ico-pitwall)}
+.hub-tab{gap:12px!important;}
+.hero-chip{gap:12px!important;}
+
+/* Quote card PADDOX brand should match navbar style: logo + PADDOX with X red, no forced spacing */
+.qf-brand{display:flex!important;align-items:center!important;gap:10px!important;opacity:1!important;}
+.qf-brand-logo{width:30px!important;height:30px!important;border-radius:50%!important;object-fit:cover!important;border:1px solid rgba(232,0,45,.48)!important;box-shadow:0 0 18px rgba(232,0,45,.16)!important;}
+.qf-brand-word{font-family:var(--font-d)!important;letter-spacing:2px!important;font-size:1.32rem!important;color:#fff!important;white-space:nowrap!important;line-height:1!important;}
+.qf-brand-word span{color:var(--red)!important;}
+.quote-preview-kicker{letter-spacing:2px!important;}

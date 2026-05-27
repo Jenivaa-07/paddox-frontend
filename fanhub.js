@@ -1470,7 +1470,7 @@ function downloadDataUrl(dataUrl, filename = 'paddox-quote.png') {
 
 function loadQuoteImageForCanvas(src) {
   return new Promise(resolve => {
-    if (!src || typeof src !== 'string' || !(src.startsWith('http') || src.startsWith('data:image/'))) {
+    if (!src || typeof src !== 'string') {
       resolve(null);
       return;
     }
@@ -1485,6 +1485,33 @@ function loadQuoteImageForCanvas(src) {
     img.onerror = () => resolve(null);
     img.src = src;
   });
+}
+
+function drawPaddoxCanvasBrand(ctx, x, y, logo, options = {}) {
+  const size = options.size || 68;
+  const fontSize = options.fontSize || 62;
+  const letterSpacingFix = options.tight ? 2 : 4;
+  let textX = x;
+
+  if (logo) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x + size / 2, y - size / 2, size / 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logo, x, y - size, size, size);
+    ctx.restore();
+    textX = x + size + 22;
+  }
+
+  ctx.save();
+  ctx.font = `${fontSize}px Bebas Neue, Arial Black, sans-serif`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('PADDO', textX, y);
+  const paddoWidth = ctx.measureText('PADDO').width;
+  ctx.fillStyle = '#e8002d';
+  ctx.fillText('X', textX + paddoWidth + letterSpacingFix, y);
+  ctx.restore();
 }
 
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
@@ -1578,20 +1605,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillRect(70, 70, W - 140, 12);
 
   const brandLogo = await loadQuoteImageForCanvas('assets/paddox-logo-icon.png');
-  if (brandLogo) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(144, 145, 44, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.drawImage(brandLogo, 100, 101, 88, 88);
-    ctx.restore();
-  }
-
-  ctx.font = '76px Bebas Neue, Arial Black, sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('PADDO', brandLogo ? 214 : 110, 175);
-  ctx.fillStyle = '#e8002d';
-  ctx.fillText('X', brandLogo ? 398 : 294, 175);
+  drawPaddoxCanvasBrand(ctx, 110, 176, brandLogo, { size: 76, fontSize: 76, tight: true });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
@@ -1615,12 +1629,14 @@ async function buildQuoteShareCanvas(q = {}) {
     const sx = (img.width - size) / 2;
     const sy = (img.height - size) / 2;
     ctx.drawImage(img, sx, sy, size, size, 682, 127, 256, 256);
+  } else if (brandLogo) {
+    ctx.drawImage(brandLogo, 682, 127, 256, 256);
   } else {
-    ctx.font = '92px Arial, sans-serif';
+    ctx.font = '72px Bebas Neue, Arial Black, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('PX', 810, 255);
+    ctx.fillText('F1', 810, 255);
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
   }
@@ -1659,11 +1675,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  ctx.font = '30px Bebas Neue, Arial Black, sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('PADDOX', 780, 1214);
-  ctx.fillStyle = '#e8002d';
-  ctx.fillText('X', 879, 1214);
+  drawPaddoxCanvasBrand(ctx, 760, 1214, brandLogo, { size: 34, fontSize: 30, tight: true });
 
   return canvas;
 }
