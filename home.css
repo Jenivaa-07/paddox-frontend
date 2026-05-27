@@ -1000,24 +1000,39 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 .animate-icon:hover { transform: scale(1.3) rotate(-8deg) !important; }
 
 /* ══════════════════════════════════════
-   MARQUEE STRIP — PHASE 11 PRO POLISH
-   Professional solid motorsport cards, no heavy glassmorphism
+   TEAMS ON THE GRID
 ══════════════════════════════════════ */
+.home-grid-strip-section {
+  padding: 88px 0 0;
+  background: linear-gradient(180deg, var(--black) 0%, #090909 100%);
+  position: relative;
+  z-index: 1;
+}
+.section-head--compact {
+  margin-bottom: 28px;
+}
+.grid-strip-title {
+  margin-bottom: 10px;
+}
+.grid-strip-sub {
+  max-width: 760px;
+  color: var(--muted2);
+  font-size: .98rem;
+  line-height: 1.7;
+}
+
 .marquee-strip {
   position: relative;
   min-height: 116px;
   display: flex;
   align-items: center;
-  background:
-    linear-gradient(90deg, #050505 0%, #0b0b0d 42%, #050505 100%);
-  padding: 18px 0;
+  background: linear-gradient(180deg, #0f1012 0%, #08090a 100%);
+  padding: 18px 0 22px;
   overflow: hidden;
   white-space: nowrap;
-  border-top: 1px solid rgba(255,255,255,.08);
-  border-bottom: 1px solid rgba(232,0,45,.30);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.035),
-    0 18px 42px rgba(0,0,0,.40);
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(232,0,45,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
 .marquee-strip::before,
 .marquee-strip::after {
@@ -1025,142 +1040,109 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 170px;
+  width: 120px;
   z-index: 3;
   pointer-events: none;
 }
 .marquee-strip::before {
   left: 0;
-  background: linear-gradient(90deg, #050505 0%, rgba(5,5,5,.92) 42%, transparent 100%);
+  background: linear-gradient(90deg, rgba(7,7,7,1), rgba(7,7,7,.72), transparent);
 }
 .marquee-strip::after {
   right: 0;
-  background: linear-gradient(270deg, #050505 0%, rgba(5,5,5,.92) 42%, transparent 100%);
+  background: linear-gradient(270deg, rgba(7,7,7,1), rgba(7,7,7,.72), transparent);
 }
-.marquee-strip::selection { background: transparent; }
 .marquee-track {
   display: inline-flex;
   align-items: center;
-  gap: 24px;
-  padding: 0 96px;
-  animation: marqueeRoll 170s linear infinite;
+  gap: 18px;
+  padding: 0 56px;
+  animation: marqueeRoll 160s linear infinite;
   will-change: transform;
 }
 .marquee-track:hover { animation-play-state: paused; }
-.marquee-loading {
-  font-family: var(--font-condensed);
-  font-size: .92rem;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: rgba(255,255,255,.72);
-  text-transform: uppercase;
-}
 .marquee-team {
-  --team-color: #e8002d;
   display: inline-grid;
-  grid-template-columns: 132px max-content;
+  grid-template-columns: 118px max-content;
   align-items: center;
-  gap: 22px;
-  min-height: 82px;
-  padding: 10px 32px 10px 10px;
-  border-radius: 0;
-  clip-path: polygon(18px 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+  gap: 18px;
+  min-height: 76px;
+  padding: 10px 28px 10px 10px;
+  clip-path: polygon(0 0, 96% 0, 100% 100%, 0 100%);
   font-family: var(--font-condensed);
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: rgba(255,255,255,.96);
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--team-color), #101010 84%) 0%, #141416 42%, #0c0c0d 100%);
-  border: 1px solid rgba(255,255,255,.10);
-  border-bottom: 3px solid var(--team-color);
-  box-shadow: 0 12px 30px rgba(0,0,0,.34);
-  overflow: hidden;
-  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background var(--transition);
-}
-.marquee-team::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 5px;
-  background: var(--team-color);
-}
-.marquee-team:hover {
-  transform: translateY(-3px);
-  border-color: rgba(255,255,255,.20);
-  box-shadow: 0 18px 42px rgba(0,0,0,.46);
+  color: rgba(255,255,255,.98);
+  background: linear-gradient(145deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+  border: 1px solid rgba(255,255,255,.08);
+  border-bottom: 3px solid var(--team-color, var(--red));
+  box-shadow: 0 14px 32px rgba(0,0,0,.28);
 }
 .marquee-team-name {
   display: inline-flex;
   align-items: center;
-  height: 100%;
   line-height: 1;
-  padding-top: 2px;
-  color: #f4f4f4;
-  text-shadow: none;
+  text-shadow: 0 1px 12px rgba(0,0,0,.42);
 }
 .team-logo-wrap {
-  width: 132px;
-  height: 62px;
-  border-radius: 0;
+  width: 118px;
+  height: 54px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 14px;
-  background: #080808;
-  border: 1px solid rgba(255,255,255,.10);
-  border-left: 4px solid var(--team-color);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+  padding: 8px 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 0;
   flex-shrink: 0;
   overflow: hidden;
 }
 .team-badge-img {
   width: 100%;
   height: 100%;
-  max-width: 112px;
-  max-height: 48px;
+  max-width: 100px;
+  max-height: 44px;
   object-fit: contain;
   object-position: center;
   display: block;
   margin: auto;
   background: transparent;
-  filter: brightness(1.12) contrast(1.08) saturate(1.02);
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.45));
 }
 .team-badge-dot {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   display: none;
-  border-radius: 0;
+  border-radius: 999px;
   background: var(--team-color, #fff);
-  clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
 }
 @keyframes marqueeRoll { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
 @media (max-width: 768px) {
-  .marquee-strip { min-height: 90px; padding: 14px 0; }
+  .home-grid-strip-section { padding-top: 72px; }
+  .section-head--compact { margin-bottom: 22px; }
+  .grid-strip-sub { font-size: .9rem; line-height: 1.6; }
+  .marquee-strip { min-height: 96px; padding: 14px 0 16px; }
   .marquee-strip::before,
-  .marquee-strip::after { width: 64px; }
-  .marquee-track { gap: 14px; padding: 0 42px; animation-duration: 132s; }
+  .marquee-strip::after { width: 56px; }
+  .marquee-track { gap: 12px; padding: 0 28px; animation-duration: 132s; }
   .marquee-team {
-    grid-template-columns: 92px max-content;
+    grid-template-columns: 78px max-content;
     min-height: 62px;
     padding: 8px 18px 8px 8px;
-    font-size: .78rem;
+    font-size: .8rem;
     letter-spacing: 2px;
     gap: 12px;
-    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
   }
   .team-logo-wrap {
-    width: 92px;
-    height: 44px;
-    padding: 6px 9px;
-    border-left-width: 3px;
+    width: 78px;
+    height: 40px;
+    padding: 6px 8px;
   }
   .team-badge-img {
-    max-width: 78px;
-    max-height: 32px;
+    max-width: 66px;
+    max-height: 30px;
   }
 }
 
