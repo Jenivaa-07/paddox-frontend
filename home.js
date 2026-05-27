@@ -162,6 +162,43 @@ function normalizeHomeProduct(p = {}) {
   };
 }
 
+function isHomeApparelProduct(product = {}) {
+  const text = `${product.cat || ''} ${product.name || ''}`.toLowerCase();
+  const nonSized = ['poster', 'wallpaper', 'print', 'collectible', 'model', 'diecast', 'sticker', 'mug', 'keychain', 'cap'];
+  if (nonSized.some(word => text.includes(word))) return false;
+  return ['apparel', 'shirt', 't-shirt', 'tee', 'hoodie', 'jacket', 'jersey', 'polo', 'sweatshirt'].some(word => text.includes(word));
+}
+
+function renderHomeModalOptions(product = {}) {
+  const box = document.getElementById('modal-options');
+  if (!box) return;
+
+  if (!isHomeApparelProduct(product)) {
+    box.innerHTML = '';
+    box.style.display = 'none';
+    return;
+  }
+
+  box.style.display = '';
+  box.innerHTML = `
+    <div class="modal-size-label">Size</div>
+    <div class="size-opts">
+      <button class="size-btn active" type="button">XS</button>
+      <button class="size-btn" type="button">S</button>
+      <button class="size-btn" type="button">M</button>
+      <button class="size-btn" type="button">L</button>
+      <button class="size-btn" type="button">XL</button>
+      <button class="size-btn" type="button">XXL</button>
+    </div>`;
+
+  box.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      box.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+}
+
 function getNestedString(obj = {}, keys = []) {
   for (const key of keys) {
     const value = obj?.[key];
@@ -845,7 +882,7 @@ function addToCart(id) {
   if (existing) {
     existing.qty++;
   } else {
-    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, emoji: product.emoji, image: product.image, category: product.cat });
+    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, emoji: product.emoji, image: product.image });
   }
   saveCart();
   showToast(`✓ ${product.name} added to cart!`);
@@ -858,15 +895,6 @@ updateCartBadge();
 ══════════════════════════════════════ */
 const modalOverlay = document.getElementById('modal-overlay');
 const modalClose   = document.getElementById('modal-close');
-
-function isApparelProduct(p = {}) {
-  const text = `${p.cat || ''} ${p.name || ''} ${p.team || ''}`.toLowerCase();
-  const apparelWords = ['apparel', 'shirt', 't-shirt', 'tshirt', 'tee', 'jersey', 'hoodie', 'jacket', 'cap', 'hat', 'wear'];
-  const nonSizeWords = ['collectible', 'poster', 'wallpaper', 'model', 'sticker', 'keychain', 'mug', 'bottle', 'frame', 'digital'];
-  if (nonSizeWords.some(word => text.includes(word))) return false;
-  return apparelWords.some(word => text.includes(word));
-}
-
 
 function openModal(id) {
   const p = PRODUCTS.find(x => String(x.id) === String(id));
@@ -882,21 +910,13 @@ function openModal(id) {
   /* Image */
   const wrap = document.getElementById('modal-img-wrap');
   wrap.style.background = p.gradient || 'linear-gradient(135deg,#111,#1a1a1a)';
-  wrap.innerHTML = `
-    <img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85)"
-      onerror="this.outerHTML='<span style=font-size:6rem>${p.emoji}</span>'"/>
-  `;
+  wrap.innerHTML = p.image
+    ? `<img src="${escapeHTML(p.image)}" alt="${escapeHTML(p.name)}" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85)"
+      onerror="this.outerHTML='<span style=font-size:6rem>${escapeHTML(p.emoji)}</span>'"/>`
+    : `<span style="font-size:6rem">${escapeHTML(p.emoji)}</span>`;
 
-  /* Size buttons: only for apparel products */
-  const sizeWrap = document.querySelector('.modal-sizes');
-  const showSizes = isApparelProduct(p);
-  if (sizeWrap) sizeWrap.style.display = showSizes ? '' : 'none';
-  document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    };
-  });
+  /* Product options: show sizes only for real apparel */
+  renderHomeModalOptions(p);
 
   /* Add btn */
   const addBtn = document.getElementById('modal-add-btn');
@@ -1183,17 +1203,6 @@ function updateTickerFromAPI() {
     }, 300);
   }, 4000);
 }
-
-
-/* ══════════════════════════════════════
-   SIZE BUTTON INTERACTION
-══════════════════════════════════════ */
-document.querySelectorAll('.size-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
 
 
 /* ══════════════════════════════════════

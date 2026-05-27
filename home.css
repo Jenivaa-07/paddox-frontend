@@ -808,13 +808,6 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   letter-spacing: 2px;
   line-height: .95;
 }
-.section-sub {
-  max-width: 720px;
-  margin-top: 14px;
-  color: var(--muted2);
-  font-size: .96rem;
-  line-height: 1.7;
-}
 .accent { color: var(--red); }
 .see-all {
   font-family: var(--font-condensed);
@@ -1305,160 +1298,102 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
    EXPERIENCE SECTION
 ══════════════════════════════════════ */
 .experience-section {
-  background:
-    linear-gradient(180deg, #070707 0%, #0b0b0d 100%);
-  overflow: hidden;
+  background: var(--black);
+  padding-top: 96px;
+  padding-bottom: 98px;
 }
-.experience-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(232,0,45,.035) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(255,255,255,.025) 1px, transparent 1px);
-  background-size: 120px 120px;
-  opacity: .28;
-  pointer-events: none;
-}
-.experience-section .container {
-  position: relative;
-  z-index: 1;
-}
+
 .exp-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto auto;
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
 }
 .exp-card {
   position: relative;
   overflow: hidden;
-  min-height: 282px;
+  min-height: 230px;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,.07);
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
-    #0f0f12;
-  border-radius: 22px;
+  background: linear-gradient(180deg, #111 0%, #0b0b0b 100%);
+  border: 1px solid rgba(255,255,255,.075);
+  border-top: 2px solid rgba(232,0,45,.38);
+  box-shadow: 0 18px 42px rgba(0,0,0,.32);
   transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background var(--transition);
-  box-shadow: 0 18px 44px rgba(0,0,0,.24);
 }
-.exp-card:nth-child(1) { --exp-accent: #e8002d; }
-.exp-card:nth-child(2) { --exp-accent: #00d2be; }
-.exp-card:nth-child(3) { --exp-accent: #c9a84c; }
-.exp-card:nth-child(4) { --exp-accent: #6c4cff; }
-.exp-card:hover {
-  transform: translateY(-8px);
-  border-color: color-mix(in srgb, var(--exp-accent), transparent 45%);
-  box-shadow: 0 28px 70px rgba(0,0,0,.42), 0 0 0 1px color-mix(in srgb, var(--exp-accent), transparent 78%);
-}
-.exp-card-wide { grid-column: span 2; }
-
 .exp-card::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--exp-accent), transparent 78%), transparent 26%),
-    linear-gradient(90deg, color-mix(in srgb, var(--exp-accent), transparent 92%), transparent 58%);
-  opacity: .78;
+    linear-gradient(135deg, rgba(232,0,45,.10), transparent 34%),
+    linear-gradient(0deg, transparent 0%, transparent 38%, rgba(255,255,255,.025) 38%, rgba(255,255,255,.025) 62%, transparent 62%);
+  opacity: .55;
   transition: opacity var(--transition), transform var(--transition);
-  pointer-events: none;
 }
-.exp-card:hover::before {
-  opacity: 1;
-  transform: scale(1.04);
+.exp-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(232,0,45,.42);
+  box-shadow: 0 26px 60px rgba(0,0,0,.46), 0 0 0 1px rgba(232,0,45,.08);
+  background: linear-gradient(180deg, #151515 0%, #0b0b0b 100%);
 }
-.exp-card::after {
-  content: '';
-  position: absolute;
-  left: 28px;
-  right: 28px;
-  bottom: 0;
-  height: 3px;
-  background: var(--exp-accent);
-  transform: scaleX(.36);
-  transform-origin: left;
-  transition: transform var(--transition);
-}
-.exp-card:hover::after { transform: scaleX(1); }
+.exp-card:hover::before { opacity: .9; transform: translateX(8px); }
+.exp-card-wide { grid-column: span 1; }
 
-/* Phase 12: remove the heavy background art from Beyond The Track cards */
 .exp-card-img {
   display: none;
 }
-.exp-img-1,
-.exp-img-2,
-.exp-img-3,
-.exp-img-4 {
-  background-image: none;
-}
 .exp-card-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.025), transparent 44%),
-    linear-gradient(0deg, rgba(0,0,0,.35), transparent 60%);
-  pointer-events: none;
+  display: none;
 }
 .exp-card-content {
   position: relative;
   z-index: 2;
-  padding: 34px;
+  padding: 30px;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
 }
-.exp-card-content::before {
-  content: attr(data-kicker);
-}
 .exp-icon {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(232,0,45,.3);
+  background: rgba(232,0,45,.08);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.65rem;
-  margin-bottom: 24px;
-  border-radius: 16px;
-  color: var(--white);
-  background: color-mix(in srgb, var(--exp-accent), transparent 78%);
-  border: 1px solid color-mix(in srgb, var(--exp-accent), transparent 58%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  font-size: 1.55rem;
+  margin-bottom: 22px;
+  border-radius: 14px;
 }
 .exp-title {
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 2.4vw, 2.45rem);
-  letter-spacing: 1.8px;
-  margin-bottom: 12px;
+  font-size: 1.95rem;
+  letter-spacing: 1.6px;
+  margin-bottom: 10px;
+  line-height: 1;
 }
 .exp-desc {
-  font-size: .9rem;
-  color: #b5b5b5;
-  line-height: 1.72;
-  margin-bottom: 26px;
-  max-width: 420px;
+  color: #aaa;
+  font-size: .88rem;
+  line-height: 1.65;
+  max-width: 280px;
+  margin-bottom: 24px;
 }
 .exp-link {
   width: max-content;
   font-family: var(--font-condensed);
-  font-size: .78rem;
-  letter-spacing: 2.4px;
-  color: var(--red);
+  font-size: .75rem;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  font-weight: 800;
-  transition: all var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(232,0,45,.45);
+  color: var(--red);
+  border-bottom: 1px solid rgba(232,0,45,.5);
+  padding-bottom: 5px;
+  transition: color var(--transition), border-color var(--transition), transform var(--transition);
 }
 .exp-link:hover {
   color: var(--white);
-  gap: 12px;
   border-color: var(--white);
+  transform: translateX(5px);
 }
 
 /* ══════════════════════════════════════
@@ -1800,6 +1735,7 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 .modal-price  { font-family: var(--font-display); font-size: 1.9rem; }
 .modal-desc   { font-size: .82rem; color: #aaa; line-height: 1.7; }
 .modal-divider { height: 1px; background: var(--gray2); }
+.modal-options:empty { display: none; }
 .modal-size-label {
   font-family: var(--font-condensed);
   font-size: .62rem;
@@ -1885,8 +1821,6 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 @media (max-width: 1100px) {
   .products-grid { grid-template-columns: repeat(2, 1fr); }
   .exp-grid { grid-template-columns: repeat(2, 1fr); }
-  .exp-card-wide { grid-column: span 1; }
-  .exp-card { min-height: 260px; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 
@@ -1905,8 +1839,6 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   .testi-grid    { grid-template-columns: 1fr; }
   .products-grid { grid-template-columns: 1fr 1fr; }
   .exp-grid      { grid-template-columns: 1fr; }
-  .exp-card      { min-height: 238px; }
-  .exp-card-content { padding: 26px; }
   .quotes-layout { grid-template-columns: 1fr; }
   .modal-box     { grid-template-columns: 1fr; }
   .modal-img-wrap { min-height: 200px; font-size: 5rem; }
@@ -1925,5 +1857,3 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   .nl-form       { flex-direction: column; }
   .nl-btn        { width: 100%; justify-content: center; }
 }
-/* Phase 12: sizes are shown only for apparel products */
-.modal-sizes[style*="display: none"] { display: none !important; }
