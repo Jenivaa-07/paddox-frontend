@@ -2098,3 +2098,287 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   .products-grid { grid-template-columns: 1fr; }
   .modal-box { width: calc(100vw - 22px); }
 }
+
+
+/* ══════════════════════════════════════
+   PHASE 13 V8 — SHOP NAVBAR + LAYOUT LOCK
+   Goal: match locked home navbar scale and make shop feel less zoomed-out.
+   Functions untouched.
+══════════════════════════════════════ */
+#navbar {
+  height: 68px !important;
+  background: rgba(7,7,7,.94) !important;
+  border-bottom: 1px solid rgba(232,0,45,.16) !important;
+  box-shadow: none !important;
+}
+#navbar.scrolled {
+  height: 60px !important;
+  background: rgba(7,7,7,.985) !important;
+  box-shadow: 0 10px 34px rgba(0,0,0,.36), 0 1px 0 rgba(232,0,45,.22) !important;
+}
+.nav-inner {
+  height: 100% !important;
+  padding: 0 52px !important;
+  gap: 28px !important;
+}
+.nav-logo {
+  gap: 12px !important;
+  min-width: 205px !important;
+}
+.helmet-wrap {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 999px !important;
+  background: radial-gradient(circle at 35% 30%, rgba(232,0,45,.26), rgba(232,0,45,.08) 54%, rgba(7,7,7,.7) 100%) !important;
+  border-color: rgba(232,0,45,.34) !important;
+}
+.helmet-icon::before {
+  width: 22px !important;
+  height: 10px !important;
+}
+.logo-text {
+  font-size: 2rem !important;
+  letter-spacing: 5.6px !important;
+  line-height: 1 !important;
+}
+.nav-links {
+  gap: 12px !important;
+  align-items: center !important;
+}
+.nav-link {
+  gap: 8px !important;
+  padding: 10px 12px !important;
+  font-size: .86rem !important;
+  letter-spacing: 2.6px !important;
+  color: rgba(255,255,255,.58) !important;
+}
+.nav-link .nl-icon {
+  width: 17px !important;
+  height: 17px !important;
+  opacity: .78 !important;
+}
+.nav-link:hover,
+.nav-link.active {
+  color: #fff !important;
+}
+.nav-link.active .nl-icon,
+.nav-link:hover .nl-icon {
+  color: var(--red) !important;
+  opacity: 1 !important;
+}
+.nl-underline {
+  left: 12px !important;
+  right: 12px !important;
+  bottom: 4px !important;
+}
+.nav-right {
+  gap: 10px !important;
+  min-width: 270px !important;
+  justify-content: flex-end !important;
+}
+.nav-search-btn,
+.nav-cart-btn {
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  background: rgba(255,255,255,.015) !important;
+}
+.search-icon-anim,
+.cart-icon-anim {
+  width: 18px !important;
+  height: 18px !important;
+}
+.nav-cta-btn {
+  min-height: 42px !important;
+  padding: 0 28px !important;
+  font-size: .88rem !important;
+  letter-spacing: 2.4px !important;
+  align-items: center !important;
+}
+.nav-cta-btn .cta-flag {
+  width: 14px !important;
+  height: 12px !important;
+}
+
+/* Shop hero: less vertical waste, products visible sooner */
+.shop-hero {
+  min-height: 48vh !important;
+  align-items: center !important;
+  padding-top: 68px !important;
+}
+.shop-hero-content {
+  padding: 84px 72px 48px !important;
+}
+.shop-hero-title {
+  font-size: clamp(4.2rem, 7.2vw, 8.2rem) !important;
+  line-height: .86 !important;
+  max-width: 620px !important;
+}
+.shop-hero-sub {
+  max-width: 560px !important;
+  margin-bottom: 28px !important;
+}
+.shop-hero-stats {
+  padding: 16px 22px !important;
+  max-width: 470px !important;
+}
+
+/* Product surface: tighten gap after hero/category */
+.cat-bar {
+  top: 68px !important;
+}
+.cat-bar-inner {
+  padding-left: 52px !important;
+  padding-right: 52px !important;
+}
+.shop-layout {
+  grid-template-columns: 280px 1fr !important;
+}
+.shop-main {
+  padding: 42px 44px 88px !important;
+}
+.shop-toolbar {
+  margin-bottom: 38px !important;
+}
+.shop-sidebar {
+  padding-top: 34px !important;
+}
+.filter-group {
+  margin-bottom: 26px !important;
+}
+.team-fopt {
+  min-height: 38px !important;
+}
+.team-filter-logo {
+  width: 38px !important;
+  height: 28px !important;
+}
+.products-grid {
+  gap: 22px !important;
+}
+.pcard-img-wrap {
+  min-height: 300px !important;
+}
+
+@media (max-width: 1180px) {
+  .nav-inner { padding: 0 28px !important; }
+  .nav-logo { min-width: auto !important; }
+  .nav-links { gap: 6px !important; }
+  .nav-link { font-size: .78rem !important; letter-spacing: 2px !important; padding: 10px 8px !important; }
+  .nav-right { min-width: auto !important; }
+  .shop-layout { grid-template-columns: 250px 1fr !important; }
+}
+@media (max-width: 900px) {
+  .nav-links { display: none !important; }
+  .hamburger { display: flex !important; }
+  .nav-right { gap: 8px !important; }
+  .nav-cta-btn { padding: 0 20px !important; }
+  .shop-hero { min-height: 46vh !important; }
+  .shop-hero-content { padding: 76px 24px 42px !important; }
+  .cat-bar { top: 68px !important; }
+  .cat-bar-inner { padding-left: 16px !important; padding-right: 16px !important; }
+  .shop-layout { grid-template-columns: 1fr !important; }
+  .shop-main { padding: 30px 18px 72px !important; }
+}
+@media (max-width: 560px) {
+  .nav-inner { padding: 0 14px !important; gap: 10px !important; }
+  .logo-text { font-size: 1.55rem !important; letter-spacing: 4px !important; }
+  .helmet-wrap { width: 36px !important; height: 36px !important; }
+  .nav-search-btn, .nav-cart-btn { width: 36px !important; height: 36px !important; }
+  .nav-cta-btn { min-height: 36px !important; padding: 0 14px !important; font-size: .72rem !important; }
+  .shop-hero-title { font-size: clamp(3.1rem, 16vw, 5rem) !important; }
+  .shop-hero-stats { max-width: 100% !important; }
+  .cat-tab { min-height: 48px !important; padding: 10px 13px !important; }
+  .ct-icon { width: 27px !important; height: 27px !important; flex-basis: 27px !important; }
+}
+
+
+/* ============================================================
+   PHASE 13 V9 — SIGN UP BUTTON EXACT HOME-STYLE LOCK
+   Fix: make Shop Sign Up button clean, balanced and not oversized.
+   ============================================================ */
+.nav-cta-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 0 30px !important;
+  background: var(--red) !important;
+  color: #fff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .86rem !important;
+  line-height: 1 !important;
+  letter-spacing: 2.4px !important;
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.nav-cta-btn::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent) !important;
+  transform: translateX(-130%) skewX(-18deg) !important;
+  transition: transform .45s ease !important;
+}
+.nav-cta-btn:hover::before {
+  transform: translateX(130%) skewX(-18deg) !important;
+}
+.nav-cta-btn:hover {
+  background: var(--red2) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 28px rgba(232,0,45,.24) !important;
+}
+.nav-cta-btn .cta-flag { display: none !important; }
+.nav-cta-btn .cta-arrow {
+  width: 16px !important;
+  height: 1.8px !important;
+  display: inline-block !important;
+  background: currentColor !important;
+  position: relative !important;
+  margin-left: 2px !important;
+  flex: 0 0 auto !important;
+  transition: transform .3s ease !important;
+}
+.nav-cta-btn .cta-arrow::before,
+.nav-cta-btn .cta-arrow::after {
+  content: '' !important;
+  position: absolute !important;
+  right: 0 !important;
+  width: 7px !important;
+  height: 1.8px !important;
+  background: currentColor !important;
+  transform-origin: right center !important;
+}
+.nav-cta-btn .cta-arrow::before { transform: rotate(38deg) !important; }
+.nav-cta-btn .cta-arrow::after  { transform: rotate(-38deg) !important; }
+.nav-cta-btn:hover .cta-arrow { transform: translateX(4px) !important; }
+
+@media (max-width: 768px) {
+  .nav-cta-btn {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 18px !important;
+    font-size: .74rem !important;
+    letter-spacing: 1.9px !important;
+    gap: 8px !important;
+  }
+  .nav-cta-btn .cta-arrow {
+    width: 13px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .nav-cta-btn {
+    display: none !important;
+  }
+}
