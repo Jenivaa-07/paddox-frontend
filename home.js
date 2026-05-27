@@ -79,36 +79,8 @@ function setHomeMarketingStats() {
   setCounter(document.getElementById('home-fan-count'), HOME_MARKETING_STATS.fans);
 }
 
-function getHomeScheduleArray(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (!payload || typeof payload !== 'object') return [];
-  const candidates = [
-    payload.races, payload.schedule, payload.calendar, payload.rounds, payload.events,
-    payload.data?.races, payload.data?.schedule, payload.data?.calendar, payload.data?.rounds, payload.data?.events,
-  ];
-  for (const item of candidates) {
-    if (Array.isArray(item)) return item;
-  }
-  return [];
-}
-
-function getUniqueRaceCount(list = []) {
-  if (!Array.isArray(list)) return 0;
-  const keys = new Set();
-  list.forEach((race, index) => {
-    if (!race) return;
-    if (typeof race === 'string') { keys.add(race.toLowerCase().trim()); return; }
-    const key = safeText(
-      race.round || race.Round || race.raceId || race.id || race.name || race.raceName || race.grandPrix || race.circuit,
-      `race-${index}`
-    ).toLowerCase();
-    if (key) keys.add(key);
-  });
-  return keys.size;
-}
-
 function updateHomeSeasonRaceCount() {
-  const races = getUniqueRaceCount(HOME_F1.schedule);
+  const races = Array.isArray(HOME_F1.schedule) ? HOME_F1.schedule.filter(Boolean).length : 0;
   if (races > 0) updateHomeRaceStat(races);
 }
 
@@ -152,7 +124,11 @@ function homeMoney(value) {
 
 function productEmoji(category = '') {
   const c = String(category || '').toLowerCase();
-  return 'PX';
+  if (c.includes('apparel') || c.includes('shirt') || c.includes('hoodie')) return '👕';
+  if (c.includes('collect')) return '🏆';
+  if (c.includes('access')) return '⌚';
+  if (c.includes('poster')) return '🖼️';
+  return '🏎️';
 }
 
 function teamEmojiFromName(name = '') {
@@ -168,7 +144,7 @@ function teamEmojiFromName(name = '') {
   if (n.includes('racing bulls') || n === 'rb') return '🟣';
   if (n.includes('sauber') || n.includes('kick') || n.includes('audi')) return '🟢';
   if (n.includes('cadillac')) return '🟡';
-  return 'PX';
+  return '🏁';
 }
 
 function normalizeHomeProduct(p = {}) {
@@ -296,7 +272,7 @@ function setCountdownFlag(flagEl, race = {}) {
   if (!flagEl) return;
   const code = countryCodeFromRace(race);
   const label = safeText(race.country || race.location || race.name, 'Race flag');
-  flagEl.classList.remove('flag-fallback', 'has-country');
+  flagEl.classList.remove('flag-fallback');
   flagEl.innerHTML = '';
 
   if (!code) {
@@ -305,28 +281,28 @@ function setCountdownFlag(flagEl, race = {}) {
     return;
   }
 
-  flagEl.classList.add('has-country');
   flagEl.innerHTML = `
     <img
       class="cs-flag-img"
-      src="https://flagcdn.com/${code}.svg"
+      src="https://flagcdn.com/w80/${code}.png"
+      srcset="https://flagcdn.com/w40/${code}.png 1x, https://flagcdn.com/w80/${code}.png 2x"
       alt="${escapeHTML(label)} flag"
       loading="lazy"
       referrerpolicy="no-referrer"
-      onerror="this.parentElement.classList.remove('has-country');this.parentElement.classList.add('flag-fallback');this.outerHTML='<span class=&quot;cs-flag-fallback&quot;>F1</span>'"
+      onerror="this.parentElement.classList.add('flag-fallback');this.outerHTML='<span class=&quot;cs-flag-fallback&quot;>F1</span>'"
     />`;
 }
 
 function renderQuoteAvatar(el, avatar, driver = 'PADDOX') {
   if (!el) return;
-  const av = safeText(avatar, 'PX');
+  const av = safeText(avatar, '🏁');
   const isImage = av.startsWith('http://') || av.startsWith('https://') || av.startsWith('data:image/');
   if (isImage) {
     el.classList.add('has-image');
     el.innerHTML = `<img src="${escapeHTML(av)}" alt="${escapeHTML(driver)}" loading="lazy"/>`;
   } else {
     el.classList.remove('has-image');
-    el.textContent = av || 'PX';
+    el.textContent = av || '🏁';
   }
 }
 
@@ -408,8 +384,7 @@ async function loadHomeF1Data() {
       PaddoxAPI.f1.driverStands(),
       PaddoxAPI.f1.consStands(),
     ]);
-    const schedulePayload = scheduleData.value?.data || scheduleData.value || {};
-    HOME_F1.schedule = getHomeScheduleArray(schedulePayload);
+    HOME_F1.schedule = scheduleData.value?.data?.races || scheduleData.value?.data || [];
     HOME_F1.drivers = driverData.value?.data?.drivers || driverData.value?.data || [];
     HOME_F1.standings = standingsData.value?.data?.standings || standingsData.value?.data?.drivers || standingsData.value?.data || [];
     HOME_F1.constructors = constructorData.value?.data?.standings || constructorData.value?.data?.constructors || constructorData.value?.data || [];
@@ -452,7 +427,7 @@ async function loadHomeFanStories() {
             <div class="testi-avatar">${escapeHTML(initials || 'PF')}</div>
             <div>
               <div class="testi-name">${escapeHTML(name)}</div>
-              <div class="testi-loc">${escapeHTML(date)}</div>
+              <div class="testi-loc">🏁 ${escapeHTML(date)}</div>
             </div>
           </div>
           <div class="testi-badge">Live Fan Hub</div>
@@ -492,72 +467,99 @@ function animateSingleCounter(el) {
 }
 
 /* ══════════════════════════════════════
-   RACE-LINE PARTICLES
+   PARTICLES
 ══════════════════════════════════════ */
 (function initParticles() {
   const canvas = document.getElementById('particles-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W = 0, H = 0, sparks = [];
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const baseCount = prefersReducedMotion ? 18 : 72;
+  let W, H, particles = [], burst = false, burstTimer = null;
 
   function resize() {
-    W = canvas.width = window.innerWidth;
+    W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
   }
   resize();
-  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('resize', resize);
 
-  class RaceSpark {
-    constructor(forceBurst = false) { this.reset(forceBurst); }
-    reset(forceBurst = false) {
-      const lane = Math.random();
-      this.x = forceBurst ? -80 - Math.random() * W * .3 : Math.random() * W;
-      this.y = H * (.18 + lane * .72) + (Math.random() - .5) * 34;
-      this.len = forceBurst ? 70 + Math.random() * 140 : 28 + Math.random() * 82;
-      this.speed = forceBurst ? 10 + Math.random() * 11 : 2.2 + Math.random() * 5.6;
-      this.size = Math.random() < .18 ? 1.6 : .65 + Math.random() * 1.05;
-      this.life = .28 + Math.random() * .72;
-      this.fade = .0025 + Math.random() * .005;
-      const r = Math.random();
-      this.color = r < .58 ? '232,0,45' : r < .82 ? '255,255,255' : '201,168,76';
+  /* Particle class */
+  class Particle {
+    constructor(isBurst = false) { this.reset(isBurst); }
+
+    reset(isBurst = false) {
+      this.isBurst = isBurst;
+      this.type    = Math.random() < 0.55 ? 'spark' : 'dot';
+      this.x       = isBurst ? W * 0.5 + (Math.random() - 0.5) * 300
+                             : Math.random() * W;
+      this.y       = isBurst ? H * 0.5 + (Math.random() - 0.5) * 100
+                             : Math.random() * H;
+      const speed  = isBurst ? 4 + Math.random() * 6 : 1.5 + Math.random() * 2.5;
+      const angle  = isBurst ? Math.random() * Math.PI * 2
+                             : -Math.PI * 0.05 + (Math.random() - 0.5) * 0.4;
+      this.vx      = Math.cos(angle) * speed;
+      this.vy      = Math.sin(angle) * speed - (isBurst ? 0 : 0.2);
+      this.life    = 1;
+      this.decay   = isBurst ? 0.016 + Math.random() * 0.02
+                             : 0.003 + Math.random() * 0.004;
+      this.size    = this.type === 'spark'
+                     ? 0.6 + Math.random() * 1.6
+                     : 0.5 + Math.random() * 1.2;
+      const r      = Math.random();
+      this.color   = r < 0.65 ? 'rgba(232,0,45,'
+                   : r < 0.82 ? 'rgba(200,200,200,'
+                               : 'rgba(201,168,76,';
     }
+
     update() {
-      this.x += this.speed;
-      this.y += Math.sin((this.x + this.len) * .004) * .18;
-      this.life -= this.fade;
-      if (this.x - this.len > W + 80 || this.life <= 0) this.reset(false);
+      this.x    += this.vx;
+      this.y    += this.vy;
+      this.vy   += 0.012; // gentle gravity
+      this.life -= this.decay;
+      if (this.life <= 0 || this.x > W + 30 || this.x < -30 || this.y > H + 30) {
+        this.reset(false);
+      }
     }
+
     draw() {
-      const alpha = Math.max(0, Math.min(.7, this.life));
       ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.lineWidth = this.size;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = `rgba(${this.color},${alpha})`;
-      ctx.beginPath();
-      ctx.moveTo(this.x, this.y);
-      ctx.lineTo(this.x - this.len, this.y + this.len * .055);
-      ctx.stroke();
+      ctx.globalAlpha = Math.max(0, this.life * 0.75);
+      if (this.type === 'spark') {
+        ctx.strokeStyle = `${this.color}1)`;
+        ctx.lineWidth   = this.size;
+        ctx.lineCap     = 'round';
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.vx * 7, this.y - this.vy * 7);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = `${this.color}0.9)`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.restore();
     }
   }
 
-  for (let i = 0; i < baseCount; i++) sparks.push(new RaceSpark(false));
+  /* Spawn base particles */
+  for (let i = 0; i < 90; i++) particles.push(new Particle());
 
-  let lastBurst = 0;
-  window.addEventListener('scroll', () => {
-    const now = Date.now();
-    if (prefersReducedMotion || now - lastBurst < 1200) return;
-    lastBurst = now;
-    for (let i = 0; i < 14; i++) sparks.push(new RaceSpark(true));
-  }, { passive: true });
+  /* Occasional speed burst */
+  function triggerBurst() {
+    for (let i = 0; i < 40; i++) particles.push(new Particle(true));
+    burstTimer = setTimeout(triggerBurst, 6000 + Math.random() * 8000);
+  }
+  burstTimer = setTimeout(triggerBurst, 3000);
 
   function loop() {
     ctx.clearRect(0, 0, W, H);
-    sparks.forEach(s => { s.update(); s.draw(); });
-    if (sparks.length > baseCount + 34) sparks = sparks.slice(sparks.length - (baseCount + 34));
+    particles.forEach(p => { p.update(); p.draw(); });
+    // Remove dead burst particles
+    particles = particles.filter(p => p.life > 0 || !p.isBurst);
+    // Keep base count stable
+    while (particles.filter(p => !p.isBurst).length < 90) {
+      particles.push(new Particle(false));
+    }
     requestAnimationFrame(loop);
   }
   loop();
@@ -1275,10 +1277,8 @@ function updateTickerFromAPI() {
   if (HOME_F1.nextRace) {
     messages.push(`Next race: ${HOME_F1.nextRace.name || 'Grand Prix'}`);
   }
-  const seasonRaceCount = getUniqueRaceCount(HOME_F1.schedule);
-  if (seasonRaceCount) {
-    updateHomeRaceStat(seasonRaceCount);
-    messages.push(`${seasonRaceCount} Grand Prix rounds this season`);
+  if (HOME_F1.schedule.length) {
+    messages.push(`${HOME_F1.schedule.length} Grand Prix rounds this season`);
   }
   if (HOME_F1.standings.length) {
     const leader = normalizeDriverFromAny(HOME_F1.standings[0]);
