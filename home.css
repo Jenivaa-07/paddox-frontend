@@ -2613,3 +2613,120 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   .nav-cart-btn { width: 38px; height: 38px; }
   .helmet-wrap { width: 38px; height: 38px; }
 }
+
+
+/* ============================================================
+   PHASE 12 V10 — Home Micro Polish Lock
+   Small premium tuning only: hero copy support, merch clarity, countdown calmness,
+   and cleaner race-particle balance. No team strip or modal logic changes.
+   ============================================================ */
+#particles-canvas {
+  opacity: .46;
+  mix-blend-mode: screen;
+}
+.hero-overlay {
+  background:
+    linear-gradient(105deg, rgba(7,7,7,.95) 0%, rgba(7,7,7,.78) 48%, rgba(7,7,7,.48) 100%),
+    linear-gradient(to top, rgba(7,7,7,1) 0%, rgba(7,7,7,.72) 24%, transparent 56%);
+}
+.hero-grid-lines { opacity: .42; }
+.hero-sub {
+  max-width: 560px;
+  color: rgba(255,255,255,.68);
+}
+.hero-ticker {
+  background: rgba(0,0,0,.28);
+  border-color: rgba(255,255,255,.08);
+}
+.hero-ticker .ticker-label { letter-spacing: 2.6px; }
+
+.countdown-strip {
+  background:
+    linear-gradient(90deg, rgba(232,0,45,.035), transparent 50%, rgba(255,255,255,.012)),
+    rgba(7,7,7,.96);
+  border-top-color: rgba(255,255,255,.045);
+  border-bottom-color: rgba(232,0,45,.12);
+}
+.cd-block {
+  background: rgba(255,255,255,.045);
+  border-color: rgba(255,255,255,.07);
+  border-bottom-color: var(--red);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.cd-num { letter-spacing: 1px; }
+.cs-chip {
+  background: rgba(232,0,45,.92);
+  box-shadow: 0 8px 22px rgba(232,0,45,.16);
+}
+
+.featured-section {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(232,0,45,.055), transparent 30%),
+    linear-gradient(180deg, #070707 0%, #050505 100%);
+}
+.products-grid { gap: 28px; }
+.pcard {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,.01)),
+    #0b0b0c;
+  border-color: rgba(255,255,255,.065);
+  box-shadow: none;
+}
+.pcard:hover {
+  transform: translateY(-6px);
+  border-color: rgba(232,0,45,.22);
+  box-shadow: 0 24px 54px rgba(0,0,0,.42);
+}
+.pcard::before { opacity: .55; }
+.pcard-img-wrap {
+  background: #070707;
+  height: clamp(246px, 21vw, 312px);
+}
+.pcard-img {
+  filter: brightness(.94) contrast(1.02) saturate(.96);
+}
+.pcard:hover .pcard-img {
+  transform: scale(1.045);
+  filter: brightness(1.02) contrast(1.04) saturate(1);
+}
+.pcard-img-overlay {
+  background: linear-gradient(to top, rgba(11,11,12,.96) 0%, rgba(11,11,12,.34) 50%, rgba(0,0,0,.04) 100%);
+}
+.pcard-info { padding: 22px 20px 20px; }
+.pcard-team {
+  font-size: .64rem;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.pcard-name {
+  min-height: 42px;
+  line-height: 1.05;
+}
+.pcard-foot {
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.pcard-rating {
+  color: rgba(201,168,76,.92);
+  letter-spacing: 1px;
+}
+.see-all {
+  color: rgba(255,255,255,.68);
+  border-color: rgba(255,255,255,.16);
+}
+.see-all:hover {
+  color: var(--white);
+  border-color: var(--red);
+}
+
+@media (max-width: 900px) {
+  .hero-sub { max-width: 480px; }
+  .products-grid { gap: 20px; }
+}
+@media (max-width: 620px) {
+  #particles-canvas { opacity: .34; }
+  .hero-sub { max-width: 100%; }
+  .products-grid { gap: 22px; }
+  .pcard-img-wrap { height: 265px; }
+  .countdown-strip { padding-top: 46px; padding-bottom: 42px; }
+}
