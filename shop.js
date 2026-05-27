@@ -21,6 +21,34 @@ const ORDER_API_BASE =
 
 let USER_WISHLIST_IDS = new Set();
 
+const SHOP_F1_TEAMS = [
+  { name: 'Ferrari', aliases: ['ferrari', 'scuderia ferrari'] },
+  { name: 'Red Bull Racing', aliases: ['red bull', 'red bull racing', 'oracle red bull', 'oracle red bull racing'] },
+  { name: 'Mercedes', aliases: ['mercedes', 'mercedes-amg', 'mercedes amg'] },
+  { name: 'McLaren', aliases: ['mclaren', 'mclaren f1'] },
+  { name: 'Aston Martin', aliases: ['aston martin'] },
+  { name: 'Alpine', aliases: ['alpine', 'bwt alpine'] },
+  { name: 'Williams', aliases: ['williams'] },
+  { name: 'Haas F1 Team', aliases: ['haas', 'haas f1', 'haas f1 team'] },
+  { name: 'Racing Bulls', aliases: ['racing bulls', 'rb', 'visa cash app rb'] },
+  { name: 'Audi', aliases: ['audi', 'kick sauber', 'sauber'] },
+  { name: 'Cadillac', aliases: ['cadillac'] },
+];
+
+function cleanTeamText(value = '') {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function canonicalShopTeam(value = '') {
+  const key = cleanTeamText(value);
+  if (!key) return 'PADDOX Original';
+  const found = SHOP_F1_TEAMS.find(team =>
+    team.aliases.some(alias => key.includes(cleanTeamText(alias)) || cleanTeamText(alias).includes(key))
+  );
+  return found ? found.name : String(value || 'PADDOX Original').trim();
+}
+
+
 function shopToken() {
   return (
     localStorage.getItem('token') ||
@@ -60,7 +88,7 @@ async function loadShopProducts() {
       id: p._id,
       name: p.name,
       team: p.team,
-      teamKey: p.team,
+      teamKey: canonicalShopTeam(p.team),
       cat: p.category,
       price: p.effectivePrice || p.price,
       rating: Number(p.ratings?.average || p.rating || 5),
@@ -94,13 +122,10 @@ async function loadShopProducts() {
 
 
 function updateShopHeroStats() {
-  const productEl = document.getElementById('shop-product-count');
+  const dropEl = document.getElementById('shop-drop-mode');
   const teamEl = document.getElementById('shop-team-count');
-  if (productEl) productEl.textContent = String(PRODUCTS.length || 0);
-  if (teamEl) {
-    const teams = new Set(PRODUCTS.map(p => String(p.team || '').trim()).filter(Boolean));
-    teamEl.textContent = String(teams.size || 0);
-  }
+  if (dropEl) dropEl.textContent = PRODUCTS.length ? 'Live' : 'Soon';
+  if (teamEl) teamEl.textContent = String(SHOP_F1_TEAMS.length);
 }
 
 async function loadShopWishlist() {

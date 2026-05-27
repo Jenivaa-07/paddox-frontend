@@ -1024,3 +1024,65 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   .modal-right { padding: 28px 22px; }
   .modal-img-main { min-height: 260px; }
 }
+
+
+/* Phase 13 V2 — official team-logo filters + cleaner hero stats */
+.shop-hero-stats {
+  gap: 18px;
+}
+.sh-stat {
+  min-width: 92px;
+}
+.sh-num {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+#shop-drop-mode {
+  color: var(--white);
+}
+#shop-team-count {
+  color: var(--white);
+}
+.team-filter-list {
+  gap: 10px;
+}
+.team-fopt {
+  min-height: 40px;
+  padding: 7px 8px 7px 0;
+  border-radius: 10px;
+  transition: color var(--transition), background var(--transition), transform var(--transition);
+}
+.team-fopt:hover {
+  background: rgba(255,255,255,.025);
+  transform: translateX(2px);
+}
+.team-fopt input {
+  margin-left: 0;
+}
+.team-filter-logo {
+  width: 38px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  background: color-mix(in srgb, var(--team-color, #e8002d), transparent 18%);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  overflow: hidden;
+}
+.team-filter-logo img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.38));
+}
+.team-fopt > span:last-child {
+  line-height: 1.05;
+}
+@media (max-width: 900px) {
+  .team-fopt { padding-right: 4px; }
+  .team-filter-logo { width: 34px; height: 26px; flex-basis: 34px; }
+}

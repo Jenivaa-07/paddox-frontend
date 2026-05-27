@@ -77,9 +77,9 @@
         Official F1-inspired merchandise, collectibles, apparel &amp; accessories — built for real fans.
       </p>
       <div class="shop-hero-stats animate-fade-up delay-4">
-        <div class="sh-stat"><span class="sh-num" id="shop-product-count">—</span><span class="sh-lbl">Products</span></div>
+        <div class="sh-stat"><span class="sh-num" id="shop-drop-mode">Live</span><span class="sh-lbl">Store Drops</span></div>
         <div class="sh-divider"></div>
-        <div class="sh-stat"><span class="sh-num" id="shop-team-count">—</span><span class="sh-lbl">Teams</span></div>
+        <div class="sh-stat"><span class="sh-num" id="shop-team-count">11</span><span class="sh-lbl">F1 Teams</span></div>
         <div class="sh-divider"></div>
         <div class="sh-stat"><span class="sh-num">Free</span><span class="sh-lbl">Shipping ₹999+</span></div>
       </div>
@@ -122,14 +122,18 @@
             <span class="filter-mark" aria-hidden="true"></span> Teams
             <button class="filter-collapse-btn" data-target="team-opts">−</button>
           </div>
-          <div class="filter-opts" id="team-opts">
-            <label class="fopt"><input type="checkbox" value="Ferrari" class="team-filter"> <span class="fopt-dot" style="background:#dc0000"></span> Scuderia Ferrari</label>
-            <label class="fopt"><input type="checkbox" value="Red Bull" class="team-filter"> <span class="fopt-dot" style="background:#3671c6"></span> Oracle Red Bull</label>
-            <label class="fopt"><input type="checkbox" value="Mercedes" class="team-filter"> <span class="fopt-dot" style="background:#27f4d2"></span> Mercedes-AMG</label>
-            <label class="fopt"><input type="checkbox" value="McLaren" class="team-filter"> <span class="fopt-dot" style="background:#ff8000"></span> McLaren F1</label>
-            <label class="fopt"><input type="checkbox" value="Aston Martin" class="team-filter"> <span class="fopt-dot" style="background:#358c75"></span> Aston Martin</label>
-            <label class="fopt"><input type="checkbox" value="Alpine" class="team-filter"> <span class="fopt-dot" style="background:#0093cc"></span> BWT Alpine</label>
-            <label class="fopt"><input type="checkbox" value="Paddox" class="team-filter"> <span class="fopt-dot" style="background:#e8002d"></span> Paddox Original</label>
+          <div class="filter-opts team-filter-list" id="team-opts">
+            <label class="fopt team-fopt"><input type="checkbox" value="Ferrari" class="team-filter"><span class="team-filter-logo" style="--team-color:#e8002d"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/ferrari/2025ferrarilogolight.webp" alt="Ferrari logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Ferrari</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Red Bull Racing" class="team-filter"><span class="team-filter-logo" style="--team-color:#1e5bff"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/redbullracing/2025redbullracinglogowhite.webp" alt="Red Bull Racing logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Red Bull Racing</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Mercedes" class="team-filter"><span class="team-filter-logo" style="--team-color:#00d2be"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mercedes/2025mercedeslogowhite.webp" alt="Mercedes logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Mercedes</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="McLaren" class="team-filter"><span class="team-filter-logo" style="--team-color:#ff8700"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mclaren/2025mclarenlogowhite.webp" alt="McLaren logo" loading="lazy" referrerpolicy="no-referrer"></span><span>McLaren</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Aston Martin" class="team-filter"><span class="team-filter-logo" style="--team-color:#006f62"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/astonmartin/2025astonmartinlogowhite.webp" alt="Aston Martin logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Aston Martin</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Alpine" class="team-filter"><span class="team-filter-logo" style="--team-color:#2293d1"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/alpine/2025alpinelogowhite.webp" alt="Alpine logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Alpine</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Williams" class="team-filter"><span class="team-filter-logo" style="--team-color:#64c4ff"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/williams/2025williamslogowhite.webp" alt="Williams logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Williams</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Haas F1 Team" class="team-filter"><span class="team-filter-logo" style="--team-color:#b6b9bc"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/haas/2025haaslogowhite.webp" alt="Haas logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Haas F1 Team</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Racing Bulls" class="team-filter"><span class="team-filter-logo" style="--team-color:#315dff"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/racingbulls/2025racingbullslogowhite.webp" alt="Racing Bulls logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Racing Bulls</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Audi" class="team-filter"><span class="team-filter-logo" style="--team-color:#d60000"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/audi/2026audilogowhite.webp" alt="Audi logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Audi</span></label>
+            <label class="fopt team-fopt"><input type="checkbox" value="Cadillac" class="team-filter"><span class="team-filter-logo" style="--team-color:#8c939c"><img src="https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/cadillac/2026cadillaclogowhite.webp" alt="Cadillac logo" loading="lazy" referrerpolicy="no-referrer"></span><span>Cadillac</span></label>
           </div>
         </div>
 
