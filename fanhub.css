@@ -2580,3 +2580,199 @@ body.modal-open { overflow: hidden; }
 .qf-brand-word{font-family:var(--font-d)!important;letter-spacing:2px!important;font-size:1.32rem!important;color:#fff!important;white-space:nowrap!important;line-height:1!important;}
 .qf-brand-word span{color:var(--red)!important;}
 .quote-preview-kicker{letter-spacing:2px!important;}
+
+/* ══════════════════════════════════════
+   Phase 17.3 — Alignment + shop-style standalone icons + realtime poll repair
+   Scope locked to Fan Hub only.
+══════════════════════════════════════ */
+.hub-tabs-bar{
+  top:var(--nav-h)!important;
+  min-height:70px!important;
+  display:flex!important;
+  align-items:center!important;
+  background:rgba(10,10,10,.96)!important;
+  backdrop-filter:blur(14px)!important;
+  -webkit-backdrop-filter:blur(14px)!important;
+  z-index:180!important;
+}
+.hub-tabs-inner{
+  width:100%!important;
+  align-items:center!important;
+}
+.hub-section{
+  padding-top:96px!important;
+  scroll-margin-top:calc(var(--nav-h) + 96px)!important;
+}
+.hub-section.on .sec-header{
+  padding-top:0!important;
+}
+#sec-community,
+#sec-quotes,
+#sec-calendar,
+#sec-drivers,
+#sec-wallpapers{
+  min-height:calc(100vh - var(--nav-h));
+}
+
+/* Replace weak box icons with cleaner Shop-style mask marks */
+.hero-chip .chip-mark,
+.hub-tab .ht-mark{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 22px!important;
+  width:22px!important;
+  height:22px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:rgba(255,255,255,.64)!important;
+  transform:none!important;
+  overflow:visible!important;
+}
+.hero-chip .chip-mark::before,
+.hub-tab .ht-mark::before{
+  content:''!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  margin:auto!important;
+  background:currentColor!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  transform:none!important;
+  -webkit-mask:var(--fh-mask) center/contain no-repeat!important;
+  mask:var(--fh-mask) center/contain no-repeat!important;
+}
+.hero-chip .chip-mark::after,
+.hub-tab .ht-mark::after{
+  display:none!important;
+  content:none!important;
+}
+.hero-chip:hover .chip-mark,
+.hub-tab:hover .ht-mark,
+.hub-tab.on .ht-mark{
+  color:var(--red)!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  transform:translateY(-1px) scale(1.08)!important;
+}
+.hero-chip{
+  background:rgba(255,255,255,.025)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  min-height:44px!important;
+}
+.hero-chip:hover{
+  border-color:rgba(232,0,45,.38)!important;
+  background:rgba(232,0,45,.055)!important;
+}
+.hub-tab{
+  min-height:70px!important;
+  padding:0 26px!important;
+  gap:12px!important;
+  border-left:1px solid rgba(255,255,255,.035)!important;
+  border-right:1px solid rgba(255,255,255,.025)!important;
+}
+.hub-tab.on{
+  background:linear-gradient(180deg,rgba(232,0,45,.10),rgba(232,0,45,.025))!important;
+}
+
+/* Community: clean badges, no emoji medals/tier icons */
+.fpd-title::before,
+.comm-card-title::before{
+  content:'';
+  display:inline-block;
+  width:24px;
+  height:2px;
+  margin-right:10px;
+  vertical-align:middle;
+  background:linear-gradient(90deg,var(--red),transparent);
+}
+.lb-podium-medal,
+.lb-rank-medal{
+  font-family:var(--font-c)!important;
+  letter-spacing:2px!important;
+  color:var(--red)!important;
+  font-size:.72rem!important;
+  text-transform:uppercase!important;
+  border:1px solid rgba(232,0,45,.28)!important;
+  background:rgba(232,0,45,.07)!important;
+  border-radius:999px!important;
+  padding:3px 9px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:44px!important;
+  margin-bottom:10px!important;
+}
+.lb-badge{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:6px!important;
+}
+.lb-badge::before,
+.lb-podium-tier::before{
+  content:'';
+  width:8px;
+  height:8px;
+  display:inline-block;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 12px rgba(232,0,45,.35);
+  margin-right:6px;
+}
+
+/* Poll: options are clean before vote, live results appear after vote */
+.popt{
+  border-radius:12px!important;
+  padding:14px 16px!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  background:rgba(255,255,255,.045)!important;
+}
+.popt:not(.show-results) .popt-fill{
+  width:0!important;
+  opacity:0!important;
+}
+.popt:not(.show-results) .popt-pct{
+  color:rgba(255,255,255,.48)!important;
+  font-size:.72rem!important;
+  letter-spacing:2px!important;
+  font-family:var(--font-c)!important;
+  text-transform:uppercase!important;
+}
+.popt.show-results .popt-fill{
+  opacity:1!important;
+}
+.popt.selected{
+  border-color:rgba(232,0,45,.65)!important;
+  background:rgba(232,0,45,.095)!important;
+}
+.popt.selected .popt-lbl::after{
+  content:'SELECTED';
+  margin-left:10px;
+  font-family:var(--font-c);
+  font-size:.58rem;
+  letter-spacing:2px;
+  color:var(--red);
+}
+
+/* Quote canvas preview modal: keep preview comfortably visible */
+.quote-preview-card{
+  width:min(560px,96vw)!important;
+}
+.quote-preview-frame{
+  max-height:64vh!important;
+}
+
+@media(max-width:760px){
+  .hub-section{padding-top:76px!important;}
+  .hub-tabs-bar{min-height:60px!important;}
+  .hub-tab{min-height:60px!important;padding:0 18px!important;}
+  .hero-chip .chip-mark,.hub-tab .ht-mark{width:19px!important;height:19px!important;flex-basis:19px!important;}
+}

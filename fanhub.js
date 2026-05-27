@@ -807,7 +807,12 @@ function activateHubTab(tabName = 'wallpapers', shouldScroll = false) {
   }
 
   if (shouldScroll) {
-    document.getElementById('hub-tabs-bar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    const tabsBar = document.getElementById('hub-tabs-bar');
+    const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68;
+    if (tabsBar) {
+      const target = tabsBar.getBoundingClientRect().top + window.scrollY - navH - 2;
+      window.scrollTo({ top: Math.max(0, target), behavior:'smooth' });
+    }
   }
 }
 
@@ -1490,7 +1495,6 @@ function loadQuoteImageForCanvas(src) {
 function drawPaddoxCanvasBrand(ctx, x, y, logo, options = {}) {
   const size = options.size || 68;
   const fontSize = options.fontSize || 62;
-  const letterSpacingFix = options.tight ? 2 : 4;
   let textX = x;
 
   if (logo) {
@@ -1500,17 +1504,17 @@ function drawPaddoxCanvasBrand(ctx, x, y, logo, options = {}) {
     ctx.clip();
     ctx.drawImage(logo, x, y - size, size, size);
     ctx.restore();
-    textX = x + size + 22;
+    textX = x + size + (options.gap ?? 18);
   }
 
   ctx.save();
-  ctx.font = `${fontSize}px Bebas Neue, Arial Black, sans-serif`;
   ctx.textBaseline = 'alphabetic';
+  ctx.font = `700 ${fontSize}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
   ctx.fillStyle = '#ffffff';
   ctx.fillText('PADDO', textX, y);
   const paddoWidth = ctx.measureText('PADDO').width;
   ctx.fillStyle = '#e8002d';
-  ctx.fillText('X', textX + paddoWidth + letterSpacingFix, y);
+  ctx.fillText('X', textX + paddoWidth + (options.xGap ?? 0), y);
   ctx.restore();
 }
 
@@ -1605,7 +1609,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillRect(70, 70, W - 140, 12);
 
   const brandLogo = await loadQuoteImageForCanvas('assets/paddox-logo-icon.png');
-  drawPaddoxCanvasBrand(ctx, 110, 176, brandLogo, { size: 76, fontSize: 76, tight: true });
+  drawPaddoxCanvasBrand(ctx, 110, 176, brandLogo, { size: 72, fontSize: 72, gap: 18, xGap: 0 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
@@ -1675,7 +1679,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxCanvasBrand(ctx, 760, 1214, brandLogo, { size: 34, fontSize: 30, tight: true });
+  drawPaddoxCanvasBrand(ctx, 735, 1215, brandLogo, { size: 42, fontSize: 34, gap: 14, xGap: 0 });
 
   return canvas;
 }
@@ -2008,7 +2012,7 @@ function updateFanPointsDock({ votes, posts, topScore, userScore } = {}) {
 
   if (tierTitle || tierSub || tierProgress) {
     const tier = getFanTier(userScore || topScore || 0);
-    if (tierTitle) tierTitle.textContent = `${tier.emoji} ${tier.name}`;
+    if (tierTitle) tierTitle.textContent = tier.name;
     if (tierSub) {
       tierSub.textContent = tier.next
         ? `${tier.score.toLocaleString('en-IN')} pts · ${Math.max(0, tier.next - tier.score).toLocaleString('en-IN')} pts to next tier`
@@ -2069,6 +2073,30 @@ async function loadFanPoll() {
   }
 }
 
+
+function fanPollId(poll = {}) {
+  return String(poll._id || poll.id || poll.question || 'active').replace(/[^a-zA-Z0-9_-]+/g, '-');
+}
+
+function fanPollVoteKey(poll = CURRENT_POLL) {
+  return `paddox_poll_vote_${fanPollId(poll)}`;
+}
+
+function getStoredFanPollVote(poll = CURRENT_POLL) {
+  try {
+    const raw = localStorage.getItem(fanPollVoteKey(poll));
+    if (raw === null || raw === undefined || raw === '') return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function storeFanPollVote(poll = CURRENT_POLL, optionIndex = 0) {
+  try { localStorage.setItem(fanPollVoteKey(poll), String(optionIndex)); } catch (_) {}
+}
+
 function renderRealtimePoll(poll, totalVotes = 0) {
   const qEl = document.getElementById('poll-q');
   const optsEl = document.getElementById('poll-opts');
@@ -2076,25 +2104,29 @@ function renderRealtimePoll(poll, totalVotes = 0) {
 
   if (!poll || !qEl || !optsEl) return;
 
+  const storedVote = getStoredFanPollVote(poll);
+  const hasVoted = storedVote !== null;
+
   qEl.textContent = poll.question || 'Fan Poll';
 
   optsEl.innerHTML = (poll.options || []).map((option, index) => {
-    const pct =
-      option.percentage ??
-      (totalVotes > 0 ? Math.round((Number(option.votes || 0) / totalVotes) * 100) : 0);
+    const votes = Number(option.votes || 0);
+    const pct = option.percentage ?? (totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0);
+    const isSelected = hasVoted && Number(storedVote) === index;
 
     return `
-      <div class="popt" onclick="voteRealtimePoll(${index})">
-        <div class="popt-fill" style="width:${pct}%"></div>
-        <span class="popt-lbl">${option.label}</span>
-        <span class="popt-pct">${pct}%</span>
+      <div class="popt ${hasVoted ? 'show-results' : ''} ${isSelected ? 'selected' : ''}" onclick="voteRealtimePoll(${index})">
+        <div class="popt-fill" style="width:${hasVoted ? pct : 0}%"></div>
+        <span class="popt-lbl">${escapeHTML(option.label || option.text || `Option ${index + 1}`)}</span>
+        <span class="popt-pct">${hasVoted ? `${pct}%` : 'Vote'}</span>
       </div>
     `;
   }).join('');
 
   if (metaEl) {
-    metaEl.textContent =
-      `${Number(totalVotes || 0).toLocaleString('en-IN')} votes · Realtime MongoDB poll`;
+    metaEl.textContent = hasVoted
+      ? `${Number(totalVotes || 0).toLocaleString('en-IN')} votes · Live results`
+      : `${Number(totalVotes || 0).toLocaleString('en-IN')} votes · Choose once to reveal live results`;
   }
 
   updateFanPointsDock({ votes: totalVotes });
@@ -2109,6 +2141,12 @@ async function voteRealtimePoll(optionIndex) {
 
     if (!CURRENT_POLL?._id) {
       showToast('❌ Poll not ready');
+      return;
+    }
+
+    if (getStoredFanPollVote(CURRENT_POLL) !== null) {
+      showToast('You already voted in this poll');
+      renderRealtimePoll(CURRENT_POLL, (CURRENT_POLL.options || []).reduce((s, o) => s + Number(o.votes || 0), 0));
       return;
     }
 
@@ -2128,12 +2166,14 @@ async function voteRealtimePoll(optionIndex) {
       data.options ||
       CURRENT_POLL.options;
 
+    storeFanPollVote(CURRENT_POLL, optionIndex);
+
     renderRealtimePoll(
       CURRENT_POLL,
       data.data?.totalVotes || data.totalVotes || 0
     );
 
-    showToast(data.message || '🔥 Vote recorded! +50 Fan Points');
+    showToast(data.message || 'Vote recorded! +50 Fan Points');
     showPointsBurst('+50 pts');
 
     loadFanLeaderboard();
@@ -2194,12 +2234,12 @@ async function loadFanLeaderboard() {
           const avatar = user.avatar;
           return `
             <div class="lb-podium-card rank-${user.rank || 0}">
-              <div class="lb-podium-medal">${user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉'}</div>
+              <div class="lb-podium-medal">RANK ${user.rank || '-'}</div>
               <div class="lb-podium-avatar">
                 ${avatar ? `<img src="${escapeHTML(avatar)}" alt="${name}">` : `<span>${initialsFromName(name)}</span>`}
               </div>
               <div class="lb-podium-name">${name}</div>
-              <div class="lb-podium-tier">${tier.emoji} ${escapeHTML(user.fanTier || tier.name)}</div>
+              <div class="lb-podium-tier">${escapeHTML(user.fanTier || tier.name)}</div>
               <div class="lb-podium-points">${Number(user.fanPoints || 0).toLocaleString('en-IN')} pts</div>
             </div>`;
         }).join('')}
@@ -2217,7 +2257,7 @@ async function loadFanLeaderboard() {
             ${avatar ? `<img src="${escapeHTML(avatar)}" alt="${name}">` : initialsFromName(name)}
           </span>
           <span class="lb-n">${name}</span>
-          <span class="lb-badge">${tier.emoji} ${escapeHTML(user.fanTier || tier.name)}</span>
+          <span class="lb-badge">${escapeHTML(user.fanTier || tier.name)}</span>
           <span class="lb-p">${Number(user.fanPoints || 0).toLocaleString('en-IN')} pts</span>
         </div>`;
     }).join('');
