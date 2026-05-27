@@ -65,7 +65,7 @@ async function loadShopProducts() {
       price: p.effectivePrice || p.price,
       rating: Number(p.ratings?.average || p.rating || 5),
       badge: p.badge,
-      emoji: p.emoji || '🏎️',
+      emoji: p.emoji || '',
       limited: !!p.isLimited,
       sale: !!p.onSale,
       isNew: p.badge === 'new',
@@ -84,10 +84,22 @@ async function loadShopProducts() {
     }));
 
     renderProducts();
+    updateShopHeroStats();
     syncWishlistButtons();
   } catch (err) {
     console.error(err);
-    showToast('❌ Failed to load products');
+    showToast('Failed to load products');
+  }
+}
+
+
+function updateShopHeroStats() {
+  const productEl = document.getElementById('shop-product-count');
+  const teamEl = document.getElementById('shop-team-count');
+  if (productEl) productEl.textContent = String(PRODUCTS.length || 0);
+  if (teamEl) {
+    const teams = new Set(PRODUCTS.map(p => String(p.team || '').trim()).filter(Boolean));
+    teamEl.textContent = String(teams.size || 0);
   }
 }
 
@@ -132,7 +144,7 @@ async function toggleWishlist(productId) {
     const token = shopToken();
 
     if (!token) {
-      showToast('🔐 Please login to use wishlist');
+      showToast('Please login to use wishlist');
       setTimeout(() => {
         window.location.href = 'account.html';
       }, 700);
@@ -171,7 +183,7 @@ async function toggleWishlist(productId) {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
   }
 }
 
@@ -443,7 +455,7 @@ function clearAllFilters() {
   const si = document.getElementById('search-input'); if (si) si.value = '';
   renderProducts();
   updateActiveFilters();
-  showToast('✓ All filters cleared');
+  showToast('All filters cleared');
 }
 
 /* ══════════════════════════════════════
@@ -596,11 +608,11 @@ function cardHTML(p, i) {
           loading="lazy"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
         />
-        <div class="pcard-img-gradient" style="background:${p.gradient};display:none">${p.emoji}</div>
+        <div class="pcard-img-gradient" style="background:${p.gradient};display:none"><span class="fallback-speedmark"></span></div>
         <div class="pcard-img-overlay"></div>
         <div class="pcard-overlay">
-          <button class="ov-btn add-to-cart-btn" data-id="${p.id}">Add to Cart 🛒</button>
-          <button class="ov-btn outline quick-view-btn" data-id="${p.id}">Quick View 👁️</button>
+          <button class="ov-btn add-to-cart-btn" data-id="${p.id}">${needsSize(p) ? 'Select Size' : 'Add to Cart'}</button>
+          <button class="ov-btn outline quick-view-btn" data-id="${p.id}">Quick View</button>
         </div>
       </div>
       ${p.badge ? `<span class="pbadge b-${p.badge}">${p.badge.toUpperCase()}</span>` : ''}
@@ -625,7 +637,12 @@ function cardHTML(p, i) {
 /* ── Bind card events ── */
 function bindCardEvents(root) {
   root.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-    btn.addEventListener('click', e => { e.stopPropagation(); addToCart(btn.dataset.id); });
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const product = PRODUCTS.find(p => String(p.id) === String(btn.dataset.id));
+      if (needsSize(product)) openModal(btn.dataset.id);
+      else addToCart(btn.dataset.id);
+    });
   });
   root.querySelectorAll('.quick-view-btn').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); openModal(btn.dataset.id); });
@@ -738,7 +755,7 @@ function addToCart(id, selectedSize = null) {
 
   saveCart();
 
-  showToast(`✓ ${p.name}${size ? ' · ' + size : ''} added to cart!`);
+  showToast(`${p.name}${size ? ' · ' + size : ''} added to cart`);
 
   /* Badge pulse */
   const badge = document.getElementById('cart-badge');
@@ -755,13 +772,13 @@ function addToCart(id, selectedSize = null) {
   }
 }
 
-function removeFromCart(id) {
-  cart = cart.filter(x => x.id !== id);
+function removeFromCart(key) {
+  cart = cart.filter(x => String(x.cartKey || x.id) !== String(key));
   saveCart();
 }
 
-function changeQty(id, delta) {
-  const item = cart.find(x => x.id === id);
+function changeQty(key, delta) {
+  const item = cart.find(x => String(x.cartKey || x.id) === String(key));
   if (!item) return;
   item.qty += delta;
   if (item.qty <= 0) removeFromCart(id);
@@ -783,7 +800,7 @@ function updateCartUI() {
   if (!cart.length) {
     if (itemsEl) itemsEl.innerHTML = `
       <div class="cart-empty">
-        <div class="cart-empty-icon">🏎️</div>
+        <div class="cart-empty-icon" aria-hidden="true"></div>
         <p>Your cart is empty.<br/>Find your favourite F1 gear!</p>
         <button class="cart-empty-btn" id="cart-empty-btn">Browse Shop</button>
       </div>`;
@@ -799,10 +816,10 @@ function updateCartUI() {
 
   if (itemsEl) {
     itemsEl.innerHTML = cart.map(item => `
-      <div class="cart-item" data-id="${item.id}">
+      <div class="cart-item" data-key="${item.cartKey || item.id}">
         <div class="ci-img" style="background:${item.gradient}">
           <img src="${item.image}" alt="${item.name}"
-            onerror="this.outerHTML='<span style=font-size:1.8rem>${item.emoji}</span>'"
+            onerror="this.outerHTML='<span class=&quot;fallback-speedmark small&quot;></span>'"
             style="width:100%;height:100%;object-fit:cover"/>
         </div>
         <div class="ci-info">
@@ -810,20 +827,20 @@ function updateCartUI() {
           <div class="ci-name">${item.name}</div>
           <div class="ci-price">₹${(item.price * item.qty).toLocaleString('en-IN')}</div>
           <div class="ci-qty">
-            <button class="qty-b" data-id="${item.id}" data-delta="-1">−</button>
+            <button class="qty-b" data-key="${item.cartKey || item.id}" data-delta="-1">−</button>
             <span class="qty-n">${item.qty}</span>
-            <button class="qty-b" data-id="${item.id}" data-delta="1">+</button>
+            <button class="qty-b" data-key="${item.cartKey || item.id}" data-delta="1">+</button>
           </div>
         </div>
-        <button class="ci-rm" data-id="${item.id}">✕</button>
+        <button class="ci-rm" data-key="${item.cartKey || item.id}">✕</button>
       </div>
     `).join('');
 
     itemsEl.querySelectorAll('.qty-b').forEach(btn => {
-      btn.addEventListener('click', () => changeQty(btn.dataset.id, parseInt(btn.dataset.delta, 10)));
+      btn.addEventListener('click', () => changeQty(btn.dataset.key, parseInt(btn.dataset.delta, 10)));
     });
     itemsEl.querySelectorAll('.ci-rm').forEach(btn => {
-      btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
+      btn.addEventListener('click', () => removeFromCart(btn.dataset.key));
     });
   }
 }
@@ -1058,7 +1075,7 @@ async function submitCheckoutForm(e) {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<span>Place Order</span><span>🏁</span>';
   }
@@ -1205,7 +1222,7 @@ function openModal(id) {
   imgMain.innerHTML = `
     <img src="${firstModalImage}" alt="${p.name}"
       style="width:100%;height:100%;object-fit:cover;filter:brightness(.88)"
-      onerror="this.outerHTML='<span style=font-size:7rem>${p.emoji}</span>'"/>
+      onerror="this.outerHTML='<span class=&quot;fallback-speedmark large&quot;></span>'"/>
   `;
 
   /* Thumbs — show exactly how many images were uploaded */
@@ -1219,7 +1236,7 @@ function openModal(id) {
     thumbsEl.innerHTML = modalImages.map((src, i) => `
       <div class="modal-thumb ${i === 0 ? 'on' : ''}" data-src="${src}">
         <img src="${src}" alt="View ${i + 1}"
-          onerror="this.outerHTML='<span>${p.emoji}</span>'"
+          onerror="this.outerHTML='<span class=&quot;fallback-speedmark small&quot;></span>'"
           style="width:100%;height:100%;object-fit:cover"/>
       </div>
     `).join('');
@@ -1240,7 +1257,7 @@ function openModal(id) {
 
   /* Badges */
   const badgesEl = document.getElementById('modal-badges');
-  if (badgesEl && p.badge) badgesEl.innerHTML = `<span class="pbadge b-${p.badge}">${p.badge.toUpperCase()}</span>`;
+  if (badgesEl) badgesEl.innerHTML = p.badge ? `<span class="pbadge b-${p.badge}">${p.badge.toUpperCase()}</span>` : '';
 
   /* Size buttons — only for apparel/clothing */
   updateModalSizeUI(p);

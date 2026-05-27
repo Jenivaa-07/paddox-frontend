@@ -20,25 +20,26 @@
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
         <span class="helmet-wrap" id="helmet-wrap">
-          <span class="helmet-icon">🏎️</span>
+          <span class="helmet-icon" aria-hidden="true"></span>
         </span>
         <span class="logo-text">PADDO<span class="logo-x">X</span></span>
       </a>
       <ul class="nav-links">
-        <li><a href="index.html" class="nav-link"><span class="nl-icon">🏠</span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
-        <li><a href="shop.html"  class="nav-link active"><span class="nl-icon">🛒</span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
-        <li><a href="fanhub.html" class="nav-link"><span class="nl-icon">🎮</span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
-        <li><a href="account.html" class="nav-link"><span class="nl-icon">👤</span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
+        <li><a href="index.html" class="nav-link"><span class="nl-icon" aria-hidden="true"></span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
+        <li><a href="shop.html"  class="nav-link active"><span class="nl-icon" aria-hidden="true"></span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
+        <li><a href="fanhub.html" class="nav-link"><span class="nl-icon" aria-hidden="true"></span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
+        <li><a href="pitwall.html" class="nav-link"><span class="nl-icon" aria-hidden="true"></span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
+        <li><a href="account.html" class="nav-link"><span class="nl-icon" aria-hidden="true"></span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
       </ul>
       <div class="nav-right">
         <button class="nav-search-btn" id="nav-search-btn" aria-label="Search">
-          <span class="search-icon-anim">🔍</span>
+          <span class="search-icon-anim" aria-hidden="true"></span>
         </button>
         <button class="nav-cart-btn" id="nav-cart-btn" aria-label="Cart">
-          <span class="cart-icon-anim">🛒</span>
+          <span class="cart-icon-anim" aria-hidden="true"></span>
           <span class="cart-badge" id="cart-badge">0</span>
         </button>
-        <a href="account.html" class="nav-cta-btn">Sign Up <span class="cta-flag">🏁</span></a>
+        <a href="account.html" class="nav-cta-btn">Sign Up <span class="cta-flag" aria-hidden="true"></span></a>
         <button class="hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -49,10 +50,11 @@
       <button class="search-close" id="search-close">✕</button>
     </div>
     <div class="mobile-menu" id="mobile-menu">
-      <a href="index.html"   class="mob-link">🏠 Home</a>
-      <a href="shop.html"    class="mob-link active">🛒 Shop</a>
-      <a href="fanhub.html"  class="mob-link">🎮 Fan Hub</a>
-      <a href="account.html" class="mob-link">👤 Account</a>
+      <a href="index.html"   class="mob-link">Home</a>
+      <a href="shop.html"    class="mob-link active">Shop</a>
+      <a href="fanhub.html"  class="mob-link">Fan Hub</a>
+      <a href="pitwall.html" class="mob-link">Pit Wall</a>
+      <a href="account.html" class="mob-link">Account</a>
     </div>
   </nav>
 
@@ -75,9 +77,9 @@
         Official F1-inspired merchandise, collectibles, apparel &amp; accessories — built for real fans.
       </p>
       <div class="shop-hero-stats animate-fade-up delay-4">
-        <div class="sh-stat"><span class="sh-num">500<span class="sh-plus">+</span></span><span class="sh-lbl">Products</span></div>
+        <div class="sh-stat"><span class="sh-num" id="shop-product-count">—</span><span class="sh-lbl">Products</span></div>
         <div class="sh-divider"></div>
-        <div class="sh-stat"><span class="sh-num">10</span><span class="sh-lbl">Teams</span></div>
+        <div class="sh-stat"><span class="sh-num" id="shop-team-count">—</span><span class="sh-lbl">Teams</span></div>
         <div class="sh-divider"></div>
         <div class="sh-stat"><span class="sh-num">Free</span><span class="sh-lbl">Shipping ₹999+</span></div>
       </div>
@@ -88,22 +90,22 @@
   <div class="cat-bar" id="cat-bar">
     <div class="cat-bar-inner">
       <button class="cat-tab on" data-cat="all">
-        <span class="ct-icon">🏁</span> All Products
+        <span class="ct-icon ct-all" aria-hidden="true"></span> All Products
       </button>
       <button class="cat-tab" data-cat="apparel">
-        <span class="ct-icon">👕</span> Apparel
+        <span class="ct-icon ct-apparel" aria-hidden="true"></span> Apparel
       </button>
       <button class="cat-tab" data-cat="collectibles">
-        <span class="ct-icon">🏆</span> Collectibles
+        <span class="ct-icon ct-collectibles" aria-hidden="true"></span> Collectibles
       </button>
       <button class="cat-tab" data-cat="accessories">
-        <span class="ct-icon">⌚</span> Accessories
+        <span class="ct-icon ct-accessories" aria-hidden="true"></span> Accessories
       </button>
       <button class="cat-tab" data-cat="posters">
-        <span class="ct-icon">🖼️</span> Posters &amp; Art
+        <span class="ct-icon ct-posters" aria-hidden="true"></span> Posters &amp; Art
       </button>
       <button class="cat-tab" data-cat="custom">
-        <span class="ct-icon">🎨</span> Custom Merch
+        <span class="ct-icon ct-custom" aria-hidden="true"></span> Custom Merch
       </button>
     </div>
   </div>
@@ -117,7 +119,7 @@
 
         <div class="filter-group">
           <div class="filter-group-title">
-            <span>🏎️</span> Teams
+            <span class="filter-mark" aria-hidden="true"></span> Teams
             <button class="filter-collapse-btn" data-target="team-opts">−</button>
           </div>
           <div class="filter-opts" id="team-opts">
@@ -133,7 +135,7 @@
 
         <div class="filter-group">
           <div class="filter-group-title">
-            <span>💰</span> Price Range
+            <span class="filter-mark" aria-hidden="true"></span> Price Range
             <button class="filter-collapse-btn" data-target="price-opts">−</button>
           </div>
           <div class="filter-opts" id="price-opts">
@@ -149,7 +151,7 @@
 
         <div class="filter-group">
           <div class="filter-group-title">
-            <span>⭐</span> Rating
+            <span class="filter-mark" aria-hidden="true"></span> Rating
             <button class="filter-collapse-btn" data-target="rating-opts">−</button>
           </div>
           <div class="filter-opts" id="rating-opts">
@@ -161,7 +163,7 @@
 
         <div class="filter-group">
           <div class="filter-group-title">
-            <span>🏷️</span> Availability
+            <span class="filter-mark" aria-hidden="true"></span> Availability
             <button class="filter-collapse-btn" data-target="avail-opts">−</button>
           </div>
           <div class="filter-opts" id="avail-opts">
@@ -172,12 +174,12 @@
         </div>
 
         <button class="clear-filters-btn" id="clear-filters">
-          ✕ Clear All Filters
+          Clear All Filters
         </button>
 
         <!-- Promo banner -->
         <div class="sidebar-promo">
-          <div class="sp-icon animate-icon">🏁</div>
+          <div class="sp-icon animate-icon" aria-hidden="true"></div>
           <div class="sp-text">Free shipping on orders above ₹999!</div>
           <div class="sp-sub">Use code: <strong>PADDOX25</strong></div>
         </div>
@@ -191,7 +193,7 @@
       <div class="shop-toolbar">
         <div class="toolbar-left">
           <button class="filter-toggle-btn" id="filter-toggle">
-            <span>⚙️</span> Filters
+            <span class="filter-btn-icon" aria-hidden="true"></span> Filters
           </button>
           <span class="results-count">
             Showing <strong id="results-num">0</strong> products
@@ -220,7 +222,7 @@
 
       <!-- Empty state -->
       <div class="empty-state" id="empty-state" style="display:none">
-        <div class="empty-icon">🔍</div>
+        <div class="empty-icon" aria-hidden="true"></div>
         <h3>No products found</h3>
         <p>Try adjusting your filters or <button class="empty-reset" id="empty-reset">clear all filters</button></p>
       </div>
@@ -235,7 +237,7 @@
   <div class="cart-drawer" id="cart-drawer">
     <div class="cart-header">
       <div class="cart-title">
-        <span class="cart-title-icon animate-icon">🛒</span>
+        <span class="cart-title-icon animate-icon" aria-hidden="true"></span>
         <span>YOUR CART</span>
         <span class="cart-count-label" id="cart-count-label">0 items</span>
       </div>
@@ -243,7 +245,7 @@
     </div>
     <div class="cart-items" id="cart-items">
       <div class="cart-empty">
-        <div class="cart-empty-icon">🏎️</div>
+        <div class="cart-empty-icon" aria-hidden="true"></div>
         <p>Your cart is empty.<br/>Find your favourite F1 gear!</p>
         <button class="cart-empty-btn" id="cart-empty-btn">Browse Shop</button>
       </div>
@@ -256,7 +258,7 @@
       </div>
       <button class="checkout-btn" id="checkout-btn">
         <span>Proceed to Checkout</span>
-        <span>🏁</span>
+        <span class="checkout-arrow" aria-hidden="true"></span>
       </button>
       <button class="continue-btn" id="continue-btn">Continue Shopping</button>
     </div>
@@ -308,7 +310,7 @@
         <div class="modal-actions">
           <button class="modal-add-btn" id="modal-add-btn">
             <span>Add to Cart</span>
-            <span class="animate-icon">🛒</span>
+            <span class="modal-cart-icon animate-icon" aria-hidden="true"></span>
           </button>
           <button class="modal-wish-btn" id="modal-wish-btn">
             <span id="wish-icon">♡</span>
@@ -316,11 +318,11 @@
         </div>
 
         <div class="modal-meta">
-          <span>✅ In Stock</span>
+          <span>In Stock</span>
           <span>·</span>
-          <span>🚚 Free shipping above ₹999</span>
+          <span>Free shipping above ₹999</span>
           <span>·</span>
-          <span>↩️ 30-day returns</span>
+          <span>30-day returns</span>
         </div>
       </div>
     </div>
