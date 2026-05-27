@@ -1108,14 +1108,17 @@ function renderHomeMarquee() {
     return `<img class="team-badge-img" src="${escapeHTML(primary)}" data-base="${escapeHTML(`assets/teams/${team.slug}`)}" data-try="0" alt="${escapeHTML(team.name)} badge" loading="lazy" referrerpolicy="no-referrer" onerror="window.homeLogoFallback && window.homeLogoFallback(this)"/>`;
   };
 
-  const renderItem = team => `
-    <span class="marquee-team" title="${escapeHTML(team.name)}">
+  const renderItem = team => {
+    const teamColor = escapeHTML(team.color || '#e8002d');
+    return `
+    <span class="marquee-team" title="${escapeHTML(team.name)}" style="--team-color:${teamColor}">
       <span class="team-logo-wrap">
         ${renderLogo(team)}
-        <i class="team-badge-dot" style="--team-color:${escapeHTML(team.color || '#e8002d')}"></i>
+        <i class="team-badge-dot"></i>
       </span>
       <span class="marquee-team-name">${escapeHTML(team.name)}</span>
     </span>`;
+  };
 
   track.innerHTML = [...teams, ...teams, ...teams].map(renderItem).join('');
 }
