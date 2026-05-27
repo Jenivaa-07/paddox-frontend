@@ -2613,3 +2613,10 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 @media (max-width: 768px) {
   .nav-cart-btn { width: 36px; height: 36px; }
 }
+
+
+/* Phase 12 V12 — live race stat safety */
+.stat-num.is-loading {
+  letter-spacing: 2px;
+  color: rgba(255,255,255,.72);
+}

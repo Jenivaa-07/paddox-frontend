@@ -11,7 +11,7 @@ let QUOTES = [];
 let HOME_F1 = { schedule: [], drivers: [], standings: [], constructors: [], nextRace: null };
 let HOME_MARQUEE_LOGOS = [];
 
-const HOME_MARKETING_STATS = { races: 24, products: 50, fans: 250 };
+const HOME_MARKETING_STATS = { races: null, products: 50, fans: 250 };
 
 const USE_OFFICIAL_F1_LOGO_LIBRARY = true;
 
@@ -74,14 +74,56 @@ const PADDOX_HOME_TEAMS = [
 ];
 
 function setHomeMarketingStats() {
-  setCounter(document.getElementById('home-race-count'), HOME_MARKETING_STATS.races);
+  setRaceStatLoading();
   setCounter(document.getElementById('home-product-count'), HOME_MARKETING_STATS.products);
   setCounter(document.getElementById('home-fan-count'), HOME_MARKETING_STATS.fans);
 }
 
-function updateHomeSeasonRaceCount() {
-  const races = Array.isArray(HOME_F1.schedule) ? HOME_F1.schedule.filter(Boolean).length : 0;
-  if (races > 0) updateHomeRaceStat(races);
+function setRaceStatLoading() {
+  const el = document.getElementById('home-race-count');
+  if (!el) return;
+  el.dataset.count = '0';
+  el.textContent = '—';
+  el.classList.add('is-loading');
+}
+
+function extractRaceList(payload = {}) {
+  if (Array.isArray(payload)) return payload;
+  const candidates = [
+    payload?.data?.races,
+    payload?.data?.schedule,
+    payload?.data?.calendar,
+    payload?.data?.RaceTable?.Races,
+    payload?.data?.MRData?.RaceTable?.Races,
+    payload?.races,
+    payload?.schedule,
+    payload?.calendar,
+    payload?.RaceTable?.Races,
+    payload?.MRData?.RaceTable?.Races,
+  ];
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+  }
+  return [];
+}
+
+function validRaceCount(list = []) {
+  return list.filter(race => {
+    if (!race) return false;
+    if (typeof race === 'string') return race.trim().length > 0;
+    return Boolean(race.name || race.raceName || race.round || race.date || race.raceDate || race.circuit || race.Circuit);
+  }).length;
+}
+
+function updateHomeSeasonRaceCount(list = HOME_F1.schedule) {
+  const races = validRaceCount(Array.isArray(list) ? list : extractRaceList(list));
+  if (races > 0) {
+    const el = document.getElementById('home-race-count');
+    if (el) el.classList.remove('is-loading');
+    updateHomeRaceStat(races);
+  } else {
+    setRaceStatLoading();
+  }
 }
 
 function homeTeamLogoSrc(slug = '') {
@@ -384,7 +426,7 @@ async function loadHomeF1Data() {
       PaddoxAPI.f1.driverStands(),
       PaddoxAPI.f1.consStands(),
     ]);
-    HOME_F1.schedule = scheduleData.value?.data?.races || scheduleData.value?.data || [];
+    HOME_F1.schedule = extractRaceList(scheduleData.value || {});
     HOME_F1.drivers = driverData.value?.data?.drivers || driverData.value?.data || [];
     HOME_F1.standings = standingsData.value?.data?.standings || standingsData.value?.data?.drivers || standingsData.value?.data || [];
     HOME_F1.constructors = constructorData.value?.data?.standings || constructorData.value?.data?.constructors || constructorData.value?.data || [];
@@ -664,6 +706,13 @@ async function initRealCountdown() {
     const raceDate = new Date(data.data.raceDate);
     const race = data.data.race;
     HOME_F1.nextRace = race;
+    const nextRaceSchedule = extractRaceList(data || {});
+    if (nextRaceSchedule.length) {
+      HOME_F1.schedule = nextRaceSchedule;
+      updateHomeSeasonRaceCount(nextRaceSchedule);
+    } else if (data.data?.seasonRaceCount || data.data?.totalRaces || race.totalRaces || race.seasonRaceCount) {
+      updateHomeSeasonRaceCount(Array.from({ length: Number(data.data?.seasonRaceCount || data.data?.totalRaces || race.totalRaces || race.seasonRaceCount) }, (_, i) => ({ round: i + 1 })));
+    }
 
     if (flagEl) {
       flagEl.title = race.country || race.name || 'Next Grand Prix';
@@ -740,6 +789,10 @@ initRealCountdown();
       if (!entry.isIntersecting) return;
       const el    = entry.target;
       const target= parseInt(el.dataset.count, 10);
+      if (!Number.isFinite(target) || target <= 0) {
+        observer.unobserve(el);
+        return;
+      }
       const dur   = 1800;
       const step  = 16;
       const inc   = target / (dur / step);
@@ -1277,8 +1330,9 @@ function updateTickerFromAPI() {
   if (HOME_F1.nextRace) {
     messages.push(`Next race: ${HOME_F1.nextRace.name || 'Grand Prix'}`);
   }
-  if (HOME_F1.schedule.length) {
-    messages.push(`${HOME_F1.schedule.length} Grand Prix rounds this season`);
+  const liveRaceCount = validRaceCount(HOME_F1.schedule);
+  if (liveRaceCount) {
+    messages.push(`${liveRaceCount} Grand Prix rounds this season`);
   }
   if (HOME_F1.standings.length) {
     const leader = normalizeDriverFromAny(HOME_F1.standings[0]);
