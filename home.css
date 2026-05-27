@@ -2361,3 +2361,82 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
     line-height: 1.45;
   }
 }
+
+
+/* ============================================================
+   PHASE 12 V7 — Final Lock: Live race stat + emoji cleanup
+   ============================================================ */
+.helmet-icon {
+  font-family: var(--font-condensed);
+  font-size: .72rem;
+  letter-spacing: 1px;
+  font-weight: 800;
+  color: var(--red);
+}
+.nl-icon,
+.btn-icon,
+.cta-flag,
+.nl-btn-icon { display: none !important; }
+.nav-link { gap: 0; }
+.nav-cart-btn {
+  width: 44px;
+  border-radius: 999px;
+  font-size: .56rem;
+  font-family: var(--font-condensed);
+  letter-spacing: 1px;
+  font-weight: 800;
+}
+.cart-icon-anim { line-height: 1; }
+.search-icon-anim {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.section-label::before,
+.cs-label::before,
+.hero-eyebrow::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  display: inline-block;
+  background: var(--red);
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(232,0,45,.45);
+  margin-right: 2px;
+}
+.hero-eyebrow::before { margin-right: 0; }
+.section-label,
+.cs-label { gap: 9px; }
+.exp-icon {
+  font-family: var(--font-condensed) !important;
+  font-size: .72rem !important;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: var(--red);
+}
+.nl-trust span,
+.footer-col-title { letter-spacing: 1.6px; }
+.stat-num {
+  min-width: 72px;
+}
+#home-race-count[data-count]::after { content: ''; }
+
+/* Better flag chip: no empty-looking black box while external SVG/PNG loads */
+.cs-flag {
+  background:
+    linear-gradient(135deg, rgba(232,0,45,.18), rgba(255,255,255,.035)),
+    #131313;
+}
+.cs-flag-img {
+  opacity: .98;
+  transition: opacity .2s ease, transform .25s ease;
+}
+.cs-race:hover .cs-flag-img { transform: scale(1.04); }
+
+@media (max-width: 768px) {
+  .nav-cart-btn { width: 42px; font-size: .54rem; }
+  .section-label::before,
+  .cs-label::before { width: 6px; height: 6px; }
+  .hero-stats { gap: 18px; }
+  .stat-num { min-width: 54px; }
+}

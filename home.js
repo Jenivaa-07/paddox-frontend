@@ -79,6 +79,11 @@ function setHomeMarketingStats() {
   setCounter(document.getElementById('home-fan-count'), HOME_MARKETING_STATS.fans);
 }
 
+function updateHomeSeasonRaceCount() {
+  const races = Array.isArray(HOME_F1.schedule) ? HOME_F1.schedule.filter(Boolean).length : 0;
+  if (races > 0) updateHomeRaceStat(races);
+}
+
 function homeTeamLogoSrc(slug = '') {
   return `assets/teams/${slug}.svg`;
 }
@@ -384,7 +389,7 @@ async function loadHomeF1Data() {
     HOME_F1.standings = standingsData.value?.data?.standings || standingsData.value?.data?.drivers || standingsData.value?.data || [];
     HOME_F1.constructors = constructorData.value?.data?.standings || constructorData.value?.data?.constructors || constructorData.value?.data || [];
     renderHomeMarquee();
-    /* Current grid count can include reserve/test drivers in APIs, so hero keeps brand milestones. */
+    updateHomeSeasonRaceCount();
     updateTickerFromAPI();
   } catch (err) {
     console.warn('Home F1 data unavailable', err);
@@ -801,7 +806,7 @@ function renderHomeProducts() {
   if (!grid) return;
 
   if (!PRODUCTS.length) {
-    grid.innerHTML = '<div class="home-empty-card merch-empty-card reveal-up"><div class="empty-icon">🛒</div><div><h3>Featured drops are loading</h3><p>Open the shop to browse every PADDOX product.</p><a href="shop.html" class="empty-cta">Open Shop →</a></div></div>'; initRevealObserver(grid.querySelectorAll('.reveal-up'));
+    grid.innerHTML = '<div class="home-empty-card merch-empty-card reveal-up"><div class="empty-icon">PX</div><div><h3>Featured drops are loading</h3><p>Open the shop to browse every PADDOX product.</p><a href="shop.html" class="empty-cta">Open Shop →</a></div></div>'; initRevealObserver(grid.querySelectorAll('.reveal-up'));
     return;
   }
 
@@ -821,8 +826,8 @@ function renderHomeProducts() {
         </div>
         <div class="pcard-img-overlay"></div>
         <div class="pcard-overlay">
-          <button class="ov-btn add-to-cart" data-id="${escapeHTML(p.id)}">Add to Cart 🛒</button>
-          <button class="ov-btn outline quick-view" data-id="${escapeHTML(p.id)}">Quick View 👁️</button>
+          <button class="ov-btn add-to-cart" data-id="${escapeHTML(p.id)}">Add to Cart</button>
+          <button class="ov-btn outline quick-view" data-id="${escapeHTML(p.id)}">Quick View</button>
         </div>
       </div>
       ${p.badge ? `<span class="pbadge b-${escapeHTML(p.badge)}">${escapeHTML(String(p.badge).toUpperCase())}</span>` : ''}
@@ -862,7 +867,7 @@ function renderHomeProducts() {
       btn.classList.toggle('on');
       const icon = btn.querySelector('.icon-anim');
       if (icon) icon.textContent = btn.classList.contains('on') ? '♥' : '♡';
-      showToast(btn.classList.contains('on') ? '♥ Added to wishlist' : 'Removed from wishlist');
+      showToast(btn.classList.contains('on') ? 'Added to wishlist' : 'Removed from wishlist');
     });
   });
 
@@ -897,7 +902,7 @@ function renderFanEmptyState(grid, title, message) {
   if (!grid) return;
   grid.innerHTML = `
     <div class="home-empty-card fan-empty-card reveal-up">
-      <div class="empty-icon">🏁</div>
+      <div class="empty-icon">PX</div>
       <div>
         <h3>${escapeHTML(title)}</h3>
         <p>${escapeHTML(message)}</p>
@@ -947,7 +952,7 @@ function addToCart(id, qty = 1, size = '') {
   }
   saveCart();
   const optionText = sizeLabel ? ` (${sizeLabel})` : amount > 1 ? ` x${amount}` : '';
-  showToast(`✓ ${product.name}${optionText} added to cart!`);
+  showToast(`${product.name}${optionText} added to cart`);
 }
 
 updateCartBadge();
@@ -1028,7 +1033,7 @@ function openModal(id) {
   /* Wish btn */
   const wishBtn = document.getElementById('modal-wish-btn');
   wishBtn.onclick = () => {
-    showToast('♥ Added to wishlist!');
+    showToast('Added to wishlist');
     wishBtn.style.borderColor = '#e8002d';
     wishBtn.style.color = '#fff';
   };
@@ -1132,7 +1137,7 @@ function renderHomeQuotes() {
     const val = input.value.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(val)) {
-      showToast('⚠️ Please enter a valid email address');
+      showToast('Please enter a valid email address');
       input.focus();
       input.style.borderColor = 'var(--red)';
       setTimeout(() => input.style.borderColor = '', 2000);
@@ -1152,11 +1157,11 @@ function renderHomeQuotes() {
           width:100%;
           text-align:center;
         ">
-          ✓ YOU'RE IN THE PADDOCK! 🏁
+          YOU'RE IN THE PADDOX CREW!
         </div>
       `;
     }
-    showToast('🏁 Welcome to the Paddox Paddock!');
+    showToast('Welcome to the PADDOX Crew');
   });
 
   input.addEventListener('keydown', e => {
@@ -1273,18 +1278,18 @@ function updateTickerFromAPI() {
     messages.push(`Next race: ${HOME_F1.nextRace.name || 'Grand Prix'}`);
   }
   if (HOME_F1.schedule.length) {
-    messages.push(`📅 ${HOME_F1.schedule.length} Grand Prix rounds this season`);
+    messages.push(`${HOME_F1.schedule.length} Grand Prix rounds this season`);
   }
   if (HOME_F1.standings.length) {
     const leader = normalizeDriverFromAny(HOME_F1.standings[0]);
-    messages.push(`🏆 Current standings leader: ${leader.name}`);
+    messages.push(`Current standings leader: ${leader.name}`);
   }
   if (PRODUCTS.length) {
-    messages.push(`🛒 Latest shop drops are live now`);
+    messages.push(`Latest shop drops are live now`);
   }
 
   if (!messages.length) {
-    tickerEl.textContent = '🏁 PADDOX data loading...';
+    tickerEl.textContent = 'PADDOX data loading...';
     return;
   }
 
@@ -1340,4 +1345,4 @@ document.querySelectorAll('.size-btn').forEach(btn => {
 /* ══════════════════════════════════════
    GLOBAL INIT LOG
 ══════════════════════════════════════ */
-console.log('%c🏎️ PADDOX — Home Page Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%cPADDOX — Home Page Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
