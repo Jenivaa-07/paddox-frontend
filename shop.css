@@ -2382,3 +2382,139 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
     display: none !important;
   }
 }
+
+
+/* ============================================================
+   PHASE 13 V10 — Sort + View Mode Icon Final Fix
+   Keep this at the end so the Featured dropdown controls match the
+   approved PADDOX premium icon system without becoming loud red blocks.
+   ============================================================ */
+.toolbar-right {
+  gap: 12px;
+}
+.sort-select {
+  min-width: 152px;
+  height: 42px;
+  padding: 0 40px 0 16px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015)),
+    var(--dark2);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.92);
+  font-family: var(--font-condensed);
+  font-size: .82rem;
+  letter-spacing: 1.4px;
+  font-weight: 700;
+  text-transform: none;
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(255,255,255,.75) 50%),
+    linear-gradient(135deg, rgba(255,255,255,.75) 50%, transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015));
+  background-position:
+    calc(100% - 18px) 17px,
+    calc(100% - 12px) 17px,
+    0 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    100% 100%;
+  background-repeat: no-repeat;
+}
+.sort-select:hover,
+.sort-select:focus {
+  border-color: rgba(232,0,45,.45);
+  box-shadow: 0 0 0 1px rgba(232,0,45,.08), 0 10px 24px rgba(0,0,0,.18);
+}
+.view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px;
+  background: rgba(255,255,255,.018);
+  border: 1px solid rgba(255,255,255,.075);
+}
+.view-btn {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: rgba(255,255,255,.62) !important;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0 !important;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+.view-btn:hover {
+  color: #fff !important;
+  border-color: rgba(255,255,255,.13) !important;
+  background: rgba(255,255,255,.045) !important;
+  transform: translateY(-1px);
+}
+.view-btn.on {
+  color: #fff !important;
+  border-color: rgba(232,0,45,.55) !important;
+  background: rgba(232,0,45,.16) !important;
+  box-shadow: inset 0 -2px 0 var(--red), 0 10px 26px rgba(232,0,45,.08);
+}
+.view-btn::before,
+.view-btn::after {
+  content: '';
+  position: absolute;
+  display: block;
+  color: currentColor;
+  background: currentColor;
+  opacity: 1;
+}
+.view-btn[data-view="grid"]::before {
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  box-shadow:
+    8px 0 0 currentColor,
+    0 8px 0 currentColor,
+    8px 8px 0 currentColor;
+  transform: translate(-4px,-4px);
+}
+.view-btn[data-view="grid"]::after {
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: 1px solid currentColor;
+  opacity: .26;
+}
+.view-btn[data-view="list"]::before {
+  width: 17px;
+  height: 2px;
+  border-radius: 999px;
+  box-shadow: 0 6px 0 currentColor, 0 12px 0 currentColor;
+  transform: translateY(-6px);
+}
+.view-btn[data-view="list"]::after {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  box-shadow: 0 6px 0 currentColor, 0 12px 0 currentColor;
+  transform: translate(-12px,-6px);
+  opacity: .75;
+}
+@media (max-width: 768px) {
+  .toolbar-right {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+  .sort-select {
+    width: 100%;
+    min-width: 0;
+  }
+  .view-toggle {
+    justify-self: end;
+  }
+}
