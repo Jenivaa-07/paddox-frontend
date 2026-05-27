@@ -2629,3 +2629,66 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   .modal-actions { position: sticky; bottom: 0; background: linear-gradient(180deg, transparent, #070707 22%); padding-top: 12px; }
   .cart-footer { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
 }
+
+
+/* Phase 14 V2 — checkout receipt transition polish */
+.pdx-checkout-pay .checkout-arrow {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  position: relative;
+  transition: transform var(--transition);
+}
+.pdx-checkout-pay .checkout-arrow::before {
+  content: '';
+  position: absolute;
+  inset: 3px 1px 3px 0;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+.pdx-checkout-pay .checkout-arrow::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 7px;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+}
+.pdx-checkout-pay:hover .checkout-arrow {
+  transform: translateX(3px);
+}
+.pdx-loading-dot {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  animation: pdxSpin .75s linear infinite;
+}
+@keyframes pdxSpin { to { transform: rotate(360deg); } }
+.pdx-checkout-pay.is-success {
+  background: #fff;
+  color: #090909;
+}
+.checkout-success-mark {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  position: relative;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+}
+.checkout-success-mark::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 3px;
+  width: 7px;
+  height: 4px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+}

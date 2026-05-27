@@ -1065,7 +1065,7 @@ function openCheckoutModal() {
   const token = getCheckoutToken();
 
   if (!token) {
-    showToast('🔐 Please login first');
+    showToast('Please login first');
     setTimeout(() => {
       window.location.href = 'account.html';
     }, 900);
@@ -1149,7 +1149,7 @@ async function submitCheckoutForm(e) {
 
   const token = getCheckoutToken();
   if (!token) {
-    showToast('🔐 Please login first');
+    showToast('Please login first');
     return;
   }
 
@@ -1191,18 +1191,23 @@ async function submitCheckoutForm(e) {
 
     cart = [];
     saveCart();
-    closeCheckoutModal();
-    toggleCart(false);
-    showToast('🔥 Order placed successfully');
+    updateCartUI();
+
+    submitBtn.classList.add('is-success');
+    submitBtn.innerHTML = '<span>Order placed. Opening receipt...</span><span class="checkout-success-mark" aria-hidden="true"></span>';
+    showToast('Order placed. Opening receipt...');
 
     setTimeout(() => {
+      closeCheckoutModal();
+      toggleCart(false);
       window.location.href = `receipt.html?orderId=${encodeURIComponent(order._id)}`;
-    }, 500);
+    }, 850);
 
   } catch (err) {
     console.error(err);
     showToast(`${err.message}`);
     submitBtn.disabled = false;
+    submitBtn.classList.remove('is-success');
     submitBtn.innerHTML = '<span>Place Order</span><span class="checkout-arrow" aria-hidden="true"></span>';
   }
 }
