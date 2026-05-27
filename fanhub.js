@@ -1087,6 +1087,17 @@ function findDriverQuote(driverName = '') {
          null;
 }
 
+function quoteImageValue(q = {}) {
+  return (
+    q.driverImage ||
+    q.image ||
+    q.imageUrl ||
+    q.headshot ||
+    q.avatar ||
+    '🏎️'
+  );
+}
+
 function quoteAvatarHTML(avatar, className = '') {
   const value = avatar || '🏎️';
 
@@ -1100,21 +1111,16 @@ function quoteAvatarHTML(avatar, className = '') {
   ) {
     return `
       <img
-        src="${value}"
-        alt="Quote avatar"
+        src="${safeText(value)}"
+        alt="Quote driver image"
         class="${className}"
-        style="
-          width:100%;
-          height:100%;
-          object-fit:cover;
-          border-radius:50%;
-          display:block;
-        "
+        loading="lazy"
+        onerror="this.outerHTML='<span class=&quot;quote-avatar-fallback&quot;>🏎️</span>'"
       />
     `;
   }
 
-  return value;
+  return `<span class="quote-avatar-fallback">${safeText(value)}</span>`;
 }
 
 async function loadRealtimeQuotes() {
@@ -1203,90 +1209,365 @@ function renderRealtimeQuotes() {
     REAL_QUOTES[quoteIdx] ||
     REAL_QUOTES[0];
 
+  const teamColor =
+    teamColorFromName(q.team || q.era || 'paddox') ||
+    '#e8002d';
+
+  const avatarValue = quoteImageValue(q);
+
   feat.innerHTML = `
     <div class="quote-progress"><span style="width:${((quoteIdx + 1) / REAL_QUOTES.length) * 100}%"></span></div>
 
-    <div class="qf-topline">
-      <span class="qf-pill">${(q.era || 'current').toUpperCase()}</span>
-      <span class="qf-dot">•</span>
-      <span>${(q.category || 'motivation').toUpperCase()}</span>
-      ${q.isFeatured ? '<span class="qf-featured-badge">FEATURED</span>' : ''}
-    </div>
+    <div class="qf-premium-card" id="quote-share-card" style="--quote-team-color:${teamColor}">
+      <div class="qf-card-glow"></div>
 
-    <div class="qf-bg">"</div>
-    <div class="big-qm">"</div>
+      <div class="qf-media">
+        <div class="qf-image-ring">
+          <div class="qf-driver-image">
+            ${quoteAvatarHTML(avatarValue, 'qf-driver-img')}
+          </div>
+        </div>
+        <div class="qf-team-strip"></div>
+      </div>
 
-    <div class="qf-text">
-      ${safeText(q.text)}
-    </div>
-
-    <div class="qf-footer">
-      <div class="qf-drv">
-        <div class="qf-ava">
-          ${quoteAvatarHTML(q.avatar)}
+      <div class="qf-content">
+        <div class="qf-topline">
+          <span class="qf-pill">${safeText(q.era || 'current').toUpperCase()}</span>
+          <span class="qf-dot">•</span>
+          <span>${safeText(q.category || 'motivation').toUpperCase()}</span>
+          ${q.isFeatured ? '<span class="qf-featured-badge">FEATURED</span>' : ''}
         </div>
 
-        <div>
-          <div class="qf-dname">
-            ${safeText(q.driver)}
+        <div class="qf-bg">"</div>
+        <div class="big-qm">"</div>
+
+        <div class="qf-text">
+          ${safeText(q.text)}
+        </div>
+
+        <div class="qf-footer">
+          <div class="qf-drv">
+            <div class="qf-ava">
+              ${quoteAvatarHTML(avatarValue)}
+            </div>
+
+            <div>
+              <div class="qf-dname">
+                ${safeText(q.driver)}
+              </div>
+              <div class="qf-dteam team-${quoteTeamClass(q.team)}">
+                ${safeText(q.team || q.era || 'Paddox Quote Library')}
+              </div>
+            </div>
           </div>
-          <div class="qf-dteam team-${quoteTeamClass(q.team)}">
-            ${safeText(q.team || q.era || 'Paddox Quote Library')}
+
+          <div class="qf-brand">
+            PADDO<span>X</span>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="qf-actions">
-        <button class="qf-share qf-copy" onclick="copyQuoteText(${quoteIdx}, true)">
-          Copy
-        </button>
-        <button class="qf-share" onclick="copyQuoteText(${quoteIdx})">
-          🔗 Share
-        </button>
-      </div>
+    <div class="qf-actions qf-premium-actions">
+      <button class="qf-share qf-copy" onclick="copyQuoteText(${quoteIdx}, true)">
+        Copy Text
+      </button>
+      <button class="qf-share" onclick="copyQuoteText(${quoteIdx})">
+        🔗 Share Text
+      </button>
+      <button class="qf-share qf-download" onclick="shareQuoteImage(${quoteIdx})">
+        🖼️ Save / Share Image
+      </button>
     </div>
   `;
 
-  list.innerHTML = REAL_QUOTES.map((qq, i) => `
-    <div class="qmini ${i === quoteIdx ? 'on' : ''}" onclick="setRealtimeQuote(${i})">
-      <div class="qmini-head">
-        <span class="qmini-era">${(qq.era || 'current').toUpperCase()}</span>
-        <div class="qm-actions">
-          <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i}, true)">Copy</button>
-          <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i})">Share</button>
-        </div>
-      </div>
-
-      <div class="qm-text">
-        ${safeText(qq.text)}
-      </div>
-
-      <div class="qm-drv">
-        <span class="qm-avatar">
-          ${quoteAvatarHTML(qq.avatar)}
-        </span>
-
-        <div>
-          <div class="qm-n">
-            ${safeText(qq.driver)}
-          </div>
-          <div class="qm-t">
-            ${safeText(qq.team || qq.era || 'Quote Library')}
+  list.innerHTML = REAL_QUOTES.map((qq, i) => {
+    const miniAvatar = quoteImageValue(qq);
+    return `
+      <div class="qmini ${i === quoteIdx ? 'on' : ''}" onclick="setRealtimeQuote(${i})">
+        <div class="qmini-head">
+          <span class="qmini-era">${safeText(qq.era || 'current').toUpperCase()}</span>
+          <div class="qm-actions">
+            <button class="qm-share" onclick="event.stopPropagation();copyQuoteText(${i}, true)">Copy</button>
+            <button class="qm-share" onclick="event.stopPropagation();shareQuoteImage(${i})">Image</button>
           </div>
         </div>
-      </div>
 
-      <div class="qm-meta">
-        ${(qq.category || 'motivation').toUpperCase()}
+        <div class="qm-text">
+          ${safeText(qq.text)}
+        </div>
+
+        <div class="qm-drv">
+          <span class="qm-avatar">
+            ${quoteAvatarHTML(miniAvatar)}
+          </span>
+
+          <div>
+            <div class="qm-n">
+              ${safeText(qq.driver)}
+            </div>
+            <div class="qm-t">
+              ${safeText(qq.team || qq.era || 'Quote Library')}
+            </div>
+          </div>
+        </div>
+
+        <div class="qm-meta">
+          ${safeText(qq.category || 'motivation').toUpperCase()}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function setRealtimeQuote(index) {
   quoteIdx = index;
   renderRealtimeQuotes();
 }
+
+function downloadDataUrl(dataUrl, filename = 'paddox-quote.png') {
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function loadQuoteImageForCanvas(src) {
+  return new Promise(resolve => {
+    if (!src || typeof src !== 'string' || !(src.startsWith('http') || src.startsWith('data:image/'))) {
+      resolve(null);
+      return;
+    }
+
+    const img = new Image();
+
+    if (src.startsWith('http')) {
+      img.crossOrigin = 'anonymous';
+    }
+
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+
+      if (lines.length >= maxLines - 1) break;
+    } else {
+      line = test;
+    }
+  }
+
+  if (line && lines.length < maxLines) lines.push(line);
+
+  lines.forEach((l, i) => {
+    ctx.fillText(l, x, y + i * lineHeight);
+  });
+
+  return y + lines.length * lineHeight;
+}
+
+function roundedRect(ctx, x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+}
+
+async function buildQuoteShareCanvas(q = {}) {
+  const W = 1080;
+  const H = 1350;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const teamColor = teamColorFromName(q.team || q.era || '') || '#e8002d';
+
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#050505');
+  bg.addColorStop(.52, '#101010');
+  bg.addColorStop(1, '#050505');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.globalAlpha = 0.20;
+  ctx.strokeStyle = teamColor;
+  ctx.lineWidth = 2;
+  for (let x = -H; x < W; x += 74) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x + H, H);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = teamColor;
+  ctx.filter = 'blur(80px)';
+  ctx.beginPath();
+  ctx.arc(870, 210, 230, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(190, 1130, 250, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  ctx.filter = 'none';
+
+  roundedRect(ctx, 70, 70, W - 140, H - 140, 44);
+  ctx.fillStyle = 'rgba(14,14,14,.90)';
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(255,255,255,.16)';
+  ctx.stroke();
+
+  ctx.fillStyle = teamColor;
+  ctx.fillRect(70, 70, W - 140, 12);
+
+  ctx.font = '76px Bebas Neue, Arial Black, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('PADDO', 110, 175);
+  ctx.fillStyle = '#e8002d';
+  ctx.fillText('X', 294, 175);
+
+  ctx.font = '24px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.62)';
+  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 215);
+
+  const imgSrc = quoteImageValue(q);
+  const img = await loadQuoteImageForCanvas(imgSrc);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(810, 255, 128, 0, Math.PI * 2);
+  ctx.fillStyle = '#171717';
+  ctx.fill();
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = teamColor;
+  ctx.stroke();
+  ctx.clip();
+
+  if (img) {
+    const size = Math.min(img.width, img.height);
+    const sx = (img.width - size) / 2;
+    const sy = (img.height - size) / 2;
+    ctx.drawImage(img, sx, sy, size, size, 682, 127, 256, 256);
+  } else {
+    ctx.font = '92px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('🏎️', 810, 255);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+  ctx.restore();
+
+  ctx.font = '140px Georgia, serif';
+  ctx.fillStyle = 'rgba(232,0,45,.55)';
+  ctx.fillText('“', 105, 430);
+
+  ctx.font = '58px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  const quoteBottom = wrapCanvasText(ctx, q.text || '', 145, 500, 790, 72, 8);
+
+  ctx.fillStyle = teamColor;
+  roundedRect(ctx, 145, Math.min(quoteBottom + 52, 930), 150, 6, 4);
+  ctx.fill();
+
+  ctx.font = '54px Bebas Neue, Arial Black, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  const driverY = Math.min(quoteBottom + 142, 1040);
+  ctx.fillText(String(q.driver || 'F1 Driver').toUpperCase(), 145, driverY);
+
+  ctx.font = '30px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.70)';
+  ctx.fillText(String(q.team || q.era || 'PADDOX Quote Library'), 145, driverY + 48);
+
+  ctx.font = '24px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.50)';
+  ctx.fillText(`${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'MOTIVATION').toUpperCase()}`, 145, driverY + 92);
+
+  ctx.fillStyle = 'rgba(255,255,255,.08)';
+  roundedRect(ctx, 110, 1160, W - 220, 82, 26);
+  ctx.fill();
+
+  ctx.font = '27px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.78)';
+  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
+
+  ctx.font = '30px Bebas Neue, Arial Black, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('PADDOX', 780, 1214);
+  ctx.fillStyle = '#e8002d';
+  ctx.fillText('X', 879, 1214);
+
+  return canvas;
+}
+
+async function shareQuoteImage(index) {
+  const q = REAL_QUOTES[index];
+
+  if (!q) return;
+
+  try {
+    showToast('🏁 Building quote image...');
+
+    const canvas = await buildQuoteShareCanvas(q);
+
+    canvas.toBlob(async blob => {
+      if (!blob) {
+        showToast('❌ Could not build image');
+        return;
+      }
+
+      const fileName = `paddox-${String(q.driver || 'quote').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-quote.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+          await navigator.share({
+            title: `PADDOX Quote — ${q.driver}`,
+            text: `"${q.text}" — ${q.driver}`,
+            files: [file]
+          });
+          showToast('🔥 Quote image shared!');
+          return;
+        }
+      } catch (err) {
+        console.warn('Native image share failed, downloading instead:', err);
+      }
+
+      downloadDataUrl(canvas.toDataURL('image/png'), fileName);
+      showToast('🖼️ Quote image saved!');
+    }, 'image/png', 0.95);
+
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Could not create quote image');
+  }
+}
+
+window.shareQuoteImage = shareQuoteImage;
 
 async function copyQuoteText(index, forceCopy = false) {
   const q = REAL_QUOTES[index];

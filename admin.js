@@ -3472,7 +3472,7 @@ function renderAdminQuoteCardPreview() {
             <div style="color:#999;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${team}</div>
           </div>
         </div>
-        <button type="button" class="act-btn" style="padding:9px 12px;white-space:nowrap">Share</button>
+        <button type="button" class="act-btn" style="padding:9px 12px;white-space:nowrap">Share Image</button>
       </div>
     </div>
   `;
@@ -3889,14 +3889,14 @@ function ensureQuoteModal() {
               <div style="flex:1">
                 <input id="quote-avatar-file" type="file" accept="image/*" style="display:none">
                 <button type="button" class="act-btn" id="quote-avatar-upload" style="width:100%;padding:10px">
-                  Upload Driver Image
+                  Upload / Crop Driver Image
                 </button>
                 <input id="quote-avatar" class="edit-product-input" placeholder="or emoji like 🏎️" style="margin-top:8px">
               </div>
             </div>
 
             <span style="color:#777;font-size:.72rem">
-              JPG / PNG supported. Image will be compressed automatically.
+              JPG / PNG supported. Drag + zoom cropper saves a clean circular driver image for Fan Hub.
             </span>
           </label>
 
@@ -4014,6 +4014,8 @@ async function saveQuote() {
       era: document.getElementById('quote-era').value,
       category: document.getElementById('quote-category').value.trim() || 'motivation',
       avatar: document.getElementById('quote-avatar').value.trim() || '🏎️',
+      driverImage: document.getElementById('quote-avatar').value.trim() || '🏎️',
+      image: document.getElementById('quote-avatar').value.trim() || '🏎️',
       source: document.getElementById('quote-source').value.trim(),
       isFeatured: document.getElementById('quote-featured').checked,
       isActive: document.getElementById('quote-active').checked
