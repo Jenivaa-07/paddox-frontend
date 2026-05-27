@@ -320,16 +320,8 @@ async function loadHomeProducts() {
       return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
     });
     PRODUCTS = ordered.slice(0, 4).map(normalizeHomeProduct).filter(p => p.id);
-    const liveProductTotal = Number(
-      data?.data?.pagination?.total ||
-      data?.pagination?.total ||
-      data?.data?.total ||
-      data?.total ||
-      active.length ||
-      HOME_MARKETING_STATS.products
-    );
-    if (liveProductTotal > 0) updateHomeProductStat(liveProductTotal);
     renderHomeProducts();
+    /* Home hero stats stay as brand milestones, not raw API counts. */
   } catch (err) {
     console.warn('Home products unavailable', err);
     PRODUCTS = [];
@@ -496,14 +488,14 @@ function animateSingleCounter(el) {
 
     reset(isBurst = false) {
       this.isBurst = isBurst;
-      this.type    = Math.random() < 0.72 ? 'spark' : 'dot';
+      this.type    = Math.random() < 0.55 ? 'spark' : 'dot';
       this.x       = isBurst ? W * 0.5 + (Math.random() - 0.5) * 300
                              : Math.random() * W;
       this.y       = isBurst ? H * 0.5 + (Math.random() - 0.5) * 100
                              : Math.random() * H;
       const speed  = isBurst ? 4 + Math.random() * 6 : 1.5 + Math.random() * 2.5;
       const angle  = isBurst ? Math.random() * Math.PI * 2
-                             : -Math.PI * 0.025 + (Math.random() - 0.5) * 0.22;
+                             : -Math.PI * 0.05 + (Math.random() - 0.5) * 0.4;
       this.vx      = Math.cos(angle) * speed;
       this.vy      = Math.sin(angle) * speed - (isBurst ? 0 : 0.2);
       this.life    = 1;
@@ -550,11 +542,11 @@ function animateSingleCounter(el) {
   }
 
   /* Spawn base particles */
-  for (let i = 0; i < 72; i++) particles.push(new Particle());
+  for (let i = 0; i < 90; i++) particles.push(new Particle());
 
   /* Occasional speed burst */
   function triggerBurst() {
-    for (let i = 0; i < 26; i++) particles.push(new Particle(true));
+    for (let i = 0; i < 40; i++) particles.push(new Particle(true));
     burstTimer = setTimeout(triggerBurst, 6000 + Math.random() * 8000);
   }
   burstTimer = setTimeout(triggerBurst, 3000);
@@ -565,7 +557,7 @@ function animateSingleCounter(el) {
     // Remove dead burst particles
     particles = particles.filter(p => p.life > 0 || !p.isBurst);
     // Keep base count stable
-    while (particles.filter(p => !p.isBurst).length < 72) {
+    while (particles.filter(p => !p.isBurst).length < 90) {
       particles.push(new Particle(false));
     }
     requestAnimationFrame(loop);
@@ -814,7 +806,7 @@ function renderHomeProducts() {
   if (!grid) return;
 
   if (!PRODUCTS.length) {
-    grid.innerHTML = '<div class="home-empty-card merch-empty-card reveal-up"><div class="empty-icon">PX</div><div><h3>Featured drops are loading</h3><p>Open the shop to browse every PADDOX product.</p><a href="shop.html" class="empty-cta">Open Shop →</a></div></div>'; initRevealObserver(grid.querySelectorAll('.reveal-up'));
+    grid.innerHTML = '<div class="home-empty-card merch-empty-card reveal-up"><div class="empty-icon" aria-hidden="true"></div><div><h3>Featured drops are loading</h3><p>Open the shop to browse every PADDOX product.</p><a href="shop.html" class="empty-cta">Open Shop →</a></div></div>'; initRevealObserver(grid.querySelectorAll('.reveal-up'));
     return;
   }
 
@@ -910,7 +902,7 @@ function renderFanEmptyState(grid, title, message) {
   if (!grid) return;
   grid.innerHTML = `
     <div class="home-empty-card fan-empty-card reveal-up">
-      <div class="empty-icon">PX</div>
+      <div class="empty-icon" aria-hidden="true"></div>
       <div>
         <h3>${escapeHTML(title)}</h3>
         <p>${escapeHTML(message)}</p>
