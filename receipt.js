@@ -4,7 +4,7 @@
 'use strict';
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
-const BRAND_LOGO_PATH = localStorage.getItem('paddox_brand_logo') || 'assets/logo.png';
+const BRAND_LOGO_PATH = localStorage.getItem('paddox_brand_logo') || 'assets/paddox-logo-icon.png';
 
 function receiptToken() {
   return (

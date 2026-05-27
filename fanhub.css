@@ -1672,3 +1672,257 @@ body.modal-open { overflow: hidden; }
     justify-content:flex-start;
   }
 }
+
+
+/* ============================================================
+   Phase 16.5 — PADDOX official logo integration
+   ============================================================ */
+.helmet-wrap,
+.adm-helmet,
+.receipt-logo-mark{
+  overflow:hidden;
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.13), rgba(232,0,45,.13) 42%, rgba(7,7,7,.92) 72%) !important;
+  border:1px solid rgba(232,0,45,.34) !important;
+  box-shadow:inset 0 0 18px rgba(255,255,255,.05), 0 0 18px rgba(232,0,45,.16);
+}
+.helmet-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:1}
+.pdx-logo-img{width:32px;height:32px;object-fit:contain;display:block;filter:drop-shadow(0 0 8px rgba(232,0,45,.55));transform:scale(1.08)}
+.nav-logo:hover .pdx-logo-img{filter:drop-shadow(0 0 13px rgba(232,0,45,.8));transform:scale(1.16) rotate(-4deg);transition:transform var(--tr, var(--transition, .35s ease)), filter var(--tr, var(--transition, .35s ease))}
+.adm-helmet .pdx-logo-img{width:31px;height:31px}
+.receipt-logo-mark .pdx-logo-img{width:34px;height:34px}
+
+
+/* ============================================================
+   Phase 16.5 — Fan Hub premium UI match with Home + Shop
+   ============================================================ */
+.hub-hero{
+  min-height:72vh;
+  align-items:center;
+  isolation:isolate;
+  background:#070707;
+}
+.hub-hero::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:
+    radial-gradient(circle at 72% 22%, rgba(232,0,45,.22), transparent 34%),
+    radial-gradient(circle at 12% 72%, rgba(200,200,200,.09), transparent 30%),
+    linear-gradient(115deg, rgba(7,7,7,.98) 0%, rgba(7,7,7,.82) 48%, rgba(7,7,7,.46) 100%);
+  pointer-events:none;
+}
+.hub-hero::after{
+  content:'PADDOX FAN HUB';
+  position:absolute;
+  right:-2vw;
+  bottom:7vh;
+  z-index:1;
+  font-family:var(--font-d);
+  font-size:clamp(5rem, 12vw, 14rem);
+  letter-spacing:10px;
+  line-height:.8;
+  color:rgba(255,255,255,.025);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.hub-hero-bg{
+  filter:brightness(.28) saturate(.75) contrast(1.08);
+  transform:scale(1.08);
+}
+.hub-hero-overlay{background:linear-gradient(to top, #070707 0%, rgba(7,7,7,.68) 38%, rgba(7,7,7,.36) 100%) !important}
+.hub-hero-grid{opacity:.9;mask-image:linear-gradient(to bottom,transparent 0%,#000 20%,#000 82%,transparent 100%)}
+.hub-hero-content{
+  padding:72px 64px 64px;
+  max-width:980px;
+  position:relative;
+  z-index:3;
+}
+.hub-hero-title{
+  font-size:clamp(4.2rem, 9vw, 8.8rem);
+  letter-spacing:4px;
+  text-shadow:0 0 36px rgba(232,0,45,.12);
+}
+.hub-hero-title .accent{
+  color:#fff;
+  -webkit-text-stroke:1px rgba(232,0,45,.65);
+  text-shadow:0 0 24px rgba(232,0,45,.34);
+}
+.hub-hero-sub{
+  max-width:650px;
+  font-size:1.02rem;
+  color:#b8b8b8;
+  border-left:2px solid rgba(232,0,45,.7);
+  padding-left:18px;
+}
+.hub-hero-chips{gap:10px;max-width:760px}
+.hero-chip{
+  background:rgba(18,18,18,.72);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 12px 34px rgba(0,0,0,.28);
+  backdrop-filter:blur(14px);
+  clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);
+}
+.hero-chip:hover{transform:translateY(-2px);border-color:rgba(232,0,45,.42);box-shadow:0 16px 38px rgba(0,0,0,.42),0 0 0 1px rgba(232,0,45,.12)}
+.hub-tabs-bar{
+  background:rgba(12,12,12,.92) !important;
+  backdrop-filter:blur(18px) saturate(1.25);
+  border-top:1px solid rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(232,0,45,.16) !important;
+  box-shadow:0 14px 36px rgba(0,0,0,.34), inset 0 -1px 0 rgba(232,0,45,.08) !important;
+}
+.hub-tabs-inner{padding:0 48px;gap:0;scrollbar-width:none}
+.hub-tabs-inner::-webkit-scrollbar{display:none}
+.hub-tab{
+  position:relative;
+  padding:17px 24px;
+  color:var(--muted2);
+  border-bottom:2px solid transparent;
+}
+.hub-tab::after{
+  content:'';
+  position:absolute;
+  left:20px;
+  right:20px;
+  bottom:0;
+  height:2px;
+  background:var(--red);
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform var(--tr);
+}
+.hub-tab:hover::after,.hub-tab.on::after{transform:scaleX(1)}
+.hub-tab.on{background:rgba(232,0,45,.07);color:#fff}
+.hub-body{
+  background:
+    radial-gradient(circle at top right, rgba(232,0,45,.08), transparent 30%),
+    linear-gradient(180deg, #070707 0%, #0b0b0b 38%, #070707 100%);
+}
+.hub-section{padding:78px 64px 88px;max-width:1480px;margin:0 auto}
+.sec-header{margin-bottom:28px}
+.section-label{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 13px;
+  background:rgba(232,0,45,.08);
+  border:1px solid rgba(232,0,45,.18);
+  color:var(--red);
+  clip-path:polygon(7px 0,100% 0,calc(100% - 7px) 100%,0 100%);
+}
+.section-title{font-size:clamp(2.8rem,5vw,4.8rem);letter-spacing:3px}
+.wp-filters,.quote-filter-row{
+  background:rgba(17,17,17,.74);
+  border:1px solid rgba(255,255,255,.06);
+  padding:8px;
+  box-shadow:0 18px 48px rgba(0,0,0,.24);
+}
+.wpf,.quote-filter{
+  border:1px solid transparent;
+  transition:all var(--tr);
+}
+.wpf:hover,.wpf.on,.quote-filter:hover,.quote-filter.on{
+  background:rgba(232,0,45,.12);
+  border-color:rgba(232,0,45,.32);
+  color:#fff;
+}
+.wp-card,.rcard,.comm-card,.fpd-card,.drv-card,.drv-stats-right,.quote-featured,.quote-mini,.quote-search-wrap{
+  background:linear-gradient(145deg,rgba(18,18,18,.94),rgba(8,8,8,.98)) !important;
+  border:1px solid rgba(255,255,255,.075) !important;
+  box-shadow:0 20px 55px rgba(0,0,0,.34);
+}
+.wp-card::before,.rcard::after,.comm-card::before,.fpd-card::before,.quote-featured::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:radial-gradient(circle at top right, rgba(232,0,45,.16), transparent 38%);
+  opacity:.75;
+}
+.wp-card:hover,.rcard:hover,.comm-card:hover,.fpd-card:hover,.quote-mini:hover{
+  transform:translateY(-6px);
+  border-color:rgba(232,0,45,.36) !important;
+  box-shadow:0 26px 70px rgba(0,0,0,.5),0 0 0 1px rgba(232,0,45,.1);
+}
+.drv-live-meta{
+  background:rgba(17,17,17,.72);
+  border:1px solid rgba(255,255,255,.07);
+  padding:13px 16px;
+  margin-bottom:18px;
+  box-shadow:0 16px 42px rgba(0,0,0,.24);
+}
+.drv-selector{
+  background:rgba(17,17,17,.62);
+  border:1px solid rgba(255,255,255,.06);
+  padding:12px;
+  margin-bottom:20px;
+}
+.race-grid,.comm-grid{gap:20px}
+.rcard{min-height:248px}
+.rcard::before{box-shadow:0 0 22px rgba(232,0,45,.42)}
+.quote-controls{
+  display:grid;
+  grid-template-columns:1fr minmax(240px,340px) auto;
+  align-items:center;
+  gap:14px;
+  margin-bottom:22px;
+}
+.quote-count{
+  font-family:var(--font-c);
+  letter-spacing:2px;
+  color:var(--muted2);
+  text-transform:uppercase;
+}
+.quotes-layout{gap:22px}
+.quote-featured{position:relative;overflow:hidden}
+.quotes-list{padding-right:6px}
+.fan-points-dock{gap:16px;margin-bottom:22px}
+.fpd-card{position:relative;overflow:hidden}
+.comm-card{position:relative;overflow:hidden;min-height:300px}
+.feed-compose textarea{
+  background:rgba(0,0,0,.24) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+}
+@media (max-width: 980px){
+  .hub-hero{min-height:62vh}
+  .hub-hero-content{padding:60px 28px 52px}
+  .hub-section{padding:54px 24px 64px}
+  .quote-controls{grid-template-columns:1fr}
+  .hub-tabs-inner{padding:0 18px}
+  .hub-tab{padding:15px 18px;white-space:nowrap}
+}
+@media (max-width: 640px){
+  .hub-hero{min-height:72vh;align-items:flex-end}
+  .hub-hero::after{display:none}
+  .hub-hero-title{font-size:clamp(3.5rem,18vw,5.6rem)}
+  .hub-hero-sub{font-size:.92rem;line-height:1.65}
+  .hub-hero-chips{gap:8px}
+  .hero-chip{font-size:.68rem;padding:7px 12px}
+  .hub-section{padding:42px 18px 54px}
+  .section-title{font-size:2.7rem}
+  .wp-filters,.quote-filter-row{overflow:auto;display:flex;flex-wrap:nowrap;scrollbar-width:none}
+  .wp-filters::-webkit-scrollbar,.quote-filter-row::-webkit-scrollbar{display:none}
+}
+
+
+/* Phase 16.6 — Exact PADDOX helmet logo PNG fix */
+.pdx-logo-img{
+  width:32px;
+  height:32px;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 0 10px rgba(232,0,45,.26));
+}
+.helmet-wrap,.adm-helmet,.receipt-logo-mark{
+  overflow:hidden;
+}
+.helmet-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+}
+.adm-helmet .pdx-logo-img{width:34px;height:34px}
+.receipt-logo-mark .pdx-logo-img{width:36px;height:36px}
+@media(max-width:640px){.pdx-logo-img{width:29px;height:29px}}

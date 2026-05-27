@@ -2692,3 +2692,44 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   border-bottom: 2px solid currentColor;
   transform: rotate(-45deg);
 }
+
+
+/* ============================================================
+   Phase 16.5 — PADDOX official logo integration
+   ============================================================ */
+.helmet-wrap,
+.adm-helmet,
+.receipt-logo-mark{
+  overflow:hidden;
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.13), rgba(232,0,45,.13) 42%, rgba(7,7,7,.92) 72%) !important;
+  border:1px solid rgba(232,0,45,.34) !important;
+  box-shadow:inset 0 0 18px rgba(255,255,255,.05), 0 0 18px rgba(232,0,45,.16);
+}
+.helmet-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:1}
+.pdx-logo-img{width:32px;height:32px;object-fit:contain;display:block;filter:drop-shadow(0 0 8px rgba(232,0,45,.55));transform:scale(1.08)}
+.nav-logo:hover .pdx-logo-img{filter:drop-shadow(0 0 13px rgba(232,0,45,.8));transform:scale(1.16) rotate(-4deg);transition:transform var(--tr, var(--transition, .35s ease)), filter var(--tr, var(--transition, .35s ease))}
+.adm-helmet .pdx-logo-img{width:31px;height:31px}
+.receipt-logo-mark .pdx-logo-img{width:34px;height:34px}
+
+
+/* Phase 16.6 — Exact PADDOX helmet logo PNG fix */
+.pdx-logo-img{
+  width:32px;
+  height:32px;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 0 10px rgba(232,0,45,.26));
+}
+.helmet-wrap,.adm-helmet,.receipt-logo-mark{
+  overflow:hidden;
+}
+.helmet-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+}
+.adm-helmet .pdx-logo-img{width:34px;height:34px}
+.receipt-logo-mark .pdx-logo-img{width:36px;height:36px}
+@media(max-width:640px){.pdx-logo-img{width:29px;height:29px}}
