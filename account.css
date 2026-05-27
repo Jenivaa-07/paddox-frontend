@@ -335,42 +335,47 @@ input:checked+.tgl-sl::before{background:var(--red);transform:translateX(20px)}
 @media(max-width:760px){.orders-premium-top,.order-card-head,.order-card-main,.order-detail-top{align-items:flex-start;flex-direction:column}.order-status-stack{align-items:flex-start}.order-total-block{text-align:left}.order-timeline{grid-template-columns:repeat(2,1fr);gap:16px}.order-timeline::before{display:none}.order-detail-grid{grid-template-columns:1fr}.order-mini-item,.order-detail-item{grid-template-columns:auto 1fr}.order-mini-price,.order-detail-item strong{grid-column:2}.order-card-actions{justify-content:flex-start}.orders-refresh-btn{width:100%;text-align:center}}
 
 
-/* ============================================================
-   Phase 16.5 — PADDOX official logo integration
-   ============================================================ */
-.helmet-wrap,
-.adm-helmet,
-.receipt-logo-mark{
-  overflow:hidden;
-  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.13), rgba(232,0,45,.13) 42%, rgba(7,7,7,.92) 72%) !important;
-  border:1px solid rgba(232,0,45,.34) !important;
-  box-shadow:inset 0 0 18px rgba(255,255,255,.05), 0 0 18px rgba(232,0,45,.16);
+/* Phase 16.9 — Exact PADDOX logo placement fix
+   Uses the real uploaded helmet image only, removes CSS-generated logo marks, and keeps navbar height normal. */
+.helmet-wrap{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  max-width:38px!important;
+  max-height:38px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 35% 28%,rgba(232,0,45,.18),rgba(7,7,7,.92) 62%)!important;
+  border:1px solid rgba(232,0,45,.28)!important;
+  box-shadow:none!important;
 }
-.helmet-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:1}
-.pdx-logo-img{width:32px;height:32px;object-fit:contain;display:block;filter:drop-shadow(0 0 8px rgba(232,0,45,.55));transform:scale(1.08)}
-.nav-logo:hover .pdx-logo-img{filter:drop-shadow(0 0 13px rgba(232,0,45,.8));transform:scale(1.16) rotate(-4deg);transition:transform var(--tr, var(--transition, .35s ease)), filter var(--tr, var(--transition, .35s ease))}
-.adm-helmet .pdx-logo-img{width:31px;height:31px}
-.receipt-logo-mark .pdx-logo-img{width:34px;height:34px}
-
-
-/* Phase 16.6 — Exact PADDOX helmet logo PNG fix */
-.pdx-logo-img{
-  width:32px;
-  height:32px;
-  object-fit:contain;
-  display:block;
-  filter:drop-shadow(0 0 10px rgba(232,0,45,.26));
+.helmet-icon,.helmet-icon::before,.helmet-icon::after{
+  display:none!important;
+  content:none!important;
 }
-.helmet-wrap,.adm-helmet,.receipt-logo-mark{
-  overflow:hidden;
+.brand-logo-icon{
+  display:block!important;
+  width:32px!important;
+  height:32px!important;
+  max-width:32px!important;
+  max-height:32px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  transform:none!important;
+  filter:none!important;
 }
-.helmet-icon{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  height:100%;
+.nav-logo{
+  height:auto!important;
+  min-height:0!important;
+  align-items:center!important;
 }
-.adm-helmet .pdx-logo-img{width:34px;height:34px}
-.receipt-logo-mark .pdx-logo-img{width:36px;height:36px}
-@media(max-width:640px){.pdx-logo-img{width:29px;height:29px}}
+.nav-inner{
+  height:100%!important;
+  align-items:center!important;
+}

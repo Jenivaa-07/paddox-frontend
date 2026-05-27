@@ -2765,22 +2765,47 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 }
 
 
-/* Phase 16.7 — Fan stories empty state uses exact PADDOX logo, not placeholder dash icon */
-.brand-empty-icon{
-  overflow:hidden !important;
-  padding:0 !important;
-  background:#050505 !important;
-  border:1px solid rgba(232,0,45,.34) !important;
-  box-shadow:0 0 0 1px rgba(255,255,255,.04),0 0 22px rgba(232,0,45,.14);
+/* Phase 16.9 — Exact PADDOX logo placement fix
+   Uses the real uploaded helmet image only, removes CSS-generated logo marks, and keeps navbar height normal. */
+.helmet-wrap{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  max-width:38px!important;
+  max-height:38px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 35% 28%,rgba(232,0,45,.18),rgba(7,7,7,.92) 62%)!important;
+  border:1px solid rgba(232,0,45,.28)!important;
+  box-shadow:none!important;
 }
-.brand-empty-icon::before,
-.brand-empty-icon::after{
-  display:none !important;
+.helmet-icon,.helmet-icon::before,.helmet-icon::after{
+  display:none!important;
+  content:none!important;
 }
-.brand-empty-icon img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  transform:scale(1.12);
+.brand-logo-icon{
+  display:block!important;
+  width:32px!important;
+  height:32px!important;
+  max-width:32px!important;
+  max-height:32px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  transform:none!important;
+  filter:none!important;
+}
+.nav-logo{
+  height:auto!important;
+  min-height:0!important;
+  align-items:center!important;
+}
+.nav-inner{
+  height:100%!important;
+  align-items:center!important;
 }

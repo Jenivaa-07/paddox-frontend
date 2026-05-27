@@ -955,7 +955,7 @@ function renderFanEmptyState(grid, title, message) {
   if (!grid) return;
   grid.innerHTML = `
     <div class="home-empty-card fan-empty-card reveal-up">
-      <div class="empty-icon brand-empty-icon" aria-hidden="true"><img src="assets/paddox-logo-icon.png" alt=""></div>
+      <div class="empty-icon" aria-hidden="true"></div>
       <div>
         <h3>${escapeHTML(title)}</h3>
         <p>${escapeHTML(message)}</p>
