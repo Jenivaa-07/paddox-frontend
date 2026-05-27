@@ -2142,16 +2142,16 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 
 /* Real flag image chip for countdown */
 .cs-flag {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
+  width: 58px;
+  height: 42px;
+  border-radius: 9px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
-  border: 1px solid rgba(255,255,255,.12);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 12px 28px rgba(0,0,0,.28);
+  background: #111;
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 28px rgba(0,0,0,.3);
   position: relative;
   overflow: hidden;
 }
@@ -2164,8 +2164,16 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   display: block;
 }
 .cs-flag-fallback {
-  font-size: 1.35rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-condensed);
+  font-size: .8rem;
+  letter-spacing: 2px;
+  color: var(--white);
+  background: linear-gradient(135deg, rgba(232,0,45,.45), rgba(255,255,255,.08));
 }
 .cs-flag.flag-fallback {
   border-color: rgba(232,0,45,.35);
@@ -2324,4 +2332,32 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   .pcard-img-wrap { height: 250px; }
   .newsletter-section { padding: 84px 0; }
   .nl-title { font-size: clamp(2.3rem, 12vw, 3.6rem); }
+}
+
+
+/* ============================================================
+   PHASE 12 V6 — Countdown Flag Bug Fix + Live Ticker Polish
+   ============================================================ */
+.hero-ticker .ticker-text {
+  transition: opacity .35s ease, transform .35s ease;
+}
+.cs-race {
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .cs-race {
+    justify-content: center;
+    text-align: center;
+  }
+  .cs-flag {
+    width: 52px;
+    height: 38px;
+    border-radius: 8px;
+  }
+  .cs-circuit {
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.45;
+  }
 }

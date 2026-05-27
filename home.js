@@ -268,18 +268,23 @@ function setCountdownFlag(flagEl, race = {}) {
   const code = countryCodeFromRace(race);
   const label = safeText(race.country || race.location || race.name, 'Race flag');
   flagEl.classList.remove('flag-fallback');
+  flagEl.innerHTML = '';
+
   if (!code) {
-    flagEl.innerHTML = '<span class="cs-flag-fallback">🏁</span>';
+    flagEl.innerHTML = '<span class="cs-flag-fallback">F1</span>';
     flagEl.classList.add('flag-fallback');
     return;
   }
+
   flagEl.innerHTML = `
     <img
       class="cs-flag-img"
-      src="https://flagcdn.com/${code}.svg"
+      src="https://flagcdn.com/w80/${code}.png"
+      srcset="https://flagcdn.com/w40/${code}.png 1x, https://flagcdn.com/w80/${code}.png 2x"
       alt="${escapeHTML(label)} flag"
       loading="lazy"
-      onerror="this.parentElement.classList.add('flag-fallback');this.outerHTML='<span class=&quot;cs-flag-fallback&quot;>🏁</span>'"
+      referrerpolicy="no-referrer"
+      onerror="this.parentElement.classList.add('flag-fallback');this.outerHTML='<span class=&quot;cs-flag-fallback&quot;>F1</span>'"
     />`;
 }
 
@@ -656,10 +661,11 @@ async function initRealCountdown() {
     HOME_F1.nextRace = race;
 
     if (flagEl) {
-      flagEl.textContent = '';
       flagEl.title = race.country || race.name || 'Next Grand Prix';
       flagEl.setAttribute('aria-label', race.country || 'Grand Prix');
+      setCountdownFlag(flagEl, race);
     }
+    updateTickerFromAPI();
     if (nameEl) nameEl.textContent = race.name || 'Next Grand Prix';
     if (circEl) circEl.textContent = [race.circuit, race.location, race.country].filter(Boolean).join(' · ');
     if (chipEl) chipEl.textContent = `Round ${race.round || '—'} · Season ${race.season || new Date().getFullYear()}`;
@@ -684,9 +690,9 @@ async function initRealCountdown() {
   } catch (err) {
     console.warn('Countdown unavailable', err);
     if (flagEl) {
-      flagEl.textContent = '';
       flagEl.title = 'Grand Prix';
       flagEl.setAttribute('aria-label', 'Grand Prix');
+      setCountdownFlag(flagEl, {});
     }
     if (nameEl) nameEl.textContent = 'Race schedule unavailable';
     if (circEl) circEl.textContent = 'Please check again shortly.';
@@ -1264,7 +1270,7 @@ function updateTickerFromAPI() {
 
   const messages = [];
   if (HOME_F1.nextRace) {
-    messages.push(`🏁 Next race: ${HOME_F1.nextRace.name || 'Grand Prix'}`);
+    messages.push(`Next race: ${HOME_F1.nextRace.name || 'Grand Prix'}`);
   }
   if (HOME_F1.schedule.length) {
     messages.push(`📅 ${HOME_F1.schedule.length} Grand Prix rounds this season`);
