@@ -76,7 +76,19 @@ let state = {
   modalProduct : null,
 };
 
-let cart = JSON.parse(sessionStorage.getItem('paddox_cart') || '[]');
+
+function loadCartState() {
+  try {
+    const raw = localStorage.getItem('paddox_cart') || sessionStorage.getItem('paddox_cart') || '[]';
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+let cart = loadCartState();
+
 async function loadShopProducts() {
   try {
     const res = await fetch(PRODUCT_API_BASE);
@@ -126,6 +138,36 @@ function updateShopHeroStats() {
   const teamEl = document.getElementById('shop-team-count');
   if (dropEl) dropEl.textContent = PRODUCTS.length ? 'Live' : 'Soon';
   if (teamEl) teamEl.textContent = String(SHOP_F1_TEAMS.length);
+}
+
+
+function productStockLimit(product = {}) {
+  const stock = Number(product.stock ?? product.inventory ?? 99);
+  if (!Number.isFinite(stock) || stock <= 0) return 99;
+  return Math.max(1, Math.floor(stock));
+}
+
+function currentCartQuantity(productId, size = '') {
+  return cart
+    .filter(item => String(item.id) === String(productId) && String(item.size || '') === String(size || ''))
+    .reduce((sum, item) => sum + Number(item.qty || 0), 0);
+}
+
+function getCartSubtotal() {
+  return cart.reduce((s, x) => s + Number(x.price || 0) * Number(x.qty || 1), 0);
+}
+
+function getCartQuantity() {
+  return cart.reduce((s, x) => s + Number(x.qty || 0), 0);
+}
+
+function cartShippingAmount(subtotal = getCartSubtotal()) {
+  return subtotal >= 999 ? 0 : 99;
+}
+
+function getCartTotal() {
+  const subtotal = getCartSubtotal();
+  return subtotal + cartShippingAmount(subtotal);
 }
 
 async function loadShopWishlist() {
@@ -744,25 +786,37 @@ function renderPagination(total) {
 /* ══════════════════════════════════════
    CART
 ══════════════════════════════════════ */
-function saveCart() { sessionStorage.setItem('paddox_cart', JSON.stringify(cart)); updateCartUI(); }
 
-function addToCart(id, selectedSize = null) {
-  const p = PRODUCTS.find(x => x.id === id);
+function saveCart() {
+  const payload = JSON.stringify(cart);
+  localStorage.setItem('paddox_cart', payload);
+  sessionStorage.setItem('paddox_cart', payload);
+  updateCartUI();
+}
 
+
+
+function addToCart(id, selectedSize = null, qtyToAdd = 1) {
+  const p = PRODUCTS.find(x => String(x.id) === String(id));
   if (!p) return;
 
-  const size = needsSize(p)
-    ? (selectedSize || 'M')
-    : '';
+  const size = needsSize(p) ? (selectedSize || 'M') : '';
+  const stockLimit = productStockLimit(p);
+  const requestedQty = Math.max(1, Number(qtyToAdd || 1));
+  const alreadyInCart = currentCartQuantity(id, size);
+  const allowedQty = Math.max(0, stockLimit - alreadyInCart);
 
-  const cartKey = size
-    ? `${id}-${size}`
-    : id;
+  if (allowedQty <= 0) {
+    showToast('Stock limit reached for this item');
+    return;
+  }
 
-  const ex = cart.find(x => x.cartKey === cartKey || (!x.cartKey && x.id === id && !size));
+  const qty = Math.min(requestedQty, allowedQty);
+  const cartKey = size ? `${id}-${size}` : String(id);
+  const ex = cart.find(x => String(x.cartKey || x.id) === String(cartKey));
 
   if (ex) {
-    ex.qty++;
+    ex.qty = Number(ex.qty || 1) + qty;
   } else {
     cart.push({
       cartKey,
@@ -774,7 +828,7 @@ function addToCart(id, selectedSize = null) {
       gradient: p.gradient,
       image: p.image,
       size,
-      qty: 1
+      qty
     });
   }
 
@@ -782,14 +836,12 @@ function addToCart(id, selectedSize = null) {
 
   showToast(`${p.name}${size ? ' · ' + size : ''} added to cart`);
 
-  /* Badge pulse */
   const badge = document.getElementById('cart-badge');
   if (badge) {
     badge.style.transform = 'scale(1.5)';
     setTimeout(() => badge.style.transform = '', 350);
   }
 
-  /* Cart icon wiggle */
   const icon = document.querySelector('.cart-icon-anim');
   if (icon) {
     icon.style.transform = 'scale(1.4) rotate(-12deg)';
@@ -802,13 +854,31 @@ function removeFromCart(key) {
   saveCart();
 }
 
+
 function changeQty(key, delta) {
   const item = cart.find(x => String(x.cartKey || x.id) === String(key));
   if (!item) return;
-  item.qty += delta;
-  if (item.qty <= 0) removeFromCart(key);
-  else saveCart();
+
+  const product = PRODUCTS.find(p => String(p.id) === String(item.id));
+  const maxQty = product ? productStockLimit(product) : 99;
+  const nextQty = Number(item.qty || 1) + Number(delta || 0);
+
+  if (nextQty <= 0) {
+    removeFromCart(key);
+    return;
+  }
+
+  if (nextQty > maxQty) {
+    item.qty = maxQty;
+    saveCart();
+    showToast('Stock limit reached for this item');
+    return;
+  }
+
+  item.qty = nextQty;
+  saveCart();
 }
+
 
 function updateCartUI() {
   const badge     = document.getElementById('cart-badge');
@@ -818,7 +888,7 @@ function updateCartUI() {
   const subtotal  = document.getElementById('cart-subtotal');
   const totalEl   = document.getElementById('cart-total');
 
-  const totalQty  = cart.reduce((s, x) => s + x.qty, 0);
+  const totalQty  = getCartQuantity();
   if (badge)    badge.textContent    = totalQty;
   if (countLbl) countLbl.textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
 
@@ -826,7 +896,7 @@ function updateCartUI() {
     if (itemsEl) itemsEl.innerHTML = `
       <div class="cart-empty">
         <div class="cart-empty-icon" aria-hidden="true"></div>
-        <p>Your cart is empty.<br/>Find your favourite F1 gear!</p>
+        <p>Your cart is empty.<br/>Find your favourite PADDOX gear.</p>
         <button class="cart-empty-btn" id="cart-empty-btn">Browse Shop</button>
       </div>`;
     document.getElementById('cart-empty-btn')?.addEventListener('click', () => toggleCart(false));
@@ -835,29 +905,52 @@ function updateCartUI() {
   }
 
   if (footer) footer.style.display = 'block';
-  const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
-  if (subtotal) subtotal.textContent = `₹${total.toLocaleString('en-IN')}`;
+  const subTotalValue = getCartSubtotal();
+  const shipping = cartShippingAmount(subTotalValue);
+  const total = subTotalValue + shipping;
+
+  if (subtotal) subtotal.textContent = `₹${subTotalValue.toLocaleString('en-IN')}`;
   if (totalEl)  totalEl.textContent  = `₹${total.toLocaleString('en-IN')}`;
+
+  const cartSummary = footer?.querySelector('.cart-summary');
+  if (cartSummary) {
+    const leftForFree = Math.max(0, 999 - subTotalValue);
+    const progress = Math.min(100, Math.round((subTotalValue / 999) * 100));
+    const shippingRow = cartSummary.querySelector('.free-ship');
+    if (shippingRow) shippingRow.textContent = shipping ? `₹${shipping}` : 'FREE';
+
+    let progressEl = cartSummary.querySelector('.pdx-cart-free-progress');
+    if (!progressEl) {
+      progressEl = document.createElement('div');
+      progressEl.className = 'pdx-cart-free-progress';
+      cartSummary.prepend(progressEl);
+    }
+
+    progressEl.innerHTML = `
+      <div class="pdx-free-label">${leftForFree ? `Add ₹${leftForFree.toLocaleString('en-IN')} more for free shipping` : 'Free shipping unlocked'}</div>
+      <div class="pdx-free-track"><span style="width:${progress}%"></span></div>
+    `;
+  }
 
   if (itemsEl) {
     itemsEl.innerHTML = cart.map(item => `
       <div class="cart-item" data-key="${item.cartKey || item.id}">
         <div class="ci-img" style="background:${item.gradient}">
-          <img src="${item.image}" alt="${item.name}"
+          <img src="${item.image}" alt="${escapeCheckoutText(item.name)}"
             onerror="this.outerHTML='<span class=&quot;fallback-speedmark small&quot;></span>'"
             style="width:100%;height:100%;object-fit:cover"/>
         </div>
         <div class="ci-info">
-          <div class="ci-team">${item.team}${item.size ? ' · Size ' + item.size : ''}</div>
-          <div class="ci-name">${item.name}</div>
-          <div class="ci-price">₹${(item.price * item.qty).toLocaleString('en-IN')}</div>
+          <div class="ci-team">${escapeCheckoutText(item.team)}${item.size ? ' · Size ' + escapeCheckoutText(item.size) : ''}</div>
+          <div class="ci-name">${escapeCheckoutText(item.name)}</div>
+          <div class="ci-price">₹${(Number(item.price || 0) * Number(item.qty || 1)).toLocaleString('en-IN')}</div>
           <div class="ci-qty">
             <button class="qty-b" data-key="${item.cartKey || item.id}" data-delta="-1">−</button>
             <span class="qty-n">${item.qty}</span>
             <button class="qty-b" data-key="${item.cartKey || item.id}" data-delta="1">+</button>
           </div>
         </div>
-        <button class="ci-rm" data-key="${item.cartKey || item.id}">✕</button>
+        <button class="ci-rm" data-key="${item.cartKey || item.id}" aria-label="Remove ${escapeCheckoutText(item.name)}">✕</button>
       </div>
     `).join('');
 
@@ -916,7 +1009,7 @@ function ensureCheckoutModal() {
     <div class="pdx-checkout-backdrop" data-close-checkout="true"></div>
     <div class="pdx-checkout-card">
       <button class="pdx-checkout-close" type="button" data-close-checkout="true">✕</button>
-      <div class="pdx-checkout-kicker">SECURE CHECKOUT</div>
+      <div class="pdx-checkout-kicker"><span class="pdx-mini-lock" aria-hidden="true"></span> SECURE CHECKOUT</div>
       <div class="pdx-checkout-title">DELIVERY DETAILS</div>
       <p class="pdx-checkout-sub">Enter your delivery details and choose your preferred payment method to place the order.</p>
 
@@ -946,7 +1039,7 @@ function ensureCheckoutModal() {
         <div class="pdx-checkout-summary" id="pdx-checkout-summary"></div>
 
         <button class="pdx-checkout-pay" type="submit">
-          <span>Place Order</span><span>🏁</span>
+          <span>Place Order</span><span class="checkout-arrow" aria-hidden="true"></span>
         </button>
       </form>
     </div>
@@ -980,15 +1073,23 @@ function openCheckoutModal() {
   }
 
   const modal = ensureCheckoutModal();
-  const subtotal = cart.reduce((s, item) => s + Number(item.price || 0) * Number(item.qty || 1), 0);
-  const shipping = subtotal >= 999 ? 0 : 99;
+  const subtotal = getCartSubtotal();
+  const shipping = cartShippingAmount(subtotal);
   const tax = Math.round(subtotal * 0.05);
   const total = subtotal + shipping + tax;
 
   const summary = modal.querySelector('#pdx-checkout-summary');
   if (summary) {
     summary.innerHTML = `
-      <div><span>Items</span><strong>${cart.reduce((s, item) => s + Number(item.qty || 1), 0)}</strong></div>
+      <div class="pdx-checkout-items">
+        ${cart.map(item => `
+          <div class="pdx-checkout-item">
+            <span>${escapeCheckoutText(item.name)}${item.size ? ' · ' + escapeCheckoutText(item.size) : ''} × ${Number(item.qty || 1)}</span>
+            <strong>₹${(Number(item.price || 0) * Number(item.qty || 1)).toLocaleString('en-IN')}</strong>
+          </div>
+        `).join('')}
+      </div>
+      <div><span>Items</span><strong>${getCartQuantity()}</strong></div>
       <div><span>Subtotal</span><strong>₹${subtotal.toLocaleString('en-IN')}</strong></div>
       <div><span>Shipping</span><strong>${shipping ? `₹${shipping.toLocaleString('en-IN')}` : 'FREE'}</strong></div>
       <div><span>Tax</span><strong>₹${tax.toLocaleString('en-IN')}</strong></div>
@@ -1058,7 +1159,7 @@ async function submitCheckoutForm(e) {
     const { shippingAddress, paymentMethod } = getCheckoutFormData();
 
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span>Processing order...</span><span>⏳</span>';
+    submitBtn.innerHTML = '<span>Processing order...</span><span class="pdx-loading-dot" aria-hidden="true"></span>';
 
     const orderRes = await fetch(ORDER_API_BASE, {
       method: 'POST',
@@ -1102,7 +1203,7 @@ async function submitCheckoutForm(e) {
     console.error(err);
     showToast(`${err.message}`);
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '<span>Place Order</span><span>🏁</span>';
+    submitBtn.innerHTML = '<span>Place Order</span><span class="checkout-arrow" aria-hidden="true"></span>';
   }
 }
 
@@ -1201,6 +1302,9 @@ function updateModalSizeUI(product) {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sz').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
+      modalQty = 1;
+      const qtyEl = document.getElementById('modal-qty');
+      if (qtyEl) qtyEl.textContent = modalQty;
     });
 
     sizeButtonsWrap.appendChild(btn);
@@ -1302,6 +1406,12 @@ function openModal(id) {
 
   if (modalQtyPlus) {
     modalQtyPlus.onclick = () => {
+      const selectedSize = needsSize(p) ? getSelectedModalSize() : '';
+      const maxQty = Math.max(1, productStockLimit(p) - currentCartQuantity(p.id, selectedSize));
+      if (modalQty >= maxQty) {
+        showToast('Stock limit reached for this item');
+        return;
+      }
       modalQty++;
       document.getElementById('modal-qty').textContent = modalQty;
     };
@@ -1313,10 +1423,7 @@ function openModal(id) {
     addBtn.onclick = () => {
       const selectedSize = needsSize(p) ? getSelectedModalSize() : '';
 
-      for (let i = 0; i < modalQty; i++) {
-        addToCart(p.id, selectedSize);
-      }
-
+      addToCart(p.id, selectedSize, modalQty);
       closeModal();
     };
   }
