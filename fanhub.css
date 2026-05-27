@@ -2776,3 +2776,62 @@ body.modal-open { overflow: hidden; }
   .hub-tab{min-height:60px!important;padding:0 18px!important;}
   .hero-chip .chip-mark,.hub-tab .ht-mark{width:19px!important;height:19px!important;flex-basis:19px!important;}
 }
+
+
+/* ============================================================
+   Phase 17.4 — Community icons + poll UI + home-strip team logos
+   ============================================================ */
+.comm-card-title::before{content:none!important;display:none!important}
+.comm-card-title{gap:12px!important;align-items:center!important}
+.comm-title-icon,
+.hero-chip .chip-mark,
+.hub-tab .ht-mark{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:28px!important;
+  height:28px!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  border-radius:8px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.018))!important;
+  box-shadow:inset 0 0 0 1px rgba(232,0,45,.12),0 0 18px rgba(232,0,45,.06)!important;
+  transform:none!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+.comm-title-icon::before,
+.hero-chip .chip-mark::before,
+.hub-tab .ht-mark::before{
+  content:''!important;
+  width:15px!important;
+  height:15px!important;
+  background:var(--red)!important;
+  display:block!important;
+  mask:center/contain no-repeat;
+  -webkit-mask:center/contain no-repeat;
+  box-shadow:none!important;
+}
+.ht-mark::after,.chip-mark::after{display:none!important;content:none!important}
+.icon-wallpaper::before,.fh-icon-wallpaper::before,.hub-tab[data-tab="wallpapers"] .ht-mark::before,.hero-chip[href="#sec-wallpapers"] .chip-mark::before{mask-image:linear-gradient(#000,#000);-webkit-mask-image:linear-gradient(#000,#000);border:2px solid var(--red);background:transparent!important;width:16px!important;height:12px!important}
+.icon-driver::before,.fh-icon-driver::before,.hub-tab[data-tab="drivers"] .ht-mark::before,.hero-chip[href="#sec-drivers"] .chip-mark::before{border-radius:50%;box-shadow:0 0 0 3px transparent inset;clip-path:polygon(15% 35%,55% 15%,88% 35%,82% 75%,50% 90%,18% 75%)}
+.icon-calendar::before,.fh-icon-calendar::before,.hub-tab[data-tab="calendar"] .ht-mark::before,.hero-chip[href="#sec-calendar"] .chip-mark::before{mask-image:linear-gradient(#000,#000);-webkit-mask-image:linear-gradient(#000,#000);border:2px solid var(--red);border-top:5px solid var(--red);background:transparent!important;width:15px!important;height:15px!important}
+.icon-quote::before,.fh-icon-quote::before,.hub-tab[data-tab="quotes"] .ht-mark::before{content:'“'!important;background:none!important;color:var(--red)!important;font-family:var(--font-d)!important;font-size:24px!important;line-height:.8!important;width:auto!important;height:auto!important;mask:none!important;-webkit-mask:none!important}
+.icon-community::before,.fh-icon-community::before,.hub-tab[data-tab="community"] .ht-mark::before,.hero-chip[href="#sec-community"] .chip-mark::before{clip-path:polygon(50% 5%,61% 34%,92% 34%,67% 52%,76% 84%,50% 64%,24% 84%,33% 52%,8% 34%,39% 34%)}
+.icon-feed::before{clip-path:polygon(8% 15%,92% 15%,92% 70%,60% 70%,45% 88%,45% 70%,8% 70%)}
+.icon-leaderboard::before{clip-path:polygon(5% 88%,5% 45%,28% 45%,28% 88%,38% 88%,38% 18%,62% 18%,62% 88%,72% 88%,72% 35%,95% 35%,95% 88%)}
+.icon-poll::before{clip-path:polygon(8% 70%,8% 56%,82% 56%,82% 70%,8% 70%,8% 32%,58% 32%,58% 46%,8% 46%,8% 8%,92% 8%,92% 22%,8% 22%)}
+.icon-trivia::before{content:'?'!important;background:none!important;color:var(--red)!important;font-family:var(--font-d)!important;font-size:19px!important;line-height:1!important;width:auto!important;height:auto!important;mask:none!important;-webkit-mask:none!important}
+.icon-pitwall::before,.hero-chip[href="pitwall.html"] .chip-mark::before{clip-path:polygon(8% 88%,8% 58%,24% 58%,24% 88%,34% 88%,34% 38%,50% 38%,50% 88%,60% 88%,60% 18%,76% 18%,76% 88%,86% 88%,86% 8%,96% 8%,96% 88%)}
+.hub-tab:hover .ht-mark,.hub-tab.on .ht-mark,.hero-chip:hover .chip-mark{
+  border-color:rgba(232,0,45,.55)!important;
+  background:linear-gradient(145deg,rgba(232,0,45,.16),rgba(255,255,255,.035))!important;
+}
+.poll-color-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--poll-color,var(--red));box-shadow:0 0 12px color-mix(in srgb,var(--poll-color,var(--red)) 55%,transparent);margin-right:10px;vertical-align:middle}
+.popt-lbl{display:flex!important;align-items:center!important;padding-right:56px!important}
+.popt-pct{right:18px!important}
+.lb-podium-medal{font-size:.62rem!important;letter-spacing:1.6px!important;border-radius:4px!important;background:rgba(232,0,45,.10)!important}
+.fh-empty-mark::before{width:28px!important;height:28px!important;border:1px solid rgba(232,0,45,.35)!important;border-radius:8px!important;background:rgba(232,0,45,.08)!important;transform:none!important}
+.fan-team-logo{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:50%;overflow:hidden}
+.fan-team-logo img{width:100%;height:100%;object-fit:contain;padding:3px;display:block}
+.fan-team-logo.mini{width:22px;height:22px;margin-right:7px;vertical-align:middle}.dp-team{display:flex!important;align-items:center!important;gap:0!important}.dp-team span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fan-team-logo.card{width:30px;height:30px;margin-right:9px}.drv-team{display:flex!important;align-items:center!important;justify-content:center!important;gap:0!important}

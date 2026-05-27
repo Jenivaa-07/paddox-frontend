@@ -611,28 +611,15 @@ select.form-input option{background:var(--dark2)}
 }
 
 
-/* Phase 16.9 — Exact PADDOX logo placement fix for admin */
-.adm-helmet{
-  width:38px!important;
-  height:38px!important;
-  min-width:38px!important;
-  min-height:38px!important;
-  max-width:38px!important;
-  max-height:38px!important;
-  padding:0!important;
-  overflow:hidden!important;
-  border-radius:50%!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:radial-gradient(circle at 35% 28%,rgba(232,0,45,.18),rgba(7,7,7,.92) 62%)!important;
-  border:1px solid rgba(232,0,45,.28)!important;
-}
-.adm-logo-icon{
-  display:block!important;
-  width:32px!important;
-  height:32px!important;
-  object-fit:cover!important;
-  object-position:center!important;
-  border-radius:50%!important;
-}
+/* Phase 17.4 — Fan Poll Admin */
+.fan-poll-admin-grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+.adm-panel-card{background:var(--dark2);border:1px solid rgba(255,255,255,.08);padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.adm-panel-title{font-family:var(--font-d);font-size:1.4rem;letter-spacing:2px;margin-bottom:14px;color:#fff}
+.adm-mini-label{display:block;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;color:var(--red);font-size:.68rem;margin:14px 0 7px}
+.poll-options-admin{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.poll-admin-option-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.poll-admin-row{display:flex;flex-direction:column;gap:8px;margin:14px 0;color:var(--muted2);font-size:.82rem}
+.adm-btn-ghost{border:1px solid rgba(255,255,255,.12);color:#ddd;padding:9px 12px;font-family:var(--font-c);letter-spacing:1.8px;text-transform:uppercase;background:rgba(255,255,255,.035)}
+.adm-btn-ghost:hover{border-color:var(--red);color:#fff}.adm-btn-ghost.danger,.act-btn.danger{color:#ff6b6b;border-color:rgba(255,80,80,.22)}
+.admin-hint{font-size:.76rem;color:var(--muted);line-height:1.6;margin-top:12px}.fan-poll-table-wrap{min-height:280px}
+@media(max-width:900px){.fan-poll-admin-grid{grid-template-columns:1fr}.poll-admin-option-row{grid-template-columns:1fr}}

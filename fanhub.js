@@ -331,6 +331,56 @@ function driverInitials(name = '') {
   return name.split(' ').filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase() || 'F1';
 }
 
+
+/* Home strip team-logo reuse for Fan Hub driver cards */
+let FAN_HOME_STRIP_LOGOS = [];
+let FAN_HOME_STRIP_LOGOS_READY = false;
+
+function normalizeLogoKey(value = '') {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/f1\s*team|formula\s*1|scuderia|oracle|bwt|petronas|amg|racing|team/g, '')
+    .replace(/[^a-z0-9]+/g, '')
+    .trim();
+}
+
+async function loadFanHomeStripLogos() {
+  if (FAN_HOME_STRIP_LOGOS_READY) return FAN_HOME_STRIP_LOGOS;
+  FAN_HOME_STRIP_LOGOS_READY = true;
+  try {
+    const res = await fetch('https://paddox-backend.onrender.com/api/fan/home-marquee-logos');
+    const data = await res.json().catch(() => ({}));
+    const list = data?.data?.logos || data?.logos || data?.data || [];
+    FAN_HOME_STRIP_LOGOS = (Array.isArray(list) ? list : [])
+      .filter(item => item && item.name && item.image && item.isActive !== false)
+      .map(item => ({
+        name: String(item.name || ''),
+        key: normalizeLogoKey(item.slug || item.name),
+        image: String(item.image || ''),
+        color: String(item.color || '#e8002d')
+      }));
+  } catch (err) {
+    console.warn('Fan Hub home-strip logos unavailable', err);
+    FAN_HOME_STRIP_LOGOS = [];
+  }
+  return FAN_HOME_STRIP_LOGOS;
+}
+
+function findTeamStripLogo(teamName = '') {
+  const key = normalizeLogoKey(teamName);
+  if (!key || !FAN_HOME_STRIP_LOGOS.length) return null;
+  return FAN_HOME_STRIP_LOGOS.find(item => {
+    const logoKey = normalizeLogoKey(item.name || item.key);
+    return key.includes(logoKey) || logoKey.includes(key);
+  }) || null;
+}
+
+function fanTeamLogoHTML(teamName = '', extraClass = '') {
+  const item = findTeamStripLogo(teamName);
+  if (!item?.image) return '';
+  return `<span class="fan-team-logo ${extraClass}"><img src="${safeText(item.image)}" alt="${safeText(item.name || teamName)} logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.fan-team-logo')?.remove()"></span>`;
+}
+
 function driverAvatarHTML(driver, size = 'small') {
   const image = driver.image || '';
   if (image && (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:image/'))) {
@@ -531,6 +581,7 @@ async function loadRealDriverStandings() {
 
     const drivers = await getRealtimeDriverGrid();
     if (!drivers.length) throw new Error('No live race drivers returned');
+    await loadFanHomeStripLogos();
 
     REAL_DRIVER_GRID_CACHE = drivers;
 
@@ -557,7 +608,7 @@ async function loadRealDriverStandings() {
           </div>
           <div>
             <div class="dp-name">${driver.code || driver.name}</div>
-            <div class="dp-team">${driver.team}</div>
+            <div class="dp-team">${fanTeamLogoHTML(driver.team, 'mini')}<span>${driver.team}</span></div>
           </div>
         </div>
       `).join('');
@@ -570,7 +621,7 @@ async function loadRealDriverStandings() {
             ${driverAvatarHTML(d, 'large')}
           </div>
           <div class="drv-name">${d.name}</div>
-          <div class="drv-team" style="color:${d.teamColor}">${d.team}</div>
+          <div class="drv-team" style="color:${d.teamColor}">${fanTeamLogoHTML(d.team, 'card')}<span>${d.team}</span></div>
           <div class="drv-country">
             <span class="driver-flag-shell">${driverFlagHTML(d)}</span>
             <span>${d.nationality || 'Country TBA'}</span>
@@ -2097,6 +2148,19 @@ function storeFanPollVote(poll = CURRENT_POLL, optionIndex = 0) {
   try { localStorage.setItem(fanPollVoteKey(poll), String(optionIndex)); } catch (_) {}
 }
 
+
+function cleanPollOptionLabel(value = '', index = 0) {
+  return String(value || `Option ${index + 1}`)
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+    .replace(/[🔵🔴🟠⭐]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim() || `Option ${index + 1}`;
+}
+
+function pollOptionAccent(index = 0) {
+  return ['#1e5bff', '#e8002d', '#ff8700', '#c9a84c', '#00d2be'][index % 5];
+}
+
 function renderRealtimePoll(poll, totalVotes = 0) {
   const qEl = document.getElementById('poll-q');
   const optsEl = document.getElementById('poll-opts');
@@ -2117,7 +2181,7 @@ function renderRealtimePoll(poll, totalVotes = 0) {
     return `
       <div class="popt ${hasVoted ? 'show-results' : ''} ${isSelected ? 'selected' : ''}" onclick="voteRealtimePoll(${index})">
         <div class="popt-fill" style="width:${hasVoted ? pct : 0}%"></div>
-        <span class="popt-lbl">${escapeHTML(option.label || option.text || `Option ${index + 1}`)}</span>
+        <span class="popt-lbl"><i class="poll-color-dot" style="--poll-color:${pollOptionAccent(index)}"></i>${escapeHTML(cleanPollOptionLabel(option.label || option.text, index))}</span>
         <span class="popt-pct">${hasVoted ? `${pct}%` : 'Vote'}</span>
       </div>
     `;

@@ -61,7 +61,7 @@
     <!-- ── ADMIN SIDEBAR ── -->
     <aside class="admin-sidebar" id="admin-sidebar">
       <div class="adm-logo-wrap">
-        <div class="adm-helmet animate-icon"><img src="assets/paddox-logo-icon.png" alt="PADDOX Logo" class="adm-logo-icon"></div>
+        <div class="adm-helmet animate-icon">🏎️</div>
         <div>
           <div class="adm-logo">PADDO<span class="logo-x">X</span></div>
           <div class="adm-badge-label">Admin Panel</div>
@@ -93,6 +93,9 @@
         </div>
         <div class="adm-nav-item" data-page="fanquotes">
           <span class="adm-icon animate-icon">💬</span> Fan Quotes
+        </div>
+        <div class="adm-nav-item" data-page="fanpolls">
+          <span class="adm-icon animate-icon">📊</span> Fan Polls
         </div>
         <div class="adm-nav-item" data-page="fandrivers">
           <span class="adm-icon animate-icon">🏁</span> Fan Drivers
@@ -453,6 +456,51 @@
               </thead>
               <tbody id="quotes-tbody"></tbody>
             </table>
+          </div>
+        </div>
+
+
+        <!-- ── FAN POLLS ── -->
+        <div class="adm-page" id="adm-fanpolls">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <input class="adm-input" id="poll-search-admin" type="text" placeholder="Search polls…"/>
+            </div>
+            <button class="adm-btn-red" onclick="resetFanPollForm()">+ New Poll</button>
+          </div>
+
+          <div class="fan-poll-admin-grid">
+            <div class="fan-poll-editor adm-panel-card">
+              <div class="adm-panel-title">Create / Edit Poll</div>
+              <input type="hidden" id="poll-edit-id"/>
+              <label class="adm-mini-label">Question</label>
+              <input class="adm-input" id="poll-question" type="text" placeholder="Who will win this weekend?"/>
+              <label class="adm-mini-label">Options</label>
+              <div id="poll-options-admin" class="poll-options-admin"></div>
+              <button class="adm-btn-ghost" type="button" onclick="addFanPollOption()">+ Add Option</button>
+              <div class="poll-admin-row">
+                <label><input type="checkbox" id="poll-active" checked/> Active poll</label>
+                <label><input type="checkbox" id="poll-reset-votes"/> Reset votes on save</label>
+              </div>
+              <button class="adm-btn-red" type="button" onclick="saveFanPollAdmin()">Save Poll</button>
+              <button class="adm-btn-ghost" type="button" onclick="resetFanPollForm()">Clear</button>
+              <div class="admin-hint" id="poll-admin-status">Polls use the Fan Hub realtime poll API.</div>
+            </div>
+
+            <div class="data-table-wrap fan-poll-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Options</th>
+                    <th>Total Votes</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="fan-polls-tbody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
