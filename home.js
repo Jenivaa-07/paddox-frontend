@@ -845,7 +845,7 @@ function addToCart(id) {
   if (existing) {
     existing.qty++;
   } else {
-    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, emoji: product.emoji, image: product.image });
+    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, emoji: product.emoji, image: product.image, category: product.cat });
   }
   saveCart();
   showToast(`✓ ${product.name} added to cart!`);
@@ -858,6 +858,15 @@ updateCartBadge();
 ══════════════════════════════════════ */
 const modalOverlay = document.getElementById('modal-overlay');
 const modalClose   = document.getElementById('modal-close');
+
+function isApparelProduct(p = {}) {
+  const text = `${p.cat || ''} ${p.name || ''} ${p.team || ''}`.toLowerCase();
+  const apparelWords = ['apparel', 'shirt', 't-shirt', 'tshirt', 'tee', 'jersey', 'hoodie', 'jacket', 'cap', 'hat', 'wear'];
+  const nonSizeWords = ['collectible', 'poster', 'wallpaper', 'model', 'sticker', 'keychain', 'mug', 'bottle', 'frame', 'digital'];
+  if (nonSizeWords.some(word => text.includes(word))) return false;
+  return apparelWords.some(word => text.includes(word));
+}
+
 
 function openModal(id) {
   const p = PRODUCTS.find(x => String(x.id) === String(id));
@@ -878,12 +887,15 @@ function openModal(id) {
       onerror="this.outerHTML='<span style=font-size:6rem>${p.emoji}</span>'"/>
   `;
 
-  /* Size buttons */
+  /* Size buttons: only for apparel products */
+  const sizeWrap = document.querySelector('.modal-sizes');
+  const showSizes = isApparelProduct(p);
+  if (sizeWrap) sizeWrap.style.display = showSizes ? '' : 'none';
   document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.onclick = () => {
       document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-    });
+    };
   });
 
   /* Add btn */
