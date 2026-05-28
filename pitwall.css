@@ -384,3 +384,84 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
   #next-race-name .pit-flag-img{width:29px;height:20px;}
   .pit-btn-icon{width:14px;height:14px;}
 }
+
+/* ============================================================
+   PHASE 19.4 — Pit Wall Timing Table Alignment Polish
+   Keeps 19.3 navbar/icons/flags. Table + side panel only.
+   ============================================================ */
+.timing-panel{overflow:hidden;}
+.timing-panel .panel-head{align-items:center;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:16px;margin-bottom:14px;}
+.timing-table{display:block;overflow-x:auto;padding:0 2px 8px;scrollbar-width:thin;}
+.timing-header,
+.timing-row.session-row{
+  width:100%;
+  min-width:1040px;
+  display:grid!important;
+  grid-template-columns:54px minmax(260px,1.75fr) minmax(82px,.62fr) minmax(96px,.72fr) minmax(96px,.72fr) minmax(78px,.58fr) minmax(78px,.58fr) minmax(92px,.7fr) minmax(64px,.48fr)!important;
+  column-gap:14px!important;
+  align-items:center!important;
+}
+.timing-header{
+  position:sticky;
+  top:0;
+  z-index:3;
+  padding:10px 18px 12px!important;
+  margin-bottom:8px;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:14px;
+  background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(232,0,45,.035));
+  color:rgba(255,255,255,.42)!important;
+  font-size:.66rem!important;
+}
+.timing-row.session-row{
+  min-height:60px;
+  padding:10px 18px!important;
+  margin-bottom:8px;
+  border-radius:15px!important;
+  background:linear-gradient(90deg,rgba(255,255,255,.028),rgba(255,255,255,.014))!important;
+}
+.timing-row.session-row:hover{transform:none!important;background:linear-gradient(90deg,rgba(232,0,45,.075),rgba(255,255,255,.025))!important;}
+.timing-row.session-row::before{width:4px!important;border-radius:0 6px 6px 0;}
+.timing-header span,
+.timing-row.session-row > div{text-align:right;min-width:0;}
+.timing-header span:nth-child(1),
+.timing-header span:nth-child(2),
+.timing-row.session-row > div:nth-child(1),
+.timing-row.session-row > div:nth-child(2){text-align:left;}
+.timing-row.session-row .pos{font-size:1.22rem;color:rgba(255,255,255,.62);}
+.timing-row.session-row .driver-cell{min-width:0;}
+.timing-row.session-row .driver-head,
+.timing-row.session-row .driver-avatar-mini{width:42px!important;height:42px!important;flex:0 0 42px;}
+.timing-row.session-row .driver-name{font-size:.92rem;line-height:1.15;}
+.timing-row.session-row .driver-team{font-size:.72rem;color:rgba(255,255,255,.44);}
+.timing-row.session-row .gap,
+.timing-row.session-row .lap-time,
+.timing-row.session-row .sector,
+.timing-row.session-row .laps,
+.timing-row.session-row .tyre-col{
+  font-size:.82rem;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.timing-row.session-row .lap-time.best{color:#fff;font-weight:900;}
+.timing-row.session-row .gap{color:rgba(255,255,255,.62);}
+.tyre-col{display:flex;justify-content:flex-end;align-items:center;}
+.tyre-pill{min-width:46px!important;max-width:74px;padding:5px 8px!important;font-size:.68rem!important;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.laps{color:rgba(255,255,255,.62)!important;}
+.pit-side-stack .pit-panel{min-height:0;}
+.race-control .pit-empty-state,
+.podium-card .pit-empty-state{min-height:132px;justify-content:center;background:linear-gradient(135deg,rgba(232,0,45,.10),rgba(0,0,0,.20));}
+.podium-row{display:grid!important;grid-template-columns:42px 1fr;gap:12px!important;align-items:center!important;padding:12px 14px!important;background:linear-gradient(90deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;}
+.podium-row:hover{border-color:rgba(232,0,45,.25)!important;transform:translateX(3px);transition:all var(--tr);}
+.podium-row small{display:block;margin-top:3px;font-size:.74rem;color:rgba(255,255,255,.48)!important;}
+.pit-kpi small{display:flex;align-items:center;gap:7px;min-height:20px;}
+.pit-kpi .pit-flag-img{width:22px;height:15px;border-radius:3px;margin-right:0;}
+@media(max-width:1180px){
+  .timing-header,.timing-row.session-row{min-width:920px;grid-template-columns:46px minmax(230px,1.5fr) minmax(76px,.62fr) minmax(88px,.72fr) minmax(88px,.72fr) minmax(74px,.58fr) minmax(74px,.58fr) minmax(84px,.7fr) minmax(56px,.48fr)!important;}
+}
+@media(max-width:760px){
+  .timing-panel .panel-head{align-items:flex-start;}
+  .timing-table{margin-inline:-2px;padding-bottom:10px;}
+  .timing-header,.timing-row.session-row{min-width:860px;}
+  .timing-row.session-row{min-height:58px;padding:10px 14px!important;}
+}
