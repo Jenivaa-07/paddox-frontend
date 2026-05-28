@@ -5569,7 +5569,7 @@ function pollTeamBadgeSvgURI(name = 'Team', color = '#e8002d', code = '') {
 function pollLogoLooksBroken(url = '') {
   const u = String(url || '').trim().toLowerCase();
   if (!u) return true;
-  return u.includes('media.formula1.com/content/dam/fom-website/teams/2026') || u.endsWith('/undefined') || u.includes('undefined');
+  return u.includes('media.formula1.com/content/dam/fom-website/teams/2026') || u.includes('logo.clearbit.com') || u.endsWith('/undefined') || u.includes('undefined');
 }
 
 
@@ -5577,17 +5577,17 @@ function pollLogoLooksBroken(url = '') {
 /* Phase 17.6.4 — real team logo resolver
    Priority: Home Branding uploaded logo -> official/public site logo -> PADDOX fallback badge. */
 const ADMIN_POLL_REAL_TEAM_LOGOS = [
-  { name:'Mercedes',        slug:'mercedes',      aliases:['mercedes','mercedes-amg','mercedes amg','kimi','george','russell','antonelli'], color:'#00d2be', image:'https://logo.clearbit.com/mercedesamgf1.com' },
-  { name:'Ferrari',         slug:'ferrari',       aliases:['ferrari','scuderia ferrari','charles','leclerc','lewis','hamilton'], color:'#e8002d', image:'https://logo.clearbit.com/ferrari.com' },
-  { name:'McLaren',         slug:'mclaren',       aliases:['mclaren','mclaren racing','lando','norris','oscar','piastri'], color:'#ff8700', image:'https://logo.clearbit.com/mclaren.com' },
-  { name:'Red Bull Racing', slug:'red-bull',      aliases:['red bull','red bull racing','oracle red bull','verstappen','max','hadjar','isack'], color:'#1e5bff', image:'https://logo.clearbit.com/redbullracing.com' },
-  { name:'Alpine',          slug:'alpine',        aliases:['alpine','bwt alpine','gasly','pierre','colapinto','franco'], color:'#2293d1', image:'https://logo.clearbit.com/alpinecars.com' },
-  { name:'Racing Bulls',    slug:'racing-bulls',  aliases:['racing bulls','visa cash app rb','vcarb','rb','lawson','liam','lindblad','arvid'], color:'#6c4cff', image:'https://logo.clearbit.com/racingbulls.com' },
-  { name:'Haas F1 Team',    slug:'haas',          aliases:['haas','haas f1','haas f1 team','ocon','esteban','bearman','oliver'], color:'#ffffff', image:'https://logo.clearbit.com/haasf1team.com' },
-  { name:'Williams',        slug:'williams',      aliases:['williams','williams racing','albon','alexander','sainz','carlos'], color:'#64c4ff', image:'https://logo.clearbit.com/williamsf1.com' },
-  { name:'Audi',            slug:'audi',          aliases:['audi','kick sauber','sauber','hulkenberg','nico','bortoleto','gabriel'], color:'#00e701', image:'https://logo.clearbit.com/audi.com' },
-  { name:'Cadillac',        slug:'cadillac',      aliases:['cadillac','cadillac f1','perez','sergio','bottas','valtteri'], color:'#d4af37', image:'https://logo.clearbit.com/cadillac.com' },
-  { name:'Aston Martin',    slug:'aston-martin',  aliases:['aston martin','aston martin aramco','alonso','fernando','stroll','lance'], color:'#006f62', image:'https://logo.clearbit.com/astonmartinf1.com' }
+  { name:'Mercedes', slug:'mercedes', aliases:['mercedes', 'mercedes-amg', 'mercedes amg', 'kimi', 'george', 'russell', 'antonelli'], color:'#00d2be', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-AMG%20Petronas%20F1%20Team%20logo%20%282026%29.svg' },
+  { name:'Ferrari', slug:'ferrari', aliases:['ferrari', 'scuderia ferrari', 'charles', 'leclerc', 'lewis', 'hamilton'], color:'#e8002d', image:'https://en.wikipedia.org/wiki/Special:Redirect/file/Scuderia%20Ferrari%20HP%20logo%2024.svg' },
+  { name:'McLaren', slug:'mclaren', aliases:['mclaren', 'mclaren racing', 'mclaren f1', 'lando', 'norris', 'oscar', 'piastri'], color:'#ff8700', image:'https://en.wikipedia.org/wiki/Special:Redirect/file/McLaren%20F1%20logo.svg' },
+  { name:'Red Bull Racing', slug:'red-bull', aliases:['red bull', 'red bull racing', 'oracle red bull', 'verstappen', 'max', 'hadjar', 'isack'], color:'#1e5bff', image:'https://commons.wikimedia.org/wiki/Special:FilePath/RED%20BULL%20LOGO%202026.svg' },
+  { name:'Alpine', slug:'alpine', aliases:['alpine', 'bwt alpine', 'gasly', 'pierre', 'colapinto', 'franco'], color:'#2293d1', image:'https://en.wikipedia.org/wiki/Special:Redirect/file/BWT%20Alpine%20F1%20Team%20Logo.png' },
+  { name:'Racing Bulls', slug:'racing-bulls', aliases:['racing bulls', 'visa cash app rb', 'vcarb', 'rb', 'lawson', 'liam', 'lindblad', 'arvid'], color:'#6c4cff', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Racing%20Bulls%20logo.svg' },
+  { name:'Haas F1 Team', slug:'haas', aliases:['haas', 'haas f1', 'haas f1 team', 'tgr haas', 'ocon', 'esteban', 'bearman', 'oliver'], color:'#ffffff', image:'https://commons.wikimedia.org/wiki/Special:FilePath/TGR%20Haas%20F1%20Team%20Logo%20%282026%29.svg' },
+  { name:'Williams', slug:'williams', aliases:['williams', 'williams racing', 'atlassian williams', 'albon', 'alexander', 'sainz', 'carlos'], color:'#64c4ff', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Atlassian%20Williams%20F1%20Team%20horizontal%20logo.svg' },
+  { name:'Audi', slug:'audi', aliases:['audi', 'audi revolut', 'kick sauber', 'sauber', 'hulkenberg', 'nico', 'bortoleto', 'gabriel'], color:'#00e701', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Audif1.com%20logo17%20%28cropped%29.svg' },
+  { name:'Cadillac', slug:'cadillac', aliases:['cadillac', 'cadillac f1', 'cadillac formula 1', 'perez', 'sergio', 'bottas', 'valtteri'], color:'#d4af37', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Cadillac%20Formula%201%20Team%20logo.png' },
+  { name:'Aston Martin', slug:'aston-martin', aliases:['aston martin', 'aston martin aramco', 'alonso', 'fernando', 'stroll', 'lance'], color:'#006f62', image:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Logo%20Aston%20Martin%20Aramco%20F1%20Team%20%282025%29.svg' }
 ];
 
 function adminPollTeamKey(value = '') {
@@ -5667,6 +5667,13 @@ function normalizeAdminPollLogo(item = {}) {
 async function loadFanPollLogoOptions(force = false) {
   if (ADMIN_POLL_LOGOS_LOADED && !force) return ADMIN_POLL_LOGOS;
 
+  /* Phase 17.6.5
+     Always show all 11 current F1 teams in the dropdown.
+     If Home Branding has a matching uploaded logo, use it.
+     Otherwise use the real team logo URL from the fixed team list.
+  */
+  const officialTeams = ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
+
   try {
     const publicApi = 'https://paddox-backend.onrender.com/api/fan/home-marquee-logos';
     const adminApi = typeof HOME_MARQUEE_API !== 'undefined'
@@ -5685,13 +5692,26 @@ async function loadFanPollLogoOptions(force = false) {
       logos = adminData.data?.logos || adminData.logos || [];
     }
 
-    ADMIN_POLL_LOGOS = Array.isArray(logos) && logos.length
+    const homeLogos = Array.isArray(logos)
       ? logos.map(normalizeAdminPollLogo)
-      : ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
+      : [];
+
+    ADMIN_POLL_LOGOS = officialTeams.map(team => {
+      const home = homeLogos.find(item =>
+        pollLogoKey(item.slug) === pollLogoKey(team.slug) ||
+        pollLogoKey(item.name) === pollLogoKey(team.name)
+      );
+
+      const homeHasRealImage = home?.image && !pollLogoLooksBroken(home.image) && !isGeneratedPollBadge(home.image);
+
+      return homeHasRealImage
+        ? { ...team, image: home.image, color: home.color || team.color }
+        : team;
+    });
 
   } catch (err) {
-    console.warn('Using fallback poll logos', err);
-    ADMIN_POLL_LOGOS = ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
+    console.warn('Using fixed F1 poll logos', err);
+    ADMIN_POLL_LOGOS = officialTeams;
   }
 
   ADMIN_POLL_LOGOS_LOADED = true;

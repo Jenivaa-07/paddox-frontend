@@ -914,3 +914,75 @@ select.form-input option{background:var(--dark2)}
   border-radius:5px !important;
   padding:3px !important;
 }
+
+/* ============================================================
+   Phase 17.6.5 — Real F1 team logo visibility fix
+   Shows full team logos/wordmarks instead of tiny fallback badges.
+   ============================================================ */
+#adm-fanpolls .poll-admin-option-row{
+  grid-template-columns:minmax(255px,285px) minmax(0,1fr) 88px !important;
+}
+#adm-fanpolls .poll-admin-logo-cell{
+  grid-template-columns:82px minmax(0,1fr) !important;
+}
+#adm-fanpolls .poll-logo-preview{
+  width:82px !important;
+  height:48px !important;
+  flex:0 0 82px !important;
+  padding:5px !important;
+  border-radius:8px !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(235,235,235,.90)) !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+#adm-fanpolls .poll-logo-preview::after{
+  inset:auto 10px 5px !important;
+  height:2px !important;
+  opacity:.95 !important;
+}
+#adm-fanpolls .poll-logo-preview img{
+  width:100% !important;
+  height:100% !important;
+  max-width:72px !important;
+  max-height:34px !important;
+  object-fit:contain !important;
+  background:transparent !important;
+  border-radius:0 !important;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.24)) !important;
+}
+#adm-fanpolls .poll-logo-preview span{
+  color:#111 !important;
+}
+#adm-fanpolls .poll-admin-table-options .poll-admin-mini-logo{
+  width:42px !important;
+  height:28px !important;
+  padding:3px !important;
+  border-radius:6px !important;
+  background:rgba(255,255,255,.94) !important;
+}
+#adm-fanpolls .poll-admin-table-options .poll-admin-mini-logo img,
+#adm-fanpolls .poll-admin-mini-logo img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  background:transparent !important;
+  border-radius:0 !important;
+}
+@media(max-width:900px){
+  #adm-fanpolls .poll-admin-option-row{grid-template-columns:1fr !important;}
+  #adm-fanpolls .poll-admin-logo-cell{grid-template-columns:82px minmax(0,1fr) !important;}
+}
+#adm-fanpolls .poll-admin-mini-option{
+  align-items:center !important;
+  gap:8px !important;
+}
+#adm-fanpolls .poll-admin-mini-option > img{
+  width:42px !important;
+  height:28px !important;
+  min-width:42px !important;
+  padding:3px !important;
+  border-radius:6px !important;
+  object-fit:contain !important;
+  background:rgba(255,255,255,.94) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+}

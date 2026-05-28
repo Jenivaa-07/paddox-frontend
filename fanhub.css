@@ -3185,3 +3185,25 @@ body.modal-open { overflow: hidden; }
   padding:4px !important;
   filter:drop-shadow(0 5px 10px rgba(0,0,0,.55)) !important;
 }
+
+/* ============================================================
+   Phase 17.6.5 — Real F1 team logo visibility in Fan Hub poll
+   ============================================================ */
+.poll-team-logo{
+  width:42px !important;
+  height:28px !important;
+  min-width:42px !important;
+  border-radius:7px !important;
+  padding:3px !important;
+  background:rgba(255,255,255,.94) !important;
+  border:1px solid rgba(255,255,255,.20) !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.32), inset 0 -2px 0 var(--poll-color,var(--red)) !important;
+}
+.poll-team-logo img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  background:transparent !important;
+  border-radius:0 !important;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.25)) !important;
+}
