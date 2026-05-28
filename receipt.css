@@ -259,3 +259,60 @@ html,body{background:#fff!important;}
 @media(max-width:760px){
   .receipt-brand img.receipt-brand-lockup{width:220px!important;}
 }
+
+/* ============================================================
+   Phase 18.0.11 — final receipt icon + wordmark alignment system
+   ============================================================ */
+.receipt-brand-system{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:12px!important;
+  max-width:360px!important;
+}
+.receipt-logo-row{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:13px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  line-height:1!important;
+}
+.receipt-brand .receipt-logo-icon-clean{
+  display:block!important;
+  width:48px!important;
+  height:48px!important;
+  object-fit:contain!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  flex:0 0 48px!important;
+}
+.receipt-logo-word{
+  font-family:var(--font-d)!important;
+  font-size:2.05rem!important;
+  letter-spacing:6px!important;
+  color:#111820!important;
+  line-height:.9!important;
+  transform:translateY(1px)!important;
+  white-space:nowrap!important;
+}
+.receipt-logo-word span{color:var(--red)!important;}
+.receipt-brand-lockup,
+.receipt-brand-text-fallback,
+.receipt-brand-fallback-wrap,
+.receipt-brand-mark,
+.receipt-brand-icon-wrap,
+.receipt-brand-wordmark{
+  display:none!important;
+}
+@media print{
+  .receipt-brand .receipt-logo-icon-clean{width:42px!important;height:42px!important;flex-basis:42px!important;}
+  .receipt-logo-word{font-size:1.82rem!important;letter-spacing:5px!important;}
+  .receipt-logo-row{gap:11px!important;}
+}
+@media(max-width:760px){
+  .receipt-brand .receipt-logo-icon-clean{width:42px!important;height:42px!important;flex-basis:42px!important;}
+  .receipt-logo-word{font-size:1.82rem!important;letter-spacing:5px!important;}
+}

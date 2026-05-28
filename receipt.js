@@ -2,11 +2,11 @@
    PADDOX — receipt.js | Phase 18.0.1 professional receipt
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.10 receipt logo lockup final loaded');
+console.log('PADDOX Phase 18.0.11 receipt icon alignment system loaded');
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
-const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup-receipt-clean.png?v=18_0_10';
-const BRAND_ICON_PATH = 'assets/paddox-logo-icon.png?v=18_0_10';
+const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup-receipt-clean.png?v=18_0_11';
+const BRAND_ICON_PATH = 'assets/paddox-logo-icon-clean.png?v=18_0_11';
 
 function receiptToken() {
   return (
@@ -153,9 +153,11 @@ function renderReceipt(order) {
     <div class="receipt-top-rule"></div>
 
     <header class="receipt-head">
-      <div class="receipt-brand">
-        <img src="${BRAND_LOGO_PATH}" alt="PADDOX logo" class="receipt-brand-lockup" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
-        <div class="receipt-brand-text-fallback">PADDO<span>X</span></div>
+      <div class="receipt-brand receipt-brand-system">
+        <div class="receipt-logo-row" aria-label="PADDOX brand">
+          <img src="${BRAND_ICON_PATH}" alt="PADDOX icon" class="receipt-logo-icon-clean">
+          <div class="receipt-logo-word">PADDO<span>X</span></div>
+        </div>
         <p>Premium motorsport merchandise<br>Official order payment receipt</p>
       </div>
       <div class="receipt-title-wrap">

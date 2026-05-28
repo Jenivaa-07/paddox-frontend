@@ -2,11 +2,11 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.10 quote footer icon final repair loaded');
+console.log('PADDOX Phase 18.0.11 final logo icon alignment system loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
-const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_10';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png?v=18_0_10';
+const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_11';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-clean.png?v=18_0_11';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -1583,47 +1583,34 @@ function drawPaddoxLockupCanvas(ctx, x, y, logo, options = {}) {
   return { width: 210, height: 74 };
 }
 
-function drawPaddoxPremiumBrand(ctx, x, y, iconLogo, options = {}) {
-  const size = options.size || 58;
-  const fontSize = options.fontSize || 60;
-  const wordGap = options.gap || 18;
+function drawPaddoxAlignedBrand(ctx, x, y, iconLogo, options = {}) {
+  const size = options.size || 48;
+  const fontSize = options.fontSize || 48;
+  const gap = options.gap ?? 14;
   const tone = options.tone || '#ffffff';
   const accent = options.accent || '#e8002d';
+  const letterGap = options.letterGap ?? 4;
+  const centerY = y + size / 2;
 
+  ctx.save();
   if (iconLogo) {
-    ctx.save();
-    ctx.shadowColor = 'rgba(232,0,45,.18)';
-    ctx.shadowBlur = 22;
-    ctx.fillStyle = 'rgba(14,14,16,.82)';
-    ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, size / 2 + 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = 'rgba(232,0,45,.35)';
-    ctx.stroke();
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, size / 2 - 2, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.drawImage(iconLogo, x + 3, y + 3, size - 6, size - 6);
-    ctx.restore();
-    ctx.restore();
+    ctx.drawImage(iconLogo, x, y, size, size);
   }
 
-  const textX = x + size + wordGap;
-  const baselineY = y + size * 0.78;
-  ctx.save();
-  ctx.textBaseline = 'alphabetic';
+  const textX = x + size + gap;
+  ctx.textBaseline = 'middle';
   ctx.font = `700 ${fontSize}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
-  ctx.fillStyle = tone;
-  ctx.fillText('PADDO', textX, baselineY);
-  const paddoWidth = ctx.measureText('PADDO').width;
-  ctx.fillStyle = accent;
-  ctx.fillText('X', textX + paddoWidth + 2, baselineY);
-  ctx.restore();
 
-  return { width: size + wordGap + 210, height: size };
+  let cursor = textX;
+  const letters = ['P','A','D','D','O'];
+  ctx.fillStyle = tone;
+  letters.forEach((ch) => {
+    ctx.fillText(ch, cursor, centerY + 1);
+    cursor += ctx.measureText(ch).width + letterGap;
+  });
+  ctx.fillStyle = accent;
+  ctx.fillText('X', cursor + Math.max(0, letterGap - 1), centerY + 1);
+  ctx.restore();
 }
 
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
@@ -1722,7 +1709,7 @@ async function buildQuoteShareCanvas(q = {}) {
 
   const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  drawPaddoxLockupCanvas(ctx, 110, 108, brandLockup, { width: 248, height: 74 });
+  drawPaddoxAlignedBrand(ctx, 110, 108, brandLogo, { size: 54, fontSize: 48, gap: 13, letterGap: 5 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
@@ -1798,7 +1785,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxPremiumBrand(ctx, 758, 1177, brandLogo, { size: 38, fontSize: 38, gap: 12 });
+  drawPaddoxAlignedBrand(ctx, 770, 1180, brandLogo, { size: 34, fontSize: 31, gap: 10, letterGap: 2 });
 
   return canvas;
 }

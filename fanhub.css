@@ -4456,3 +4456,57 @@ body.modal-open { overflow: hidden; }
   .qf-brand-final .qf-brand-icon-wrap{width:25px!important;height:25px!important;flex-basis:25px!important;}
   .qf-brand-final .qf-brand-wordmark{font-size:.92rem!important;letter-spacing:1.7px!important;}
 }
+
+/* ============================================================
+   Phase 18.0.11 — final logo icon alignment system
+   Only controls icon + wordmark alignment. No baked logo box.
+   ============================================================ */
+.qf-brand-final{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:9px!important;
+  min-width:128px!important;
+  max-width:150px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.qf-brand-final .qf-brand-icon-wrap{
+  width:31px!important;
+  height:31px!important;
+  flex:0 0 31px!important;
+  display:grid!important;
+  place-items:center!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.qf-brand-final .qf-brand-icon{
+  width:31px!important;
+  height:31px!important;
+  display:block!important;
+  object-fit:contain!important;
+  border-radius:50%!important;
+  background:transparent!important;
+}
+.qf-brand-final .qf-brand-wordmark{
+  display:inline-flex!important;
+  align-items:center!important;
+  font-family:var(--font-d)!important;
+  font-size:1.14rem!important;
+  line-height:.9!important;
+  letter-spacing:2.2px!important;
+  color:#fff!important;
+  white-space:nowrap!important;
+  transform:translateY(1px)!important;
+}
+.qf-brand-final .qf-brand-wordmark span{color:var(--red)!important;}
+@media(max-width:760px){
+  .qf-brand-final{min-width:108px!important;gap:7px!important;}
+  .qf-brand-final .qf-brand-icon-wrap,
+  .qf-brand-final .qf-brand-icon{width:26px!important;height:26px!important;flex-basis:26px!important;}
+  .qf-brand-final .qf-brand-wordmark{font-size:.98rem!important;letter-spacing:1.8px!important;}
+}
