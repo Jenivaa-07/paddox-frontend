@@ -1305,3 +1305,160 @@ select.form-input option{background:var(--dark2)}
   .trivia-admin-option-row{grid-template-columns:34px 1fr}
   .trivia-option-badge{width:34px;height:34px;border-radius:10px}
 }
+
+
+/* ============================================================
+   Phase 17.8.1 — Admin Trivia Alignment Fix
+   Wider editor, cleaner table columns, balanced action buttons.
+   ============================================================ */
+#adm-fantrivia .page-toolbar{
+  align-items:center !important;
+  margin-bottom:22px !important;
+}
+#adm-fantrivia .toolbar-filters{
+  min-width:260px !important;
+}
+#adm-fantrivia .toolbar-filters .adm-input{
+  width:100% !important;
+  min-height:46px !important;
+}
+.fan-trivia-admin-grid{
+  grid-template-columns:minmax(430px,480px) minmax(0,1fr) !important;
+  gap:24px !important;
+}
+.fan-trivia-editor{
+  padding:24px !important;
+  border-color:rgba(255,255,255,.10) !important;
+}
+.fan-trivia-editor .adm-panel-title{
+  margin-bottom:20px !important;
+}
+.fan-trivia-editor .adm-textarea{
+  width:100% !important;
+  min-height:126px !important;
+  padding:16px 18px !important;
+  line-height:1.55 !important;
+  font-size:.92rem !important;
+}
+.trivia-options-admin{
+  gap:12px !important;
+  margin-bottom:18px !important;
+}
+.trivia-admin-option-row{
+  grid-template-columns:46px minmax(0,1fr) !important;
+  gap:12px !important;
+  padding:10px !important;
+  background:rgba(255,255,255,.025) !important;
+  border:1px solid rgba(255,255,255,.075) !important;
+}
+.trivia-option-badge{
+  width:46px !important;
+  height:46px !important;
+  border-radius:14px !important;
+  font-size:1.35rem !important;
+}
+.trivia-option-input{
+  width:100% !important;
+  min-height:46px !important;
+  padding-left:16px !important;
+}
+.trivia-meta-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:16px 14px !important;
+  margin-top:12px !important;
+}
+.trivia-meta-grid > div{
+  min-width:0 !important;
+}
+.trivia-meta-grid .adm-input{
+  width:100% !important;
+  min-height:46px !important;
+}
+.trivia-admin-row{
+  margin:18px 0 !important;
+  padding:12px 14px !important;
+  background:rgba(255,255,255,.025) !important;
+  border:1px solid rgba(255,255,255,.075) !important;
+}
+.fan-trivia-editor > .adm-btn-red,
+.fan-trivia-editor > .adm-btn-ghost{
+  min-height:46px !important;
+  padding-left:22px !important;
+  padding-right:22px !important;
+  margin-right:8px !important;
+}
+.fan-trivia-table-wrap{
+  min-height:360px !important;
+  overflow-x:auto !important;
+  border-color:rgba(255,255,255,.08) !important;
+}
+.fan-trivia-table-wrap .data-table{
+  min-width:920px !important;
+  table-layout:fixed !important;
+}
+.fan-trivia-table-wrap .data-table th,
+.fan-trivia-table-wrap .data-table td{
+  vertical-align:middle !important;
+}
+.fan-trivia-table-wrap .data-table th:nth-child(1){width:34% !important;}
+.fan-trivia-table-wrap .data-table th:nth-child(2){width:18% !important;}
+.fan-trivia-table-wrap .data-table th:nth-child(3){width:18% !important;}
+.fan-trivia-table-wrap .data-table th:nth-child(4){width:10% !important;}
+.fan-trivia-table-wrap .data-table th:nth-child(5){width:20% !important;}
+.trivia-question-cell strong{
+  display:block !important;
+  max-width:100% !important;
+  line-height:1.35 !important;
+  font-size:.9rem !important;
+}
+.trivia-answer-pill{
+  max-width:100% !important;
+  min-height:36px !important;
+  padding:8px 12px !important;
+  word-break:break-word !important;
+}
+.trivia-meta-stack{
+  gap:7px !important;
+}
+.trivia-meta-stack span{
+  padding:5px 9px !important;
+  line-height:1.15 !important;
+}
+.trivia-action-cell{
+  min-width:170px !important;
+}
+.trivia-action-stack{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:8px !important;
+  align-items:center !important;
+}
+.trivia-action-stack .act-btn{
+  width:100% !important;
+  min-height:34px !important;
+  padding:7px 10px !important;
+  text-align:center !important;
+  justify-content:center !important;
+  white-space:nowrap !important;
+}
+.trivia-action-stack .act-btn.danger{
+  grid-column:1 / -1 !important;
+}
+@media(max-width:1280px){
+  .fan-trivia-admin-grid{
+    grid-template-columns:410px minmax(0,1fr) !important;
+    gap:18px !important;
+  }
+  .fan-trivia-table-wrap .data-table{min-width:860px !important;}
+}
+@media(max-width:980px){
+  .fan-trivia-admin-grid{grid-template-columns:1fr !important;}
+  .fan-trivia-table-wrap .data-table{min-width:820px !important;}
+}
+@media(max-width:620px){
+  .trivia-meta-grid{grid-template-columns:1fr !important;}
+  .trivia-admin-option-row{grid-template-columns:40px 1fr !important;padding:8px !important;}
+  .trivia-option-badge{width:40px !important;height:40px !important;border-radius:12px !important;}
+  .fan-trivia-editor > .adm-btn-red,
+  .fan-trivia-editor > .adm-btn-ghost{width:100% !important;margin:0 0 8px 0 !important;}
+}

@@ -6166,22 +6166,24 @@ function renderFanTriviaAdmin() {
     const correctText = options[correctIndex] || '-';
     return `
       <tr>
-        <td style="max-width:390px"><strong>${escapeTriviaAdminText(item.question || 'Untitled trivia')}</strong></td>
-        <td>
+        <td class="trivia-question-cell"><strong>${escapeTriviaAdminText(item.question || 'Untitled trivia')}</strong></td>
+        <td class="trivia-answer-cell">
           <span class="trivia-answer-pill">${escapeTriviaAdminText(correctText)}</span>
         </td>
-        <td>
+        <td class="trivia-meta-cell">
           <div class="trivia-meta-stack">
             <span>${escapeTriviaAdminText(item.difficulty || 'medium')}</span>
             <span>${escapeTriviaAdminText(item.category || 'drivers')}</span>
             <span>${Number(item.points || 100)} pts</span>
           </div>
         </td>
-        <td><span class="sb ${item.isActive !== false ? 's-ok' : 's-pr'}">${item.isActive !== false ? 'Active' : 'Inactive'}</span></td>
-        <td>
-          <button class="act-btn" onclick="editFanTriviaAdmin('${item._id || item.id}')">Edit</button>
-          <button class="act-btn" onclick="toggleFanTriviaActive('${item._id || item.id}', ${item.isActive === false})">${item.isActive === false ? 'Activate' : 'Deactivate'}</button>
-          <button class="act-btn danger" onclick="deleteFanTriviaAdmin('${item._id || item.id}')">Delete</button>
+        <td class="trivia-status-cell"><span class="sb ${item.isActive !== false ? 's-ok' : 's-pr'}">${item.isActive !== false ? 'Active' : 'Inactive'}</span></td>
+        <td class="trivia-action-cell">
+          <div class="trivia-action-stack">
+            <button class="act-btn" onclick="editFanTriviaAdmin('${item._id || item.id}')">Edit</button>
+            <button class="act-btn" onclick="toggleFanTriviaActive('${item._id || item.id}', ${item.isActive === false})">${item.isActive === false ? 'Activate' : 'Deactivate'}</button>
+            <button class="act-btn danger" onclick="deleteFanTriviaAdmin('${item._id || item.id}')">Delete</button>
+          </div>
         </td>
       </tr>`;
   }).join('');
