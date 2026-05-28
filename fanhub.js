@@ -2,7 +2,7 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.2.5 wallpapers and race calendar premium polish loaded');
+console.log('PADDOX Phase 18.2.6 fan hub final consistency pass loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_12';
