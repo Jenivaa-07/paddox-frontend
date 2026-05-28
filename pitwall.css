@@ -1156,3 +1156,62 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
 @media(max-width:560px){
   .pit-title{font-size:3.75rem!important;}
 }
+
+/* ============================================================
+   PHASE 19.10 — PIT WALL HERO CLEAN ATMOSPHERE REPAIR
+   Fixes over-heavy particles and the hero background feeling too busy.
+   Keeps the Fan Hub-style clean hero, navbar, flags, icons, and table.
+   ============================================================ */
+.pit-hero{
+  min-height:64vh!important;
+  padding:calc(var(--nav-h) + 68px) 0 68px!important;
+  background:
+    linear-gradient(90deg,rgba(2,2,3,.99) 0%,rgba(4,4,5,.965) 34%,rgba(5,5,6,.90) 61%,rgba(4,4,5,.985) 100%),
+    linear-gradient(to bottom,rgba(0,0,0,.38),rgba(0,0,0,.48) 52%,rgba(0,0,0,.92) 100%),
+    radial-gradient(circle at 76% 18%,rgba(232,0,45,.12),transparent 34%),
+    radial-gradient(circle at 12% 88%,rgba(0,210,255,.055),transparent 30%),
+    url('https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=2200&q=64') center center/cover no-repeat!important;
+}
+.pit-hero::before{
+  background:
+    linear-gradient(to bottom,rgba(0,0,0,.30) 0%,transparent 35%,rgba(0,0,0,.88) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.52),transparent 52%,rgba(232,0,45,.055)),
+    repeating-linear-gradient(90deg,rgba(232,0,45,.032) 0 1px,transparent 1px 112px),
+    repeating-linear-gradient(0deg,rgba(232,0,45,.022) 0 1px,transparent 1px 86px)!important;
+  opacity:.62!important;
+}
+.pit-hero::after{
+  background:
+    linear-gradient(104deg,transparent 0 18%,rgba(255,255,255,.035) 18.3%,transparent 19.1% 42%,rgba(232,0,45,.065) 42.4%,transparent 43.2% 68%,rgba(201,168,76,.045) 68.3%,transparent 69.2% 100%),
+    radial-gradient(circle at 82% 24%,rgba(232,0,45,.10),transparent 26%)!important;
+  opacity:.30!important;
+  animation:pitRaceStreakDrift 14s linear infinite!important;
+}
+.pit-grid-bg{
+  opacity:.34!important;
+  background-size:72px 72px!important;
+}
+.pit-scanline{
+  opacity:.18!important;
+  height:110px!important;
+}
+#particles-canvas{
+  opacity:.28!important;
+  mix-blend-mode:screen!important;
+}
+.pit-title{
+  font-size:clamp(4.45rem,6.1vw,6.75rem)!important;
+  max-width:760px!important;
+}
+.pit-sub{
+  color:rgba(255,255,255,.70)!important;
+}
+.pit-dashboard::before,
+.pit-panel::before,
+.weekend-board::before{
+  opacity:.22!important;
+}
+@media(max-width:900px){
+  #particles-canvas{opacity:.18!important;}
+  .pit-hero{background-position:center!important;}
+}
