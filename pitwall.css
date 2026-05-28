@@ -984,3 +984,109 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
 @media(max-width:900px){
   .pit-hero-showcase{display:none!important;}
 }
+
+
+/* ============================================================
+   PHASE 19.8 — PIT WALL FANHUB-STYLE HERO REFINEMENT
+   Remove right showcase card, reduce hero title scale, add race streaks.
+   ============================================================ */
+.pit-hero{
+  min-height:68vh!important;
+  align-items:flex-end!important;
+  padding:calc(var(--nav-h) + 72px) 0 76px!important;
+  background:
+    linear-gradient(90deg,rgba(5,5,6,.96) 0%,rgba(5,5,6,.86) 34%,rgba(7,7,7,.72) 62%,rgba(7,7,7,.95) 100%),
+    radial-gradient(circle at 76% 25%,rgba(232,0,45,.24),transparent 34%),
+    radial-gradient(circle at 12% 92%,rgba(0,210,255,.10),transparent 28%),
+    url('https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=2200&q=78') center right/cover no-repeat!important;
+}
+.pit-hero-layout{
+  display:block!important;
+  max-width:820px!important;
+}
+.pit-hero-showcase,
+.command-card.pit-command-card,
+.mini-radar-wrap,
+.mini-radar,
+.mini-radar-core{
+  display:none!important;
+}
+.pit-title{
+  font-size:clamp(4.9rem,7.2vw,7.8rem)!important;
+  line-height:.88!important;
+  letter-spacing:5px!important;
+  max-width:780px!important;
+  text-shadow:0 24px 70px rgba(0,0,0,.88),0 0 28px rgba(255,255,255,.05)!important;
+}
+.pit-sub{
+  max-width:640px!important;
+  font-size:1rem!important;
+  line-height:1.7!important;
+  margin:24px 0 28px!important;
+}
+.pit-hero::before{
+  content:''!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(to bottom,rgba(0,0,0,.12) 0%,transparent 30%,rgba(0,0,0,.72) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.28),transparent 48%,rgba(232,0,45,.10)),
+    repeating-linear-gradient(90deg,rgba(232,0,45,.045) 0 1px,transparent 1px 96px),
+    repeating-linear-gradient(0deg,rgba(232,0,45,.030) 0 1px,transparent 1px 72px)!important;
+  opacity:.72!important;
+  mix-blend-mode:normal!important;
+}
+.pit-hero::after{
+  content:''!important;
+  position:absolute!important;
+  inset:-18% -10%!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(105deg,transparent 0 18%,rgba(255,255,255,.10) 18.4%,transparent 19.2% 38%,rgba(232,0,45,.16) 38.4%,transparent 39.1% 56%,rgba(201,168,76,.14) 56.2%,transparent 57% 100%),
+    radial-gradient(circle at 80% 28%,rgba(232,0,45,.20),transparent 24%)!important;
+  opacity:.50!important;
+  filter:blur(.2px)!important;
+  transform:translate3d(0,0,0)!important;
+  animation:pitRaceStreakDrift 10s linear infinite!important;
+}
+@keyframes pitRaceStreakDrift{
+  0%{transform:translate3d(-3%,0,0)}
+  50%{transform:translate3d(3%,1%,0)}
+  100%{transform:translate3d(-3%,0,0)}
+}
+.pit-grid-bg{
+  opacity:.42!important;
+  background-size:64px 64px!important;
+  mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.70) 55%,transparent 100%)!important;
+}
+.pit-scanline{
+  opacity:.38!important;
+  height:120px!important;
+}
+#particles-canvas{
+  opacity:.55!important;
+  z-index:1!important;
+  mix-blend-mode:screen!important;
+}
+.pit-page{position:relative;z-index:2!important;}
+.pit-hero-content{z-index:4!important;}
+.pit-kicker{
+  margin-bottom:16px!important;
+  letter-spacing:3.2px!important;
+}
+.pit-hero-actions{
+  gap:16px!important;
+}
+.pit-primary,.pit-secondary{
+  min-height:48px!important;
+}
+@media(max-width:900px){
+  .pit-hero{min-height:auto!important;padding:calc(var(--nav-h) + 50px) 0 58px!important;}
+  .pit-hero-layout{max-width:100%!important;}
+  .pit-title{font-size:clamp(4rem,15vw,5.8rem)!important;letter-spacing:3px!important;}
+  .pit-sub{font-size:.95rem!important;}
+}
+@media(max-width:560px){
+  .pit-title{font-size:4rem!important;line-height:.9!important;}
+}
