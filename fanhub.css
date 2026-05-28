@@ -3207,3 +3207,74 @@ body.modal-open { overflow: hidden; }
   border-radius:0 !important;
   filter:drop-shadow(0 2px 4px rgba(0,0,0,.25)) !important;
 }
+
+/* ============================================================
+   Phase 17.6.7 — Fan Hub Formula1.com logo contrast tile polish
+   Keeps Formula1.com logos, improves visibility on dark poll cards.
+   ============================================================ */
+.popt-lbl{
+  gap:12px !important;
+}
+
+.poll-team-logo{
+  width:54px !important;
+  height:40px !important;
+  min-width:54px !important;
+  padding:8px 10px !important;
+  border-radius:16px !important;
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in srgb,var(--poll-color,var(--red)) 52%,#1a1a1a) 0%, color-mix(in srgb,var(--poll-color,var(--red)) 28%,#070707) 52%, #101014 100%) !important;
+  border:1px solid color-mix(in srgb,var(--poll-color,var(--red)) 45%,rgba(255,255,255,.20)) !important;
+  box-shadow:
+    0 12px 24px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -7px 14px rgba(0,0,0,.30) !important;
+  overflow:hidden !important;
+}
+
+.poll-team-logo::before{
+  content:'' !important;
+  position:absolute !important;
+  inset:5px !important;
+  border-radius:13px !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.03)) !important;
+  border:1px solid rgba(255,255,255,.09) !important;
+  pointer-events:none !important;
+}
+
+.poll-team-logo::after{
+  left:13px !important;
+  right:13px !important;
+  bottom:7px !important;
+  height:2px !important;
+  border-radius:999px !important;
+  opacity:1 !important;
+  box-shadow:0 0 10px color-mix(in srgb,var(--poll-color,var(--red)) 65%,transparent) !important;
+}
+
+.poll-team-logo img{
+  position:relative !important;
+  z-index:2 !important;
+  width:100% !important;
+  height:100% !important;
+  max-width:36px !important;
+  max-height:22px !important;
+  object-fit:contain !important;
+  background:transparent !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  filter:
+    drop-shadow(0 2px 1px rgba(0,0,0,.36))
+    drop-shadow(0 7px 12px rgba(0,0,0,.34)) !important;
+}
+
+.popt:hover .poll-team-logo,
+.popt.selected .poll-team-logo{
+  transform:translateY(-1px) !important;
+  border-color:color-mix(in srgb,var(--poll-color,var(--red)) 64%,rgba(255,255,255,.24)) !important;
+  box-shadow:
+    0 16px 30px rgba(0,0,0,.42),
+    0 0 22px color-mix(in srgb,var(--poll-color,var(--red)) 22%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -7px 14px rgba(0,0,0,.30) !important;
+}

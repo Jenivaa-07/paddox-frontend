@@ -986,3 +986,124 @@ select.form-input option{background:var(--dark2)}
   background:rgba(255,255,255,.94) !important;
   border:1px solid rgba(255,255,255,.16) !important;
 }
+
+/* ============================================================
+   Phase 17.6.7 — Formula1.com logo contrast tile polish
+   Goal: keep Formula1.com logo assets, but place each logo on a
+   premium team-colour medallion so light logos never merge with UI.
+   ============================================================ */
+#adm-fanpolls .poll-admin-option-row{
+  grid-template-columns:minmax(330px,390px) minmax(0,1fr) 112px !important;
+  gap:14px !important;
+  padding:14px 16px !important;
+  align-items:center !important;
+}
+
+#adm-fanpolls .poll-admin-logo-cell{
+  grid-template-columns:108px minmax(0,1fr) !important;
+  gap:14px !important;
+  align-items:center !important;
+}
+
+#adm-fanpolls .poll-logo-preview{
+  width:100px !important;
+  height:74px !important;
+  flex:0 0 100px !important;
+  padding:13px 16px !important;
+  border-radius:24px !important;
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in srgb,var(--poll-admin-color,var(--red)) 52%,#1a1a1a) 0%, color-mix(in srgb,var(--poll-admin-color,var(--red)) 28%,#070707) 48%, #101014 100%) !important;
+  border:1px solid color-mix(in srgb,var(--poll-admin-color,var(--red)) 46%,rgba(255,255,255,.22)) !important;
+  box-shadow:
+    0 18px 34px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -8px 18px rgba(0,0,0,.28),
+    0 0 0 1px rgba(255,255,255,.045) !important;
+  overflow:hidden !important;
+}
+
+#adm-fanpolls .poll-logo-preview::before{
+  content:'' !important;
+  position:absolute !important;
+  inset:9px !important;
+  border-radius:20px !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.035)) !important;
+  border:1px solid rgba(255,255,255,.11) !important;
+  pointer-events:none !important;
+}
+
+#adm-fanpolls .poll-logo-preview::after{
+  inset:auto 20px 11px !important;
+  height:3px !important;
+  border-radius:999px !important;
+  background:var(--poll-admin-color,var(--red)) !important;
+  opacity:1 !important;
+  box-shadow:0 0 12px color-mix(in srgb,var(--poll-admin-color,var(--red)) 65%,transparent) !important;
+}
+
+#adm-fanpolls .poll-logo-preview img{
+  position:relative !important;
+  z-index:2 !important;
+  width:100% !important;
+  height:100% !important;
+  max-width:74px !important;
+  max-height:42px !important;
+  object-fit:contain !important;
+  background:transparent !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  filter:
+    drop-shadow(0 2px 1px rgba(0,0,0,.35))
+    drop-shadow(0 8px 14px rgba(0,0,0,.34)) !important;
+}
+
+#adm-fanpolls .poll-logo-preview span{
+  position:relative !important;
+  z-index:2 !important;
+  color:#fff !important;
+  text-shadow:0 2px 8px rgba(0,0,0,.55) !important;
+}
+
+#adm-fanpolls .poll-logo-select,
+#adm-fanpolls .poll-option-input{
+  height:50px !important;
+  font-size:.86rem !important;
+}
+
+#adm-fanpolls .poll-admin-option-row .adm-btn-ghost.danger{
+  width:112px !important;
+  min-width:112px !important;
+  height:50px !important;
+  letter-spacing:1.7px !important;
+}
+
+#adm-fanpolls .poll-admin-table-options .poll-admin-mini-logo,
+#adm-fanpolls .poll-admin-mini-logo{
+  width:44px !important;
+  height:34px !important;
+  padding:6px !important;
+  border-radius:14px !important;
+  background:
+    radial-gradient(circle at 50% 36%, color-mix(in srgb,var(--poll-admin-color,var(--red)) 50%,#1a1a1a), #101014 78%) !important;
+  border:1px solid color-mix(in srgb,var(--poll-admin-color,var(--red)) 42%,rgba(255,255,255,.18)) !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+
+#adm-fanpolls .poll-admin-table-options .poll-admin-mini-logo img,
+#adm-fanpolls .poll-admin-mini-logo img{
+  width:100% !important;
+  height:100% !important;
+  max-width:30px !important;
+  max-height:22px !important;
+  object-fit:contain !important;
+  background:transparent !important;
+  padding:0 !important;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.45)) !important;
+}
+
+@media(max-width:760px){
+  #adm-fanpolls .poll-admin-option-row{grid-template-columns:1fr !important;}
+  #adm-fanpolls .poll-admin-logo-cell{grid-template-columns:96px minmax(0,1fr) !important;}
+  #adm-fanpolls .poll-logo-preview{width:88px !important;height:66px !important;}
+  #adm-fanpolls .poll-admin-option-row .adm-btn-ghost.danger{width:100% !important;}
+}
