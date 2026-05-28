@@ -8,17 +8,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-  <canvas id="receipt-particles"></canvas>
-
   <main class="receipt-shell">
-    <section class="receipt-hero">
-      <a href="shop.html" class="receipt-logo receipt-logo-lockup-wrap">
-        <img src="assets/paddox-logo-lockup.png" alt="PADDOX logo" class="receipt-logo-lockup" loading="eager">
+    <div class="receipt-screen-head no-print">
+      <a href="shop.html" class="receipt-site-logo" aria-label="Back to PADDOX shop">
+        <img src="assets/paddox-logo-lockup.png" alt="PADDOX logo"/>
       </a>
-      <div class="receipt-kicker">ORDER RECEIPT</div>
-      <h1>PAYMENT RECEIPT</h1>
-      <p>Your PADDOX payment receipt with complete order and delivery details.</p>
-    </section>
+      <div class="receipt-screen-actions" id="receipt-actions" style="display:none">
+        <button id="print-receipt" type="button">Print / Save PDF</button>
+        <a href="account.html">My Orders</a>
+        <a href="shop.html">Shop</a>
+      </div>
+    </div>
 
     <section class="receipt-card" id="receipt-card">
       <div class="receipt-loading">
@@ -26,15 +26,9 @@
         <p>Loading receipt...</p>
       </div>
     </section>
-
-    <div class="receipt-actions" id="receipt-actions" style="display:none">
-      <button id="print-receipt">Print / Save PDF</button>
-      <a href="account.html">View My Orders</a>
-      <a href="shop.html">Continue Shopping</a>
-    </div>
   </main>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast no-print" id="toast"></div>
   <script src="receipt.js"></script>
 </body>
 </html>

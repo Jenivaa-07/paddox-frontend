@@ -4274,68 +4274,42 @@ body.modal-open { overflow: hidden; }
   #sec-community .comm-card-title .comm-title-icon::before{width:16px!important;height:16px!important;}
 }
 
-
 /* ============================================================
-   Phase 18.0 — PADDOX lockup logo in Quotes card/share layout
-   Uses assets/paddox-logo-lockup.png for top + bottom branding.
+   Phase 18.0.1 — Quotes brand lockup hotfix
+   Keeps quote section working even when the new brand asset is used.
    ============================================================ */
-.qf-card-brand-top{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:18px!important;
-  margin-bottom:18px!important;
-  position:relative!important;
-  z-index:3!important;
-}
-.qf-card-brand-top .qf-brand-lockup{
-  width:min(260px,56vw)!important;
-  height:72px!important;
-  object-fit:contain!important;
-  object-position:left center!important;
-  display:block!important;
-  filter:drop-shadow(0 10px 24px rgba(0,0,0,.35))!important;
-}
-.qf-card-brand-top span{
-  font-family:var(--font-c)!important;
-  letter-spacing:2.8px!important;
-  text-transform:uppercase!important;
-  color:rgba(255,255,255,.55)!important;
-  font-size:.72rem!important;
-  white-space:nowrap!important;
-}
 .qf-brand-lockup-wrap{
-  min-width:180px!important;
+  display:inline-flex!important;
+  align-items:center!important;
   justify-content:flex-end!important;
+  gap:10px!important;
+  min-width:148px!important;
+  max-width:230px!important;
+  opacity:1!important;
 }
 .qf-brand-lockup{
   display:block!important;
-  width:210px!important;
-  height:58px!important;
+  width:min(190px,22vw)!important;
+  height:auto!important;
+  max-height:42px!important;
   object-fit:contain!important;
-  object-position:right center!important;
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-  padding:0!important;
-  box-shadow:none!important;
-  filter:drop-shadow(0 10px 26px rgba(0,0,0,.35))!important;
+  border-radius:8px!important;
+  background:rgba(0,0,0,.42)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  padding:3px 7px!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.22)!important;
 }
-.qf-brand-lockup-small{
-  width:190px!important;
-  height:54px!important;
+.qf-brand-fallback{
+  display:none;
+  align-items:center;
+  font-family:var(--font-d);
+  letter-spacing:2.5px;
+  font-size:1.34rem;
+  color:#fff;
+  line-height:1;
 }
-.qf-brand-logo,.qf-brand-word{
-  display:none!important;
-}
-@media(max-width:900px){
-  .qf-card-brand-top{align-items:flex-start!important;flex-direction:column!important;gap:8px!important;}
-  .qf-card-brand-top .qf-brand-lockup{height:58px!important;width:min(230px,70vw)!important;}
-  .qf-footer{align-items:flex-start!important;}
-  .qf-brand-lockup-wrap{min-width:0!important;}
-  .qf-brand-lockup-small{width:160px!important;height:46px!important;object-position:left center!important;}
-}
-@media(max-width:620px){
-  .qf-card-brand-top .qf-brand-lockup{height:52px!important;width:min(210px,80vw)!important;}
-  .qf-brand-lockup-small{width:145px!important;height:42px!important;}
+.qf-brand-fallback span{color:var(--red)}
+@media(max-width:760px){
+  .qf-brand-lockup{width:138px!important;max-height:34px!important;padding:2px 5px!important;}
+  .qf-brand-lockup-wrap{min-width:120px!important;}
 }

@@ -2,6 +2,11 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
+
+/* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
+const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup.png';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png';
+
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
    Replace all hardcoded arrays with live API calls
@@ -1409,11 +1414,6 @@ function renderRealtimeQuotes() {
       </div>
 
       <div class="qf-content">
-        <div class="qf-card-brand-top">
-          <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX logo" class="qf-brand-lockup" loading="lazy">
-          <span>Digital Fan Hub Quote Card</span>
-        </div>
-
         <div class="qf-topline">
           <span class="qf-pill">${safeText(q.era || 'current').toUpperCase()}</span>
           <span class="qf-dot">•</span>
@@ -1445,7 +1445,9 @@ function renderRealtimeQuotes() {
           </div>
 
           <div class="qf-brand qf-brand-lockup-wrap">
-            <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX logo" class="qf-brand-lockup qf-brand-lockup-small" loading="lazy">
+            <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX logo" class="qf-brand-lockup" loading="lazy"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'">
+            <span class="qf-brand-fallback">PADDO<span>X</span></span>
           </div>
         </div>
       </div>
@@ -1563,25 +1565,22 @@ function drawPaddoxCanvasBrand(ctx, x, y, logo, options = {}) {
 }
 
 
+function drawPaddoxLockupCanvas(ctx, x, y, logo, options = {}) {
+  const maxW = options.width || 270;
+  const maxH = options.height || 86;
 
-function drawPaddoxCanvasLockup(ctx, img, x, y, w, h, options = {}) {
-  if (!img) {
-    const icon = options.icon || null;
-    drawPaddoxCanvasBrand(ctx, x, y + h * 0.72, icon, { size: Math.min(h, 62), fontSize: Math.min(h * .72, 56), gap: 14 });
-    return;
+  if (logo) {
+    const ratio = Math.min(maxW / logo.width, maxH / logo.height);
+    const w = logo.width * ratio;
+    const h = logo.height * ratio;
+    ctx.save();
+    ctx.drawImage(logo, x, y, w, h);
+    ctx.restore();
+    return { width: w, height: h };
   }
 
-  const ratio = Math.min(w / img.width, h / img.height);
-  const dw = img.width * ratio;
-  const dh = img.height * ratio;
-  const dx = x + (w - dw) / 2;
-  const dy = y + (h - dh) / 2;
-
-  ctx.save();
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(img, dx, dy, dw, dh);
-  ctx.restore();
+  drawPaddoxCanvasBrand(ctx, x, y + 62, null, { fontSize: 62, gap: 0 });
+  return { width: 210, height: 74 };
 }
 
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
@@ -1674,13 +1673,13 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = teamColor;
   ctx.fillRect(70, 70, W - 140, 12);
 
-  const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
   const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
-  drawPaddoxCanvasLockup(ctx, brandLockup, 108, 112, 318, 88, { icon: brandLogo });
+  const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
+  drawPaddoxLockupCanvas(ctx, 110, 125, brandLockup, { width: 280, height: 86 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
-  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 222);
+  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 215);
 
   const imgSrc = quoteImageValue(q);
   const img = await loadQuoteImageForCanvas(imgSrc);
@@ -1746,7 +1745,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxCanvasLockup(ctx, brandLockup, 730, 1174, 220, 56, { icon: brandLogo });
+  drawPaddoxLockupCanvas(ctx, 742, 1182, brandLockup, { width: 218, height: 48 });
 
   return canvas;
 }
