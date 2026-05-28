@@ -4184,491 +4184,92 @@ body.modal-open { overflow: hidden; }
   .lb-row .lb-p{grid-column:3;text-align:left;font-size:.95rem!important;}
 }
 
-/* ============================================================
-   Phase 17.8.2 — Fan Hub Trivia Display Polish
-   ============================================================ */
-#sec-community .comm-card:has(#triv-q) {
-  position: relative;
-  overflow: hidden;
-  border-color: rgba(255,255,255,.075);
-  background:
-    radial-gradient(circle at 10% 0%, rgba(232,0,45,.08), transparent 34%),
-    linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
-}
-
-#sec-community .comm-card:has(#triv-q)::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 2px;
-  background: linear-gradient(to bottom, transparent, var(--red), transparent);
-  opacity: .7;
-  pointer-events: none;
-}
-
-.triv-q {
-  margin-bottom: 18px !important;
-  padding: 18px 18px 16px;
-  border: 1px solid rgba(255,255,255,.08);
-  background:
-    linear-gradient(135deg, rgba(232,0,45,.09), rgba(255,255,255,.025)),
-    rgba(8,8,8,.55);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-.triv-kicker {
-  font-family: var(--font-c);
-  color: var(--red);
-  font-size: .64rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.triv-question-text {
-  color: #fff;
-  font-size: 1rem;
-  line-height: 1.55;
-  font-weight: 800;
-  letter-spacing: .1px;
-}
-
-.triv-meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.triv-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 24px;
-  padding: 4px 10px;
-  border: 1px solid rgba(255,255,255,.11);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.72);
-  font-family: var(--font-c);
-  font-size: .62rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.triv-chip-points {
-  color: #fff;
-  border-color: rgba(232,0,45,.45);
-  background: rgba(232,0,45,.13);
-}
-
-.triv-opts {
-  gap: 10px !important;
-}
-
-.topt {
-  position: relative;
-  display: grid;
-  grid-template-columns: 38px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  min-height: 54px;
-  padding: 10px 14px !important;
-  border: 1px solid rgba(255,255,255,.08) !important;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
-    rgba(18,18,18,.92) !important;
-  color: rgba(255,255,255,.78) !important;
-  overflow: hidden;
-}
-
-.topt::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(232,0,45,.08), transparent 45%);
-  opacity: 0;
-  transition: opacity var(--tr);
-  pointer-events: none;
-}
-
-.topt:hover::before,
-.topt.selected::before {
-  opacity: 1;
-}
-
-.topt:hover {
-  border-color: rgba(232,0,45,.35) !important;
-  color: #fff !important;
-  transform: translateX(3px);
-}
-
-.topt:disabled {
-  cursor: default;
-}
-
-.topt-key {
-  position: relative;
-  z-index: 1;
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.055);
-  color: var(--red);
-  font-family: var(--font-d);
-  font-size: 1.1rem;
-  letter-spacing: 1px;
-}
-
-.topt-text {
-  position: relative;
-  z-index: 1;
-  font-weight: 750;
-  line-height: 1.35;
-}
-
-.topt-status {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-c);
-  font-size: .58rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.45);
-}
-
-.topt.correct {
-  border-color: rgba(0,180,0,.62) !important;
-  background:
-    linear-gradient(90deg, rgba(0,180,0,.18), rgba(255,255,255,.018)),
-    rgba(16,22,16,.95) !important;
-  color: #fff !important;
-}
-
-.topt.correct .topt-key {
-  color: #fff;
-  border-color: rgba(0,180,0,.7);
-  background: rgba(0,180,0,.38);
-  box-shadow: 0 0 20px rgba(0,180,0,.15);
-}
-
-.topt.correct .topt-status {
-  color: #65ff65;
-}
-
-.topt.wrong {
-  border-color: rgba(232,0,45,.72) !important;
-  background:
-    linear-gradient(90deg, rgba(232,0,45,.2), rgba(255,255,255,.015)),
-    rgba(27,10,14,.95) !important;
-  color: #fff !important;
-}
-
-.topt.wrong .topt-key {
-  color: #fff;
-  border-color: rgba(232,0,45,.75);
-  background: rgba(232,0,45,.42);
-}
-
-.topt.wrong .topt-status {
-  color: #ff6b86;
-}
-
-.topt.dimmed {
-  opacity: .55;
-}
-
-.triv-res {
-  margin-top: 16px !important;
-  padding: 14px 16px !important;
-  text-align: left !important;
-  border: 1px solid rgba(255,255,255,.09);
-  background: rgba(255,255,255,.035);
-  font-family: var(--font-b) !important;
-}
-
-.triv-res strong {
-  display: block;
-  font-family: var(--font-d);
-  font-size: 1.35rem;
-  letter-spacing: 2px;
-  margin-bottom: 4px;
-}
-
-.triv-res span {
-  display: block;
-  color: rgba(255,255,255,.68);
-  font-size: .82rem;
-  line-height: 1.5;
-}
-
-.triv-res-correct {
-  border-color: rgba(0,180,0,.38) !important;
-  background: rgba(0,180,0,.08) !important;
-}
-
-.triv-res-correct strong {
-  color: #65ff65;
-}
-
-.triv-res-wrong {
-  border-color: rgba(232,0,45,.45) !important;
-  background: rgba(232,0,45,.08) !important;
-}
-
-.triv-res-wrong strong {
-  color: var(--red);
-}
-
-.triv-next {
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  margin-top: 12px !important;
-  border: 1px solid rgba(232,0,45,.55);
-  background: linear-gradient(135deg, var(--red), #8b001a) !important;
-  box-shadow: 0 14px 34px rgba(232,0,45,.16);
-}
-
-.triv-next::after {
-  content: '→';
-  margin-left: 9px;
-}
-
-@media (max-width: 680px) {
-  .triv-q { padding: 15px; }
-  .topt { grid-template-columns: 34px 1fr; }
-  .topt-status { grid-column: 2; }
-}
 
 /* ============================================================
-   Phase 17.9 — Community Final Premium Pass
-   Frontend-only: final spacing, dashboard balance, card hierarchy,
-   sticky-tab safe spacing, and mobile consistency for Community.
+   Phase 17.9.1 — Community Card Title Icons: Shop-style Boxed
+   Matches Fan Hub subhero / Shop category icon treatment.
+   Affects only: Fan Poll, Fan Leaderboard, F1 Trivia, Fan Live Feed.
    ============================================================ */
-#sec-community{
-  position:relative;
-  scroll-margin-top:142px;
-  padding-top:82px!important;
-  padding-bottom:86px!important;
-  overflow:hidden;
-}
-#sec-community::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 16% 10%, rgba(232,0,45,.075), transparent 30%),
-    radial-gradient(circle at 88% 34%, rgba(201,168,76,.055), transparent 28%),
-    linear-gradient(180deg, rgba(255,255,255,.012), transparent 34%);
-  opacity:.95;
-}
-#sec-community > *{
-  position:relative;
-  z-index:1;
-}
-#sec-community .sec-header{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:22px;
-  margin-bottom:28px!important;
-  padding-bottom:18px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-#sec-community .sec-header::after{
-  content:'LIVE FAN GRID';
-  font-family:var(--font-c);
-  font-size:.64rem;
-  font-weight:800;
-  letter-spacing:3px;
-  color:rgba(255,255,255,.44);
-  border:1px solid rgba(232,0,45,.22);
-  background:rgba(232,0,45,.06);
-  padding:7px 12px;
-  white-space:nowrap;
-}
-#sec-community .section-title{
-  text-shadow:0 0 34px rgba(232,0,45,.11);
-}
-#sec-community .fan-points-dock{
-  display:grid!important;
-  grid-template-columns:minmax(280px,1.35fr) repeat(3,minmax(130px,.55fr))!important;
-  gap:14px!important;
-  margin-bottom:22px!important;
-}
-#sec-community .fpd-card{
-  position:relative;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.085)!important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.058), rgba(255,255,255,.022))!important;
-  box-shadow:0 16px 38px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.045)!important;
-}
-#sec-community .fpd-card::after{
-  content:'';
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:2px;
-  background:linear-gradient(90deg, var(--red), transparent 72%);
-  opacity:.72;
-}
-#sec-community .fpd-main{
-  border-left:2px solid rgba(232,0,45,.75)!important;
-}
-#sec-community .comm-grid{
-  display:grid!important;
-  grid-template-columns:minmax(0,5fr) minmax(0,7fr)!important;
-  gap:18px!important;
-  align-items:start!important;
-}
-#sec-community .comm-card{
-  position:relative!important;
-  min-width:0!important;
-  height:100%!important;
-  border:1px solid rgba(255,255,255,.082)!important;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(232,0,45,.055), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.018))!important;
-  box-shadow:0 20px 48px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.04)!important;
-  padding:24px!important;
-  overflow:hidden!important;
-}
-#sec-community .comm-card::before{
-  content:'';
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:1px;
-  background:linear-gradient(90deg, rgba(232,0,45,.72), rgba(255,255,255,.10), transparent);
-  opacity:.78;
-}
-#sec-community .comm-card:hover{
-  border-color:rgba(232,0,45,.22)!important;
-  box-shadow:0 26px 62px rgba(0,0,0,.42), 0 0 30px rgba(232,0,45,.055)!important;
-}
-#sec-community .comm-card:nth-child(1){grid-column:1 / span 1!important;}
-#sec-community .comm-card:nth-child(2){grid-column:2 / span 1!important;}
-#sec-community .comm-card:nth-child(3){grid-column:1 / span 1!important;}
-#sec-community .comm-card:nth-child(4){grid-column:2 / span 1!important;}
 #sec-community .comm-card-title{
-  position:relative;
   display:flex!important;
   align-items:center!important;
-  justify-content:flex-start!important;
-  gap:11px!important;
-  min-height:42px;
-  margin-bottom:18px!important;
-  padding-bottom:13px;
-  border-bottom:1px solid rgba(255,255,255,.065);
-  font-size:1.24rem!important;
+  gap:13px!important;
+  min-height:40px!important;
+  letter-spacing:2.6px!important;
 }
-#sec-community .comm-title-icon{
+#sec-community .comm-card-title::before{
+  display:none!important;
+  content:none!important;
+}
+#sec-community .comm-card-title .comm-title-icon{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 34px!important;
   width:34px!important;
   height:34px!important;
+  margin:0 2px 0 0!important;
+  color:rgba(255,255,255,.78)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.022))!important;
+  border:1px solid rgba(255,255,255,.125)!important;
   border-radius:11px!important;
-  flex:0 0 auto!important;
-  background:
-    linear-gradient(180deg, rgba(232,0,45,.22), rgba(232,0,45,.06))!important;
-  border:1px solid rgba(232,0,45,.35)!important;
-  box-shadow:0 10px 24px rgba(232,0,45,.10), inset 0 1px 0 rgba(255,255,255,.08)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 12px 26px rgba(0,0,0,.22)!important;
+  -webkit-mask:none!important;
+  mask:none!important;
+  opacity:1!important;
+  overflow:hidden!important;
+  transform:none!important;
+  transition:color var(--tr),background var(--tr),border-color var(--tr),box-shadow var(--tr),transform var(--tr)!important;
 }
-#sec-community .comm-title-icon::before{
-  width:16px!important;
-  height:16px!important;
+#sec-community .comm-card-title .comm-title-icon::before{
+  content:''!important;
+  position:absolute!important;
+  inset:0!important;
+  width:17px!important;
+  height:17px!important;
+  margin:auto!important;
+  display:block!important;
+  background:currentColor!important;
+  -webkit-mask:var(--fh-icon) center/contain no-repeat!important;
+  mask:var(--fh-icon) center/contain no-repeat!important;
+  border:0!important;
+  box-shadow:none!important;
+  transform:none!important;
 }
-#sec-community .poll-q,
-#sec-community .triv-q,
-#sec-community .feed-compose,
-#sec-community .lb-header-card{
-  margin-top:0!important;
+#sec-community .comm-card:hover .comm-card-title .comm-title-icon,
+#sec-community .comm-card-title:hover .comm-title-icon{
+  color:#fff!important;
+  background:linear-gradient(180deg,rgba(232,0,45,.30),rgba(232,0,45,.075))!important;
+  border-color:rgba(232,0,45,.52)!important;
+  box-shadow:
+    0 14px 30px rgba(232,0,45,.12),
+    inset 0 1px 0 rgba(255,255,255,.11)!important;
+  transform:translateY(-1px) scale(1.05)!important;
 }
-#sec-community .poll-meta,
-#sec-community .triv-res,
-#sec-community .feed-comments{
-  border-radius:0!important;
+#sec-community .comm-card-title .fh-ico-poll,
+#sec-community .comm-card-title .fh-ico-leaderboard,
+#sec-community .comm-card-title .fh-ico-trivia,
+#sec-community .comm-card-title .fh-ico-feed{
+  --fh-icon:inherit;
 }
-#sec-community .poll-opts,
-#sec-community .triv-opts,
-#sec-community .lb-list,
-#sec-community .live-feed{
-  min-width:0!important;
+#sec-community .comm-card-title .fh-ico-poll{--fh-icon:var(--fh-ico-poll)!important;}
+#sec-community .comm-card-title .fh-ico-leaderboard{--fh-icon:var(--fh-ico-leaderboard)!important;}
+#sec-community .comm-card-title .fh-ico-trivia{--fh-icon:var(--fh-ico-trivia)!important;}
+#sec-community .comm-card-title .fh-ico-feed{--fh-icon:var(--fh-ico-feed)!important;}
+
+/* Make card headers visually consistent with the premium icon box */
+#sec-community .comm-card-title{
+  border-bottom:1px solid rgba(255,255,255,.065)!important;
+  padding-bottom:14px!important;
 }
-#sec-community .live-feed{
-  max-height:640px;
-  overflow:auto;
-  padding-right:4px;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(232,0,45,.45) transparent;
+#sec-community .comm-card-title + *{
+  margin-top:2px;
 }
-#sec-community .live-feed::-webkit-scrollbar{width:4px;}
-#sec-community .live-feed::-webkit-scrollbar-track{background:transparent;}
-#sec-community .live-feed::-webkit-scrollbar-thumb{background:rgba(232,0,45,.55);border-radius:10px;}
-#sec-community #feed-post-btn,
-#sec-community .triv-next{
-  letter-spacing:2.4px!important;
-}
-#sec-community .feed-empty,
-#sec-community .triv-empty,
-#sec-community .lb-empty{
-  border:1px solid rgba(255,255,255,.075)!important;
-  background:rgba(255,255,255,.025)!important;
-}
-@media(max-width:1180px){
-  #sec-community .fan-points-dock{
-    grid-template-columns:1fr 1fr!important;
-  }
-  #sec-community .fpd-main{
-    grid-column:1 / -1!important;
-  }
-}
-@media(max-width:980px){
-  #sec-community{
-    padding-top:66px!important;
-  }
-  #sec-community .sec-header{
-    align-items:flex-start;
-    flex-direction:column;
-    gap:12px;
-  }
-  #sec-community .comm-grid{
-    grid-template-columns:1fr!important;
-  }
-  #sec-community .comm-card:nth-child(n){
-    grid-column:1 / -1!important;
-  }
-  #sec-community .live-feed{
-    max-height:none;
-    overflow:visible;
-    padding-right:0;
-  }
-}
-@media(max-width:640px){
-  #sec-community{
-    padding-left:18px!important;
-    padding-right:18px!important;
-    padding-top:54px!important;
-  }
-  #sec-community .sec-header::after{
-    font-size:.56rem;
-    letter-spacing:2px;
-    padding:6px 10px;
-  }
-  #sec-community .fan-points-dock{
-    grid-template-columns:1fr!important;
-    gap:10px!important;
-  }
-  #sec-community .comm-card{
-    padding:18px!important;
-  }
-  #sec-community .comm-card-title{
-    font-size:1.12rem!important;
-  }
+@media(max-width:760px){
+  #sec-community .comm-card-title{gap:11px!important;font-size:1.15rem!important;}
+  #sec-community .comm-card-title .comm-title-icon{width:31px!important;height:31px!important;flex-basis:31px!important;border-radius:10px!important;}
+  #sec-community .comm-card-title .comm-title-icon::before{width:16px!important;height:16px!important;}
 }
