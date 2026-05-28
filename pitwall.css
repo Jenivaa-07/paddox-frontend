@@ -1215,3 +1215,146 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
   #particles-canvas{opacity:.18!important;}
   .pit-hero{background-position:center!important;}
 }
+
+/* ============================================================
+   PHASE 19.11 — PIT WALL FONT SCALE & TYPOGRAPHY BALANCE
+   Typography-only pass. No layout, navbar, table logic, flags, or backend changes.
+   ============================================================ */
+.pit-title{
+  font-size:clamp(4.95rem,6.7vw,7.35rem)!important;
+  letter-spacing:4.8px!important;
+  line-height:.86!important;
+  text-shadow:0 22px 70px rgba(0,0,0,.86),0 0 26px rgba(232,0,45,.10)!important;
+}
+.pit-kicker{
+  font-size:.88rem!important;
+  letter-spacing:3px!important;
+  line-height:1!important;
+}
+.pit-sub{
+  font-size:1.08rem!important;
+  line-height:1.72!important;
+  color:rgba(255,255,255,.76)!important;
+  max-width:640px!important;
+}
+.breadcrumb{
+  font-size:.76rem!important;
+  letter-spacing:2.15px!important;
+  color:rgba(255,255,255,.43)!important;
+}
+.strip-label,
+.panel-tag,
+.selector-block span,
+.session-type,
+.auto-refresh,
+.mini-btn{
+  font-size:.76rem!important;
+  letter-spacing:2px!important;
+}
+.pit-top-strip strong{
+  font-size:2.12rem!important;
+  letter-spacing:1.7px!important;
+}
+.pit-top-strip small,
+.context-card small,
+.pit-kpi small,
+.podium-row small{
+  color:rgba(255,255,255,.58)!important;
+}
+.panel-head h2{
+  font-size:2.08rem!important;
+  letter-spacing:1.8px!important;
+  line-height:.95!important;
+}
+.panel-head.compact h2{
+  font-size:1.68rem!important;
+  letter-spacing:1.65px!important;
+}
+.pit-kpi p{
+  font-size:.80rem!important;
+  letter-spacing:1.85px!important;
+  color:rgba(255,255,255,.48)!important;
+}
+.pit-kpi b{
+  font-size:2.08rem!important;
+  letter-spacing:1.5px!important;
+}
+.pit-primary,
+.pit-secondary,
+.mini-load,
+.session-tab{
+  font-size:.86rem!important;
+  letter-spacing:1.85px!important;
+}
+.selector-block select{
+  font-size:.92rem!important;
+  letter-spacing:.15px!important;
+}
+.timing-header{
+  font-size:.62rem!important;
+  letter-spacing:1.35px!important;
+  color:rgba(255,255,255,.50)!important;
+}
+.timing-row.session-row .driver-name{
+  font-size:.86rem!important;
+  letter-spacing:.05px!important;
+  line-height:1.15!important;
+}
+.timing-row.session-row .driver-team{
+  font-size:.66rem!important;
+  line-height:1.2!important;
+  color:rgba(255,255,255,.50)!important;
+}
+.timing-row.session-row .gap,
+.timing-row.session-row .lap-time,
+.timing-row.session-row .sector,
+.timing-row.session-row .laps,
+.timing-row.session-row .tyre-col{
+  font-size:.76rem!important;
+  letter-spacing:.45px!important;
+}
+.timing-row.session-row .pos{
+  font-size:1.13rem!important;
+  color:rgba(255,255,255,.68)!important;
+}
+.tyre-pill{
+  font-size:.62rem!important;
+  letter-spacing:.55px!important;
+}
+.rc-time{
+  font-size:.80rem!important;
+  letter-spacing:1.35px!important;
+}
+.rc-text{
+  font-size:.90rem!important;
+  color:rgba(255,255,255,.62)!important;
+}
+.session-name{
+  font-size:1.58rem!important;
+  letter-spacing:1.35px!important;
+}
+.session-meta{
+  font-size:.88rem!important;
+  color:rgba(255,255,255,.58)!important;
+}
+.empty-row,
+.loading-row,
+.pit-empty-state p{
+  font-size:.94rem!important;
+  color:rgba(255,255,255,.64)!important;
+}
+@media(max-width:1280px){
+  .pit-title{font-size:clamp(4.5rem,6.2vw,6.5rem)!important;}
+  .timing-row.session-row .driver-name{font-size:.82rem!important;}
+  .timing-row.session-row .driver-team{font-size:.63rem!important;}
+}
+@media(max-width:900px){
+  .pit-title{font-size:clamp(4.2rem,14vw,5.75rem)!important;letter-spacing:3.2px!important;}
+  .pit-sub{font-size:1rem!important;}
+  .panel-head h2{font-size:1.82rem!important;}
+}
+@media(max-width:560px){
+  .pit-title{font-size:3.95rem!important;}
+  .pit-kicker{font-size:.78rem!important;letter-spacing:2.4px!important;}
+  .pit-sub{font-size:.94rem!important;}
+}
