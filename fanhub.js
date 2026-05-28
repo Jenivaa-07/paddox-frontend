@@ -2650,15 +2650,15 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
           <div class="feed-head">
             <div>
               <div class="feed-user">@${handle || 'paddoxfan'}</div>
-              <div class="feed-role">Grid Member</div>
+              <div class="feed-role">PADDOX GRID MEMBER</div>
             </div>
             <div class="feed-time">${timeAgo(post.createdAt)}</div>
           </div>
           <div class="feed-txt">${safeText}</div>
           <div class="feed-actions">
-            <button type="button" onclick="showToast('Like action coming in backend phase')">Like ${likes}</button>
-            <button type="button" onclick="showToast('Comments coming in backend phase')">Comment</button>
-            <button type="button" onclick="navigator.clipboard?.writeText(this.closest('.feed-item').querySelector('.feed-txt')?.textContent || ''); showToast('Post copied')">↗ Share</button>
+            <button class="feed-action-btn like" type="button" onclick="showToast('Like action coming in backend phase')"><span class="feed-action-icon feed-like-icon" aria-hidden="true"></span><span>Like</span><strong>${likes}</strong></button>
+            <button class="feed-action-btn comment" type="button" onclick="showToast('Comments coming in backend phase')"><span class="feed-action-icon feed-comment-icon" aria-hidden="true"></span><span>Comment</span></button>
+            <button class="feed-action-btn share" type="button" onclick="navigator.clipboard?.writeText(this.closest('.feed-item').querySelector('.feed-txt')?.textContent || ''); showToast('Post copied')"><span class="feed-action-icon feed-share-icon" aria-hidden="true"></span><span>Share</span></button>
           </div>
         </div>
       </div>
