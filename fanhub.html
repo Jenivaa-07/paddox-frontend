@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Digital Fan Hub</title>
-  <link rel="stylesheet" href="fanhub.css?v=18_2_6"/>
+  <link rel="stylesheet" href="fanhub.css?v=18_2_7"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -123,6 +123,27 @@
           <div class="stat-bars" id="stat-bars"></div>
           <div class="cmp-grid" id="cmp-grid"></div>
         </div>
+      </div>
+
+      <div class="driver-compare-shell reveal-up delay-2" id="driver-compare-shell">
+        <div class="compare-head">
+          <div>
+            <div class="compare-kicker">Racecraft Lab</div>
+            <h3>Compare <span>Drivers</span></h3>
+          </div>
+          <p>Pick any two current-grid drivers and compare standings, points, wins, team and car number.</p>
+        </div>
+        <div class="compare-controls">
+          <label>
+            <span>Driver A</span>
+            <select id="compare-driver-a"></select>
+          </label>
+          <label>
+            <span>Driver B</span>
+            <select id="compare-driver-b"></select>
+          </label>
+        </div>
+        <div class="compare-board" id="compare-board"></div>
       </div>
     </section>
 
@@ -260,6 +281,6 @@
 <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="js/api.js"></script>
-<script src="fanhub.js?v=18_2_6"></script>
+<script src="fanhub.js?v=18_2_7"></script>
 </body>
 </html>
