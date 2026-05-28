@@ -818,12 +818,12 @@ function renderNotifications(){
 }
 
 /* ══ TEAM PREFS ══ */
-const TEAMS=[{emoji:'🔴',name:'Ferrari'},{emoji:'🔵',name:'Red Bull'},{emoji:'⚫',name:'Mercedes'},{emoji:'🟠',name:'McLaren'},{emoji:'🟢',name:'Aston'},{emoji:'🔵',name:'Alpine'}];
+const TEAMS=[{name:'Scuderia Ferrari'},{name:'Oracle Red Bull Racing'},{name:'Mercedes-AMG Petronas'},{name:'McLaren F1 Team'},{name:'Aston Martin F1'},{name:'BWT Alpine F1'},{name:'Williams Racing'},{name:'Haas F1 Team'},{name:'RB F1 Team'},{name:'Audi F1 Team'},{name:'Cadillac F1 Team'}];
 function renderTeamPrefs(){
   const grid=document.getElementById('team-pref');if(!grid)return;
   const fav = currentUser?.preferences?.favouriteTeam || '';
   grid.innerHTML=TEAMS.map((t,i)=>`
-    <button class="team-pref-btn ${(fav ? fav === t.name : i===0)?'on':''}" data-team="${t.name}" onclick="selectTeam(this)">${t.emoji} ${t.name}</button>
+    <button class="team-pref-btn ${(fav ? fav === t.name : i===0)?'on':''}" data-team="${t.name}" onclick="selectTeam(this)"><span class="team-pref-dot" aria-hidden="true"></span>${t.name}</button>
   `).join('');
 }
 function selectTeam(el){
@@ -858,7 +858,7 @@ function setFieldValue(id, value = '') {
 
 function getSelectedTeam() {
   const selected = document.querySelector('.team-pref-btn.on');
-  return selected?.dataset?.team || selected?.textContent?.replace(/[🔴🔵⚫🟠🟢]/g, '').trim() || '';
+  return selected?.dataset?.team || selected?.textContent?.trim() || '';
 }
 
 
