@@ -4862,3 +4862,215 @@ body.modal-open { overflow: hidden; }
   #sec-quotes .qf-premium-actions{display:grid!important;grid-template-columns:1fr!important;}
   #sec-quotes .qf-share{width:100%!important;}
 }
+
+/* ============================================================
+   Phase 18.1.1 — Quotes Section Professional Alignment Pass
+   Focus: spacing, hierarchy, card balance, list consistency.
+   Official PADDOX icon untouched.
+   ============================================================ */
+#sec-quotes{
+  padding-top:78px!important;
+}
+#sec-quotes .section-head{
+  margin-bottom:22px!important;
+  align-items:flex-end!important;
+}
+#sec-quotes .section-title{
+  line-height:.95!important;
+  letter-spacing:1.5px!important;
+}
+#sec-quotes .quote-controls{
+  display:grid!important;
+  grid-template-columns:auto minmax(360px,1fr) auto!important;
+  align-items:center!important;
+  gap:14px!important;
+  padding:14px 16px!important;
+  margin-bottom:24px!important;
+  border-radius:22px!important;
+}
+#sec-quotes .quote-filter-row{
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  min-width:max-content!important;
+}
+#sec-quotes .quote-filter{
+  min-height:38px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:9px 16px!important;
+}
+#sec-quotes .quote-search-wrap{
+  min-width:0!important;
+  width:100%!important;
+  height:48px!important;
+  padding:0 15px!important;
+  border-radius:16px!important;
+}
+#sec-quotes .quote-count{
+  min-height:38px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 13px!important;
+  white-space:nowrap!important;
+}
+#sec-quotes .quotes-layout{
+  grid-template-columns:minmax(650px,1fr) minmax(330px,360px)!important;
+  gap:24px!important;
+  align-items:start!important;
+}
+#sec-quotes .quote-featured{
+  border-radius:26px!important;
+}
+#sec-quotes .qf-premium-card{
+  min-height:500px!important;
+  grid-template-columns:minmax(240px,32%) minmax(0,1fr)!important;
+  border-radius:26px!important;
+}
+#sec-quotes .qf-media{
+  padding:30px 18px!important;
+  min-width:0!important;
+}
+#sec-quotes .qf-image-ring{
+  width:min(242px,82%)!important;
+  padding:7px!important;
+}
+#sec-quotes .qf-driver-image{
+  border-width:7px!important;
+  font-size:4rem!important;
+}
+#sec-quotes .qf-content{
+  padding:34px 34px 28px!important;
+  justify-content:flex-start!important;
+  min-width:0!important;
+}
+#sec-quotes .qf-topline{
+  margin-bottom:18px!important;
+}
+#sec-quotes .big-qm{
+  margin-bottom:10px!important;
+  line-height:.75!important;
+  font-size:2.25rem!important;
+}
+#sec-quotes .qf-text{
+  font-size:clamp(1.42rem,2vw,1.9rem)!important;
+  line-height:1.32!important;
+  margin:0 0 22px!important;
+  max-width:620px!important;
+}
+#sec-quotes .qf-footer{
+  min-height:72px!important;
+  padding:13px 15px!important;
+  border-radius:18px!important;
+  margin-top:auto!important;
+}
+#sec-quotes .qf-drv{
+  min-width:0!important;
+}
+#sec-quotes .qf-drv>div:last-child{
+  min-width:0!important;
+}
+#sec-quotes .qf-dname,
+#sec-quotes .qf-dteam{
+  max-width:245px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#sec-quotes .qf-brand-final{
+  flex:0 0 auto!important;
+  min-width:112px!important;
+  justify-content:flex-end!important;
+}
+#sec-quotes .qf-premium-actions{
+  margin-top:14px!important;
+  justify-content:flex-end!important;
+}
+#sec-quotes .qf-share{
+  min-height:38px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+#sec-quotes .quotes-list{
+  max-height:620px!important;
+  padding-right:6px!important;
+  overflow-y:auto!important;
+}
+#sec-quotes .qmini{
+  position:relative!important;
+  min-height:142px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  border-radius:18px!important;
+  padding:15px 15px 14px!important;
+}
+#sec-quotes .qmini.on{
+  background:linear-gradient(145deg,rgba(232,0,45,.13),rgba(255,255,255,.03))!important;
+}
+#sec-quotes .qmini-head{
+  min-height:26px!important;
+}
+#sec-quotes .qmini-era{
+  max-width:128px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#sec-quotes .qm-actions{
+  opacity:.72!important;
+  transition:opacity var(--tr)!important;
+}
+#sec-quotes .qmini:hover .qm-actions,
+#sec-quotes .qmini.on .qm-actions{
+  opacity:1!important;
+}
+#sec-quotes .qm-text{
+  display:-webkit-box!important;
+  -webkit-line-clamp:3!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+  min-height:62px!important;
+  margin:2px 0 10px!important;
+}
+#sec-quotes .qm-drv{
+  display:flex!important;
+  gap:10px!important;
+  min-width:0!important;
+}
+#sec-quotes .qm-drv>div{
+  min-width:0!important;
+}
+#sec-quotes .qm-n,
+#sec-quotes .qm-t{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#sec-quotes .qm-meta{
+  margin-top:8px!important;
+}
+@media(max-width:1160px){
+  #sec-quotes .quotes-layout{grid-template-columns:1fr!important;}
+  #sec-quotes .quotes-list{max-height:none!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+@media(max-width:900px){
+  #sec-quotes .quote-controls{grid-template-columns:1fr!important;}
+  #sec-quotes .quote-filter-row{overflow-x:auto!important;padding-bottom:2px!important;scrollbar-width:none!important;}
+  #sec-quotes .quote-filter-row::-webkit-scrollbar{display:none!important;}
+  #sec-quotes .quote-count{justify-self:start!important;}
+  #sec-quotes .qf-premium-card{grid-template-columns:1fr!important;}
+  #sec-quotes .qf-media{border-right:0!important;border-bottom:1px solid rgba(255,255,255,.08)!important;}
+  #sec-quotes .qf-image-ring{width:min(235px,70vw)!important;}
+  #sec-quotes .quotes-list{grid-template-columns:1fr!important;}
+}
+@media(max-width:640px){
+  #sec-quotes{padding-top:54px!important;}
+  #sec-quotes .section-head{align-items:flex-start!important;}
+  #sec-quotes .qf-content{padding:24px 18px 20px!important;}
+  #sec-quotes .qf-text{font-size:1.28rem!important;line-height:1.38!important;}
+  #sec-quotes .qf-footer{flex-direction:column!important;align-items:flex-start!important;}
+  #sec-quotes .qf-brand-final{align-self:flex-start!important;}
+}
