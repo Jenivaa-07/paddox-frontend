@@ -1213,3 +1213,95 @@ select.form-input option{background:var(--dark2)}
     justify-self:stretch !important;
   }
 }
+
+
+/* ============================================================
+   Phase 17.8 — Fan Trivia Admin Manager
+   ============================================================ */
+.fan-trivia-admin-grid{
+  display:grid;
+  grid-template-columns:390px minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+}
+.fan-trivia-editor .adm-textarea{
+  min-height:96px;
+  resize:vertical;
+  line-height:1.55;
+}
+.trivia-options-admin{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:14px;
+}
+.trivia-admin-option-row{
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+}
+.trivia-option-badge{
+  width:38px;
+  height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,rgba(232,0,45,.2),rgba(232,0,45,.06));
+  border:1px solid rgba(232,0,45,.35);
+  color:#fff;
+  font-family:var(--font-d);
+  font-size:1.25rem;
+  border-radius:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.trivia-meta-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:8px;
+}
+.trivia-admin-row{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin:14px 0;
+  color:var(--muted2);
+  font-size:.82rem;
+}
+.trivia-answer-pill{
+  display:inline-flex;
+  align-items:center;
+  max-width:240px;
+  padding:6px 10px;
+  background:rgba(0,180,0,.08);
+  border:1px solid rgba(0,180,0,.26);
+  color:#baffba;
+  font-size:.78rem;
+  line-height:1.35;
+}
+.trivia-meta-stack{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.trivia-meta-stack span{
+  display:inline-flex;
+  padding:4px 8px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.035);
+  color:var(--muted2);
+  font-family:var(--font-c);
+  font-size:.66rem;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+}
+.fan-trivia-table-wrap{min-height:320px}
+@media(max-width:980px){
+  .fan-trivia-admin-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .trivia-meta-grid{grid-template-columns:1fr}
+  .trivia-admin-option-row{grid-template-columns:34px 1fr}
+  .trivia-option-badge{width:34px;height:34px;border-radius:10px}
+}

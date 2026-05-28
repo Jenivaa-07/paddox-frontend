@@ -3177,3 +3177,14 @@ loadNextRaceCountdown();
 loadLastResult();
 
 console.log('%cPADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
+
+/* Phase 17.8 — refresh Fan Hub trivia when admin updates trivia */
+try {
+  if (typeof socket !== 'undefined' && socket?.on) {
+    socket.on('trivia:changed', () => {
+      if (document.getElementById('sec-community')?.classList.contains('on')) {
+        loadRealtimeTrivia();
+      }
+    });
+  }
+} catch {}

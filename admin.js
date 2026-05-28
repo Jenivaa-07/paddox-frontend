@@ -161,6 +161,7 @@ const PAGE_META = {
   homebranding: { title:'HOME BRANDING', action:'+ Add Logo', fn:()=>resetHomeLogoForm() },
   fanquotes:  { title:'FAN QUOTES',      action:'+ Add Quote',   fn:()=>openQuoteModal() },
   fanpolls:   { title:'FAN POLLS',       action:'+ New Poll',    fn:()=>resetFanPollForm() },
+  fantrivia:  { title:'FAN TRIVIA',      action:'+ New Trivia',  fn:()=>resetFanTriviaForm() },
   fandrivers: { title:'FAN DRIVERS',     action:'+ Add Image',   fn:()=>openDriverProfileModal() },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
   analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>showToast('📊 Report downloaded!') },
@@ -208,6 +209,10 @@ if (id === 'fanquotes') {
 if (id === 'fanpolls') {
   loadFanPollsAdmin();
   resetFanPollForm(false);
+}
+if (id === 'fantrivia') {
+  loadFanTriviaAdmin();
+  resetFanTriviaForm(false);
 }
 if (id === 'fandrivers') {
   loadAdminDriverProfiles();
@@ -6052,3 +6057,238 @@ document.addEventListener('input', e => {
   if (e.target?.id === 'poll-search-admin') renderFanPollsAdmin();
 });
 
+
+
+/* ══════════════════════════════════════
+   FAN TRIVIA ADMIN MANAGER — Phase 17.8
+   Admin-controlled MongoDB trivia questions
+══════════════════════════════════════ */
+const FAN_TRIVIA_ADMIN_API = 'https://paddox-backend.onrender.com/api/fan/admin/trivia';
+let ADMIN_FAN_TRIVIA = [];
+
+function triviaAdminHeaders(json = false) {
+  return {
+    ...(json ? { 'Content-Type': 'application/json' } : {}),
+    ...(getAdminToken() ? { Authorization: `Bearer ${getAdminToken()}` } : {})
+  };
+}
+
+function setTriviaAdminStatus(message = '') {
+  const el = document.getElementById('trivia-admin-status');
+  if (el) el.textContent = message;
+}
+
+function escapeTriviaAdminText(value = '') {
+  if (typeof escapeAdminText === 'function') return escapeAdminText(value);
+  return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function buildTriviaOptionRows(options = []) {
+  const wrap = document.getElementById('trivia-options-admin');
+  if (!wrap) return;
+
+  const safeOptions = Array.isArray(options) && options.length
+    ? options.slice(0, 4)
+    : ['', '', '', ''];
+
+  while (safeOptions.length < 4) safeOptions.push('');
+
+  wrap.innerHTML = safeOptions.slice(0, 4).map((value, index) => `
+    <div class="trivia-admin-option-row">
+      <div class="trivia-option-badge">${index + 1}</div>
+      <input class="adm-input trivia-option-input" type="text" placeholder="Option ${index + 1}" value="${escapeTriviaAdminText(value)}"/>
+    </div>
+  `).join('');
+}
+
+function resetFanTriviaForm(clear = true) {
+  const edit = document.getElementById('trivia-edit-id');
+  const question = document.getElementById('trivia-question');
+  const correct = document.getElementById('trivia-correct-index');
+  const difficulty = document.getElementById('trivia-difficulty');
+  const category = document.getElementById('trivia-category');
+  const points = document.getElementById('trivia-points');
+  const active = document.getElementById('trivia-active');
+
+  if (edit) edit.value = '';
+  if (question) question.value = '';
+  if (correct) correct.value = '0';
+  if (difficulty) difficulty.value = 'medium';
+  if (category) category.value = 'drivers';
+  if (points) points.value = '100';
+  if (active) active.checked = true;
+
+  buildTriviaOptionRows();
+  if (clear) setTriviaAdminStatus('Create active trivia questions for Fan Hub.');
+}
+
+async function loadFanTriviaAdmin() {
+  const tbody = document.getElementById('fan-trivia-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading trivia…</td></tr>';
+
+  try {
+    const res = await fetch(FAN_TRIVIA_ADMIN_API, { headers: triviaAdminHeaders() });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Trivia admin API unavailable');
+    }
+
+    ADMIN_FAN_TRIVIA = data.data?.trivia || data.trivia || data.data || [];
+    renderFanTriviaAdmin();
+    setTriviaAdminStatus('Trivia manager connected.');
+  } catch (err) {
+    console.warn(err);
+    ADMIN_FAN_TRIVIA = [];
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:34px;color:#777">${escapeTriviaAdminText(err.message)}. Backend route may need to be added.</td></tr>`;
+    setTriviaAdminStatus('Backend endpoint expected: /api/fan/admin/trivia');
+  }
+}
+
+function renderFanTriviaAdmin() {
+  const tbody = document.getElementById('fan-trivia-tbody');
+  if (!tbody) return;
+
+  const q = String(document.getElementById('trivia-search-admin')?.value || '').toLowerCase().trim();
+  const list = ADMIN_FAN_TRIVIA.filter(item => {
+    const text = `${item.question || ''} ${(item.options || []).join(' ')} ${item.category || ''} ${item.difficulty || ''}`.toLowerCase();
+    return !q || text.includes(q);
+  });
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No trivia questions created yet</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(item => {
+    const options = Array.isArray(item.options) ? item.options : [];
+    const correctIndex = Number(item.correctIndex || 0);
+    const correctText = options[correctIndex] || '-';
+    return `
+      <tr>
+        <td style="max-width:390px"><strong>${escapeTriviaAdminText(item.question || 'Untitled trivia')}</strong></td>
+        <td>
+          <span class="trivia-answer-pill">${escapeTriviaAdminText(correctText)}</span>
+        </td>
+        <td>
+          <div class="trivia-meta-stack">
+            <span>${escapeTriviaAdminText(item.difficulty || 'medium')}</span>
+            <span>${escapeTriviaAdminText(item.category || 'drivers')}</span>
+            <span>${Number(item.points || 100)} pts</span>
+          </div>
+        </td>
+        <td><span class="sb ${item.isActive !== false ? 's-ok' : 's-pr'}">${item.isActive !== false ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <button class="act-btn" onclick="editFanTriviaAdmin('${item._id || item.id}')">Edit</button>
+          <button class="act-btn" onclick="toggleFanTriviaActive('${item._id || item.id}', ${item.isActive === false})">${item.isActive === false ? 'Activate' : 'Deactivate'}</button>
+          <button class="act-btn danger" onclick="deleteFanTriviaAdmin('${item._id || item.id}')">Delete</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function editFanTriviaAdmin(id) {
+  const item = ADMIN_FAN_TRIVIA.find(t => String(t._id || t.id) === String(id));
+  if (!item) return;
+
+  const edit = document.getElementById('trivia-edit-id');
+  const question = document.getElementById('trivia-question');
+  const correct = document.getElementById('trivia-correct-index');
+  const difficulty = document.getElementById('trivia-difficulty');
+  const category = document.getElementById('trivia-category');
+  const points = document.getElementById('trivia-points');
+  const active = document.getElementById('trivia-active');
+
+  if (edit) edit.value = item._id || item.id || '';
+  if (question) question.value = item.question || '';
+  if (correct) correct.value = String(Number(item.correctIndex || 0));
+  if (difficulty) difficulty.value = item.difficulty || 'medium';
+  if (category) category.value = item.category || 'drivers';
+  if (points) points.value = String(Number(item.points || 100));
+  if (active) active.checked = item.isActive !== false;
+  buildTriviaOptionRows(item.options || []);
+  setTriviaAdminStatus('Editing existing trivia question.');
+}
+
+async function saveFanTriviaAdmin() {
+  try {
+    const id = String(document.getElementById('trivia-edit-id')?.value || '').trim();
+    const question = String(document.getElementById('trivia-question')?.value || '').trim();
+    const options = [...document.querySelectorAll('.trivia-option-input')]
+      .map(input => String(input.value || '').trim());
+    const correctIndex = Number(document.getElementById('trivia-correct-index')?.value || 0);
+    const difficulty = String(document.getElementById('trivia-difficulty')?.value || 'medium');
+    const category = String(document.getElementById('trivia-category')?.value || 'drivers');
+    const points = Number(document.getElementById('trivia-points')?.value || 100);
+    const isActive = !!document.getElementById('trivia-active')?.checked;
+
+    if (!question) throw new Error('Trivia question is required');
+    if (options.length !== 4 || options.some(option => !option)) throw new Error('Add all 4 answer options');
+    if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex > 3) throw new Error('Select the correct answer');
+
+    setTriviaAdminStatus('Saving trivia…');
+
+    const payload = {
+      question,
+      options,
+      correctIndex,
+      difficulty,
+      category,
+      points: Number.isFinite(points) ? points : 100,
+      isActive
+    };
+
+    const res = await fetch(id ? `${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}` : FAN_TRIVIA_ADMIN_API, {
+      method: id ? 'PUT' : 'POST',
+      headers: triviaAdminHeaders(true),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Could not save trivia');
+
+    showToast('🔥 Trivia saved');
+    resetFanTriviaForm(false);
+    loadFanTriviaAdmin();
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+    setTriviaAdminStatus(err.message);
+  }
+}
+
+async function toggleFanTriviaActive(id, makeActive = true) {
+  try {
+    const res = await fetch(`${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: triviaAdminHeaders(true),
+      body: JSON.stringify({ isActive: !!makeActive })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Could not update trivia');
+    showToast(makeActive ? '🔥 Trivia activated' : 'Trivia deactivated');
+    loadFanTriviaAdmin();
+  } catch (err) {
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function deleteFanTriviaAdmin(id) {
+  if (!confirm('Delete this trivia question?')) return;
+  try {
+    const res = await fetch(`${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}`, {
+      method:'DELETE',
+      headers: triviaAdminHeaders()
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Could not delete trivia');
+    showToast('Trivia deleted');
+    loadFanTriviaAdmin();
+  } catch (err) {
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+document.addEventListener('input', e => {
+  if (e.target?.id === 'trivia-search-admin') renderFanTriviaAdmin();
+});

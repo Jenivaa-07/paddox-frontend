@@ -4183,3 +4183,45 @@ body.modal-open { overflow: hidden; }
   .lb-row .lb-badge{display:none;}
   .lb-row .lb-p{grid-column:3;text-align:left;font-size:.95rem!important;}
 }
+
+
+/* ============================================================
+   Phase 17.8 — Admin-managed Trivia display polish
+   ============================================================ */
+.triv-q{
+  position:relative;
+  padding:16px 18px;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(232,0,45,.035));
+  border-left:3px solid var(--red);
+  color:#f2f2f2;
+}
+.topt{
+  position:relative;
+  overflow:hidden;
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+}
+.topt::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:rgba(232,0,45,.65);
+  opacity:.55;
+}
+.topt:hover{
+  transform:translateX(3px);
+  background:rgba(255,255,255,.055);
+}
+.triv-res{
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.035);
+  border-radius:14px;
+}
+.triv-next{
+  border-radius:14px;
+  box-shadow:0 12px 28px rgba(232,0,45,.15);
+}

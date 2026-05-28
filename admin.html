@@ -97,6 +97,9 @@
         <div class="adm-nav-item" data-page="fanpolls">
           <span class="adm-icon animate-icon">📊</span> Fan Polls
         </div>
+        <div class="adm-nav-item" data-page="fantrivia">
+          <span class="adm-icon animate-icon">?</span> Fan Trivia
+        </div>
         <div class="adm-nav-item" data-page="fandrivers">
           <span class="adm-icon animate-icon">🏁</span> Fan Drivers
         </div>
@@ -499,6 +502,87 @@
                   </tr>
                 </thead>
                 <tbody id="fan-polls-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ── FAN TRIVIA ── -->
+        <div class="adm-page" id="adm-fantrivia">
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <input class="adm-input" id="trivia-search-admin" type="text" placeholder="Search trivia…"/>
+            </div>
+            <button class="adm-btn-red" onclick="resetFanTriviaForm()">+ New Trivia</button>
+          </div>
+
+          <div class="fan-trivia-admin-grid">
+            <div class="fan-trivia-editor adm-panel-card">
+              <div class="adm-panel-title">Create / Edit Trivia</div>
+              <input type="hidden" id="trivia-edit-id"/>
+
+              <label class="adm-mini-label">Question</label>
+              <textarea class="adm-input adm-textarea" id="trivia-question" rows="3" placeholder="Which circuit is known as the Temple of Speed?"></textarea>
+
+              <label class="adm-mini-label">Answer Options</label>
+              <div id="trivia-options-admin" class="trivia-options-admin"></div>
+
+              <div class="trivia-meta-grid">
+                <div>
+                  <label class="adm-mini-label">Correct Answer</label>
+                  <select class="adm-input" id="trivia-correct-index">
+                    <option value="0">Option 1</option>
+                    <option value="1">Option 2</option>
+                    <option value="2">Option 3</option>
+                    <option value="3">Option 4</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="adm-mini-label">Difficulty</label>
+                  <select class="adm-input" id="trivia-difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="adm-mini-label">Category</label>
+                  <select class="adm-input" id="trivia-category">
+                    <option value="drivers">Drivers</option>
+                    <option value="teams">Teams</option>
+                    <option value="circuits">Circuits</option>
+                    <option value="rules">Rules</option>
+                    <option value="history">History</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="adm-mini-label">Points</label>
+                  <input class="adm-input" id="trivia-points" type="number" min="10" max="500" step="5" value="100"/>
+                </div>
+              </div>
+
+              <div class="trivia-admin-row">
+                <label><input type="checkbox" id="trivia-active" checked/> Active question</label>
+              </div>
+
+              <button class="adm-btn-red" type="button" onclick="saveFanTriviaAdmin()">Save Trivia</button>
+              <button class="adm-btn-ghost" type="button" onclick="resetFanTriviaForm()">Clear</button>
+              <div class="admin-hint" id="trivia-admin-status">Create active trivia questions for Fan Hub.</div>
+            </div>
+
+            <div class="data-table-wrap fan-trivia-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Meta</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="fan-trivia-tbody"></tbody>
               </table>
             </div>
           </div>
