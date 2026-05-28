@@ -4412,21 +4412,47 @@ body.modal-open { overflow: hidden; }
   .qf-brand-lockup-img{width:128px!important;}
 }
 
+
 /* ============================================================
-   Phase 18.0.9 — quote footer logo final tune
+   Phase 18.0.10 — quote footer logo final fix
+   No black rectangle asset at footer; clean icon + wordmark alignment.
    ============================================================ */
-.qf-footer{
-  gap:18px!important;
+.qf-brand-final{
+  min-width:128px!important;
+  max-width:150px!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
 }
-.qf-brand-lockup-clean{
-  min-width:146px!important;
-  max-width:158px!important;
+.qf-brand-final .qf-brand-icon-wrap{
+  width:28px!important;
+  height:28px!important;
+  flex:0 0 28px!important;
+  border-radius:50%!important;
+  background:rgba(10,10,12,.72)!important;
+  border:1px solid rgba(232,0,45,.26)!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
 }
-.qf-brand-lockup-img{
-  width:146px!important;
-  border-radius:16px!important;
+.qf-brand-final .qf-brand-icon{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+  border-radius:50%!important;
 }
+.qf-brand-final .qf-brand-wordmark{
+  font-size:1.05rem!important;
+  letter-spacing:2px!important;
+  line-height:1!important;
+  color:#fff!important;
+  text-shadow:none!important;
+}
+.qf-brand-final .qf-brand-wordmark span{color:var(--red)!important;}
 @media(max-width:760px){
-  .qf-brand-lockup-clean{min-width:112px!important;max-width:126px!important;}
-  .qf-brand-lockup-img{width:118px!important;}
+  .qf-brand-final{min-width:108px!important;}
+  .qf-brand-final .qf-brand-icon-wrap{width:25px!important;height:25px!important;flex-basis:25px!important;}
+  .qf-brand-final .qf-brand-wordmark{font-size:.92rem!important;letter-spacing:1.7px!important;}
 }
