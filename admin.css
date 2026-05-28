@@ -1107,3 +1107,109 @@ select.form-input option{background:var(--dark2)}
   #adm-fanpolls .poll-logo-preview{width:88px !important;height:66px !important;}
   #adm-fanpolls .poll-admin-option-row .adm-btn-ghost.danger{width:100% !important;}
 }
+
+/* ============================================================
+   Phase 17.6.8 — Admin Fan Poll option input alignment
+   Keeps Formula1.com logo tiles, but gives the typing field
+   proper width and prevents the Remove button/input from squeezing.
+   ============================================================ */
+#adm-fanpolls .poll-options-admin{
+  gap:14px !important;
+}
+
+#adm-fanpolls .poll-admin-option-row{
+  display:grid !important;
+  grid-template-columns:110px minmax(170px,.88fr) minmax(190px,1.12fr) 108px !important;
+  gap:12px !important;
+  align-items:center !important;
+  padding:14px 14px !important;
+  overflow:visible !important;
+}
+
+/* Let preview and team dropdown occupy their own columns */
+#adm-fanpolls .poll-admin-logo-cell{
+  display:contents !important;
+}
+
+#adm-fanpolls .poll-logo-preview{
+  grid-column:1 !important;
+  width:100px !important;
+  height:72px !important;
+  justify-self:center !important;
+}
+
+#adm-fanpolls .poll-logo-select{
+  grid-column:2 !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:52px !important;
+  padding:0 42px 0 18px !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+#adm-fanpolls .poll-option-input{
+  grid-column:3 !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:52px !important;
+  padding:0 18px !important;
+  font-size:.92rem !important;
+}
+
+#adm-fanpolls .poll-admin-option-row .adm-btn-ghost.danger{
+  grid-column:4 !important;
+  width:108px !important;
+  min-width:108px !important;
+  height:52px !important;
+  justify-self:end !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 12px !important;
+  white-space:nowrap !important;
+}
+
+#adm-fanpolls .adm-panel-card{
+  overflow:visible !important;
+}
+
+/* Keep the table side compact so the form gets cleaner space */
+#adm-fanpolls .fan-poll-admin-grid{
+  grid-template-columns:minmax(620px,680px) minmax(520px,1fr) !important;
+  gap:24px !important;
+}
+
+@media(max-width:1280px){
+  #adm-fanpolls .fan-poll-admin-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+
+@media(max-width:760px){
+  #adm-fanpolls .poll-admin-option-row{
+    grid-template-columns:96px minmax(0,1fr) !important;
+    gap:12px !important;
+  }
+  #adm-fanpolls .poll-logo-preview{
+    grid-column:1 !important;
+    grid-row:1 / span 2 !important;
+    width:88px !important;
+    height:64px !important;
+  }
+  #adm-fanpolls .poll-logo-select{
+    grid-column:2 !important;
+    grid-row:1 !important;
+  }
+  #adm-fanpolls .poll-option-input{
+    grid-column:2 !important;
+    grid-row:2 !important;
+  }
+  #adm-fanpolls .poll-admin-option-row .adm-btn-ghost.danger{
+    grid-column:1 / -1 !important;
+    grid-row:3 !important;
+    width:100% !important;
+    min-width:0 !important;
+    justify-self:stretch !important;
+  }
+}
