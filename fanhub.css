@@ -3732,3 +3732,114 @@ body.modal-open { overflow: hidden; }
   .feed-actions{gap:7px !important;}
   .feed-actions button,.feed-action-btn{padding:6px 10px !important;}
 }
+
+/* ============================================================
+   Phase 17.7 — Fan Feed Likes + Comments Backend UI
+   ============================================================ */
+.feed-action-btn.on,
+.feed-action-btn.like.on{
+  color:#fff !important;
+  border-color:rgba(232,0,45,.55) !important;
+  background:linear-gradient(135deg, rgba(232,0,45,.22), rgba(232,0,45,.06)) !important;
+  box-shadow:0 10px 26px rgba(232,0,45,.14) !important;
+}
+.feed-action-btn.on .feed-action-icon,
+.feed-action-btn.like.on .feed-action-icon{
+  color:var(--red) !important;
+  opacity:1 !important;
+}
+.feed-comments{
+  margin-top:12px !important;
+  padding-top:10px !important;
+  border-top:1px solid rgba(255,255,255,.06) !important;
+}
+.feed-comments-list{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  margin-bottom:10px !important;
+}
+.feed-comment-item{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:9px !important;
+  padding:9px 10px !important;
+  border-radius:14px !important;
+  background:rgba(255,255,255,.026) !important;
+  border:1px solid rgba(255,255,255,.065) !important;
+}
+.feed-comment-av{
+  width:26px !important;
+  height:26px !important;
+  flex:0 0 26px !important;
+  border-radius:9px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:linear-gradient(135deg, rgba(232,0,45,.20), rgba(255,255,255,.035)) !important;
+  border:1px solid rgba(232,0,45,.22) !important;
+  font-family:var(--font-d) !important;
+  font-size:.72rem !important;
+  color:#fff !important;
+  letter-spacing:.8px !important;
+}
+.feed-comment-body{
+  min-width:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:2px !important;
+}
+.feed-comment-body strong{
+  font-family:var(--font-c) !important;
+  font-size:.68rem !important;
+  letter-spacing:1.1px !important;
+  color:rgba(255,255,255,.80) !important;
+}
+.feed-comment-body span{
+  color:rgba(255,255,255,.62) !important;
+  font-size:.76rem !important;
+  line-height:1.45 !important;
+  word-break:break-word !important;
+}
+.feed-comment-box{
+  display:none !important;
+  grid-template-columns:1fr auto !important;
+  gap:8px !important;
+  align-items:center !important;
+  margin-top:8px !important;
+}
+.feed-comment-box.open{
+  display:grid !important;
+}
+.feed-comment-box input{
+  width:100% !important;
+  min-height:36px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  background:rgba(0,0,0,.22) !important;
+  color:#fff !important;
+  outline:none !important;
+  padding:0 14px !important;
+  font-family:var(--font-b) !important;
+  font-size:.78rem !important;
+}
+.feed-comment-box input:focus{
+  border-color:rgba(232,0,45,.42) !important;
+  box-shadow:0 0 0 3px rgba(232,0,45,.08) !important;
+}
+.feed-comment-box button{
+  min-height:36px !important;
+  padding:0 15px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(232,0,45,.48) !important;
+  background:linear-gradient(135deg, var(--red), #9b001f) !important;
+  color:#fff !important;
+  font-family:var(--font-c) !important;
+  letter-spacing:1.5px !important;
+  font-weight:800 !important;
+  text-transform:uppercase !important;
+}
+@media(max-width:560px){
+  .feed-comment-box{grid-template-columns:1fr !important;}
+  .feed-comment-box button{width:max-content !important;}
+}

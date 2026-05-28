@@ -1978,6 +1978,19 @@ const FAN_API_BASE =
       body: JSON.stringify({ text })
     }).then(r => r.json());
   }
+  if (!fan.likePost) {
+    fan.likePost = (postId) => fetch(`${FAN_API_BASE}/feed/${encodeURIComponent(postId)}/like`, {
+      method:'POST',
+      headers: fanAuthHeaders(true)
+    }).then(r => r.json());
+  }
+  if (!fan.commentPost) {
+    fan.commentPost = (postId, text) => fetch(`${FAN_API_BASE}/feed/${encodeURIComponent(postId)}/comments`, {
+      method:'POST',
+      headers: fanAuthHeaders(true),
+      body: JSON.stringify({ text })
+    }).then(r => r.json());
+  }
 })();
 
 let CURRENT_POLL = null;
@@ -2656,6 +2669,49 @@ document
   ?.addEventListener('click', loadRealtimeTrivia);
 
 /* Live Feed */
+function feedPostId(post = {}) {
+  return String(post._id || post.id || '');
+}
+
+function replaceFeedPost(updatedPost = {}) {
+  const id = feedPostId(updatedPost);
+  if (!id) return;
+  LIVE_FEED_POSTS = LIVE_FEED_POSTS.map(post =>
+    feedPostId(post) === id ? { ...post, ...updatedPost } : post
+  );
+}
+
+function renderFeedComments(post = {}) {
+  const comments = Array.isArray(post.comments) ? post.comments : [];
+  const postId = feedPostId(post);
+  const shown = comments.slice(-3);
+
+  return `
+    <div class="feed-comments" id="feed-comments-${postId}">
+      ${shown.length ? `
+        <div class="feed-comments-list">
+          ${shown.map(comment => {
+            const user = comment.user || {};
+            const cname = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Paddox Fan';
+            return `
+              <div class="feed-comment-item">
+                <div class="feed-comment-av">${initialsFromName(cname)}</div>
+                <div class="feed-comment-body">
+                  <strong>@${escapeHTML(cname.replace(/\s+/g,'').toLowerCase())}</strong>
+                  <span>${escapeHTML(comment.text || '')}</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>` : ''}
+      <div class="feed-comment-box" id="feed-comment-box-${postId}">
+        <input id="feed-comment-input-${postId}" type="text" maxlength="220" placeholder="Add a comment..." onkeydown="if(event.key==='Enter') submitFanPostComment('${postId}')" />
+        <button type="button" onclick="submitFanPostComment('${postId}')">Post</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderFanFeed(posts = LIVE_FEED_POSTS) {
   const feedEl = document.getElementById('live-feed');
 
@@ -2686,10 +2742,13 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
     const safeText = escapeHTML(post.text || '');
     const avatar = user.avatar?.url || post.avatar || '';
     const handle = safeName.replace(/\s+/g, '').toLowerCase();
-    const likes = Number(post.likesCount || post.likes?.length || post.likes || 0);
+    const likes = Number(post.likesCount || post.likedBy?.length || post.likes || 0);
+    const commentsCount = Number(post.commentsCount || post.comments?.length || 0);
+    const postId = feedPostId(post);
+    const liked = !!post.likedByCurrentUser;
 
     return `
-      <div class="feed-item premium">
+      <div class="feed-item premium" data-post-id="${postId}">
         <div class="feed-av">
           ${avatar && avatar.startsWith('http')
             ? `<img src="${escapeHTML(avatar)}" alt="${safeName}">`
@@ -2706,15 +2765,100 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
           </div>
           <div class="feed-txt">${safeText}</div>
           <div class="feed-actions">
-            <button class="feed-action-btn like" type="button" onclick="showToast('Like action coming in backend phase')"><span class="feed-action-icon feed-like-icon" aria-hidden="true"></span><span>Like</span><strong>${likes}</strong></button>
-            <button class="feed-action-btn comment" type="button" onclick="showToast('Comments coming in backend phase')"><span class="feed-action-icon feed-comment-icon" aria-hidden="true"></span><span>Comment</span></button>
+            <button class="feed-action-btn like ${liked ? 'on' : ''}" type="button" onclick="toggleFanPostLike('${postId}')"><span class="feed-action-icon feed-like-icon" aria-hidden="true"></span><span>${liked ? 'Liked' : 'Like'}</span><strong>${likes}</strong></button>
+            <button class="feed-action-btn comment" type="button" onclick="toggleFanPostCommentBox('${postId}')"><span class="feed-action-icon feed-comment-icon" aria-hidden="true"></span><span>Comment</span><strong>${commentsCount}</strong></button>
             <button class="feed-action-btn share" type="button" onclick="navigator.clipboard?.writeText(this.closest('.feed-item').querySelector('.feed-txt')?.textContent || ''); showToast('Post copied')"><span class="feed-action-icon feed-share-icon" aria-hidden="true"></span><span>Share</span></button>
           </div>
+          ${renderFeedComments(post)}
         </div>
       </div>
     `;
   }).join('');
 }
+
+async function toggleFanPostLike(postId) {
+  if (!fanToken()) {
+    fanLoginRequired();
+    return;
+  }
+
+  try {
+    const data = await PaddoxAPI.fan.likePost(postId);
+
+    if (!data.success) {
+      throw new Error(data.message || 'Like failed');
+    }
+
+    const updated = data.data?.post || data.post;
+    if (updated) {
+      replaceFeedPost(updated);
+      renderFanFeed();
+    } else {
+      await loadFanFeed();
+    }
+  } catch (err) {
+    console.error(err);
+    showToast(`${err.message}`);
+  }
+}
+
+function toggleFanPostCommentBox(postId) {
+  if (!fanToken()) {
+    fanLoginRequired();
+    return;
+  }
+
+  const box = document.getElementById(`feed-comment-box-${postId}`);
+  if (!box) return;
+  box.classList.toggle('open');
+  if (box.classList.contains('open')) {
+    setTimeout(() => document.getElementById(`feed-comment-input-${postId}`)?.focus(), 80);
+  }
+}
+
+async function submitFanPostComment(postId) {
+  if (!fanToken()) {
+    fanLoginRequired();
+    return;
+  }
+
+  const input = document.getElementById(`feed-comment-input-${postId}`);
+  const text = String(input?.value || '').trim();
+
+  if (!text) {
+    showToast('Write a comment first');
+    return;
+  }
+
+  try {
+    const data = await PaddoxAPI.fan.commentPost(postId, text);
+
+    if (!data.success) {
+      throw new Error(data.message || 'Comment failed');
+    }
+
+    if (input) input.value = '';
+
+    const updated = data.data?.post || data.post;
+    if (updated) {
+      replaceFeedPost(updated);
+      renderFanFeed();
+    } else {
+      await loadFanFeed();
+    }
+
+    showToast(data.message || 'Comment added');
+    showPointsBurst('+5 pts');
+    await loadFanLeaderboard();
+  } catch (err) {
+    console.error(err);
+    showToast(`${err.message}`);
+  }
+}
+
+window.toggleFanPostLike = toggleFanPostLike;
+window.toggleFanPostCommentBox = toggleFanPostCommentBox;
+window.submitFanPostComment = submitFanPostComment;
 
 async function loadFanFeed() {
   try {
@@ -2810,15 +2954,35 @@ try {
     const socket = io('https://paddox-backend.onrender.com');
 
     socket.on('fan:new-post', post => {
-      LIVE_FEED_POSTS.unshift({
+      const livePost = post.post || {
         text: post.text,
         userName: post.user,
         avatar: post.avatar,
         createdAt: new Date().toISOString()
-      });
+      };
+
+      const liveId = feedPostId(livePost);
+      if (!liveId || !LIVE_FEED_POSTS.some(item => feedPostId(item) === liveId)) {
+        LIVE_FEED_POSTS.unshift(livePost);
+      }
 
       LIVE_FEED_POSTS = LIVE_FEED_POSTS.slice(0, 20);
       renderFanFeed();
+    });
+
+    socket.on('fan:post-like', payload => {
+      const target = LIVE_FEED_POSTS.find(post => feedPostId(post) === String(payload.postId));
+      if (target) {
+        target.likesCount = payload.likesCount;
+        renderFanFeed();
+      }
+    });
+
+    socket.on('fan:post-comment', payload => {
+      if (payload.post) {
+        replaceFeedPost(payload.post);
+        renderFanFeed();
+      }
     });
 
     socket.on('poll:vote-update', payload => {
