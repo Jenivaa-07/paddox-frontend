@@ -2169,19 +2169,58 @@ function pollOptionAccent(index = 0) {
   return ['#1e5bff', '#e8002d', '#ff8700', '#c9a84c', '#00d2be'][index % 5];
 }
 
+
+function fanPollTeamBadgeSvgURI(name = 'Team', color = '#e8002d', code = '') {
+  const safeName = String(name || 'Team').replace(/[&<>"']/g, '');
+  const safeColor = String(color || '#e8002d').match(/^#[0-9a-fA-F]{3,8}$/) ? color : '#e8002d';
+  const initials = String(code || safeName)
+    .replace(/F1|TEAM|RACING|FORMULA|SCUDERIA|ORACLE|PETRONAS|AMG|HP/gi, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(w => w[0])
+    .join('')
+    .slice(0, 3)
+    .toUpperCase() || 'PX';
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#1b1b1f"/>
+          <stop offset="1" stop-color="#050505"/>
+        </linearGradient>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="${safeColor}" flood-opacity="0.30"/>
+        </filter>
+      </defs>
+      <rect x="6" y="6" width="84" height="84" rx="18" fill="url(#g)" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+      <path d="M19 66 H77" stroke="${safeColor}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M24 28 H72" stroke="${safeColor}" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+      <text x="48" y="56" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-size="24" letter-spacing="2" fill="#fff" filter="url(#shadow)">${initials}</text>
+    </svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function fanPollLogoLooksBroken(url = '') {
+  const u = String(url || '').trim().toLowerCase();
+  if (!u) return true;
+  return u.includes('media.formula1.com/content/dam/fom-website/teams/2026') || u.endsWith('/undefined') || u.includes('undefined');
+}
+
 function pollOptionLogoHTML(option = {}, index = 0) {
-  const logo = String(option.logo || option.teamLogo || option.image || '').trim();
-  const label = escapeHTML(option.teamName || option.label || `Option ${index + 1}`);
-  const color = escapeHTML(option.teamColor || pollOptionAccent(index));
+  const rawLogo = String(option.logo || option.teamLogo || option.image || '').trim();
+  const labelText = option.teamName || option.label || `Option ${index + 1}`;
+  const label = escapeHTML(labelText);
+  const colorRaw = option.teamColor || pollOptionAccent(index);
+  const color = escapeHTML(colorRaw);
+  const code = option.logoKey || option.teamName || option.label || `Option ${index + 1}`;
+  const logo = fanPollLogoLooksBroken(rawLogo)
+    ? fanPollTeamBadgeSvgURI(labelText, colorRaw, code)
+    : rawLogo;
+  const fallback = fanPollTeamBadgeSvgURI(labelText, colorRaw, code);
 
-  if (logo) {
-    return `<span class="poll-team-logo" style="--poll-color:${color}">
-      <img src="${escapeHTML(logo)}" alt="${label}" loading="lazy" referrerpolicy="no-referrer">
-    </span>`;
-  }
-
-  return `<span class="poll-team-logo no-logo" style="--poll-color:${color}">
-    <i></i>
+  return `<span class="poll-team-logo" style="--poll-color:${color}">
+    <img src="${escapeHTML(logo)}" alt="${label}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='${escapeHTML(fallback)}';this.onerror=null;">
   </span>`;
 }
 

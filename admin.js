@@ -5534,18 +5534,56 @@ let ADMIN_FAN_POLLS = [];
 let ADMIN_POLL_LOGOS = [];
 let ADMIN_POLL_LOGOS_LOADED = false;
 
+
+function pollTeamBadgeSvgURI(name = 'Team', color = '#e8002d', code = '') {
+  const safeName = String(name || 'Team').replace(/[&<>"']/g, '');
+  const safeColor = String(color || '#e8002d').match(/^#[0-9a-fA-F]{3,8}$/) ? color : '#e8002d';
+  const initials = String(code || safeName)
+    .replace(/F1|TEAM|RACING|FORMULA|SCUDERIA|ORACLE|PETRONAS|AMG|HP/gi, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(w => w[0])
+    .join('')
+    .slice(0, 3)
+    .toUpperCase() || 'PX';
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#1b1b1f"/>
+          <stop offset="1" stop-color="#050505"/>
+        </linearGradient>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="${safeColor}" flood-opacity="0.28"/>
+        </filter>
+      </defs>
+      <rect x="6" y="6" width="84" height="84" rx="18" fill="url(#g)" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+      <path d="M19 66 H77" stroke="${safeColor}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M24 28 H72" stroke="${safeColor}" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+      <text x="48" y="56" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-size="24" letter-spacing="2" fill="#fff" filter="url(#shadow)">${initials}</text>
+    </svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function pollLogoLooksBroken(url = '') {
+  const u = String(url || '').trim().toLowerCase();
+  if (!u) return true;
+  return u.includes('media.formula1.com/content/dam/fom-website/teams/2026') || u.endsWith('/undefined') || u.includes('undefined');
+}
+
 const ADMIN_POLL_FALLBACK_LOGOS = [
-  { name:'Ferrari',        slug:'ferrari',       color:'#e8002d', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/ferrari-logo.png' },
-  { name:'Red Bull Racing',slug:'red-bull',      color:'#1e5bff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/red-bull-racing-logo.png' },
-  { name:'Mercedes',       slug:'mercedes',      color:'#00d2be', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/mercedes-logo.png' },
-  { name:'McLaren',        slug:'mclaren',       color:'#ff8700', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/mclaren-logo.png' },
-  { name:'Aston Martin',   slug:'aston-martin',  color:'#006f62', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/aston-martin-logo.png' },
-  { name:'Alpine',         slug:'alpine',        color:'#2293d1', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/alpine-logo.png' },
-  { name:'Williams',       slug:'williams',      color:'#64c4ff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/williams-logo.png' },
-  { name:'Haas F1 Team',   slug:'haas',          color:'#ffffff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/haas-logo.png' },
-  { name:'Racing Bulls',   slug:'racing-bulls',  color:'#6c4cff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/racing-bulls-logo.png' },
-  { name:'Audi',           slug:'audi',          color:'#00e701', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/kick-sauber-logo.png' },
-  { name:'Cadillac',       slug:'cadillac',      color:'#d4af37', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/cadillac-logo.png' },
+  { name:'Ferrari',        slug:'ferrari',       color:'#e8002d', image:pollTeamBadgeSvgURI('Ferrari', '#e8002d', 'FER') },
+  { name:'Red Bull Racing',slug:'red-bull',      color:'#1e5bff', image:pollTeamBadgeSvgURI('Red Bull Racing', '#1e5bff', 'RBR') },
+  { name:'Mercedes',       slug:'mercedes',      color:'#00d2be', image:pollTeamBadgeSvgURI('Mercedes', '#00d2be', 'MER') },
+  { name:'McLaren',        slug:'mclaren',       color:'#ff8700', image:pollTeamBadgeSvgURI('McLaren', '#ff8700', 'MCL') },
+  { name:'Aston Martin',   slug:'aston-martin',  color:'#006f62', image:pollTeamBadgeSvgURI('Aston Martin', '#006f62', 'AMR') },
+  { name:'Alpine',         slug:'alpine',        color:'#2293d1', image:pollTeamBadgeSvgURI('Alpine', '#2293d1', 'ALP') },
+  { name:'Williams',       slug:'williams',      color:'#64c4ff', image:pollTeamBadgeSvgURI('Williams', '#64c4ff', 'WIL') },
+  { name:'Haas F1 Team',   slug:'haas',          color:'#ffffff', image:pollTeamBadgeSvgURI('Haas F1 Team', '#ffffff', 'HAA') },
+  { name:'Racing Bulls',   slug:'racing-bulls',  color:'#6c4cff', image:pollTeamBadgeSvgURI('Racing Bulls', '#6c4cff', 'RB') },
+  { name:'Audi',           slug:'audi',          color:'#00e701', image:pollTeamBadgeSvgURI('Audi', '#00e701', 'AUD') },
+  { name:'Cadillac',       slug:'cadillac',      color:'#d4af37', image:pollTeamBadgeSvgURI('Cadillac', '#d4af37', 'CAD') },
   { name:'PADDOX',         slug:'paddox',        color:'#e8002d', image:'assets/paddox-logo-icon.png' }
 ];
 
@@ -5571,9 +5609,10 @@ function pollLogoKey(value = '') {
 
 function normalizeAdminPollLogo(item = {}) {
   const name = String(item.name || item.teamName || item.label || 'Team').trim();
-  const image = String(item.image || item.logo || item.teamLogo || '').trim();
+  let image = String(item.image || item.logo || item.teamLogo || '').trim();
   const color = String(item.color || item.teamColor || '#e8002d').trim();
   const slug = String(item.slug || item.logoKey || pollLogoKey(name)).trim();
+  if (pollLogoLooksBroken(image)) image = pollTeamBadgeSvgURI(name, color, slug);
 
   return { name, image, color, slug };
 }
@@ -5582,14 +5621,23 @@ async function loadFanPollLogoOptions(force = false) {
   if (ADMIN_POLL_LOGOS_LOADED && !force) return ADMIN_POLL_LOGOS;
 
   try {
-    const api = typeof HOME_MARQUEE_API !== 'undefined'
+    const publicApi = 'https://paddox-backend.onrender.com/api/fan/home-marquee-logos';
+    const adminApi = typeof HOME_MARQUEE_API !== 'undefined'
       ? HOME_MARQUEE_API
       : 'https://paddox-backend.onrender.com/api/fan/admin/home-marquee-logos';
 
-    const res = await fetch(api, { headers: pollAdminHeaders() });
-    const data = await res.json().catch(() => ({}));
+    let logos = [];
 
-    const logos = data.data?.logos || data.logos || [];
+    const publicRes = await fetch(publicApi);
+    const publicData = await publicRes.json().catch(() => ({}));
+    logos = publicData.data?.logos || publicData.logos || [];
+
+    if (!Array.isArray(logos) || !logos.length) {
+      const adminRes = await fetch(adminApi, { headers: pollAdminHeaders() });
+      const adminData = await adminRes.json().catch(() => ({}));
+      logos = adminData.data?.logos || adminData.logos || [];
+    }
+
     ADMIN_POLL_LOGOS = Array.isArray(logos) && logos.length
       ? logos.map(normalizeAdminPollLogo)
       : ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
@@ -5635,12 +5683,26 @@ function updatePollLogoPreview(row) {
   if (!preview) return;
 
   if (selected?.image) {
-    preview.innerHTML = `<img src="${escapeAdminText(selected.image)}" alt="${escapeAdminText(selected.name)}" onerror="this.outerHTML='<span>PX</span>'">`;
+    preview.innerHTML = `<img src="${escapeAdminText(selected.image)}" alt="${escapeAdminText(selected.name)}" onerror="this.outerHTML='<span>'+((this.alt||'PX').trim().slice(0,3).toUpperCase())+'</span>'">`;
   } else {
     preview.innerHTML = '<span>PX</span>';
   }
 
   preview.style.setProperty('--poll-admin-color', selected?.color || '#e8002d');
+}
+
+
+function adminPollMiniLogoHTML(option = {}) {
+  const labelText = option.teamName || option.label || option.text || 'Team';
+  const color = option.teamColor || '#e8002d';
+  const rawLogo = String(option.logo || option.teamLogo || option.image || '').trim();
+  const code = option.logoKey || option.teamName || option.label || option.text || 'PX';
+  const logo = pollLogoLooksBroken(rawLogo)
+    ? pollTeamBadgeSvgURI(labelText, color, code)
+    : rawLogo;
+  const fallback = pollTeamBadgeSvgURI(labelText, color, code);
+
+  return `<img src="${escapeAdminText(logo || fallback)}" alt="${escapeAdminText(labelText)}" onerror="this.src='${escapeAdminText(fallback)}';this.onerror=null;">`;
 }
 
 function refreshPollOptionLogoSelects() {
@@ -5749,7 +5811,7 @@ function renderFanPollsAdmin() {
           <div class="poll-admin-table-options">
             ${opts.map(o => `
               <span class="poll-admin-mini-option">
-                ${o.logo ? `<img src="${escapeAdminText(o.logo)}" alt="${escapeAdminText(o.teamName || o.label || 'Logo')}" onerror="this.outerHTML='<span class=&quot;poll-mini-fallback&quot;>PX</span>'">` : `<span class="poll-mini-fallback" style="--poll-admin-color:${escapeAdminText(o.teamColor || '#e8002d')}">PX</span>`}
+                ${adminPollMiniLogoHTML(o)}
                 <span>${escapeAdminText(o.label || o.text || '')}</span>
               </span>
             `).join('')}
