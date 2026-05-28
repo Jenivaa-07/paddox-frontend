@@ -60,18 +60,31 @@
               <a href="fanhub.html" class="pit-secondary"><span class="pit-btn-icon pit-back-icon" aria-hidden="true"></span> Back to Fan Hub</a>
             </div>
           </div>
-          <div class="command-card">
-            <div class="command-top">
-              <span>Session Signal</span>
-              <b id="signal-status">LOADING</b>
+          <div class="command-card pit-command-card">
+            <div class="command-media">
+              <span class="command-live-dot"></span>
+              <span class="command-media-label">Live Control Room</span>
             </div>
-            <div class="radar-wrap">
-              <div class="radar"></div>
-              <div class="radar-core">F1</div>
-            </div>
-            <div class="command-bottom">
-              <span id="last-sync">Waiting for data</span>
-              <span id="socket-state">Backend pending</span>
+            <div class="command-overlay-content">
+              <div class="command-top">
+                <span>Session Signal</span>
+                <b id="signal-status">LOADING</b>
+              </div>
+              <div class="command-centerline">
+                <div class="mini-radar-wrap">
+                  <div class="radar mini-radar"></div>
+                  <div class="radar-core mini-radar-core">F1</div>
+                </div>
+                <div class="command-copy">
+                  <span>Race telemetry</span>
+                  <strong>LIVE PIT WALL</strong>
+                  <small>Timing, weather and race-control feed</small>
+                </div>
+              </div>
+              <div class="command-bottom">
+                <span id="last-sync">Waiting for data</span>
+                <span id="socket-state">Backend pending</span>
+              </div>
             </div>
           </div>
         </div>

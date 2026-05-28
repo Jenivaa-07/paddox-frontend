@@ -608,3 +608,209 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
     grid-template-columns:38px minmax(170px,1fr) 64px 64px 50px 50px 58px!important;
   }
 }
+
+/* ============================================================
+   PHASE 19.6 — PIT WALL HERO CINEMATIC BACKGROUND POLISH
+   Keeps navbar/table stable. Hero only.
+   ============================================================ */
+.pit-hero{
+  min-height:72vh!important;
+  background:
+    linear-gradient(90deg,rgba(5,5,6,.98) 0%,rgba(5,5,6,.82) 38%,rgba(7,7,7,.72) 64%,rgba(8,8,9,.94) 100%),
+    radial-gradient(circle at 78% 22%,rgba(232,0,45,.30),transparent 34%),
+    radial-gradient(circle at 14% 86%,rgba(0,210,255,.14),transparent 30%),
+    url('https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=2200&q=78') center right/cover no-repeat!important;
+}
+.pit-hero::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(115deg,transparent 0 54%,rgba(232,0,45,.10) 56%,transparent 68%),
+    repeating-linear-gradient(100deg,rgba(255,255,255,.045) 0 1px,transparent 1px 78px),
+    linear-gradient(to bottom,rgba(0,0,0,.30),transparent 28%,rgba(0,0,0,.65) 100%);
+  opacity:.72;
+  mix-blend-mode:screen;
+}
+.pit-hero::after{
+  content:'';
+  position:absolute;
+  inset:-20% -10%;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 70% 34%,rgba(232,0,45,.22),transparent 21%),
+    linear-gradient(105deg,transparent 0 35%,rgba(232,0,45,.13) 36%,transparent 37% 52%,rgba(255,255,255,.08) 53%,transparent 54% 100%);
+  filter:blur(.3px);
+  opacity:.55;
+  animation:pitHeroStreaks 8s linear infinite;
+}
+@keyframes pitHeroStreaks{
+  0%{transform:translate3d(-2%,0,0)}
+  50%{transform:translate3d(2%,1%,0)}
+  100%{transform:translate3d(-2%,0,0)}
+}
+.pit-grid-bg{
+  opacity:.50!important;
+  background-image:
+    linear-gradient(rgba(232,0,45,.040) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,0,45,.040) 1px,transparent 1px)!important;
+}
+.pit-scanline{
+  opacity:.72!important;
+  background:linear-gradient(to bottom,transparent,rgba(232,0,45,.055),rgba(0,210,255,.035),transparent)!important;
+}
+.pit-hero-content{z-index:3!important}
+.pit-kicker{
+  padding:8px 0;
+  text-shadow:0 0 22px rgba(232,0,45,.26);
+}
+.pit-title{
+  text-shadow:0 28px 80px rgba(0,0,0,.85),0 0 30px rgba(255,255,255,.06);
+}
+.pit-sub{
+  max-width:650px!important;
+  color:rgba(255,255,255,.70)!important;
+}
+.pit-command-card{
+  min-height:300px!important;
+  padding:0!important;
+  border-radius:28px!important;
+  overflow:hidden!important;
+  background:linear-gradient(145deg,rgba(18,18,20,.80),rgba(6,6,7,.88))!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 34px 100px rgba(0,0,0,.58),0 0 0 1px rgba(232,0,45,.12),inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+.pit-command-card::before{
+  display:none!important;
+}
+.pit-command-card::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(120deg,transparent 0 46%,rgba(232,0,45,.16) 48%,transparent 65%),
+    radial-gradient(circle at 78% 22%,rgba(232,0,45,.30),transparent 34%),
+    linear-gradient(to bottom,rgba(0,0,0,.08),rgba(0,0,0,.58));
+}
+.command-media{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.80),rgba(0,0,0,.22) 44%,rgba(232,0,45,.20)),
+    url('https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?auto=format&fit=crop&w=1100&q=78') center/cover no-repeat;
+  transform:scale(1.02);
+  filter:saturate(.95) contrast(1.1) brightness(.62);
+}
+.command-media::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 7px),
+    radial-gradient(circle at 72% 40%,rgba(0,210,255,.18),transparent 28%);
+  opacity:.55;
+}
+.command-live-dot{
+  position:absolute;
+  left:24px;
+  top:24px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 0 7px rgba(0,209,95,.10),0 0 22px rgba(0,209,95,.50);
+  z-index:2;
+}
+.command-media-label{
+  position:absolute;
+  left:44px;
+  top:19px;
+  z-index:2;
+  font-family:var(--font-c);
+  font-weight:900;
+  letter-spacing:2.2px;
+  text-transform:uppercase;
+  font-size:.72rem;
+  color:rgba(255,255,255,.70);
+}
+.command-overlay-content{
+  position:relative;
+  z-index:3;
+  min-height:300px;
+  padding:26px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.command-top,.command-bottom{
+  color:rgba(255,255,255,.62)!important;
+}
+.command-top b{
+  color:var(--green)!important;
+  text-shadow:0 0 20px rgba(0,209,95,.24);
+}
+.command-centerline{
+  display:grid;
+  grid-template-columns:130px 1fr;
+  gap:22px;
+  align-items:center;
+}
+.mini-radar-wrap{
+  position:relative;
+  width:126px;
+  height:126px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.mini-radar{
+  width:126px!important;
+  height:126px!important;
+  box-shadow:0 0 48px rgba(0,210,255,.15)!important;
+  opacity:.88;
+}
+.mini-radar-core{
+  width:54px!important;
+  height:54px!important;
+  font-size:1.35rem!important;
+}
+.command-copy span{
+  display:block;
+  color:var(--red);
+  font-family:var(--font-c);
+  font-size:.72rem;
+  font-weight:900;
+  letter-spacing:2.4px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.command-copy strong{
+  display:block;
+  font-family:var(--font-d);
+  font-size:2.6rem;
+  line-height:.9;
+  letter-spacing:2px;
+  color:#fff;
+  text-shadow:0 18px 42px rgba(0,0,0,.58);
+}
+.command-copy small{
+  display:block;
+  margin-top:10px;
+  color:rgba(255,255,255,.62);
+  font-size:.82rem;
+  line-height:1.4;
+}
+@media(max-width:1180px){
+  .pit-command-card{max-width:640px;width:100%}
+}
+@media(max-width:900px){
+  .pit-hero{
+    background:
+      linear-gradient(180deg,rgba(5,5,6,.92),rgba(5,5,6,.84)),
+      radial-gradient(circle at 60% 12%,rgba(232,0,45,.24),transparent 40%),
+      url('https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1400&q=72') center/cover no-repeat!important;
+  }
+  .command-card{display:none!important}
+}
