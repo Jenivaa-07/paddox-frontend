@@ -2157,6 +2157,41 @@ function storeFanPollVote(poll = CURRENT_POLL, optionIndex = 0) {
   try { localStorage.setItem(fanPollVoteKey(poll), String(optionIndex)); } catch (_) {}
 }
 
+function clearFanPollVote(poll = CURRENT_POLL) {
+  try { localStorage.removeItem(fanPollVoteKey(poll)); } catch (_) {}
+}
+
+function getFanPollTotalVotes(poll = CURRENT_POLL, fallback = 0) {
+  const options = Array.isArray(poll?.options) ? poll.options : [];
+  const total = options.reduce((sum, option) => sum + Number(option.votes || 0), 0);
+  return Number.isFinite(total) ? total : Number(fallback || 0);
+}
+
+function syncFanPollStoredVote(poll = CURRENT_POLL, totalVotes = 0) {
+  const storedVote = getStoredFanPollVote(poll);
+  if (storedVote === null) return null;
+
+  const options = Array.isArray(poll?.options) ? poll.options : [];
+  const total = Number(totalVotes || getFanPollTotalVotes(poll));
+
+  if (storedVote < 0 || storedVote >= options.length) {
+    clearFanPollVote(poll);
+    return null;
+  }
+
+  /*
+    Admin reset protection:
+    If votes are reset to 0, or the previously selected option has no votes
+    after a poll edit/reset, the browser's old localStorage vote is stale.
+  */
+  if (!total || Number(options[storedVote]?.votes || 0) <= 0) {
+    clearFanPollVote(poll);
+    return null;
+  }
+
+  return storedVote;
+}
+
 
 function cleanPollOptionLabel(value = '', index = 0) {
   return String(value || `Option ${index + 1}`)
@@ -2289,8 +2324,9 @@ function renderRealtimePoll(poll, totalVotes = 0) {
 
   if (!poll || !qEl || !optsEl) return;
 
-  const storedVote = getStoredFanPollVote(poll);
-  const hasVoted = storedVote !== null;
+  const liveTotalVotes = Number(totalVotes || getFanPollTotalVotes(poll));
+  const storedVote = syncFanPollStoredVote(poll, liveTotalVotes);
+  const hasVoted = storedVote !== null && liveTotalVotes > 0;
 
   qEl.textContent = poll.question || 'Fan Poll';
 
@@ -2318,11 +2354,11 @@ function renderRealtimePoll(poll, totalVotes = 0) {
 
   if (metaEl) {
     metaEl.textContent = hasVoted
-      ? `${Number(totalVotes || 0).toLocaleString('en-IN')} votes · Live results`
-      : `${Number(totalVotes || 0).toLocaleString('en-IN')} votes · Choose once to reveal live results`;
+      ? `${Number(liveTotalVotes || 0).toLocaleString('en-IN')} votes · Live results`
+      : `${Number(liveTotalVotes || 0).toLocaleString('en-IN')} votes · Choose once to reveal live results`;
   }
 
-  updateFanPointsDock({ votes: totalVotes });
+  updateFanPointsDock({ votes: liveTotalVotes });
 }
 
 async function voteRealtimePoll(optionIndex) {
@@ -2337,9 +2373,12 @@ async function voteRealtimePoll(optionIndex) {
       return;
     }
 
-    if (getStoredFanPollVote(CURRENT_POLL) !== null) {
+    const currentTotalVotes = getFanPollTotalVotes(CURRENT_POLL);
+    const validStoredVote = syncFanPollStoredVote(CURRENT_POLL, currentTotalVotes);
+
+    if (validStoredVote !== null) {
       showToast('You already voted in this poll');
-      renderRealtimePoll(CURRENT_POLL, (CURRENT_POLL.options || []).reduce((s, o) => s + Number(o.votes || 0), 0));
+      await loadFanPoll();
       return;
     }
 
@@ -2359,11 +2398,14 @@ async function voteRealtimePoll(optionIndex) {
       data.options ||
       CURRENT_POLL.options;
 
+    const updatedTotalVotes = data.data?.totalVotes || data.totalVotes || getFanPollTotalVotes(CURRENT_POLL);
+    CURRENT_POLL.totalVotes = updatedTotalVotes;
+
     storeFanPollVote(CURRENT_POLL, optionIndex);
 
     renderRealtimePoll(
       CURRENT_POLL,
-      data.data?.totalVotes || data.totalVotes || 0
+      updatedTotalVotes
     );
 
     showToast(data.message || 'Vote recorded! +50 Fan Points');
@@ -2373,7 +2415,15 @@ async function voteRealtimePoll(optionIndex) {
 
   } catch (err) {
     console.error(err);
-    showToast(`${err.message}`);
+    const msg = String(err?.message || 'Vote failed');
+    showToast(msg);
+
+    /* If backend says this account already voted, reload the real poll state
+       instead of keeping a stale selected/0-vote browser state. */
+    if (/already voted/i.test(msg)) {
+      clearFanPollVote(CURRENT_POLL);
+      await loadFanPoll();
+    }
   }
 }
 
@@ -2775,6 +2825,7 @@ try {
       if (!CURRENT_POLL || payload.pollId !== CURRENT_POLL._id) return;
 
       CURRENT_POLL.options = payload.options;
+      CURRENT_POLL.totalVotes = payload.totalVotes;
       renderRealtimePoll(CURRENT_POLL, payload.totalVotes);
     });
   }
