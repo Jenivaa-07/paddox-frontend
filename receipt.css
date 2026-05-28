@@ -143,3 +143,32 @@ html,body{background:#fff!important;}
 @media(max-width:760px){
   .receipt-brand-lockup{width:210px!important;}
 }
+
+
+/* ============================================================
+   Phase 18.0.7 — receipt logo visibility fallback
+   ============================================================ */
+.receipt-brand-fallback-wrap{
+  display:none;
+  align-items:center;
+  gap:14px;
+}
+.receipt-brand-fallback-icon{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1.5px solid rgba(232,0,45,.28);
+}
+.receipt-brand-fallback-word{
+  font-family:var(--font-d);
+  letter-spacing:6px;
+  font-size:2rem;
+  color:#111;
+  line-height:1;
+}
+.receipt-brand-fallback-word span{color:var(--red);}
+@media print{
+  .receipt-brand-fallback-icon{width:46px;height:46px;}
+  .receipt-brand-fallback-word{font-size:1.8rem;letter-spacing:5px;}
+}

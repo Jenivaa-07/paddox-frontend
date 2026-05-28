@@ -4370,3 +4370,20 @@ body.modal-open { overflow: hidden; }
   .qf-brand-lockup-img{width:132px!important;max-width:38vw!important;}
   .qf-brand-lockup-clean{min-width:120px!important;}
 }
+
+
+/* ============================================================
+   Phase 18.0.7 — quote card lockup alignment tune
+   ============================================================ */
+.qf-brand-lockup-clean{
+  min-width:168px!important;
+  justify-content:flex-end!important;
+}
+.qf-brand-lockup-img{
+  width:172px!important;
+  max-width:19vw!important;
+}
+@media(max-width:760px){
+  .qf-brand-lockup-clean{min-width:126px!important;}
+  .qf-brand-lockup-img{width:136px!important;max-width:40vw!important;}
+}
