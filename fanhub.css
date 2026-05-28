@@ -3843,3 +3843,69 @@ body.modal-open { overflow: hidden; }
   .feed-comment-box{grid-template-columns:1fr !important;}
   .feed-comment-box button{width:max-content !important;}
 }
+
+/* ============================================================
+   Phase 17.7.2 — Fan Feed Delete Post / Comment UI
+   ============================================================ */
+.feed-head-right{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  flex-shrink:0 !important;
+}
+.feed-delete-btn{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:28px !important;
+  height:28px !important;
+  border-radius:10px !important;
+  border:1px solid rgba(255,255,255,.09) !important;
+  background:rgba(255,255,255,.028) !important;
+  color:rgba(255,255,255,.42) !important;
+  transition:all var(--tr) !important;
+  cursor:pointer !important;
+}
+.feed-delete-btn:hover{
+  color:#fff !important;
+  border-color:rgba(232,0,45,.55) !important;
+  background:rgba(232,0,45,.12) !important;
+  box-shadow:0 10px 24px rgba(232,0,45,.12) !important;
+  transform:translateY(-1px) !important;
+}
+.feed-delete-icon{
+  width:13px !important;
+  height:13px !important;
+  display:block !important;
+  background:currentColor !important;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='black' d='M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.7 11.2A2 2 0 0 1 14.3 22H9.7a2 2 0 0 1-2-1.8L7 9Zm3 2v8h2v-8h-2Zm4 0v8h2v-8h-2Z'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  mask:url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='black' d='M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.7 11.2A2 2 0 0 1 14.3 22H9.7a2 2 0 0 1-2-1.8L7 9Zm3 2v8h2v-8h-2Zm4 0v8h2v-8h-2Z'/%3E%3C/svg%3E") center/contain no-repeat !important;
+}
+.feed-comment-body{
+  flex:1 !important;
+}
+.feed-comment-meta{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  min-width:0 !important;
+}
+.feed-comment-delete-btn{
+  width:24px !important;
+  height:24px !important;
+  border-radius:8px !important;
+  opacity:.72 !important;
+  margin-left:auto !important;
+}
+.feed-comment-delete-btn .feed-delete-icon{
+  width:11px !important;
+  height:11px !important;
+}
+.feed-comment-item:hover .feed-comment-delete-btn{
+  opacity:1 !important;
+}
+@media(max-width:560px){
+  .feed-head-right{align-items:flex-end !important;flex-direction:column !important;gap:6px !important;}
+  .feed-delete-btn{width:26px !important;height:26px !important;border-radius:9px !important;}
+}

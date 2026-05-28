@@ -1969,7 +1969,7 @@ const FAN_API_BASE =
   if (!fan.feed && fan.getFeed) fan.feed = fan.getFeed;
   if (!fan.post && fan.postFeed) fan.post = fan.postFeed;
   if (!fan.feed) {
-    fan.feed = () => fetch(`${FAN_API_BASE}/feed`).then(r => r.json());
+    fan.feed = () => fetch(`${FAN_API_BASE}/feed`, { headers: fanAuthHeaders(false) }).then(r => r.json());
   }
   if (!fan.post) {
     fan.post = (text) => fetch(`${FAN_API_BASE}/feed`, {
@@ -1989,6 +1989,18 @@ const FAN_API_BASE =
       method:'POST',
       headers: fanAuthHeaders(true),
       body: JSON.stringify({ text })
+    }).then(r => r.json());
+  }
+  if (!fan.deletePost) {
+    fan.deletePost = (postId) => fetch(`${FAN_API_BASE}/feed/${encodeURIComponent(postId)}`, {
+      method:'DELETE',
+      headers: fanAuthHeaders(true)
+    }).then(r => r.json());
+  }
+  if (!fan.deleteComment) {
+    fan.deleteComment = (postId, commentId) => fetch(`${FAN_API_BASE}/feed/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}`, {
+      method:'DELETE',
+      headers: fanAuthHeaders(true)
     }).then(r => r.json());
   }
 })();
@@ -2693,11 +2705,16 @@ function renderFeedComments(post = {}) {
           ${shown.map(comment => {
             const user = comment.user || {};
             const cname = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Paddox Fan';
+            const commentId = String(comment._id || comment.id || '');
+            const canDelete = !!comment.canDeleteComment && !!commentId;
             return `
-              <div class="feed-comment-item">
+              <div class="feed-comment-item" data-comment-id="${escapeHTML(commentId)}">
                 <div class="feed-comment-av">${initialsFromName(cname)}</div>
                 <div class="feed-comment-body">
-                  <strong>@${escapeHTML(cname.replace(/\s+/g,'').toLowerCase())}</strong>
+                  <div class="feed-comment-meta">
+                    <strong>@${escapeHTML(cname.replace(/\s+/g,'').toLowerCase())}</strong>
+                    ${canDelete ? `<button class="feed-delete-btn feed-comment-delete-btn" type="button" title="Delete comment" aria-label="Delete comment" onclick="deleteFanPostComment('${postId}','${commentId}')"><span class="feed-delete-icon" aria-hidden="true"></span></button>` : ''}
+                  </div>
                   <span>${escapeHTML(comment.text || '')}</span>
                 </div>
               </div>
@@ -2746,6 +2763,7 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
     const commentsCount = Number(post.commentsCount || post.comments?.length || 0);
     const postId = feedPostId(post);
     const liked = !!post.likedByCurrentUser;
+    const canDeletePost = !!post.canDeletePost;
 
     return `
       <div class="feed-item premium" data-post-id="${postId}">
@@ -2761,7 +2779,10 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
               <div class="feed-user">@${handle || 'paddoxfan'}</div>
               <div class="feed-role">PADDOX GRID MEMBER</div>
             </div>
-            <div class="feed-time">${timeAgo(post.createdAt)}</div>
+            <div class="feed-head-right">
+              <div class="feed-time">${timeAgo(post.createdAt)}</div>
+              ${canDeletePost ? `<button class="feed-delete-btn feed-post-delete-btn" type="button" title="Delete post" aria-label="Delete post" onclick="deleteFanPost('${postId}')"><span class="feed-delete-icon" aria-hidden="true"></span></button>` : ''}
+            </div>
           </div>
           <div class="feed-txt">${safeText}</div>
           <div class="feed-actions">
@@ -2856,9 +2877,67 @@ async function submitFanPostComment(postId) {
   }
 }
 
+
+async function deleteFanPost(postId) {
+  if (!fanToken()) {
+    fanLoginRequired();
+    return;
+  }
+
+  if (!confirm('Delete this post from the Fan Hub?')) return;
+
+  try {
+    const data = await PaddoxAPI.fan.deletePost(postId);
+
+    if (!data.success) {
+      throw new Error(data.message || 'Delete post failed');
+    }
+
+    LIVE_FEED_POSTS = LIVE_FEED_POSTS.filter(post => feedPostId(post) !== String(postId));
+    renderFanFeed();
+    showToast(data.message || 'Post deleted');
+    await loadFanLeaderboard();
+  } catch (err) {
+    console.error(err);
+    showToast(`${err.message}`);
+  }
+}
+
+async function deleteFanPostComment(postId, commentId) {
+  if (!fanToken()) {
+    fanLoginRequired();
+    return;
+  }
+
+  if (!confirm('Delete this comment?')) return;
+
+  try {
+    const data = await PaddoxAPI.fan.deleteComment(postId, commentId);
+
+    if (!data.success) {
+      throw new Error(data.message || 'Delete comment failed');
+    }
+
+    const updated = data.data?.post || data.post;
+    if (updated) {
+      replaceFeedPost(updated);
+      renderFanFeed();
+    } else {
+      await loadFanFeed();
+    }
+
+    showToast(data.message || 'Comment deleted');
+  } catch (err) {
+    console.error(err);
+    showToast(`${err.message}`);
+  }
+}
+
 window.toggleFanPostLike = toggleFanPostLike;
 window.toggleFanPostCommentBox = toggleFanPostCommentBox;
 window.submitFanPostComment = submitFanPostComment;
+window.deleteFanPost = deleteFanPost;
+window.deleteFanPostComment = deleteFanPostComment;
 
 async function loadFanFeed() {
   try {
@@ -2983,6 +3062,13 @@ try {
         replaceFeedPost(payload.post);
         renderFanFeed();
       }
+    });
+
+    socket.on('fan:post-delete', payload => {
+      const deletedId = String(payload?.postId || '');
+      if (!deletedId) return;
+      LIVE_FEED_POSTS = LIVE_FEED_POSTS.filter(post => feedPostId(post) !== deletedId);
+      renderFanFeed();
     });
 
     socket.on('poll:vote-update', payload => {
