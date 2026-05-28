@@ -4443,3 +4443,232 @@ body.modal-open { overflow: hidden; }
   .topt { grid-template-columns: 34px 1fr; }
   .topt-status { grid-column: 2; }
 }
+
+/* ============================================================
+   Phase 17.9 — Community Final Premium Pass
+   Frontend-only: final spacing, dashboard balance, card hierarchy,
+   sticky-tab safe spacing, and mobile consistency for Community.
+   ============================================================ */
+#sec-community{
+  position:relative;
+  scroll-margin-top:142px;
+  padding-top:82px!important;
+  padding-bottom:86px!important;
+  overflow:hidden;
+}
+#sec-community::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 16% 10%, rgba(232,0,45,.075), transparent 30%),
+    radial-gradient(circle at 88% 34%, rgba(201,168,76,.055), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,.012), transparent 34%);
+  opacity:.95;
+}
+#sec-community > *{
+  position:relative;
+  z-index:1;
+}
+#sec-community .sec-header{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:22px;
+  margin-bottom:28px!important;
+  padding-bottom:18px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+#sec-community .sec-header::after{
+  content:'LIVE FAN GRID';
+  font-family:var(--font-c);
+  font-size:.64rem;
+  font-weight:800;
+  letter-spacing:3px;
+  color:rgba(255,255,255,.44);
+  border:1px solid rgba(232,0,45,.22);
+  background:rgba(232,0,45,.06);
+  padding:7px 12px;
+  white-space:nowrap;
+}
+#sec-community .section-title{
+  text-shadow:0 0 34px rgba(232,0,45,.11);
+}
+#sec-community .fan-points-dock{
+  display:grid!important;
+  grid-template-columns:minmax(280px,1.35fr) repeat(3,minmax(130px,.55fr))!important;
+  gap:14px!important;
+  margin-bottom:22px!important;
+}
+#sec-community .fpd-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.085)!important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.058), rgba(255,255,255,.022))!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+#sec-community .fpd-card::after{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:2px;
+  background:linear-gradient(90deg, var(--red), transparent 72%);
+  opacity:.72;
+}
+#sec-community .fpd-main{
+  border-left:2px solid rgba(232,0,45,.75)!important;
+}
+#sec-community .comm-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,5fr) minmax(0,7fr)!important;
+  gap:18px!important;
+  align-items:start!important;
+}
+#sec-community .comm-card{
+  position:relative!important;
+  min-width:0!important;
+  height:100%!important;
+  border:1px solid rgba(255,255,255,.082)!important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(232,0,45,.055), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.018))!important;
+  box-shadow:0 20px 48px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.04)!important;
+  padding:24px!important;
+  overflow:hidden!important;
+}
+#sec-community .comm-card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:1px;
+  background:linear-gradient(90deg, rgba(232,0,45,.72), rgba(255,255,255,.10), transparent);
+  opacity:.78;
+}
+#sec-community .comm-card:hover{
+  border-color:rgba(232,0,45,.22)!important;
+  box-shadow:0 26px 62px rgba(0,0,0,.42), 0 0 30px rgba(232,0,45,.055)!important;
+}
+#sec-community .comm-card:nth-child(1){grid-column:1 / span 1!important;}
+#sec-community .comm-card:nth-child(2){grid-column:2 / span 1!important;}
+#sec-community .comm-card:nth-child(3){grid-column:1 / span 1!important;}
+#sec-community .comm-card:nth-child(4){grid-column:2 / span 1!important;}
+#sec-community .comm-card-title{
+  position:relative;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:11px!important;
+  min-height:42px;
+  margin-bottom:18px!important;
+  padding-bottom:13px;
+  border-bottom:1px solid rgba(255,255,255,.065);
+  font-size:1.24rem!important;
+}
+#sec-community .comm-title-icon{
+  width:34px!important;
+  height:34px!important;
+  border-radius:11px!important;
+  flex:0 0 auto!important;
+  background:
+    linear-gradient(180deg, rgba(232,0,45,.22), rgba(232,0,45,.06))!important;
+  border:1px solid rgba(232,0,45,.35)!important;
+  box-shadow:0 10px 24px rgba(232,0,45,.10), inset 0 1px 0 rgba(255,255,255,.08)!important;
+}
+#sec-community .comm-title-icon::before{
+  width:16px!important;
+  height:16px!important;
+}
+#sec-community .poll-q,
+#sec-community .triv-q,
+#sec-community .feed-compose,
+#sec-community .lb-header-card{
+  margin-top:0!important;
+}
+#sec-community .poll-meta,
+#sec-community .triv-res,
+#sec-community .feed-comments{
+  border-radius:0!important;
+}
+#sec-community .poll-opts,
+#sec-community .triv-opts,
+#sec-community .lb-list,
+#sec-community .live-feed{
+  min-width:0!important;
+}
+#sec-community .live-feed{
+  max-height:640px;
+  overflow:auto;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(232,0,45,.45) transparent;
+}
+#sec-community .live-feed::-webkit-scrollbar{width:4px;}
+#sec-community .live-feed::-webkit-scrollbar-track{background:transparent;}
+#sec-community .live-feed::-webkit-scrollbar-thumb{background:rgba(232,0,45,.55);border-radius:10px;}
+#sec-community #feed-post-btn,
+#sec-community .triv-next{
+  letter-spacing:2.4px!important;
+}
+#sec-community .feed-empty,
+#sec-community .triv-empty,
+#sec-community .lb-empty{
+  border:1px solid rgba(255,255,255,.075)!important;
+  background:rgba(255,255,255,.025)!important;
+}
+@media(max-width:1180px){
+  #sec-community .fan-points-dock{
+    grid-template-columns:1fr 1fr!important;
+  }
+  #sec-community .fpd-main{
+    grid-column:1 / -1!important;
+  }
+}
+@media(max-width:980px){
+  #sec-community{
+    padding-top:66px!important;
+  }
+  #sec-community .sec-header{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:12px;
+  }
+  #sec-community .comm-grid{
+    grid-template-columns:1fr!important;
+  }
+  #sec-community .comm-card:nth-child(n){
+    grid-column:1 / -1!important;
+  }
+  #sec-community .live-feed{
+    max-height:none;
+    overflow:visible;
+    padding-right:0;
+  }
+}
+@media(max-width:640px){
+  #sec-community{
+    padding-left:18px!important;
+    padding-right:18px!important;
+    padding-top:54px!important;
+  }
+  #sec-community .sec-header::after{
+    font-size:.56rem;
+    letter-spacing:2px;
+    padding:6px 10px;
+  }
+  #sec-community .fan-points-dock{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  #sec-community .comm-card{
+    padding:18px!important;
+  }
+  #sec-community .comm-card-title{
+    font-size:1.12rem!important;
+  }
+}
