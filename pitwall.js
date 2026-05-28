@@ -420,8 +420,8 @@ function initNav() {
 function initParticles() {
   const canvas = $('#particles-canvas'); if (!canvas) return; const ctx = canvas.getContext('2d'); let W,H,p=[];
   function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; } resize(); window.addEventListener('resize', resize);
-  class P{ constructor(){this.r()} r(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=1.5+Math.random()*4;this.vy=(Math.random()-.5)*.8;this.l=.3+Math.random()*.7;this.sz=.6+Math.random()*1.8;this.c=Math.random()<.72?'232,0,45':'201,168,76'} u(){this.x+=this.vx;this.y+=this.vy;this.l-=.002;if(this.x>W+50||this.l<=0){this.r();this.x=-20}} d(){ctx.fillStyle=`rgba(${this.c},${this.l})`;ctx.fillRect(this.x,this.y,this.sz*8,this.sz)}}
-  for(let i=0;i<70;i++) p.push(new P()); (function loop(){ctx.clearRect(0,0,W,H);p.forEach(x=>{x.u();x.d()});requestAnimationFrame(loop)})();
+  class P{ constructor(){this.r()} r(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=2.2+Math.random()*5.2;this.vy=(Math.random()-.5)*.9;this.l=.34+Math.random()*.66;this.sz=.7+Math.random()*2.0;this.c=Math.random()<.72?'232,0,45':'201,168,76'} u(){this.x+=this.vx;this.y+=this.vy;this.l-=.002;if(this.x>W+50||this.l<=0){this.r();this.x=-20}} d(){ctx.fillStyle=`rgba(${this.c},${this.l})`;ctx.fillRect(this.x,this.y,this.sz*11,this.sz)}}
+  for(let i=0;i<115;i++) p.push(new P()); (function loop(){ctx.clearRect(0,0,W,H);p.forEach(x=>{x.u();x.d()});requestAnimationFrame(loop)})();
 }
 function initSocket() {
   try { if (typeof io !== 'function') return; const socket = io('https://paddox-backend.onrender.com', { transports: ['websocket', 'polling'] }); socket.on('connect', () => setText('socket-state', 'Live link connected')); socket.on('disconnect', () => setText('socket-state', 'Live link standby')); } catch (err) { console.warn('Socket unavailable', err); }

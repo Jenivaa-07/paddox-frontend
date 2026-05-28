@@ -1090,3 +1090,69 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
 @media(max-width:560px){
   .pit-title{font-size:4rem!important;line-height:.9!important;}
 }
+
+/* ============================================================
+   PHASE 19.9 — PIT WALL FINAL HERO ATMOSPHERE POLISH
+   Tiny pass: darker cinematic overlay, Fan Hub-like hero rhythm,
+   stronger race particles/streak visibility. No navbar/table changes.
+   ============================================================ */
+.pit-hero{
+  min-height:64vh!important;
+  padding:calc(var(--nav-h) + 66px) 0 66px!important;
+  background:
+    linear-gradient(90deg,rgba(3,3,4,.985) 0%,rgba(5,5,6,.93) 35%,rgba(6,6,7,.80) 62%,rgba(6,6,7,.965) 100%),
+    linear-gradient(to bottom,rgba(0,0,0,.26),rgba(0,0,0,.34) 45%,rgba(0,0,0,.86) 100%),
+    radial-gradient(circle at 78% 20%,rgba(232,0,45,.20),transparent 32%),
+    radial-gradient(circle at 10% 92%,rgba(0,210,255,.09),transparent 28%),
+    url('https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=2200&q=74') center right/cover no-repeat!important;
+}
+.pit-hero-layout{
+  max-width:760px!important;
+}
+.pit-title{
+  font-size:clamp(4.6rem,6.35vw,7rem)!important;
+  line-height:.88!important;
+  letter-spacing:4.6px!important;
+  max-width:740px!important;
+}
+.pit-sub{
+  max-width:600px!important;
+  color:rgba(255,255,255,.68)!important;
+}
+.pit-hero::before{
+  background:
+    linear-gradient(to bottom,rgba(0,0,0,.16) 0%,transparent 32%,rgba(0,0,0,.82) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.44),transparent 48%,rgba(232,0,45,.12)),
+    repeating-linear-gradient(90deg,rgba(232,0,45,.06) 0 1px,transparent 1px 92px),
+    repeating-linear-gradient(0deg,rgba(232,0,45,.04) 0 1px,transparent 1px 70px)!important;
+  opacity:.82!important;
+}
+.pit-hero::after{
+  background:
+    linear-gradient(104deg,transparent 0 16%,rgba(255,255,255,.11) 16.3%,transparent 17.2% 34%,rgba(232,0,45,.20) 34.4%,transparent 35.2% 53%,rgba(201,168,76,.16) 53.3%,transparent 54.2% 100%),
+    linear-gradient(116deg,transparent 0 60%,rgba(232,0,45,.11) 60.5%,transparent 62% 100%),
+    radial-gradient(circle at 80% 24%,rgba(232,0,45,.22),transparent 25%)!important;
+  opacity:.62!important;
+  animation:pitRaceStreakDrift 8.5s linear infinite!important;
+}
+.pit-grid-bg{
+  opacity:.56!important;
+  background-size:58px 58px!important;
+}
+.pit-scanline{
+  opacity:.46!important;
+}
+#particles-canvas{
+  opacity:.72!important;
+}
+.pit-hero-actions .pit-primary,
+.pit-hero-actions .pit-secondary{
+  box-shadow:0 14px 40px rgba(0,0,0,.32)!important;
+}
+@media(max-width:900px){
+  .pit-hero{padding:calc(var(--nav-h) + 48px) 0 54px!important;min-height:auto!important;}
+  .pit-title{font-size:clamp(4rem,14vw,5.55rem)!important;letter-spacing:3px!important;}
+}
+@media(max-width:560px){
+  .pit-title{font-size:3.75rem!important;}
+}
