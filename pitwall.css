@@ -814,3 +814,173 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
   }
   .command-card{display:none!important}
 }
+
+/* ============================================================
+   Phase 19.7 — Pit Wall shop-style hero showcase
+   Removes radar control box and replaces it with a cinematic
+   image-led card matching Home / Shop / Fan Hub language.
+   ============================================================ */
+.pit-hero-layout{
+  grid-template-columns:minmax(0,1.02fr) minmax(360px,520px)!important;
+  align-items:center!important;
+}
+.pit-hero-showcase{
+  position:relative;
+  min-height:318px;
+  border-radius:28px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#090909;
+  box-shadow:0 34px 110px rgba(0,0,0,.48),0 0 0 1px rgba(232,0,45,.08) inset;
+  isolation:isolate;
+}
+.pit-hero-showcase::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(232,0,45,.9) 0 3px,transparent 3px),
+    linear-gradient(135deg,rgba(255,255,255,.12),transparent 34%,rgba(232,0,45,.18));
+  opacity:.78;
+  z-index:3;
+  pointer-events:none;
+}
+.pit-hero-showcase::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:linear-gradient(115deg,rgba(255,255,255,.08) 0 1px,transparent 1px 46px);
+  opacity:.2;
+  z-index:2;
+  pointer-events:none;
+}
+.pit-showcase-image{
+  position:absolute;
+  inset:0;
+  background-image:url('https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=1200&q=82');
+  background-size:cover;
+  background-position:center;
+  transform:scale(1.04);
+  filter:saturate(.92) contrast(1.08) brightness(.78);
+  z-index:0;
+}
+.pit-showcase-shade{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 76% 18%,rgba(232,0,45,.42),transparent 38%),
+    linear-gradient(90deg,rgba(5,5,5,.88),rgba(5,5,5,.42) 44%,rgba(8,8,8,.78)),
+    linear-gradient(0deg,rgba(0,0,0,.55),transparent 45%);
+  z-index:1;
+}
+.pit-showcase-content{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:26px;
+}
+.pit-showcase-top,
+.pit-showcase-stats{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.pit-live-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:rgba(0,0,0,.42);
+  border:1px solid rgba(255,255,255,.13);
+  color:rgba(255,255,255,.82);
+  font-family:var(--font-c);
+  font-weight:900;
+  letter-spacing:1.9px;
+  text-transform:uppercase;
+  font-size:.68rem;
+  backdrop-filter:blur(12px);
+}
+.pit-live-chip i{
+  width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 16px rgba(0,209,95,.6);
+}
+.pit-showcase-top>b{
+  color:var(--green);
+  font-family:var(--font-c);
+  font-size:.74rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+.pit-showcase-main{
+  max-width:360px;
+}
+.pit-showcase-kicker{
+  display:block;
+  color:var(--red);
+  font-family:var(--font-c);
+  font-size:.74rem;
+  letter-spacing:2.8px;
+  text-transform:uppercase;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.pit-showcase-main strong{
+  display:block;
+  font-family:var(--font-d);
+  font-size:clamp(2.25rem,4vw,3.8rem);
+  line-height:.92;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:#fff;
+  text-shadow:0 14px 42px rgba(0,0,0,.6);
+}
+.pit-showcase-main small{
+  display:block;
+  margin-top:10px;
+  color:rgba(255,255,255,.72);
+  line-height:1.55;
+}
+.pit-showcase-stats{
+  padding:12px 14px;
+  border-radius:18px;
+  background:rgba(0,0,0,.42);
+  border:1px solid rgba(255,255,255,.11);
+  backdrop-filter:blur(14px);
+}
+.pit-showcase-stats span{
+  min-width:0;
+  display:grid;
+  gap:3px;
+}
+.pit-showcase-stats em{
+  font-style:normal;
+  color:var(--red);
+  font-family:var(--font-c);
+  font-weight:900;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-size:.62rem;
+}
+.pit-showcase-stats b{
+  color:rgba(255,255,255,.82);
+  font-family:var(--font-c);
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  font-size:.72rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:190px;
+}
+.command-card.pit-command-card,.mini-radar-wrap,.mini-radar,.mini-radar-core{display:none!important;}
+@media(max-width:1180px){
+  .pit-hero-layout{grid-template-columns:1fr!important;gap:32px!important;}
+  .pit-hero-showcase{max-width:680px;width:100%;min-height:280px;}
+}
+@media(max-width:900px){
+  .pit-hero-showcase{display:none!important;}
+}
