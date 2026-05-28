@@ -2,11 +2,11 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.13 official logo icon integration loaded');
+console.log('PADDOX Phase 18.2.3 driver stats compare polish loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_12';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-official.png?v=18_0_14';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-official.png?v=18_2_3';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -669,8 +669,17 @@ async function loadRealDriverStandings() {
       }
     }
 
-    window.selectRealDriver = renderDriver;
+    window.selectRealDriver = (index) => {
+      const nextIndex = Number(index) || 0;
+      compareDriverAIndex = nextIndex;
+      if (compareDriverBIndex === compareDriverAIndex && drivers.length > 1) {
+        compareDriverBIndex = (compareDriverAIndex + 1) % drivers.length;
+      }
+      renderDriver(nextIndex);
+      renderDriverComparePanel();
+    };
     renderDriver(0);
+    renderDriverComparePanel();
 
   } catch (err) {
     console.warn('Driver grid load failed', err);
@@ -1250,6 +1259,8 @@ let quoteSearchText = '';
 let quoteAutoTimer = null;
 let REAL_DRIVER_GRID_CACHE = [];
 let activeRealDriverIndex = 0;
+let compareDriverAIndex = 0;
+let compareDriverBIndex = 1;
 
 function safeText(value = '') {
   return String(value ?? '')
@@ -1259,6 +1270,115 @@ function safeText(value = '') {
     .replace(/\"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+
+function compareDriverValue(driver = {}, key = '') {
+  if (!driver) return '—';
+  if (key === 'position') return driver.position ? `P${driver.position}` : '—';
+  if (key === 'points') return `${Number(driver.points || 0).toLocaleString('en-IN')} pts`;
+  if (key === 'wins') return `${Number(driver.wins || 0)} wins`;
+  if (key === 'team') return safeText(driver.team || 'Team TBA');
+  if (key === 'number') return driver.number ? `#${safeText(driver.number)}` : '—';
+  return '—';
+}
+
+function compareMetricWinner(a = {}, b = {}, key = '') {
+  const av = Number(key === 'position' ? (a.position ? -a.position : -999) : a[key] || 0);
+  const bv = Number(key === 'position' ? (b.position ? -b.position : -999) : b[key] || 0);
+  if (av === bv) return 'tie';
+  return av > bv ? 'a' : 'b';
+}
+
+function compareDriverCard(driver = {}, side = 'a') {
+  const teamColor = driver.teamColor || '#e8002d';
+  return `
+    <div class="compare-driver-card compare-${side}" style="--team-color:${teamColor}">
+      <div class="compare-driver-top">
+        <div class="compare-avatar" style="border-color:${teamColor};background:${teamColor}18">
+          ${driverAvatarHTML(driver, 'compare')}
+        </div>
+        <div>
+          <div class="compare-side">Driver ${side.toUpperCase()}</div>
+          <div class="compare-name">${safeText(driver.name || 'F1 Driver')}</div>
+          <div class="compare-team">${fanTeamLogoHTML(driver.team, 'compare')}<span>${safeText(driver.team || 'Team TBA')}</span></div>
+        </div>
+      </div>
+      <div class="compare-mini-tags">
+        <span>${driver.position ? `P${driver.position}` : 'Grid'}</span>
+        <span>${Number(driver.points || 0).toLocaleString('en-IN')} pts</span>
+        <span>${driver.number ? `#${safeText(driver.number)}` : 'No.'}</span>
+      </div>
+    </div>`;
+}
+
+function renderDriverComparePanel() {
+  const shell = document.getElementById('driver-compare-shell');
+  const selectA = document.getElementById('compare-driver-a');
+  const selectB = document.getElementById('compare-driver-b');
+  const board = document.getElementById('compare-board');
+  const drivers = REAL_DRIVER_GRID_CACHE || [];
+  if (!shell || !selectA || !selectB || !board) return;
+
+  if (!drivers.length) {
+    shell.style.display = 'none';
+    return;
+  }
+  shell.style.display = '';
+  compareDriverAIndex = Math.min(Math.max(0, compareDriverAIndex || 0), drivers.length - 1);
+  compareDriverBIndex = Math.min(Math.max(0, compareDriverBIndex || 1), drivers.length - 1);
+  if (drivers.length > 1 && compareDriverAIndex === compareDriverBIndex) {
+    compareDriverBIndex = (compareDriverAIndex + 1) % drivers.length;
+  }
+
+  const options = drivers.map((driver, idx) => `<option value="${idx}">${safeText(driver.code || driver.name)} — ${safeText(driver.team || 'Team')}</option>`).join('');
+  selectA.innerHTML = options;
+  selectB.innerHTML = options;
+  selectA.value = String(compareDriverAIndex);
+  selectB.value = String(compareDriverBIndex);
+  selectA.onchange = () => selectCompareDriver('a', selectA.value);
+  selectB.onchange = () => selectCompareDriver('b', selectB.value);
+
+  const a = drivers[compareDriverAIndex];
+  const b = drivers[compareDriverBIndex];
+  const metrics = [
+    ['position','Standing'],
+    ['points','Points'],
+    ['wins','Wins'],
+    ['team','Team'],
+    ['number','Car No.']
+  ];
+
+  board.innerHTML = `
+    <div class="compare-driver-pair">
+      ${compareDriverCard(a, 'a')}
+      <div class="compare-vs">VS</div>
+      ${compareDriverCard(b, 'b')}
+    </div>
+    <div class="compare-metrics">
+      ${metrics.map(([key, label]) => {
+        const winner = compareMetricWinner(a, b, key);
+        const canWin = key !== 'team' && key !== 'number';
+        return `
+          <div class="compare-metric-row">
+            <div class="cm-val ${canWin && winner === 'a' ? 'win' : ''}">${compareDriverValue(a, key)}</div>
+            <div class="cm-label">${label}</div>
+            <div class="cm-val ${canWin && winner === 'b' ? 'win' : ''}">${compareDriverValue(b, key)}</div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function selectCompareDriver(side = 'a', value = 0) {
+  const next = Number(value) || 0;
+  if (side === 'a') compareDriverAIndex = next;
+  else compareDriverBIndex = next;
+  if (REAL_DRIVER_GRID_CACHE.length > 1 && compareDriverAIndex === compareDriverBIndex) {
+    if (side === 'a') compareDriverBIndex = (compareDriverAIndex + 1) % REAL_DRIVER_GRID_CACHE.length;
+    else compareDriverAIndex = (compareDriverBIndex + 1) % REAL_DRIVER_GRID_CACHE.length;
+  }
+  renderDriverComparePanel();
+}
+window.selectCompareDriver = selectCompareDriver;
 
 function quoteTeamClass(team = '') {
   return String(team || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'paddox';
