@@ -2453,14 +2453,37 @@ async function voteRealtimePoll(optionIndex) {
 }
 
 /* Leaderboard */
+function leaderboardMedal(rank = 0) {
+  const r = Number(rank || 0);
+  if (r === 1) return 'P1';
+  if (r === 2) return 'P2';
+  if (r === 3) return 'P3';
+  return `#${r || '-'}`;
+}
+
+function leaderboardRankLabel(rank = 0) {
+  const r = Number(rank || 0);
+  if (r === 1) return 'Pole Position';
+  if (r === 2) return 'Front Row';
+  if (r === 3) return 'Podium';
+  return 'Grid Rank';
+}
+
+function leaderboardProgress(points = 0, max = 1) {
+  const pct = max > 0 ? Math.round((Number(points || 0) / max) * 100) : 0;
+  return Math.max(6, Math.min(100, pct));
+}
+
 async function loadFanLeaderboard() {
   const lbEl = document.getElementById('lb-list');
 
   if (!lbEl) return;
 
   lbEl.innerHTML = `
-    <div class="lb-empty">
-      Loading leaderboard...
+    <div class="lb-empty fh-action-empty">
+      <div class="fh-empty-mark fh-mark-leaderboard"></div>
+      <strong>Loading leaderboard...</strong>
+      <span>Syncing the PADDOX fan grid.</span>
     </div>
   `;
 
@@ -2488,60 +2511,94 @@ async function loadFanLeaderboard() {
     }
 
     const topThree = leaderboard.slice(0, 3);
-    const remaining = leaderboard.slice(3, 8);
+    const remaining = leaderboard.slice(3, 10);
     const topScore = Number(leaderboard[0]?.fanPoints || 0);
     const userScore = Number(leaderboard.find(u => String(u.name || '').toLowerCase().includes('jenivaa'))?.fanPoints || topScore || 0);
 
     updateFanPointsDock({ topScore, userScore });
 
+    const leader = leaderboard[0] || {};
+    const leaderName = escapeHTML(leader.name || 'Paddox Fan');
+    const leaderTier = getFanTier(leader.fanPoints);
+
+    const headerHtml = `
+      <div class="lb-header-card">
+        <div>
+          <div class="lb-kicker">Current Leader</div>
+          <div class="lb-leader-name">${leaderName}</div>
+          <div class="lb-leader-sub">${escapeHTML(leader.fanTier || leaderTier.name)} · ${Number(leader.fanPoints || 0).toLocaleString('en-IN')} pts</div>
+        </div>
+        <div class="lb-leader-chip">P1</div>
+      </div>
+    `;
+
     const podiumHtml = topThree.length ? `
-      <div class="lb-podium">
+      <div class="lb-podium lb-podium-premium">
         ${topThree.map(user => {
           const tier = getFanTier(user.fanPoints);
           const name = escapeHTML(user.name || 'Paddox Fan');
           const avatar = user.avatar;
+          const rank = Number(user.rank || 0);
+          const points = Number(user.fanPoints || 0);
+          const progress = leaderboardProgress(points, topScore || points || 1);
           return `
-            <div class="lb-podium-card rank-${user.rank || 0}">
-              <div class="lb-podium-medal">RANK ${user.rank || '-'}</div>
+            <div class="lb-podium-card rank-${rank} ${rank === 1 ? 'is-champion' : ''}">
+              <div class="lb-card-glow"></div>
+              <div class="lb-podium-topline">
+                <span class="lb-podium-medal">${leaderboardMedal(rank)}</span>
+                <span class="lb-rank-label">${leaderboardRankLabel(rank)}</span>
+              </div>
               <div class="lb-podium-avatar">
                 ${avatar ? `<img src="${escapeHTML(avatar)}" alt="${name}">` : `<span>${initialsFromName(name)}</span>`}
               </div>
               <div class="lb-podium-name">${name}</div>
               <div class="lb-podium-tier">${escapeHTML(user.fanTier || tier.name)}</div>
-              <div class="lb-podium-points">${Number(user.fanPoints || 0).toLocaleString('en-IN')} pts</div>
+              <div class="lb-podium-points">${points.toLocaleString('en-IN')} pts</div>
+              <div class="lb-progress-track"><span style="width:${progress}%"></span></div>
             </div>`;
         }).join('')}
       </div>` : '';
 
-    const rowsHtml = remaining.map(user => {
-      const tier = getFanTier(user.fanPoints);
-      const name = escapeHTML(user.name || 'Paddox Fan');
-      const avatar = user.avatar;
+    const rowsHtml = remaining.length ? `
+      <div class="lb-grid-list">
+        ${remaining.map(user => {
+          const tier = getFanTier(user.fanPoints);
+          const name = escapeHTML(user.name || 'Paddox Fan');
+          const avatar = user.avatar;
+          const points = Number(user.fanPoints || 0);
+          const progress = leaderboardProgress(points, topScore || points || 1);
 
-      return `
-        <div class="lb-row premium">
-          <span class="lb-rank">${user.rank || '-'}</span>
-          <span class="lb-avatar">
-            ${avatar ? `<img src="${escapeHTML(avatar)}" alt="${name}">` : initialsFromName(name)}
-          </span>
-          <span class="lb-n">${name}</span>
-          <span class="lb-badge">${escapeHTML(user.fanTier || tier.name)}</span>
-          <span class="lb-p">${Number(user.fanPoints || 0).toLocaleString('en-IN')} pts</span>
-        </div>`;
-    }).join('');
+          return `
+            <div class="lb-row premium">
+              <span class="lb-rank">#${user.rank || '-'}</span>
+              <span class="lb-avatar">
+                ${avatar ? `<img src="${escapeHTML(avatar)}" alt="${name}">` : initialsFromName(name)}
+              </span>
+              <span class="lb-main">
+                <span class="lb-n">${name}</span>
+                <span class="lb-row-track"><span style="width:${progress}%"></span></span>
+              </span>
+              <span class="lb-badge">${escapeHTML(user.fanTier || tier.name)}</span>
+              <span class="lb-p">${points.toLocaleString('en-IN')} pts</span>
+            </div>`;
+        }).join('')}
+      </div>` : '';
 
-    lbEl.innerHTML = podiumHtml + rowsHtml;
+    lbEl.innerHTML = headerHtml + podiumHtml + rowsHtml;
 
   } catch (err) {
     console.error(err);
 
     lbEl.innerHTML = `
-      <div class="lb-empty">
-        Could not load leaderboard.
+      <div class="lb-empty fh-action-empty">
+        <div class="fh-empty-mark fh-mark-leaderboard"></div>
+        <strong>Could not load leaderboard.</strong>
+        <span>Try again after a quick refresh.</span>
       </div>
     `;
   }
 }
+
 
 /* Trivia */
 async function loadRealtimeTrivia() {
