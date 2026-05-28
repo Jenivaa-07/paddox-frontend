@@ -5635,7 +5635,7 @@ function updatePollLogoPreview(row) {
   if (!preview) return;
 
   if (selected?.image) {
-    preview.innerHTML = `<img src="${escapeAdminText(selected.image)}" alt="${escapeAdminText(selected.name)}">`;
+    preview.innerHTML = `<img src="${escapeAdminText(selected.image)}" alt="${escapeAdminText(selected.name)}" onerror="this.outerHTML='<span>PX</span>'">`;
   } else {
     preview.innerHTML = '<span>PX</span>';
   }
@@ -5749,8 +5749,8 @@ function renderFanPollsAdmin() {
           <div class="poll-admin-table-options">
             ${opts.map(o => `
               <span class="poll-admin-mini-option">
-                ${o.logo ? `<img src="${escapeAdminText(o.logo)}" alt="${escapeAdminText(o.teamName || o.label || 'Logo')}">` : `<i style="--poll-admin-color:${escapeAdminText(o.teamColor || '#e8002d')}"></i>`}
-                ${escapeAdminText(o.label || o.text || '')}
+                ${o.logo ? `<img src="${escapeAdminText(o.logo)}" alt="${escapeAdminText(o.teamName || o.label || 'Logo')}" onerror="this.outerHTML='<span class=&quot;poll-mini-fallback&quot;>PX</span>'">` : `<span class="poll-mini-fallback" style="--poll-admin-color:${escapeAdminText(o.teamColor || '#e8002d')}">PX</span>`}
+                <span>${escapeAdminText(o.label || o.text || '')}</span>
               </span>
             `).join('')}
           </div>

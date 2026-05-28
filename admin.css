@@ -715,3 +715,181 @@ select.form-input option{background:var(--dark2)}
   .poll-admin-option-row{grid-template-columns:1fr}
   .poll-admin-logo-cell{grid-template-columns:42px 1fr}
 }
+
+/* ============================================================
+   Phase 17.6.1 — Admin Fan Poll alignment polish
+   Fixes option row overflow, table spacing, logo fallbacks.
+   ============================================================ */
+#adm-fanpolls .page-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:22px;
+}
+#adm-fanpolls .toolbar-filters{
+  flex:1;
+  max-width:360px;
+}
+#adm-fanpolls #poll-search-admin{
+  width:100%;
+  height:42px;
+}
+.fan-poll-admin-grid{
+  display:grid;
+  grid-template-columns:minmax(380px,500px) minmax(0,1fr) !important;
+  gap:22px !important;
+  align-items:start;
+}
+.fan-poll-editor{
+  width:100%;
+  overflow:hidden;
+}
+#adm-fanpolls .adm-input,
+#adm-fanpolls .poll-logo-select,
+#adm-fanpolls .poll-option-input{
+  width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box;
+}
+#poll-question{
+  height:42px;
+}
+.poll-options-admin{
+  gap:10px !important;
+}
+.poll-admin-option-row{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:minmax(155px,180px) minmax(0,1fr) 78px !important;
+  gap:9px !important;
+  align-items:center !important;
+  padding:10px !important;
+  background:rgba(255,255,255,.026) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  overflow:hidden !important;
+}
+.poll-admin-logo-cell{
+  display:grid !important;
+  grid-template-columns:42px minmax(0,1fr) !important;
+  gap:8px !important;
+  align-items:center !important;
+  min-width:0 !important;
+}
+.poll-logo-preview{
+  width:42px !important;
+  height:42px !important;
+  flex:0 0 42px !important;
+}
+.poll-logo-select{
+  height:42px !important;
+  padding:8px 9px !important;
+  text-overflow:ellipsis;
+}
+.poll-option-input{
+  height:42px !important;
+  padding:8px 12px !important;
+}
+.poll-admin-option-row .adm-btn-ghost.danger{
+  width:78px !important;
+  min-width:78px !important;
+  height:42px !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:.66rem !important;
+  letter-spacing:1.2px !important;
+  white-space:nowrap !important;
+}
+.poll-admin-row{
+  gap:9px !important;
+  margin:16px 0 !important;
+}
+#adm-fanpolls .adm-btn-red,
+#adm-fanpolls .adm-btn-ghost{
+  margin-top:0;
+}
+.fan-poll-table-wrap{
+  width:100%;
+  min-width:0;
+  overflow-x:auto;
+}
+.fan-poll-table-wrap .data-table{
+  width:100%;
+  table-layout:fixed;
+}
+.fan-poll-table-wrap .data-table th,
+.fan-poll-table-wrap .data-table td{
+  vertical-align:middle;
+}
+.fan-poll-table-wrap .data-table th:nth-child(1),
+.fan-poll-table-wrap .data-table td:nth-child(1){width:26%;}
+.fan-poll-table-wrap .data-table th:nth-child(2),
+.fan-poll-table-wrap .data-table td:nth-child(2){width:35%;}
+.fan-poll-table-wrap .data-table th:nth-child(3),
+.fan-poll-table-wrap .data-table td:nth-child(3){width:9%;text-align:center;}
+.fan-poll-table-wrap .data-table th:nth-child(4),
+.fan-poll-table-wrap .data-table td:nth-child(4){width:10%;}
+.fan-poll-table-wrap .data-table th:nth-child(5),
+.fan-poll-table-wrap .data-table td:nth-child(5){width:20%;}
+.poll-admin-table-options{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px !important;
+  max-width:100%;
+}
+.poll-admin-mini-option{
+  min-width:0;
+  height:34px;
+  padding:5px 8px !important;
+  overflow:hidden;
+}
+.poll-admin-mini-option img,
+.poll-admin-mini-option .poll-mini-fallback{
+  width:22px !important;
+  height:22px !important;
+  flex:0 0 22px !important;
+}
+.poll-admin-mini-option img{
+  object-fit:contain;
+}
+.poll-admin-mini-option .poll-mini-fallback{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--font-d);
+  font-size:.62rem;
+  letter-spacing:.8px;
+  color:#fff;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.10);
+}
+.poll-admin-mini-option span:last-child{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.fan-poll-table-wrap .data-table td:last-child{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.fan-poll-table-wrap .data-table td:last-child .act-btn{
+  margin:0;
+  min-width:70px;
+  text-align:center;
+}
+@media(max-width:1280px){
+  .fan-poll-admin-grid{grid-template-columns:1fr !important;}
+  .poll-admin-option-row{grid-template-columns:minmax(160px,190px) minmax(0,1fr) 78px !important;}
+}
+@media(max-width:720px){
+  #adm-fanpolls .page-toolbar{align-items:stretch;flex-direction:column;}
+  #adm-fanpolls .toolbar-filters{max-width:none;}
+  .poll-admin-option-row{grid-template-columns:1fr !important;}
+  .poll-admin-option-row .adm-btn-ghost.danger{width:100% !important;}
+  .poll-admin-table-options{grid-template-columns:1fr;}
+}
