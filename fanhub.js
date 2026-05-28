@@ -2,6 +2,7 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
+console.log('PADDOX Phase 18.0.3 quotes/receipt cache-busted polish loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup.png';
@@ -1719,7 +1720,6 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = teamColor;
   ctx.fillRect(70, 70, W - 140, 12);
 
-  const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
   drawPaddoxPremiumBrand(ctx, 110, 112, brandLogo, { size: 62, fontSize: 64, gap: 18 });
 

@@ -2,6 +2,7 @@
    PADDOX — receipt.js | Phase 18.0.1 professional receipt
    ============================================================ */
 'use strict';
+console.log('PADDOX Phase 18.0.3 professional receipt loaded');
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
 const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup.png';
@@ -226,6 +227,6 @@ function renderReceipt(order) {
   `;
 }
 
-document.getElementById('print-receipt')?.addEventListener('click', () => window.print());
+document.getElementById('print-receipt')?.addEventListener('click', () => setTimeout(() => window.print(), 80));
 
 loadReceipt();

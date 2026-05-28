@@ -84,3 +84,16 @@ button{font-family:inherit;cursor:pointer}
 .receipt-screen-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .receipt-screen-actions button,.receipt-screen-actions a{border:1px solid #d8dce1;background:#fff;color:#111;padding:11px 16px;font-family:var(--font-c);font-weight:800;letter-spacing:1.7px;text-transform:uppercase;font-size:.8rem;box-shadow:none}
 .receipt-screen-actions button{background:var(--red);border-color:var(--red);color:#fff}
+
+
+/* Phase 18.0.3 FORCE PATCH — professional white receipt, no black logo blocks */
+html,body{background:#fff!important;}
+.receipt-site-logo{display:none!important;}
+.receipt-brand img{display:none!important;}
+.receipt-brand-mark,.receipt-brand-icon-wrap,.receipt-brand-wordmark{background:transparent!important;box-shadow:none!important;}
+.receipt-card{background:#fff!important;box-shadow:0 8px 28px rgba(17,24,39,.06)!important;}
+@media print{
+  html,body{background:#fff!important;}
+  .receipt-card{box-shadow:none!important;background:#fff!important;}
+  .receipt-screen-head,.no-print{display:none!important;}
+}

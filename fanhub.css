@@ -4319,3 +4319,17 @@ body.modal-open { overflow: hidden; }
   .qf-brand-icon-wrap{width:30px;height:30px;flex-basis:30px;}
   .qf-brand-wordmark{font-size:1.12rem!important;letter-spacing:2px!important;}
 }
+
+
+/* Phase 18.0.3 FORCE PATCH — remove old black brand strip/box from quote cards */
+.qf-brand-lockup,
+.qf-brand-logo,
+.qf-brand-word,
+.qf-brand-lockup-wrap{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.qf-brand-mark,
+.qf-brand{background:transparent!important;border:0!important;box-shadow:none!important;}
+.qf-brand-icon-wrap{background:rgba(8,8,10,.75)!important;}
