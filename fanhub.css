@@ -4795,3 +4795,170 @@ body.modal-open { overflow: hidden; }
   .compare-metric-row{grid-template-columns:1fr;gap:4px;padding:10px 0;}
   .cm-val,.cm-val:last-child{text-align:center;padding:0 10px;}
 }
+
+
+/* ============================================================
+   Phase 18.2.4 — Driver Compare Alignment Polish
+   Safe CSS-only refinement. No logic/layout rebuild.
+   ============================================================ */
+#sec-drivers .drv-selector{
+  max-height:216px;
+  padding:2px 8px 8px 0;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(232,0,45,.55) rgba(255,255,255,.04);
+  mask-image:linear-gradient(to bottom,#000 calc(100% - 18px),transparent 100%);
+}
+#sec-drivers .drv-selector::-webkit-scrollbar{width:4px;height:4px;}
+#sec-drivers .drv-selector::-webkit-scrollbar-thumb{background:rgba(232,0,45,.55);border-radius:999px;}
+#sec-drivers .drv-pill{
+  min-height:47px;
+  padding:8px 12px;
+  border-color:rgba(255,255,255,.075);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+#sec-drivers .drv-pill.on{
+  border-color:rgba(232,0,45,.72);
+  box-shadow:0 14px 34px rgba(232,0,45,.08), inset 0 1px 0 rgba(255,255,255,.05);
+}
+#sec-drivers .dp-av{width:34px;height:34px;flex:0 0 34px;}
+#sec-drivers .dp-name{font-size:.82rem;line-height:1;}
+#sec-drivers .dp-team{font-size:.58rem;line-height:1.05;}
+#sec-drivers .drv-card{
+  min-height:0;
+  padding:25px 22px 24px;
+  border-top-width:2px;
+  box-shadow:0 22px 54px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.035);
+}
+#sec-drivers .drv-card .drv-big-av,
+#sec-drivers .drv-big-av{margin-bottom:12px;}
+#sec-drivers .drv-stats-right{
+  padding:21px 22px 19px;
+  box-shadow:0 20px 52px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.025);
+}
+#sec-drivers .stat-bars{gap:15px;}
+#sec-drivers .sb-track{height:5px;background:rgba(255,255,255,.075);}
+#sec-drivers .sb-fill{box-shadow:0 0 14px rgba(0,210,190,.28);}
+#sec-drivers .cmp-grid{gap:12px;margin-top:22px;}
+#sec-drivers .cmp-c{padding:16px 14px;min-height:78px;display:grid;place-items:center;}
+#sec-drivers .cmp-v{font-size:1.85rem;line-height:1;}
+#sec-drivers .cmp-l{margin-top:6px;}
+
+#driver-compare-shell.driver-compare-shell{
+  margin-top:25px;
+  padding:22px 22px 21px;
+  border-radius:20px;
+  border-color:rgba(255,255,255,.085);
+  border-top-color:rgba(232,0,45,.78);
+  background:
+    radial-gradient(circle at 10% 0,rgba(232,0,45,.13),transparent 30%),
+    radial-gradient(circle at 92% 8%,rgba(255,255,255,.045),transparent 22%),
+    linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.014));
+  box-shadow:0 24px 64px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.035);
+}
+#driver-compare-shell .compare-head{
+  align-items:center;
+  margin-bottom:15px;
+  padding-bottom:13px;
+  gap:18px;
+}
+#driver-compare-shell .compare-kicker{font-size:.62rem;letter-spacing:3.2px;margin-bottom:3px;color:rgba(232,0,45,.95);}
+#driver-compare-shell .compare-head h3{font-size:1.86rem;letter-spacing:2.2px;}
+#driver-compare-shell .compare-head p{
+  max-width:430px;
+  font-size:.78rem;
+  line-height:1.45;
+  color:rgba(255,255,255,.54);
+  margin:0;
+}
+#driver-compare-shell .compare-controls{
+  gap:12px;
+  margin-bottom:15px;
+}
+#driver-compare-shell .compare-controls label{gap:6px;}
+#driver-compare-shell .compare-controls label span{font-size:.6rem;letter-spacing:2.6px;color:rgba(255,255,255,.36);}
+#driver-compare-shell .compare-controls select{
+  height:40px;
+  padding:0 13px;
+  background:rgba(18,18,18,.92);
+  border-color:rgba(255,255,255,.085);
+  font-size:.78rem;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+#driver-compare-shell .compare-board{gap:14px;}
+#driver-compare-shell .compare-driver-pair{
+  grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);
+  gap:11px;
+}
+#driver-compare-shell .compare-driver-card{
+  min-height:95px;
+  padding:14px;
+  border-radius:15px;
+  background:linear-gradient(135deg,rgba(255,255,255,.042),rgba(255,255,255,.018));
+  border-color:rgba(255,255,255,.075);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+#driver-compare-shell .compare-driver-top{gap:11px;}
+#driver-compare-shell .compare-avatar{
+  width:52px;height:52px;flex-basis:52px;border-width:1.5px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);
+}
+#driver-compare-shell .compare-side{font-size:.55rem;letter-spacing:2.1px;line-height:1;color:rgba(255,255,255,.38);}
+#driver-compare-shell .compare-name{font-size:.94rem;line-height:1.15;letter-spacing:.6px;margin-top:3px;}
+#driver-compare-shell .compare-team{font-size:.68rem;margin-top:2px;}
+#driver-compare-shell .fan-team-logo.compare{width:16px;height:16px;flex-basis:16px;}
+#driver-compare-shell .compare-mini-tags{gap:6px;margin-top:10px;}
+#driver-compare-shell .compare-mini-tags span{
+  padding:3px 7px;
+  font-size:.55rem;
+  letter-spacing:1.55px;
+  border-radius:0;
+  background:rgba(255,255,255,.045);
+}
+#driver-compare-shell .compare-vs{
+  min-height:95px;
+  height:auto;
+  border-radius:14px;
+  font-size:1.18rem;
+  background:linear-gradient(180deg,rgba(232,0,45,.11),rgba(232,0,45,.045));
+  color:rgba(255,255,255,.9);
+}
+#driver-compare-shell .compare-metrics{
+  border-radius:14px;
+  border-color:rgba(255,255,255,.075);
+  background:rgba(0,0,0,.1);
+}
+#driver-compare-shell .compare-metric-row{
+  grid-template-columns:minmax(0,1fr) 118px minmax(0,1fr);
+  min-height:40px;
+  background:linear-gradient(90deg,rgba(255,255,255,.012),rgba(255,255,255,.028),rgba(255,255,255,.012));
+}
+#driver-compare-shell .cm-val{
+  padding:0 14px;
+  font-size:.86rem;
+  font-weight:800;
+  color:rgba(255,255,255,.86);
+}
+#driver-compare-shell .cm-val.win{color:#fff;text-shadow:0 0 15px rgba(232,0,45,.42);}
+#driver-compare-shell .cm-label{
+  font-size:.56rem;
+  letter-spacing:2.15px;
+  color:rgba(255,255,255,.34);
+}
+
+@media(max-width:1180px){
+  #sec-drivers .drv-selector{grid-template-columns:repeat(4,minmax(0,1fr));max-height:226px;}
+  #driver-compare-shell .compare-driver-pair{grid-template-columns:1fr;}
+  #driver-compare-shell .compare-vs{min-height:42px;height:42px;}
+}
+@media(max-width:820px){
+  #driver-compare-shell.driver-compare-shell{padding:18px;}
+  #driver-compare-shell .compare-head{display:block;}
+  #driver-compare-shell .compare-head p{text-align:left;max-width:none;margin-top:8px;}
+  #driver-compare-shell .compare-controls{grid-template-columns:1fr;}
+  #driver-compare-shell .compare-metric-row{grid-template-columns:1fr 90px 1fr;}
+}
+@media(max-width:560px){
+  #sec-drivers .drv-selector{grid-template-columns:1fr;max-height:300px;}
+  #driver-compare-shell .compare-metric-row{grid-template-columns:1fr;gap:3px;padding:10px 0;}
+  #driver-compare-shell .cm-val,#driver-compare-shell .cm-val:last-child{text-align:center;}
+}
