@@ -1409,6 +1409,11 @@ function renderRealtimeQuotes() {
       </div>
 
       <div class="qf-content">
+        <div class="qf-card-brand-top">
+          <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX logo" class="qf-brand-lockup" loading="lazy">
+          <span>Digital Fan Hub Quote Card</span>
+        </div>
+
         <div class="qf-topline">
           <span class="qf-pill">${safeText(q.era || 'current').toUpperCase()}</span>
           <span class="qf-dot">•</span>
@@ -1439,9 +1444,8 @@ function renderRealtimeQuotes() {
             </div>
           </div>
 
-          <div class="qf-brand">
-            <img src="assets/paddox-logo-icon.png" alt="PADDOX logo" class="qf-brand-logo" loading="lazy">
-            <span class="qf-brand-word">PADDO<span>X</span></span>
+          <div class="qf-brand qf-brand-lockup-wrap">
+            <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX logo" class="qf-brand-lockup qf-brand-lockup-small" loading="lazy">
           </div>
         </div>
       </div>
@@ -1558,6 +1562,28 @@ function drawPaddoxCanvasBrand(ctx, x, y, logo, options = {}) {
   ctx.restore();
 }
 
+
+
+function drawPaddoxCanvasLockup(ctx, img, x, y, w, h, options = {}) {
+  if (!img) {
+    const icon = options.icon || null;
+    drawPaddoxCanvasBrand(ctx, x, y + h * 0.72, icon, { size: Math.min(h, 62), fontSize: Math.min(h * .72, 56), gap: 14 });
+    return;
+  }
+
+  const ratio = Math.min(w / img.width, h / img.height);
+  const dw = img.width * ratio;
+  const dh = img.height * ratio;
+  const dx = x + (w - dw) / 2;
+  const dy = y + (h - dh) / 2;
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.restore();
+}
+
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
   const words = String(text || '').split(/\s+/).filter(Boolean);
   const lines = [];
@@ -1648,12 +1674,13 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = teamColor;
   ctx.fillRect(70, 70, W - 140, 12);
 
-  const brandLogo = await loadQuoteImageForCanvas('assets/paddox-logo-icon.png');
-  drawPaddoxCanvasBrand(ctx, 110, 176, brandLogo, { size: 72, fontSize: 72, gap: 18, xGap: 0 });
+  const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
+  const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
+  drawPaddoxCanvasLockup(ctx, brandLockup, 108, 112, 318, 88, { icon: brandLogo });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
-  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 215);
+  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 222);
 
   const imgSrc = quoteImageValue(q);
   const img = await loadQuoteImageForCanvas(imgSrc);
@@ -1719,7 +1746,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxCanvasBrand(ctx, 735, 1215, brandLogo, { size: 42, fontSize: 34, gap: 14, xGap: 0 });
+  drawPaddoxCanvasLockup(ctx, brandLockup, 730, 1174, 220, 56, { icon: brandLogo });
 
   return canvas;
 }

@@ -2,6 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
+const ADMIN_PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup.png';
 /* ══════════════════════════════════════
    ADMIN AUTH GUARD
 ══════════════════════════════════════ */
@@ -3470,6 +3471,10 @@ function renderAdminQuoteCardPreview() {
       border-top:2px solid var(--red);
       box-shadow:0 18px 45px rgba(0,0,0,.28);
     ">
+      <div class="admin-quote-brand-top">
+        <img src="${ADMIN_PADDOX_BRAND_LOCKUP}" alt="PADDOX logo">
+        <span>Digital Fan Hub Quote Card</span>
+      </div>
       <div style="display:flex;align-items:center;gap:8px;color:var(--red);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-size:.72rem;margin-bottom:12px">
         <span>${era}</span><span style="color:#555">•</span><span>${category}</span>
       </div>
@@ -3482,7 +3487,9 @@ function renderAdminQuoteCardPreview() {
             <div style="color:#999;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${team}</div>
           </div>
         </div>
-        <button type="button" class="act-btn" style="padding:9px 12px;white-space:nowrap">Share Image</button>
+        <div class="admin-quote-brand-bottom">
+          <img src="${ADMIN_PADDOX_BRAND_LOCKUP}" alt="PADDOX logo">
+        </div>
       </div>
     </div>
   `;

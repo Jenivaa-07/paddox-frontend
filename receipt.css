@@ -12,3 +12,45 @@ html{scroll-behavior:smooth}body{min-height:100vh;background:radial-gradient(cir
 .receipt-bottom{display:grid;grid-template-columns:1fr 360px;gap:22px;margin-top:22px;align-items:start}.receipt-note{color:var(--muted2);line-height:1.8;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);padding:18px}.receipt-total-box{background:#101010;border:1px solid rgba(255,255,255,.08);padding:18px}.receipt-total-row{display:flex;justify-content:space-between;gap:16px;color:#ddd;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}.receipt-total-row:last-child{border-bottom:0}.receipt-grand{margin-top:6px;padding-top:14px!important;color:#fff;font-size:1.15rem}.receipt-grand strong{font-family:var(--font-d);font-size:2rem;letter-spacing:1px;color:var(--red)}.receipt-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:.82rem}.receipt-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:24px}.receipt-actions button,.receipt-actions a{background:#151515;color:#fff;border:1px solid rgba(255,255,255,.12);padding:12px 18px;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-weight:800}.receipt-actions button{background:var(--red);border-color:var(--red)}.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:9999;background:#111;color:#fff;border:1px solid rgba(232,0,45,.35);box-shadow:0 15px 45px rgba(0,0,0,.45);padding:12px 18px;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:760px){.receipt-shell{width:min(96vw,1120px);padding-top:22px}.receipt-card{padding:18px}.receipt-head,.receipt-bottom{display:flex;flex-direction:column}.receipt-title-wrap{text-align:left}.receipt-status{align-items:flex-start}.receipt-grid{grid-template-columns:1fr}.receipt-items{overflow-x:auto}.receipt-items-head,.receipt-item{grid-template-columns:58px minmax(160px,1fr) 50px 92px;min-width:520px}.receipt-bottom{gap:14px}.receipt-total-box{width:100%}.receipt-footer{flex-direction:column}}
 @media print{body{background:#fff;color:#000}.receipt-shell{width:100%;padding:0}.receipt-hero,.receipt-actions,.toast,#receipt-particles{display:none!important}.receipt-card{box-shadow:none;border:1px solid #ddd;background:#fff;color:#000}.receipt-card::before{display:none}.receipt-box,.receipt-note,.receipt-total-box,.receipt-item{background:#fff}.receipt-title,.receipt-item-price,.receipt-grand strong{color:#000}.receipt-box h3{color:#000}.receipt-status{color:#000;border-color:#999}.receipt-line span,.receipt-company,.receipt-item-meta,.receipt-note,.receipt-footer{color:#555}}
+
+
+/* ============================================================
+   Phase 18.0 — PADDOX lockup logo for receipt branding
+   ============================================================ */
+.receipt-logo-lockup-wrap{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin-bottom:20px!important;
+}
+.receipt-logo-lockup{
+  width:min(430px,82vw)!important;
+  height:auto!important;
+  max-height:118px!important;
+  object-fit:contain!important;
+  display:block!important;
+  filter:drop-shadow(0 16px 34px rgba(0,0,0,.42))!important;
+}
+.receipt-brand-lockup-wrap{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:8px!important;
+}
+.receipt-brand-lockup{
+  width:min(310px,42vw)!important;
+  height:auto!important;
+  max-height:96px!important;
+  object-fit:contain!important;
+  object-position:left center!important;
+  display:block!important;
+  filter:drop-shadow(0 12px 26px rgba(0,0,0,.35))!important;
+}
+.receipt-brand-img{display:none!important;}
+@media(max-width:760px){
+  .receipt-brand-lockup{width:min(280px,82vw)!important;max-height:82px!important;}
+  .receipt-logo-lockup{width:min(340px,88vw)!important;max-height:95px!important;}
+}
+@media print{
+  .receipt-logo-lockup,.receipt-brand-lockup{filter:none!important;}
+}

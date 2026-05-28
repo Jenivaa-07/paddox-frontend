@@ -1462,3 +1462,45 @@ select.form-input option{background:var(--dark2)}
   .fan-trivia-editor > .adm-btn-red,
   .fan-trivia-editor > .adm-btn-ghost{width:100% !important;margin:0 0 8px 0 !important;}
 }
+
+
+/* ============================================================
+   Phase 18.0 — Fan Quotes admin preview PADDOX lockup
+   ============================================================ */
+.admin-quote-brand-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+}
+.admin-quote-brand-top img{
+  width:190px;
+  max-width:58%;
+  height:58px;
+  object-fit:contain;
+  object-position:left center;
+  display:block;
+  filter:drop-shadow(0 10px 22px rgba(0,0,0,.36));
+}
+.admin-quote-brand-top span{
+  font-family:var(--font-c);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  font-size:.68rem;
+  text-align:right;
+}
+.admin-quote-brand-bottom img{
+  width:130px;
+  height:38px;
+  object-fit:contain;
+  object-position:right center;
+  display:block;
+  filter:drop-shadow(0 10px 22px rgba(0,0,0,.36));
+}
+@media(max-width:720px){
+  .admin-quote-brand-top{align-items:flex-start;flex-direction:column;}
+  .admin-quote-brand-top img{max-width:100%;width:170px;height:52px;}
+  .admin-quote-brand-top span{text-align:left;}
+}

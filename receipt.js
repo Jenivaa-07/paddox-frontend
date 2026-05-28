@@ -4,7 +4,7 @@
 'use strict';
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
-const BRAND_LOGO_PATH = localStorage.getItem('paddox_brand_logo') || 'assets/logo.png';
+const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup.png';
 
 function receiptToken() {
   return (
@@ -110,13 +110,10 @@ function paymentReference(payment = {}) {
 
 function brandBlock() {
   return `
-    <div class="receipt-brand">
-      <img class="receipt-brand-img" src="${esc(BRAND_LOGO_PATH)}" alt="PADDOX logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
+    <div class="receipt-brand receipt-brand-lockup-wrap">
+      <img class="receipt-brand-lockup" src="${esc(BRAND_LOGO_PATH)}" alt="PADDOX logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
       <div class="receipt-brand-fallback" style="display:none">PADDO<span>X</span></div>
-      <div>
-        <div class="receipt-brand-fallback">PADDO<span>X</span></div>
-        <div class="receipt-company">Premium motorsport merchandise<br>Official order payment receipt</div>
-      </div>
+      <div class="receipt-company">Premium motorsport merchandise<br>Official order payment receipt</div>
     </div>
   `;
 }
