@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Pit Wall Live</title>
-  <link rel="stylesheet" href="pitwall.css?v=19_1"/>
+  <link rel="stylesheet" href="pitwall.css?v=19_3"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -56,8 +56,8 @@
             <h1 class="pit-title">PIT WALL <span>DATA</span></h1>
             <p class="pit-sub">Choose a Grand Prix session and view available timing, weather, driver and race-control data.</p>
             <div class="pit-hero-actions">
-              <button class="pit-primary" id="refresh-btn">↻ Refresh Session Data</button>
-              <a href="fanhub.html" class="pit-secondary">← Back to Fan Hub</a>
+              <button class="pit-primary" id="refresh-btn"><span class="pit-btn-icon pit-refresh-icon" aria-hidden="true"></span> Refresh Session Data</button>
+              <a href="fanhub.html" class="pit-secondary"><span class="pit-btn-icon pit-back-icon" aria-hidden="true"></span> Back to Fan Hub</a>
             </div>
           </div>
           <div class="command-card">
@@ -135,16 +135,16 @@
 
       <div class="pit-kpi-grid">
         <article class="pit-kpi">
-          <span>📡</span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">Waiting for data metadata</small>
+          <span class="pit-kpi-icon pit-kpi-signal" aria-hidden="true"></span><p>Live Session</p><b id="kpi-session">Loading</b><small id="kpi-session-sub">Waiting for data metadata</small>
         </article>
         <article class="pit-kpi">
-          <span>🌡️</span><p>Track Weather</p><b id="kpi-weather">--°C</b><small id="kpi-weather-sub">No weather returned yet</small>
+          <span class="pit-kpi-icon pit-kpi-weather" aria-hidden="true"></span><p>Track Weather</p><b id="kpi-weather">--°C</b><small id="kpi-weather-sub">No weather returned yet</small>
         </article>
         <article class="pit-kpi">
-          <span>🏆</span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Waiting for latest result</small>
+          <span class="pit-kpi-icon pit-kpi-trophy" aria-hidden="true"></span><p>Last Winner</p><b id="kpi-winner">Loading</b><small id="kpi-winner-sub">Waiting for latest result</small>
         </article>
         <article class="pit-kpi">
-          <span>⚡</span><p>Grid Size</p><b id="kpi-grid">--</b><small>Rows returned</small>
+          <span class="pit-kpi-icon pit-kpi-grid-icon" aria-hidden="true"></span><p>Grid Size</p><b id="kpi-grid">--</b><small>Rows returned</small>
         </article>
       </div>
 
@@ -183,6 +183,6 @@
 
   <div class="toast" id="toast"></div>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
-  <script src="pitwall.js?v=19_0"></script>
+  <script src="pitwall.js?v=19_3"></script>
 </body>
 </html>

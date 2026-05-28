@@ -25,6 +25,26 @@ let lastGoodSessionData = null;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
+function setHTML(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+function flagEmojiToCode(flag='') {
+  const chars = Array.from(String(flag || '').trim());
+  if (chars.length < 2) return '';
+  const code = chars.slice(0, 2).map(ch => {
+    const cp = ch.codePointAt(0);
+    return cp >= 0x1F1E6 && cp <= 0x1F1FF ? String.fromCharCode(cp - 0x1F1E6 + 65) : '';
+  }).join('');
+  return /^[A-Z]{2}$/.test(code) ? code.toLowerCase() : '';
+}
+function flagImgHTML(flag='', label='') {
+  const code = flagEmojiToCode(flag);
+  if (!code) return '<span class="pit-flag-fallback" aria-hidden="true"></span>';
+  const safe = esc(label || code.toUpperCase());
+  return `<img class="pit-flag-img" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="${safe} flag" loading="lazy" onerror="this.outerHTML='<span class=&quot;pit-flag-fallback&quot;></span>'">`;
+}
+function uiIconHTML(type='signal') {
+  const safe = String(type || 'signal').replace(/[^a-z0-9-]/gi, '').toLowerCase() || 'signal';
+  return `<span class="pit-ui-icon pit-ui-${safe}" aria-hidden="true"></span>`;
+}
 function esc(v='') { return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
 function setLiveNotice(message, kind = 'info') {
@@ -128,7 +148,7 @@ async function loadNextRace() {
   try {
     const data = await api('/f1/next-race'); const race = data.race;
     if (!race) throw new Error('No next race');
-    setText('next-race-name', `${race.flag || '🏁'} ${race.name}`);
+    setHTML('next-race-name', `${flagImgHTML(race.flag, race.country || race.name)}<span>${esc(race.name)}</span>`);
     setText('next-race-meta', `Round ${race.round} · ${race.circuit || 'Circuit TBA'} · ${race.location || race.country || ''}`);
     const raceDate = data.raceDate ? new Date(data.raceDate) : new Date(`${race.date || ''}T${race.time || '13:00:00Z'}`);
     startCountdown(raceDate);
@@ -177,7 +197,7 @@ async function loadWeekend(){
     if (data.race?.round && Number(data.race.round) !== currentRound) currentRound = Number(data.race.round);
     currentSession = data.defaultSession || weekendSessions.find(s=>s.hasTiming)?.key || weekendSessions.find(s=>s.available)?.key || weekendSessions[0]?.key || 'Race';
     updateSelectedContext();
-    setText('kpi-session-sub', `${race.flag || '🏁'} ${race.name || race.raceName || 'Grand Prix'}`);
+    setHTML('kpi-session-sub', `${flagImgHTML(race.flag, race.country || race.name || race.raceName)}<span>${esc(race.name || race.raceName || 'Grand Prix')}</span>`);
     setText('timing-panel-tag', `Round ${currentRound || '--'} · ${currentYear}`);
     setLiveNotice('', 'info');
     renderSessionControls();
@@ -253,9 +273,10 @@ function updateSelectedContext(data = null){
   setText('selected-session-state', state);
   setText('selected-session-note', note);
 }
-function renderPremiumEmpty(title, body, icon='📡'){
+function renderPremiumEmpty(title, body, icon='signal'){
+  const iconType = icon || 'signal';
   return `<div class="pit-empty-state">
-    <div class="pit-empty-icon">${esc(icon)}</div>
+    <div class="pit-empty-icon">${uiIconHTML(iconType)}</div>
     <div>
       <b>${esc(title)}</b>
       <p>${esc(body)}</p>
@@ -341,7 +362,7 @@ function renderTimingRows(){
   if(standingsSort === 'best') rows.sort((a,b)=>(a.bestSec||9999)-(b.bestSec||9999));
   else if(standingsSort === 'last') rows.sort((a,b)=>(a.lastSec||9999)-(b.lastSec||9999));
   else rows.sort((a,b)=>(Number(a.position)||999)-(Number(b.position)||999));
-  if(!rows.length){ box.innerHTML = renderPremiumEmpty('Timing data is not available yet', 'Try another available session from this race weekend, or check again later after official timing data is returned.', '⏱️'); return; }
+  if(!rows.length){ box.innerHTML = renderPremiumEmpty('Timing data is not available yet', 'Try another available session from this race weekend, or check again later after official timing data is returned.', 'timer'); return; }
   const hasAnyTiming = rows.some(r => !r.noTiming && (r.bestLap !== '—' || r.lastLap !== '—' || r.tyre));
   const header = `<div class="timing-header"><span>POS</span><span>DRIVER</span><span>GAP</span><span>BEST</span><span>LAST</span><span>S1</span><span>S2</span><span>TYRE</span><span>LAPS</span></div>`;
   const body = rows.map((r,i)=>{
@@ -349,7 +370,7 @@ function renderTimingRows(){
     const color = r.teamColor || '#e8002d';
     return `<div class="timing-row session-row ${r.noTiming ? 'waiting-row' : ''}" style="--team-color:${esc(color)}">
       <div class="pos">P${esc(pos)}</div>
-      <div class="driver-cell with-photo">${driverImage(r)}<div><div class="driver-name">${esc(r.flag || '')} ${esc(driverName(r))}</div><div class="driver-team">${esc(r.code || '')} · ${esc(r.team || 'Team TBA')}</div></div></div>
+      <div class="driver-cell with-photo">${driverImage(r)}<div><div class="driver-name">${flagImgHTML(r.flag, driverName(r))}<span>${esc(driverName(r))}</span></div><div class="driver-team">${esc(r.code || '')} · ${esc(r.team || 'Team TBA')}</div></div></div>
       <div class="gap">${esc(r.gap || (pos===1?'LEADER':'—'))}</div>
       <div class="lap-time best">${esc(r.bestLap || '—')}</div>
       <div class="lap-time last">${esc(r.lastLap || '—')}</div>
@@ -365,7 +386,7 @@ function renderTimingRows(){
 function renderRaceControl(messages=[], data={}){
   const box = $('#race-control'); if(!box) return;
   if(!messages.length){
-    box.innerHTML = renderPremiumEmpty('No race-control messages yet', 'Messages will appear here when they are returned for the selected session.', '📢');
+    box.innerHTML = renderPremiumEmpty('No race-control messages yet', 'Messages will appear here when they are returned for the selected session.', 'message');
     return;
   }
   const base = messages.slice(-8).reverse().map(m => [fmtTime(m.date || m.created_at || new Date()), m.message || m.text || m.flag || 'Race control update', m.flag || m.category || '']);
@@ -373,12 +394,11 @@ function renderRaceControl(messages=[], data={}){
 }
 function renderPodium(top3) {
   const box = $('#podium-card'); if (!box) return;
-  if (!top3?.length) { box.innerHTML = renderPremiumEmpty('Latest result unavailable', 'The latest podium will appear once result data is returned.', '🏆'); return; }
-  const medals = ['🥇','🥈','🥉'];
-  box.innerHTML = top3.slice(0,3).map((r, i) => `<div class="podium-row"><div class="podium-medal">${medals[i]}</div><div><b>${esc(r.flag || '')} ${esc(r.name || 'Driver')}</b><small>${esc(r.team || 'Team')} · ${esc(r.points || 0)} pts</small></div></div>`).join('');
+  if (!top3?.length) { box.innerHTML = renderPremiumEmpty('Latest result unavailable', 'The latest podium will appear once result data is returned.', 'trophy'); return; }
+  box.innerHTML = top3.slice(0,3).map((r, i) => `<div class="podium-row"><div class="podium-medal rank-${i+1}">P${i+1}</div><div><b>${flagImgHTML(r.flag, r.name || 'Driver')}<span>${esc(r.name || 'Driver')}</span></b><small>${esc(r.team || 'Team')} · ${esc(r.points || 0)} pts</small></div></div>`).join('');
 }
 async function loadLastResult() {
-  try { const data = await api('/f1/last-result'); const race = data.race; if (!race) throw new Error('No result'); setText('kpi-winner', race.winner?.name || 'Winner TBA'); setText('kpi-winner-sub', `${race.flag || '🏁'} ${race.name || 'Latest GP'}`); renderPodium(race.top3 || []); }
+  try { const data = await api('/f1/last-result'); const race = data.race; if (!race) throw new Error('No result'); setText('kpi-winner', race.winner?.name || 'Winner TBA'); setHTML('kpi-winner-sub', `${flagImgHTML(race.flag, race.name || 'Latest GP')}<span>${esc(race.name || 'Latest GP')}</span>`); renderPodium(race.top3 || []); }
   catch (err) { console.warn(err); setText('kpi-winner', 'Unavailable'); setText('kpi-winner-sub', 'Latest result unavailable'); renderPodium([]); }
 }
 function initNav() {
@@ -421,7 +441,7 @@ function clearPitWallData(message){
   updateSelectedContext();
   setText('refresh-rate-label', 'Standby');
   setText('refresh-note', 'Refresh resumes when a session loads.');
-  const timing = $('#timing-table'); if(timing) timing.innerHTML = renderPremiumEmpty('Session data unavailable', message || 'Try refresh or choose another session.', '📡');
+  const timing = $('#timing-table'); if(timing) timing.innerHTML = renderPremiumEmpty('Session data unavailable', message || 'Try refresh or choose another session.', 'signal');
   renderRaceControl([], {});
 }
 
