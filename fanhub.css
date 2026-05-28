@@ -5074,3 +5074,281 @@ body.modal-open { overflow: hidden; }
   #sec-quotes .qf-footer{flex-direction:column!important;align-items:flex-start!important;}
   #sec-quotes .qf-brand-final{align-self:flex-start!important;}
 }
+
+/* ============================================================
+   Phase 18.1.2 — Quotes Final Professional Alignment Correction
+   Fixes visual balance after 18.1.1: less bulky featured card,
+   cleaner right list, stronger grid alignment, tighter footer/actions.
+   ============================================================ */
+#sec-quotes{
+  padding-top:70px!important;
+}
+#sec-quotes .fan-zone-head,
+#sec-quotes .section-head{
+  margin-bottom:20px!important;
+}
+#sec-quotes .quote-controls{
+  display:grid!important;
+  grid-template-columns:max-content minmax(420px,1fr) max-content!important;
+  gap:14px!important;
+  align-items:center!important;
+  padding:12px 14px!important;
+  margin-bottom:22px!important;
+  border-radius:20px!important;
+  max-width:100%!important;
+}
+#sec-quotes .quote-filter-row{
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-width:0!important;
+}
+#sec-quotes .quote-filter{
+  min-height:36px!important;
+  padding:8px 14px!important;
+  border-radius:999px!important;
+  font-size:.66rem!important;
+  letter-spacing:1.45px!important;
+}
+#sec-quotes .quote-search-wrap{
+  height:44px!important;
+  border-radius:14px!important;
+  min-width:0!important;
+}
+#sec-quotes .quote-count{
+  height:36px!important;
+  min-height:36px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  font-size:.66rem!important;
+}
+#sec-quotes .quotes-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,735px) minmax(300px,340px)!important;
+  gap:24px!important;
+  align-items:start!important;
+}
+#sec-quotes .quote-featured{
+  width:100%!important;
+  border-radius:26px!important;
+}
+#sec-quotes .qf-premium-card{
+  min-height:430px!important;
+  height:auto!important;
+  grid-template-columns:235px minmax(0,1fr)!important;
+  border-radius:26px!important;
+  overflow:hidden!important;
+}
+#sec-quotes .qf-media{
+  padding:24px 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-right:1px solid rgba(255,255,255,.075)!important;
+}
+#sec-quotes .qf-image-ring{
+  width:178px!important;
+  max-width:178px!important;
+  padding:6px!important;
+  box-shadow:0 0 30px rgba(232,0,45,.16),0 16px 40px rgba(0,0,0,.42)!important;
+}
+#sec-quotes .qf-driver-image{
+  border-width:6px!important;
+  font-size:3.35rem!important;
+}
+#sec-quotes .qf-team-strip{
+  height:4px!important;
+}
+#sec-quotes .qf-content{
+  padding:28px 30px 24px!important;
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+}
+#sec-quotes .qf-topline{
+  min-height:28px!important;
+  margin:0 0 18px!important;
+  gap:8px!important;
+}
+#sec-quotes .qf-pill{
+  padding:6px 10px!important;
+  font-size:.62rem!important;
+  letter-spacing:1.5px!important;
+}
+#sec-quotes .qf-featured-badge{
+  margin-left:auto!important;
+}
+#sec-quotes .big-qm{
+  font-size:2rem!important;
+  line-height:.8!important;
+  margin:0 0 8px!important;
+  opacity:.72!important;
+}
+#sec-quotes .qf-text{
+  font-size:clamp(1.34rem,1.55vw,1.62rem)!important;
+  line-height:1.38!important;
+  letter-spacing:.1px!important;
+  max-width:100%!important;
+  margin:0 0 20px!important;
+}
+#sec-quotes .qf-bg{
+  font-size:11rem!important;
+  opacity:.035!important;
+  right:28px!important;
+  bottom:78px!important;
+}
+#sec-quotes .qf-footer{
+  min-height:60px!important;
+  margin-top:auto!important;
+  padding:10px 12px!important;
+  border-radius:16px!important;
+  gap:12px!important;
+  align-items:center!important;
+}
+#sec-quotes .qf-drv{
+  min-width:0!important;
+  gap:10px!important;
+}
+#sec-quotes .qf-ava{
+  width:38px!important;
+  height:38px!important;
+  flex:0 0 38px!important;
+  box-shadow:none!important;
+}
+#sec-quotes .qf-dname{
+  font-size:.9rem!important;
+  line-height:1.1!important;
+}
+#sec-quotes .qf-dteam{
+  font-size:.62rem!important;
+  line-height:1.1!important;
+  max-width:190px!important;
+}
+#sec-quotes .qf-brand-final{
+  min-width:96px!important;
+  max-width:110px!important;
+  gap:7px!important;
+}
+#sec-quotes .qf-brand-final .qf-brand-icon-wrap,
+#sec-quotes .qf-brand-final .qf-brand-icon{
+  width:24px!important;
+  height:24px!important;
+  flex:0 0 24px!important;
+}
+#sec-quotes .qf-brand-final .qf-brand-wordmark{
+  font-size:.84rem!important;
+  letter-spacing:1.45px!important;
+}
+#sec-quotes .qf-premium-actions{
+  margin-top:12px!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+}
+#sec-quotes .qf-share{
+  min-height:34px!important;
+  padding:9px 14px!important;
+  border-radius:999px!important;
+  font-size:.63rem!important;
+  letter-spacing:1.4px!important;
+}
+#sec-quotes .quotes-list{
+  max-height:500px!important;
+  padding-right:6px!important;
+  overflow-y:auto!important;
+}
+#sec-quotes .qmini{
+  min-height:116px!important;
+  padding:14px 14px 13px!important;
+  border-radius:16px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  transform:none!important;
+}
+#sec-quotes .qmini + .qmini{
+  margin-top:12px!important;
+}
+#sec-quotes .qmini:hover,
+#sec-quotes .qmini.on{
+  transform:none!important;
+}
+#sec-quotes .qmini::before{
+  top:14px!important;
+  bottom:14px!important;
+  width:2px!important;
+}
+#sec-quotes .qmini-head{
+  min-height:22px!important;
+  margin:0!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+#sec-quotes .qmini-era{
+  padding:5px 9px!important;
+  font-size:.56rem!important;
+  letter-spacing:1.3px!important;
+  max-width:108px!important;
+}
+#sec-quotes .qm-actions{
+  display:flex!important;
+  gap:5px!important;
+  opacity:.55!important;
+}
+#sec-quotes .qm-actions .qm-share{
+  padding:5px 8px!important;
+  font-size:.56rem!important;
+}
+#sec-quotes .qm-text{
+  min-height:42px!important;
+  margin:0!important;
+  font-size:.88rem!important;
+  line-height:1.38!important;
+  -webkit-line-clamp:2!important;
+}
+#sec-quotes .qm-drv{
+  margin-top:auto!important;
+  gap:9px!important;
+  align-items:center!important;
+}
+#sec-quotes .qm-avatar{
+  width:30px!important;
+  height:30px!important;
+  flex:0 0 30px!important;
+  font-size:.82rem!important;
+  box-shadow:none!important;
+}
+#sec-quotes .qm-n{
+  font-size:.78rem!important;
+  line-height:1.05!important;
+}
+#sec-quotes .qm-t{
+  font-size:.62rem!important;
+  line-height:1.08!important;
+  max-width:190px!important;
+}
+#sec-quotes .qm-meta{
+  display:none!important;
+}
+@media(max-width:1180px){
+  #sec-quotes .quotes-layout{grid-template-columns:1fr!important;}
+  #sec-quotes .quotes-list{max-height:none!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;padding-right:0!important;}
+}
+@media(max-width:900px){
+  #sec-quotes .quote-controls{grid-template-columns:1fr!important;}
+  #sec-quotes .quote-filter-row{overflow-x:auto!important;scrollbar-width:none!important;}
+  #sec-quotes .quote-filter-row::-webkit-scrollbar{display:none!important;}
+  #sec-quotes .qf-premium-card{grid-template-columns:1fr!important;min-height:auto!important;}
+  #sec-quotes .qf-media{border-right:0!important;border-bottom:1px solid rgba(255,255,255,.075)!important;padding:26px 18px!important;}
+  #sec-quotes .qf-image-ring{width:min(210px,60vw)!important;max-width:210px!important;}
+  #sec-quotes .quotes-list{grid-template-columns:1fr!important;}
+}
+@media(max-width:640px){
+  #sec-quotes{padding-top:52px!important;}
+  #sec-quotes .qf-content{padding:24px 18px 20px!important;}
+  #sec-quotes .qf-text{font-size:1.22rem!important;line-height:1.4!important;}
+  #sec-quotes .qf-footer{flex-direction:column!important;align-items:flex-start!important;}
+  #sec-quotes .qf-brand-final{align-self:flex-start!important;}
+  #sec-quotes .qf-premium-actions{display:grid!important;grid-template-columns:1fr!important;}
+}
