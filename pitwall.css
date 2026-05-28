@@ -119,3 +119,151 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
 .pit-empty-icon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(232,0,45,.10);border:1px solid rgba(232,0,45,.18);flex:0 0 auto;}
 @media(max-width:900px){.brand-logo-icon{width:38px!important;height:38px!important}.helmet-wrap{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}.nav-inner{padding:0 20px!important}.pit-hero-content,.pit-dashboard{width:min(100% - 32px,1560px)!important}}
 @media(max-width:560px){.pit-hero-actions .pit-primary,.pit-hero-actions .pit-secondary{display:flex!important;align-items:center!important;justify-content:center!important}.pit-title{font-size:4.2rem!important;line-height:.86!important}.pit-kicker{letter-spacing:2px!important}.pit-empty-state{align-items:flex-start!important}}
+
+
+/* ============================================================
+   Phase 19.1 — Pit Wall navbar exact-match repair
+   Fixes the Pit Wall icon regression: use the same bar-chart icon
+   and spacing system as Home / Shop / Fan Hub.
+   ============================================================ */
+:root{
+  --pdx-ico-pitwall: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%3E%3Cpath%20fill=%22black%22%20d=%22M4%2020V9h4v11zm6%200V4h4v16zm6%200v-8h4v8z%22/%3E%3C/svg%3E")!important;
+}
+#navbar{
+  height:var(--nav-h)!important;
+  background:rgba(7,7,7,.92)!important;
+  backdrop-filter:blur(18px)!important;
+  border-bottom:1px solid rgba(232,0,45,.08)!important;
+}
+#navbar.scrolled{
+  height:54px!important;
+  background:rgba(7,7,7,.98)!important;
+  box-shadow:0 0 40px rgba(232,0,45,.14),0 2px 0 rgba(232,0,45,.28)!important;
+}
+.nav-inner{
+  height:100%!important;
+  min-height:0!important;
+  padding:0 48px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+}
+.nav-logo{
+  height:auto!important;
+  min-height:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  flex:0 0 auto!important;
+}
+.helmet-wrap{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  max-width:38px!important;
+  max-height:38px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 35% 28%,rgba(232,0,45,.18),rgba(7,7,7,.92) 62%)!important;
+  border:1px solid rgba(232,0,45,.28)!important;
+  box-shadow:none!important;
+}
+.brand-logo-icon{
+  display:block!important;
+  width:32px!important;
+  height:32px!important;
+  max-width:32px!important;
+  max-height:32px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  transform:none!important;
+  filter:none!important;
+}
+.logo-text{
+  font-family:var(--font-d)!important;
+  font-size:1.85rem!important;
+  line-height:1!important;
+  letter-spacing:5px!important;
+  color:#fff!important;
+}
+.nav-links{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:1 1 auto!important;
+  gap:4px!important;
+  list-style:none!important;
+}
+.nav-link{
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  padding:8px 14px!important;
+  min-height:0!important;
+  height:auto!important;
+  font-family:var(--font-c)!important;
+  font-size:.78rem!important;
+  line-height:1!important;
+  letter-spacing:2px!important;
+  text-transform:uppercase!important;
+  font-weight:600!important;
+  color:var(--muted2)!important;
+}
+.nav-link:hover,.nav-link.active{color:var(--white)!important}
+.nav-link .nl-icon,.search-icon-anim,.cart-icon-anim,.cta-arrow{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 auto!important;
+  font-size:0!important;
+  line-height:0!important;
+  letter-spacing:0!important;
+  color:rgba(255,255,255,.80)!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.nav-link .nl-icon::before,.search-icon-anim::before,.cart-icon-anim::before,.cta-arrow::before{
+  content:''!important;
+  position:absolute!important;
+  inset:0!important;
+  margin:auto!important;
+  width:100%!important;
+  height:100%!important;
+  background:currentColor!important;
+  -webkit-mask:var(--pdx-mask) center/contain no-repeat!important;
+  mask:var(--pdx-mask) center/contain no-repeat!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+.nav-link .nl-icon::after,.search-icon-anim::after,.cart-icon-anim::after,.cta-arrow::after{display:none!important;content:none!important}
+.nav-pitwall-icon{--pdx-mask:var(--pdx-ico-pitwall)!important}
+.nav-link .nl-icon{width:17px!important;height:17px!important;opacity:.68;transition:color var(--tr),opacity var(--tr),transform var(--tr)}
+.nav-link:hover .nl-icon,.nav-link.active .nl-icon{color:var(--red)!important;opacity:1;transform:translateY(-1px) scale(1.04)!important}
+.nav-search-btn,.nav-cart-btn{
+  width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  border-radius:999px!important;background:rgba(255,255,255,.018)!important;
+  border:1px solid rgba(255,255,255,.12)!important;color:rgba(255,255,255,.82)!important;
+  font-size:0!important;padding:0!important;
+}
+.search-icon-anim{width:19px!important;height:19px!important;--pdx-mask:var(--pdx-ico-search)}
+.cart-icon-anim{width:19px!important;height:19px!important;--pdx-mask:var(--pdx-ico-bag)}
+.nav-cta-btn{
+  height:42px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:10px!important;padding:0 24px!important;background:var(--red)!important;color:#fff!important;
+  font-family:var(--font-c)!important;font-size:.82rem!important;letter-spacing:2px!important;
+  text-transform:uppercase!important;font-weight:700!important;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)!important;
+}
+.cta-arrow{width:16px!important;height:16px!important;--pdx-mask:var(--pdx-ico-arrow);color:currentColor!important;opacity:.96!important;transition:transform var(--tr)!important}
+.nav-cta-btn:hover .cta-arrow{transform:translateX(3px)!important}
