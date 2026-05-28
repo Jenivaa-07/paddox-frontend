@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Pit Wall Live</title>
-  <link rel="stylesheet" href="pitwall.css"/>
+  <link rel="stylesheet" href="pitwall.css?v=19_0"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -14,21 +14,21 @@
   <nav id="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
-        <span class="helmet-wrap"><span class="helmet-icon">🏎️</span></span>
+        <span class="helmet-wrap" id="helmet-wrap"><img src="assets/paddox-logo-icon-official.png?v=19_0" alt="PADDOX Logo" class="brand-logo-icon"></span>
         <span class="logo-text">PADDO<span class="logo-x">X</span></span>
       </a>
       <ul class="nav-links">
-        <li><a href="index.html" class="nav-link"><span class="nl-icon">🏠</span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
-        <li><a href="shop.html" class="nav-link"><span class="nl-icon">🛒</span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
-        <li><a href="fanhub.html" class="nav-link"><span class="nl-icon">🎮</span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
-        <li><a href="pitwall.html" class="nav-link active"><span class="nl-icon">📡</span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
-        <li><a href="account.html" class="nav-link"><span class="nl-icon">👤</span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
+        <li><a href="index.html" class="nav-link"><span class="nl-icon nav-home-icon" aria-hidden="true"></span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
+        <li><a href="shop.html" class="nav-link"><span class="nl-icon nav-shop-icon" aria-hidden="true"></span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
+        <li><a href="fanhub.html" class="nav-link"><span class="nl-icon nav-fanhub-icon" aria-hidden="true"></span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
+        <li><a href="pitwall.html" class="nav-link active"><span class="nl-icon nav-pitwall-icon" aria-hidden="true"></span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
+        <li><a href="account.html" class="nav-link"><span class="nl-icon nav-account-icon" aria-hidden="true"></span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
       </ul>
       <div class="nav-right">
-        <button class="nav-search-btn" id="nav-search-btn">🔍</button>
-        <a href="shop.html" class="nav-cart-btn"><span class="cart-icon-anim">🛒</span><span class="cart-badge" id="cart-badge">0</span></a>
-        <a href="account.html" class="nav-cta-btn">Sign Up <span class="cta-flag">🏁</span></a>
-        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+        <button class="nav-search-btn" id="nav-search-btn" aria-label="Search"><span class="search-icon-anim" aria-hidden="true"></span></button>
+        <a href="shop.html" class="nav-cart-btn" aria-label="Cart"><span class="cart-icon-anim" aria-hidden="true"></span><span class="cart-badge" id="cart-badge">0</span></a>
+        <a href="account.html" class="nav-cta-btn">Sign Up <span class="cta-arrow" aria-hidden="true"></span></a>
+        <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
       </div>
     </div>
     <div class="nav-search-drawer" id="search-drawer">
@@ -36,11 +36,11 @@
       <button class="search-close" id="search-close">✕</button>
     </div>
     <div class="mobile-menu" id="mobile-menu">
-      <a href="index.html" class="mob-link">🏠 Home</a>
-      <a href="shop.html" class="mob-link">🛒 Shop</a>
-      <a href="fanhub.html" class="mob-link">🎮 Fan Hub</a>
-      <a href="pitwall.html" class="mob-link active">📡 Pit Wall</a>
-      <a href="account.html" class="mob-link">👤 Account</a>
+      <a href="index.html" class="mob-link">Home</a>
+      <a href="shop.html" class="mob-link">Shop</a>
+      <a href="fanhub.html" class="mob-link">Fan Hub</a>
+      <a href="pitwall.html" class="mob-link active">Pit Wall</a>
+      <a href="account.html" class="mob-link">Account</a>
     </div>
   </nav>
 
@@ -183,6 +183,6 @@
 
   <div class="toast" id="toast"></div>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
-  <script src="pitwall.js"></script>
+  <script src="pitwall.js?v=19_0"></script>
 </body>
 </html>

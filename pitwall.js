@@ -3,6 +3,7 @@
    Practice 1/2/3, Qualifying, Sprint Qualifying, Sprint, Race
    ============================================================ */
 'use strict';
+console.log('PADDOX Phase 19 Pit Wall premium polish loaded');
 
 const API_BASE = 'https://paddox-backend.onrender.com/api';
 let currentYear = new Date().getFullYear();
@@ -382,6 +383,13 @@ async function loadLastResult() {
 }
 function initNav() {
   const navbar = $('#navbar'); window.addEventListener('scroll', () => navbar?.classList.toggle('scrolled', scrollY > 20));
+  try {
+    const raw = localStorage.getItem('paddox_cart') || localStorage.getItem('cart') || '[]';
+    const items = JSON.parse(raw);
+    const count = Array.isArray(items) ? items.reduce((sum, item) => sum + Number(item.qty || item.quantity || 1), 0) : 0;
+    const badge = $('#cart-badge');
+    if (badge) badge.textContent = String(count || 0);
+  } catch (_) {}
   $('#nav-search-btn')?.addEventListener('click', () => $('#search-drawer')?.classList.toggle('open'));
   $('#search-close')?.addEventListener('click', () => $('#search-drawer')?.classList.remove('open'));
   $('#hamburger')?.addEventListener('click', e => { e.currentTarget.classList.toggle('open'); $('#mobile-menu')?.classList.toggle('open'); });
