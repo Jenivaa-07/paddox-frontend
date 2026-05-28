@@ -4184,44 +4184,262 @@ body.modal-open { overflow: hidden; }
   .lb-row .lb-p{grid-column:3;text-align:left;font-size:.95rem!important;}
 }
 
-
 /* ============================================================
-   Phase 17.8 — Admin-managed Trivia display polish
+   Phase 17.8.2 — Fan Hub Trivia Display Polish
    ============================================================ */
-.triv-q{
-  position:relative;
-  padding:16px 18px;
-  border:1px solid rgba(255,255,255,.08);
-  background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(232,0,45,.035));
-  border-left:3px solid var(--red);
-  color:#f2f2f2;
+#sec-community .comm-card:has(#triv-q) {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(255,255,255,.075);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(232,0,45,.08), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
 }
-.topt{
-  position:relative;
-  overflow:hidden;
-  border-radius:14px;
-  background:rgba(255,255,255,.035);
+
+#sec-community .comm-card:has(#triv-q)::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--red), transparent);
+  opacity: .7;
+  pointer-events: none;
 }
-.topt::before{
-  content:'';
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  width:3px;
-  background:rgba(232,0,45,.65);
-  opacity:.55;
+
+.triv-q {
+  margin-bottom: 18px !important;
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background:
+    linear-gradient(135deg, rgba(232,0,45,.09), rgba(255,255,255,.025)),
+    rgba(8,8,8,.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
 }
-.topt:hover{
-  transform:translateX(3px);
-  background:rgba(255,255,255,.055);
+
+.triv-kicker {
+  font-family: var(--font-c);
+  color: var(--red);
+  font-size: .64rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
-.triv-res{
-  border:1px solid rgba(255,255,255,.1);
-  background:rgba(255,255,255,.035);
-  border-radius:14px;
+
+.triv-question-text {
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.55;
+  font-weight: 800;
+  letter-spacing: .1px;
 }
-.triv-next{
-  border-radius:14px;
-  box-shadow:0 12px 28px rgba(232,0,45,.15);
+
+.triv-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.triv-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,.11);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.72);
+  font-family: var(--font-c);
+  font-size: .62rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.triv-chip-points {
+  color: #fff;
+  border-color: rgba(232,0,45,.45);
+  background: rgba(232,0,45,.13);
+}
+
+.triv-opts {
+  gap: 10px !important;
+}
+
+.topt {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 10px 14px !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+    rgba(18,18,18,.92) !important;
+  color: rgba(255,255,255,.78) !important;
+  overflow: hidden;
+}
+
+.topt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(232,0,45,.08), transparent 45%);
+  opacity: 0;
+  transition: opacity var(--tr);
+  pointer-events: none;
+}
+
+.topt:hover::before,
+.topt.selected::before {
+  opacity: 1;
+}
+
+.topt:hover {
+  border-color: rgba(232,0,45,.35) !important;
+  color: #fff !important;
+  transform: translateX(3px);
+}
+
+.topt:disabled {
+  cursor: default;
+}
+
+.topt-key {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.055);
+  color: var(--red);
+  font-family: var(--font-d);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.topt-text {
+  position: relative;
+  z-index: 1;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.topt-status {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-c);
+  font-size: .58rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+}
+
+.topt.correct {
+  border-color: rgba(0,180,0,.62) !important;
+  background:
+    linear-gradient(90deg, rgba(0,180,0,.18), rgba(255,255,255,.018)),
+    rgba(16,22,16,.95) !important;
+  color: #fff !important;
+}
+
+.topt.correct .topt-key {
+  color: #fff;
+  border-color: rgba(0,180,0,.7);
+  background: rgba(0,180,0,.38);
+  box-shadow: 0 0 20px rgba(0,180,0,.15);
+}
+
+.topt.correct .topt-status {
+  color: #65ff65;
+}
+
+.topt.wrong {
+  border-color: rgba(232,0,45,.72) !important;
+  background:
+    linear-gradient(90deg, rgba(232,0,45,.2), rgba(255,255,255,.015)),
+    rgba(27,10,14,.95) !important;
+  color: #fff !important;
+}
+
+.topt.wrong .topt-key {
+  color: #fff;
+  border-color: rgba(232,0,45,.75);
+  background: rgba(232,0,45,.42);
+}
+
+.topt.wrong .topt-status {
+  color: #ff6b86;
+}
+
+.topt.dimmed {
+  opacity: .55;
+}
+
+.triv-res {
+  margin-top: 16px !important;
+  padding: 14px 16px !important;
+  text-align: left !important;
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(255,255,255,.035);
+  font-family: var(--font-b) !important;
+}
+
+.triv-res strong {
+  display: block;
+  font-family: var(--font-d);
+  font-size: 1.35rem;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.triv-res span {
+  display: block;
+  color: rgba(255,255,255,.68);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.triv-res-correct {
+  border-color: rgba(0,180,0,.38) !important;
+  background: rgba(0,180,0,.08) !important;
+}
+
+.triv-res-correct strong {
+  color: #65ff65;
+}
+
+.triv-res-wrong {
+  border-color: rgba(232,0,45,.45) !important;
+  background: rgba(232,0,45,.08) !important;
+}
+
+.triv-res-wrong strong {
+  color: var(--red);
+}
+
+.triv-next {
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 12px !important;
+  border: 1px solid rgba(232,0,45,.55);
+  background: linear-gradient(135deg, var(--red), #8b001a) !important;
+  box-shadow: 0 14px 34px rgba(232,0,45,.16);
+}
+
+.triv-next::after {
+  content: '→';
+  margin-left: 9px;
+}
+
+@media (max-width: 680px) {
+  .triv-q { padding: 15px; }
+  .topt { grid-template-columns: 34px 1fr; }
+  .topt-status { grid-column: 2; }
 }

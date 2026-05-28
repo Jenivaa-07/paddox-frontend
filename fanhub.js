@@ -2647,6 +2647,15 @@ async function loadRealtimeTrivia() {
   }
 }
 
+function triviaDifficultyLabel(value = '') {
+  const raw = String(value || 'medium').trim().toLowerCase();
+  return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Medium';
+}
+
+function triviaOptionLetter(index = 0) {
+  return ['A', 'B', 'C', 'D'][Number(index)] || String(Number(index) + 1);
+}
+
 function renderRealtimeTrivia() {
   const qEl = document.getElementById('triv-q');
   const optsEl = document.getElementById('triv-opts');
@@ -2655,29 +2664,42 @@ function renderRealtimeTrivia() {
 
   if (!CURRENT_TRIVIA || !qEl || !optsEl) return;
 
-  const points =
-    Number(CURRENT_TRIVIA.points || 100);
+  const points = Number(CURRENT_TRIVIA.points || 100);
+  const difficulty = triviaDifficultyLabel(CURRENT_TRIVIA.difficulty);
+  const category = triviaDifficultyLabel(CURRENT_TRIVIA.category || 'drivers');
 
-  qEl.textContent =
-    `${CURRENT_TRIVIA.question} (${points} pts)`;
+  qEl.innerHTML = `
+    <div class="triv-kicker">Paddox Quiz Challenge</div>
+    <div class="triv-question-text">${safeText(CURRENT_TRIVIA.question || 'F1 Trivia')}</div>
+    <div class="triv-meta-row">
+      <span class="triv-chip triv-chip-points">${points} pts</span>
+      <span class="triv-chip">${safeText(difficulty)}</span>
+      <span class="triv-chip">${safeText(category)}</span>
+    </div>
+  `;
 
-  optsEl.innerHTML =
-    (CURRENT_TRIVIA.options || []).map((option, index) => `
-      <button
-        class="topt"
-        onclick="answerRealtimeTrivia(${index})"
-      >
-        ${option}
-      </button>
-    `).join('');
+  optsEl.innerHTML = (CURRENT_TRIVIA.options || []).map((option, index) => `
+    <button
+      class="topt"
+      data-index="${index}"
+      onclick="answerRealtimeTrivia(${index})"
+      type="button"
+    >
+      <span class="topt-key">${triviaOptionLetter(index)}</span>
+      <span class="topt-text">${safeText(option)}</span>
+      <span class="topt-status"></span>
+    </button>
+  `).join('');
 
   if (resEl) {
+    resEl.className = 'triv-res';
     resEl.style.display = 'none';
-    resEl.textContent = '';
+    resEl.innerHTML = '';
   }
 
   if (nextBtn) {
     nextBtn.style.display = 'none';
+    nextBtn.textContent = 'Next Question';
   }
 }
 
@@ -2689,6 +2711,12 @@ async function answerRealtimeTrivia(answerIndex) {
 
     const resEl = document.getElementById('triv-res');
     const nextBtn = document.getElementById('triv-next');
+    const optionButtons = [...document.querySelectorAll('.topt')];
+
+    optionButtons.forEach((btn, index) => {
+      btn.disabled = true;
+      btn.classList.toggle('selected', Number(index) === Number(answerIndex));
+    });
 
     const data = await PaddoxAPI.fan.answerTrivia(
       CURRENT_TRIVIA._id,
@@ -2700,26 +2728,31 @@ async function answerRealtimeTrivia(answerIndex) {
     }
 
     const result = data.data || data;
-    const correctIndex = result.correctIndex;
+    const correctIndex = Number(result.correctIndex);
 
-    document.querySelectorAll('.topt').forEach((btn, index) => {
-      if (index === correctIndex) {
+    optionButtons.forEach((btn, index) => {
+      const status = btn.querySelector('.topt-status');
+      if (Number(index) === correctIndex) {
         btn.classList.add('correct');
-      } else if (index === answerIndex && !result.correct) {
+        if (status) status.textContent = 'Correct';
+      } else if (Number(index) === Number(answerIndex) && !result.correct) {
         btn.classList.add('wrong');
+        if (status) status.textContent = 'Wrong';
+      } else {
+        btn.classList.add('dimmed');
       }
     });
 
     if (resEl) {
+      const earned = Number(result.pointsEarned || 0);
+      resEl.className = `triv-res ${result.correct ? 'triv-res-correct' : 'triv-res-wrong'}`;
       resEl.style.display = 'block';
-      resEl.style.color = result.correct ? '#00e000' : 'var(--red)';
-      resEl.textContent =
-        result.correct
-          ? `✓ Correct! +${result.pointsEarned || 0} Fan Points`
-          : `✗ Wrong! Answer: ${result.correctAnswer}`;
+      resEl.innerHTML = result.correct
+        ? `<strong>Correct answer!</strong><span>+${earned} Fan Points added to your grid score.</span>`
+        : `<strong>Wrong answer</strong><span>Correct answer: ${safeText(result.correctAnswer || '')}</span>`;
     }
 
-    if (nextBtn) nextBtn.style.display = 'block';
+    if (nextBtn) nextBtn.style.display = 'inline-flex';
 
     if (result.correct) {
       showPointsBurst(`+${result.pointsEarned || 0} pts`);
@@ -2729,6 +2762,10 @@ async function answerRealtimeTrivia(answerIndex) {
   } catch (err) {
     console.error(err);
     TRIVIA_ANSWERED = false;
+    document.querySelectorAll('.topt').forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('selected');
+    });
     showToast(`${err.message}`);
   }
 }
@@ -3177,14 +3214,3 @@ loadNextRaceCountdown();
 loadLastResult();
 
 console.log('%cPADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
-
-/* Phase 17.8 — refresh Fan Hub trivia when admin updates trivia */
-try {
-  if (typeof socket !== 'undefined' && socket?.on) {
-    socket.on('trivia:changed', () => {
-      if (document.getElementById('sec-community')?.classList.contains('on')) {
-        loadRealtimeTrivia();
-      }
-    });
-  }
-} catch {}
