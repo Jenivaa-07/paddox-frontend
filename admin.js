@@ -5526,10 +5526,28 @@ document.addEventListener('change', e => {
 
 
 /* ══════════════════════════════════════
-   FAN POLLS ADMIN MANAGER
+   FAN POLLS ADMIN MANAGER — Phase 17.6
+   Realtime MongoDB polls + Home Branding logo dropdown
 ══════════════════════════════════════ */
 const FAN_POLLS_ADMIN_API = 'https://paddox-backend.onrender.com/api/fan/admin/polls';
 let ADMIN_FAN_POLLS = [];
+let ADMIN_POLL_LOGOS = [];
+let ADMIN_POLL_LOGOS_LOADED = false;
+
+const ADMIN_POLL_FALLBACK_LOGOS = [
+  { name:'Ferrari',        slug:'ferrari',       color:'#e8002d', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/ferrari-logo.png' },
+  { name:'Red Bull Racing',slug:'red-bull',      color:'#1e5bff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/red-bull-racing-logo.png' },
+  { name:'Mercedes',       slug:'mercedes',      color:'#00d2be', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/mercedes-logo.png' },
+  { name:'McLaren',        slug:'mclaren',       color:'#ff8700', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/mclaren-logo.png' },
+  { name:'Aston Martin',   slug:'aston-martin',  color:'#006f62', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/aston-martin-logo.png' },
+  { name:'Alpine',         slug:'alpine',        color:'#2293d1', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/alpine-logo.png' },
+  { name:'Williams',       slug:'williams',      color:'#64c4ff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/williams-logo.png' },
+  { name:'Haas F1 Team',   slug:'haas',          color:'#ffffff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/haas-logo.png' },
+  { name:'Racing Bulls',   slug:'racing-bulls',  color:'#6c4cff', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/racing-bulls-logo.png' },
+  { name:'Audi',           slug:'audi',          color:'#00e701', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/kick-sauber-logo.png' },
+  { name:'Cadillac',       slug:'cadillac',      color:'#d4af37', image:'https://media.formula1.com/content/dam/fom-website/teams/2026/cadillac-logo.png' },
+  { name:'PADDOX',         slug:'paddox',        color:'#e8002d', image:'assets/paddox-logo-icon.png' }
+];
 
 function pollAdminHeaders(json = false) {
   return {
@@ -5543,48 +5561,167 @@ function setPollAdminStatus(message = '') {
   if (el) el.textContent = message;
 }
 
-function addFanPollOption(value = '') {
+function escapeAdminText(value='') {
+  return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function pollLogoKey(value = '') {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function normalizeAdminPollLogo(item = {}) {
+  const name = String(item.name || item.teamName || item.label || 'Team').trim();
+  const image = String(item.image || item.logo || item.teamLogo || '').trim();
+  const color = String(item.color || item.teamColor || '#e8002d').trim();
+  const slug = String(item.slug || item.logoKey || pollLogoKey(name)).trim();
+
+  return { name, image, color, slug };
+}
+
+async function loadFanPollLogoOptions(force = false) {
+  if (ADMIN_POLL_LOGOS_LOADED && !force) return ADMIN_POLL_LOGOS;
+
+  try {
+    const api = typeof HOME_MARQUEE_API !== 'undefined'
+      ? HOME_MARQUEE_API
+      : 'https://paddox-backend.onrender.com/api/fan/admin/home-marquee-logos';
+
+    const res = await fetch(api, { headers: pollAdminHeaders() });
+    const data = await res.json().catch(() => ({}));
+
+    const logos = data.data?.logos || data.logos || [];
+    ADMIN_POLL_LOGOS = Array.isArray(logos) && logos.length
+      ? logos.map(normalizeAdminPollLogo)
+      : ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
+
+  } catch (err) {
+    console.warn('Using fallback poll logos', err);
+    ADMIN_POLL_LOGOS = ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
+  }
+
+  ADMIN_POLL_LOGOS_LOADED = true;
+  refreshPollOptionLogoSelects();
+  return ADMIN_POLL_LOGOS;
+}
+
+function pollLogoOptionsHTML(selected = '') {
+  const selectedKey = pollLogoKey(selected);
+  const logos = ADMIN_POLL_LOGOS.length
+    ? ADMIN_POLL_LOGOS
+    : ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
+
+  return `
+    <option value="">No logo</option>
+    ${logos.map(item => {
+      const key = item.slug || pollLogoKey(item.name);
+      return `<option value="${escapeAdminText(key)}" ${selectedKey === pollLogoKey(key) ? 'selected' : ''}>${escapeAdminText(item.name)}</option>`;
+    }).join('')}
+  `;
+}
+
+function findPollLogoByKey(key = '') {
+  const clean = pollLogoKey(key);
+  return (ADMIN_POLL_LOGOS.length ? ADMIN_POLL_LOGOS : ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo))
+    .find(item => pollLogoKey(item.slug) === clean || pollLogoKey(item.name) === clean) || null;
+}
+
+function updatePollLogoPreview(row) {
+  if (!row) return;
+
+  const select = row.querySelector('.poll-logo-select');
+  const preview = row.querySelector('.poll-logo-preview');
+  const selected = findPollLogoByKey(select?.value || '');
+
+  if (!preview) return;
+
+  if (selected?.image) {
+    preview.innerHTML = `<img src="${escapeAdminText(selected.image)}" alt="${escapeAdminText(selected.name)}">`;
+  } else {
+    preview.innerHTML = '<span>PX</span>';
+  }
+
+  preview.style.setProperty('--poll-admin-color', selected?.color || '#e8002d');
+}
+
+function refreshPollOptionLogoSelects() {
+  document.querySelectorAll('.poll-logo-select').forEach(select => {
+    const current = select.value;
+    select.innerHTML = pollLogoOptionsHTML(current);
+    updatePollLogoPreview(select.closest('.poll-admin-option-row'));
+  });
+}
+
+function addFanPollOption(value = '', logoKey = '') {
   const wrap = document.getElementById('poll-options-admin');
   if (!wrap) return;
+
   const row = document.createElement('div');
   row.className = 'poll-admin-option-row';
   row.innerHTML = `
-    <input class="adm-input poll-option-input" type="text" placeholder="Poll option" value="${String(value || '').replace(/"/g, '&quot;')}"/>
+    <div class="poll-admin-logo-cell">
+      <div class="poll-logo-preview"><span>PX</span></div>
+      <select class="adm-input poll-logo-select" onchange="updatePollLogoPreview(this.closest('.poll-admin-option-row'))">
+        ${pollLogoOptionsHTML(logoKey)}
+      </select>
+    </div>
+    <input class="adm-input poll-option-input" type="text" placeholder="Poll option" value="${escapeAdminText(value)}"/>
     <button type="button" class="adm-btn-ghost danger" onclick="this.closest('.poll-admin-option-row').remove()">Remove</button>
   `;
+
   wrap.appendChild(row);
+  updatePollLogoPreview(row);
+  loadFanPollLogoOptions();
 }
 
 function resetFanPollForm(clear = true) {
   const ids = ['poll-edit-id','poll-question'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
   const active = document.getElementById('poll-active');
   const reset = document.getElementById('poll-reset-votes');
   if (active) active.checked = true;
   if (reset) reset.checked = false;
+
   const wrap = document.getElementById('poll-options-admin');
   if (wrap) {
     wrap.innerHTML = '';
     addFanPollOption('');
     addFanPollOption('');
   }
-  if (clear) setPollAdminStatus('Create a poll with 2–5 options. Active poll appears in Fan Hub.');
+
+  loadFanPollLogoOptions();
+  if (clear) setPollAdminStatus('Create a live Fan Hub poll with 2–5 options and optional team logos.');
 }
 
 async function loadFanPollsAdmin() {
   const tbody = document.getElementById('fan-polls-tbody');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading polls…</td></tr>';
+
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading polls…</td></tr>';
+  }
+
+  await loadFanPollLogoOptions();
+
   try {
     const res = await fetch(FAN_POLLS_ADMIN_API, { headers: pollAdminHeaders() });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Poll admin API unavailable');
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Poll admin API unavailable');
+    }
+
     ADMIN_FAN_POLLS = data.data?.polls || data.polls || data.data || [];
     renderFanPollsAdmin();
-    setPollAdminStatus('Poll manager connected.');
+    setPollAdminStatus('Poll manager connected. Active poll reflects on Fan Hub.');
+
   } catch (err) {
     console.warn(err);
     ADMIN_FAN_POLLS = [];
-    if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:34px;color:#777">${err.message}. Backend route may need to be added.</td></tr>`;
+
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:34px;color:#777">${escapeAdminText(err.message)}. Check backend route /api/fan/admin/polls.</td></tr>`;
+    }
+
     setPollAdminStatus('Backend endpoint expected: /api/fan/admin/polls');
   }
 }
@@ -5592,19 +5729,32 @@ async function loadFanPollsAdmin() {
 function renderFanPollsAdmin() {
   const tbody = document.getElementById('fan-polls-tbody');
   if (!tbody) return;
+
   const q = String(document.getElementById('poll-search-admin')?.value || '').toLowerCase().trim();
   const list = ADMIN_FAN_POLLS.filter(p => !q || String(p.question || '').toLowerCase().includes(q));
+
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No polls created yet</td></tr>';
     return;
   }
+
   tbody.innerHTML = list.map(p => {
     const opts = Array.isArray(p.options) ? p.options : [];
     const total = opts.reduce((s,o)=>s+Number(o.votes||0),0);
+
     return `
       <tr>
         <td style="max-width:360px"><strong>${escapeAdminText(p.question || 'Untitled poll')}</strong></td>
-        <td>${opts.map(o => escapeAdminText(o.label || o.text || '')).join('<br>')}</td>
+        <td>
+          <div class="poll-admin-table-options">
+            ${opts.map(o => `
+              <span class="poll-admin-mini-option">
+                ${o.logo ? `<img src="${escapeAdminText(o.logo)}" alt="${escapeAdminText(o.teamName || o.label || 'Logo')}">` : `<i style="--poll-admin-color:${escapeAdminText(o.teamColor || '#e8002d')}"></i>`}
+                ${escapeAdminText(o.label || o.text || '')}
+              </span>
+            `).join('')}
+          </div>
+        </td>
         <td>${total.toLocaleString('en-IN')}</td>
         <td><span class="sb ${p.isActive !== false ? 's-ok' : 's-pr'}">${p.isActive !== false ? 'Active' : 'Inactive'}</span></td>
         <td>
@@ -5616,58 +5766,88 @@ function renderFanPollsAdmin() {
   }).join('');
 }
 
-function escapeAdminText(value='') {
-  return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-}
-
 function editFanPollAdmin(id) {
   const poll = ADMIN_FAN_POLLS.find(p => String(p._id || p.id) === String(id));
   if (!poll) return;
+
   document.getElementById('poll-edit-id').value = poll._id || poll.id || '';
   document.getElementById('poll-question').value = poll.question || '';
+
   const active = document.getElementById('poll-active');
   const reset = document.getElementById('poll-reset-votes');
   if (active) active.checked = poll.isActive !== false;
   if (reset) reset.checked = false;
+
   const wrap = document.getElementById('poll-options-admin');
   if (wrap) {
     wrap.innerHTML = '';
-    (poll.options || []).forEach(o => addFanPollOption(o.label || o.text || ''));
+    (poll.options || []).forEach(o => addFanPollOption(
+      o.label || o.text || '',
+      o.logoKey || o.slug || o.teamName || ''
+    ));
   }
+
   setPollAdminStatus('Editing existing poll.');
+}
+
+function collectFanPollOptions() {
+  return [...document.querySelectorAll('.poll-admin-option-row')]
+    .map(row => {
+      const label = String(row.querySelector('.poll-option-input')?.value || '').trim();
+      const logoKey = String(row.querySelector('.poll-logo-select')?.value || '').trim();
+      const logo = findPollLogoByKey(logoKey);
+
+      if (!label) return null;
+
+      return {
+        label,
+        logoKey,
+        logo: logo?.image || '',
+        teamName: logo?.name || '',
+        teamColor: logo?.color || '#e8002d'
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 5);
 }
 
 async function saveFanPollAdmin() {
   try {
     const id = String(document.getElementById('poll-edit-id')?.value || '').trim();
     const question = String(document.getElementById('poll-question')?.value || '').trim();
-    const options = [...document.querySelectorAll('.poll-option-input')]
-      .map(input => String(input.value || '').trim())
-      .filter(Boolean)
-      .slice(0,5);
+    const options = collectFanPollOptions();
+
     if (!question) throw new Error('Poll question is required');
     if (options.length < 2) throw new Error('Add at least 2 options');
 
     setPollAdminStatus('Saving poll…');
+
     const payload = {
       question,
       options,
       isActive: !!document.getElementById('poll-active')?.checked,
       resetVotes: !!document.getElementById('poll-reset-votes')?.checked
     };
+
     const res = await fetch(id ? `${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}` : FAN_POLLS_ADMIN_API, {
       method: id ? 'PUT' : 'POST',
       headers: pollAdminHeaders(true),
       body: JSON.stringify(payload)
     });
+
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Could not save poll');
-    showToast('🔥 Poll saved');
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Could not save poll');
+    }
+
+    showToast('Poll saved');
     resetFanPollForm(false);
     loadFanPollsAdmin();
+
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
     setPollAdminStatus(err.message);
   }
 }
@@ -5679,31 +5859,45 @@ async function setFanPollActive(id) {
       headers: pollAdminHeaders(true),
       body: JSON.stringify({ isActive:true })
     });
+
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Could not activate poll');
-    showToast('🔥 Active poll updated');
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Could not activate poll');
+    }
+
+    showToast('Active poll updated');
     loadFanPollsAdmin();
+
   } catch (err) {
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
   }
 }
 
 async function deleteFanPollAdmin(id) {
   if (!confirm('Delete this poll?')) return;
+
   try {
     const res = await fetch(`${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}`, {
       method:'DELETE',
       headers: pollAdminHeaders()
     });
+
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Could not delete poll');
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Could not delete poll');
+    }
+
     showToast('Poll deleted');
     loadFanPollsAdmin();
+
   } catch (err) {
-    showToast(`❌ ${err.message}`);
+    showToast(`${err.message}`);
   }
 }
 
 document.addEventListener('input', e => {
   if (e.target?.id === 'poll-search-admin') renderFanPollsAdmin();
 });
+

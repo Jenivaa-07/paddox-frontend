@@ -2962,153 +2962,60 @@ body.modal-open { overflow: hidden; }
 /* Remove old Phase 17.3 box marks if stale markup is cached */
 .chip-mark,.ht-mark{display:none!important}
 
+
 /* ============================================================
-   Phase 17.6 — Shop-style Fan Hub icon chips/tabs
-   Matches Shop category icon treatment: icon inside premium box,
-   dark glass tab, subtle red accent only on hover/active.
-   Paste at the VERY END of fanhub.css.
+   Phase 17.6 — Realtime poll team/logo option display
    ============================================================ */
-.hub-hero-chips {
-  gap: 12px !important;
+.popt{
+  --poll-color: var(--red);
 }
-
-.hero-chip {
-  position: relative !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  min-height: 50px !important;
-  padding: 9px 17px !important;
-  color: rgba(255,255,255,.64) !important;
-  background: rgba(255,255,255,.018) !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
-  border-bottom: 2px solid transparent !important;
-  font-family: var(--font-c) !important;
-  font-size: .76rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 1.7px !important;
-  text-transform: uppercase !important;
-  transition: color var(--tr), background var(--tr), border-color var(--tr), transform var(--tr), box-shadow var(--tr) !important;
+.popt-fill{
+  background:linear-gradient(90deg, color-mix(in srgb, var(--poll-color) 38%, transparent), rgba(232,0,45,.12)) !important;
 }
-
-.hero-chip:hover {
-  color: var(--white) !important;
-  background: rgba(255,255,255,.032) !important;
-  border-color: rgba(255,255,255,.13) !important;
-  border-bottom-color: var(--red) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 12px 28px rgba(0,0,0,.28) !important;
+.popt-lbl{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  min-width:0;
 }
-
-.hub-tabs-bar {
-  background: #070707 !important;
-  border-top: 1px solid rgba(255,255,255,.035) !important;
-  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+.poll-team-logo{
+  width:34px;
+  height:34px;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 18px color-mix(in srgb,var(--poll-color) 18%,transparent);
+  position:relative;
+  overflow:hidden;
 }
-
-.hub-tabs-inner {
-  gap: 8px !important;
-  padding: 8px 48px !important;
+.poll-team-logo::after{
+  content:'';
+  position:absolute;
+  left:7px;
+  right:7px;
+  bottom:5px;
+  height:2px;
+  background:var(--poll-color);
+  opacity:.85;
 }
-
-.hub-tab {
-  position: relative !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  min-height: 54px !important;
-  padding: 13px 18px !important;
-  color: rgba(255,255,255,.62) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  border-bottom: 2px solid transparent !important;
-  font-family: var(--font-c) !important;
-  font-size: .8rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 2px !important;
-  text-transform: uppercase !important;
-  transition: color var(--tr), background var(--tr), border-color var(--tr), transform var(--tr) !important;
+.poll-team-logo img{
+  width:78%;
+  height:78%;
+  object-fit:contain;
+  filter:drop-shadow(0 5px 10px rgba(0,0,0,.45));
 }
-
-.hub-tab:hover,
-.hub-tab.on {
-  color: var(--white) !important;
-  background: rgba(255,255,255,.025) !important;
-  border-color: rgba(255,255,255,.08) !important;
-  border-bottom-color: var(--red) !important;
-  transform: translateY(-1px) !important;
+.poll-team-logo.no-logo i{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--poll-color);
+  box-shadow:0 0 14px var(--poll-color);
 }
-
-.fh-chip-icon,
-.fh-tab-icon {
-  position: relative !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 0 0 auto !important;
-  width: 32px !important;
-  height: 32px !important;
-  color: rgba(255,255,255,.74) !important;
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.018)) !important;
-  border: 1px solid rgba(255,255,255,.12) !important;
-  border-radius: 10px !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
-  -webkit-mask: none !important;
-  mask: none !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-  opacity: 1 !important;
-  transition: color var(--tr), background var(--tr), border-color var(--tr), box-shadow var(--tr), transform var(--tr) !important;
-}
-
-.fh-chip-icon::before,
-.fh-tab-icon::before {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  width: 17px !important;
-  height: 17px !important;
-  margin: auto !important;
-  background: currentColor !important;
-  -webkit-mask: var(--fh-icon) center / contain no-repeat !important;
-  mask: var(--fh-icon) center / contain no-repeat !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.fh-chip-icon::after,
-.fh-tab-icon::after {
-  display: none !important;
-  content: none !important;
-}
-
-.hero-chip:hover .fh-chip-icon,
-.hub-tab:hover .fh-tab-icon,
-.hub-tab.on .fh-tab-icon {
-  color: #fff !important;
-  background: linear-gradient(180deg, rgba(232,0,45,.28), rgba(232,0,45,.08)) !important;
-  border-color: rgba(232,0,45,.55) !important;
-  box-shadow: 0 12px 28px rgba(232,0,45,.12), inset 0 1px 0 rgba(255,255,255,.10) !important;
-  transform: translateY(-1px) scale(1.06) !important;
-  filter: none !important;
-}
-
-/* Kill old/cached mark systems so no duplicate or emoji-looking icon returns */
-.ht-icon,
-.chip-mark,
-.ht-mark,
-.hero-chip .animate-icon {
-  display: none !important;
-}
-
-@media (max-width: 760px) {
-  .hub-tabs-inner { padding: 8px 18px !important; }
-  .hub-tab { min-height: 52px !important; padding: 12px 15px !important; }
-  .hero-chip { min-height: 48px !important; padding: 8px 14px !important; }
-  .fh-chip-icon,
-  .fh-tab-icon { width: 30px !important; height: 30px !important; }
-  .fh-chip-icon::before,
-  .fh-tab-icon::before { width: 16px !important; height: 16px !important; }
+.popt:hover .poll-team-logo,
+.popt.selected .poll-team-logo{
+  border-color:color-mix(in srgb,var(--poll-color) 60%,rgba(255,255,255,.12));
+  background:linear-gradient(180deg,color-mix(in srgb,var(--poll-color) 18%,transparent),rgba(255,255,255,.03));
 }

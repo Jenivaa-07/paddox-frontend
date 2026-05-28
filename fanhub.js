@@ -2169,6 +2169,22 @@ function pollOptionAccent(index = 0) {
   return ['#1e5bff', '#e8002d', '#ff8700', '#c9a84c', '#00d2be'][index % 5];
 }
 
+function pollOptionLogoHTML(option = {}, index = 0) {
+  const logo = String(option.logo || option.teamLogo || option.image || '').trim();
+  const label = escapeHTML(option.teamName || option.label || `Option ${index + 1}`);
+  const color = escapeHTML(option.teamColor || pollOptionAccent(index));
+
+  if (logo) {
+    return `<span class="poll-team-logo" style="--poll-color:${color}">
+      <img src="${escapeHTML(logo)}" alt="${label}" loading="lazy" referrerpolicy="no-referrer">
+    </span>`;
+  }
+
+  return `<span class="poll-team-logo no-logo" style="--poll-color:${color}">
+    <i></i>
+  </span>`;
+}
+
 function renderRealtimePoll(poll, totalVotes = 0) {
   const qEl = document.getElementById('poll-q');
   const optsEl = document.getElementById('poll-opts');
@@ -2185,11 +2201,15 @@ function renderRealtimePoll(poll, totalVotes = 0) {
     const votes = Number(option.votes || 0);
     const pct = option.percentage ?? (totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0);
     const isSelected = hasVoted && Number(storedVote) === index;
+    const accent = escapeHTML(option.teamColor || pollOptionAccent(index));
 
     return `
-      <div class="popt ${hasVoted ? 'show-results' : ''} ${isSelected ? 'selected' : ''}" onclick="voteRealtimePoll(${index})">
+      <div class="popt ${hasVoted ? 'show-results' : ''} ${isSelected ? 'selected' : ''}" onclick="voteRealtimePoll(${index})" style="--poll-color:${accent}">
         <div class="popt-fill" style="width:${hasVoted ? pct : 0}%"></div>
-        <span class="popt-lbl"><i class="poll-color-dot" style="--poll-color:${pollOptionAccent(index)}"></i>${escapeHTML(cleanPollOptionLabel(option.label || option.text, index))}</span>
+        <span class="popt-lbl">
+          ${pollOptionLogoHTML(option, index)}
+          <span>${escapeHTML(cleanPollOptionLabel(option.label || option.text, index))}</span>
+        </span>
         <span class="popt-pct">${hasVoted ? `${pct}%` : 'Vote'}</span>
       </div>
     `;

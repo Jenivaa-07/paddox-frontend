@@ -623,3 +623,95 @@ select.form-input option{background:var(--dark2)}
 .adm-btn-ghost:hover{border-color:var(--red);color:#fff}.adm-btn-ghost.danger,.act-btn.danger{color:#ff6b6b;border-color:rgba(255,80,80,.22)}
 .admin-hint{font-size:.76rem;color:var(--muted);line-height:1.6;margin-top:12px}.fan-poll-table-wrap{min-height:280px}
 @media(max-width:900px){.fan-poll-admin-grid{grid-template-columns:1fr}.poll-admin-option-row{grid-template-columns:1fr}}
+
+
+/* ============================================================
+   Phase 17.6 — Admin realtime fan poll logo dropdown
+   ============================================================ */
+.fan-poll-admin-grid{
+  grid-template-columns:minmax(420px,480px) 1fr;
+}
+.poll-admin-option-row{
+  display:grid;
+  grid-template-columns:190px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:10px;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.07);
+}
+.poll-admin-logo-cell{
+  display:grid;
+  grid-template-columns:42px 1fr;
+  gap:8px;
+  align-items:center;
+}
+.poll-logo-preview{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  box-shadow:0 0 0 1px rgba(232,0,45,.08), inset 0 1px 0 rgba(255,255,255,.07);
+  position:relative;
+  overflow:hidden;
+}
+.poll-logo-preview::after{
+  content:'';
+  position:absolute;
+  inset:auto 7px 6px;
+  height:2px;
+  background:var(--poll-admin-color,var(--red));
+  opacity:.8;
+}
+.poll-logo-preview img{
+  width:82%;
+  height:82%;
+  object-fit:contain;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.45));
+}
+.poll-logo-preview span{
+  font-family:var(--font-d);
+  letter-spacing:1px;
+  color:#fff;
+  font-size:.88rem;
+}
+.poll-logo-select{
+  min-width:0;
+  height:42px;
+  font-size:.74rem;
+}
+.poll-admin-table-options{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.poll-admin-mini-option{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:5px 8px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  color:#ddd;
+  font-size:.75rem;
+}
+.poll-admin-mini-option img{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
+.poll-admin-mini-option i{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--poll-admin-color,var(--red));
+  box-shadow:0 0 10px var(--poll-admin-color,var(--red));
+}
+@media(max-width:1100px){
+  .fan-poll-admin-grid{grid-template-columns:1fr}
+  .poll-admin-option-row{grid-template-columns:1fr}
+  .poll-admin-logo-cell{grid-template-columns:42px 1fr}
+}
