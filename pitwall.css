@@ -267,3 +267,44 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
 }
 .cta-arrow{width:16px!important;height:16px!important;--pdx-mask:var(--pdx-ico-arrow);color:currentColor!important;opacity:.96!important;transition:transform var(--tr)!important}
 .nav-cta-btn:hover .cta-arrow{transform:translateX(3px)!important}
+
+
+/* ============================================================
+   PHASE 19.2 — EXACT PIT WALL NAVBAR ICON SYNC
+   Fix: Pit Wall must use the same bar-chart timing icon as Home/Shop/FanHub nav.
+   This final override intentionally wins over the older radar/target icon block.
+   ============================================================ */
+:root{
+  --pdx-ico-pitwall:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%3E%3Cpath%20fill=%22black%22%20d=%22M4%2020V9h4v11zm6%200V4h4v16zm6%200v-8h4v8z%22/%3E%3C/svg%3E")!important;
+}
+#navbar .nav-link .nl-icon.nav-pitwall-icon,
+#navbar .nav-pitwall-icon{
+  --pdx-mask:var(--pdx-ico-pitwall)!important;
+  width:17px!important;
+  height:17px!important;
+  color:rgba(255,255,255,.80)!important;
+  opacity:.68!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+#navbar .nav-link.active .nl-icon.nav-pitwall-icon,
+#navbar .nav-link:hover .nl-icon.nav-pitwall-icon{
+  color:var(--red)!important;
+  opacity:1!important;
+  transform:translateY(-1px) scale(1.04)!important;
+}
+#navbar .nav-link .nl-icon.nav-pitwall-icon::before{
+  content:''!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  background:currentColor!important;
+  -webkit-mask:var(--pdx-ico-pitwall) center/contain no-repeat!important;
+  mask:var(--pdx-ico-pitwall) center/contain no-repeat!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+#navbar .nav-link .nl-icon.nav-pitwall-icon::after{display:none!important;content:none!important;}
