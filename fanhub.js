@@ -2,11 +2,11 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.8 clean transparent logo repair loaded');
+console.log('PADDOX Phase 18.0.9 quote footer and receipt logo alignment loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
-const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_8';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png?v=18_0_7';
+const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_9';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png?v=18_0_9';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -1625,6 +1625,50 @@ function drawPaddoxPremiumBrand(ctx, x, y, iconLogo, options = {}) {
   return { width: size + wordGap + 210, height: size };
 }
 
+
+function drawPaddoxCanvasCleanMark(ctx, x, y, iconLogo, options = {}) {
+  const size = options.size || 38;
+  const fontSize = options.fontSize || 38;
+  const gap = options.gap || 12;
+  const textColor = options.textColor || '#ffffff';
+  const accent = options.accent || '#e8002d';
+
+  ctx.save();
+
+  if (iconLogo) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+    ctx.clip();
+
+    const logoSize = Math.min(iconLogo.width, iconLogo.height);
+    const sx = (iconLogo.width - logoSize) / 2;
+    const sy = (iconLogo.height - logoSize) / 2;
+    ctx.drawImage(iconLogo, sx, sy, logoSize, logoSize, x, y, size, size);
+    ctx.restore();
+
+    ctx.lineWidth = Math.max(1.2, size * 0.035);
+    ctx.strokeStyle = 'rgba(232,0,45,.42)';
+    ctx.beginPath();
+    ctx.arc(x + size / 2, y + size / 2, size / 2 - 1, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  const textX = x + size + gap;
+  const baselineY = y + size * 0.76;
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = `700 ${fontSize}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
+  ctx.fillStyle = textColor;
+  ctx.fillText('PADDO', textX, baselineY);
+  const paddoWidth = ctx.measureText('PADDO').width;
+  ctx.fillStyle = accent;
+  ctx.fillText('X', textX + paddoWidth + 2, baselineY);
+
+  ctx.restore();
+  return { width: size + gap + paddoWidth + ctx.measureText('X').width + 2, height: size };
+}
+
+
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
   const words = String(text || '').split(/\s+/).filter(Boolean);
   const lines = [];
@@ -1797,7 +1841,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxLockupCanvas(ctx, 772, 1177, brandLockup, { width: 158, height: 44 });
+  drawPaddoxCanvasCleanMark(ctx, 778, 1176, brandLogo, { size: 42, fontSize: 38, gap: 12 });
 
   return canvas;
 }

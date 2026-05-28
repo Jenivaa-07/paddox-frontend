@@ -4411,3 +4411,22 @@ body.modal-open { overflow: hidden; }
   .qf-brand-lockup-clean{min-width:118px!important;max-width:138px!important;}
   .qf-brand-lockup-img{width:128px!important;}
 }
+
+/* ============================================================
+   Phase 18.0.9 — quote footer logo final tune
+   ============================================================ */
+.qf-footer{
+  gap:18px!important;
+}
+.qf-brand-lockup-clean{
+  min-width:146px!important;
+  max-width:158px!important;
+}
+.qf-brand-lockup-img{
+  width:146px!important;
+  border-radius:16px!important;
+}
+@media(max-width:760px){
+  .qf-brand-lockup-clean{min-width:112px!important;max-width:126px!important;}
+  .qf-brand-lockup-img{width:118px!important;}
+}
