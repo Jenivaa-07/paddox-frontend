@@ -5572,20 +5572,65 @@ function pollLogoLooksBroken(url = '') {
   return u.includes('media.formula1.com/content/dam/fom-website/teams/2026') || u.endsWith('/undefined') || u.includes('undefined');
 }
 
-const ADMIN_POLL_FALLBACK_LOGOS = [
-  { name:'Ferrari',        slug:'ferrari',       color:'#e8002d', image:pollTeamBadgeSvgURI('Ferrari', '#e8002d', 'FER') },
-  { name:'Red Bull Racing',slug:'red-bull',      color:'#1e5bff', image:pollTeamBadgeSvgURI('Red Bull Racing', '#1e5bff', 'RBR') },
-  { name:'Mercedes',       slug:'mercedes',      color:'#00d2be', image:pollTeamBadgeSvgURI('Mercedes', '#00d2be', 'MER') },
-  { name:'McLaren',        slug:'mclaren',       color:'#ff8700', image:pollTeamBadgeSvgURI('McLaren', '#ff8700', 'MCL') },
-  { name:'Aston Martin',   slug:'aston-martin',  color:'#006f62', image:pollTeamBadgeSvgURI('Aston Martin', '#006f62', 'AMR') },
-  { name:'Alpine',         slug:'alpine',        color:'#2293d1', image:pollTeamBadgeSvgURI('Alpine', '#2293d1', 'ALP') },
-  { name:'Williams',       slug:'williams',      color:'#64c4ff', image:pollTeamBadgeSvgURI('Williams', '#64c4ff', 'WIL') },
-  { name:'Haas F1 Team',   slug:'haas',          color:'#ffffff', image:pollTeamBadgeSvgURI('Haas F1 Team', '#ffffff', 'HAA') },
-  { name:'Racing Bulls',   slug:'racing-bulls',  color:'#6c4cff', image:pollTeamBadgeSvgURI('Racing Bulls', '#6c4cff', 'RB') },
-  { name:'Audi',           slug:'audi',          color:'#00e701', image:pollTeamBadgeSvgURI('Audi', '#00e701', 'AUD') },
-  { name:'Cadillac',       slug:'cadillac',      color:'#d4af37', image:pollTeamBadgeSvgURI('Cadillac', '#d4af37', 'CAD') },
-  { name:'PADDOX',         slug:'paddox',        color:'#e8002d', image:'assets/paddox-logo-icon.png' }
+
+
+/* Phase 17.6.4 — real team logo resolver
+   Priority: Home Branding uploaded logo -> official/public site logo -> PADDOX fallback badge. */
+const ADMIN_POLL_REAL_TEAM_LOGOS = [
+  { name:'Mercedes',        slug:'mercedes',      aliases:['mercedes','mercedes-amg','mercedes amg','kimi','george','russell','antonelli'], color:'#00d2be', image:'https://logo.clearbit.com/mercedesamgf1.com' },
+  { name:'Ferrari',         slug:'ferrari',       aliases:['ferrari','scuderia ferrari','charles','leclerc','lewis','hamilton'], color:'#e8002d', image:'https://logo.clearbit.com/ferrari.com' },
+  { name:'McLaren',         slug:'mclaren',       aliases:['mclaren','mclaren racing','lando','norris','oscar','piastri'], color:'#ff8700', image:'https://logo.clearbit.com/mclaren.com' },
+  { name:'Red Bull Racing', slug:'red-bull',      aliases:['red bull','red bull racing','oracle red bull','verstappen','max','hadjar','isack'], color:'#1e5bff', image:'https://logo.clearbit.com/redbullracing.com' },
+  { name:'Alpine',          slug:'alpine',        aliases:['alpine','bwt alpine','gasly','pierre','colapinto','franco'], color:'#2293d1', image:'https://logo.clearbit.com/alpinecars.com' },
+  { name:'Racing Bulls',    slug:'racing-bulls',  aliases:['racing bulls','visa cash app rb','vcarb','rb','lawson','liam','lindblad','arvid'], color:'#6c4cff', image:'https://logo.clearbit.com/racingbulls.com' },
+  { name:'Haas F1 Team',    slug:'haas',          aliases:['haas','haas f1','haas f1 team','ocon','esteban','bearman','oliver'], color:'#ffffff', image:'https://logo.clearbit.com/haasf1team.com' },
+  { name:'Williams',        slug:'williams',      aliases:['williams','williams racing','albon','alexander','sainz','carlos'], color:'#64c4ff', image:'https://logo.clearbit.com/williamsf1.com' },
+  { name:'Audi',            slug:'audi',          aliases:['audi','kick sauber','sauber','hulkenberg','nico','bortoleto','gabriel'], color:'#00e701', image:'https://logo.clearbit.com/audi.com' },
+  { name:'Cadillac',        slug:'cadillac',      aliases:['cadillac','cadillac f1','perez','sergio','bottas','valtteri'], color:'#d4af37', image:'https://logo.clearbit.com/cadillac.com' },
+  { name:'Aston Martin',    slug:'aston-martin',  aliases:['aston martin','aston martin aramco','alonso','fernando','stroll','lance'], color:'#006f62', image:'https://logo.clearbit.com/astonmartinf1.com' }
 ];
+
+function adminPollTeamKey(value = '') {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function findRealAdminPollTeam(value = '') {
+  const key = adminPollTeamKey(value);
+  if (!key) return null;
+  return ADMIN_POLL_REAL_TEAM_LOGOS.find(team => {
+    const names = [team.name, team.slug, ...(team.aliases || [])];
+    return names.some(name => {
+      const n = adminPollTeamKey(name);
+      return key === n || key.includes(n) || n.includes(key);
+    });
+  }) || null;
+}
+
+function isGeneratedPollBadge(url = '') {
+  const u = String(url || '');
+  return u.startsWith('data:image/svg+xml') && (u.includes('%3Ctext') || u.includes('<text'));
+}
+
+function officialAdminPollLogoFor(name = '', key = '') {
+  const found = findRealAdminPollTeam(key) || findRealAdminPollTeam(name);
+  return found ? found.image : '';
+}
+
+function resolveAdminPollLogoImage(rawLogo = '', name = '', key = '', color = '#e8002d') {
+  const official = officialAdminPollLogoFor(name, key);
+  if (!rawLogo || pollLogoLooksBroken(rawLogo) || isGeneratedPollBadge(rawLogo)) {
+    return official || pollTeamBadgeSvgURI(name || key || 'Team', color, key || name);
+  }
+  return rawLogo;
+}
+const ADMIN_POLL_FALLBACK_LOGOS = ADMIN_POLL_REAL_TEAM_LOGOS.map(team => ({
+  name: team.name,
+  slug: team.slug,
+  color: team.color,
+  image: team.image
+})).concat([
+  { name:'PADDOX', slug:'paddox', color:'#e8002d', image:'assets/paddox-logo-icon.png' }
+]);
 
 function pollAdminHeaders(json = false) {
   return {
@@ -5612,9 +5657,11 @@ function normalizeAdminPollLogo(item = {}) {
   let image = String(item.image || item.logo || item.teamLogo || '').trim();
   const color = String(item.color || item.teamColor || '#e8002d').trim();
   const slug = String(item.slug || item.logoKey || pollLogoKey(name)).trim();
-  if (pollLogoLooksBroken(image)) image = pollTeamBadgeSvgURI(name, color, slug);
+  const realTeam = findRealAdminPollTeam(slug) || findRealAdminPollTeam(name);
+  const finalColor = realTeam?.color || color;
+  image = resolveAdminPollLogoImage(image, name, slug, finalColor);
 
-  return { name, image, color, slug };
+  return { name: realTeam?.name || name, image, color: finalColor, slug: realTeam?.slug || slug };
 }
 
 async function loadFanPollLogoOptions(force = false) {
@@ -5683,7 +5730,9 @@ function updatePollLogoPreview(row) {
   if (!preview) return;
 
   if (selected?.image) {
-    preview.innerHTML = `<img src="${escapeAdminText(selected.image)}" alt="${escapeAdminText(selected.name)}" onerror="this.outerHTML='<span>'+((this.alt||'PX').trim().slice(0,3).toUpperCase())+'</span>'">`;
+    const fallback = pollTeamBadgeSvgURI(selected.name, selected.color || '#e8002d', selected.slug || selected.name);
+    const logo = resolveAdminPollLogoImage(selected.image, selected.name, selected.slug, selected.color || '#e8002d');
+    preview.innerHTML = `<img src="${escapeAdminText(logo)}" alt="${escapeAdminText(selected.name)}" referrerpolicy="no-referrer" onerror="this.src='${escapeAdminText(fallback)}';this.onerror=null;">`;
   } else {
     preview.innerHTML = '<span>PX</span>';
   }
@@ -5697,12 +5746,13 @@ function adminPollMiniLogoHTML(option = {}) {
   const color = option.teamColor || '#e8002d';
   const rawLogo = String(option.logo || option.teamLogo || option.image || '').trim();
   const code = option.logoKey || option.teamName || option.label || option.text || 'PX';
-  const logo = pollLogoLooksBroken(rawLogo)
-    ? pollTeamBadgeSvgURI(labelText, color, code)
-    : rawLogo;
-  const fallback = pollTeamBadgeSvgURI(labelText, color, code);
+  const realTeam = findRealAdminPollTeam(option.logoKey || option.teamName || option.label || option.text || '');
+  const finalName = realTeam?.name || labelText;
+  const finalColor = realTeam?.color || color;
+  const logo = resolveAdminPollLogoImage(rawLogo, finalName, option.logoKey || option.teamName || option.label || option.text || '', finalColor);
+  const fallback = pollTeamBadgeSvgURI(finalName, finalColor, option.logoKey || finalName);
 
-  return `<img src="${escapeAdminText(logo || fallback)}" alt="${escapeAdminText(labelText)}" onerror="this.src='${escapeAdminText(fallback)}';this.onerror=null;">`;
+  return `<img src="${escapeAdminText(logo || fallback)}" alt="${escapeAdminText(finalName)}" referrerpolicy="no-referrer" onerror="this.src='${escapeAdminText(fallback)}';this.onerror=null;">`;
 }
 
 function refreshPollOptionLogoSelects() {
@@ -5861,12 +5911,16 @@ function collectFanPollOptions() {
 
       if (!label) return null;
 
+      const realTeam = findRealAdminPollTeam(logoKey) || findRealAdminPollTeam(logo?.name || '');
+      const teamName = realTeam?.name || logo?.name || '';
+      const teamColor = realTeam?.color || logo?.color || '#e8002d';
+      const teamLogo = resolveAdminPollLogoImage(logo?.image || '', teamName, logoKey, teamColor);
       return {
         label,
-        logoKey,
-        logo: logo?.image || '',
-        teamName: logo?.name || '',
-        teamColor: logo?.color || '#e8002d'
+        logoKey: realTeam?.slug || logoKey,
+        logo: teamLogo,
+        teamName,
+        teamColor
       };
     })
     .filter(Boolean)

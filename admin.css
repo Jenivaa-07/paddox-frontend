@@ -893,3 +893,24 @@ select.form-input option{background:var(--dark2)}
   .poll-admin-option-row .adm-btn-ghost.danger{width:100% !important;}
   .poll-admin-table-options{grid-template-columns:1fr;}
 }
+
+/* ============================================================
+   Phase 17.6.4 — Real F1 poll logo visibility polish
+   ============================================================ */
+.poll-logo-preview img{
+  width:78% !important;
+  height:78% !important;
+  object-fit:contain !important;
+  background:rgba(255,255,255,.92) !important;
+  border-radius:6px !important;
+  padding:4px !important;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.55)) !important;
+}
+.poll-admin-mini-option img{
+  width:24px !important;
+  height:24px !important;
+  object-fit:contain !important;
+  background:rgba(255,255,255,.92) !important;
+  border-radius:5px !important;
+  padding:3px !important;
+}

@@ -2170,6 +2170,51 @@ function pollOptionAccent(index = 0) {
 }
 
 
+
+/* Phase 17.6.4 — Fan Hub real team logo resolver */
+const FAN_POLL_REAL_TEAM_LOGOS = [
+  { name:'Mercedes',        slug:'mercedes',      aliases:['mercedes','mercedes-amg','mercedes amg','kimi','george','russell','antonelli'], color:'#00d2be', image:'https://logo.clearbit.com/mercedesamgf1.com' },
+  { name:'Ferrari',         slug:'ferrari',       aliases:['ferrari','scuderia ferrari','charles','leclerc','lewis','hamilton'], color:'#e8002d', image:'https://logo.clearbit.com/ferrari.com' },
+  { name:'McLaren',         slug:'mclaren',       aliases:['mclaren','mclaren racing','lando','norris','oscar','piastri'], color:'#ff8700', image:'https://logo.clearbit.com/mclaren.com' },
+  { name:'Red Bull Racing', slug:'red-bull',      aliases:['red bull','red bull racing','oracle red bull','verstappen','max','hadjar','isack'], color:'#1e5bff', image:'https://logo.clearbit.com/redbullracing.com' },
+  { name:'Alpine',          slug:'alpine',        aliases:['alpine','bwt alpine','gasly','pierre','colapinto','franco'], color:'#2293d1', image:'https://logo.clearbit.com/alpinecars.com' },
+  { name:'Racing Bulls',    slug:'racing-bulls',  aliases:['racing bulls','visa cash app rb','vcarb','rb','lawson','liam','lindblad','arvid'], color:'#6c4cff', image:'https://logo.clearbit.com/racingbulls.com' },
+  { name:'Haas F1 Team',    slug:'haas',          aliases:['haas','haas f1','haas f1 team','ocon','esteban','bearman','oliver'], color:'#ffffff', image:'https://logo.clearbit.com/haasf1team.com' },
+  { name:'Williams',        slug:'williams',      aliases:['williams','williams racing','albon','alexander','sainz','carlos'], color:'#64c4ff', image:'https://logo.clearbit.com/williamsf1.com' },
+  { name:'Audi',            slug:'audi',          aliases:['audi','kick sauber','sauber','hulkenberg','nico','bortoleto','gabriel'], color:'#00e701', image:'https://logo.clearbit.com/audi.com' },
+  { name:'Cadillac',        slug:'cadillac',      aliases:['cadillac','cadillac f1','perez','sergio','bottas','valtteri'], color:'#d4af37', image:'https://logo.clearbit.com/cadillac.com' },
+  { name:'Aston Martin',    slug:'aston-martin',  aliases:['aston martin','aston martin aramco','alonso','fernando','stroll','lance'], color:'#006f62', image:'https://logo.clearbit.com/astonmartinf1.com' }
+];
+
+function fanPollTeamKey(value = '') {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function findRealFanPollTeam(value = '') {
+  const key = fanPollTeamKey(value);
+  if (!key) return null;
+  return FAN_POLL_REAL_TEAM_LOGOS.find(team => {
+    const names = [team.name, team.slug, ...(team.aliases || [])];
+    return names.some(name => {
+      const n = fanPollTeamKey(name);
+      return key === n || key.includes(n) || n.includes(key);
+    });
+  }) || null;
+}
+
+function isGeneratedFanPollBadge(url = '') {
+  const u = String(url || '');
+  return u.startsWith('data:image/svg+xml') && (u.includes('%3Ctext') || u.includes('<text'));
+}
+
+function resolveFanPollLogoImage(rawLogo = '', name = '', key = '', color = '#e8002d') {
+  const realTeam = findRealFanPollTeam(key) || findRealFanPollTeam(name);
+  if (!rawLogo || fanPollLogoLooksBroken(rawLogo) || isGeneratedFanPollBadge(rawLogo)) {
+    return realTeam?.image || fanPollTeamBadgeSvgURI(name || key || 'Team', color, key || name);
+  }
+  return rawLogo;
+}
+
 function fanPollTeamBadgeSvgURI(name = 'Team', color = '#e8002d', code = '') {
   const safeName = String(name || 'Team').replace(/[&<>"']/g, '');
   const safeColor = String(color || '#e8002d').match(/^#[0-9a-fA-F]{3,8}$/) ? color : '#e8002d';
@@ -2214,13 +2259,16 @@ function pollOptionLogoHTML(option = {}, index = 0) {
   const colorRaw = option.teamColor || pollOptionAccent(index);
   const color = escapeHTML(colorRaw);
   const code = option.logoKey || option.teamName || option.label || `Option ${index + 1}`;
-  const logo = fanPollLogoLooksBroken(rawLogo)
-    ? fanPollTeamBadgeSvgURI(labelText, colorRaw, code)
-    : rawLogo;
-  const fallback = fanPollTeamBadgeSvgURI(labelText, colorRaw, code);
+  const realTeam = findRealFanPollTeam(option.logoKey || option.teamName || option.label || option.text || '');
+  const finalName = realTeam?.name || labelText;
+  const finalColorRaw = realTeam?.color || colorRaw;
+  const finalColor = escapeHTML(finalColorRaw);
+  const finalLabel = escapeHTML(finalName);
+  const logo = resolveFanPollLogoImage(rawLogo, finalName, option.logoKey || option.teamName || option.label || option.text || '', finalColorRaw);
+  const fallback = fanPollTeamBadgeSvgURI(finalName, finalColorRaw, code);
 
-  return `<span class="poll-team-logo" style="--poll-color:${color}">
-    <img src="${escapeHTML(logo)}" alt="${label}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='${escapeHTML(fallback)}';this.onerror=null;">
+  return `<span class="poll-team-logo" style="--poll-color:${finalColor}">
+    <img src="${escapeHTML(logo)}" alt="${finalLabel}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='${escapeHTML(fallback)}';this.onerror=null;">
   </span>`;
 }
 
@@ -2240,7 +2288,8 @@ function renderRealtimePoll(poll, totalVotes = 0) {
     const votes = Number(option.votes || 0);
     const pct = option.percentage ?? (totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0);
     const isSelected = hasVoted && Number(storedVote) === index;
-    const accent = escapeHTML(option.teamColor || pollOptionAccent(index));
+    const realTeam = findRealFanPollTeam(option.logoKey || option.teamName || option.label || option.text || '');
+    const accent = escapeHTML(realTeam?.color || option.teamColor || pollOptionAccent(index));
 
     return `
       <div class="popt ${hasVoted ? 'show-results' : ''} ${isSelected ? 'selected' : ''}" onclick="voteRealtimePoll(${index})" style="--poll-color:${accent}">

@@ -3172,3 +3172,16 @@ body.modal-open { overflow: hidden; }
   .fh-tab-icon::before { width: 16px !important; height: 16px !important; }
 }
 
+
+/* ============================================================
+   Phase 17.6.4 — Real F1 poll logo visibility polish
+   ============================================================ */
+.poll-team-logo img{
+  width:78% !important;
+  height:78% !important;
+  object-fit:contain !important;
+  background:rgba(255,255,255,.92) !important;
+  border-radius:6px !important;
+  padding:4px !important;
+  filter:drop-shadow(0 5px 10px rgba(0,0,0,.55)) !important;
+}
