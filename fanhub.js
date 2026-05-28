@@ -6,7 +6,7 @@ console.log('PADDOX Phase 18.0.3 quotes/receipt cache-busted polish loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup.png';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png?v=18_0_4';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS

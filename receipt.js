@@ -6,7 +6,7 @@ console.log('PADDOX Phase 18.0.3 professional receipt loaded');
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
 const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup.png';
-const BRAND_ICON_PATH = 'assets/paddox-logo-icon.png';
+const BRAND_ICON_PATH = 'assets/paddox-logo-icon.png?v=18_0_4';
 
 function receiptToken() {
   return (
