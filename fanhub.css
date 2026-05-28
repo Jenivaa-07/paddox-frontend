@@ -4510,3 +4510,41 @@ body.modal-open { overflow: hidden; }
   .qf-brand-final .qf-brand-icon{width:26px!important;height:26px!important;flex-basis:26px!important;}
   .qf-brand-final .qf-brand-wordmark{font-size:.98rem!important;letter-spacing:1.8px!important;}
 }
+
+/* ============================================================
+   Phase 18.0.12 — centered logo icon only
+   ============================================================ */
+.qf-brand-final{
+  gap:8px!important;
+  min-width:122px!important;
+}
+.qf-brand-final .qf-brand-icon-wrap{
+  width:29px!important;
+  height:29px!important;
+  flex:0 0 29px!important;
+  display:grid!important;
+  place-items:center!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.qf-brand-final .qf-brand-icon{
+  width:29px!important;
+  height:29px!important;
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  background:transparent!important;
+}
+.qf-brand-final .qf-brand-wordmark{
+  transform:translateY(0)!important;
+  line-height:1!important;
+}
+@media(max-width:760px){
+  .qf-brand-final{min-width:104px!important;gap:7px!important;}
+  .qf-brand-final .qf-brand-icon-wrap,
+  .qf-brand-final .qf-brand-icon{width:25px!important;height:25px!important;flex-basis:25px!important;}
+}

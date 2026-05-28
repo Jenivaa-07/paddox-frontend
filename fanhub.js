@@ -2,11 +2,11 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.11 final logo icon alignment system loaded');
+console.log('PADDOX Phase 18.0.12 centered logo icon fix loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
-const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_11';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-clean.png?v=18_0_11';
+const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_12';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-centered.png?v=18_0_12';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -1709,7 +1709,7 @@ async function buildQuoteShareCanvas(q = {}) {
 
   const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  drawPaddoxAlignedBrand(ctx, 110, 108, brandLogo, { size: 54, fontSize: 48, gap: 13, letterGap: 5 });
+  drawPaddoxAlignedBrand(ctx, 110, 108, brandLogo, { size: 52, fontSize: 49, gap: 14, letterGap: 5 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
@@ -1785,7 +1785,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxAlignedBrand(ctx, 770, 1180, brandLogo, { size: 34, fontSize: 31, gap: 10, letterGap: 2 });
+  drawPaddoxAlignedBrand(ctx, 780, 1180, brandLogo, { size: 30, fontSize: 29, gap: 9, letterGap: 2 });
 
   return canvas;
 }
