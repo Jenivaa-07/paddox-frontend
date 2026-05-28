@@ -2306,7 +2306,10 @@ function renderRealtimePoll(poll, totalVotes = 0) {
         <div class="popt-fill" style="width:${hasVoted ? pct : 0}%"></div>
         <span class="popt-lbl">
           ${pollOptionLogoHTML(option, index)}
-          <span>${escapeHTML(cleanPollOptionLabel(option.label || option.text, index))}</span>
+          <span class="poll-option-copy">
+            <span class="poll-option-name">${escapeHTML(cleanPollOptionLabel(option.label || option.text, index))}</span>
+            ${isSelected ? '<span class="poll-selected-badge">Selected</span>' : ''}
+          </span>
         </span>
         <span class="popt-pct">${hasVoted ? `${pct}%` : 'Vote'}</span>
       </div>
