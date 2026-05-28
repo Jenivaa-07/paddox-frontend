@@ -54,30 +54,33 @@
   <nav id="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
-        <span class="helmet-wrap" id="helmet-wrap"><img src="assets/paddox-logo-icon.png" alt="PADDOX Logo" class="brand-logo-icon"></span>
+        <span class="helmet-wrap" id="helmet-wrap"><img src="assets/paddox-logo-icon-official.png?v=20_2" alt="PADDOX Logo" class="brand-logo-icon"></span>
         <span class="logo-text">PADDO<span class="logo-x">X</span></span>
       </a>
       <ul class="nav-links">
-        <li><a href="index.html"   class="nav-link"><span class="nl-icon">🏠</span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
-        <li><a href="shop.html"    class="nav-link"><span class="nl-icon">🛒</span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
-        <li><a href="fanhub.html"  class="nav-link"><span class="nl-icon">🎮</span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
-        <li><a href="account.html" class="nav-link active"><span class="nl-icon">👤</span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
+        <li><a href="index.html" class="nav-link"><span class="nl-icon nav-home-icon" aria-hidden="true"></span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
+        <li><a href="shop.html" class="nav-link"><span class="nl-icon nav-shop-icon" aria-hidden="true"></span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
+        <li><a href="fanhub.html" class="nav-link"><span class="nl-icon nav-fanhub-icon" aria-hidden="true"></span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
+        <li><a href="pitwall.html" class="nav-link"><span class="nl-icon nav-pitwall-icon" aria-hidden="true"></span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
+        <li><a href="account.html" class="nav-link active"><span class="nl-icon nav-account-icon" aria-hidden="true"></span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
       </ul>
       <div class="nav-right">
-        <button class="nav-search-btn" id="nav-search-btn">🔍</button>
-        <a href="shop.html" class="nav-cart-btn"><span class="cart-icon-anim">🛒</span><span class="cart-badge" id="cart-badge">0</span></a>
-        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+        <button class="nav-search-btn" id="nav-search-btn" aria-label="Search"><span class="search-icon-anim" aria-hidden="true"></span></button>
+        <a href="shop.html" class="nav-cart-btn" aria-label="Cart"><span class="cart-icon-anim" aria-hidden="true"></span><span class="cart-badge" id="cart-badge">0</span></a>
+        <a href="account.html" class="nav-cta-btn">Sign Up <span class="cta-arrow" aria-hidden="true"></span></a>
+        <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
       </div>
     </div>
     <div class="nav-search-drawer" id="search-drawer">
-      <input type="text" class="search-input" placeholder="Search Paddox…"/>
+      <input type="text" class="search-input" placeholder="Search PADDOX account…"/>
       <button class="search-close" id="search-close">✕</button>
     </div>
     <div class="mobile-menu" id="mobile-menu">
-      <a href="index.html"   class="mob-link">🏠 Home</a>
-      <a href="shop.html"    class="mob-link">🛒 Shop</a>
-      <a href="fanhub.html"  class="mob-link">🎮 Fan Hub</a>
-      <a href="account.html" class="mob-link active">👤 Account</a>
+      <a href="index.html" class="mob-link">Home</a>
+      <a href="shop.html" class="mob-link">Shop</a>
+      <a href="fanhub.html" class="mob-link">Fan Hub</a>
+      <a href="pitwall.html" class="mob-link">Pit Wall</a>
+      <a href="account.html" class="mob-link active">Account</a>
     </div>
   </nav>
 
@@ -96,14 +99,14 @@
 
       <!-- LOGIN FORM -->
       <div class="auth-form on" id="form-login">
-        <div class="auth-brand-lockup"><img src="assets/paddox-logo-icon-official.png" alt="PADDOX logo" class="auth-brand-icon"><div class="auth-logo">PADDO<span class="logo-x">X</span></div></div>
+        <div class="auth-brand-lockup"><img src="assets/paddox-logo-icon-official.png?v=20_4" alt="PADDOX logo" class="auth-brand-icon"><div class="auth-logo">PADDO<span class="logo-x">X</span></div></div>
         <div class="auth-sub">Sign in to your fan account</div>
         <div class="form-group">
-          <label class="form-label"><span class="form-label-icon form-icon-mail"></span>Email Address</label>
+          <label class="form-label"><span class="form-label-icon form-email-icon" aria-hidden="true"></span>Email Address</label>
           <input class="form-input" type="email" id="li-email" placeholder="you@example.com"/>
         </div>
         <div class="form-group">
-          <label class="form-label"><span class="form-label-icon form-icon-lock"></span>Password</label>
+          <label class="form-label"><span class="form-label-icon form-lock-icon" aria-hidden="true"></span>Password</label>
           <input class="form-input" type="password" id="li-pass" placeholder="••••••••"/>
         </div>
         <div class="form-check">
@@ -116,18 +119,14 @@
         <div class="forgot-link">Forgot your password?</div>
         <div class="divider-or"><span>or continue with</span></div>
         <div class="social-auth">
-          <button class="social-btn" onclick="demoLogin()">
-            <span class="social-logo social-logo-google" aria-hidden="true"></span> Google
-          </button>
-          <button class="social-btn" onclick="demoLogin()">
-            <span class="social-logo social-logo-facebook" aria-hidden="true"></span> Facebook
-          </button>
+          <button class="social-btn" onclick="demoLogin()"><span class="social-logo google-logo" aria-hidden="true"></span><span>Google</span></button>
+          <button class="social-btn" onclick="demoLogin()"><span class="social-logo facebook-logo" aria-hidden="true"></span><span>Facebook</span></button>
         </div>
       </div>
 
       <!-- REGISTER FORM -->
       <div class="auth-form" id="form-register">
-        <div class="auth-brand-lockup"><img src="assets/paddox-logo-icon-official.png" alt="PADDOX logo" class="auth-brand-icon"><div class="auth-logo">PADDO<span class="logo-x">X</span></div></div>
+        <div class="auth-brand-lockup"><img src="assets/paddox-logo-icon-official.png?v=20_4" alt="PADDOX logo" class="auth-brand-icon"><div class="auth-logo">PADDO<span class="logo-x">X</span></div></div>
         <div class="auth-sub">Join the Paddox fan universe</div>
         <div class="form-row">
           <div class="form-group">
@@ -140,15 +139,15 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label"><span class="form-label-icon form-icon-mail"></span>Email Address</label>
+          <label class="form-label"><span class="form-label-icon form-email-icon" aria-hidden="true"></span>Email Address</label>
           <input class="form-input" type="email" id="ri-email" placeholder="you@example.com"/>
         </div>
         <div class="form-group">
-          <label class="form-label"><span class="form-label-icon form-icon-lock"></span>Password</label>
+          <label class="form-label"><span class="form-label-icon form-lock-icon" aria-hidden="true"></span>Password</label>
           <input class="form-input" type="password" id="ri-pass" placeholder="Min 8 characters"/>
         </div>
         <div class="form-group">
-          <label class="form-label"><span class="form-label-icon form-icon-team"></span>Favourite Team</label>
+          <label class="form-label"><span class="form-label-icon form-team-icon" aria-hidden="true"></span>Favourite Team</label>
           <select class="form-input" id="ri-team">
             <option value="">Select your team…</option>
             <option>Scuderia Ferrari</option>
@@ -173,8 +172,8 @@
         </button>
         <div class="divider-or"><span>or continue with</span></div>
         <div class="social-auth">
-          <button class="social-btn" onclick="demoLogin()"><span class="social-logo social-logo-google" aria-hidden="true"></span> Google</button>
-          <button class="social-btn" onclick="demoLogin()"><span class="social-logo social-logo-facebook" aria-hidden="true"></span> Facebook</button>
+          <button class="social-btn" onclick="demoLogin()"><span class="social-logo google-logo" aria-hidden="true"></span><span>Google</span></button>
+          <button class="social-btn" onclick="demoLogin()"><span class="social-logo facebook-logo" aria-hidden="true"></span><span>Facebook</span></button>
         </div>
       </div>
     </div>
