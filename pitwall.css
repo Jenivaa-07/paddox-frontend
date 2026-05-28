@@ -465,3 +465,146 @@ html{scroll-behavior:smooth}body{background:var(--black);color:var(--white);font
   .timing-header,.timing-row.session-row{min-width:860px;}
   .timing-row.session-row{min-height:58px;padding:10px 14px!important;}
 }
+
+/* ============================================================
+   PHASE 19.5 — Pit Wall Timing Table Overflow Repair
+   Removes desktop horizontal clipping and keeps timing board aligned.
+   ============================================================ */
+.timing-panel{
+  overflow:hidden!important;
+}
+.timing-table{
+  display:grid!important;
+  gap:8px!important;
+  overflow-x:hidden!important;
+  padding:0!important;
+  scrollbar-width:none!important;
+}
+.timing-table::-webkit-scrollbar{display:none!important;}
+.timing-header,
+.timing-row.session-row{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  display:grid!important;
+  grid-template-columns:42px minmax(150px,1.55fr) minmax(52px,.52fr) minmax(70px,.72fr) minmax(64px,.62fr) minmax(52px,.52fr) minmax(52px,.52fr) minmax(58px,.58fr) minmax(38px,.38fr)!important;
+  column-gap:8px!important;
+  align-items:center!important;
+  box-sizing:border-box!important;
+}
+.timing-header{
+  padding:9px 12px!important;
+  margin:0 0 4px!important;
+  border-radius:12px!important;
+  font-size:.58rem!important;
+  letter-spacing:1.25px!important;
+}
+.timing-row.session-row{
+  min-height:56px!important;
+  padding:8px 12px!important;
+  margin:0!important;
+  border-radius:13px!important;
+}
+.timing-row.session-row > div,
+.timing-header span{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.timing-row.session-row .pos{
+  font-size:1.05rem!important;
+  letter-spacing:.5px!important;
+}
+.timing-row.session-row .driver-cell{
+  min-width:0!important;
+  overflow:hidden!important;
+  gap:9px!important;
+}
+.timing-row.session-row .driver-cell > div{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.timing-row.session-row .driver-head,
+.timing-row.session-row .driver-avatar-mini{
+  width:34px!important;
+  height:34px!important;
+  flex:0 0 34px!important;
+}
+.timing-row.session-row .driver-name{
+  display:block!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:.80rem!important;
+  line-height:1.1!important;
+}
+.timing-row.session-row .driver-team{
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:.64rem!important;
+  line-height:1.2!important;
+  margin-top:2px!important;
+}
+.timing-row.session-row .gap,
+.timing-row.session-row .lap-time,
+.timing-row.session-row .sector,
+.timing-row.session-row .laps,
+.timing-row.session-row .tyre-col{
+  font-size:.72rem!important;
+  letter-spacing:.35px!important;
+  font-variant-numeric:tabular-nums!important;
+}
+.tyre-col{justify-content:flex-end!important;overflow:visible!important;}
+.tyre-pill{
+  min-width:42px!important;
+  max-width:56px!important;
+  padding:4px 6px!important;
+  font-size:.60rem!important;
+  letter-spacing:.4px!important;
+}
+.timing-row.session-row .laps{
+  text-align:right!important;
+  font-size:.68rem!important;
+}
+
+@media(max-width:1280px){
+  .timing-header,
+  .timing-row.session-row{
+    grid-template-columns:38px minmax(140px,1.45fr) minmax(48px,.48fr) minmax(66px,.66fr) minmax(58px,.56fr) minmax(46px,.46fr) minmax(46px,.46fr) minmax(54px,.54fr) minmax(34px,.34fr)!important;
+    column-gap:7px!important;
+  }
+  .timing-row.session-row .driver-head,
+  .timing-row.session-row .driver-avatar-mini{width:32px!important;height:32px!important;flex-basis:32px!important;}
+  .timing-row.session-row .driver-name{font-size:.76rem!important;}
+  .timing-row.session-row .driver-team{font-size:.60rem!important;}
+  .tyre-pill{min-width:38px!important;max-width:50px!important;font-size:.56rem!important;}
+}
+
+@media(max-width:1180px){
+  .timing-header,
+  .timing-row.session-row{
+    grid-template-columns:38px minmax(170px,1fr) minmax(70px,.45fr) minmax(70px,.45fr) minmax(58px,.35fr) minmax(58px,.35fr) minmax(62px,.38fr)!important;
+  }
+  .timing-header span:nth-child(3),
+  .timing-row.session-row > div:nth-child(3),
+  .timing-header span:nth-child(9),
+  .timing-row.session-row > div:nth-child(9){display:none!important;}
+}
+
+@media(max-width:760px){
+  .timing-table{
+    overflow-x:auto!important;
+    padding-bottom:8px!important;
+    scrollbar-width:thin!important;
+  }
+  .timing-table::-webkit-scrollbar{display:block!important;height:4px!important;}
+  .timing-header,
+  .timing-row.session-row{
+    min-width:680px!important;
+    grid-template-columns:38px minmax(170px,1fr) 64px 64px 50px 50px 58px!important;
+  }
+}
