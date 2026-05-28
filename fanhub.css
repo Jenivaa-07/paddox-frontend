@@ -4333,3 +4333,10 @@ body.modal-open { overflow: hidden; }
 .qf-brand-mark,
 .qf-brand{background:transparent!important;border:0!important;box-shadow:none!important;}
 .qf-brand-icon-wrap{background:rgba(8,8,10,.75)!important;}
+
+/* Phase 18.0.5 — quote brand alignment correction */
+.qf-brand-mark.compact{min-width:118px!important;gap:8px!important;}
+.qf-brand-icon-wrap{width:28px!important;height:28px!important;flex-basis:28px!important;box-shadow:0 6px 16px rgba(232,0,45,.12)!important;}
+.qf-brand-wordmark{font-size:1.08rem!important;letter-spacing:2px!important;}
+.qf-footer{align-items:center!important;}
+@media(max-width:760px){.qf-brand-icon-wrap{width:25px!important;height:25px!important;flex-basis:25px!important}.qf-brand-wordmark{font-size:.98rem!important}.qf-brand-mark.compact{min-width:96px!important}}

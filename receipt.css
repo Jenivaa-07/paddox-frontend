@@ -97,3 +97,11 @@ html,body{background:#fff!important;}
   .receipt-card{box-shadow:none!important;background:#fff!important;}
   .receipt-screen-head,.no-print{display:none!important;}
 }
+
+/* Phase 18.0.5 — receipt logo visibility + professional alignment */
+.receipt-brand-mark{display:inline-flex!important;align-items:center!important;gap:14px!important;background:transparent!important;}
+.receipt-brand-icon-wrap{width:58px!important;height:58px!important;border-radius:50%!important;overflow:hidden!important;display:grid!important;place-items:center!important;border:1.5px solid rgba(232,0,45,.32)!important;background:#fff!important;box-shadow:0 8px 20px rgba(232,0,45,.10)!important;}
+.receipt-brand-icon{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important;}
+.receipt-brand-wordmark{font-family:var(--font-d)!important;letter-spacing:6px!important;font-size:2.18rem!important;color:#111!important;line-height:1!important;}
+.receipt-brand-wordmark span{color:var(--red)!important;}
+@media print{.receipt-brand-icon-wrap{width:46px!important;height:46px!important}.receipt-brand-wordmark{font-size:1.95rem!important;letter-spacing:5px!important}}

@@ -6,7 +6,7 @@ console.log('PADDOX Phase 18.0.3 professional receipt loaded');
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
 const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup.png';
-const BRAND_ICON_PATH = 'assets/paddox-logo-icon.png?v=18_0_4';
+const BRAND_ICON_PATH = 'assets/paddox-logo-icon.png?v=18_0_5';
 
 function receiptToken() {
   return (
@@ -156,7 +156,7 @@ function renderReceipt(order) {
       <div class="receipt-brand">
         <div class="receipt-brand-mark" aria-label="PADDOX brand">
           <span class="receipt-brand-icon-wrap">
-            <img src="${BRAND_ICON_PATH}" alt="PADDOX logo" class="receipt-brand-icon" onerror="this.parentElement.style.display='none'">
+            <img src="${BRAND_ICON_PATH}" alt="PADDOX logo" class="receipt-brand-icon" onerror="this.style.display='none';this.parentElement.classList.add('receipt-brand-icon-fallback')">
           </span>
           <span class="receipt-brand-wordmark">PADDO<span>X</span></span>
         </div>

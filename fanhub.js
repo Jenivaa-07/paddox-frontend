@@ -6,7 +6,7 @@ console.log('PADDOX Phase 18.0.3 quotes/receipt cache-busted polish loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup.png';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png?v=18_0_4';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png?v=18_0_5';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -1721,11 +1721,11 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillRect(70, 70, W - 140, 12);
 
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  drawPaddoxPremiumBrand(ctx, 110, 112, brandLogo, { size: 62, fontSize: 64, gap: 18 });
+  drawPaddoxPremiumBrand(ctx, 110, 118, brandLogo, { size: 52, fontSize: 50, gap: 16 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
-  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 215);
+  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 205);
 
   const imgSrc = quoteImageValue(q);
   const img = await loadQuoteImageForCanvas(imgSrc);
@@ -1794,7 +1794,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxPremiumBrand(ctx, 742, 1176, brandLogo, { size: 40, fontSize: 41, gap: 14 });
+  drawPaddoxPremiumBrand(ctx, 748, 1182, brandLogo, { size: 34, fontSize: 34, gap: 12 });
 
   return canvas;
 }
