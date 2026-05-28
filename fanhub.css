@@ -5352,3 +5352,406 @@ body.modal-open { overflow: hidden; }
   #sec-quotes .qf-brand-final{align-self:flex-start!important;}
   #sec-quotes .qf-premium-actions{display:grid!important;grid-template-columns:1fr!important;}
 }
+
+/* ============================================================
+   Phase 18.1.3 — Quotes Layout Rebuild
+   Goal: stop the stretched/hollow look and rebuild quote layout
+   into a tighter premium editorial composition.
+   ============================================================ */
+#sec-quotes{
+  --quotes-shell-max: 1180px;
+  --quote-feature-w: 760px;
+  --quote-side-w: 360px;
+}
+#sec-quotes .fan-zone-head,
+#sec-quotes .section-head,
+#sec-quotes .quote-controls,
+#sec-quotes .quotes-layout{
+  max-width:var(--quotes-shell-max)!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#sec-quotes .section-head{
+  margin-bottom:22px!important;
+}
+#sec-quotes .quote-controls{
+  display:grid!important;
+  grid-template-columns:auto minmax(320px,1fr) auto!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:12px!important;
+  border-radius:22px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02))!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+}
+#sec-quotes .quote-filter-row{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-width:0!important;
+}
+#sec-quotes .quote-filter{
+  height:38px!important;
+  padding:0 16px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:999px!important;
+  white-space:nowrap!important;
+}
+#sec-quotes .quote-search-wrap{
+  min-width:0!important;
+  height:46px!important;
+  border-radius:999px!important;
+}
+#sec-quotes .quote-count{
+  height:38px!important;
+  padding:0 14px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  white-space:nowrap!important;
+  border-radius:999px!important;
+}
+#sec-quotes .quotes-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,var(--quote-feature-w)) var(--quote-side-w)!important;
+  gap:24px!important;
+  align-items:start!important;
+}
+#sec-quotes .quote-featured{
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+#sec-quotes .quote-progress{
+  height:2px!important;
+  border-radius:999px!important;
+  overflow:hidden!important;
+  margin-bottom:0!important;
+}
+#sec-quotes .qf-premium-card{
+  width:100%!important;
+  min-height:382px!important;
+  height:382px!important;
+  grid-template-columns:205px minmax(0,1fr)!important;
+  border-radius:24px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--quote-team-color) 20%, transparent), transparent 28%),
+    linear-gradient(135deg,rgba(255,255,255,.065),rgba(255,255,255,.025) 48%,rgba(0,0,0,.36))!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 26px 80px rgba(0,0,0,.38)!important;
+}
+#sec-quotes .qf-premium-card::before{
+  opacity:.20!important;
+}
+#sec-quotes .qf-card-glow{
+  opacity:.14!important;
+  filter:blur(72px)!important;
+}
+#sec-quotes .qf-media{
+  height:100%!important;
+  min-height:0!important;
+  padding:24px 18px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-right:1px solid rgba(255,255,255,.075)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.18))!important;
+}
+#sec-quotes .qf-image-ring{
+  width:142px!important;
+  height:142px!important;
+  max-width:142px!important;
+  padding:6px!important;
+  border-radius:50%!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 14px 38px rgba(0,0,0,.42)!important;
+}
+#sec-quotes .qf-driver-image{
+  width:100%!important;
+  height:100%!important;
+  border-width:5px!important;
+  font-size:2.7rem!important;
+}
+#sec-quotes .qf-team-strip{
+  height:3px!important;
+  opacity:.9!important;
+}
+#sec-quotes .qf-content{
+  height:100%!important;
+  min-width:0!important;
+  padding:30px 32px 24px!important;
+  display:grid!important;
+  grid-template-rows:auto 1fr auto!important;
+  align-content:stretch!important;
+}
+#sec-quotes .qf-topline{
+  min-height:30px!important;
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  color:rgba(255,255,255,.60)!important;
+}
+#sec-quotes .qf-pill,
+#sec-quotes .qf-featured-badge{
+  height:28px!important;
+  padding:0 12px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  border-radius:999px!important;
+  font-size:.61rem!important;
+  letter-spacing:1.55px!important;
+}
+#sec-quotes .qf-featured-badge{
+  margin-left:auto!important;
+}
+#sec-quotes .big-qm{
+  position:absolute!important;
+  left:32px!important;
+  top:78px!important;
+  font-size:3.5rem!important;
+  opacity:.18!important;
+  margin:0!important;
+  pointer-events:none!important;
+}
+#sec-quotes .qf-bg{
+  right:42px!important;
+  bottom:84px!important;
+  font-size:9rem!important;
+  opacity:.032!important;
+}
+#sec-quotes .qf-text{
+  align-self:center!important;
+  margin:0!important;
+  max-width:560px!important;
+  font-size:clamp(1.18rem,1.34vw,1.45rem)!important;
+  line-height:1.42!important;
+  letter-spacing:.15px!important;
+  color:rgba(255,255,255,.92)!important;
+}
+#sec-quotes .qf-footer{
+  margin:0!important;
+  min-height:56px!important;
+  padding:9px 12px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  border-radius:16px!important;
+  background:rgba(255,255,255,.055)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+}
+#sec-quotes .qf-drv{
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+#sec-quotes .qf-ava{
+  width:36px!important;
+  height:36px!important;
+  flex:0 0 36px!important;
+}
+#sec-quotes .qf-drv>div:last-child{
+  min-width:0!important;
+}
+#sec-quotes .qf-dname{
+  font-size:.88rem!important;
+  line-height:1.06!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#sec-quotes .qf-dteam{
+  max-width:210px!important;
+  font-size:.62rem!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#sec-quotes .qf-brand-final{
+  flex:0 0 auto!important;
+  min-width:auto!important;
+  max-width:none!important;
+  gap:7px!important;
+}
+#sec-quotes .qf-brand-final .qf-brand-icon-wrap,
+#sec-quotes .qf-brand-final .qf-brand-icon{
+  width:25px!important;
+  height:25px!important;
+  flex:0 0 25px!important;
+}
+#sec-quotes .qf-brand-final .qf-brand-wordmark{
+  font-size:.82rem!important;
+  letter-spacing:1.5px!important;
+}
+#sec-quotes .qf-premium-actions{
+  margin-top:12px!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  padding-right:0!important;
+}
+#sec-quotes .qf-share{
+  height:36px!important;
+  min-height:36px!important;
+  padding:0 16px!important;
+  border-radius:999px!important;
+  font-size:.62rem!important;
+  letter-spacing:1.35px!important;
+}
+#sec-quotes .qf-download{
+  padding-inline:20px!important;
+}
+#sec-quotes .quotes-list{
+  width:100%!important;
+  max-height:438px!important;
+  overflow-y:auto!important;
+  padding-right:8px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  scrollbar-width:thin!important;
+}
+#sec-quotes .qmini{
+  position:relative!important;
+  min-height:102px!important;
+  height:102px!important;
+  padding:13px 14px!important;
+  border-radius:16px!important;
+  display:grid!important;
+  grid-template-rows:22px 1fr 28px!important;
+  gap:7px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  border-left:0!important;
+  overflow:hidden!important;
+  transform:none!important;
+}
+#sec-quotes .qmini + .qmini{
+  margin-top:0!important;
+}
+#sec-quotes .qmini::before{
+  content:''!important;
+  position:absolute!important;
+  inset:0 auto 0 0!important;
+  width:2px!important;
+  background:transparent!important;
+}
+#sec-quotes .qmini:hover,
+#sec-quotes .qmini.on{
+  border-color:rgba(232,0,45,.45)!important;
+  background:linear-gradient(180deg,rgba(232,0,45,.12),rgba(255,255,255,.025))!important;
+  transform:none!important;
+}
+#sec-quotes .qmini:hover::before,
+#sec-quotes .qmini.on::before{
+  background:var(--red)!important;
+}
+#sec-quotes .qmini-head{
+  min-height:22px!important;
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+}
+#sec-quotes .qmini-era{
+  height:22px!important;
+  max-width:112px!important;
+  padding:0 9px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  border-radius:999px!important;
+  font-size:.54rem!important;
+  letter-spacing:1.25px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#sec-quotes .qm-actions{
+  display:flex!important;
+  gap:5px!important;
+  opacity:0!important;
+  transition:opacity .18s ease!important;
+}
+#sec-quotes .qmini:hover .qm-actions,
+#sec-quotes .qmini.on .qm-actions{
+  opacity:.72!important;
+}
+#sec-quotes .qm-actions .qm-share{
+  height:22px!important;
+  padding:0 8px!important;
+  border-radius:999px!important;
+  font-size:.52rem!important;
+}
+#sec-quotes .qm-text{
+  margin:0!important;
+  min-height:0!important;
+  font-size:.86rem!important;
+  line-height:1.32!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+#sec-quotes .qm-drv{
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-width:0!important;
+}
+#sec-quotes .qm-avatar{
+  width:28px!important;
+  height:28px!important;
+  flex:0 0 28px!important;
+  font-size:.74rem!important;
+  box-shadow:none!important;
+}
+#sec-quotes .qm-drv>div{
+  min-width:0!important;
+}
+#sec-quotes .qm-n{
+  font-size:.76rem!important;
+  line-height:1.08!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#sec-quotes .qm-t{
+  max-width:210px!important;
+  font-size:.60rem!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#sec-quotes .qm-meta{
+  display:none!important;
+}
+@media(max-width:1180px){
+  #sec-quotes .quote-controls,
+  #sec-quotes .quotes-layout{max-width:calc(100vw - 36px)!important;}
+  #sec-quotes .quotes-layout{grid-template-columns:1fr!important;}
+  #sec-quotes .quotes-list{max-height:none!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;padding-right:0!important;}
+}
+@media(max-width:760px){
+  #sec-quotes .quote-controls{grid-template-columns:1fr!important;border-radius:18px!important;}
+  #sec-quotes .quote-filter-row{overflow-x:auto!important;scrollbar-width:none!important;}
+  #sec-quotes .quote-filter-row::-webkit-scrollbar{display:none!important;}
+  #sec-quotes .qf-premium-card{height:auto!important;min-height:auto!important;grid-template-columns:1fr!important;}
+  #sec-quotes .qf-media{height:auto!important;padding:24px 16px!important;border-right:0!important;border-bottom:1px solid rgba(255,255,255,.075)!important;}
+  #sec-quotes .qf-image-ring{width:132px!important;height:132px!important;}
+  #sec-quotes .qf-content{padding:24px 18px 18px!important;display:flex!important;flex-direction:column!important;gap:20px!important;}
+  #sec-quotes .qf-text{font-size:1.18rem!important;line-height:1.4!important;align-self:auto!important;}
+  #sec-quotes .qf-footer{flex-direction:column!important;align-items:flex-start!important;}
+  #sec-quotes .qf-brand-final{align-self:flex-start!important;}
+  #sec-quotes .qf-premium-actions{display:grid!important;grid-template-columns:1fr!important;}
+  #sec-quotes .quotes-list{grid-template-columns:1fr!important;}
+}
