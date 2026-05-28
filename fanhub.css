@@ -4548,3 +4548,56 @@ body.modal-open { overflow: hidden; }
   .qf-brand-final .qf-brand-icon-wrap,
   .qf-brand-final .qf-brand-icon{width:25px!important;height:25px!important;flex-basis:25px!important;}
 }
+
+
+/* ============================================================
+   Phase 18.0.13 — official PADDOX logo icon integration
+   Uses final approved circular helmet medallion asset only.
+   ============================================================ */
+.qf-brand-final{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  min-width:124px!important;
+  max-width:150px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.qf-brand-final .qf-brand-icon-wrap{
+  width:30px!important;
+  height:30px!important;
+  flex:0 0 30px!important;
+  display:block!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+  border-radius:50%!important;
+}
+.qf-brand-final .qf-brand-icon{
+  width:30px!important;
+  height:30px!important;
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  background:transparent!important;
+}
+.qf-brand-final .qf-brand-wordmark{
+  font-family:var(--font-d)!important;
+  font-size:1.13rem!important;
+  line-height:1!important;
+  letter-spacing:2.15px!important;
+  color:#fff!important;
+  transform:translateY(0)!important;
+  white-space:nowrap!important;
+}
+.qf-brand-final .qf-brand-wordmark span{color:var(--red)!important;}
+@media(max-width:760px){
+  .qf-brand-final{min-width:104px!important;gap:7px!important;}
+  .qf-brand-final .qf-brand-icon-wrap,
+  .qf-brand-final .qf-brand-icon{width:25px!important;height:25px!important;flex-basis:25px!important;}
+  .qf-brand-final .qf-brand-wordmark{font-size:.98rem!important;letter-spacing:1.8px!important;}
+}

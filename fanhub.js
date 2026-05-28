@@ -2,11 +2,11 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.12 centered logo icon fix loaded');
+console.log('PADDOX Phase 18.0.13 official logo icon integration loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_12';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-centered.png?v=18_0_12';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-official.png?v=18_0_13';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS

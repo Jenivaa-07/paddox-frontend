@@ -351,3 +351,50 @@ html,body{background:#fff!important;}
     flex-basis:40px!important;
   }
 }
+
+
+/* ============================================================
+   Phase 18.0.13 — official PADDOX receipt icon integration
+   Uses final approved circular helmet medallion asset only.
+   ============================================================ */
+.receipt-logo-row{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:14px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  line-height:1!important;
+}
+.receipt-brand .receipt-logo-icon-clean{
+  display:block!important;
+  width:46px!important;
+  height:46px!important;
+  flex:0 0 46px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  transform:translateY(0)!important;
+}
+.receipt-logo-word{
+  font-family:var(--font-d)!important;
+  font-size:2.05rem!important;
+  letter-spacing:6px!important;
+  color:#111820!important;
+  line-height:1!important;
+  transform:translateY(0)!important;
+  white-space:nowrap!important;
+}
+.receipt-logo-word span{color:var(--red)!important;}
+@media print{
+  .receipt-brand .receipt-logo-icon-clean{width:40px!important;height:40px!important;flex-basis:40px!important;}
+  .receipt-logo-word{font-size:1.82rem!important;letter-spacing:5px!important;}
+  .receipt-logo-row{gap:12px!important;}
+}
+@media(max-width:760px){
+  .receipt-brand .receipt-logo-icon-clean{width:40px!important;height:40px!important;flex-basis:40px!important;}
+  .receipt-logo-word{font-size:1.82rem!important;letter-spacing:5px!important;}
+}
