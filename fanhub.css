@@ -4965,7 +4965,7 @@ body.modal-open { overflow: hidden; }
 
 
 /* ============================================================
-   Phase 18.2.9 — Driver Stats repair after final consistency pass
+   Phase 18.2.7 — Driver Stats repair after final consistency pass
    Restores compare feature base and prevents driver grid clipping.
    ============================================================ */
 #sec-drivers .drv-selector{
