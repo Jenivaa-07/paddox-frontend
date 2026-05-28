@@ -2738,3 +2738,42 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   height:100%!important;
   align-items:center!important;
 }
+
+/* ============================================================
+   Phase 18.0.14 — Official PADDOX navbar logo icon
+   Applies the finalized centered helmet medallion to the navbar.
+   ============================================================ */
+.nav-logo .helmet-wrap{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  max-width:40px!important;
+  max-height:40px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.nav-logo .brand-logo-icon{
+  display:block!important;
+  width:40px!important;
+  height:40px!important;
+  max-width:40px!important;
+  max-height:40px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  transform:none!important;
+  filter:none!important;
+}
+.nav-logo:hover .helmet-wrap{transform:scale(1.04)!important;box-shadow:none!important;}
+@media(max-width:760px){
+  .nav-logo .helmet-wrap{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;}
+  .nav-logo .brand-logo-icon{width:38px!important;height:38px!important;max-width:38px!important;max-height:38px!important;}
+}

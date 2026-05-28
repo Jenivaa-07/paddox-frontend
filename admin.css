@@ -1462,3 +1462,32 @@ select.form-input option{background:var(--dark2)}
   .fan-trivia-editor > .adm-btn-red,
   .fan-trivia-editor > .adm-btn-ghost{width:100% !important;margin:0 0 8px 0 !important;}
 }
+
+/* ============================================================
+   Phase 18.0.14 — Official PADDOX admin sidebar logo icon
+   Replaces emoji/old icon treatment with finalized helmet medallion.
+   ============================================================ */
+.adm-helmet{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  font-size:0!important;
+}
+.adm-logo-icon-official{
+  display:block!important;
+  width:40px!important;
+  height:40px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+}
