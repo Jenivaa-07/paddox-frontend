@@ -1444,10 +1444,9 @@ function renderRealtimeQuotes() {
             </div>
           </div>
 
-          <div class="qf-brand qf-brand-lockup-wrap">
-            <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX logo" class="qf-brand-lockup" loading="lazy"
-              onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'">
-            <span class="qf-brand-fallback">PADDO<span>X</span></span>
+          <div class="qf-brand qf-brand-mark compact">
+            <span class="qf-brand-icon-wrap"><img src="${PADDOX_BRAND_ICON}" alt="PADDOX logo" class="qf-brand-icon" loading="lazy"></span>
+            <span class="qf-brand-wordmark">PADDO<span>X</span></span>
           </div>
         </div>
       </div>
@@ -1583,6 +1582,49 @@ function drawPaddoxLockupCanvas(ctx, x, y, logo, options = {}) {
   return { width: 210, height: 74 };
 }
 
+function drawPaddoxPremiumBrand(ctx, x, y, iconLogo, options = {}) {
+  const size = options.size || 58;
+  const fontSize = options.fontSize || 60;
+  const wordGap = options.gap || 18;
+  const tone = options.tone || '#ffffff';
+  const accent = options.accent || '#e8002d';
+
+  if (iconLogo) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(232,0,45,.18)';
+    ctx.shadowBlur = 22;
+    ctx.fillStyle = 'rgba(14,14,16,.82)';
+    ctx.beginPath();
+    ctx.arc(x + size / 2, y + size / 2, size / 2 + 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(232,0,45,.35)';
+    ctx.stroke();
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x + size / 2, y + size / 2, size / 2 - 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(iconLogo, x + 3, y + 3, size - 6, size - 6);
+    ctx.restore();
+    ctx.restore();
+  }
+
+  const textX = x + size + wordGap;
+  const baselineY = y + size * 0.78;
+  ctx.save();
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = `700 ${fontSize}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
+  ctx.fillStyle = tone;
+  ctx.fillText('PADDO', textX, baselineY);
+  const paddoWidth = ctx.measureText('PADDO').width;
+  ctx.fillStyle = accent;
+  ctx.fillText('X', textX + paddoWidth + 2, baselineY);
+  ctx.restore();
+
+  return { width: size + wordGap + 210, height: size };
+}
+
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
   const words = String(text || '').split(/\s+/).filter(Boolean);
   const lines = [];
@@ -1664,7 +1706,11 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.filter = 'none';
 
   roundedRect(ctx, 70, 70, W - 140, H - 140, 44);
-  ctx.fillStyle = 'rgba(14,14,14,.90)';
+  const cardGradient = ctx.createLinearGradient(70, 70, W - 70, H - 70);
+  cardGradient.addColorStop(0, 'rgba(9,10,13,.96)');
+  cardGradient.addColorStop(.52, 'rgba(12,13,16,.93)');
+  cardGradient.addColorStop(1, 'rgba(17,12,14,.94)');
+  ctx.fillStyle = cardGradient;
   ctx.fill();
   ctx.lineWidth = 3;
   ctx.strokeStyle = 'rgba(255,255,255,.16)';
@@ -1675,7 +1721,7 @@ async function buildQuoteShareCanvas(q = {}) {
 
   const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  drawPaddoxLockupCanvas(ctx, 110, 125, brandLockup, { width: 280, height: 86 });
+  drawPaddoxPremiumBrand(ctx, 110, 112, brandLogo, { size: 62, fontSize: 64, gap: 18 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
@@ -1737,7 +1783,10 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.50)';
   ctx.fillText(`${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'MOTIVATION').toUpperCase()}`, 145, driverY + 92);
 
-  ctx.fillStyle = 'rgba(255,255,255,.08)';
+  const footerGrad = ctx.createLinearGradient(110, 1160, W - 110, 1242);
+  footerGrad.addColorStop(0, 'rgba(255,255,255,.08)');
+  footerGrad.addColorStop(1, 'rgba(255,255,255,.05)');
+  ctx.fillStyle = footerGrad;
   roundedRect(ctx, 110, 1160, W - 220, 82, 26);
   ctx.fill();
 
@@ -1745,7 +1794,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxLockupCanvas(ctx, 742, 1182, brandLockup, { width: 218, height: 48 });
+  drawPaddoxPremiumBrand(ctx, 742, 1176, brandLogo, { size: 40, fontSize: 41, gap: 14 });
 
   return canvas;
 }

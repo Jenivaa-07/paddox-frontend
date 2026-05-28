@@ -1376,8 +1376,9 @@ body.modal-open { overflow: hidden; }
   border:1px solid rgba(255,255,255,.12);
   border-radius:28px;
   background:
-    radial-gradient(circle at 18% 15%, rgba(232,0,45,.18), transparent 32%),
-    linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025) 48%,rgba(0,0,0,.46));
+    radial-gradient(circle at 18% 15%, rgba(232,0,45,.14), transparent 30%),
+    radial-gradient(circle at 88% 16%, rgba(255,255,255,.05), transparent 20%),
+    linear-gradient(145deg,rgba(20,20,24,.98),rgba(10,10,13,.96) 55%,rgba(19,13,16,.97));
   box-shadow:0 28px 80px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.08);
   isolation:isolate;
 }
@@ -1410,7 +1411,7 @@ body.modal-open { overflow: hidden; }
   align-items:center;
   justify-content:center;
   padding:34px 18px;
-  background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.54));
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.28));
   border-right:1px solid rgba(255,255,255,.08);
 }
 .qf-image-ring{
@@ -1430,7 +1431,7 @@ body.modal-open { overflow: hidden; }
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#121212;
+  background:linear-gradient(180deg,#181b20,#101115);
   font-size:5rem;
   border:10px solid rgba(0,0,0,.42);
 }
@@ -1526,7 +1527,7 @@ body.modal-open { overflow: hidden; }
   flex:0 0 56px;
   overflow:hidden;
   border-color:var(--quote-team-color);
-  background:#121212;
+  background:linear-gradient(180deg,#181b20,#101115);
 }
 .qf-dname{
   font-size:1rem;
@@ -4275,41 +4276,46 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ============================================================
-   Phase 18.0.1 — Quotes brand lockup hotfix
-   Keeps quote section working even when the new brand asset is used.
+   Phase 18.0.2 — Premium PADDOX inline branding for quote cards
+   Removes boxed black logo strips and uses cleaner icon + wordmark.
    ============================================================ */
-.qf-brand-lockup-wrap{
+.qf-brand-mark{
   display:inline-flex!important;
   align-items:center!important;
-  justify-content:flex-end!important;
   gap:10px!important;
-  min-width:148px!important;
-  max-width:230px!important;
   opacity:1!important;
 }
-.qf-brand-lockup{
-  display:block!important;
-  width:min(190px,22vw)!important;
-  height:auto!important;
-  max-height:42px!important;
-  object-fit:contain!important;
-  border-radius:8px!important;
-  background:rgba(0,0,0,.42)!important;
-  border:1px solid rgba(255,255,255,.08)!important;
-  padding:3px 7px!important;
-  box-shadow:0 10px 24px rgba(0,0,0,.22)!important;
+.qf-brand-mark.compact{justify-content:flex-end!important;min-width:148px!important;}
+.qf-brand-icon-wrap{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(10,10,12,.88);
+  border:1px solid rgba(232,0,45,.35);
+  box-shadow:0 8px 22px rgba(232,0,45,.14);
+  overflow:hidden;
+  flex:0 0 34px;
 }
-.qf-brand-fallback{
-  display:none;
-  align-items:center;
-  font-family:var(--font-d);
-  letter-spacing:2.5px;
-  font-size:1.34rem;
-  color:#fff;
-  line-height:1;
+.qf-brand-icon{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:50%;
+  display:block;
 }
-.qf-brand-fallback span{color:var(--red)}
+.qf-brand-wordmark{
+  font-family:var(--font-d)!important;
+  letter-spacing:2.6px!important;
+  font-size:1.34rem!important;
+  color:#fff!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+.qf-brand-wordmark span{color:var(--red)!important}
 @media(max-width:760px){
-  .qf-brand-lockup{width:138px!important;max-height:34px!important;padding:2px 5px!important;}
-  .qf-brand-lockup-wrap{min-width:120px!important;}
+  .qf-brand-mark.compact{min-width:120px!important;}
+  .qf-brand-icon-wrap{width:30px;height:30px;flex-basis:30px;}
+  .qf-brand-wordmark{font-size:1.12rem!important;letter-spacing:2px!important;}
 }
