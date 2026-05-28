@@ -2,10 +2,10 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.7 logo visibility + quote card alignment repair loaded');
+console.log('PADDOX Phase 18.0.8 clean transparent logo repair loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
-const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup.png?v=18_0_7';
+const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_0_8';
 const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon.png?v=18_0_7';
 
 /* ============================================================
@@ -1721,7 +1721,7 @@ async function buildQuoteShareCanvas(q = {}) {
 
   const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  drawPaddoxLockupCanvas(ctx, 110, 108, brandLockup, { width: 230, height: 76 });
+  drawPaddoxLockupCanvas(ctx, 110, 108, brandLockup, { width: 255, height: 76 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';
@@ -1797,7 +1797,7 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = 'rgba(255,255,255,.78)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
 
-  drawPaddoxLockupCanvas(ctx, 778, 1180, brandLockup, { width: 150, height: 42 });
+  drawPaddoxLockupCanvas(ctx, 772, 1177, brandLockup, { width: 158, height: 44 });
 
   return canvas;
 }

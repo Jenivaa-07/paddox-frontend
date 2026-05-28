@@ -172,3 +172,40 @@ html,body{background:#fff!important;}
   .receipt-brand-fallback-icon{width:46px;height:46px;}
   .receipt-brand-fallback-word{font-size:1.8rem;letter-spacing:5px;}
 }
+
+
+/* ============================================================
+   Phase 18.0.8 — show clean transparent receipt logo properly
+   ============================================================ */
+.receipt-brand img.receipt-brand-lockup{
+  display:block!important;
+}
+.receipt-brand img.receipt-brand-fallback-icon{
+  display:block!important;
+}
+.receipt-brand{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:12px!important;
+  max-width:380px!important;
+}
+.receipt-brand-lockup{
+  width:240px!important;
+  max-width:100%!important;
+  height:auto!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:18px!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.receipt-brand p{
+  margin:0!important;
+}
+@media print{
+  .receipt-brand-lockup{width:220px!important;}
+}
+@media(max-width:760px){
+  .receipt-brand-lockup{width:210px!important;}
+}

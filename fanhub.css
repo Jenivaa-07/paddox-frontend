@@ -4387,3 +4387,27 @@ body.modal-open { overflow: hidden; }
   .qf-brand-lockup-clean{min-width:126px!important;}
   .qf-brand-lockup-img{width:136px!important;max-width:40vw!important;}
 }
+
+
+/* ============================================================
+   Phase 18.0.8 — clean transparent PADDOX quote logo asset
+   ============================================================ */
+.qf-brand-lockup-clean{
+  min-width:156px!important;
+  max-width:176px!important;
+  justify-content:flex-end!important;
+  align-self:center!important;
+}
+.qf-brand-lockup-img{
+  width:158px!important;
+  max-width:100%!important;
+  height:auto!important;
+  display:block!important;
+  background:transparent!important;
+  border-radius:18px!important;
+  box-shadow:none!important;
+}
+@media(max-width:760px){
+  .qf-brand-lockup-clean{min-width:118px!important;max-width:138px!important;}
+  .qf-brand-lockup-img{width:128px!important;}
+}

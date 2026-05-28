@@ -2,11 +2,11 @@
    PADDOX — receipt.js | Phase 18.0.1 professional receipt
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.0.7 receipt logo visibility repair loaded');
+console.log('PADDOX Phase 18.0.8 clean receipt logo repair loaded');
 
 const RECEIPT_ORDER_API = 'https://paddox-backend.onrender.com/api/orders';
-const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup.png?v=18_0_7';
-const BRAND_ICON_PATH = 'assets/paddox-logo-icon.png?v=18_0_7';
+const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup-receipt-clean.png?v=18_0_8';
+const BRAND_ICON_PATH = 'assets/paddox-logo-icon.png?v=18_0_8';
 
 function receiptToken() {
   return (
