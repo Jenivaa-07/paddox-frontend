@@ -105,3 +105,41 @@ html,body{background:#fff!important;}
 .receipt-brand-wordmark{font-family:var(--font-d)!important;letter-spacing:6px!important;font-size:2.18rem!important;color:#111!important;line-height:1!important;}
 .receipt-brand-wordmark span{color:var(--red)!important;}
 @media print{.receipt-brand-icon-wrap{width:46px!important;height:46px!important}.receipt-brand-wordmark{font-size:1.95rem!important;letter-spacing:5px!important}}
+
+
+/* ============================================================
+   Phase 18.0.6 — FINAL receipt logo repair
+   No empty circle. Uses the actual PADDOX lockup image directly.
+   ============================================================ */
+.receipt-brand{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  max-width:380px!important;
+}
+.receipt-brand-lockup{
+  display:block!important;
+  width:250px!important;
+  max-width:100%!important;
+  height:auto!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  box-shadow:none!important;
+}
+.receipt-brand-mark,
+.receipt-brand-icon-wrap,
+.receipt-brand-icon,
+.receipt-brand-wordmark{
+  display:none!important;
+}
+@media print{
+  .receipt-brand-lockup{
+    width:220px!important;
+  }
+}
+@media(max-width:760px){
+  .receipt-brand-lockup{width:210px!important;}
+}

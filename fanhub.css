@@ -4340,3 +4340,33 @@ body.modal-open { overflow: hidden; }
 .qf-brand-wordmark{font-size:1.08rem!important;letter-spacing:2px!important;}
 .qf-footer{align-items:center!important;}
 @media(max-width:760px){.qf-brand-icon-wrap{width:25px!important;height:25px!important;flex-basis:25px!important}.qf-brand-wordmark{font-size:.98rem!important}.qf-brand-mark.compact{min-width:96px!important}}
+
+
+/* ============================================================
+   Phase 18.0.6 — FINAL quote card logo alignment repair
+   Use the real PADDOX lockup image, not oversized canvas text.
+   ============================================================ */
+.qf-brand-lockup-clean{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  min-width:150px!important;
+  max-width:210px!important;
+  opacity:1!important;
+}
+.qf-brand-lockup-img{
+  display:block!important;
+  width:168px!important;
+  max-width:18vw!important;
+  height:auto!important;
+  object-fit:contain!important;
+  border-radius:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+@media(max-width:760px){
+  .qf-brand-lockup-img{width:132px!important;max-width:38vw!important;}
+  .qf-brand-lockup-clean{min-width:120px!important;}
+}
