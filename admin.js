@@ -64,6 +64,49 @@ async function checkAdminAccess() {
     return true;
   }
 }
+
+/* ══════════════════════════════════════
+   REALTIME ADMIN NOTIFICATION BRIDGE
+══════════════════════════════════════ */
+const ADMIN_SOCKET_URL = 'https://paddox-backend.onrender.com';
+let adminSocket = null;
+
+function initAdminNotificationSocket() {
+  if (adminSocket?.connected || typeof window.io !== 'function') return;
+  const token = getAdminToken();
+  if (!token) return;
+  adminSocket = window.io(ADMIN_SOCKET_URL, {
+    transports: ['websocket', 'polling'],
+    auth: { token },
+    query: { token },
+    withCredentials: true,
+    reconnection: true
+  });
+}
+
+function emitAdminDropNotification(kind, payload = {}) {
+  try {
+    initAdminNotificationSocket();
+    adminSocket?.emit('admin:new-drop', { kind, ...payload });
+  } catch (err) {
+    console.warn('Admin drop notification failed:', err.message);
+  }
+}
+
+function emitAdminRaceNotification(title, message, ref = '') {
+  try {
+    initAdminNotificationSocket();
+    adminSocket?.emit('admin:race-alert', { title, message, ref });
+    showToast('🏁 Race alert sent');
+  } catch (err) {
+    console.warn('Race notification failed:', err.message);
+  }
+}
+
+window.sendPaddoxRaceNotification = emitAdminRaceNotification;
+
+window.addEventListener('load', initAdminNotificationSocket);
+
 /* ══ DATA ══ */
 
 
@@ -1723,7 +1766,17 @@ async function submitAssetUpload() {
       throw new Error(data.message);
     }
 
+    const createdAsset = data.data?.asset || data.asset || data.data || {};
+
     showToast('🔥 Wallpaper uploaded');
+
+    emitAdminDropNotification('asset', {
+      id: createdAsset._id || createdAsset.id || document.getElementById('asset-name').value,
+      name: createdAsset.name || document.getElementById('asset-name').value || 'New digital asset',
+      category: createdAsset.category || document.getElementById('asset-category').value || 'Digital Asset',
+      title: 'New digital asset',
+      message: `${createdAsset.name || document.getElementById('asset-name').value || 'A new PADDOX asset'} is now available.`
+    });
 
     closeAssetModal();
 
@@ -2910,7 +2963,19 @@ async function saveNewProduct() {
       throw new Error(data.message || 'Product create failed');
     }
 
+    const createdProduct = data.data?.product || data.product || data.data || productPayload;
+
     showToast('🔥 Product added successfully');
+
+    emitAdminDropNotification('product', {
+      id: createdProduct._id || createdProduct.id || name,
+      name: createdProduct.name || name,
+      team: createdProduct.team || team,
+      category: createdProduct.category || category,
+      price: createdProduct.price || price,
+      title: 'New product drop',
+      message: `${createdProduct.name || name} is now live in the PADDOX shop.`
+    });
 
     closeAddModal();
 

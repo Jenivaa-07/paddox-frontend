@@ -1550,6 +1550,14 @@ function handleFanPointsSocketNotification(payload = {}) {
   });
 }
 
+function handleRaceSocketNotification(payload = {}) {
+  addChannelNotification('race', payload.title || 'Race alert', payload.message || 'A PADDOX race alert is live.', {
+    category: payload.category || 'Race Alerts',
+    ref: payload.ref || payload.raceId || payload.round || payload.title || Date.now(),
+    createdAt: payload.createdAt || new Date().toISOString()
+  });
+}
+
 function reconcileFanPointsNotification(user = currentUser) {
   if (!user) return;
   const userId = user._id || user.id || user.email || 'guest';
@@ -1618,6 +1626,14 @@ function initOrderNotificationSocket() {
   accountSocket.on('product:new-drop', handleNewDropSocketNotification);
   accountSocket.on('asset:new-drop', handleNewDropSocketNotification);
   accountSocket.on('fan:points-update', handleFanPointsSocketNotification);
+  accountSocket.on('race:notification', handleRaceSocketNotification);
+  accountSocket.on('community:notification', payload => {
+    addChannelNotification('community', payload.title || 'Community update', payload.message || 'New PADDOX community activity is live.', {
+      category: payload.category || 'Fan Hub',
+      ref: payload.ref || payload.id || payload._id || payload.title || Date.now(),
+      createdAt: payload.createdAt || new Date().toISOString()
+    });
+  });
 
   accountSocket.on('connect_error', err => {
     orderSocketConnected = false;
