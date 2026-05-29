@@ -514,13 +514,11 @@ function updateDashboardSavedItems() {
 
   if (!REAL_WISHLIST.length) {
     container.innerHTML = `
-      <div style="
-        padding:24px;
-        text-align:center;
-        color:#777;
-        border-top:1px solid rgba(255,255,255,.08);
-      ">
-        No saved items yet.
+      <div class="dashboard-empty-state">
+        <span class="empty-orders-icon heart-mini-icon" aria-hidden="true"></span>
+        <b>No saved items yet</b>
+        <small>Your favourite PADDOX products will appear here.</small>
+        <a href="shop.html">Explore shop</a>
       </div>
     `;
     return;
