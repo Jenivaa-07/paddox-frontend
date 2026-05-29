@@ -1220,20 +1220,35 @@ function getProductCategoryLabel(value) {
   return v.charAt(0).toUpperCase() + v.slice(1);
 }
 
-function getProductPrice(product) {
+function getProductSaleInfo(product = {}) {
   const price = Number(product.price || 0);
   const sale = Number(product.salePrice || 0);
+  const active = price > 0 && sale > 0 && sale < price;
+  const percent = active ? Math.round(((price - sale) / price) * 100) : 0;
+  const savings = active ? Math.max(0, price - sale) : 0;
 
-  if (sale > 0 && sale < price) {
+  return { price, sale, active, percent, savings };
+}
+
+function getProductDiscountLabel(product = {}) {
+  const info = getProductSaleInfo(product);
+  return info.active ? `${info.percent}% OFF` : 'No discount';
+}
+
+function getProductPrice(product) {
+  const info = getProductSaleInfo(product);
+
+  if (info.active) {
     return `
-      <div class="product-price-stack">
-        <span class="product-sale-price">₹${sale.toLocaleString('en-IN')}</span>
-        <span class="product-mrp">₹${price.toLocaleString('en-IN')}</span>
+      <div class="product-price-stack has-discount">
+        <span class="product-sale-price">₹${info.sale.toLocaleString('en-IN')}</span>
+        <span class="product-mrp">₹${info.price.toLocaleString('en-IN')}</span>
+        <span class="product-discount-chip">${info.percent}% OFF</span>
       </div>
     `;
   }
 
-  return `<span class="product-sale-price">₹${price.toLocaleString('en-IN')}</span>`;
+  return `<span class="product-sale-price">₹${info.price.toLocaleString('en-IN')}</span>`;
 }
 
 function getProductStockPill(product) {
@@ -1255,26 +1270,30 @@ function getProductStockPill(product) {
 function getFilteredProducts() {
   const category = String(document.getElementById('product-category-filter')?.value || 'all').toLowerCase();
   const team = String(document.getElementById('product-team-filter')?.value || 'all').toLowerCase();
+  const saleFilter = String(document.getElementById('product-sale-filter')?.value || 'all').toLowerCase();
   const search = String(document.getElementById('product-search-input')?.value || '').toLowerCase().trim();
 
   return REAL_PRODUCTS.filter(product => {
     const productCategory = String(product.category || '').toLowerCase();
     const productTeam = String(product.team || '').toLowerCase();
-    const haystack = [product.name, product.category, product.team, product.badge, product.description]
+    const saleInfo = getProductSaleInfo(product);
+    const haystack = [product.name, product.category, product.team, product.badge, product.description, getProductDiscountLabel(product)]
       .map(v => String(v || '').toLowerCase())
       .join(' ');
 
     const categoryOk = category === 'all' || productCategory === category;
     const teamOk = teamMatchesProductFilter(productTeam, team);
+    const saleOk = saleFilter === 'all' || (saleFilter === 'sale' ? saleInfo.active : !saleInfo.active);
     const searchOk = !search || haystack.includes(search);
 
-    return categoryOk && teamOk && searchOk;
+    return categoryOk && teamOk && saleOk && searchOk;
   });
 }
 
 function updateProductStats() {
   const total = REAL_PRODUCTS.length;
   const featured = REAL_PRODUCTS.filter(product => product.isFeatured || String(product.badge || '').toLowerCase() === 'featured').length;
+  const saleDeals = REAL_PRODUCTS.filter(product => getProductSaleInfo(product).active).length;
   const low = REAL_PRODUCTS.filter(product => Number(product.stock || 0) <= 10).length;
   const units = REAL_PRODUCTS.reduce((sum, product) => sum + Number(product.stock || 0), 0);
 
@@ -1285,6 +1304,7 @@ function updateProductStats() {
 
   setText('products-count-stat', total);
   setText('products-featured-stat', featured);
+  setText('products-sale-stat', saleDeals);
   setText('products-low-stat', low);
   setText('products-stock-stat', units.toLocaleString('en-IN'));
 }
@@ -1324,6 +1344,7 @@ function renderProducts() {
 
       const isFeatured = product.isFeatured || String(product.badge || '').toLowerCase() === 'featured';
       const badge = String(product.badge || '').toLowerCase();
+      const saleInfo = getProductSaleInfo(product);
       const statusClass = product.isActive === false ? 's-out' : 's-act';
       const statusText = product.isActive === false ? 'Inactive' : 'Active';
 
@@ -1351,8 +1372,8 @@ function renderProducts() {
             <div class="product-flag-stack">
               ${isFeatured ? '<span class="product-flag featured">Featured</span>' : ''}
               ${badge && badge !== 'featured' ? `<span class="product-flag">${escapeProductHTML(badge.toUpperCase())}</span>` : ''}
-              ${product.onSale ? '<span class="product-flag sale">Sale</span>' : ''}
-              ${!isFeatured && !badge && !product.onSale ? '<span class="product-flag muted">Standard</span>' : ''}
+              ${saleInfo.active ? `<span class="product-flag sale">${saleInfo.percent}% OFF</span>` : ''}
+              ${!isFeatured && !badge && !saleInfo.active ? '<span class="product-flag muted">Standard</span>' : ''}
             </div>
           </td>
 
@@ -1372,7 +1393,7 @@ function renderProducts() {
 }
 
 function bindProductAdminControls() {
-  ['product-category-filter', 'product-team-filter', 'product-search-input'].forEach(id => {
+  ['product-category-filter', 'product-sale-filter', 'product-team-filter', 'product-search-input'].forEach(id => {
     const el = document.getElementById(id);
     if (el && !el.dataset.productBound) {
       const eventName = el.tagName === 'INPUT' ? 'input' : 'change';
@@ -2764,6 +2785,7 @@ ${getProductTeamOptionsHTML()}
             <label class="product-edit-field">
               <span>Sale Price ₹</span>
               <input id="edit-product-sale-price" type="number" min="0" class="edit-product-input" placeholder="Optional">
+              <em id="edit-product-discount-preview" class="product-discount-preview inline">No sale discount</em>
             </label>
 
             <label class="product-edit-field">
@@ -2835,6 +2857,9 @@ ${getProductTeamOptionsHTML()}
     if (e.target.id === 'product-edit-overlay') closeProductEditModal();
   };
   modal.querySelector('#save-product-edit').onclick = saveProductEdit;
+  ['edit-product-price', 'edit-product-sale-price'].forEach(id => {
+    modal.querySelector(`#${id}`)?.addEventListener('input', updateEditProductDiscountPreview);
+  });
   modal.querySelector('#edit-product-images').addEventListener('change', e => {
     setEditProductImageFiles(e.target.files, false);
   });
@@ -2865,6 +2890,7 @@ function openProductEditModal(productId) {
   document.getElementById('edit-product-rating').value = String(Math.round(Number(product.ratings?.average || product.rating || 5)));
   document.getElementById('edit-product-active').value = String(product.isActive !== false);
   document.getElementById('edit-product-description').value = product.description || '';
+  updateEditProductDiscountPreview();
 
   renderEditProductCurrentImages(product);
   updateEditProductImageCount();
@@ -2901,6 +2927,12 @@ async function saveProductEdit() {
     if (Number.isNaN(price) || price < 0) return showToast('❌ Valid price required');
     if (Number.isNaN(stock) || stock < 0) return showToast('❌ Valid stock required');
 
+    if (salePriceRaw !== '') {
+      const salePrice = Number(salePriceRaw);
+      if (Number.isNaN(salePrice) || salePrice < 0) return showToast('❌ Valid sale price required');
+      if (salePrice >= price) return showToast('❌ Sale price must be less than original price');
+    }
+
     const formData = new FormData();
     formData.append('name', name);
     formData.append('team', team);
@@ -2918,11 +2950,15 @@ async function saveProductEdit() {
 
     if (salePriceRaw !== '') {
       const salePrice = Number(salePriceRaw);
+      const discountPercent = Math.round(((price - salePrice) / price) * 100);
       formData.append('salePrice', String(salePrice));
-      formData.append('onSale', String(salePrice > 0 && salePrice < price));
+      formData.append('onSale', 'true');
+      formData.append('discountPercent', String(discountPercent));
+      if (!badge) formData.set('badge', 'sale');
     } else {
       formData.append('salePrice', '');
       formData.append('onSale', 'false');
+      formData.append('discountPercent', '0');
     }
 
     EDIT_PRODUCT_IMAGE_FILES.slice(0, 10).forEach(file => {
@@ -2966,6 +3002,40 @@ async function saveProductEdit() {
 
 function getAddValue(id) {
   return document.getElementById(id)?.value?.trim() || '';
+}
+
+function discountPreviewText(priceValue, saleValue) {
+  const price = Number(priceValue || 0);
+  const sale = Number(saleValue || 0);
+
+  if (!price || !sale) return 'No sale discount';
+  if (sale >= price) return 'Sale price must be lower';
+
+  const percent = Math.round(((price - sale) / price) * 100);
+  const savings = price - sale;
+  return `${percent}% OFF · saves ₹${savings.toLocaleString('en-IN')}`;
+}
+
+function updateAddProductDiscountPreview() {
+  const el = document.getElementById('add-product-discount-preview');
+  if (!el) return;
+  el.textContent = discountPreviewText(
+    document.getElementById('add-product-price')?.value,
+    document.getElementById('add-product-sale-price')?.value
+  );
+  el.classList.toggle('active', el.textContent.includes('% OFF'));
+  el.classList.toggle('error', el.textContent.includes('must be lower'));
+}
+
+function updateEditProductDiscountPreview() {
+  const el = document.getElementById('edit-product-discount-preview');
+  if (!el) return;
+  el.textContent = discountPreviewText(
+    document.getElementById('edit-product-price')?.value,
+    document.getElementById('edit-product-sale-price')?.value
+  );
+  el.classList.toggle('active', el.textContent.includes('% OFF'));
+  el.classList.toggle('error', el.textContent.includes('must be lower'));
 }
 
 
@@ -3084,6 +3154,7 @@ async function saveNewProduct() {
     const category = normaliseCategory(getAddValue('add-product-category'));
     const badge = normaliseBadge(getAddValue('add-product-badge'));
     const price = Number(getAddValue('add-product-price'));
+    const salePriceRaw = getAddValue('add-product-sale-price');
     const stock = Number(getAddValue('add-product-stock'));
     const rating = Number(getAddValue('add-product-rating') || 5);
     const description =
@@ -3111,6 +3182,18 @@ async function saveNewProduct() {
       return;
     }
 
+    if (salePriceRaw !== '') {
+      const salePrice = Number(salePriceRaw);
+      if (Number.isNaN(salePrice) || salePrice < 0) {
+        showToast('❌ Valid sale price required');
+        return;
+      }
+      if (salePrice >= price) {
+        showToast('❌ Sale price must be less than original price');
+        return;
+      }
+    }
+
     if (Number.isNaN(stock) || stock < 0) {
       showToast('❌ Valid stock required');
       return;
@@ -3127,8 +3210,11 @@ async function saveNewProduct() {
       name,
       team: canonicalTeam,
       category,
-      badge,
+      badge: salePriceRaw !== '' && !badge ? 'sale' : badge,
       price,
+      salePrice: salePriceRaw !== '' ? Number(salePriceRaw) : '',
+      onSale: salePriceRaw !== '' && Number(salePriceRaw) > 0 && Number(salePriceRaw) < price,
+      discountPercent: salePriceRaw !== '' ? Math.round(((price - Number(salePriceRaw)) / price) * 100) : 0,
       stock,
       description,
       shortDesc: description.slice(0, 180),
@@ -3209,6 +3295,7 @@ function clearAddProductForm() {
   [
     'add-product-name',
     'add-product-price',
+    'add-product-sale-price',
     'add-product-stock',
     'add-product-rating',
     'add-product-description',
@@ -3230,11 +3317,21 @@ function clearAddProductForm() {
 
   const badge = document.getElementById('add-product-badge');
   if (badge) badge.value = '';
+
+  updateAddProductDiscountPreview();
 }
 
 /* ══ ADD PRODUCT MODAL ══ */
 function openAddModal() {
   initAddProductDropzone();
+  ['add-product-price', 'add-product-sale-price'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.discountBound) {
+      el.addEventListener('input', updateAddProductDiscountPreview);
+      el.dataset.discountBound = 'true';
+    }
+  });
+  updateAddProductDiscountPreview();
   document.getElementById('add-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }

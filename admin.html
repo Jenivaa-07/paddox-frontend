@@ -341,7 +341,7 @@
             <div class="products-command-copy">
               <div class="products-live-kicker"><span></span> LIVE PRODUCT CONTROL</div>
               <h2>MERCHANDISE COMMAND CENTER</h2>
-              <p>Create products, control stock, mark featured drops and sync Cloudinary-protected merch images from one premium workspace.</p>
+              <p>Create products, control stock, run sale pricing, mark featured drops and sync Cloudinary-protected merch images from one premium workspace.</p>
             </div>
             <button class="products-command-btn" onclick="openAddModal()">+ ADD PRODUCT</button>
           </section>
@@ -354,6 +354,11 @@
               <option value="accessories">Accessories</option>
               <option value="posters">Posters</option>
               <option value="custom">Custom</option>
+            </select>
+            <select class="adm-select" id="product-sale-filter">
+              <option value="all">All Pricing</option>
+              <option value="sale">On Sale</option>
+              <option value="regular">Regular Price</option>
             </select>
             <select class="adm-select" id="product-team-filter">
               <option value="all">All Teams</option>
@@ -382,6 +387,7 @@
           <div class="products-kpi-grid reveal-up delay-2">
             <div class="products-mini-kpi"><span>Total Products</span><strong id="products-count-stat">0</strong></div>
             <div class="products-mini-kpi"><span>Featured Drops</span><strong id="products-featured-stat">0</strong></div>
+            <div class="products-mini-kpi"><span>Sale Deals</span><strong id="products-sale-stat">0</strong></div>
             <div class="products-mini-kpi"><span>Low Stock</span><strong id="products-low-stat">0</strong></div>
             <div class="products-mini-kpi"><span>Inventory Units</span><strong id="products-stock-stat">0</strong></div>
           </div>
@@ -801,8 +807,19 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Price (₹)</label>
+            <label class="form-label">Original Price (₹)</label>
             <input id="add-product-price" class="form-input" type="number" min="0" placeholder="2499"/>
+          </div>
+        </div>
+
+        <div class="form-row product-discount-row">
+          <div class="form-group">
+            <label class="form-label">Sale Price (₹)</label>
+            <input id="add-product-sale-price" class="form-input" type="number" min="0" placeholder="Optional sale price"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Discount Preview</label>
+            <div id="add-product-discount-preview" class="product-discount-preview">No sale discount</div>
           </div>
         </div>
 
