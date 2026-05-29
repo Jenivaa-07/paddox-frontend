@@ -150,7 +150,7 @@
           <div class="adm-avatar animate-icon"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-shield"></use></svg></div>
           <div>
             <div class="adm-pname admin-profile-name" id="admin-profile-name">Signed-in Admin</div>
-            <div class="adm-prole admin-profile-email" id="admin-profile-email">Loading admin account…</div>
+            <div class="adm-prole admin-profile-email" id="admin-profile-email">Verifying admin session…</div>
           </div>
         </div>
         <a href="index.html" class="adm-back-btn">← Back to Site</a>
@@ -184,7 +184,7 @@
 
         <!-- ── OVERVIEW ── -->
         <div class="adm-page on" id="adm-overview">
-          <div class="kpi-grid">
+          <div class="kpi-grid overview-kpi-grid">
             <div class="kpi-card kpi-red reveal-up">
               <div class="kpi-icon animate-icon"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-rupee"></use></svg></div>
               <div class="kpi-label">Total Revenue</div>
@@ -211,10 +211,10 @@
             </div>
           </div>
 
-          <div class="charts-row">
+          <div class="charts-row overview-charts-row">
             <div class="chart-card reveal-up">
               <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-analytics"></use></svg></span> Revenue Overview</div>
-              <div class="chart-sub">Monthly revenue · Jan – May 2026</div>
+              <div class="chart-sub" id="overview-revenue-sub">Monthly revenue · Live order data</div>
               <div class="bar-chart" id="bar-chart"></div>
             </div>
             <div class="chart-card reveal-up delay-1">
@@ -240,7 +240,7 @@
             </div>
           </div>
 
-          <div class="tables-row">
+          <div class="tables-row overview-tables-row">
             <div class="table-card reveal-up">
               <div class="table-card-head">
                 <div class="table-card-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-orders"></use></svg></span> Recent Orders</div>
@@ -749,7 +749,7 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script src="admin.js?v=18_0_14"></script>
+  <script src="admin.js?v=A2_2"></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>

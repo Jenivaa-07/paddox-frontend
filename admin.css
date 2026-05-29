@@ -1573,3 +1573,179 @@ html,body{max-width:100%;overflow-x:hidden}
   .adm-topbar-left{width:100%}
   .adm-topbar-right{width:100%}
 }
+
+
+/* ============================================================
+   PADDOX ADMIN — PHASE A2.2
+   Overview Production Polish + Footer Admin Alignment
+   ============================================================ */
+.admin-main{
+  background:
+    radial-gradient(circle at 28% 0%, rgba(232,0,45,.055), transparent 32%),
+    radial-gradient(circle at 82% 20%, rgba(201,168,76,.035), transparent 30%);
+}
+.adm-pages{padding:26px 34px 36px;}
+
+/* Sidebar footer: fix bottom admin identity alignment */
+.adm-sidebar-footer{
+  padding:14px 18px 16px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,.008));
+  border-top:1px solid rgba(255,255,255,.055)!important;
+}
+.adm-profile{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr);
+  align-items:center!important;
+  column-gap:12px!important;
+  min-height:56px;
+  margin:0 0 12px!important;
+  padding:8px 0!important;
+}
+.adm-avatar{
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  border-radius:50%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  line-height:1!important;
+  transform:none!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 12px 26px rgba(232,0,45,.18)!important;
+}
+.adm-avatar .pdx-svg{
+  width:18px!important;
+  height:18px!important;
+  margin:0!important;
+  display:block!important;
+}
+.adm-pname{
+  font-size:.86rem!important;
+  line-height:1.15!important;
+  color:#fff!important;
+  font-weight:800!important;
+  letter-spacing:.2px!important;
+  margin:0!important;
+}
+.adm-prole{
+  font-size:.70rem!important;
+  line-height:1.25!important;
+  margin-top:3px!important;
+  color:rgba(255,255,255,.48)!important;
+  max-width:150px!important;
+}
+.adm-back-btn{
+  height:39px;
+  border-color:rgba(255,255,255,.10)!important;
+  background:rgba(255,255,255,.018);
+}
+
+/* Overview grid polish */
+.overview-kpi-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(210px,1fr))!important;
+  gap:18px!important;
+  margin-bottom:26px!important;
+}
+.kpi-card{
+  min-height:132px;
+  padding:24px 24px 22px!important;
+  background:linear-gradient(145deg,rgba(18,18,20,.98),rgba(8,8,9,.98))!important;
+  border:1px solid rgba(255,255,255,.065)!important;
+  border-bottom-width:2px!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.028);
+  isolation:isolate;
+}
+.kpi-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg,rgba(255,255,255,.055),transparent 34%,transparent 72%,rgba(232,0,45,.035));
+  opacity:.45;
+  pointer-events:none;
+  z-index:-1;
+}
+.kpi-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(255,255,255,.12)!important;
+  box-shadow:0 22px 54px rgba(0,0,0,.36),0 0 0 1px rgba(232,0,45,.035);
+}
+.kpi-label{font-size:.66rem!important;letter-spacing:2.7px!important;color:rgba(255,255,255,.38)!important;margin-bottom:10px!important;}
+.kpi-value{font-size:2.35rem!important;letter-spacing:.8px!important;line-height:.95!important;}
+.kpi-change{font-size:.74rem!important;margin-top:11px!important;font-weight:700;}
+.kpi-icon{
+  top:18px!important;
+  right:18px!important;
+  width:48px!important;
+  height:48px!important;
+  opacity:.24!important;
+  background:rgba(255,255,255,.026)!important;
+  border-color:rgba(255,255,255,.065)!important;
+}
+
+.overview-charts-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,2fr) minmax(360px,1fr)!important;
+  gap:20px!important;
+  margin-bottom:26px!important;
+}
+.chart-card,.table-card{
+  background:linear-gradient(145deg,rgba(15,15,17,.98),rgba(8,8,9,.98))!important;
+  border:1px solid rgba(255,255,255,.065)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.026);
+}
+.chart-card{padding:26px 28px!important;min-height:300px;}
+.chart-title,.table-card-title{
+  letter-spacing:4px!important;
+  color:var(--red)!important;
+  font-size:.78rem!important;
+}
+.chart-sub{font-size:.73rem!important;color:rgba(255,255,255,.42)!important;margin-bottom:26px!important;}
+.bar-chart{height:185px!important;gap:18px!important;padding:0 12px;}
+.bc-col{gap:10px!important;}
+.bc-bar{
+  width:66%!important;
+  min-height:5px!important;
+  border-radius:4px 4px 0 0!important;
+  box-shadow:0 0 28px rgba(232,0,45,.18);
+}
+.bc-bar:hover{width:76%!important;}
+.bc-lbl{font-size:.64rem!important;color:rgba(255,255,255,.34)!important;}
+.donut-wrap{min-height:190px;align-items:center!important;justify-content:center;gap:28px!important;}
+.donut-svg{filter:drop-shadow(0 18px 26px rgba(0,0,0,.35));}
+.donut-legend{max-width:220px;gap:13px!important;}
+.leg-item{font-size:.82rem!important;}
+.leg-lbl{color:rgba(255,255,255,.46)!important;}
+.leg-val{color:#fff;font-size:.95rem!important;}
+
+.overview-tables-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:20px!important;
+}
+.table-card{padding:24px 26px!important;min-height:245px;}
+.table-card-head{margin-bottom:16px!important;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.045);}
+.view-all-link{padding:6px 0;color:rgba(255,255,255,.42)!important;}
+.view-all-link:hover{color:#fff!important;}
+.mini-table th{padding:10px 12px!important;color:rgba(255,255,255,.28)!important;letter-spacing:2.4px!important;}
+.mini-table td{padding:12px!important;font-size:.82rem!important;}
+.mini-table tr:hover td{background:rgba(232,0,45,.025)!important;}
+
+@media(max-width:1440px){
+  .adm-pages{padding:22px 28px 32px;}
+  .overview-kpi-grid{grid-template-columns:repeat(4,minmax(190px,1fr))!important;gap:16px!important;}
+  .kpi-card{padding:21px 20px!important;}
+  .overview-charts-row{grid-template-columns:minmax(0,1.75fr) minmax(330px,1fr)!important;}
+}
+@media(max-width:1180px){
+  .overview-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .overview-charts-row,.overview-tables-row{grid-template-columns:1fr!important;}
+  .chart-card{min-height:280px;}
+}
+@media(max-width:680px){
+  .overview-kpi-grid{grid-template-columns:1fr!important;}
+  .kpi-card{min-height:120px;}
+  .chart-card,.table-card{padding:20px 18px!important;}
+  .bar-chart{gap:10px!important;padding:0;height:150px!important;}
+  .donut-wrap{justify-content:flex-start;}
+}

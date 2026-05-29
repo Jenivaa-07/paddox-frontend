@@ -4557,7 +4557,14 @@ document.addEventListener('keydown', e => {
    SAFE INITIAL ADMIN LOAD
 ══════════════════════════════════════ */
 
+document.addEventListener('DOMContentLoaded', () => {
+  updateAdminTopbarDate();
+  const localIdentity = pickAdminIdentityFromStorage();
+  setAdminIdentityUI(localIdentity, !!(localIdentity.name || localIdentity.email));
+});
+
 document.addEventListener('DOMContentLoaded', async () => {
+  updateAdminTopbarDate();
   const allowed = await checkAdminAccess();
 
   if (!allowed) return;
@@ -4575,7 +4582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ══ INIT LOG ══ */
-console.log('%c⚙️ PADDOX — Admin Dashboard Ready · A2.1', 'color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%c⚙️ PADDOX — Admin Dashboard Ready · A2.2', 'color:#e8002d;font-size:14px;font-weight:bold;');
 /* ══════════════════════════════════════
    PHASE 9 — ADMIN ORDERS + ANALYTICS POLISH
    Real orders only · clean admin controls
@@ -5036,9 +5043,9 @@ function updateOverviewCards() {
 
   const values = [
     { label:'Total Revenue', value:money(totalRevenue), change:'From real orders' },
-    { label:'Total Orders', value:REAL_ORDERS.length, change:'Live admin order list' },
-    { label:'Paid Orders', value:paidOrders, change:'Payment marked paid' },
-    { label:'Low Stock', value:lowStockCount, change:`${pendingFulfilment} orders need fulfilment` }
+    { label:'Total Orders', value:REAL_ORDERS.length, change:'Live order list' },
+    { label:'Paid Orders', value:paidOrders, change:'Payment confirmed' },
+    { label:'Low Stock', value:lowStockCount, change:lowStockCount ? 'Products need restock' : 'Stock levels healthy' }
   ];
 
   cards.forEach((card, index) => {
@@ -5068,6 +5075,11 @@ function updateOverviewRevenueChart() {
       ? sum + adminPhase9OrderTotal(order)
       : sum;
   }, 0));
+
+  const sub = document.getElementById('overview-revenue-sub');
+  if (sub && labels.length) {
+    sub.textContent = `Monthly revenue · ${labels[0].label} – ${labels[labels.length - 1].label} ${labels[labels.length - 1].year}`;
+  }
 
   const max = Math.max(...monthTotals, 1);
   container.innerHTML = labels.map((meta, index) => {
