@@ -192,7 +192,7 @@ document.addEventListener('click', e => {
 
 /* ══ NAV PAGE SWITCHING ══ */
 const PAGE_META = {
-  overview:   { title:'OVERVIEW',        action:'+ Add Product',  fn:()=>openAddModal() },
+  overview:   { title:'OVERVIEW',        action:'',  fn:null, hideAction:true },
   orders:     { title:'ORDERS',          action:'Export CSV',     fn:()=>showToast('📥 Exporting orders…') },
   products:   { title:'PRODUCTS',        action:'+ Add Product',  fn:()=>openAddModal() },
   inventory:  { title:'INVENTORY',       action:'Restock All',    fn:()=>showToast('✓ Restock request sent!') },
@@ -222,7 +222,12 @@ function switchPage(id) {
   const titleEl = document.getElementById('adm-topbar-title');
   const actionBtn = document.getElementById('adm-action-btn');
   if (titleEl) titleEl.textContent = meta.title;
-  if (actionBtn) { actionBtn.textContent = meta.action; actionBtn.onclick = meta.fn; }
+  if (actionBtn) {
+    actionBtn.textContent = meta.action || '';
+    actionBtn.onclick = meta.fn || null;
+    actionBtn.hidden = !!meta.hideAction;
+    actionBtn.classList.toggle('is-hidden', !!meta.hideAction);
+  }
   if (id === 'products') {
   loadProducts();
 }
@@ -6601,4 +6606,147 @@ function updateOverviewRealtime() {
   updateOverviewCategoryChart();
   renderAnalyticsRealtime();
   updateAdminSidebarBadges();
+}
+
+
+/* ══════════════════════════════════════
+   ADMIN PHASE A2.4 — OVERVIEW FINAL LOCK
+   - Overview has no primary add-product CTA
+   - Revenue chart is live month-after-month
+   - Bell icon clarified with tooltip
+   - Overview empty states polished
+══════════════════════════════════════ */
+(function adminPhaseA24OverviewLock(){
+  const notif = document.querySelector('.adm-notif');
+  if (notif) {
+    notif.setAttribute('title', 'Admin notifications: live order, stock and fan activity alerts');
+    notif.setAttribute('aria-label', 'Admin notifications');
+  }
+
+  const overviewAction = () => {
+    const active = document.querySelector('.adm-page.on')?.id === 'adm-overview';
+    const btn = document.getElementById('adm-action-btn');
+    if (!btn) return;
+    btn.hidden = active;
+    btn.classList.toggle('is-hidden', active);
+  };
+
+  document.querySelectorAll('.adm-nav-item').forEach(item => {
+    item.addEventListener('click', () => setTimeout(overviewAction, 0));
+  });
+  window.addEventListener('load', overviewAction);
+  setTimeout(overviewAction, 0);
+})();
+
+function adminA24MonthLabel(date) {
+  return date.toLocaleString('en-IN', { month: 'short' });
+}
+
+function adminA24MoneyShort(value) {
+  const n = Number(value || 0);
+  if (n >= 10000000) return `₹${(n / 10000000).toFixed(n % 10000000 ? 1 : 0)}Cr`;
+  if (n >= 100000) return `₹${(n / 100000).toFixed(n % 100000 ? 1 : 0)}L`;
+  if (n >= 1000) return `₹${(n / 1000).toFixed(n % 1000 ? 1 : 0)}K`;
+  return money(n);
+}
+
+function adminA24MomText(current, previous) {
+  if (!previous && !current) return 'No orders';
+  if (!previous && current) return 'New sales';
+  const diff = ((current - previous) / previous) * 100;
+  const sign = diff >= 0 ? '+' : '';
+  return `${sign}${diff.toFixed(0)}% MoM`;
+}
+
+function updateOverviewRevenueChart() {
+  const container = document.getElementById('bar-chart');
+  if (!container) return;
+
+  const now = new Date();
+  const labels = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    labels.push({
+      month: d.getMonth(),
+      year: d.getFullYear(),
+      label: adminA24MonthLabel(d),
+      full: d.toLocaleString('en-IN', { month: 'long', year: 'numeric' })
+    });
+  }
+
+  const monthTotals = labels.map(meta => (REAL_ORDERS || []).reduce((sum, order) => {
+    if (!order.createdAt) return sum;
+    const d = new Date(order.createdAt);
+    return d.getMonth() === meta.month && d.getFullYear() === meta.year
+      ? sum + adminPhase9OrderTotal(order)
+      : sum;
+  }, 0));
+
+  const sub = document.getElementById('overview-revenue-sub');
+  if (sub && labels.length) {
+    sub.textContent = `Live month-by-month revenue · ${labels[0].label} – ${labels[labels.length - 1].label} ${labels[labels.length - 1].year}`;
+  }
+
+  const max = Math.max(...monthTotals, 1);
+  container.innerHTML = `
+    <div class="revenue-gridlines" aria-hidden="true"><span></span><span></span><span></span></div>
+    ${labels.map((meta, index) => {
+      const total = monthTotals[index];
+      const prev = index > 0 ? monthTotals[index - 1] : 0;
+      const height = total > 0 ? Math.max(18, (total / max) * 100) : 4;
+      const active = index === labels.length - 1 ? ' is-current-month' : '';
+      return `
+        <div class="bc-col${active}">
+          <div class="bc-value">${total ? adminA24MoneyShort(total) : '—'}</div>
+          <div class="bc-wrap">
+            <div class="bc-bar" style="height:${height}%" data-v="${meta.full} · ${money(total)} · ${adminA24MomText(total, prev)}"></div>
+          </div>
+          <div class="bc-lbl">${meta.label}</div>
+          <div class="bc-mom">${adminA24MomText(total, prev)}</div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function updateOverviewLowStock() {
+  const overview = document.getElementById('adm-overview');
+  if (!overview) return;
+
+  const cards = [...overview.querySelectorAll('.table-card')];
+  const lowStockCard = cards.find(card =>
+    card.querySelector('.table-card-title')?.textContent?.toLowerCase().includes('low stock')
+  );
+  const tbody = lowStockCard?.querySelector('tbody');
+  if (!tbody) return;
+
+  const lowStock = (REAL_PRODUCTS || [])
+    .filter(product => Number(product.stock || 0) <= 10)
+    .sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0))
+    .slice(0, 5);
+
+  if (!lowStock.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3">
+          <div class="overview-empty-state">
+            <div class="overview-empty-icon">✓</div>
+            <div>
+              <div class="overview-empty-title">Inventory healthy</div>
+              <div class="overview-empty-sub">All monitored products are above safety stock.</div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = lowStock.map(product => `
+    <tr>
+      <td>${product.name || 'Product'}</td>
+      <td>${Number(product.stock || 0)}</td>
+      <td><span class="sb ${Number(product.stock || 0) === 0 ? 's-out' : 's-pr'}">${Number(product.stock || 0) === 0 ? 'Out' : 'Low'}</span></td>
+    </tr>
+  `).join('');
 }

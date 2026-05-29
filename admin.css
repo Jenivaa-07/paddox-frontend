@@ -1973,3 +1973,243 @@ html,body{max-width:100%;overflow-x:hidden}
   #adm-overview .bar-chart{height:170px}
   .overview-donut-wrap{justify-content:flex-start}
 }
+
+
+/* ============================================================
+   ADMIN PHASE A2.4 — Overview Final Premium Lock
+   ============================================================ */
+.adm-action-btn.is-hidden,
+.adm-action-btn[hidden]{display:none!important;}
+
+#adm-overview .overview-command-strip{
+  padding:22px 26px;
+  margin-bottom:22px;
+  border-left-width:4px;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(232,0,45,.18), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,.035), rgba(232,0,45,.035) 42%, rgba(201,168,76,.05)),
+    #0d0d0f;
+  box-shadow:0 22px 58px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.045);
+}
+#adm-overview .overview-command-strip::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:4px;
+  height:100%;
+  background:linear-gradient(180deg, var(--red), rgba(232,0,45,.25), var(--gold));
+  box-shadow:0 0 22px rgba(232,0,45,.5);
+}
+#adm-overview .overview-command-title{
+  font-size:1.7rem;
+  letter-spacing:2.4px;
+}
+#adm-overview .overview-command-sub{
+  max-width:760px;
+  color:#a0a0a0;
+}
+#adm-overview .overview-command-chips span{
+  background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.018));
+  border-color:rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+#adm-overview .kpi-card{
+  border-top:1px solid rgba(255,255,255,.08);
+  transform:translateZ(0);
+}
+#adm-overview .kpi-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(232,0,45,.18);
+  box-shadow:0 22px 56px rgba(0,0,0,.45), 0 0 28px rgba(232,0,45,.08);
+}
+#adm-overview .kpi-card .pdx-svg{
+  width:24px;
+  height:24px;
+}
+
+#adm-overview .chart-card,
+#adm-overview .table-card{
+  border-color:rgba(255,255,255,.085);
+}
+#adm-overview .chart-card:hover,
+#adm-overview .table-card:hover{
+  border-color:rgba(232,0,45,.16);
+  box-shadow:0 22px 56px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+#adm-overview #bar-chart{
+  position:relative;
+  display:flex;
+  align-items:flex-end;
+  gap:18px;
+  padding:26px 16px 0;
+  border-top:1px solid rgba(255,255,255,.04);
+  overflow:hidden;
+}
+#adm-overview .revenue-gridlines{
+  position:absolute;
+  inset:24px 16px 36px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  pointer-events:none;
+  opacity:.55;
+}
+#adm-overview .revenue-gridlines span{
+  display:block;
+  height:1px;
+  background:linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.018));
+}
+#adm-overview .bc-col{
+  position:relative;
+  z-index:1;
+  min-width:54px;
+}
+#adm-overview .bc-value{
+  font-family:var(--font-c);
+  color:#ddd;
+  letter-spacing:1.2px;
+  font-weight:800;
+  font-size:.76rem;
+  min-height:18px;
+  margin-bottom:7px;
+  opacity:.86;
+}
+#adm-overview .bc-wrap{
+  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+  border:1px solid rgba(255,255,255,.045);
+  border-radius:8px 8px 0 0;
+  min-height:150px;
+  padding:0 6px;
+  width:100%;
+}
+#adm-overview .bc-bar{
+  width:100%;
+  min-height:4px;
+  background:linear-gradient(180deg, #ff003d 0%, #d00030 42%, #650018 100%);
+  border-radius:6px 6px 0 0;
+  box-shadow:0 0 28px rgba(232,0,45,.22), inset 0 1px 0 rgba(255,255,255,.22);
+}
+#adm-overview .bc-col.is-current-month .bc-bar{
+  box-shadow:0 0 34px rgba(232,0,45,.36), 0 0 70px rgba(232,0,45,.10), inset 0 1px 0 rgba(255,255,255,.25);
+}
+#adm-overview .bc-col.is-current-month .bc-lbl{
+  color:#fff;
+}
+#adm-overview .bc-mom{
+  font-family:var(--font-c);
+  font-size:.62rem;
+  letter-spacing:1px;
+  color:#777;
+  margin-top:3px;
+  min-height:14px;
+}
+#adm-overview .bc-col.is-current-month .bc-mom{
+  color:var(--green);
+}
+#adm-overview .bc-bar::after{
+  top:-34px;
+  padding:6px 9px;
+  background:#101014;
+  border:1px solid rgba(232,0,45,.35);
+  box-shadow:0 12px 28px rgba(0,0,0,.5);
+}
+
+#adm-overview .overview-donut-wrap{
+  min-height:250px;
+  gap:34px;
+}
+#overview-category-svg{
+  width:170px;
+  height:170px;
+}
+#overview-category-legend .leg-item{
+  padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,.035);
+}
+#overview-category-legend .leg-item:last-child{border-bottom:0;}
+
+#adm-overview .mini-table tr{
+  transition:background .24s ease, transform .24s ease;
+}
+#adm-overview .mini-table tr:hover{
+  transform:translateX(2px);
+}
+#adm-overview .mini-table .oid{
+  color:var(--red);
+  letter-spacing:1.4px;
+}
+#adm-overview .view-all-link{
+  color:#aaa;
+  letter-spacing:2px;
+}
+
+.overview-empty-state{
+  min-height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  text-align:left;
+  color:#ddd;
+}
+.overview-empty-icon{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(0,180,0,.35);
+  background:rgba(0,180,0,.08);
+  color:var(--green);
+  font-weight:900;
+  box-shadow:0 0 28px rgba(0,180,0,.08);
+}
+.overview-empty-title{
+  font-family:var(--font-c);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-weight:800;
+  color:#fff;
+}
+.overview-empty-sub{
+  color:#777;
+  font-size:.82rem;
+  margin-top:4px;
+}
+
+.adm-notif::after{
+  content:"Live alerts";
+  position:absolute;
+  right:0;
+  top:calc(100% + 10px);
+  background:#111116;
+  border:1px solid rgba(255,255,255,.12);
+  color:#ddd;
+  padding:7px 10px;
+  font-family:var(--font-c);
+  letter-spacing:1.3px;
+  font-size:.66rem;
+  text-transform:uppercase;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(-4px);
+  transition:opacity .2s ease, transform .2s ease;
+  box-shadow:0 12px 30px rgba(0,0,0,.45);
+}
+.adm-notif:hover::after{
+  opacity:1;
+  transform:translateY(0);
+}
+
+@media(max-width:900px){
+  #adm-overview #bar-chart{gap:10px;padding-inline:8px;}
+  #adm-overview .bc-value{font-size:.66rem;}
+  #adm-overview .bc-wrap{min-height:120px;}
+  #adm-overview .bc-mom{display:none;}
+  #adm-overview .overview-donut-wrap{align-items:flex-start;}
+}
