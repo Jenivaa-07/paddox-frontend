@@ -510,3 +510,83 @@ input:checked+.tgl-sl::before{background:var(--red);transform:translateX(20px)}
 .security-mini-icon{--pdx-mask:var(--pdx-ico-lock)}.shield-mini-icon{--pdx-mask:var(--pdx-ico-lock)}
 .r-oicon{font-size:0!important;}
 .r-oicon .section-mini-icon{width:22px;height:22px;margin:0;color:var(--red)}
+
+
+/* ============================================================
+   Phase 20.6.2 — Navbar avatar visibility + user-friendly crop fix
+   ============================================================ */
+.nav-cta-btn.nav-profile-only{
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  padding:0!important;
+  border-radius:50%!important;
+  clip-path:none!important;
+  background:rgba(255,255,255,.035)!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:inset 0 0 0 1px rgba(232,0,45,.08),0 0 22px rgba(0,0,0,.35)!important;
+  overflow:hidden!important;
+}
+.nav-cta-btn.nav-profile-only::before{display:none!important;}
+.nav-cta-btn.nav-profile-only:hover{
+  background:rgba(232,0,45,.10)!important;
+  border-color:rgba(232,0,45,.55)!important;
+  transform:translateY(-1px) scale(1.04)!important;
+  box-shadow:0 0 24px rgba(232,0,45,.25)!important;
+}
+.nav-cta-btn.nav-profile-only .nav-profile-img,
+.nav-cta-btn.nav-profile-only .nav-profile-fallback{
+  width:100%!important;
+  height:100%!important;
+  border-radius:50%!important;
+  object-fit:cover!important;
+  display:block!important;
+  border:0!important;
+  box-shadow:none!important;
+  background-color:#111!important;
+}
+.nav-cta-btn.nav-profile-only .nav-profile-fallback{
+  background:center/cover no-repeat url('assets/paddox-logo-icon-official.png?v=20_6_2')!important;
+}
+.avatar-studio-modal{width:min(940px,96vw)!important;}
+.avatar-studio-sub{max-width:680px;}
+.avatar-crop-help{
+  margin:0 auto 12px;
+  max-width:420px;
+  color:#bdbdbd;
+  font-size:.82rem;
+  line-height:1.5;
+  text-align:center;
+  background:rgba(232,0,45,.06);
+  border:1px solid rgba(232,0,45,.18);
+  padding:10px 14px;
+}
+.avatar-stage{
+  width:380px!important;
+  height:380px!important;
+  max-width:min(82vw,380px)!important;
+  max-height:min(82vw,380px)!important;
+  border-color:rgba(232,0,45,.28)!important;
+  background:
+    linear-gradient(45deg,rgba(255,255,255,.035) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.035) 75%),
+    linear-gradient(45deg,rgba(255,255,255,.035) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.035) 75%),
+    #090909!important;
+  background-size:28px 28px!important;
+  background-position:0 0,14px 14px!important;
+}
+.avatar-crop-ring{
+  width:300px!important;
+  height:300px!important;
+  border-color:rgba(255,255,255,.96)!important;
+  box-shadow:0 0 0 999px rgba(0,0,0,.58),0 0 34px rgba(232,0,45,.36)!important;
+}
+.avatar-preview-circle{width:160px!important;height:160px!important;}
+.avatar-zoom{min-width:250px;justify-content:center;}
+.avatar-zoom input{width:180px;}
+.avatar-reset-btn,.avatar-change-btn{color:#fff!important;}
+.avatar-view-img{background:#111;}
+@media(max-width:760px){
+  .avatar-studio-grid{grid-template-columns:1fr!important;}
+  .avatar-stage{width:300px!important;height:300px!important;}
+  .avatar-crop-ring{width:240px!important;height:240px!important;}
+}

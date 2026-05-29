@@ -913,8 +913,8 @@ async function handleAvatarInput(input) {
     return;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    showToast('❌ Image must be below 5MB');
+  if (file.size > 8 * 1024 * 1024) {
+    showToast('❌ Image must be below 8MB');
     input.value = '';
     return;
   }
@@ -1925,18 +1925,19 @@ function openOrderReceipt(orderId) {
               <div>
                 <span class="avatar-drop-icon acc-icon" aria-hidden="true"></span>
                 <div class="avatar-drop-title">Drop image here</div>
-                <div class="avatar-drop-text">PNG, JPG, JPEG, WEBP, GIF or any browser-supported image format below 5MB.</div>
+                <div class="avatar-drop-text">PNG, JPG, JPEG, WEBP, GIF or any browser-supported image format. Drag, crop, preview, then save.</div>
                 <button class="avatar-pick-btn" id="avatar-pick-btn" type="button">Choose File</button>
               </div>
             </div>
             <div class="avatar-crop-wrap" id="avatar-crop-wrap">
+              <div class="avatar-crop-help">Drag the image to position your face. Use zoom for a tighter or wider profile crop.</div>
               <div class="avatar-stage" id="avatar-stage">
                 <img id="avatar-crop-img" alt="Crop profile preview" draggable="false"/>
                 <div class="avatar-crop-ring" aria-hidden="true"></div>
               </div>
               <div class="avatar-controls">
-                <label class="avatar-zoom">Zoom <input id="avatar-zoom" type="range" min="1" max="3" step="0.01" value="1"/></label>
-                <button class="avatar-reset-btn" id="avatar-reset-btn" type="button">Reset Crop</button>
+                <label class="avatar-zoom">Zoom <input id="avatar-zoom" type="range" min="1" max="3.5" step="0.01" value="1"/></label>
+                <button class="avatar-reset-btn" id="avatar-reset-btn" type="button">Center Image</button>
                 <button class="avatar-change-btn" id="avatar-change-btn" type="button">Choose Different</button>
               </div>
             </div>
@@ -2037,7 +2038,7 @@ function openOrderReceipt(orderId) {
     stage?.addEventListener('wheel', e => {
       if (!cropState.img) return;
       e.preventDefault();
-      const nextZoom = Math.min(3, Math.max(1, cropState.zoom + (e.deltaY < 0 ? .08 : -.08)));
+      const nextZoom = Math.min(3.5, Math.max(1, cropState.zoom + (e.deltaY < 0 ? .08 : -.08)));
       cropState.zoom = nextZoom;
       if (zoom) zoom.value = String(nextZoom);
       renderAvatarCrop();
@@ -2085,8 +2086,8 @@ function openOrderReceipt(orderId) {
       showToast('❌ Select a valid image file');
       return false;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('❌ Image must be below 5MB');
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('❌ Image must be below 8MB');
       return false;
     }
     return true;
@@ -2241,16 +2242,33 @@ function openOrderReceipt(orderId) {
     syncNavUserProfile(user);
   }
 
-  function syncNavUserProfile(user = currentUser || {}) {
+  function resetNavSignup() {
     const cta = document.querySelector('.nav-cta-btn');
     if (!cta) return;
+    cta.classList.remove('nav-profile-only');
+    cta.removeAttribute('aria-label');
+    cta.href = 'account.html';
+    cta.onclick = null;
+    cta.innerHTML = 'Sign Up <span class="cta-arrow" aria-hidden="true"></span>';
+  }
+
+  function syncNavUserProfile(user = currentUser || {}) {
+    const cta = document.querySelector('.nav-cta-btn');
+    if (!cta || !user || !profileToken()) {
+      resetNavSignup();
+      return;
+    }
     const avatarUrl = avatarUrlFromUser(user);
     cta.classList.add('nav-profile-only');
-    cta.setAttribute('aria-label', 'Open my account profile');
+    cta.setAttribute('aria-label', 'Preview my profile picture');
     cta.href = 'account.html';
     cta.innerHTML = avatarUrl
       ? `<img class="nav-profile-img" src="${avatarUrl}" alt="Profile">`
       : `<span class="nav-profile-fallback" aria-hidden="true"></span>`;
+    cta.onclick = e => {
+      e.preventDefault();
+      openAvatarPreview();
+    };
   }
 
   function openAvatarPreview() {
@@ -2295,6 +2313,7 @@ function openOrderReceipt(orderId) {
       hydrateProfile(updatedUser);
       setProfileAvatar(updatedUser);
       showToast('🔥 Profile picture updated');
+      openAvatarPreview();
       await loadAccountProfile();
     } catch (err) {
       console.error(err);
@@ -2319,7 +2338,6 @@ function openOrderReceipt(orderId) {
   document.addEventListener('DOMContentLoaded', () => {
     ensureAvatarStudio();
     bindAvatarUpload();
-    const stored = JSON.parse(localStorage.getItem('paddox_user') || 'null');
-    if (stored) syncNavUserProfile(stored);
+    resetNavSignup();
   });
 })();
