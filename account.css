@@ -3535,3 +3535,238 @@ button.r-order.r-order-card{color:inherit;}
   color:#fff!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.09)!important;
 }
+
+
+/* ══════════════════════════════════════
+   PHASE 20.11D — REAL NOTIFICATION INBOX
+══════════════════════════════════════ */
+.notif-nav-badge{
+  margin-left:auto;
+  min-width:18px;
+  height:18px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--red);
+  color:#fff;
+  font-family:var(--font-c);
+  font-size:.58rem;
+  font-weight:900;
+  letter-spacing:1px;
+  box-shadow:0 0 16px rgba(232,0,45,.34);
+}
+.notification-command-bar{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(140px,1fr)) auto;
+  gap:12px;
+  margin-bottom:18px;
+  background:linear-gradient(145deg,rgba(17,17,17,.96),rgba(7,7,7,.98));
+  border:1px solid rgba(255,255,255,.08);
+  padding:14px;
+  box-shadow:0 18px 45px rgba(0,0,0,.28);
+}
+.notification-command-bar>div{
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.025);
+  padding:12px 14px;
+}
+.notification-command-bar span{
+  display:block;
+  color:var(--muted);
+  font-family:var(--font-c);
+  font-size:.62rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.notification-command-bar strong{
+  font-family:var(--font-d);
+  letter-spacing:1.5px;
+  font-size:1.25rem;
+  color:#fff;
+}
+.notification-command-actions{
+  display:flex;
+  align-items:stretch;
+  gap:8px;
+}
+.notification-command-actions button,
+.notif-refresh-btn{
+  border:1px solid rgba(255,255,255,.12);
+  background:#151515;
+  color:#fff;
+  padding:10px 13px;
+  font-family:var(--font-c);
+  font-size:.72rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-weight:800;
+  transition:all var(--tr);
+}
+.notification-command-actions button:hover,
+.notif-refresh-btn:hover{
+  border-color:var(--red);
+  background:rgba(232,0,45,.12);
+  transform:translateY(-1px);
+}
+.real-notification-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.real-notification-card{
+  position:relative;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:14px;
+  align-items:center;
+  padding:16px 18px;
+  background:linear-gradient(145deg,rgba(17,17,17,.96),rgba(8,8,8,.98));
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:0 16px 38px rgba(0,0,0,.26);
+  cursor:pointer;
+  overflow:hidden;
+  transition:transform var(--tr),border-color var(--tr),box-shadow var(--tr);
+}
+.real-notification-card:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top right,rgba(232,0,45,.12),transparent 38%);
+  opacity:0;
+  transition:opacity var(--tr);
+  pointer-events:none;
+}
+.real-notification-card:hover{
+  transform:translateX(4px);
+  border-color:rgba(232,0,45,.28);
+  box-shadow:0 22px 52px rgba(0,0,0,.38);
+}
+.real-notification-card:hover:before,
+.real-notification-card.unread:before{
+  opacity:1;
+}
+.real-notification-card.unread{
+  border-color:rgba(232,0,45,.24);
+}
+.real-notification-icon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  flex:0 0 auto;
+}
+.real-notification-icon:before,
+.real-notification-icon:after{
+  content:'';
+  position:absolute;
+  display:block;
+}
+.notif-order-status-icon:before{
+  width:18px;height:22px;border:2px solid #fff;border-radius:3px;
+}
+.notif-order-status-icon:after{
+  width:10px;height:2px;background:var(--red);top:14px;left:16px;box-shadow:0 6px 0 rgba(255,255,255,.8);
+}
+.notif-shipped-icon:before{
+  width:23px;height:13px;border:2px solid #fff;left:8px;top:15px;
+}
+.notif-shipped-icon:after{
+  width:18px;height:2px;background:var(--red);left:12px;top:31px;box-shadow:-4px 0 0 #fff,14px 0 0 #fff;
+}
+.notif-delivered-icon:before{
+  width:23px;height:23px;border:2px solid rgba(255,255,255,.95);border-radius:50%;
+}
+.notif-delivered-icon:after{
+  width:13px;height:7px;border-left:2px solid var(--red);border-bottom:2px solid var(--red);transform:rotate(-45deg);top:16px;left:15px;
+}
+.notif-cancelled-icon:before{
+  width:24px;height:24px;border:2px solid #fff;border-radius:50%;
+}
+.notif-cancelled-icon:after{
+  width:17px;height:2px;background:var(--red);transform:rotate(-45deg);
+}
+.real-notification-body{
+  position:relative;
+  min-width:0;
+  z-index:1;
+}
+.real-notification-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:5px;
+}
+.real-notification-top strong{
+  color:#fff;
+  font-size:.92rem;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.real-notification-body p{
+  color:var(--muted2);
+  line-height:1.55;
+  font-size:.78rem;
+  margin-bottom:8px;
+}
+.real-notification-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.real-notification-meta span{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.035);
+  color:var(--muted);
+  padding:4px 8px;
+  border-radius:999px;
+  font-family:var(--font-c);
+  font-size:.62rem;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+.real-unread-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 14px rgba(232,0,45,.65);
+}
+.real-notification-action{
+  position:relative;
+  z-index:1;
+  border:1px solid rgba(232,0,45,.35);
+  background:rgba(232,0,45,.12);
+  color:#fff;
+  padding:9px 14px;
+  font-family:var(--font-c);
+  font-size:.7rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-weight:900;
+  transition:all var(--tr);
+}
+.real-notification-action:hover{
+  background:var(--red);
+  border-color:var(--red);
+  transform:translateY(-1px);
+}
+.real-notification-empty{
+  min-height:260px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+@media(max-width:760px){
+  .notification-command-bar{grid-template-columns:1fr}
+  .notification-command-actions{flex-direction:column}
+  .real-notification-card{grid-template-columns:auto 1fr}
+  .real-notification-action{grid-column:1/-1}
+}

@@ -318,6 +318,8 @@ function loginUser(user) {
   loadWishlist();
   setTimeout(updateDashboardSavedItems, 500);
   loadDownloads();
+  initOrderNotificationInbox(user);
+  initOrderNotificationSocket();
 }
 
 /* LOGOUT */
@@ -1006,41 +1008,375 @@ function updateNotificationSummary(state = notificationPayloadFromUI()) {
   if (communityEl) communityEl.textContent = state.community ? 'On' : 'Off';
 }
 
-function renderNotifications(state = getNotificationState()){
+function renderNotifications(){
   const list = document.getElementById('notif-list');
   if (!list) return;
 
-  const enabled = Object.entries(state).filter(([, enabled]) => enabled);
+  const notifications = getStoredAccountNotifications();
+  updateNotificationInboxBadge();
 
-  if (!enabled.length) {
+  if (!notifications.length) {
     list.innerHTML = `
-      <div class="notification-empty-state">
-        <span class="notification-empty-icon" aria-hidden="true"></span>
-        <h3>No active notification channels</h3>
-        <p>Turn on alerts from Profile Settings to receive PADDOX updates.</p>
+      <div class="notification-empty-state real-notification-empty">
+        <span class="notification-empty-icon order-status-mini-icon" aria-hidden="true"></span>
+        <h3>No notifications yet</h3>
+        <p>When PADDOX updates your order status, shipping, delivery, fan points, or community activity, it will appear here.</p>
+        <button class="notif-refresh-btn" onclick="loadMyOrders()">Refresh Orders</button>
       </div>
     `;
     return;
   }
 
+  const unread = notifications.filter(item => !item.read).length;
+  const latest = notifications[0];
+
   list.innerHTML = `
-    <div class="notification-inbox-grid">
-      ${enabled.map(([key]) => {
-        const meta = NOTIFICATION_META[key] || NOTIFICATION_META.orderUpdates;
-        return `
-          <article class="notification-inbox-card">
-            <span class="notification-card-icon ${meta.icon}" aria-hidden="true"></span>
-            <div>
-              <strong>${meta.title}</strong>
-              <p>${meta.text}</p>
+    <div class="notification-command-bar">
+      <div>
+        <span>Notification Inbox</span>
+        <strong>${unread} Unread</strong>
+      </div>
+      <div>
+        <span>Latest Update</span>
+        <strong>${latest ? timeAgo(latest.createdAt) : '-'}</strong>
+      </div>
+      <div>
+        <span>Live Socket</span>
+        <strong id="notif-socket-status">${orderSocketConnected ? 'Connected' : 'Waiting'}</strong>
+      </div>
+      <div class="notification-command-actions">
+        <button onclick="markAllNotificationsRead()">Mark all read</button>
+        <button onclick="clearAccountNotifications()">Clear</button>
+      </div>
+    </div>
+
+    <div class="real-notification-list">
+      ${notifications.map(item => `
+        <article class="real-notification-card ${item.read ? '' : 'unread'}" onclick="markNotificationRead('${item.id}')">
+          <span class="real-notification-icon ${notificationTypeIcon(item.type)}" aria-hidden="true"></span>
+
+          <div class="real-notification-body">
+            <div class="real-notification-top">
+              <strong>${escapeHtml(item.title || 'PADDOX Update')}</strong>
+              ${item.read ? '' : '<span class="real-unread-dot" aria-hidden="true"></span>'}
             </div>
-            <span class="notification-live-pill">Live</span>
-          </article>
-        `;
-      }).join('')}
+            <p>${escapeHtml(item.message || '')}</p>
+            <div class="real-notification-meta">
+              <span>${escapeHtml(item.orderNumber ? '#' + item.orderNumber : item.category || 'PADDOX')}</span>
+              <span>${timeAgo(item.createdAt)}</span>
+            </div>
+          </div>
+
+          ${item.orderId ? `<button class="real-notification-action" onclick="event.stopPropagation();openOrderFromNotification('${item.orderId}')">View</button>` : ''}
+        </article>
+      `).join('')}
     </div>
   `;
 }
+
+
+/* ══════════════════════════════════════
+   REAL NOTIFICATION INBOX + ORDER SOCKET
+══════════════════════════════════════ */
+
+const PADDOX_SOCKET_URL = 'https://paddox-backend.onrender.com';
+let accountSocket = null;
+let orderSocketConnected = false;
+let ACCOUNT_ORDER_CACHE = [];
+
+function accountNotificationKey() {
+  const userId =
+    currentUser?._id ||
+    currentUser?.id ||
+    currentUser?.email ||
+    'guest';
+
+  return `paddox_notifications_${userId}`;
+}
+
+function getStoredAccountNotifications() {
+  try {
+    const raw = localStorage.getItem(accountNotificationKey()) || '[]';
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function setStoredAccountNotifications(items = []) {
+  localStorage.setItem(
+    accountNotificationKey(),
+    JSON.stringify(items.slice(0, 60))
+  );
+  updateNotificationInboxBadge();
+}
+
+function notificationStatusLabel(status = '') {
+  const labels = {
+    placed: 'Placed',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    out_for_delivery: 'Out for Delivery',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+    refunded: 'Refunded'
+  };
+
+  return labels[String(status || '').toLowerCase()] || String(status || 'Updated');
+}
+
+function notificationTypeIcon(type = '') {
+  const map = {
+    order: 'notif-order-status-icon',
+    shipped: 'notif-shipped-icon',
+    delivered: 'notif-delivered-icon',
+    cancelled: 'notif-cancelled-icon',
+    fan: 'notif-community-icon',
+    rewards: 'notif-points-icon'
+  };
+
+  return map[type] || 'notif-order-status-icon';
+}
+
+function timeAgo(value) {
+  const ts = new Date(value || Date.now()).getTime();
+  const diff = Math.max(0, Date.now() - ts);
+  const mins = Math.floor(diff / 60000);
+
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min ago`;
+
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hr ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+
+  return new Date(ts).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+}
+
+function addAccountNotification(notification = {}) {
+  const id =
+    notification.id ||
+    `${notification.type || 'notice'}-${notification.orderId || notification.orderNumber || 'paddox'}-${notification.status || ''}-${Date.now()}`;
+
+  const next = {
+    id,
+    type: notification.type || 'order',
+    title: notification.title || 'PADDOX Update',
+    message: notification.message || '',
+    orderId: notification.orderId || '',
+    orderNumber: notification.orderNumber || '',
+    status: notification.status || '',
+    category: notification.category || '',
+    createdAt: notification.createdAt || new Date().toISOString(),
+    read: !!notification.read
+  };
+
+  const items = getStoredAccountNotifications();
+  const duplicate = items.some(item =>
+    item.orderNumber &&
+    next.orderNumber &&
+    item.orderNumber === next.orderNumber &&
+    item.status === next.status &&
+    Math.abs(new Date(item.createdAt).getTime() - new Date(next.createdAt).getTime()) < 4000
+  );
+
+  if (duplicate) return;
+
+  setStoredAccountNotifications([next, ...items]);
+  renderNotifications();
+}
+
+function updateNotificationInboxBadge() {
+  const unread = getStoredAccountNotifications().filter(item => !item.read).length;
+  const navItem = document.querySelector('.acc-nav-item[data-page="notifications"]');
+
+  if (!navItem) return;
+
+  let badge = navItem.querySelector('.notif-nav-badge');
+
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 'notif-nav-badge';
+    navItem.appendChild(badge);
+  }
+
+  badge.textContent = unread > 9 ? '9+' : String(unread);
+  badge.style.display = unread ? 'inline-flex' : 'none';
+}
+
+function markNotificationRead(id) {
+  const items = getStoredAccountNotifications().map(item =>
+    item.id === id ? { ...item, read: true } : item
+  );
+
+  setStoredAccountNotifications(items);
+  renderNotifications();
+}
+
+function markAllNotificationsRead() {
+  const items = getStoredAccountNotifications().map(item => ({
+    ...item,
+    read: true
+  }));
+
+  setStoredAccountNotifications(items);
+  renderNotifications();
+  showToast('✓ Notifications marked as read');
+}
+
+function clearAccountNotifications() {
+  setStoredAccountNotifications([]);
+  renderNotifications();
+  showToast('✓ Notification inbox cleared');
+}
+
+function openOrderFromNotification(orderId) {
+  const order =
+    ACCOUNT_ORDER_CACHE.find(item => String(item._id || item.id) === String(orderId));
+
+  if (order && typeof showAccountOrderDetails === 'function') {
+    showAccountOrderDetails(orderId);
+    return;
+  }
+
+  document.querySelector('.acc-nav-item[data-page="orders"]')?.click();
+  setTimeout(() => {
+    const target = document.querySelector(`[data-order-id="${orderId}"]`);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 250);
+}
+
+function initOrderNotificationInbox(user = currentUser) {
+  if (!user) return;
+  updateNotificationInboxBadge();
+  renderNotifications();
+}
+
+function handleOrderStatusNotification(payload = {}) {
+  const settings = getNotificationState();
+
+  if (settings.orderUpdates === false) return;
+
+  const status = String(payload.status || '').toLowerCase();
+  const orderNumber =
+    payload.orderNumber ||
+    payload.order?.orderNumber ||
+    payload.orderId ||
+    'ORDER';
+
+  const orderId =
+    payload.orderId ||
+    payload.order?._id ||
+    payload.order?.id ||
+    '';
+
+  const label = notificationStatusLabel(status);
+  const type =
+    status === 'shipped'
+      ? 'shipped'
+      : status === 'delivered'
+        ? 'delivered'
+        : status === 'cancelled'
+          ? 'cancelled'
+          : 'order';
+
+  addAccountNotification({
+    type,
+    orderId,
+    orderNumber,
+    status,
+    title: `Order #${orderNumber} is now ${label}`,
+    message: payload.message || `Your PADDOX order status was updated to ${label}.`,
+    createdAt: new Date().toISOString()
+  });
+
+  showToast(`🔔 Order #${orderNumber} updated to ${label}`);
+  loadMyOrders();
+}
+
+function initOrderNotificationSocket() {
+  const token = profileToken();
+
+  if (!token || typeof window.io !== 'function') {
+    if (!token) return;
+
+    setTimeout(initOrderNotificationSocket, 500);
+    return;
+  }
+
+  if (accountSocket?.connected || accountSocket?.connecting) return;
+
+  accountSocket = window.io(PADDOX_SOCKET_URL, {
+    transports: ['websocket', 'polling'],
+    auth: { token },
+    query: { token },
+    withCredentials: true,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 800
+  });
+
+  accountSocket.on('connect', () => {
+    orderSocketConnected = true;
+    const status = document.getElementById('notif-socket-status');
+    if (status) status.textContent = 'Connected';
+    renderNotifications();
+  });
+
+  accountSocket.on('disconnect', () => {
+    orderSocketConnected = false;
+    const status = document.getElementById('notif-socket-status');
+    if (status) status.textContent = 'Waiting';
+    renderNotifications();
+  });
+
+  accountSocket.on('order:status-update', handleOrderStatusNotification);
+
+  accountSocket.on('connect_error', err => {
+    orderSocketConnected = false;
+    console.warn('Order notification socket failed:', err.message);
+  });
+}
+
+function reconcileOrderNotificationsFromOrders(orders = []) {
+  const remembered = JSON.parse(localStorage.getItem('paddox_order_status_snapshot') || '{}');
+  let changed = false;
+
+  orders.forEach(order => {
+    const orderId = String(order._id || order.id || '');
+    const status = String(order.status || '').toLowerCase();
+
+    if (!orderId || !status) return;
+
+    if (remembered[orderId] && remembered[orderId] !== status) {
+      handleOrderStatusNotification({
+        orderId,
+        orderNumber: order.orderNumber || orderId,
+        status,
+        message: `Order status changed to ${notificationStatusLabel(status)}`
+      });
+    }
+
+    remembered[orderId] = status;
+    changed = true;
+  });
+
+  if (changed) {
+    localStorage.setItem('paddox_order_status_snapshot', JSON.stringify(remembered));
+  }
+}
+
+window.markNotificationRead = markNotificationRead;
+window.markAllNotificationsRead = markAllNotificationsRead;
+window.clearAccountNotifications = clearAccountNotifications;
+window.openOrderFromNotification = openOrderFromNotification;
 
 async function saveNotifications(options = {}) {
   const silent = !!options.silent;
@@ -1718,6 +2054,8 @@ async function loadMyOrders() {
           ? data.orders
           : [];
 
+    ACCOUNT_ORDER_CACHE = orders;
+    reconcileOrderNotificationsFromOrders(orders);
     renderAccountOrders(orders);
     renderDashboardOrders(orders);
     updateAccountStats(orders);
