@@ -3770,3 +3770,125 @@ button.r-order.r-order-card{color:inherit;}
   .real-notification-card{grid-template-columns:auto 1fr}
   .real-notification-action{grid-column:1/-1}
 }
+
+/* ══════════════════════════════════════
+   PHASE 20.11D.1 — TRUE NOTIFICATION CHANNEL ICONS
+   Compact Shop/FanHub-style icon chips + all inbox channels
+══════════════════════════════════════ */
+.notification-control-list{
+  gap:10px!important;
+}
+.notification-setting-card{
+  display:grid!important;
+  grid-template-columns:42px 1fr auto!important;
+  align-items:center!important;
+  gap:14px!important;
+  min-height:auto!important;
+  padding:13px 14px!important;
+  background:rgba(17,17,17,.82)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-left:0!important;
+  border-top:0!important;
+  box-shadow:none!important;
+}
+.notification-setting-card::before,
+.notification-setting-card::after{
+  display:none!important;
+  content:none!important;
+}
+.notification-setting-card:hover,
+.notification-setting-card.is-on{
+  background:rgba(255,255,255,.035)!important;
+  border-color:rgba(255,255,255,.14)!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+.notification-setting-card .tlbl{
+  font-family:var(--font-c)!important;
+  font-size:.94rem!important;
+  letter-spacing:2.5px!important;
+  text-transform:uppercase!important;
+  font-weight:900!important;
+  color:#fff!important;
+}
+.notification-setting-card .tsub{
+  margin-top:4px!important;
+  font-size:.78rem!important;
+  color:var(--muted2)!important;
+  line-height:1.45!important;
+}
+.notification-card-icon,
+.real-notification-icon{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  border-radius:10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  background:#151515!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+.notification-card-icon::before,
+.notification-card-icon::after,
+.real-notification-icon::before,
+.real-notification-icon::after{
+  display:none!important;
+  content:none!important;
+}
+.notification-card-icon svg,
+.real-notification-icon svg{
+  width:20px!important;
+  height:20px!important;
+  display:block!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:2!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+.notification-setting-card:hover .notification-card-icon,
+.notification-setting-card.is-on .notification-card-icon,
+.real-notification-card:hover .real-notification-icon,
+.real-notification-card.unread .real-notification-icon{
+  border-color:rgba(232,0,45,.42)!important;
+  background:rgba(232,0,45,.08)!important;
+  color:#fff!important;
+  transform:none!important;
+}
+.notification-summary-strip>div{
+  border-left:2px solid var(--red)!important;
+}
+.real-notification-card{
+  border-left:0!important;
+  border-top:0!important;
+  padding:16px 18px!important;
+}
+.real-notification-card:before{
+  background:linear-gradient(90deg,rgba(232,0,45,.10),transparent 45%)!important;
+}
+.real-notification-top strong{
+  font-family:var(--font-b)!important;
+  letter-spacing:.1px!important;
+  text-transform:none!important;
+}
+.real-notification-meta span{
+  border-radius:6px!important;
+}
+.notification-empty-icon svg{
+  width:24px;
+  height:24px;
+}
+@media(max-width:760px){
+  .notification-setting-card{
+    grid-template-columns:38px 1fr!important;
+  }
+  .notification-setting-card .notification-toggle{
+    grid-column:2;
+    justify-self:start;
+  }
+}

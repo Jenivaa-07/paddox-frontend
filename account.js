@@ -993,6 +993,7 @@ function hydrateNotificationControls(notifications = {}) {
     if (card) card.classList.toggle('is-on', !!value);
   });
 
+  injectNotificationSettingIcons();
   updateNotificationSummary(state);
   renderNotifications(state);
 }
@@ -1006,6 +1007,71 @@ function updateNotificationSummary(state = notificationPayloadFromUI()) {
   if (activeEl) activeEl.textContent = String(activeCount);
   if (orderEl) orderEl.textContent = state.orderUpdates ? 'On' : 'Off';
   if (communityEl) communityEl.textContent = state.community ? 'On' : 'Off';
+}
+
+
+function notificationIconKindFromType(type = '') {
+  const key = String(type || '').toLowerCase();
+  if (['race', 'racealerts', 'race_alert', 'race_day'].includes(key)) return 'race';
+  if (['drop', 'newdrops', 'new_drop', 'product', 'asset'].includes(key)) return 'drop';
+  if (['points', 'fanpoints', 'fan_points', 'rewards', 'reward'].includes(key)) return 'points';
+  if (['community', 'fan', 'poll', 'trivia', 'quote', 'comment'].includes(key)) return 'community';
+  if (['shipped', 'delivered', 'cancelled', 'order', 'processing', 'placed', 'out_for_delivery'].includes(key)) return 'order';
+  return 'order';
+}
+
+function notificationIconSvg(kind = 'order') {
+  const icons = {
+    race: `
+      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+        <path d="M6 20V5"/>
+        <path d="M7 5h9l-1.6 3L16 11H7"/>
+      </svg>`,
+    drop: `
+      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+        <path d="M12 4v10"/>
+        <path d="M8 10l4 4 4-4"/>
+        <path d="M5 19h14"/>
+      </svg>`,
+    order: `
+      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+        <path d="M7 8h10l1 12H6L7 8Z"/>
+        <path d="M9 8a3 3 0 0 1 6 0"/>
+      </svg>`,
+    points: `
+      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+        <path d="M12 4l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 9.2l5-.7L12 4Z"/>
+      </svg>`,
+    community: `
+      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+        <path d="M5 6h14v10H9l-4 3V6Z"/>
+        <path d="M8 10h8"/>
+        <path d="M8 13h5"/>
+      </svg>`
+  };
+  return icons[notificationIconKindFromType(kind)] || icons.order;
+}
+
+function notificationIconMarkup(type = 'order', className = 'notification-card-icon') {
+  const kind = notificationIconKindFromType(type);
+  return `<span class="${className} notif-${kind}-svg-icon" aria-hidden="true">${notificationIconSvg(kind)}</span>`;
+}
+
+function injectNotificationSettingIcons() {
+  const settingIconMap = {
+    raceAlerts: 'race',
+    newDrops: 'drop',
+    orderUpdates: 'order',
+    fanPoints: 'points',
+    community: 'community'
+  };
+
+  Object.entries(settingIconMap).forEach(([key, kind]) => {
+    const icon = document.querySelector(`[data-notification-card="${key}"] .notification-card-icon`);
+    if (!icon) return;
+    icon.classList.add(`notif-${kind}-svg-icon`);
+    icon.innerHTML = notificationIconSvg(kind);
+  });
 }
 
 function renderNotifications(){
@@ -1053,7 +1119,7 @@ function renderNotifications(){
     <div class="real-notification-list">
       ${notifications.map(item => `
         <article class="real-notification-card ${item.read ? '' : 'unread'}" onclick="markNotificationRead('${item.id}')">
-          <span class="real-notification-icon ${notificationTypeIcon(item.type)}" aria-hidden="true"></span>
+          ${notificationIconMarkup(item.type, 'real-notification-icon')}
 
           <div class="real-notification-body">
             <div class="real-notification-top">
@@ -1127,16 +1193,8 @@ function notificationStatusLabel(status = '') {
 }
 
 function notificationTypeIcon(type = '') {
-  const map = {
-    order: 'notif-order-status-icon',
-    shipped: 'notif-shipped-icon',
-    delivered: 'notif-delivered-icon',
-    cancelled: 'notif-cancelled-icon',
-    fan: 'notif-community-icon',
-    rewards: 'notif-points-icon'
-  };
-
-  return map[type] || 'notif-order-status-icon';
+  const kind = notificationIconKindFromType(type);
+  return `notif-${kind}-svg-icon`;
 }
 
 function timeAgo(value) {
@@ -1301,6 +1359,79 @@ function handleOrderStatusNotification(payload = {}) {
   loadMyOrders();
 }
 
+
+function notificationPreferenceAllows(type = '') {
+  const settings = getNotificationState();
+  const kind = notificationIconKindFromType(type);
+  if (kind === 'order') return settings.orderUpdates !== false;
+  if (kind === 'drop') return settings.newDrops !== false;
+  if (kind === 'points') return settings.fanPoints !== false;
+  if (kind === 'community') return settings.community !== false;
+  if (kind === 'race') return settings.raceAlerts !== false;
+  return true;
+}
+
+function addChannelNotification(type, title, message, extra = {}) {
+  if (!notificationPreferenceAllows(type)) return;
+  addAccountNotification({
+    type,
+    title,
+    message,
+    category: extra.category || notificationIconKindFromType(type).toUpperCase(),
+    id: extra.id || `${type}-${extra.ref || Date.now()}`,
+    createdAt: extra.createdAt || new Date().toISOString(),
+    ...extra
+  });
+}
+
+function handleCommunitySocketNotification(payload = {}, label = 'Fan Hub') {
+  const ref = payload.postId || payload.commentId || payload.poll?._id || payload.trivia?._id || payload.deletedId || payload._id || Date.now();
+  const title = payload.title || `${label} update`;
+  const message = payload.message || payload.text || 'New Fan Hub activity is available in PADDOX.';
+  addChannelNotification('community', title, message, { category: 'Fan Hub', ref });
+}
+
+function handleNewDropSocketNotification(payload = {}) {
+  const name = payload.name || payload.product?.name || payload.asset?.name || 'New PADDOX drop';
+  addChannelNotification('drop', 'New drop is live', `${name} is now available.`, {
+    category: 'New Drops',
+    ref: payload._id || payload.id || payload.product?._id || payload.asset?._id || name
+  });
+}
+
+function handleFanPointsSocketNotification(payload = {}) {
+  const points = Number(payload.points || payload.fanPoints || payload.delta || 0);
+  const message = points
+    ? `Your fan points changed by ${points > 0 ? '+' : ''}${points}.`
+    : 'Your PADDOX fan points were updated.';
+  addChannelNotification('points', 'Fan points updated', message, {
+    category: 'Rewards',
+    ref: payload.ref || payload.reason || Date.now()
+  });
+}
+
+function reconcileFanPointsNotification(user = currentUser) {
+  if (!user) return;
+  const userId = user._id || user.id || user.email || 'guest';
+  const key = `paddox_fan_points_snapshot_${userId}`;
+  const nextPoints = Number(user.fanPoints || 0);
+  const previousRaw = localStorage.getItem(key);
+
+  if (previousRaw !== null) {
+    const previous = Number(previousRaw || 0);
+    if (Number.isFinite(previous) && nextPoints > previous && notificationPreferenceAllows('points')) {
+      addChannelNotification(
+        'points',
+        'Fan points increased',
+        `You earned ${nextPoints - previous} fan points. Total balance: ${nextPoints.toLocaleString('en-IN')}.`,
+        { category: 'Rewards', ref: `${userId}-${nextPoints}` }
+      );
+    }
+  }
+
+  localStorage.setItem(key, String(nextPoints));
+}
+
 function initOrderNotificationSocket() {
   const token = profileToken();
 
@@ -1338,6 +1469,15 @@ function initOrderNotificationSocket() {
   });
 
   accountSocket.on('order:status-update', handleOrderStatusNotification);
+
+  accountSocket.on('fan:new-post', payload => handleCommunitySocketNotification(payload, 'Fan Hub'));
+  accountSocket.on('fan:post-comment', payload => handleCommunitySocketNotification(payload, 'Comment'));
+  accountSocket.on('poll:changed', payload => handleCommunitySocketNotification(payload, 'Poll'));
+  accountSocket.on('trivia:changed', payload => handleCommunitySocketNotification(payload, 'Trivia'));
+  accountSocket.on('quote:changed', payload => handleCommunitySocketNotification(payload, 'Quote'));
+  accountSocket.on('product:new-drop', handleNewDropSocketNotification);
+  accountSocket.on('asset:new-drop', handleNewDropSocketNotification);
+  accountSocket.on('fan:points-update', handleFanPointsSocketNotification);
 
   accountSocket.on('connect_error', err => {
     orderSocketConnected = false;
@@ -1812,6 +1952,7 @@ function hydrateProfile(user = {}) {
   updateFanPreferenceSummary();
   hydrateNotificationControls(user.notifications || NOTIFICATION_DEFAULTS);
   bindNotificationControls();
+  reconcileFanPointsNotification(user);
 
   localStorage.setItem('paddox_user', JSON.stringify(user));
 }
@@ -2363,6 +2504,8 @@ window.addEventListener('DOMContentLoaded', () => {
   loadMyOrders();
   loadWishlist();
   loadDownloads();
+  initOrderNotificationInbox(currentUser);
+  initOrderNotificationSocket();
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
 
