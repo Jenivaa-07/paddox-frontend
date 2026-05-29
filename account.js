@@ -1074,6 +1074,26 @@ function injectNotificationSettingIcons() {
   });
 }
 
+function notificationFilterKind(item = {}) {
+  return notificationIconKindFromType(item.type || item.category || 'order');
+}
+
+function notificationCategoryCounts(notifications = []) {
+  return {
+    all: notifications.length,
+    order: notifications.filter(n => notificationFilterKind(n) === 'order').length,
+    race: notifications.filter(n => notificationFilterKind(n) === 'race').length,
+    drop: notifications.filter(n => notificationFilterKind(n) === 'drop').length,
+    points: notifications.filter(n => notificationFilterKind(n) === 'points').length,
+    community: notifications.filter(n => notificationFilterKind(n) === 'community').length
+  };
+}
+
+function setNotificationFilter(type = 'all') {
+  CURRENT_NOTIFICATION_FILTER = type;
+  renderNotifications();
+}
+
 function renderNotifications(){
   const list = document.getElementById('notif-list');
   if (!list) return;
@@ -1086,7 +1106,7 @@ function renderNotifications(){
       <div class="notification-empty-state real-notification-empty">
         <span class="notification-empty-icon order-status-mini-icon" aria-hidden="true"></span>
         <h3>No notifications yet</h3>
-        <p>When PADDOX updates your order status, shipping, delivery, fan points, or community activity, it will appear here.</p>
+        <p>Order updates appear live now. Race alerts, new drops, fan points and community updates will appear when those backend events are triggered.</p>
         <button class="notif-refresh-btn" onclick="loadMyOrders()">Refresh Orders</button>
       </div>
     `;
@@ -1095,6 +1115,23 @@ function renderNotifications(){
 
   const unread = notifications.filter(item => !item.read).length;
   const latest = notifications[0];
+  const counts = notificationCategoryCounts(notifications);
+  const filtered = CURRENT_NOTIFICATION_FILTER === 'all'
+    ? notifications
+    : notifications.filter(item => notificationFilterKind(item) === CURRENT_NOTIFICATION_FILTER);
+
+  const filterButtons = [
+    ['all', 'All', counts.all],
+    ['order', 'Orders', counts.order],
+    ['race', 'Race', counts.race],
+    ['drop', 'Drops', counts.drop],
+    ['points', 'Points', counts.points],
+    ['community', 'Community', counts.community]
+  ].map(([key, label, count]) => `
+    <button class="notif-filter-chip ${CURRENT_NOTIFICATION_FILTER === key ? 'on' : ''}" onclick="setNotificationFilter('${key}')">
+      <span>${label}</span><b>${count}</b>
+    </button>
+  `).join('');
 
   list.innerHTML = `
     <div class="notification-command-bar">
@@ -1116,30 +1153,40 @@ function renderNotifications(){
       </div>
     </div>
 
-    <div class="real-notification-list">
-      ${notifications.map(item => `
-        <article class="real-notification-card ${item.read ? '' : 'unread'}" onclick="markNotificationRead('${item.id}')">
-          ${notificationIconMarkup(item.type, 'real-notification-icon')}
-
-          <div class="real-notification-body">
-            <div class="real-notification-top">
-              <strong>${escapeHtml(item.title || 'PADDOX Update')}</strong>
-              ${item.read ? '' : '<span class="real-unread-dot" aria-hidden="true"></span>'}
-            </div>
-            <p>${escapeHtml(item.message || '')}</p>
-            <div class="real-notification-meta">
-              <span>${escapeHtml(item.orderNumber ? '#' + item.orderNumber : item.category || 'PADDOX')}</span>
-              <span>${timeAgo(item.createdAt)}</span>
-            </div>
-          </div>
-
-          ${item.orderId ? `<button class="real-notification-action" onclick="event.stopPropagation();openOrderFromNotification('${item.orderId}')">View</button>` : ''}
-        </article>
-      `).join('')}
+    <div class="notification-filter-row">
+      ${filterButtons}
     </div>
+
+    ${filtered.length ? `
+      <div class="real-notification-list">
+        ${filtered.map(item => `
+          <article class="real-notification-card ${item.read ? '' : 'unread'}" onclick="markNotificationRead('${item.id}')">
+            ${notificationIconMarkup(item.type, 'real-notification-icon')}
+
+            <div class="real-notification-body">
+              <div class="real-notification-top">
+                <strong>${escapeHtml(item.title || 'PADDOX Update')}</strong>
+                ${item.read ? '' : '<span class="real-unread-dot" aria-hidden="true"></span>'}
+              </div>
+              <p>${escapeHtml(item.message || '')}</p>
+              <div class="real-notification-meta">
+                <span>${escapeHtml(item.orderNumber ? '#' + item.orderNumber : item.category || 'PADDOX')}</span>
+                <span>${timeAgo(item.createdAt)}</span>
+              </div>
+            </div>
+
+            ${item.orderId ? `<button class="real-notification-action" onclick="event.stopPropagation();openOrderFromNotification('${item.orderId}')">View</button>` : ''}
+          </article>
+        `).join('')}
+      </div>
+    ` : `
+      <div class="notification-empty-state real-notification-empty compact">
+        <h3>No ${CURRENT_NOTIFICATION_FILTER} notifications yet</h3>
+        <p>This category is ready, but no matching update has been received yet.</p>
+      </div>
+    `}
   `;
 }
-
 
 /* ══════════════════════════════════════
    REAL NOTIFICATION INBOX + ORDER SOCKET
@@ -1149,6 +1196,7 @@ const PADDOX_SOCKET_URL = 'https://paddox-backend.onrender.com';
 let accountSocket = null;
 let orderSocketConnected = false;
 let ACCOUNT_ORDER_CACHE = [];
+let CURRENT_NOTIFICATION_FILTER = 'all';
 
 function accountNotificationKey() {
   const userId =
@@ -1219,33 +1267,65 @@ function timeAgo(value) {
 }
 
 function addAccountNotification(notification = {}) {
-  const id =
-    notification.id ||
-    `${notification.type || 'notice'}-${notification.orderId || notification.orderNumber || 'paddox'}-${notification.status || ''}-${Date.now()}`;
+  const type = notification.type || 'order';
+  const status = String(notification.status || '').toLowerCase();
+  const orderId = String(notification.orderId || '').trim();
+  const orderNumber = String(notification.orderNumber || '').trim();
+  const category = notification.category || '';
+  const ref = String(notification.ref || notification.id || '').trim();
+
+  const stableKey = notification.key || [
+    notificationIconKindFromType(type),
+    orderId || orderNumber || ref || category || 'paddox',
+    status || String(notification.title || '').toLowerCase().trim()
+  ].join('|');
+
+  const id = notification.id || stableKey.replace(/[^a-z0-9|_-]+/gi, '-');
 
   const next = {
     id,
-    type: notification.type || 'order',
+    key: stableKey,
+    type,
     title: notification.title || 'PADDOX Update',
     message: notification.message || '',
-    orderId: notification.orderId || '',
-    orderNumber: notification.orderNumber || '',
-    status: notification.status || '',
-    category: notification.category || '',
+    orderId,
+    orderNumber,
+    status,
+    category,
+    ref,
     createdAt: notification.createdAt || new Date().toISOString(),
     read: !!notification.read
   };
 
   const items = getStoredAccountNotifications();
-  const duplicate = items.some(item =>
-    item.orderNumber &&
-    next.orderNumber &&
-    item.orderNumber === next.orderNumber &&
-    item.status === next.status &&
-    Math.abs(new Date(item.createdAt).getTime() - new Date(next.createdAt).getTime()) < 4000
-  );
+  const duplicateIndex = items.findIndex(item => {
+    if (item.key && item.key === stableKey) return true;
 
-  if (duplicate) return;
+    const itemKind = notificationIconKindFromType(item.type);
+    const nextKind = notificationIconKindFromType(next.type);
+
+    if (itemKind === 'order' && nextKind === 'order') {
+      const sameOrder =
+        (item.orderId && next.orderId && String(item.orderId) === String(next.orderId)) ||
+        (item.orderNumber && next.orderNumber && String(item.orderNumber) === String(next.orderNumber));
+      return sameOrder && String(item.status || '').toLowerCase() === next.status;
+    }
+
+    return itemKind === nextKind && item.ref && next.ref && String(item.ref) === String(next.ref);
+  });
+
+  if (duplicateIndex > -1) {
+    const merged = [...items];
+    merged[duplicateIndex] = {
+      ...merged[duplicateIndex],
+      ...next,
+      read: merged[duplicateIndex].read && next.read,
+      createdAt: merged[duplicateIndex].createdAt || next.createdAt
+    };
+    setStoredAccountNotifications(merged);
+    renderNotifications();
+    return;
+  }
 
   setStoredAccountNotifications([next, ...items]);
   renderNotifications();
@@ -1352,7 +1432,8 @@ function handleOrderStatusNotification(payload = {}) {
     status,
     title: `Order #${orderNumber} is now ${label}`,
     message: payload.message || `Your PADDOX order status was updated to ${label}.`,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    key: `order|${orderId || orderNumber}|${status}`
   });
 
   showToast(`🔔 Order #${orderNumber} updated to ${label}`);
@@ -1517,6 +1598,7 @@ window.markNotificationRead = markNotificationRead;
 window.markAllNotificationsRead = markAllNotificationsRead;
 window.clearAccountNotifications = clearAccountNotifications;
 window.openOrderFromNotification = openOrderFromNotification;
+window.setNotificationFilter = setNotificationFilter;
 
 async function saveNotifications(options = {}) {
   const silent = !!options.silent;
