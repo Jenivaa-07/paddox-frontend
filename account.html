@@ -315,10 +315,39 @@
 
       <!-- DOWNLOADS -->
       <div class="acc-page" id="page-downloads">
-        <div class="page-header"><div class="page-label">Digital Assets</div><div class="page-title">MY <span class="accent">DOWNLOADS</span></div></div>
+        <div class="page-header downloads-page-head">
+          <div>
+            <div class="page-label">Digital Assets</div>
+            <div class="page-title">MY <span class="accent">DOWNLOADS</span></div>
+          </div>
+          <button class="downloads-shop-btn" onclick="window.location.href='fanhub.html'">Explore Assets <span aria-hidden="true">→</span></button>
+        </div>
+
+        <div class="downloads-command-strip" id="downloads-summary-strip">
+          <div class="downloads-command-card">
+            <span>Downloaded Assets</span>
+            <strong id="dl-summary-count">0</strong>
+          </div>
+          <div class="downloads-command-card">
+            <span>Total Size</span>
+            <strong id="dl-summary-size">0 MB</strong>
+          </div>
+          <div class="downloads-command-card">
+            <span>Latest Download</span>
+            <strong id="dl-summary-latest">—</strong>
+          </div>
+          <div class="downloads-command-card">
+            <span>Asset Type</span>
+            <strong id="dl-summary-type">Digital</strong>
+          </div>
+        </div>
+
         <div class="dl-grid" id="downloads-grid">
-          <div style="grid-column:1/-1;text-align:center;padding:40px;color:#777">
-            Downloads will appear here after you save digital assets from Fan Hub.
+          <div class="downloads-empty-state">
+            <span class="downloads-empty-icon" aria-hidden="true"></span>
+            <h3>No downloads yet</h3>
+            <p>Downloads will appear here after you save digital assets from Fan Hub.</p>
+            <button class="downloads-empty-btn" onclick="window.location.href='fanhub.html'">Explore Fan Hub <span aria-hidden="true">→</span></button>
           </div>
         </div>
       </div>

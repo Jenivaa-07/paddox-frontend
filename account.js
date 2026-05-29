@@ -721,6 +721,78 @@ async function loadDownloads() {
   }
 }
 
+
+function parseDownloadSizeToMB(sizeValue) {
+  if (!sizeValue) return 0;
+  if (typeof sizeValue === 'number') return sizeValue / (1024 * 1024);
+
+  const raw = String(sizeValue).trim().toLowerCase();
+  const num = parseFloat(raw.replace(/,/g, ''));
+
+  if (Number.isNaN(num)) return 0;
+  if (raw.includes('gb')) return num * 1024;
+  if (raw.includes('kb')) return num / 1024;
+  if (raw.includes('byte') || raw.includes(' b')) return num / (1024 * 1024);
+  return num;
+}
+
+function formatDownloadSize(mb) {
+  if (!mb || mb <= 0) return '0 MB';
+  if (mb >= 1024) return `${(mb / 1024).toFixed(mb >= 10240 ? 0 : 1)} GB`;
+  return `${mb.toFixed(mb >= 100 ? 0 : 1)} MB`;
+}
+
+function updateDownloadsSummary() {
+  const count = REAL_DOWNLOADS.length;
+  const countEl = document.getElementById('dl-summary-count');
+  const sizeEl = document.getElementById('dl-summary-size');
+  const latestEl = document.getElementById('dl-summary-latest');
+  const typeEl = document.getElementById('dl-summary-type');
+
+  if (countEl) countEl.textContent = count;
+
+  const totalSize = REAL_DOWNLOADS.reduce((sum, asset) => {
+    return sum + parseDownloadSizeToMB(asset.fileSize || asset.size || asset.meta?.fileSize || asset.meta?.size);
+  }, 0);
+
+  if (sizeEl) sizeEl.textContent = formatDownloadSize(totalSize);
+
+  const latest = REAL_DOWNLOADS
+    .map(assetDownloadedDate)
+    .filter(Boolean)
+    .map(date => new Date(date))
+    .filter(date => !Number.isNaN(date.getTime()))
+    .sort((a, b) => b - a)[0];
+
+  if (latestEl) {
+    latestEl.textContent = latest
+      ? latest.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+      : '—';
+  }
+
+  const types = new Set(
+    REAL_DOWNLOADS
+      .map(asset => asset.type || asset.category || asset.assetType || 'Digital')
+      .filter(Boolean)
+  );
+
+  if (typeEl) typeEl.textContent = types.size > 1 ? `${types.size} Types` : (types.values().next().value || 'Digital');
+}
+
+function downloadAssetTypeLabel(asset) {
+  return asset.type || asset.category || asset.assetType || 'Digital Asset';
+}
+
+function downloadAssetMetaLine(asset, downloadedAt) {
+  const resolution = asset.resolution || asset.meta?.resolution || 'HD';
+  const size = asset.fileSize || asset.size || asset.meta?.fileSize || 'Digital Asset';
+  const date = downloadedAt
+    ? new Date(downloadedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+    : 'Saved';
+
+  return `${resolution} · ${size} · Downloaded ${date}`;
+}
+
 function updateDownloadStats() {
   const count = REAL_DOWNLOADS.length;
 
@@ -729,6 +801,8 @@ function updateDownloadStats() {
 
   const statNums = document.querySelectorAll('.ds-card .ds-num');
   if (statNums[2]) statNums[2].textContent = count;
+
+  updateDownloadsSummary();
 }
 
 function renderDownloads() {
@@ -736,17 +810,17 @@ function renderDownloads() {
 
   if (!grid) return;
 
+  updateDownloadsSummary();
+
   if (!REAL_DOWNLOADS.length) {
     grid.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        padding:40px;
-        text-align:center;
-        color:#777;
-        border:1px solid rgba(255,255,255,.08);
-        background:#0d0d0d;
-      ">
-        No downloads yet. Go to Fan Hub → Digital Assets and download a wallpaper.
+      <div class="downloads-empty-state">
+        <span class="downloads-empty-icon" aria-hidden="true"></span>
+        <h3>No downloads yet</h3>
+        <p>Go to Fan Hub and download wallpapers, posters, race-day visuals, or other PADDOX digital assets. Your saved files will appear here.</p>
+        <button class="downloads-empty-btn" onclick="window.location.href='fanhub.html'">
+          Explore Fan Hub <span aria-hidden="true">→</span>
+        </button>
       </div>
     `;
 
@@ -757,35 +831,33 @@ function renderDownloads() {
   grid.innerHTML = REAL_DOWNLOADS.map(asset => {
     const image = assetImage(asset);
     const downloadedAt = assetDownloadedDate(asset);
+    const name = asset.name || 'Paddox Digital Asset';
+    const typeLabel = downloadAssetTypeLabel(asset);
+    const metaLine = downloadAssetMetaLine(asset, downloadedAt);
 
     return `
-      <div class="dl-card">
-        <div class="dl-thumb">
+      <div class="dl-card premium-download-card">
+        <div class="dl-thumb download-thumb">
           ${
             image
-              ? `<img src="${image}" alt="${asset.name || 'Digital Asset'}"/>`
-              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#111;font-size:2rem">🖼️</div>`
+              ? `<img src="${image}" alt="${name}"/>`
+              : `<span class="download-thumb-fallback" aria-hidden="true"></span>`
           }
+          <span class="download-type-pill">${typeLabel}</span>
         </div>
 
-        <div class="dl-info">
-          <div class="dl-name">
-            ${asset.name || 'Paddox Digital Asset'}
-          </div>
-          <div class="dl-meta">
-            ${asset.resolution || 'HD'} · ${asset.fileSize || 'Digital Asset'} · ${
-              downloadedAt
-                ? 'Downloaded ' + new Date(downloadedAt).toLocaleDateString()
-                : 'Downloaded'
-            }
-          </div>
+        <div class="dl-info download-info">
+          <div class="dl-name download-name">${name}</div>
+          <div class="dl-meta download-meta">${metaLine}</div>
         </div>
 
         <button
-          class="dl-act animate-icon"
+          class="dl-act download-action-btn"
           onclick="downloadAccountAsset('${asset._id}')"
+          aria-label="Download ${name} again"
         >
-          ↓ Download Again
+          <span aria-hidden="true">↓</span>
+          <span>Download Again</span>
         </button>
       </div>
     `;
