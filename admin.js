@@ -4893,7 +4893,6 @@ function openOrderDetails(orderId) {
     <div class="admin-order-modal-actions">
       <button class="admin-mini-btn red" onclick="adminPhase9OpenReceipt('${order._id}')">Open Receipt</button>
       <button class="admin-mini-btn danger" onclick="deleteAdminOrder('${order._id}', '${(order.orderNumber || order._id)}')">Delete Order</button>
-      <button class="admin-mini-btn" onclick="window.print()">Print Admin View</button>
     </div>
   `;
 
@@ -7278,7 +7277,7 @@ function renderOrders() {
         </td>
         <td>
           <span class="admin-items-pill admin-items-pill-clean" title="${adminPhase9Text(fullItems)}">
-            <span class="admin-items-dot"></span>${adminPhase9Text(itemLabel)}
+            <span class="admin-items-dot"></span><span class="admin-items-label">${adminPhase9Text(itemLabel)}</span>
           </span>
         </td>
         <td class="admin-date-cell">${adminPhase9Date(order.createdAt)}</td>
@@ -7401,7 +7400,6 @@ function openOrderDetails(orderId) {
 
     <div class="admin-order-modal-actions">
       <button class="admin-mini-btn red" onclick="adminPhase9OpenReceipt('${order._id}')">Open Receipt</button>
-      <button class="admin-mini-btn" onclick="window.print()">Print Admin View</button>
       <button class="admin-mini-btn danger" onclick="deleteAdminOrder('${order._id}', '${(order.orderNumber || order._id)}')">Delete Order</button>
     </div>
   `;
@@ -7411,3 +7409,5 @@ function openOrderDetails(orderId) {
 }
 
 console.log('%c🏁 PADDOX — Admin Orders A3.2 alignment + modal lock', 'color:#e8002d;font-size:13px;font-weight:bold;');
+
+console.log('%c🏁 PADDOX — Admin Orders A3.3 product alignment + modal cleanup', 'color:#e8002d;font-size:13px;font-weight:bold;');
