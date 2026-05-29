@@ -438,23 +438,134 @@
 
       <!-- SECURITY -->
       <div class="acc-page" id="page-security">
-        <div class="page-header"><div class="page-label">Account Security</div><div class="page-title">SECURITY <span class="accent">SETTINGS</span></div></div>
-        <div class="settings-grid">
-          <div class="set-card reveal-up">
-            <div class="set-title"><span class="section-mini-icon security-mini-icon" aria-hidden="true"></span> Change Password</div>
-            <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" placeholder="••••••••"/></div>
-            <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" placeholder="Min 8 characters"/></div>
-            <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" type="password" placeholder="Repeat new password"/></div>
-            <button class="save-btn" onclick="showToast('✓ Password updated successfully!')">Update Password ✓</button>
+        <div class="page-header">
+          <div class="page-label">Account Security</div>
+          <div class="page-title">SECURITY <span class="accent">SETTINGS</span></div>
+        </div>
+
+        <div class="security-summary-grid reveal-up">
+          <div class="security-summary-card">
+            <span>Password Status</span>
+            <strong id="sec-password-status">Protected</strong>
           </div>
-          <div class="set-card reveal-up delay-1">
-            <div class="set-title"><span class="section-mini-icon shield-mini-icon" aria-hidden="true"></span> Two-Factor Auth</div>
-            <div class="toggle-row"><div><div class="tlbl">Enable 2FA</div><div class="tsub">SMS or Authenticator app</div></div><label class="toggle"><input type="checkbox"><span class="tgl-sl"></span></label></div>
-            <div class="set-title" style="margin-top:24px">Active Sessions</div>
-            <div class="session-row"><div><div class="sess-name">Chrome · Chennai, IN</div><div class="sess-meta">Current session · Active now</div></div><span class="sess-active">● Active</span></div>
-            <div class="session-row"><div><div class="sess-name">Safari · iPhone</div><div class="sess-meta">Last seen 2 days ago</div></div><button class="revoke-btn" onclick="showToast('Session revoked')">Revoke</button></div>
+          <div class="security-summary-card">
+            <span>Two-Factor Auth</span>
+            <strong id="sec-2fa-status">Coming Soon</strong>
+          </div>
+          <div class="security-summary-card">
+            <span>Active Sessions</span>
+            <strong id="sec-session-count">1 Active</strong>
+          </div>
+          <div class="security-summary-card">
+            <span>Account Safety</span>
+            <strong id="sec-safety-status">Good</strong>
           </div>
         </div>
+
+        <div class="security-grid-premium">
+          <section class="security-card premium-password-card reveal-up">
+            <div class="security-card-head">
+              <div>
+                <div class="set-title"><span class="section-mini-icon security-mini-icon" aria-hidden="true"></span> Change Password</div>
+                <p>Use a strong password that you do not reuse on other sites.</p>
+              </div>
+              <span class="security-chip">Encrypted</span>
+            </div>
+
+            <div class="security-field">
+              <label class="form-label" for="sec-current-pass">Current Password</label>
+              <div class="password-input-wrap">
+                <input class="form-input" type="password" id="sec-current-pass" placeholder="••••••••" autocomplete="current-password"/>
+                <button type="button" class="password-eye-btn" onclick="toggleSecurityPassword('sec-current-pass', this)" aria-label="Show current password">Show</button>
+              </div>
+            </div>
+
+            <div class="security-field">
+              <label class="form-label" for="sec-new-pass">New Password</label>
+              <div class="password-input-wrap">
+                <input class="form-input" type="password" id="sec-new-pass" placeholder="Min 8 characters" autocomplete="new-password" oninput="updateSecurityStrength()"/>
+                <button type="button" class="password-eye-btn" onclick="toggleSecurityPassword('sec-new-pass', this)" aria-label="Show new password">Show</button>
+              </div>
+              <div class="password-strength-wrap" aria-live="polite">
+                <div class="password-strength-track"><span id="password-strength-bar"></span></div>
+                <div class="password-strength-copy" id="password-strength-copy">Strength: waiting for password</div>
+              </div>
+            </div>
+
+            <div class="security-field">
+              <label class="form-label" for="sec-confirm-pass">Confirm New Password</label>
+              <div class="password-input-wrap">
+                <input class="form-input" type="password" id="sec-confirm-pass" placeholder="Repeat new password" autocomplete="new-password" oninput="updateSecurityStrength()"/>
+                <button type="button" class="password-eye-btn" onclick="toggleSecurityPassword('sec-confirm-pass', this)" aria-label="Show confirm password">Show</button>
+              </div>
+              <small class="security-hint" id="password-match-hint">Confirm password to continue.</small>
+            </div>
+
+            <button class="save-btn security-primary-btn" id="security-password-btn" onclick="submitSecurityPassword()">Update Password ✓</button>
+            <p class="security-status-note" id="security-password-status">Password validation runs locally. Backend password update can be connected when the API route is added.</p>
+          </section>
+
+          <section class="security-card reveal-up delay-1">
+            <div class="security-card-head">
+              <div>
+                <div class="set-title"><span class="section-mini-icon shield-mini-icon" aria-hidden="true"></span> Account Protection</div>
+                <p>Review 2FA availability and trusted sessions.</p>
+              </div>
+              <span class="security-chip muted">Safe Mode</span>
+            </div>
+
+            <div class="twofa-premium-box">
+              <div class="twofa-icon" aria-hidden="true"></div>
+              <div>
+                <div class="tlbl">Two-Factor Authentication</div>
+                <div class="tsub">Authenticator app and SMS verification will be enabled after backend support is added.</div>
+              </div>
+              <label class="toggle disabled-toggle" title="2FA coming soon">
+                <input type="checkbox" disabled>
+                <span class="tgl-sl"></span>
+              </label>
+            </div>
+
+            <div class="session-head-row">
+              <div class="set-title">Active Sessions</div>
+              <button class="revoke-btn" type="button" onclick="refreshSecuritySessions()">Refresh</button>
+            </div>
+
+            <div class="session-premium-list" id="security-session-list">
+              <div class="session-premium-card current">
+                <span class="session-device-icon" aria-hidden="true"></span>
+                <div>
+                  <div class="sess-name" id="current-session-name">Current browser</div>
+                  <div class="sess-meta" id="current-session-meta">Active now · This device</div>
+                </div>
+                <span class="sess-active">● Active</span>
+              </div>
+              <div class="session-premium-card locked">
+                <span class="session-device-icon phone" aria-hidden="true"></span>
+                <div>
+                  <div class="sess-name">Other sessions</div>
+                  <div class="sess-meta">Session revoke needs backend session management.</div>
+                </div>
+                <button class="revoke-btn" type="button" onclick="showToast('Session revoke backend is not connected yet')">Locked</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="security-card security-tips-card reveal-up delay-2">
+          <div class="security-card-head">
+            <div>
+              <div class="set-title"><span class="section-mini-icon shield-mini-icon" aria-hidden="true"></span> Safety Checklist</div>
+              <p>Small steps that keep your PADDOX account safe.</p>
+            </div>
+          </div>
+          <div class="security-tips-grid">
+            <div class="security-tip"><span></span><b>Use 8+ characters</b><small>Mix uppercase, lowercase, numbers and symbols.</small></div>
+            <div class="security-tip"><span></span><b>Avoid reused passwords</b><small>Keep PADDOX unique from other accounts.</small></div>
+            <div class="security-tip"><span></span><b>Check sessions</b><small>Review unknown browsers or devices regularly.</small></div>
+            <div class="security-tip"><span></span><b>Enable 2FA later</b><small>Turn on two-factor auth when it becomes available.</small></div>
+          </div>
+        </section>
       </div>
 
     </main>

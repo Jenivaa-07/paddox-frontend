@@ -3571,3 +3571,121 @@ document.addEventListener('DOMContentLoaded', () => {
   populateDriverSelect();
   updateFanPreferenceSummary();
 });
+
+
+/* ══════════════════════════════════════
+   PHASE 20.12 — SECURITY SECTION PREMIUM POLISH
+══════════════════════════════════════ */
+function securityPasswordScore(value = '') {
+  let score = 0;
+  if (value.length >= 8) score++;
+  if (value.length >= 12) score++;
+  if (/[A-Z]/.test(value)) score++;
+  if (/[a-z]/.test(value)) score++;
+  if (/[0-9]/.test(value)) score++;
+  if (/[^A-Za-z0-9]/.test(value)) score++;
+  return Math.min(score, 6);
+}
+
+function updateSecurityStrength() {
+  const pass = document.getElementById('sec-new-pass')?.value || '';
+  const confirm = document.getElementById('sec-confirm-pass')?.value || '';
+  const bar = document.getElementById('password-strength-bar');
+  const copy = document.getElementById('password-strength-copy');
+  const hint = document.getElementById('password-match-hint');
+  const status = document.getElementById('sec-password-status');
+  if (!bar || !copy || !hint) return;
+
+  const score = securityPasswordScore(pass);
+  const pct = pass ? Math.max(14, Math.round((score / 6) * 100)) : 0;
+  bar.style.width = `${pct}%`;
+  bar.style.background = score >= 5 ? '#00b400' : score >= 3 ? '#c9a84c' : '#e8002d';
+
+  copy.className = 'password-strength-copy';
+  if (!pass) {
+    copy.textContent = 'Strength: waiting for password';
+  } else if (score >= 5) {
+    copy.textContent = 'Strength: strong';
+    copy.classList.add('ok');
+  } else if (score >= 3) {
+    copy.textContent = 'Strength: medium — add more variety';
+    copy.classList.add('warn');
+  } else {
+    copy.textContent = 'Strength: weak — use 8+ chars, numbers and symbols';
+    copy.classList.add('bad');
+  }
+
+  hint.className = 'security-hint';
+  if (!confirm) {
+    hint.textContent = 'Confirm password to continue.';
+  } else if (pass === confirm) {
+    hint.textContent = 'Passwords match.';
+    hint.classList.add('ok');
+  } else {
+    hint.textContent = 'Passwords do not match.';
+    hint.classList.add('bad');
+  }
+
+  if (status) status.textContent = score >= 5 ? 'Strong' : pass ? 'Needs Work' : 'Protected';
+}
+
+function toggleSecurityPassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  if (btn) btn.textContent = show ? 'Hide' : 'Show';
+}
+
+function submitSecurityPassword() {
+  const current = document.getElementById('sec-current-pass')?.value || '';
+  const pass = document.getElementById('sec-new-pass')?.value || '';
+  const confirm = document.getElementById('sec-confirm-pass')?.value || '';
+  const btn = document.getElementById('security-password-btn');
+  const note = document.getElementById('security-password-status');
+
+  if (!current || !pass || !confirm) {
+    showToast('⚠️ Fill all password fields');
+    return;
+  }
+  if (pass.length < 8) {
+    showToast('⚠️ New password must be at least 8 characters');
+    return;
+  }
+  if (pass !== confirm) {
+    showToast('⚠️ Confirm password does not match');
+    return;
+  }
+  if (securityPasswordScore(pass) < 3) {
+    showToast('⚠️ Use a stronger password');
+    return;
+  }
+
+  if (btn) btn.textContent = 'Validated ✓';
+  if (note) note.textContent = 'Password passed validation. Backend password update route is not connected in this phase.';
+  showToast('✓ Password is valid — backend update route needed to save it');
+}
+
+function getSecurityBrowserName() {
+  const ua = navigator.userAgent;
+  if (/Edg\//.test(ua)) return 'Edge';
+  if (/Chrome\//.test(ua) && !/Edg\//.test(ua)) return 'Chrome';
+  if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) return 'Safari';
+  if (/Firefox\//.test(ua)) return 'Firefox';
+  return 'Current browser';
+}
+
+function refreshSecuritySessions() {
+  const name = document.getElementById('current-session-name');
+  const meta = document.getElementById('current-session-meta');
+  const count = document.getElementById('sec-session-count');
+  if (name) name.textContent = `${getSecurityBrowserName()} · Current device`;
+  if (meta) meta.textContent = 'Active now · Protected session';
+  if (count) count.textContent = '1 Active';
+  showToast('✓ Session details refreshed');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateSecurityStrength();
+  refreshSecuritySessions();
+});
