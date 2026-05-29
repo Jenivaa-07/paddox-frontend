@@ -1208,11 +1208,68 @@ function accountNotificationKey() {
   return `paddox_notifications_${userId}`;
 }
 
+function notificationDedupeKey(item = {}) {
+  const kind = notificationIconKindFromType(item.type || item.category || 'order');
+  const title = String(item.title || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const status = String(item.status || '').toLowerCase().trim();
+  const orderNumberMatch = title.match(/#?pdx[- ]?\d+/i);
+  const orderNumber = String(item.orderNumber || (orderNumberMatch ? orderNumberMatch[0].replace('#', '') : '') || '').toLowerCase().trim();
+  const orderId = String(item.orderId || '').toLowerCase().trim();
+  const ref = String(item.ref || item.key || item.id || '').toLowerCase().trim();
+
+  if (kind === 'order') {
+    const orderRef = orderNumber || orderId || ref || title;
+    const orderStatus = status || title.replace(/.*now\s+/i, '').trim() || String(item.message || '').toLowerCase().trim();
+    return `order|${orderRef}|${orderStatus}`;
+  }
+
+  return `${kind}|${ref || title}|${status}`;
+}
+
+function dedupeAccountNotifications(items = []) {
+  const map = new Map();
+
+  items.forEach(item => {
+    if (!item) return;
+    const key = notificationDedupeKey(item);
+    const existing = map.get(key);
+
+    if (!existing) {
+      map.set(key, { ...item, key: item.key || key });
+      return;
+    }
+
+    const existingTime = new Date(existing.createdAt || 0).getTime();
+    const itemTime = new Date(item.createdAt || 0).getTime();
+    const base = itemTime >= existingTime ? item : existing;
+
+    map.set(key, {
+      ...existing,
+      ...base,
+      key,
+      read: Boolean(existing.read && item.read),
+      createdAt: itemTime >= existingTime ? item.createdAt : existing.createdAt
+    });
+  });
+
+  return Array.from(map.values()).sort((a, b) =>
+    new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+  );
+}
+
 function getStoredAccountNotifications() {
   try {
     const raw = localStorage.getItem(accountNotificationKey()) || '[]';
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+
+    const deduped = dedupeAccountNotifications(parsed).slice(0, 60);
+
+    if (deduped.length !== parsed.length) {
+      localStorage.setItem(accountNotificationKey(), JSON.stringify(deduped));
+    }
+
+    return deduped;
   } catch {
     return [];
   }
@@ -1221,7 +1278,7 @@ function getStoredAccountNotifications() {
 function setStoredAccountNotifications(items = []) {
   localStorage.setItem(
     accountNotificationKey(),
-    JSON.stringify(items.slice(0, 60))
+    JSON.stringify(dedupeAccountNotifications(items).slice(0, 60))
   );
   updateNotificationInboxBadge();
 }
@@ -1298,8 +1355,10 @@ function addAccountNotification(notification = {}) {
   };
 
   const items = getStoredAccountNotifications();
+  const nextDedupeKey = notificationDedupeKey(next);
   const duplicateIndex = items.findIndex(item => {
     if (item.key && item.key === stableKey) return true;
+    if (notificationDedupeKey(item) === nextDedupeKey) return true;
 
     const itemKind = notificationIconKindFromType(item.type);
     const nextKind = notificationIconKindFromType(next.type);
