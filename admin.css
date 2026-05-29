@@ -2980,3 +2980,212 @@ html,body{max-width:100%;overflow-x:hidden}
   .products-command-copy h2{font-size:1.8rem;}
   .products-command-btn{width:100%;text-align:center;}
 }
+
+/* ============================================================
+   PADDOX Admin Phase A4.1.1 — Product Teams + 10 Image Dropzone
+   ============================================================ */
+#adm-products .products-command-card{
+  margin-top:2px;
+  min-height:148px;
+}
+#adm-products .products-command-card::before{
+  content:"SHOP SYNC";
+  position:absolute;
+  right:24px;
+  top:18px;
+  color:rgba(255,255,255,.09);
+  font-family:var(--font-c);
+  letter-spacing:3px;
+  font-weight:900;
+  font-size:.68rem;
+  transform:skewX(-10deg);
+}
+#adm-products .products-command-copy h2{
+  text-shadow:0 18px 48px rgba(232,0,45,.12);
+}
+#adm-products .products-filter-row{
+  align-items:stretch;
+}
+#adm-products .adm-select option,
+#add-modal .form-input option,
+#product-edit-modal .edit-product-input option{
+  background:#0d0d0f;
+  color:#fff;
+}
+#adm-products .adm-select optgroup,
+#add-modal .form-input optgroup,
+#product-edit-modal .edit-product-input optgroup{
+  background:#050505;
+  color:var(--red);
+  font-family:var(--font-c);
+  letter-spacing:1px;
+}
+#adm-products .products-table-wrap{
+  position:relative;
+  overflow:auto;
+}
+#adm-products .products-table-wrap::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,var(--red),rgba(201,168,76,.5),transparent);
+  pointer-events:none;
+}
+#adm-products .products-table tbody tr{
+  transition:background .22s ease, transform .22s ease;
+}
+#adm-products .products-table tbody tr:hover{
+  background:rgba(255,255,255,.018);
+}
+.product-upload-group{
+  margin-top:2px;
+}
+.product-image-dropzone{
+  min-height:132px;
+  border:1px dashed rgba(255,255,255,.2);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(232,0,45,.14), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:22px;
+  cursor:pointer;
+  transition:border-color .25s ease, background .25s ease, transform .25s ease, box-shadow .25s ease;
+  outline:none;
+}
+.product-image-dropzone:hover,
+.product-image-dropzone:focus,
+.product-image-dropzone.drag-over{
+  border-color:rgba(232,0,45,.78);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(232,0,45,.24), transparent 34%),
+    linear-gradient(135deg, rgba(232,0,45,.09), rgba(255,255,255,.025));
+  box-shadow:0 22px 60px rgba(232,0,45,.12), inset 0 0 0 1px rgba(232,0,45,.15);
+  transform:translateY(-1px);
+}
+.product-drop-icon{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(232,0,45,.12);
+  color:#fff;
+  border:1px solid rgba(232,0,45,.45);
+  font-size:1.5rem;
+  box-shadow:0 0 28px rgba(232,0,45,.15);
+  flex:0 0 48px;
+}
+.product-image-dropzone strong{
+  display:block;
+  color:#fff;
+  font-family:var(--font-c);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-size:.9rem;
+  margin-bottom:6px;
+}
+.product-image-dropzone span{
+  display:block;
+  color:var(--muted2);
+  font-size:.82rem;
+}
+.product-image-meta-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.product-image-meta-row small{
+  color:#777;
+}
+.product-image-meta-row b{
+  color:#fff;
+}
+.product-image-count{
+  color:var(--red);
+  font-size:.8rem;
+  font-family:var(--font-c);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-weight:800;
+}
+.product-image-preview-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.product-image-preview-tile{
+  position:relative;
+  aspect-ratio:1/1;
+  overflow:hidden;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:#111;
+  box-shadow:0 12px 28px rgba(0,0,0,.28);
+}
+.product-image-preview-tile img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.product-image-preview-tile button{
+  position:absolute;
+  top:6px;
+  right:6px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:rgba(0,0,0,.72);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.16);
+  line-height:1;
+  font-size:1rem;
+}
+.product-image-preview-tile span{
+  position:absolute;
+  left:6px;
+  bottom:6px;
+  padding:4px 7px;
+  background:rgba(232,0,45,.9);
+  color:#fff;
+  font-family:var(--font-c);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-size:.58rem;
+  font-weight:900;
+}
+#add-modal .modal-box{
+  max-width:860px;
+  border-top:0;
+  border-left:3px solid var(--red);
+  background:linear-gradient(145deg,rgba(15,15,17,.98),rgba(7,7,8,.98));
+}
+#add-modal .modal-head{
+  background:linear-gradient(90deg,rgba(232,0,45,.12),rgba(255,255,255,.02));
+}
+#add-modal .form-row{
+  gap:18px;
+}
+#add-modal .form-input:focus{
+  border-color:rgba(232,0,45,.7);
+  box-shadow:0 0 0 3px rgba(232,0,45,.08);
+}
+@media(max-width:900px){
+  .product-image-preview-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+  #add-modal .modal-box{width:94vw;}
+}
+@media(max-width:560px){
+  .product-image-dropzone{flex-direction:column;text-align:center;}
+  .product-image-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}

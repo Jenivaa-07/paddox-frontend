@@ -1210,7 +1210,7 @@ function getFilteredProducts() {
       .join(' ');
 
     const categoryOk = category === 'all' || productCategory === category;
-    const teamOk = team === 'all' || productTeam === team;
+    const teamOk = teamMatchesProductFilter(productTeam, team);
     const searchOk = !search || haystack.includes(search);
 
     return categoryOk && teamOk && searchOk;
@@ -1549,6 +1549,58 @@ const PRODUCT_API_BASE =
   'https://paddox-backend.onrender.com/api/products';
 
 let REAL_PRODUCTS = [];
+const PADDOX_PRODUCT_TEAMS = [
+  { value: 'Ferrari', label: 'Ferrari', aliases: ['ferrari'] },
+  { value: 'Red Bull Racing', label: 'Red Bull Racing', aliases: ['red bull', 'red bull racing'] },
+  { value: 'Mercedes', label: 'Mercedes', aliases: ['mercedes'] },
+  { value: 'McLaren', label: 'McLaren', aliases: ['mclaren'] },
+  { value: 'Aston Martin', label: 'Aston Martin', aliases: ['aston martin'] },
+  { value: 'Alpine', label: 'Alpine', aliases: ['alpine'] },
+  { value: 'Williams', label: 'Williams', aliases: ['williams'] },
+  { value: 'Racing Bulls', label: 'Racing Bulls', aliases: ['racing bulls', 'rb', 'visa cash app rb', 'vcarb'] },
+  { value: 'Kick Sauber', label: 'Kick Sauber', aliases: ['kick sauber', 'sauber', 'stake sauber'] },
+  { value: 'Haas', label: 'Haas', aliases: ['haas'] },
+  { value: 'Cadillac', label: 'Cadillac', aliases: ['cadillac'] },
+  { value: 'Paddox', label: 'Paddox Originals', aliases: ['paddox', 'paddox originals'] },
+  { value: 'Collector', label: 'Collector', aliases: ['collector', 'collectors'] }
+];
+
+function getProductTeamOptionsHTML(selected = '') {
+  const selectedKey = String(selected || '').toLowerCase();
+  const optionHtml = PADDOX_PRODUCT_TEAMS.map(team => {
+    const aliases = [team.value, team.label, ...(team.aliases || [])].map(v => String(v).toLowerCase());
+    const isSelected = aliases.includes(selectedKey);
+    return `<option value="${team.value}" ${isSelected ? 'selected' : ''}>${team.label}</option>`;
+  }).join('');
+
+  return `
+    <optgroup label="F1 Team Categories">
+      ${optionHtml.split('</option>').slice(0, 11).filter(Boolean).map(x => x + '</option>').join('')}
+    </optgroup>
+    <optgroup label="PADDOX Collections">
+      ${optionHtml.split('</option>').slice(11).filter(Boolean).map(x => x + '</option>').join('')}
+    </optgroup>
+  `;
+}
+
+function teamMatchesProductFilter(productTeam, selectedTeam) {
+  const wanted = String(selectedTeam || 'all').toLowerCase();
+  if (wanted === 'all') return true;
+
+  const productValue = String(productTeam || '').toLowerCase();
+  const team = PADDOX_PRODUCT_TEAMS.find(item =>
+    [item.value, item.label, ...(item.aliases || [])]
+      .map(v => String(v).toLowerCase())
+      .includes(wanted)
+  );
+
+  if (!team) return productValue === wanted;
+
+  return [team.value, team.label, ...(team.aliases || [])]
+    .map(v => String(v).toLowerCase())
+    .some(alias => productValue === alias || productValue.includes(alias));
+}
+
 
 let REAL_ASSETS = [];
 let EDIT_ASSET_ID = null;
@@ -2505,18 +2557,7 @@ function ensureProductEditModal() {
           <label style="display:flex;flex-direction:column;gap:6px">
             <span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span>
             <select id="edit-product-team" class="edit-product-input">
-              <option value="Ferrari">Ferrari</option>
-              <option value="Red Bull Racing">Red Bull Racing</option>
-              <option value="Mercedes">Mercedes</option>
-              <option value="McLaren">McLaren</option>
-              <option value="Aston Martin">Aston Martin</option>
-              <option value="Alpine">Alpine</option>
-              <option value="Williams">Williams</option>
-              <option value="RB">RB</option>
-              <option value="Sauber">Sauber</option>
-              <option value="Haas">Haas</option>
-              <option value="Paddox">Paddox</option>
-              <option value="Collector">Collector</option>
+${getProductTeamOptionsHTML()}
             </select>
           </label>
 
@@ -2939,33 +2980,113 @@ function getAddValue(id) {
 }
 
 
+let ADD_PRODUCT_IMAGE_FILES = [];
+
+function syncAddProductFileInput() {
+  const input = document.getElementById('add-product-image');
+  if (!input) return;
+  const transfer = new DataTransfer();
+  ADD_PRODUCT_IMAGE_FILES.slice(0, 10).forEach(file => transfer.items.add(file));
+  input.files = transfer.files;
+}
+
+function setAddProductImageFiles(files, append = false) {
+  const incoming = Array.from(files || []).filter(file => file && file.type && file.type.startsWith('image/'));
+  const combined = append ? [...ADD_PRODUCT_IMAGE_FILES, ...incoming] : incoming;
+  const unique = [];
+  const seen = new Set();
+
+  combined.forEach(file => {
+    const key = `${file.name}-${file.size}-${file.lastModified}`;
+    if (!seen.has(key) && unique.length < 10) {
+      seen.add(key);
+      unique.push(file);
+    }
+  });
+
+  ADD_PRODUCT_IMAGE_FILES = unique;
+  syncAddProductFileInput();
+  updateAddProductImageCount();
+}
+
+function removeAddProductImage(index) {
+  ADD_PRODUCT_IMAGE_FILES.splice(index, 1);
+  syncAddProductFileInput();
+  updateAddProductImageCount();
+}
+window.removeAddProductImage = removeAddProductImage;
+
 function updateAddProductImageCount() {
   const input = document.getElementById('add-product-image');
   const countEl = document.getElementById('add-product-image-count');
+  const preview = document.getElementById('add-product-image-preview');
 
-  if (!input || !countEl) return;
+  if (!countEl) return;
 
-  const files = Array.from(input.files || []);
+  const files = ADD_PRODUCT_IMAGE_FILES.length
+    ? ADD_PRODUCT_IMAGE_FILES
+    : Array.from(input?.files || []);
 
   if (!files.length) {
     countEl.textContent = 'No images selected';
+    if (preview) preview.innerHTML = '';
     return;
   }
 
-  if (files.length > 3) {
-    countEl.textContent = `Selected ${files.length} images. Only first 3 will be saved.`;
-    return;
-  }
+  countEl.textContent = `${files.length}/10 image${files.length > 1 ? 's' : ''} selected`;
 
-  countEl.textContent =
-    `${files.length} image${files.length > 1 ? 's' : ''} selected`;
+  if (!preview) return;
+
+  preview.innerHTML = files.map((file, index) => `
+    <div class="product-image-preview-tile">
+      <img src="${URL.createObjectURL(file)}" alt="Product preview ${index + 1}">
+      <button type="button" onclick="removeAddProductImage(${index})">×</button>
+      ${index === 0 ? '<span>Cover</span>' : ''}
+    </div>
+  `).join('');
 }
 
 document.addEventListener('change', e => {
   if (e.target?.id === 'add-product-image') {
-    updateAddProductImageCount();
+    setAddProductImageFiles(e.target.files, false);
   }
 });
+
+function initAddProductDropzone() {
+  const zone = document.getElementById('add-product-dropzone');
+  const input = document.getElementById('add-product-image');
+
+  if (!zone || !input || zone.dataset.bound === 'true') return;
+  zone.dataset.bound = 'true';
+
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      input.click();
+    }
+  });
+
+  ['dragenter', 'dragover'].forEach(type => {
+    zone.addEventListener(type, e => {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(type => {
+    zone.addEventListener(type, e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+    });
+  });
+
+  zone.addEventListener('drop', e => {
+    setAddProductImageFiles(e.dataTransfer?.files || [], true);
+  });
+}
+
+window.addEventListener('load', initAddProductDropzone);
 
 async function saveNewProduct() {
   try {
@@ -2981,8 +3102,10 @@ async function saveNewProduct() {
       `${name} from Paddox store`;
 
     const imageFiles =
-      Array.from(document.getElementById('add-product-image')?.files || [])
-        .slice(0, 3);
+      (ADD_PRODUCT_IMAGE_FILES.length
+        ? ADD_PRODUCT_IMAGE_FILES
+        : Array.from(document.getElementById('add-product-image')?.files || []))
+        .slice(0, 10);
 
     if (!name) {
       showToast('❌ Product name required');
@@ -3106,6 +3229,8 @@ function clearAddProductForm() {
     if (el) el.value = '';
   });
 
+  ADD_PRODUCT_IMAGE_FILES = [];
+  syncAddProductFileInput();
   updateAddProductImageCount();
 
   const team = document.getElementById('add-product-team');
@@ -3120,6 +3245,7 @@ function clearAddProductForm() {
 
 /* ══ ADD PRODUCT MODAL ══ */
 function openAddModal() {
+  initAddProductDropzone();
   document.getElementById('add-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -7512,3 +7638,19 @@ console.log('%c🏁 PADDOX — Admin Orders A3.3 product alignment + modal clean
 
 /* PADDOX Admin Phase A4.1 product controls bootstrap */
 document.addEventListener('DOMContentLoaded', bindProductAdminControls);
+
+
+/* Phase A4.1.1 — keep product team dropdowns synced with shop categories */
+function syncProductTeamSelects() {
+  ['add-product-team', 'product-team-filter'].forEach(id => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    const current = select.value || (id === 'product-team-filter' ? 'all' : 'Ferrari');
+    const allOption = id === 'product-team-filter' ? '<option value="all">All Teams</option>' : '';
+    select.innerHTML = allOption + getProductTeamOptionsHTML(current);
+    select.value = current;
+    if (id === 'product-team-filter' && !select.value) select.value = 'all';
+    if (id === 'add-product-team' && !select.value) select.value = 'Ferrari';
+  });
+}
+window.addEventListener('load', syncProductTeamSelects);

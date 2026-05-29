@@ -357,18 +357,23 @@
             </select>
             <select class="adm-select" id="product-team-filter">
               <option value="all">All Teams</option>
-              <option value="Ferrari">Ferrari</option>
-              <option value="Red Bull Racing">Red Bull Racing</option>
-              <option value="Mercedes">Mercedes</option>
-              <option value="McLaren">McLaren</option>
-              <option value="Aston Martin">Aston Martin</option>
-              <option value="Alpine">Alpine</option>
-              <option value="Williams">Williams</option>
-              <option value="RB">RB</option>
-              <option value="Sauber">Sauber</option>
-              <option value="Haas">Haas</option>
-              <option value="Paddox">Paddox</option>
-              <option value="Collector">Collector</option>
+              <optgroup label="F1 Team Categories">
+                <option value="Ferrari">Ferrari</option>
+                <option value="Red Bull Racing">Red Bull Racing</option>
+                <option value="Mercedes">Mercedes</option>
+                <option value="McLaren">McLaren</option>
+                <option value="Aston Martin">Aston Martin</option>
+                <option value="Alpine">Alpine</option>
+                <option value="Williams">Williams</option>
+                <option value="Racing Bulls">Racing Bulls</option>
+                <option value="Kick Sauber">Kick Sauber</option>
+                <option value="Haas">Haas</option>
+                <option value="Cadillac">Cadillac</option>
+              </optgroup>
+              <optgroup label="PADDOX Collections">
+                <option value="Paddox">Paddox Originals</option>
+                <option value="Collector">Collector</option>
+              </optgroup>
             </select>
             <input class="adm-input" id="product-search-input" type="text" placeholder="Search product, team, category…"/>
             <button class="products-refresh-btn" id="products-refresh-btn" type="button">REFRESH</button>
@@ -762,18 +767,23 @@
           <div class="form-group">
             <label class="form-label">Team</label>
             <select id="add-product-team" class="form-input">
-              <option value="Ferrari">Ferrari</option>
-              <option value="Red Bull Racing">Red Bull Racing</option>
-              <option value="Mercedes">Mercedes</option>
-              <option value="McLaren">McLaren</option>
-              <option value="Aston Martin">Aston Martin</option>
-              <option value="Alpine">Alpine</option>
-              <option value="Williams">Williams</option>
-              <option value="RB">RB</option>
-              <option value="Sauber">Sauber</option>
-              <option value="Haas">Haas</option>
-              <option value="Paddox">Paddox</option>
-              <option value="Collector">Collector</option>
+              <optgroup label="F1 Team Categories">
+                <option value="Ferrari">Ferrari</option>
+                <option value="Red Bull Racing">Red Bull Racing</option>
+                <option value="Mercedes">Mercedes</option>
+                <option value="McLaren">McLaren</option>
+                <option value="Aston Martin">Aston Martin</option>
+                <option value="Alpine">Alpine</option>
+                <option value="Williams">Williams</option>
+                <option value="Racing Bulls">Racing Bulls</option>
+                <option value="Kick Sauber">Kick Sauber</option>
+                <option value="Haas">Haas</option>
+                <option value="Cadillac">Cadillac</option>
+              </optgroup>
+              <optgroup label="PADDOX Collections">
+                <option value="Paddox">Paddox Originals</option>
+                <option value="Collector">Collector</option>
+              </optgroup>
             </select>
           </div>
         </div>
@@ -832,11 +842,21 @@
           <textarea id="add-product-description" class="form-input" rows="3" style="resize:vertical" placeholder="Product description…"></textarea>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Upload Product Images</label>
-          <input id="add-product-image" class="form-input" type="file" accept="image/*" multiple/>
-          <small style="color:#777">You can upload 1 to 3 images. JPG / PNG / WebP supported.</small>
-          <div id="add-product-image-count" style="color:var(--red);font-size:.8rem;margin-top:8px;font-family:var(--font-c);letter-spacing:1px">No images selected</div>
+        <div class="form-group product-upload-group">
+          <label class="form-label">Product Images</label>
+          <div class="product-image-dropzone" id="add-product-dropzone" role="button" tabindex="0">
+            <input id="add-product-image" type="file" accept="image/*" multiple hidden/>
+            <div class="product-drop-icon">＋</div>
+            <div>
+              <strong>Drag &amp; drop product images here</strong>
+              <span>or click to browse · JPG / PNG / WebP · Max 10 images</span>
+            </div>
+          </div>
+          <div class="product-image-meta-row">
+            <small>Upload up to <b>10</b> product images. First image becomes the shop cover.</small>
+            <div id="add-product-image-count" class="product-image-count">No images selected</div>
+          </div>
+          <div id="add-product-image-preview" class="product-image-preview-grid"></div>
         </div>
       </div>
 
@@ -850,7 +870,7 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script src="admin.js?v=A2_4"></script>
+  <script src="admin.js?v=A4_1_1"></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>
