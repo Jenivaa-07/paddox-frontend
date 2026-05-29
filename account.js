@@ -1380,46 +1380,46 @@ function renderDashboardOrders(orders) {
   if (!recentCard) return;
 
   const recent =
-    orders.slice(0, 3);
+    (orders || []).slice(0, 3);
 
   recentCard.innerHTML = `
     <div class="dc-title"><span class="section-mini-icon orders-mini-icon" aria-hidden="true"></span> Recent Orders</div>
-    ${
-      recent.length
-        ? recent.map(order => {
-            const firstItem =
-              order.items?.[0];
+    <div class="dashboard-mini-list">
+      ${
+        recent.length
+          ? recent.map(order => {
+              const firstItem = order.items?.[0] || {};
+              const safeOrderId = accountEsc(orderSafeId(order));
+              const status = order.status || 'placed';
+              const itemCount = (order.items || []).reduce((sum, item) => sum + Number(item.quantity || 1), 0);
 
-            return `
-              <div class="r-order">
-                <div class="r-oicon"><span class="section-mini-icon orders-mini-icon" aria-hidden="true"></span></div>
-
-                <div>
-                  <div class="r-oname">
-                    ${firstItem?.name || 'Order'}
+              return `
+                <button class="r-order r-order-card" onclick="showAccountOrderDetails('${safeOrderId}')" type="button">
+                  <div class="r-oicon r-oicon-thumb">
+                    ${orderProductThumb(firstItem)}
                   </div>
 
-                  <div class="r-ometa">
-                    ${
-                      order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString()
-                        : '-'
-                    }
-                    ·
-                    <span class="ostatus ${statusClass(order.status)}">
-                      ${order.status || 'placed'}
-                    </span>
-                  </div>
-                </div>
+                  <div class="r-order-info">
+                    <div class="r-oname">
+                      ${accountEsc(firstItem?.name || 'PADDOX Order')}
+                    </div>
 
-                <div class="r-oprice">
-                  ${formatMoney(order.pricing?.total)}
-                </div>
-              </div>
-            `;
-          }).join('')
-        : `<div style="color:#777;padding:20px 0">No orders yet</div>`
-    }
+                    <div class="r-ometa">
+                      ${orderDateLabel(order.createdAt)}
+                      · ${itemCount || 1} item${itemCount === 1 ? '' : 's'}
+                      · <span class="ostatus ${statusClass(status)}">${accountEsc(status)}</span>
+                    </div>
+                  </div>
+
+                  <div class="r-oprice">
+                    ${formatMoney(order.pricing?.total)}
+                  </div>
+                </button>
+              `;
+            }).join('')
+          : `<div class="dashboard-empty-state"><span class="empty-orders-icon" aria-hidden="true"></span><b>No orders yet</b><small>Your latest PADDOX purchases will appear here.</small><a href="shop.html">Start shopping</a></div>`
+      }
+    </div>
   `;
 }
 
