@@ -2777,3 +2777,105 @@ body.page-transition-init { opacity:0; animation:bodyReveal .4s .3s forwards; }
   .nav-logo .helmet-wrap{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;}
   .nav-logo .brand-logo-icon{width:38px!important;height:38px!important;max-width:38px!important;max-height:38px!important;}
 }
+
+
+/* ============================================================
+   Phase 20.11B — Saved Address Checkout Autofill
+   ============================================================ */
+.pdx-saved-address-panel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: stretch;
+  margin: 0 0 18px;
+  padding: 14px;
+  background:
+    linear-gradient(135deg, rgba(232,0,45,.10), rgba(255,255,255,.025)),
+    rgba(10,10,10,.72);
+  border: 1px solid rgba(232,0,45,.22);
+  border-left: 3px solid var(--red);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  position: relative;
+  overflow: hidden;
+}
+.pdx-saved-address-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.045), transparent);
+  transform: translateX(-120%) skewX(-18deg);
+  transition: transform .7s ease;
+  pointer-events: none;
+}
+.pdx-saved-address-panel:hover::after { transform: translateX(120%) skewX(-18deg); }
+.pdx-saved-address-copy { min-width: 0; position: relative; z-index: 1; }
+.pdx-saved-address-kicker {
+  font-family: var(--font-condensed);
+  color: var(--red);
+  font-size: .66rem;
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+.pdx-saved-address-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--muted2);
+  font-size: .84rem;
+  line-height: 1.45;
+}
+.pdx-saved-address-text strong {
+  color: #fff;
+  font-size: .92rem;
+  letter-spacing: .2px;
+}
+.pdx-saved-address-text span,
+.pdx-saved-address-text em {
+  display: block;
+  color: #aaa;
+  font-style: normal;
+}
+.pdx-use-saved-address {
+  align-self: stretch;
+  min-width: 172px;
+  padding: 11px 16px;
+  background: transparent;
+  color: #777;
+  border: 1px solid rgba(255,255,255,.12);
+  font-family: var(--font-condensed);
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: .76rem;
+  transition: all var(--transition);
+  position: relative;
+  z-index: 1;
+}
+.pdx-use-saved-address.ready {
+  color: #fff;
+  border-color: rgba(232,0,45,.42);
+  background: rgba(232,0,45,.08);
+}
+.pdx-use-saved-address.ready:hover {
+  background: var(--red);
+  border-color: var(--red);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(232,0,45,.22);
+}
+.pdx-use-saved-address:disabled {
+  cursor: not-allowed;
+  opacity: .72;
+}
+.pdx-use-saved-address span {
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform var(--transition);
+}
+.pdx-use-saved-address.ready:hover span { transform: translateX(4px); }
+
+@media (max-width: 720px) {
+  .pdx-saved-address-panel { grid-template-columns: 1fr; }
+  .pdx-use-saved-address { width: 100%; }
+}

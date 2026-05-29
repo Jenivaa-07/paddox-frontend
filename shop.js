@@ -19,6 +19,9 @@ const WISHLIST_API_BASE =
 const ORDER_API_BASE =
   'https://paddox-backend.onrender.com/api/orders';
 
+const SHOP_USER_PROFILE_API =
+  'https://paddox-backend.onrender.com/api/users/profile';
+
 let USER_WISHLIST_IDS = new Set();
 
 const SHOP_F1_TEAMS = [
@@ -998,6 +1001,153 @@ function escapeCheckoutText(value = '') {
     .replace(/'/g, '&#039;');
 }
 
+function readJsonStorage(key) {
+  try {
+    const value = localStorage.getItem(key) || sessionStorage.getItem(key) || '';
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildCheckoutAddressFromUser(user = {}) {
+  const address = user.address || user.shippingAddress || {};
+  const firstName = user.firstName || '';
+  const lastName = user.lastName || '';
+  return {
+    name: String(user.name || `${firstName} ${lastName}`.trim() || '').trim(),
+    phone: String(user.phone || address.phone || '').trim(),
+    line1: String(address.line1 || address.address || '').trim(),
+    line2: String(address.line2 || '').trim(),
+    city: String(address.city || '').trim(),
+    state: String(address.state || '').trim(),
+    pincode: String(address.pincode || address.pinCode || address.zip || '').trim(),
+    country: String(address.country || 'India').trim() || 'India'
+  };
+}
+
+function normalizeCheckoutAddress(source = {}) {
+  return {
+    name: String(source.name || source.fullName || '').trim(),
+    phone: String(source.phone || source.mobile || '').trim(),
+    line1: String(source.line1 || source.address || source.addressLine1 || '').trim(),
+    line2: String(source.line2 || source.addressLine2 || '').trim(),
+    city: String(source.city || '').trim(),
+    state: String(source.state || '').trim(),
+    pincode: String(source.pincode || source.pinCode || source.zip || '').trim(),
+    country: String(source.country || 'India').trim() || 'India'
+  };
+}
+
+function checkoutAddressComplete(address = {}) {
+  return !!(
+    address.name &&
+    address.phone &&
+    address.line1 &&
+    address.city &&
+    address.state &&
+    address.pincode
+  );
+}
+
+function checkoutAddressLabel(address = {}) {
+  const parts = [address.line1, address.line2, address.city, address.state, address.pincode]
+    .filter(Boolean)
+    .join(', ');
+  return parts || 'No saved delivery address found yet.';
+}
+
+async function getSavedCheckoutAddress() {
+  const savedAddress = normalizeCheckoutAddress(readJsonStorage('paddox_saved_address') || {});
+  const savedUser = buildCheckoutAddressFromUser(readJsonStorage('paddox_user') || {});
+
+  if (checkoutAddressComplete(savedAddress)) return savedAddress;
+  if (checkoutAddressComplete(savedUser)) return savedUser;
+
+  const token = getCheckoutToken();
+  if (!token) return savedAddress;
+
+  try {
+    const res = await fetch(SHOP_USER_PROFILE_API, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) return savedAddress;
+
+    const user = data.data?.user || data.data || data.user || {};
+    const profileAddress = buildCheckoutAddressFromUser(user);
+    if (checkoutAddressComplete(profileAddress)) {
+      localStorage.setItem('paddox_saved_address', JSON.stringify(profileAddress));
+      return profileAddress;
+    }
+  } catch (err) {
+    console.warn('Saved address fetch skipped:', err);
+  }
+
+  return savedAddress;
+}
+
+function fillCheckoutAddress(address = {}) {
+  const setValue = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value || '';
+  };
+
+  setValue('co-name', address.name);
+  setValue('co-phone', address.phone);
+  setValue('co-line1', address.line1);
+  setValue('co-line2', address.line2);
+  setValue('co-city', address.city);
+  setValue('co-state', address.state);
+  setValue('co-pincode', address.pincode);
+}
+
+async function refreshSavedAddressPanel(modal) {
+  if (!modal) return;
+
+  const panel = modal.querySelector('#pdx-saved-address-panel');
+  const body = modal.querySelector('#pdx-saved-address-text');
+  const button = modal.querySelector('#pdx-use-saved-address');
+  if (!panel || !body || !button) return;
+
+  body.textContent = 'Checking saved profile address...';
+  button.disabled = true;
+  button.classList.remove('ready');
+
+  const address = await getSavedCheckoutAddress();
+  panel._savedAddress = address;
+
+  if (checkoutAddressComplete(address)) {
+    body.innerHTML = `
+      <strong>${escapeCheckoutText(address.name)}</strong>
+      <span>${escapeCheckoutText(checkoutAddressLabel(address))}</span>
+      <em>${escapeCheckoutText(address.phone)}</em>
+    `;
+    button.disabled = false;
+    button.classList.add('ready');
+  } else {
+    body.innerHTML = `
+      <strong>No saved address yet</strong>
+      <span>Save your address in Account → Profile Settings first, then use it here.</span>
+    `;
+  }
+}
+
+function applySavedCheckoutAddress() {
+  const modal = document.getElementById('paddox-checkout-modal');
+  const panel = modal?.querySelector('#pdx-saved-address-panel');
+  const address = panel?._savedAddress;
+
+  if (!checkoutAddressComplete(address || {})) {
+    showToast('Save your address in Profile Settings first');
+    return;
+  }
+
+  fillCheckoutAddress(address);
+  modal.querySelector('#co-payment-method')?.focus();
+  showToast('Saved address applied');
+}
+
 function ensureCheckoutModal() {
   let modal = document.getElementById('paddox-checkout-modal');
   if (modal) return modal;
@@ -1012,6 +1162,16 @@ function ensureCheckoutModal() {
       <div class="pdx-checkout-kicker"><span class="pdx-mini-lock" aria-hidden="true"></span> SECURE CHECKOUT</div>
       <div class="pdx-checkout-title">DELIVERY DETAILS</div>
       <p class="pdx-checkout-sub">Enter your delivery details and choose your preferred payment method to place the order.</p>
+
+      <div class="pdx-saved-address-panel" id="pdx-saved-address-panel">
+        <div class="pdx-saved-address-copy">
+          <div class="pdx-saved-address-kicker">PROFILE ADDRESS</div>
+          <div class="pdx-saved-address-text" id="pdx-saved-address-text">Checking saved profile address...</div>
+        </div>
+        <button class="pdx-use-saved-address" id="pdx-use-saved-address" type="button" disabled>
+          Use saved address <span aria-hidden="true">→</span>
+        </button>
+      </div>
 
       <form id="paddox-checkout-form" class="pdx-checkout-form">
         <div class="pdx-checkout-grid">
@@ -1052,6 +1212,7 @@ function ensureCheckoutModal() {
   });
 
   modal.querySelector('#paddox-checkout-form')?.addEventListener('submit', submitCheckoutForm);
+  modal.querySelector('#pdx-use-saved-address')?.addEventListener('click', applySavedCheckoutAddress);
 
   return modal;
 }
@@ -1073,6 +1234,7 @@ function openCheckoutModal() {
   }
 
   const modal = ensureCheckoutModal();
+  refreshSavedAddressPanel(modal);
   const subtotal = getCartSubtotal();
   const shipping = cartShippingAmount(subtotal);
   const tax = Math.round(subtotal * 0.05);
@@ -1157,6 +1319,7 @@ async function submitCheckoutForm(e) {
 
   try {
     const { shippingAddress, paymentMethod } = getCheckoutFormData();
+    localStorage.setItem('paddox_saved_address', JSON.stringify(shippingAddress));
 
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span>Processing order...</span><span class="pdx-loading-dot" aria-hidden="true"></span>';
