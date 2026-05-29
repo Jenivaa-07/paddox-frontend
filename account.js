@@ -78,17 +78,24 @@ function demoLogin() {
 
 async function authFetch(path, options = {}) {
   const sessionId = localStorage.getItem('paddox_session_id') || '';
+  const existingHeaders = options.headers || {};
+  const hasAuthHeader = Object.keys(existingHeaders).some(k => k.toLowerCase() === 'authorization');
+  const accessToken = window.TokenManager?.getAccess?.() || profileToken?.() || '';
+
   const res = await fetch(`${PADDOX_API_BASE}${path}`, {
     credentials: 'include',
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(accessToken && !hasAuthHeader ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(sessionId ? { 'X-Paddox-Session-Id': sessionId } : {}),
-      ...(options.headers || {})
+      ...existingHeaders
     }
   });
+
   const responseSessionId = res.headers.get('X-Paddox-Session-Id');
   if (responseSessionId) localStorage.setItem('paddox_session_id', responseSessionId);
+
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) {
     throw new Error(data.message || 'Request failed');
