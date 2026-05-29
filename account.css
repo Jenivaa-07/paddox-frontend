@@ -4233,3 +4233,161 @@ button.r-order.r-order-card{color:inherit;}
     width:max-content!important;
   }
 }
+
+/* ============================================================
+   Phase 20.14 — Account Mobile Responsiveness Final Pass
+   Mobile-first cleanup for dashboard, orders, wishlist,
+   downloads, profile settings, notifications, and security.
+   Backend/auth logic is untouched.
+   ============================================================ */
+@media(max-width:900px){
+  html,body{max-width:100%;overflow-x:hidden;}
+  #navbar{height:58px;}
+  .nav-inner{padding:0 14px!important;gap:10px!important;}
+  .nav-logo{gap:8px!important;}
+  .helmet-wrap{width:34px!important;height:34px!important;}
+  .logo-text{font-size:1.55rem!important;letter-spacing:4px!important;}
+  .nav-right{gap:8px!important;}
+  .nav-cart-btn{width:38px!important;height:38px!important;}
+  .hamburger{padding:7px!important;}
+  .acc-screen{display:block!important;padding-top:58px!important;min-height:auto!important;}
+  .acc-sidebar{position:relative!important;top:auto!important;width:100%!important;height:auto!important;max-height:none!important;border-right:0!important;border-bottom:1px solid rgba(255,255,255,.06)!important;overflow:visible!important;background:linear-gradient(180deg,rgba(12,12,12,.98),rgba(7,7,7,.98))!important;}
+  .prof-summary{padding:24px 18px 18px!important;}
+  .prof-avatar{width:86px!important;height:86px!important;font-size:2rem!important;}
+  .prof-name{font-size:1.35rem!important;letter-spacing:2px!important;}
+  .prof-email{display:block!important;max-width:100%!important;padding:0 8px!important;word-break:break-all!important;overflow-wrap:anywhere!important;line-height:1.35!important;}
+  .prof-tier-badge{margin-top:2px!important;}
+  .fan-pts-box{max-width:260px!important;margin:16px auto 0!important;}
+  .acc-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;padding:10px 0!important;}
+  .acc-nav-item{min-height:46px!important;padding:12px 18px!important;border-left:0!important;border-bottom:1px solid rgba(255,255,255,.04)!important;font-size:.82rem!important;}
+  .acc-nav-item.on{border-left:3px solid var(--red)!important;background:rgba(232,0,45,.09)!important;}
+  .acc-nav-divider{grid-column:1/-1!important;margin:0!important;}
+  .logout-btn{padding:16px 20px!important;}
+  .acc-main{padding:34px 20px 48px!important;min-width:0!important;width:100%!important;}
+  .page-header{margin-bottom:24px!important;}
+  .page-title{font-size:2.55rem!important;line-height:.95!important;letter-spacing:2px!important;}
+  .page-label{font-size:.66rem!important;letter-spacing:3px!important;}
+  .toast{left:16px!important;right:16px!important;bottom:18px!important;max-width:none!important;transform:translateY(160%)!important;}
+  .toast.show{transform:translateY(0)!important;}
+}
+
+@media(max-width:620px){
+  .acc-main{padding:30px 18px 44px!important;}
+  .page-title{font-size:2.35rem!important;}
+  .dash-stats,
+  .security-summary-grid,
+  .fan-pref-summary,
+  .orders-summary-grid,
+  .dl-summary-grid,
+  .wl-summary-grid{grid-template-columns:1fr!important;gap:12px!important;}
+  .ds-card,.security-summary-card{min-height:112px!important;padding:22px 18px!important;}
+  .dash-grid,.settings-grid,.security-grid-premium{grid-template-columns:1fr!important;gap:18px!important;}
+  .dash-card,.set-card,.security-card,.notification-control-card{padding:18px!important;}
+  .dc-title,.set-title{letter-spacing:3px!important;}
+
+  /* Dashboard mobile rows */
+  .r-order,.wi-row{align-items:flex-start!important;gap:12px!important;}
+  .r-oicon,.wi-img{width:48px!important;height:48px!important;flex:0 0 48px!important;}
+  .r-oname,.wi-name{line-height:1.25!important;}
+  .r-oprice,.wi-price{margin-left:0!important;align-self:flex-start!important;}
+
+  /* Orders mobile layout */
+  #page-orders .orders-premium-shell{padding:16px!important;}
+  #page-orders .orders-premium-top{flex-direction:column!important;align-items:stretch!important;gap:14px!important;}
+  #page-orders .orders-refresh-btn{width:100%!important;text-align:center!important;justify-content:center!important;}
+  #page-orders .orders-grid-premium{grid-template-columns:1fr!important;gap:16px!important;}
+  #page-orders .order-premium-card{padding:18px 15px!important;}
+  #page-orders .order-card-head,
+  #page-orders .order-card-main,
+  #page-orders .order-detail-top{flex-direction:column!important;align-items:flex-start!important;gap:12px!important;}
+  #page-orders .order-primary-product{width:100%!important;display:grid!important;grid-template-columns:74px 1fr!important;gap:12px!important;align-items:center!important;}
+  #page-orders .order-main-img{width:74px!important;height:74px!important;}
+  #page-orders .order-main-name{font-size:1.05rem!important;line-height:1.2!important;word-break:break-word!important;}
+  #page-orders .order-main-meta{font-size:.78rem!important;line-height:1.45!important;}
+  #page-orders .order-total-block{text-align:left!important;width:100%!important;}
+  #page-orders .order-total-block strong{font-size:1.7rem!important;}
+  #page-orders .order-timeline{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important;margin:18px 0!important;}
+  #page-orders .order-step{font-size:.54rem!important;letter-spacing:.8px!important;}
+  #page-orders .order-card-actions{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;}
+  #page-orders .order-card-actions .trk-btn,
+  #page-orders .order-card-actions .receipt-mini-btn{width:100%!important;text-align:center!important;justify-content:center!important;padding:12px 14px!important;}
+  #page-orders .order-mini-item{grid-template-columns:52px 1fr auto!important;gap:10px!important;}
+  #page-orders .order-mini-img{width:52px!important;height:52px!important;}
+  #page-orders .order-mini-name{font-size:.9rem!important;line-height:1.2!important;}
+
+  /* Wishlist + downloads */
+  .wl-grid,.dl-grid{grid-template-columns:1fr!important;gap:18px!important;}
+  .wl-card.wl-premium-card,.dl-card{width:100%!important;}
+  .wl-premium-img{height:230px!important;}
+  .wl-premium-info{padding:18px!important;}
+  .wl-premium-info .wl-card-name{font-size:1.28rem!important;line-height:1.15!important;}
+  .wl-premium-foot{flex-direction:column!important;align-items:stretch!important;gap:14px!important;}
+  .wl-premium-foot .wl-card-btn{width:100%!important;text-align:center!important;justify-content:center!important;}
+  .dl-thumb{height:185px!important;}
+  .dl-info{padding:18px!important;}
+  .dl-name{font-size:1.15rem!important;}
+  .dl-act{padding:14px 16px!important;}
+
+  /* Profile settings */
+  .settings-grid{grid-template-columns:1fr!important;}
+  .form-row{grid-template-columns:1fr!important;gap:0!important;}
+  .form-input{min-height:46px!important;font-size:.88rem!important;}
+  .team-pref-grid-premium{grid-template-columns:1fr!important;}
+  .team-pref-card{min-height:88px!important;padding:13px!important;}
+  .team-logo-box{width:64px!important;height:28px!important;margin-bottom:8px!important;}
+  .team-card-name{font-size:.88rem!important;}
+  .team-card-drivers{font-size:.68rem!important;}
+  .driver-select-premium{width:100%!important;}
+
+  /* Notification preferences and inbox */
+  .notification-control-list{gap:10px!important;}
+  .notification-setting-card{grid-template-columns:38px 1fr!important;gap:12px!important;min-height:auto!important;padding:14px!important;}
+  .notification-setting-card .toggle{grid-column:2!important;justify-self:start!important;margin-top:10px!important;}
+  .notification-card-title{font-size:.92rem!important;line-height:1.2!important;}
+  .notification-card-desc{font-size:.78rem!important;line-height:1.35!important;}
+  .notification-summary-strip,
+  .notification-inbox-summary,
+  .notif-filter-row{grid-template-columns:1fr!important;gap:10px!important;}
+  .notif-filter-row{display:grid!important;}
+  .notif-filter-btn{min-height:44px!important;}
+  .notification-inbox-card{grid-template-columns:42px 1fr!important;gap:14px!important;padding:18px!important;}
+  .notification-inbox-card .notification-view-btn{grid-column:1/-1!important;width:100%!important;margin-top:8px!important;}
+
+  /* Security */
+  .security-summary-grid{grid-template-columns:1fr!important;}
+  .twofa-premium-box,.session-premium-card{grid-template-columns:38px 1fr!important;gap:13px!important;padding:14px!important;}
+  .twofa-premium-box .toggle,
+  .session-premium-card .sess-active,
+  .session-premium-card .revoke-btn{grid-column:2!important;justify-self:start!important;margin-top:8px!important;}
+  .security-card .session-head-row{align-items:stretch!important;flex-direction:column!important;}
+  .security-card .session-head-row .revoke-btn{width:max-content!important;}
+  .security-tips-grid{grid-template-columns:1fr!important;}
+  .security-tip{min-height:auto!important;padding:18px!important;}
+}
+
+@media(max-width:420px){
+  .nav-inner{padding:0 10px!important;}
+  .logo-text{font-size:1.38rem!important;letter-spacing:3px!important;}
+  .helmet-wrap{width:32px!important;height:32px!important;}
+  .nav-cart-btn{width:36px!important;height:36px!important;}
+  .nav-cta-btn.nav-profile-only{width:46px!important;height:38px!important;min-width:46px!important;}
+  .nav-cta-btn.nav-profile-only .nav-profile-img,
+  .nav-cta-btn.nav-profile-only .nav-profile-fallback{width:30px!important;height:30px!important;}
+  .acc-main{padding:28px 16px 42px!important;}
+  .prof-summary{padding:22px 14px 16px!important;}
+  .prof-avatar{width:78px!important;height:78px!important;}
+  .fan-pts-box{max-width:230px!important;}
+  .acc-nav-item{padding:11px 13px!important;font-size:.78rem!important;gap:8px!important;}
+  .page-title{font-size:2.12rem!important;}
+  .page-label{font-size:.6rem!important;}
+  .dash-stats,.dash-grid,.settings-grid{gap:14px!important;}
+  #page-orders .order-premium-card{padding:16px 13px!important;}
+  #page-orders .order-primary-product{grid-template-columns:64px 1fr!important;}
+  #page-orders .order-main-img{width:64px!important;height:64px!important;}
+  #page-orders .order-timeline{gap:2px!important;}
+  #page-orders .order-step{font-size:.49rem!important;letter-spacing:.6px!important;}
+  .wl-premium-img{height:210px!important;}
+  .dl-thumb{height:170px!important;}
+  .twofactor-login-card{padding:24px 18px!important;}
+  .twofactor-code-input{font-size:1.55rem!important;letter-spacing:6px!important;}
+}
