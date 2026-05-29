@@ -3158,3 +3158,158 @@ button.r-order.r-order-card{color:inherit;}
 @media(max-width:860px){
   .team-pref-grid-premium,.fan-pref-summary{grid-template-columns:1fr!important;}
 }
+
+/* ============================================================
+   Phase 20.11C.3 — Notification controls: Shop/FanHub hero icon chips
+   Fix: make notification icons match the premium category/hero icon system
+   ============================================================ */
+.notification-control-list{
+  gap:12px !important;
+}
+.notification-setting-card{
+  grid-template-columns:56px minmax(0,1fr) auto !important;
+  gap:18px !important;
+  min-height:82px !important;
+  padding:15px 18px !important;
+  align-items:center !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.012) 58%, rgba(232,0,45,.035)) !important;
+  border:1px solid rgba(255,255,255,.075) !important;
+  border-left:2px solid rgba(255,255,255,.10) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035) !important;
+  position:relative !important;
+  overflow:hidden !important;
+  transition:transform .28s ease,border-color .28s ease,background .28s ease,box-shadow .28s ease !important;
+}
+.notification-setting-card::before{
+  content:'' !important;
+  position:absolute !important;
+  left:0 !important;
+  top:0 !important;
+  bottom:0 !important;
+  width:2px !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  transition:background .28s ease,box-shadow .28s ease !important;
+}
+.notification-setting-card::after{
+  content:'' !important;
+  position:absolute !important;
+  inset:auto -18% 0 44% !important;
+  height:1px !important;
+  background:linear-gradient(90deg,transparent,rgba(232,0,45,.38),transparent) !important;
+  opacity:.18 !important;
+  transform:skewX(-22deg) !important;
+  pointer-events:none !important;
+}
+.notification-setting-card:hover{
+  transform:translateY(-2px) !important;
+  border-color:rgba(232,0,45,.32) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.015) 56%, rgba(232,0,45,.08)) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+.notification-setting-card.is-on{
+  border-color:rgba(232,0,45,.42) !important;
+  border-left-color:var(--red) !important;
+  background:
+    linear-gradient(135deg, rgba(232,0,45,.13), rgba(255,255,255,.016) 48%, rgba(232,0,45,.055)) !important;
+  box-shadow:0 15px 38px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.notification-setting-card.is-on::before{
+  background:var(--red) !important;
+  box-shadow:0 0 18px rgba(232,0,45,.65) !important;
+}
+.notification-card-icon{
+  width:46px !important;
+  height:46px !important;
+  min-width:46px !important;
+  border-radius:14px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  position:relative !important;
+  color:rgba(255,255,255,.78) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.018)) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07) !important;
+  overflow:hidden !important;
+  transform:none !important;
+  filter:none !important;
+  transition:color .28s ease,background .28s ease,border-color .28s ease,box-shadow .28s ease,transform .28s ease !important;
+}
+.notification-card-icon::before{
+  content:'' !important;
+  position:relative !important;
+  left:auto !important;
+  top:auto !important;
+  width:22px !important;
+  height:22px !important;
+  display:block !important;
+  background:currentColor !important;
+  border:0 !important;
+  border-radius:0 !important;
+  transform:none !important;
+  box-shadow:none !important;
+  -webkit-mask:var(--notif-mask) center/contain no-repeat !important;
+  mask:var(--notif-mask) center/contain no-repeat !important;
+  z-index:2 !important;
+}
+.notification-card-icon::after{
+  content:'' !important;
+  position:absolute !important;
+  left:10px !important;
+  right:10px !important;
+  bottom:8px !important;
+  height:2px !important;
+  display:block !important;
+  background:var(--red) !important;
+  border:0 !important;
+  border-radius:999px !important;
+  transform:skewX(-24deg) !important;
+  box-shadow:0 0 12px rgba(232,0,45,.6) !important;
+  opacity:.82 !important;
+  z-index:1 !important;
+}
+.notification-setting-card.is-on .notification-card-icon,
+.notification-setting-card:hover .notification-card-icon{
+  color:#fff !important;
+  background:linear-gradient(180deg, rgba(232,0,45,.34), rgba(232,0,45,.09)) !important;
+  border-color:rgba(232,0,45,.62) !important;
+  box-shadow:0 12px 28px rgba(232,0,45,.13), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  transform:translateY(-1px) !important;
+}
+.notification-copy .tlbl{
+  font-size:.96rem !important;
+  letter-spacing:.2px !important;
+  margin-bottom:4px !important;
+  color:#fff !important;
+}
+.notification-copy .tsub{
+  font-size:.80rem !important;
+  color:rgba(255,255,255,.62) !important;
+  line-height:1.45 !important;
+}
+.notif-race-icon{--notif-mask:var(--pdx-ico-flag) !important;}
+.notif-drop-icon{--notif-mask:var(--pdx-ico-download) !important;}
+.notif-order-icon{--notif-mask:var(--pdx-ico-bag) !important;}
+.notif-points-icon{--notif-mask:var(--pdx-ico-star) !important;}
+.notif-community-icon{--notif-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 5h16v11H8l-4 4V5Zm2 2v8.2L7.2 14H18V7H6Zm3 2h6v2H9V9Zm0 3h4v2H9v-2Z'/%3E%3C/svg%3E") !important;}
+.notification-toggle{
+  transform:scale(.98) !important;
+}
+.notification-sync-row{
+  border-top:1px solid rgba(255,255,255,.08) !important;
+  margin-top:14px !important;
+  padding-top:14px !important;
+}
+@media(max-width:720px){
+  .notification-setting-card{
+    grid-template-columns:48px 1fr !important;
+    gap:13px !important;
+    padding:14px !important;
+  }
+  .notification-card-icon{width:42px!important;height:42px!important;min-width:42px!important;}
+  .notification-toggle{grid-column:1/-1!important;justify-self:start!important;margin-left:61px!important;}
+}
