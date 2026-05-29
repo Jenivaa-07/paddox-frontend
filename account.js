@@ -189,6 +189,57 @@ let pendingTwoFactorToken = '';
 let pendingTwoFactorAction = 'enable';
 const PADDOX_API_BASE = 'https://paddox-backend.onrender.com/api';
 
+/* Phase 20.12B.2 — Auth compatibility safety
+   Keeps login/register/logout/getMe working even when older PADDOX auth helpers
+   are missing from cache or from previous builds. */
+const TokenManager = window.TokenManager || {
+  getAccess() {
+    return localStorage.getItem('token') || localStorage.getItem('paddox_access_token') || localStorage.getItem('accessToken') || '';
+  },
+  setAccess(token = '') {
+    if (!token) return;
+    localStorage.setItem('token', token);
+    localStorage.setItem('paddox_access_token', token);
+    localStorage.setItem('accessToken', token);
+  },
+  clearAccess() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('paddox_access_token');
+    localStorage.removeItem('accessToken');
+  }
+};
+
+const AuthAPI = window.AuthAPI || {
+  login(payload) {
+    return authFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(payload || {})
+    });
+  },
+  register(payload) {
+    return authFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload || {})
+    });
+  },
+  logout() {
+    const token = TokenManager.getAccess();
+    return authFetch('/auth/logout', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    }).catch(() => ({ success: true }));
+  },
+  getMe() {
+    const token = TokenManager.getAccess();
+    return authFetch('/auth/me', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+  }
+};
+
+window.TokenManager = TokenManager;
+window.AuthAPI = AuthAPI;
+
 /* TAB SWITCH */
 document.querySelectorAll('.auth-tab').forEach(tab => {
 
@@ -260,7 +311,7 @@ async function doLogin() {
         password
       });
 
-    if (!data.success) {
+    if (!data || !data.success) {
 
       throw new Error(
         data.message ||
@@ -343,7 +394,7 @@ async function doRegister() {
         }
       });
 
-    if (!data.success) {
+    if (!data || !data.success) {
 
       throw new Error(
         data.message ||
