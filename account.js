@@ -1467,11 +1467,8 @@ function updateAccountStats(orders) {
 }
 
 function showAccountOrderDetails(orderId) {
-  const orders =
-    window.USER_ACCOUNT_ORDERS || [];
-
-  const order =
-    orders.find(o => o._id === orderId);
+  const orders = window.USER_ACCOUNT_ORDERS || [];
+  const order = orders.find(o => String(orderSafeId(o)) === String(orderId) || String(o._id) === String(orderId));
 
   if (!order) {
     showToast('❌ Order not found');
@@ -1479,128 +1476,106 @@ function showAccountOrderDetails(orderId) {
   }
 
   const safeOrderId = accountEsc(orderSafeId(order));
+  const address = order.shippingAddress || {};
+  const items = order.items || [];
+  const itemCount = items.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+  const orderNo = order.orderNumber || order._id;
+  const products = items.map(item => {
+    const qty = Number(item.quantity || 1);
+    const lineTotal = Number(item.price || 0) * qty;
 
-  const products =
-    (order.items || [])
-      .map(item => `
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          gap:10px;
-          padding:10px 0;
-          border-bottom:1px solid rgba(255,255,255,.08);
-        ">
-          <div>
-            <div style="font-weight:700;color:#fff">
-              ${item.name}
-            </div>
-            <div style="color:#777;font-size:.85rem">
-              Qty: ${item.quantity || 1}
-            </div>
-          </div>
-
-          <div style="font-family:var(--font-d)">
-            ${formatMoney((item.price || 0) * (item.quantity || 1))}
+    return `
+      <div class="order-detail-item pdx-detail-product">
+        <div class="order-detail-img">${orderProductThumb(item)}</div>
+        <div class="order-detail-copy">
+          <div class="order-detail-name">${accountEsc(item.name || 'Product')}</div>
+          <div class="order-detail-meta">
+            <span class="detail-qty-pill">Qty ${qty}</span>
+            ${item.size ? `<span>Size ${accountEsc(item.size)}</span>` : ''}
+            ${item.color ? `<span>${accountEsc(item.color)}</span>` : ''}
           </div>
         </div>
-      `)
-      .join('');
+        <strong class="order-detail-price">${formatMoney(lineTotal)}</strong>
+      </div>
+    `;
+  }).join('');
 
   const modal = document.createElement('div');
-
   modal.innerHTML = `
-    <div class="trk-modal on" style="
-      position:fixed;
-      inset:0;
-      z-index:9999;
-      background:rgba(0,0,0,.82);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:20px;
-    ">
-      <div style="
-        width:min(650px,95vw);
-        background:#0d0d0d;
-        border:1px solid rgba(255,255,255,.14);
-        padding:28px;
-        color:white;
-        position:relative;
-      ">
-        <button
-          id="close-user-order-modal"
-          style="
-            position:absolute;
-            top:16px;
-            right:18px;
-            background:#111;
-            color:white;
-            border:0;
-            font-size:1.4rem;
-            cursor:pointer;
-          "
-        >
-          ✕
-        </button>
+    <div class="order-detail-overlay">
+      <div class="order-detail-modal pdx-order-modal">
+        <button class="order-detail-close" type="button" aria-label="Close order details">✕</button>
 
-        <div style="
-          font-family:var(--font-d);
-          letter-spacing:4px;
-          font-size:1.8rem;
-        ">
-          ORDER DETAILS
-        </div>
-
-        <div style="
-          color:var(--red);
-          margin:8px 0 20px;
-          font-family:var(--font-c);
-          letter-spacing:2px;
-        ">
-          #${order.orderNumber || order._id}
-        </div>
-
-        <div style="margin-bottom:18px">
-          <strong>Status:</strong>
-          <span class="ostatus ${statusClass(order.status)}">
-            ${order.status || 'placed'}
-          </span>
-        </div>
-
-        <div style="margin-bottom:18px">
-          <div style="color:#777;letter-spacing:2px;font-size:.8rem">
-            PRODUCTS
+        <div class="order-detail-top">
+          <div>
+            <div class="orders-kicker">Order garage</div>
+            <h2>ORDER DETAILS</h2>
+            <p>#${accountEsc(orderNo)} · ${orderDateLabel(order.createdAt)}</p>
           </div>
-          ${products}
+          <div class="order-status-stack">
+            <span class="ostatus ${statusClass(order.status)}">${accountEsc(order.status || 'placed')}</span>
+            <span class="payment-pill ${paymentStatusClass(order)}">${paymentStatusLabel(order)}</span>
+          </div>
         </div>
 
-        <div style="line-height:1.8">
-          Subtotal: ${formatMoney(order.pricing?.subtotal)}<br>
-          Shipping: ${formatMoney(order.pricing?.shipping)}<br>
-          Tax: ${formatMoney(order.pricing?.tax)}<br>
-          <strong style="font-size:1.3rem">
-            Total: ${formatMoney(order.pricing?.total)}
-          </strong>
+        <div class="order-detail-meta-strip">
+          <div><span>Order Total</span><strong>${formatMoney(order.pricing?.total)}</strong></div>
+          <div><span>Payment</span><strong>${accountEsc(paymentMethodLabel(order))}</strong></div>
+          <div><span>Items</span><strong>${itemCount}</strong></div>
+          <div><span>Placed On</span><strong>${orderTimeLabel(order.createdAt)}</strong></div>
         </div>
 
-        <button
-          class="trk-btn receipt-open-btn"
-          onclick="openOrderReceipt('${safeOrderId}')"
-          style="margin-top:20px;width:100%;padding:13px;background:var(--red);color:#fff;border:0;font-weight:800;letter-spacing:2px"
-        >
-          View Receipt
-        </button>
+        ${renderOrderTimeline(order)}
+
+        <div class="order-detail-grid">
+          <section class="order-detail-panel order-detail-items-panel">
+            <h3>Items</h3>
+            <div class="order-detail-items-list">
+              ${products || '<p class="order-muted">No items returned.</p>'}
+            </div>
+          </section>
+          <section class="order-detail-panel order-detail-delivery-panel">
+            <h3>Delivery</h3>
+            <div class="order-address-box">
+              <p class="order-address-line"><b>${accountEsc(address.name || '-')}</b></p>
+              <p class="order-address-line">${accountEsc(address.line1 || '')}</p>
+              ${address.line2 ? `<p class="order-address-line">${accountEsc(address.line2)}</p>` : ''}
+              <p class="order-address-line">${accountEsc([address.city, address.state, address.pincode].filter(Boolean).join(', '))}</p>
+              <p class="order-address-line">${accountEsc(address.country || 'India')}</p>
+              <p class="order-address-line">Phone: ${accountEsc(address.phone || '-')}</p>
+            </div>
+          </section>
+        </div>
+
+        <div class="order-detail-lower">
+          <div class="order-detail-note">
+            <b>PADDOX order support</b>
+            <span>Keep this order ID handy for tracking, receipt access and delivery support.</span>
+          </div>
+          <div class="order-detail-summary">
+            <div class="summary-title">Payment Summary</div>
+            <div><span>Subtotal</span><b>${formatMoney(order.pricing?.subtotal)}</b></div>
+            <div><span>Shipping</span><b>${formatMoney(order.pricing?.shipping)}</b></div>
+            ${(Number(order.pricing?.discount || 0) > 0) ? `<div><span>Discount</span><b>${formatMoney(order.pricing?.discount)}</b></div>` : ''}
+            <div><span>Tax</span><b>${formatMoney(order.pricing?.tax)}</b></div>
+            <div class="grand"><span>Total</span><b>${formatMoney(order.pricing?.total)}</b></div>
+          </div>
+        </div>
+
+        <div class="order-detail-actions">
+          <button class="trk-btn detail-primary-action" onclick="openOrderReceipt('${safeOrderId}')">Open Receipt</button>
+          <button class="trk-btn detail-secondary-action" onclick="showTracking('${accountEsc(orderNo)}', ${Math.max(orderStepIndex(order.status), 0)}); this.closest('.order-detail-overlay')?.remove();">Track Order</button>
+        </div>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
-
-  modal.querySelector('#close-user-order-modal').onclick =
-    () => modal.remove();
+  modal.querySelector('.order-detail-close').onclick = () => modal.remove();
+  modal.querySelector('.order-detail-overlay').onclick = e => {
+    if (e.target.classList.contains('order-detail-overlay')) modal.remove();
+  };
 }
-
-
 function openOrderReceipt(orderId) {
   if (!orderId) {
     showToast('❌ Order not found');
