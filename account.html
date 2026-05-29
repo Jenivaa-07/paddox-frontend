@@ -119,7 +119,7 @@
         <div class="forgot-link">Forgot your password?</div>
         <div class="divider-or"><span>or continue with</span></div>
         <div class="social-auth">
-          <button class="social-btn" onclick="demoLogin()"><span class="social-logo google-logo" aria-hidden="true"></span><span>Google</span></button>
+          <button class="social-btn google-auth-btn" type="button" onclick="startGoogleLogin()"><span class="social-logo google-logo" aria-hidden="true"></span><span>Google</span></button>
           <button class="social-btn" onclick="demoLogin()"><span class="social-logo facebook-logo" aria-hidden="true"></span><span>Facebook</span></button>
         </div>
       </div>
@@ -172,12 +172,26 @@
         </button>
         <div class="divider-or"><span>or continue with</span></div>
         <div class="social-auth">
-          <button class="social-btn" onclick="demoLogin()"><span class="social-logo google-logo" aria-hidden="true"></span><span>Google</span></button>
+          <button class="social-btn google-auth-btn" type="button" onclick="startGoogleLogin()"><span class="social-logo google-logo" aria-hidden="true"></span><span>Google</span></button>
           <button class="social-btn" onclick="demoLogin()"><span class="social-logo facebook-logo" aria-hidden="true"></span><span>Facebook</span></button>
         </div>
       </div>
     </div>
   </div>
+
+
+
+<div class="twofactor-login-modal" id="twofactor-login-modal" aria-hidden="true">
+  <div class="twofactor-login-card">
+    <div class="auth-brand-lockup"><img src="assets/paddox-logo-icon-official.png?v=20_4" alt="PADDOX logo" class="auth-brand-icon"><div class="auth-logo">PADDO<span class="logo-x">X</span></div></div>
+    <div class="twofactor-kicker">Security Check</div>
+    <h3>Enter verification code</h3>
+    <p id="twofactor-login-copy">We sent a 6-digit code to your email.</p>
+    <input class="form-input twofactor-code-input" id="twofactor-login-code" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
+    <button class="submit-btn" type="button" onclick="verifyTwoFactorLoginCode()">Verify Code <span class="cta-arrow" aria-hidden="true"></span></button>
+    <button class="twofactor-cancel-btn" type="button" onclick="cancelTwoFactorLogin()">Cancel</button>
+  </div>
+</div>
 
   <!-- ░░ ACCOUNT DASHBOARD ░░ -->
   <div class="acc-screen" id="acc-screen" style="display:none">
@@ -450,7 +464,7 @@
           </div>
           <div class="security-summary-card">
             <span>Two-Factor Auth</span>
-            <strong id="sec-2fa-status">Coming Soon</strong>
+            <strong id="sec-2fa-status">OFF</strong>
           </div>
           <div class="security-summary-card">
             <span>Active Sessions</span>
@@ -502,7 +516,7 @@
             </div>
 
             <button class="save-btn security-primary-btn" id="security-password-btn" onclick="submitSecurityPassword()">Update Password ✓</button>
-            <p class="security-status-note" id="security-password-status">Password validation runs locally. Backend password update can be connected when the API route is added.</p>
+            <p class="security-status-note" id="security-password-status">Password update is connected to backend. You will be logged out after a successful password change.</p>
           </section>
 
           <section class="security-card reveal-up delay-1">
@@ -518,12 +532,26 @@
               <div class="twofa-icon" aria-hidden="true"></div>
               <div>
                 <div class="tlbl">Two-Factor Authentication</div>
-                <div class="tsub">Authenticator app and SMS verification will be enabled after backend support is added.</div>
+                <div class="tsub">Email code verification will be required after login when enabled.</div>
               </div>
-              <label class="toggle disabled-toggle" title="2FA coming soon">
-                <input type="checkbox" disabled>
+              <label class="toggle" title="Enable email 2FA">
+                <input type="checkbox" id="security-2fa-toggle" onchange="prepareTwoFactorToggle(this.checked)">
                 <span class="tgl-sl"></span>
               </label>
+            </div>
+
+            <div class="twofa-setup-panel" id="twofa-setup-panel">
+              <label class="form-label" for="sec-2fa-pass">Current Password</label>
+              <div class="password-input-wrap">
+                <input class="form-input" type="password" id="sec-2fa-pass" placeholder="Enter current password to change 2FA" autocomplete="current-password"/>
+                <button type="button" class="password-eye-btn" onclick="toggleSecurityPassword('sec-2fa-pass', this)">Show</button>
+              </div>
+              <button class="revoke-btn twofa-send-btn" type="button" onclick="sendSecurityTwoFactorCode()">Send Verification Code</button>
+              <div class="twofa-code-row" id="twofa-code-row">
+                <input class="form-input" id="sec-2fa-code" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code" autocomplete="one-time-code"/>
+                <button class="save-btn" type="button" onclick="verifySecurityTwoFactorCode()">Verify 2FA ✓</button>
+              </div>
+              <small class="security-hint" id="sec-2fa-hint">A code will be sent to your account email.</small>
             </div>
 
             <div class="session-head-row">
@@ -563,7 +591,7 @@
             <div class="security-tip"><span></span><b>Use 8+ characters</b><small>Mix uppercase, lowercase, numbers and symbols.</small></div>
             <div class="security-tip"><span></span><b>Avoid reused passwords</b><small>Keep PADDOX unique from other accounts.</small></div>
             <div class="security-tip"><span></span><b>Check sessions</b><small>Review unknown browsers or devices regularly.</small></div>
-            <div class="security-tip"><span></span><b>Enable 2FA later</b><small>Turn on two-factor auth when it becomes available.</small></div>
+            <div class="security-tip"><span></span><b>Enable 2FA later</b><small>Turn on email two-factor auth from Account Protection.</small></div>
           </div>
         </section>
       </div>
@@ -573,6 +601,7 @@
 
   <div class="toast" id="toast"></div>
   <script src="js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="account.js"></script>
 </body>

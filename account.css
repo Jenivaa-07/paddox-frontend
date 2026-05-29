@@ -3994,3 +3994,27 @@ button.r-order.r-order-card{color:inherit;}
 .security-tips-card{margin-top:0}.security-tips-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.security-tip{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);padding:15px;min-height:145px}.security-tip span{margin-bottom:12px}.security-tip span:before{content:'✓';font-family:var(--font-c);font-weight:800;color:#fff;font-size:1rem}.security-tip span:after{content:'';position:absolute;width:16px;height:2px;background:var(--red);bottom:9px}.security-tip b{display:block;font-size:.88rem;margin-bottom:7px}.security-tip small{color:var(--muted2);font-size:.72rem;line-height:1.5}
 @media(max-width:1050px){.security-summary-grid,.security-tips-grid{grid-template-columns:repeat(2,1fr)}.security-grid-premium{grid-template-columns:1fr}}
 @media(max-width:560px){.security-summary-grid,.security-tips-grid{grid-template-columns:1fr}.session-premium-card,.twofa-premium-box{grid-template-columns:auto 1fr}.session-premium-card .sess-active,.session-premium-card .revoke-btn,.twofa-premium-box .toggle{grid-column:2}.security-card{padding:18px}.password-input-wrap .form-input{padding-right:66px}.password-eye-btn{font-size:.6rem;padding:0 8px}}
+
+
+/* ══════════════════════════════════════
+   PHASE 20.12B — REAL SECURITY BACKEND
+══════════════════════════════════════ */
+.twofactor-login-modal{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.82);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
+.twofactor-login-modal.show{display:flex}
+.twofactor-login-card{width:min(430px,94vw);background:linear-gradient(145deg,#121212,#080808);border:1px solid rgba(232,0,45,.32);border-top:3px solid var(--red);padding:28px;box-shadow:0 35px 100px rgba(0,0,0,.7);text-align:center}
+.twofactor-kicker{font-family:var(--font-c);letter-spacing:3px;text-transform:uppercase;color:var(--red);font-size:.68rem;margin-top:8px}
+.twofactor-login-card h3{font-family:var(--font-d);letter-spacing:3px;font-size:2rem;margin:8px 0 6px}
+.twofactor-login-card p{color:var(--muted2);font-size:.84rem;line-height:1.55;margin-bottom:18px}
+.twofactor-code-input{text-align:center;font-family:var(--font-d);font-size:1.8rem;letter-spacing:8px;margin-bottom:16px}
+.twofactor-cancel-btn{color:var(--muted2);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;padding:8px 16px}
+.twofactor-cancel-btn:hover{color:#fff}
+.twofa-setup-panel{margin:-8px 0 22px;padding:16px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07)}
+.twofa-send-btn{margin-top:12px;background:#151515;color:#fff;border-color:rgba(255,255,255,.16);padding:9px 14px}
+.twofa-code-row{display:none;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:12px}
+.twofa-code-row.show{display:grid}
+.twofa-code-row .save-btn{margin-top:0;white-space:nowrap}
+.security-chip.ok{border-color:rgba(0,180,0,.35);color:#82ff82;background:rgba(0,180,0,.08)}
+.security-chip.warn{border-color:rgba(201,168,76,.38);color:#ffd36d;background:rgba(201,168,76,.08)}
+.google-auth-btn.ready{border-color:rgba(255,255,255,.18);color:#fff}
+.google-auth-btn.ready:hover{border-color:var(--red);background:rgba(232,0,45,.08)}
+@media(max-width:620px){.twofa-code-row{grid-template-columns:1fr}.twofa-code-row .save-btn{width:100%}}

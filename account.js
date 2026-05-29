@@ -76,12 +76,118 @@ function demoLogin() {
   showToast('Social sign-in will be available soon. Please use email login.');
 }
 
+async function authFetch(path, options = {}) {
+  const res = await fetch(`${PADDOX_API_BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === false) {
+    throw new Error(data.message || 'Request failed');
+  }
+  return data;
+}
+
+async function startGoogleLogin() {
+  try {
+    const cfg = await authFetch('/auth/google/config');
+    const clientId = cfg.data?.clientId || cfg.clientId || '';
+    if (!clientId) {
+      showToast('⚠️ Google login is not configured yet');
+      return;
+    }
+    if (!window.google?.accounts?.id) {
+      showToast('⚠️ Google is still loading. Try again in a second.');
+      return;
+    }
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleCredential
+    });
+    google.accounts.id.prompt(notification => {
+      if (notification.isNotDisplayed?.() || notification.isSkippedMoment?.()) {
+        showToast('Google popup was closed or blocked');
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function handleGoogleCredential(response) {
+  try {
+    showToast('🏁 Signing in with Google...');
+    const data = await authFetch('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential: response.credential })
+    });
+    handleAuthSuccess(data);
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function handleAuthSuccess(data) {
+  if (data.data?.requires2FA) {
+    pendingTwoFactorToken = data.data.twoFactorToken;
+    showTwoFactorLogin(data.data.email);
+    return;
+  }
+  TokenManager.setAccess(data.data.accessToken);
+  loginUser(data.data.user);
+}
+
+function showTwoFactorLogin(email) {
+  const modal = document.getElementById('twofactor-login-modal');
+  const copy = document.getElementById('twofactor-login-copy');
+  const code = document.getElementById('twofactor-login-code');
+  if (copy) copy.textContent = `We sent a 6-digit code to ${email || 'your email'}.`;
+  if (code) code.value = '';
+  modal?.classList.add('show');
+  setTimeout(() => code?.focus(), 80);
+}
+
+function cancelTwoFactorLogin() {
+  pendingTwoFactorToken = '';
+  document.getElementById('twofactor-login-modal')?.classList.remove('show');
+}
+
+async function verifyTwoFactorLoginCode() {
+  const code = document.getElementById('twofactor-login-code')?.value.trim();
+  if (!pendingTwoFactorToken || !code) {
+    showToast('⚠️ Enter the verification code');
+    return;
+  }
+  try {
+    showToast('🔐 Verifying code...');
+    const data = await authFetch('/auth/2fa/verify', {
+      method: 'POST',
+      body: JSON.stringify({ twoFactorToken: pendingTwoFactorToken, code })
+    });
+    cancelTwoFactorLogin();
+    TokenManager.setAccess(data.data.accessToken);
+    loginUser(data.data.user);
+    showToast('🔥 Secure login successful');
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
 /* ══ AUTH ══ */
 /* ══════════════════════════════════════
    AUTH SYSTEM
 ══════════════════════════════════════ */
 
 let currentUser = null;
+let pendingTwoFactorToken = '';
+let pendingTwoFactorAction = 'enable';
+const PADDOX_API_BASE = 'https://paddox-backend.onrender.com/api';
 
 /* TAB SWITCH */
 document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -162,11 +268,9 @@ async function doLogin() {
       );
     }
 
-    TokenManager.setAccess(data.data.accessToken);
+    handleAuthSuccess(data);
 
-    loginUser(data.data.user);
-
-    showToast('🔥 Login successful');
+    showToast(data.data?.requires2FA ? '🔐 Verification code sent' : '🔥 Login successful');
 
   } catch (err) {
 
@@ -247,9 +351,7 @@ async function doRegister() {
       );
     }
 
-    TokenManager.setAccess(data.data.accessToken);
-
-    loginUser(data.data.user);
+    handleAuthSuccess(data);
 
     showToast('🔥 Account created');
 
@@ -286,6 +388,7 @@ function loginUser(user) {
     `${user.firstName || ''} ${user.lastName || ''}`.trim();
 
   setProfileAvatar(user);
+  hydrateSecurityState(user);
 
   document.getElementById('prof-name')
     .textContent = fullName;
@@ -2076,6 +2179,7 @@ function hydrateProfile(user = {}) {
     `HEY, ${(user.firstName || 'FAN').toUpperCase()}`;
 
   setProfileAvatar(user);
+  hydrateSecurityState(user);
 
   const realFanPoints = Number(user.fanPoints || 0).toLocaleString('en-IN');
 
@@ -3539,6 +3643,7 @@ function openOrderReceipt(orderId) {
   function hydrateProfile(user = {}) {
     oldHydrateProfile(user);
     setProfileAvatar(user);
+  hydrateSecurityState(user);
     bindAvatarUpload();
   }
 
@@ -3637,7 +3742,8 @@ function toggleSecurityPassword(inputId, btn) {
   if (btn) btn.textContent = show ? 'Hide' : 'Show';
 }
 
-function submitSecurityPassword() {
+
+async function submitSecurityPassword() {
   const current = document.getElementById('sec-current-pass')?.value || '';
   const pass = document.getElementById('sec-new-pass')?.value || '';
   const confirm = document.getElementById('sec-confirm-pass')?.value || '';
@@ -3661,9 +3767,101 @@ function submitSecurityPassword() {
     return;
   }
 
-  if (btn) btn.textContent = 'Validated ✓';
-  if (note) note.textContent = 'Password passed validation. Backend password update route is not connected in this phase.';
-  showToast('✓ Password is valid — backend update route needed to save it');
+  try {
+    if (btn) btn.textContent = 'Updating...';
+    const token = profileToken();
+    await authFetch('/users/security/password', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ currentPassword: current, newPassword: pass })
+    });
+
+    if (note) note.textContent = 'Password updated. Please sign in again.';
+    showToast('✅ Password updated — please login again');
+    TokenManager.clearAccess();
+    localStorage.removeItem('paddox_user');
+    setTimeout(() => location.reload(), 1200);
+  } catch (err) {
+    console.error(err);
+    if (btn) btn.textContent = 'Update Password ✓';
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function hydrateSecurityState(user = currentUser || {}) {
+  const enabled = !!user.security?.twoFactor?.enabled;
+  const status = document.getElementById('sec-2fa-status');
+  const toggle = document.getElementById('security-2fa-toggle');
+  const chip = document.querySelector('.twofa-premium-box')?.closest('.security-card')?.querySelector('.security-chip');
+  if (status) status.textContent = enabled ? 'ON' : 'OFF';
+  if (toggle) toggle.checked = enabled;
+  if (chip) {
+    chip.textContent = enabled ? '2FA ACTIVE' : 'SAFE MODE';
+    chip.classList.toggle('ok', enabled);
+    chip.classList.toggle('muted', !enabled);
+  }
+  const safety = document.getElementById('sec-safety-status');
+  if (safety) safety.textContent = enabled ? 'Strong' : 'Good';
+}
+
+function prepareTwoFactorToggle(enable) {
+  pendingTwoFactorAction = enable ? 'enable' : 'disable';
+  const row = document.getElementById('twofa-code-row');
+  const hint = document.getElementById('sec-2fa-hint');
+  if (row) row.classList.remove('show');
+  if (hint) hint.textContent = `${enable ? 'Enable' : 'Disable'} 2FA: enter your current password, then request a code.`;
+}
+
+async function sendSecurityTwoFactorCode() {
+  const currentPassword = document.getElementById('sec-2fa-pass')?.value || '';
+  const hint = document.getElementById('sec-2fa-hint');
+  if (!currentPassword) {
+    showToast('⚠️ Enter current password first');
+    return;
+  }
+  try {
+    const token = profileToken();
+    showToast('📩 Sending security code...');
+    const data = await authFetch('/users/security/2fa/send', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ currentPassword, action: pendingTwoFactorAction })
+    });
+    document.getElementById('twofa-code-row')?.classList.add('show');
+    if (hint) hint.textContent = data.message || 'Code sent. Enter it below.';
+    showToast('✅ Verification code sent');
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function verifySecurityTwoFactorCode() {
+  const code = document.getElementById('sec-2fa-code')?.value.trim() || '';
+  if (!code) {
+    showToast('⚠️ Enter the 6-digit code');
+    return;
+  }
+  try {
+    const token = profileToken();
+    const data = await authFetch('/users/security/2fa/verify', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ code })
+    });
+    if (data.data?.user) {
+      currentUser = data.data.user;
+      localStorage.setItem('paddox_user', JSON.stringify(currentUser));
+      hydrateSecurityState(currentUser);
+    }
+    document.getElementById('twofa-code-row')?.classList.remove('show');
+    document.getElementById('sec-2fa-pass').value = '';
+    document.getElementById('sec-2fa-code').value = '';
+    showToast(data.message || '✅ Two-factor settings updated');
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
 }
 
 function getSecurityBrowserName() {
@@ -3688,4 +3886,5 @@ function refreshSecuritySessions() {
 document.addEventListener('DOMContentLoaded', () => {
   updateSecurityStrength();
   refreshSecuritySessions();
+  hydrateSecurityState(JSON.parse(localStorage.getItem('paddox_user') || 'null') || currentUser || {});
 });
