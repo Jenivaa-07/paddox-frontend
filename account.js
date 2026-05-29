@@ -83,6 +83,9 @@ function demoLogin() {
 
 let currentUser = null;
 
+try { currentUser = JSON.parse(localStorage.getItem('paddox_user') || 'null'); } catch (err) { currentUser = null; }
+setTimeout(() => updateNavbarUser(currentUser || {}), 0);
+
 /* TAB SWITCH */
 document.querySelectorAll('.auth-tab').forEach(tab => {
 
@@ -139,14 +142,14 @@ async function doLogin() {
 
   if (!email || !password) {
 
-    showToast('⚠️ Fill all fields');
+    showToast('Fill all fields');
 
     return;
   }
 
   try {
 
-    showToast('🏁 Signing in...');
+    showToast('Signing in...');
 
     const data =
       await AuthAPI.login({
@@ -166,7 +169,7 @@ async function doLogin() {
 
     loginUser(data.data.user);
 
-    showToast('🔥 Login successful');
+    showToast('Login successful');
 
   } catch (err) {
 
@@ -210,23 +213,21 @@ async function doRegister() {
     !password
   ) {
 
-    showToast('⚠️ Fill required fields');
+    showToast('Fill required fields');
 
     return;
   }
 
   if (password.length < 6) {
 
-    showToast(
-      '⚠️ Password must be at least 6 characters'
-    );
+    showToast('Password must be at least 6 characters');
 
     return;
   }
 
   try {
 
-    showToast('🏎️ Creating account...');
+    showToast('Creating account...');
 
     const data =
       await AuthAPI.register({
@@ -251,7 +252,7 @@ async function doRegister() {
 
     loginUser(data.data.user);
 
-    showToast('🔥 Account created');
+    showToast('Account created');
 
   } catch (err) {
 
@@ -535,7 +536,7 @@ function updateDashboardSavedItems() {
           ${
             image
               ? `<img src="${image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover">`
-              : '🏎️'
+              : '<span class="acc-icon acc-helmet-icon" aria-hidden="true"></span>'
           }
         </div>
         <div class="wi-name">${product.name || 'Product'}</div>
@@ -579,7 +580,7 @@ function renderWishlist(){
           ${
             image
               ? `<img src="${image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover">`
-              : '🏎️'
+              : '<span class="acc-icon acc-helmet-icon" aria-hidden="true"></span>'
           }
         </div>
 
@@ -755,11 +756,11 @@ async function downloadAccountAsset(assetId) {
     const token = profileToken();
 
     if (!token) {
-      showToast('🔐 Please login first');
+      showToast('Please login first');
       return;
     }
 
-    showToast('⏳ Preparing download...');
+    showToast('Preparing download...');
 
     const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download`, {
       method: 'POST',
@@ -862,37 +863,108 @@ function getSelectedTeam() {
 }
 
 
-function setProfileAvatar(user = {}) {
-  const avatarEl = document.getElementById('prof-avatar');
 
-  if (!avatarEl) return;
-
-  const avatarUrl =
+function avatarSource(user = {}) {
+  return (
     user.avatar?.url ||
     user.avatarUrl ||
-    '';
+    user.profileImage?.url ||
+    user.photoURL ||
+    ''
+  );
+}
+
+function userDisplayName(user = {}) {
+  return (
+    `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+    user.name ||
+    user.email?.split('@')?.[0] ||
+    'Paddox Fan'
+  );
+}
+
+function setProfileAvatar(user = {}) {
+  const avatarEl = document.getElementById('prof-avatar');
+  if (!avatarEl) return;
+
+  const avatarUrl = avatarSource(user);
 
   if (avatarUrl) {
     avatarEl.innerHTML = `
       <img
         src="${avatarUrl}"
         alt="Profile picture"
-        style="
-          width:100%;
-          height:100%;
-          object-fit:cover;
-          border-radius:50%;
-          display:block;
-        "
+        class="profile-avatar-img"
       />
     `;
   } else {
-    avatarEl.textContent = '🏎️';
+    avatarEl.innerHTML = '<span class="avatar-fallback-icon acc-icon acc-helmet-icon" aria-hidden="true"></span>';
   }
+
+  updateNavbarUser(user);
+}
+
+function updateNavbarUser(user = currentUser || {}) {
+  const cta = document.querySelector('.nav-cta-btn');
+  if (!cta) return;
+
+  const token = profileToken();
+  const hasUser = token && user && (user.email || user.firstName || user.name);
+
+  if (!hasUser) {
+    cta.classList.remove('nav-user-pill');
+    cta.innerHTML = 'Sign Up <span class="cta-arrow" aria-hidden="true"></span>';
+    cta.href = 'account.html';
+    return;
+  }
+
+  const name = userDisplayName(user).split(' ')[0] || 'Fan';
+  const img = avatarSource(user);
+  cta.classList.add('nav-user-pill');
+  cta.href = 'account.html';
+  cta.innerHTML = `
+    <span class="nav-user-avatar">
+      ${img ? `<img src="${img}" alt="${name} profile"/>` : '<span class="acc-icon acc-profile-icon" aria-hidden="true"></span>'}
+    </span>
+    <span class="nav-user-name">${name}</span>
+  `;
+}
+
+let avatarStudioState = {
+  img: null,
+  file: null,
+  scale: 1,
+  baseScale: 1,
+  x: 0,
+  y: 0,
+  dragging: false,
+  startX: 0,
+  startY: 0,
+  startImgX: 0,
+  startImgY: 0
+};
+
+function openAvatarStudio() {
+  const studio = document.getElementById('avatar-studio');
+  if (!studio) {
+    openAvatarPicker();
+    return;
+  }
+  studio.classList.add('on');
+  studio.setAttribute('aria-hidden', 'false');
+  bindAvatarStudio();
+}
+
+function closeAvatarStudio() {
+  const studio = document.getElementById('avatar-studio');
+  if (!studio) return;
+  studio.classList.remove('on');
+  studio.setAttribute('aria-hidden', 'true');
 }
 
 function openAvatarPicker() {
-  const input = document.getElementById('avatar-file-input');
+  openAvatarStudio();
+  const input = document.getElementById('avatar-drop-input') || document.getElementById('avatar-file-input');
 
   if (!input) {
     showToast('❌ Avatar input not found');
@@ -902,38 +974,247 @@ function openAvatarPicker() {
   input.click();
 }
 
-async function handleAvatarInput(input) {
-  const file = input?.files?.[0];
-
-  if (!file) return;
+function validateAvatarFile(file) {
+  if (!file) return false;
 
   if (!file.type.startsWith('image/')) {
     showToast('❌ Select a valid image');
-    input.value = '';
-    return;
+    return false;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    showToast('❌ Image must be below 5MB');
-    input.value = '';
-    return;
+  if (file.size > 8 * 1024 * 1024) {
+    showToast('❌ Image must be below 8MB');
+    return false;
   }
 
-  await uploadProfileAvatar(file);
+  return true;
+}
+
+function handleAvatarInput(input) {
+  const file = input?.files?.[0];
+  if (!file) return;
+  loadAvatarFile(file);
   input.value = '';
+}
+
+function loadAvatarFile(file) {
+  if (!validateAvatarFile(file)) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      avatarStudioState.img = img;
+      avatarStudioState.file = file;
+      setupAvatarCrop();
+      showToast('✅ Image ready to crop');
+    };
+    img.onerror = () => showToast('❌ Could not read this image');
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+  openAvatarStudio();
+}
+
+function avatarCanvas() {
+  return document.getElementById('avatar-crop-canvas');
+}
+
+function avatarPreviewCanvas() {
+  return document.getElementById('avatar-preview-canvas');
+}
+
+function setupAvatarCrop() {
+  const canvas = avatarCanvas();
+  const zoom = document.getElementById('avatar-zoom');
+  const img = avatarStudioState.img;
+  if (!canvas || !img) return;
+
+  const size = canvas.width;
+  avatarStudioState.baseScale = Math.max(size / img.width, size / img.height);
+  avatarStudioState.scale = avatarStudioState.baseScale;
+  avatarStudioState.x = (size - img.width * avatarStudioState.scale) / 2;
+  avatarStudioState.y = (size - img.height * avatarStudioState.scale) / 2;
+
+  if (zoom) {
+    zoom.value = '1';
+    zoom.oninput = () => {
+      const oldScale = avatarStudioState.scale;
+      const multiplier = Number(zoom.value || 1);
+      const newScale = avatarStudioState.baseScale * multiplier;
+      const center = size / 2;
+      avatarStudioState.x = center - ((center - avatarStudioState.x) / oldScale) * newScale;
+      avatarStudioState.y = center - ((center - avatarStudioState.y) / oldScale) * newScale;
+      avatarStudioState.scale = newScale;
+      clampAvatarCrop();
+      drawAvatarCrop();
+    };
+  }
+
+  clampAvatarCrop();
+  drawAvatarCrop();
+}
+
+function clampAvatarCrop() {
+  const canvas = avatarCanvas();
+  const img = avatarStudioState.img;
+  if (!canvas || !img) return;
+
+  const size = canvas.width;
+  const w = img.width * avatarStudioState.scale;
+  const h = img.height * avatarStudioState.scale;
+
+  if (w <= size) avatarStudioState.x = (size - w) / 2;
+  else avatarStudioState.x = Math.min(0, Math.max(size - w, avatarStudioState.x));
+
+  if (h <= size) avatarStudioState.y = (size - h) / 2;
+  else avatarStudioState.y = Math.min(0, Math.max(size - h, avatarStudioState.y));
+}
+
+function drawAvatarCrop() {
+  const canvas = avatarCanvas();
+  const preview = avatarPreviewCanvas();
+  const img = avatarStudioState.img;
+  if (!canvas || !preview || !img) return;
+
+  const ctx = canvas.getContext('2d');
+  const size = canvas.width;
+  ctx.clearRect(0, 0, size, size);
+  ctx.fillStyle = '#0b0b0b';
+  ctx.fillRect(0, 0, size, size);
+  ctx.drawImage(
+    img,
+    avatarStudioState.x,
+    avatarStudioState.y,
+    img.width * avatarStudioState.scale,
+    img.height * avatarStudioState.scale
+  );
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.46)';
+  ctx.beginPath();
+  ctx.rect(0, 0, size, size);
+  ctx.arc(size / 2, size / 2, size * .42, 0, Math.PI * 2, true);
+  ctx.fill('evenodd');
+  ctx.restore();
+
+  const pctx = preview.getContext('2d');
+  const ps = preview.width;
+  pctx.clearRect(0, 0, ps, ps);
+  pctx.save();
+  pctx.beginPath();
+  pctx.arc(ps / 2, ps / 2, ps / 2 - 2, 0, Math.PI * 2);
+  pctx.clip();
+  const ratio = ps / size;
+  pctx.drawImage(
+    img,
+    avatarStudioState.x * ratio,
+    avatarStudioState.y * ratio,
+    img.width * avatarStudioState.scale * ratio,
+    img.height * avatarStudioState.scale * ratio
+  );
+  pctx.restore();
+}
+
+function resetAvatarCrop() {
+  if (!avatarStudioState.img) return;
+  setupAvatarCrop();
+}
+
+function avatarBlobFromCrop() {
+  return new Promise(resolve => {
+    const out = document.createElement('canvas');
+    const source = avatarCanvas();
+    if (!source) return resolve(null);
+    out.width = 512;
+    out.height = 512;
+    const ctx = out.getContext('2d');
+    ctx.drawImage(source, 0, 0, out.width, out.height);
+    out.toBlob(blob => resolve(blob), 'image/png', .95);
+  });
+}
+
+async function saveCroppedAvatar() {
+  if (!avatarStudioState.img) {
+    showToast('⚠️ Choose an image first');
+    return;
+  }
+
+  const blob = await avatarBlobFromCrop();
+  if (!blob) {
+    showToast('❌ Crop failed');
+    return;
+  }
+
+  const file = new File([blob], 'paddox-profile-avatar.png', { type: 'image/png' });
+  await uploadProfileAvatar(file);
+  closeAvatarStudio();
+}
+
+function bindAvatarStudio() {
+  const drop = document.getElementById('avatar-drop-zone');
+  const dropInput = document.getElementById('avatar-drop-input');
+  const canvas = avatarCanvas();
+
+  if (drop && !drop.dataset.bound) {
+    drop.dataset.bound = 'true';
+    drop.addEventListener('click', () => dropInput?.click());
+    ['dragenter', 'dragover'].forEach(type => {
+      drop.addEventListener(type, e => {
+        e.preventDefault();
+        drop.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(type => {
+      drop.addEventListener(type, e => {
+        e.preventDefault();
+        drop.classList.remove('drag-over');
+      });
+    });
+    drop.addEventListener('drop', e => {
+      const file = e.dataTransfer?.files?.[0];
+      if (file) loadAvatarFile(file);
+    });
+  }
+
+  if (dropInput && !dropInput.dataset.bound) {
+    dropInput.dataset.bound = 'true';
+    dropInput.addEventListener('change', () => handleAvatarInput(dropInput));
+  }
+
+  if (canvas && !canvas.dataset.bound) {
+    canvas.dataset.bound = 'true';
+    canvas.addEventListener('pointerdown', e => {
+      if (!avatarStudioState.img) return;
+      avatarStudioState.dragging = true;
+      canvas.setPointerCapture(e.pointerId);
+      avatarStudioState.startX = e.clientX;
+      avatarStudioState.startY = e.clientY;
+      avatarStudioState.startImgX = avatarStudioState.x;
+      avatarStudioState.startImgY = avatarStudioState.y;
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!avatarStudioState.dragging) return;
+      avatarStudioState.x = avatarStudioState.startImgX + (e.clientX - avatarStudioState.startX);
+      avatarStudioState.y = avatarStudioState.startImgY + (e.clientY - avatarStudioState.startY);
+      clampAvatarCrop();
+      drawAvatarCrop();
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => {
+      canvas.addEventListener(type, () => {
+        avatarStudioState.dragging = false;
+      });
+    });
+  }
 }
 
 function bindAvatarUpload() {
   const editBtn = document.getElementById('avatar-edit-btn');
   const input = document.getElementById('avatar-file-input');
 
-  if (editBtn) {
-    editBtn.onclick = openAvatarPicker;
-  }
-
-  if (input) {
-    input.onchange = () => handleAvatarInput(input);
-  }
+  if (editBtn) editBtn.onclick = openAvatarStudio;
+  if (input) input.onchange = () => handleAvatarInput(input);
+  bindAvatarStudio();
 }
 
 /* Extra safety: works even if inline onclick is blocked by cache/order */
@@ -945,22 +1226,30 @@ document.addEventListener('click', e => {
   e.preventDefault();
   e.stopPropagation();
 
-  openAvatarPicker();
+  openAvatarStudio();
 });
 
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAvatarStudio();
+});
+
+window.openAvatarStudio = openAvatarStudio;
+window.closeAvatarStudio = closeAvatarStudio;
 window.openAvatarPicker = openAvatarPicker;
 window.handleAvatarInput = handleAvatarInput;
+window.resetAvatarCrop = resetAvatarCrop;
+window.saveCroppedAvatar = saveCroppedAvatar;
 
 async function uploadProfileAvatar(file) {
   try {
     const token = profileToken();
 
     if (!token) {
-      showToast('🔐 Please login first');
+      showToast('Please login first');
       return;
     }
 
-    showToast('🖼️ Uploading profile picture...');
+    showToast('Uploading profile picture...');
 
     const formData = new FormData();
     formData.append('avatar', file);
@@ -990,7 +1279,7 @@ async function uploadProfileAvatar(file) {
 
     hydrateProfile(updatedUser);
 
-    showToast('🔥 Profile picture updated');
+    showToast('Profile picture updated');
 
     await loadAccountProfile();
 
@@ -1088,7 +1377,7 @@ async function saveProfile(){
   }
 
   try {
-    showToast('⏳ Saving profile...');
+    showToast('Saving profile...');
 
     const res = await fetch(USER_PROFILE_API, {
       method: 'PUT',
@@ -1113,7 +1402,7 @@ async function saveProfile(){
 
     hydrateProfile(user);
 
-    showToast('🔥 Profile updated');
+    showToast('Profile updated');
 
   } catch (err) {
     console.error(err);
