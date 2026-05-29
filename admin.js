@@ -1550,18 +1550,18 @@ const PRODUCT_API_BASE =
 
 let REAL_PRODUCTS = [];
 const PADDOX_PRODUCT_TEAMS = [
-  { value: 'Ferrari', label: 'Ferrari', aliases: ['ferrari'] },
-  { value: 'Red Bull Racing', label: 'Red Bull Racing', aliases: ['red bull', 'red bull racing'] },
-  { value: 'Mercedes', label: 'Mercedes', aliases: ['mercedes'] },
-  { value: 'McLaren', label: 'McLaren', aliases: ['mclaren'] },
+  { value: 'Ferrari', label: 'Ferrari', aliases: ['ferrari', 'scuderia ferrari'] },
+  { value: 'Red Bull Racing', label: 'Red Bull Racing', aliases: ['red bull', 'red bull racing', 'oracle red bull', 'oracle red bull racing'] },
+  { value: 'Mercedes', label: 'Mercedes', aliases: ['mercedes', 'mercedes-amg', 'mercedes amg'] },
+  { value: 'McLaren', label: 'McLaren', aliases: ['mclaren', 'mclaren f1'] },
   { value: 'Aston Martin', label: 'Aston Martin', aliases: ['aston martin'] },
-  { value: 'Alpine', label: 'Alpine', aliases: ['alpine'] },
+  { value: 'Alpine', label: 'Alpine', aliases: ['alpine', 'bwt alpine'] },
   { value: 'Williams', label: 'Williams', aliases: ['williams'] },
+  { value: 'Haas F1 Team', label: 'Haas F1 Team', aliases: ['haas', 'haas f1', 'haas f1 team'] },
   { value: 'Racing Bulls', label: 'Racing Bulls', aliases: ['racing bulls', 'rb', 'visa cash app rb', 'vcarb'] },
-  { value: 'Kick Sauber', label: 'Kick Sauber', aliases: ['kick sauber', 'sauber', 'stake sauber'] },
-  { value: 'Haas', label: 'Haas', aliases: ['haas'] },
+  { value: 'Audi', label: 'Audi', aliases: ['audi', 'kick sauber', 'sauber', 'stake sauber'] },
   { value: 'Cadillac', label: 'Cadillac', aliases: ['cadillac'] },
-  { value: 'Paddox', label: 'Paddox Originals', aliases: ['paddox', 'paddox originals'] },
+  { value: 'PADDOX Original', label: 'PADDOX Original', aliases: ['paddox', 'paddox original', 'paddox originals'] },
   { value: 'Collector', label: 'Collector', aliases: ['collector', 'collectors'] }
 ];
 
@@ -1574,7 +1574,7 @@ function getProductTeamOptionsHTML(selected = '') {
   }).join('');
 
   return `
-    <optgroup label="F1 Team Categories">
+    <optgroup label="Shop Team Categories">
       ${optionHtml.split('</option>').slice(0, 11).filter(Boolean).map(x => x + '</option>').join('')}
     </optgroup>
     <optgroup label="PADDOX Collections">
@@ -1599,6 +1599,19 @@ function teamMatchesProductFilter(productTeam, selectedTeam) {
   return [team.value, team.label, ...(team.aliases || [])]
     .map(v => String(v).toLowerCase())
     .some(alias => productValue === alias || productValue.includes(alias));
+}
+
+function canonicalProductTeam(value = '') {
+  const key = String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  if (!key) return 'PADDOX Original';
+
+  const found = PADDOX_PRODUCT_TEAMS.find(team =>
+    [team.value, team.label, ...(team.aliases || [])]
+      .map(v => String(v).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim())
+      .some(alias => key === alias || key.includes(alias) || alias.includes(key))
+  );
+
+  return found ? found.value : String(value || 'PADDOX Original').trim();
 }
 
 
@@ -3132,23 +3145,11 @@ async function saveNewProduct() {
       return;
     }
 
-    let uploadedImages = [];
-
-    if (imageFiles.length) {
-      showToast(`🖼️ Preparing ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}...`);
-
-      uploadedImages =
-        await Promise.all(
-          imageFiles.map(async (file, index) => ({
-            url: await readImageFileAsDataUrl(file),
-            alt: `${name} image ${index + 1}`
-          }))
-        );
-    }
+    const canonicalTeam = canonicalProductTeam(team);
 
     const productPayload = {
       name,
-      team,
+      team: canonicalTeam,
       category,
       badge,
       price,
@@ -3160,26 +3161,38 @@ async function saveNewProduct() {
       ratings: {
         average: rating,
         count: rating > 0 ? 1 : 0
-      },
-      images: uploadedImages.length
-        ? uploadedImages
-        : [{
-            url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&q=80',
-            alt: name
-          }]
+      }
     };
 
-    showToast('⏳ Saving product...');
+    const formData = new FormData();
+    Object.entries(productPayload).forEach(([key, value]) => {
+      if (key === 'ratings') {
+        formData.append('rating', String(rating));
+        formData.append('ratings[average]', String(rating));
+        formData.append('ratings[count]', String(rating > 0 ? 1 : 0));
+      } else {
+        formData.append(key, String(value));
+      }
+    });
+
+    imageFiles.forEach(file => {
+      formData.append('images', file);
+    });
+
+    if (imageFiles.length) {
+      showToast(`☁️ Uploading ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''} to Cloudinary...`);
+    } else {
+      showToast('⏳ Saving product...');
+    }
 
     const res = await fetch(
       PRODUCT_API_BASE,
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${getAdminToken()}`
         },
-        body: JSON.stringify(productPayload)
+        body: formData
       }
     );
 
