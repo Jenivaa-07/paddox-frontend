@@ -2942,110 +2942,219 @@ button.r-order.r-order-card{color:inherit;}
 
 
 /* ============================================================
-   Phase 20.11C.1 — Notification Icons Shop/FanHub Style Fix
-   Replaces chunky pseudo icons with clean premium masked line marks
+   Phase 20.11C.2 — Restore Fan Preference Cards + Hero Line Icons
    ============================================================ */
-:root{
-  --pdx-notif-race:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='black' d='M7 5h2v22H7V5Zm4 1h14l-1.8 4L25 14H11V6Zm2 2v4h8.8l-.9-2 .9-2H13Z'/%3E%3C/svg%3E");
-  --pdx-notif-drop:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='black' d='M9 10h14l-1.2 16H10.2L9 10Zm3-4h8l2 4h-3l-.8-1.6h-4.4L13 10h-3l2-4Zm1 7 .7 10h4.6l.7-10h-6Z'/%3E%3C/svg%3E");
-  --pdx-notif-order:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='black' d='M8 5h16v22H8V5Zm3 3v16h10V8H11Zm2 4h6v2h-6v-2Zm0 4h6v2h-6v-2Zm0 4h4v2h-4v-2Z'/%3E%3C/svg%3E");
-  --pdx-notif-points:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='black' d='m16 4 3.4 6.9 7.6 1.1-5.5 5.3 1.3 7.5L16 21.2l-6.8 3.6 1.3-7.5L5 12l7.6-1.1L16 4Z'/%3E%3C/svg%3E");
-  --pdx-notif-community:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='black' d='M6 7h20v12H12l-6 5V7Zm3 3v9l2.7-2.3H23V10H9Zm4 2h2.4v2H13v-2Zm4.2 0h2.4v2h-2.4v-2Z'/%3E%3C/svg%3E");
+.fan-preferences-card {
+  position: relative;
+  overflow: hidden;
 }
-.notification-setting-card{
-  grid-template-columns:48px 1fr auto!important;
-  border-left:0!important;
-  overflow:hidden;
+.fan-pref-help {
+  color: var(--muted2);
+  font-size: .78rem;
+  line-height: 1.55;
+  margin: -2px 0 16px;
 }
-.notification-setting-card::before{
-  content:'';
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  width:2px;
-  background:rgba(255,255,255,.12);
-  transition:background var(--tr),box-shadow var(--tr);
+.fan-pref-summary {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+  margin-bottom: 16px;
 }
-.notification-setting-card.is-on::before{
-  background:var(--red);
-  box-shadow:0 0 18px rgba(232,0,45,.58);
+.fan-pref-summary div {
+  padding: 12px 13px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.08);
+  border-left: 2px solid var(--red);
 }
-.notification-card-icon{
-  width:42px!important;
-  height:42px!important;
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  position:relative!important;
-  border-radius:0!important;
-  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018))!important;
-  border:1px solid rgba(255,255,255,.10)!important;
-  clip-path:polygon(7px 0,100% 0,calc(100% - 7px) 100%,0 100%)!important;
-  color:rgba(255,255,255,.78)!important;
-  transition:transform var(--tr),border-color var(--tr),background var(--tr),color var(--tr),filter var(--tr)!important;
+.fan-pref-summary span {
+  display: block;
+  font-family: var(--font-c);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-size: .55rem;
+  margin-bottom: 5px;
 }
-.notification-card-icon::before{
-  content:''!important;
-  position:absolute!important;
-  inset:auto!important;
-  width:22px!important;
-  height:22px!important;
-  left:50%!important;
-  top:50%!important;
-  transform:translate(-50%,-50%)!important;
-  background:currentColor!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  -webkit-mask:var(--notify-mask) center/contain no-repeat!important;
-  mask:var(--notify-mask) center/contain no-repeat!important;
+.fan-pref-summary strong {
+  display: block;
+  color: #fff;
+  font-size: .86rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.notification-card-icon::after{
-  content:''!important;
-  position:absolute!important;
-  right:7px!important;
-  bottom:7px!important;
-  left:auto!important;
-  top:auto!important;
-  width:15px!important;
-  height:2px!important;
-  background:var(--red)!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:0 0 10px rgba(232,0,45,.55)!important;
-  transform:skewX(-25deg)!important;
-  opacity:.95!important;
+.team-pref-grid-premium {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: 10px !important;
 }
-.notif-race-icon{--notify-mask:var(--pdx-notif-race)}
-.notif-drop-icon{--notify-mask:var(--pdx-notif-drop)}
-.notif-order-icon{--notify-mask:var(--pdx-notif-order)}
-.notif-points-icon{--notify-mask:var(--pdx-notif-points)}
-.notif-community-icon{--notify-mask:var(--pdx-notif-community)}
+.team-pref-card {
+  min-height: 96px !important;
+  padding: 12px !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  background: linear-gradient(145deg,rgba(18,18,18,.92),rgba(6,6,6,.96)) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform var(--tr), border-color var(--tr), box-shadow var(--tr), background var(--tr) !important;
+}
+.team-pref-card::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 3px !important;
+  background: var(--team-color,var(--red)) !important;
+  opacity: .65 !important;
+  transition: opacity var(--tr), box-shadow var(--tr) !important;
+}
+.team-card-glow {
+  position: absolute;
+  right: -34px;
+  top: -42px;
+  width: 110px;
+  height: 110px;
+  background: var(--team-color,var(--red));
+  opacity: .06;
+  filter: blur(20px);
+  border-radius: 50%;
+  transition: opacity var(--tr), transform var(--tr);
+}
+.team-logo-box {
+  width: 72px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+.team-logo-box img {
+  max-width: 70px;
+  max-height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.09));
+}
+.team-logo-box b {
+  min-width: 46px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.14);
+  color: #fff;
+  font-family: var(--font-c);
+  letter-spacing: 2px;
+  font-size: .72rem;
+}
+.team-card-name {
+  display: block;
+  position: relative;
+  z-index: 1;
+  font-weight: 800;
+  color: #fff;
+  font-size: .82rem;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.team-card-drivers {
+  display: block;
+  position: relative;
+  z-index: 1;
+  color: rgba(255,255,255,.42);
+  font-size: .66rem;
+  line-height: 1.35;
+}
+.team-pref-card:hover,
+.team-pref-card.on {
+  border-color: color-mix(in srgb, var(--team-color,var(--red)) 65%, rgba(255,255,255,.22)) !important;
+  background: linear-gradient(145deg,rgba(22,22,22,.98),rgba(8,8,8,.98)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 18px 45px rgba(0,0,0,.35) !important;
+}
+.team-pref-card:hover .team-card-glow,
+.team-pref-card.on .team-card-glow {
+  opacity: .16;
+  transform: scale(1.08);
+}
+.team-pref-card.on::before {
+  opacity: 1 !important;
+  box-shadow: 0 0 18px var(--team-color,var(--red)) !important;
+}
+.driver-select-premium { min-height: 44px; }
+.field-hint { margin-top: 8px; color: rgba(255,255,255,.42); font-size: .72rem; }
+
+/* Shop/FanHub-style slim line icons for notification controls */
+.notification-setting-card {
+  grid-template-columns: 32px 1fr auto !important;
+  min-height: 68px !important;
+  border-left: 1px solid rgba(255,255,255,.09) !important;
+}
+.notification-setting-card.is-on {
+  border-left-color: var(--red) !important;
+}
+.notification-card-icon {
+  width: 28px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(255,255,255,.72) !important;
+  filter: drop-shadow(0 0 9px rgba(232,0,45,.18));
+}
+.notification-card-icon::before {
+  content: '' !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+  background: currentColor !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  transform: none !important;
+  box-shadow: none !important;
+  -webkit-mask: var(--notif-mask) center/contain no-repeat !important;
+  mask: var(--notif-mask) center/contain no-repeat !important;
+}
+.notification-card-icon::after {
+  content: '' !important;
+  position: absolute !important;
+  left: 6px !important;
+  bottom: 1px !important;
+  width: 16px !important;
+  height: 2px !important;
+  display: block !important;
+  background: var(--red) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  transform: skewX(-24deg) !important;
+  box-shadow: 0 0 11px rgba(232,0,45,.5) !important;
+  opacity: .9 !important;
+}
 .notification-setting-card.is-on .notification-card-icon,
-.notification-inbox-card:hover .notification-card-icon{
-  color:#fff!important;
-  border-color:rgba(232,0,45,.36)!important;
-  background:linear-gradient(145deg,rgba(232,0,45,.18),rgba(255,255,255,.035))!important;
-  filter:drop-shadow(0 0 14px rgba(232,0,45,.22));
+.notification-setting-card:hover .notification-card-icon {
+  color: #fff !important;
+  filter: drop-shadow(0 0 14px rgba(232,0,45,.34));
 }
-.notification-setting-card:hover .notification-card-icon{
-  transform:translateY(-1px) scale(1.05)!important;
-  color:#fff!important;
+.notif-race-icon{--notif-mask:var(--pdx-ico-flag)}
+.notif-drop-icon{--notif-mask:var(--pdx-ico-download)}
+.notif-order-icon{--notif-mask:var(--pdx-ico-bag)}
+.notif-points-icon{--notif-mask:var(--pdx-ico-star)}
+.notif-community-icon{--notif-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 5h16v11H8l-4 4V5Zm2 2v8.2L7.2 14H18V7H6Zm3 2h6v2H9V9Zm0 3h4v2H9v-2Z'/%3E%3C/svg%3E")}
+.notification-inbox-card .notification-card-icon {
+  flex: 0 0 28px;
 }
-.notification-copy .tlbl{
-  font-family:var(--font-c);
-  letter-spacing:.7px;
-  text-transform:none;
-}
-.notification-copy .tsub{
-  color:rgba(255,255,255,.52)!important;
-}
-.notification-inbox-card .notification-card-icon{
-  flex:0 0 42px;
-}
-@media(max-width:640px){
-  .notification-setting-card{grid-template-columns:44px 1fr!important;}
-  .notification-card-icon{width:38px!important;height:38px!important;}
-  .notification-card-icon::before{width:20px!important;height:20px!important;}
+@media(max-width:860px){
+  .team-pref-grid-premium,.fan-pref-summary{grid-template-columns:1fr!important;}
 }

@@ -370,15 +370,21 @@
             <div class="form-group"><label class="form-label">State</label><input class="form-input" id="pf-state" placeholder="Tamil Nadu"/></div>
             <button class="save-btn" onclick="saveAddress()">Save Address ✓</button>
           </div>
-          <div class="set-card reveal-up delay-2">
+          <div class="set-card reveal-up delay-2 fan-preferences-card">
             <div class="set-title"><span class="section-mini-icon fanpref-mini-icon" aria-hidden="true"></span> Fan Preferences</div>
+            <p class="fan-pref-help">Pick your team and driver to personalize polls, quotes, recommendations and PADDOX fan moments.</p>
+            <div class="fan-pref-summary" id="fan-pref-summary">
+              <div><span>Team</span><strong id="fan-summary-team">Select one</strong></div>
+              <div><span>Driver</span><strong id="fan-summary-driver">Select one</strong></div>
+            </div>
             <div class="form-group">
               <label class="form-label">Favourite Team</label>
-              <div class="team-pref-grid" id="team-pref"></div>
+              <div class="team-pref-grid team-pref-grid-premium" id="team-pref"></div>
             </div>
             <div class="form-group">
               <label class="form-label">Favourite Driver</label>
-              <select class="form-input" id="pf-driver"><option>Max Verstappen</option><option>Charles Leclerc</option><option>Lewis Hamilton</option><option>Lando Norris</option><option>Oscar Piastri</option><option>Carlos Sainz</option></select>
+              <select class="form-input driver-select-premium" id="pf-driver"></select>
+              <div class="field-hint">All 22 current grid drivers are available in this dropdown.</div>
             </div>
             <button class="save-btn" onclick="savePreferences()">Save Preferences ✓</button>
           </div>

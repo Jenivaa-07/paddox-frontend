@@ -1121,17 +1121,141 @@ function bindNotificationControls() {
 }
 
 /* ══ TEAM PREFS ══ */
-const TEAMS=[{name:'Scuderia Ferrari'},{name:'Oracle Red Bull Racing'},{name:'Mercedes-AMG Petronas'},{name:'McLaren F1 Team'},{name:'Aston Martin F1'},{name:'BWT Alpine F1'},{name:'Williams Racing'},{name:'Haas F1 Team'},{name:'RB F1 Team'},{name:'Audi F1 Team'},{name:'Cadillac F1 Team'}];
+const PADDOX_F1_TEAMS = [
+  {
+    name: 'Mercedes', short: 'MER', color: '#00d2be',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mercedes/2025mercedeslogowhite.webp',
+    drivers: ['George Russell', 'Kimi Antonelli']
+  },
+  {
+    name: 'Ferrari', short: 'FER', color: '#e8002d',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/ferrari/2025ferrarilogolight.webp',
+    drivers: ['Charles Leclerc', 'Lewis Hamilton']
+  },
+  {
+    name: 'McLaren', short: 'MCL', color: '#ff8700',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/mclaren/2025mclarenlogowhite.webp',
+    drivers: ['Lando Norris', 'Oscar Piastri']
+  },
+  {
+    name: 'Red Bull Racing', short: 'RBR', color: '#1e5bff',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/redbullracing/2025redbullracinglogowhite.webp',
+    drivers: ['Max Verstappen', 'Isack Hadjar']
+  },
+  {
+    name: 'Alpine', short: 'ALP', color: '#2293d1',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/alpine/2025alpinelogowhite.webp',
+    drivers: ['Pierre Gasly', 'Franco Colapinto']
+  },
+  {
+    name: 'Racing Bulls', short: 'VCARB', color: '#6c4cff',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/racingbulls/2025racingbullslogowhite.webp',
+    drivers: ['Liam Lawson', 'Arvid Lindblad']
+  },
+  {
+    name: 'Haas F1 Team', short: 'HAA', color: '#ffffff',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/haas/2025haaslogowhite.webp',
+    drivers: ['Esteban Ocon', 'Oliver Bearman']
+  },
+  {
+    name: 'Williams', short: 'WIL', color: '#64c4ff',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/williams/2025williamslogowhite.webp',
+    drivers: ['Alexander Albon', 'Carlos Sainz']
+  },
+  {
+    name: 'Audi', short: 'AUD', color: '#00e701',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/audi/2026audilogowhite.webp',
+    drivers: ['Nico Hulkenberg', 'Gabriel Bortoleto']
+  },
+  {
+    name: 'Cadillac', short: 'CAD', color: '#d4af37',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2026/cadillac/2026cadillaclogowhite.webp',
+    drivers: ['Sergio Perez', 'Valtteri Bottas']
+  },
+  {
+    name: 'Aston Martin', short: 'AMR', color: '#006f62',
+    logo: 'https://media.formula1.com/image/upload/c_fit%2Ch_64/q_auto/v1740000001/common/f1/2025/astonmartin/2025astonmartinlogowhite.webp',
+    drivers: ['Fernando Alonso', 'Lance Stroll']
+  }
+];
+
+const TEAMS = PADDOX_F1_TEAMS;
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function populateDriverSelect(selectedValue = '') {
+  const driverSelect = document.getElementById('pf-driver');
+  if (!driverSelect) return;
+
+  const current =
+    selectedValue ||
+    currentUser?.preferences?.favouriteDriver ||
+    driverSelect.value ||
+    '';
+
+  driverSelect.innerHTML = PADDOX_F1_TEAMS.map(team => `
+    <optgroup label="${escapeHtml(team.name)}">
+      ${team.drivers.map(driver => `
+        <option value="${escapeHtml(driver)}">${escapeHtml(driver)}</option>
+      `).join('')}
+    </optgroup>
+  `).join('');
+
+  if (current) driverSelect.value = current;
+
+  driverSelect.onchange = updateFanPreferenceSummary;
+  updateFanPreferenceSummary();
+}
+
 function renderTeamPrefs(){
   const grid=document.getElementById('team-pref');if(!grid)return;
   const fav = currentUser?.preferences?.favouriteTeam || '';
-  grid.innerHTML=TEAMS.map((t,i)=>`
-    <button class="team-pref-btn ${(fav ? fav === t.name : i===0)?'on':''}" data-team="${t.name}" onclick="selectTeam(this)"><span class="team-pref-dot" aria-hidden="true"></span>${t.name}</button>
+
+  grid.innerHTML=PADDOX_F1_TEAMS.map((t,i)=>`
+    <button
+      class="team-pref-btn team-pref-card ${(fav ? fav === t.name : i===1)?'on':''}"
+      data-team="${escapeHtml(t.name)}"
+      data-color="${escapeHtml(t.color)}"
+      onclick="selectTeam(this)"
+      style="--team-color:${escapeHtml(t.color)}"
+      type="button"
+    >
+      <span class="team-card-glow" aria-hidden="true"></span>
+      <span class="team-logo-box">
+        <img src="${escapeHtml(t.logo)}" alt="${escapeHtml(t.name)} logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"/>
+        <b style="display:none">${escapeHtml(t.short)}</b>
+      </span>
+      <span class="team-card-name">${escapeHtml(t.name)}</span>
+      <span class="team-card-drivers">${escapeHtml(t.drivers.join(' · '))}</span>
+    </button>
   `).join('');
+
+  populateDriverSelect();
+  updateFanPreferenceSummary();
 }
+
 function selectTeam(el){
   document.querySelectorAll('.team-pref-btn').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
+  updateFanPreferenceSummary();
+}
+
+function updateFanPreferenceSummary() {
+  const team = getSelectedTeam();
+  const driver = document.getElementById('pf-driver')?.value || '';
+
+  const teamEl = document.getElementById('fan-summary-team');
+  const driverEl = document.getElementById('fan-summary-driver');
+
+  if (teamEl) teamEl.textContent = team || 'Select one';
+  if (driverEl) driverEl.textContent = driver || 'Select one';
 }
 
 /* ══════════════════════════════════════
@@ -1338,10 +1462,7 @@ function hydrateProfile(user = {}) {
   setFieldValue('pf-pin', user.address?.pincode || '');
   setFieldValue('pf-state', user.address?.state || '');
 
-  const driver = document.getElementById('pf-driver');
-  if (driver && user.preferences?.favouriteDriver) {
-    driver.value = user.preferences.favouriteDriver;
-  }
+  populateDriverSelect(user.preferences?.favouriteDriver || '');
 
   if (user.preferences?.favouriteTeam) {
     document.querySelectorAll('.team-pref-btn').forEach(btn => {
@@ -1352,6 +1473,7 @@ function hydrateProfile(user = {}) {
     });
   }
 
+  updateFanPreferenceSummary();
   hydrateNotificationControls(user.notifications || NOTIFICATION_DEFAULTS);
   bindNotificationControls();
 
@@ -2802,4 +2924,12 @@ document.addEventListener('DOMContentLoaded', () => {
   bindNotificationControls();
   const cachedUser = JSON.parse(localStorage.getItem('paddox_user') || 'null');
   if (cachedUser?.notifications) hydrateNotificationControls(cachedUser.notifications);
+});
+
+
+/* Phase 20.11C.2 — fan preferences restore */
+document.addEventListener('DOMContentLoaded', () => {
+  renderTeamPrefs();
+  populateDriverSelect();
+  updateFanPreferenceSummary();
 });
