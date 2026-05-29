@@ -1853,67 +1853,102 @@ function showAccountOrderDetails(orderId) {
 
   const safeOrderId = accountEsc(orderSafeId(order));
   const address = order.shippingAddress || {};
-  const products = (order.items || []).map(item => `
-    <div class="order-detail-item">
-      <div class="order-detail-img">${orderProductThumb(item)}</div>
-      <div>
-        <div class="order-detail-name">${accountEsc(item.name || 'Product')}</div>
-        <div class="order-detail-meta">
-          Qty ${item.quantity || 1}
-          ${item.size ? ` · Size ${accountEsc(item.size)}` : ''}
-          ${item.color ? ` · ${accountEsc(item.color)}` : ''}
+  const items = order.items || [];
+  const itemCount = items.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+  const orderNo = order.orderNumber || order._id;
+  const paymentLabel = paymentMethodLabel(order);
+
+  const products = items.map(item => {
+    const qty = Number(item.quantity || 1);
+    const lineTotal = Number(item.price || 0) * qty;
+    const meta = [
+      `Qty ${qty}`,
+      item.size ? `Size ${accountEsc(item.size)}` : '',
+      item.color ? accountEsc(item.color) : ''
+    ].filter(Boolean).join(' · ');
+
+    return `
+      <div class="order-detail-item pdx-detail-product-v2">
+        <div class="order-detail-img pdx-detail-img-v2">${orderProductThumb(item)}</div>
+        <div class="pdx-detail-product-copy">
+          <div class="order-detail-name pdx-detail-product-name">${accountEsc(item.name || 'Product')}</div>
+          <div class="order-detail-meta pdx-detail-product-meta">${meta}</div>
         </div>
+        <strong class="order-detail-price pdx-detail-product-price">${formatMoney(lineTotal)}</strong>
       </div>
-      <strong>${formatMoney((item.price || 0) * (item.quantity || 1))}</strong>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   const modal = document.createElement('div');
   modal.innerHTML = `
-    <div class="order-detail-overlay">
-      <div class="order-detail-modal">
-        <button class="order-detail-close" type="button">✕</button>
+    <div class="order-detail-overlay pdx-detail-overlay-v2">
+      <div class="order-detail-modal pdx-order-modal-v2">
+        <button class="order-detail-close pdx-detail-close-v2" type="button" aria-label="Close order details">✕</button>
 
-        <div class="order-detail-top">
+        <div class="pdx-detail-hero-v2">
           <div>
             <div class="orders-kicker">Order garage</div>
             <h2>ORDER DETAILS</h2>
-            <p>#${accountEsc(order.orderNumber || order._id)} · ${orderDateLabel(order.createdAt)}</p>
+            <p>#${accountEsc(orderNo)} · ${orderDateLabel(order.createdAt)}</p>
           </div>
-          <div class="order-status-stack">
+          <div class="order-status-stack pdx-detail-status-v2">
             <span class="ostatus ${statusClass(order.status)}">${accountEsc(order.status || 'placed')}</span>
             <span class="payment-pill ${paymentStatusClass(order)}">${paymentStatusLabel(order)}</span>
           </div>
         </div>
 
-        ${renderOrderTimeline(order)}
-
-        <div class="order-detail-grid">
-          <section>
-            <h3>Items</h3>
-            ${products || '<p class="order-muted">No items returned.</p>'}
-          </section>
-          <section>
-            <h3>Delivery</h3>
-            <p class="order-address-line"><b>${accountEsc(address.name || '-')}</b></p>
-            <p class="order-address-line">${accountEsc(address.line1 || '')}</p>
-            ${address.line2 ? `<p class="order-address-line">${accountEsc(address.line2)}</p>` : ''}
-            <p class="order-address-line">${accountEsc([address.city, address.state, address.pincode].filter(Boolean).join(', '))}</p>
-            <p class="order-address-line">${accountEsc(address.country || 'India')}</p>
-            <p class="order-address-line">Phone: ${accountEsc(address.phone || '-')}</p>
-          </section>
+        <div class="pdx-detail-stats-v2">
+          <div><span>Total Paid</span><strong>${formatMoney(order.pricing?.total)}</strong></div>
+          <div><span>Payment</span><strong>${accountEsc(paymentLabel)}</strong></div>
+          <div><span>Items</span><strong>${itemCount}</strong></div>
+          <div><span>Placed</span><strong>${orderTimeLabel(order.createdAt)}</strong></div>
         </div>
 
-        <div class="order-detail-summary">
-          <div><span>Subtotal</span><b>${formatMoney(order.pricing?.subtotal)}</b></div>
-          <div><span>Shipping</span><b>${formatMoney(order.pricing?.shipping)}</b></div>
-          <div><span>Tax</span><b>${formatMoney(order.pricing?.tax)}</b></div>
-          <div class="grand"><span>Total</span><b>${formatMoney(order.pricing?.total)}</b></div>
+        <div class="pdx-detail-timeline-v2">
+          ${renderOrderTimeline(order)}
         </div>
 
-        <div class="order-detail-actions">
-          <button class="trk-btn" onclick="openOrderReceipt('${safeOrderId}')">Open Receipt</button>
-          <button class="trk-btn" onclick="showTracking('${accountEsc(order.orderNumber || order._id)}', ${Math.max(orderStepIndex(order.status), 0)})">Track Order</button>
+        <div class="pdx-detail-layout-v2">
+          <section class="pdx-detail-card-v2 pdx-detail-items-v2">
+            <h3>Items in this order</h3>
+            <div class="pdx-detail-items-list-v2">
+              ${products || '<p class="order-muted">No items returned.</p>'}
+            </div>
+          </section>
+
+          <aside class="pdx-detail-side-v2">
+            <section class="pdx-detail-card-v2 pdx-detail-delivery-v2">
+              <h3>Delivery details</h3>
+              <div class="pdx-address-v2">
+                <b>${accountEsc(address.name || '-')}</b>
+                <span>${accountEsc(address.line1 || '')}</span>
+                ${address.line2 ? `<span>${accountEsc(address.line2)}</span>` : ''}
+                <span>${accountEsc([address.city, address.state, address.pincode].filter(Boolean).join(', '))}</span>
+                <span>${accountEsc(address.country || 'India')}</span>
+                <span>Phone: ${accountEsc(address.phone || '-')}</span>
+              </div>
+            </section>
+
+            <section class="pdx-detail-card-v2 pdx-detail-summary-v2">
+              <h3>Payment summary</h3>
+              <div><span>Subtotal</span><b>${formatMoney(order.pricing?.subtotal)}</b></div>
+              <div><span>Shipping</span><b>${formatMoney(order.pricing?.shipping)}</b></div>
+              ${(Number(order.pricing?.discount || 0) > 0) ? `<div><span>Discount</span><b>${formatMoney(order.pricing?.discount)}</b></div>` : ''}
+              <div><span>Tax</span><b>${formatMoney(order.pricing?.tax)}</b></div>
+              <div class="grand"><span>Total</span><b>${formatMoney(order.pricing?.total)}</b></div>
+            </section>
+          </aside>
+        </div>
+
+        <div class="pdx-detail-footer-v2">
+          <div class="pdx-detail-support-v2">
+            <b>PADDOX support ready</b>
+            <span>Use this order ID for receipt access, support and delivery tracking.</span>
+          </div>
+          <div class="order-detail-actions pdx-detail-actions-v2">
+            <button class="trk-btn detail-primary-action" onclick="openOrderReceipt('${safeOrderId}')">Open Receipt</button>
+            <button class="trk-btn detail-secondary-action" onclick="showTracking('${accountEsc(orderNo)}', ${Math.max(orderStepIndex(order.status), 0)}); this.closest('.order-detail-overlay')?.remove();">Track Order</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1925,6 +1960,7 @@ function showAccountOrderDetails(orderId) {
     if (e.target.classList.contains('order-detail-overlay')) modal.remove();
   };
 }
+
 
 function openOrderReceipt(orderId) {
   if (!orderId) {
