@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Admin Dashboard</title>
-  <link rel="stylesheet" href="admin.css?v=admin_A2"/>
+  <link rel="stylesheet" href="admin.css?v=admin_A2_1"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
 <style>
@@ -149,8 +149,8 @@
         <div class="adm-profile">
           <div class="adm-avatar animate-icon"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-shield"></use></svg></div>
           <div>
-            <div class="adm-pname">Super Admin</div>
-            <div class="adm-prole">admin@paddox.com</div>
+            <div class="adm-pname admin-profile-name" id="admin-profile-name">Signed-in Admin</div>
+            <div class="adm-prole admin-profile-email" id="admin-profile-email">Loading admin account…</div>
           </div>
         </div>
         <a href="index.html" class="adm-back-btn">← Back to Site</a>
@@ -243,7 +243,7 @@
           <div class="tables-row">
             <div class="table-card reveal-up">
               <div class="table-card-head">
-                <div class="table-card-title">📦 Recent Orders</div>
+                <div class="table-card-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-orders"></use></svg></span> Recent Orders</div>
                 <span class="view-all-link" onclick="switchPage('orders')">View All →</span>
               </div>
               <table class="mini-table">
@@ -258,7 +258,7 @@
             </div>
             <div class="table-card reveal-up delay-1">
               <div class="table-card-head">
-                <div class="table-card-title">⚠️ Low Stock Alerts</div>
+                <div class="table-card-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-inventory"></use></svg></span> Low Stock Alerts</div>
                 <span class="view-all-link" onclick="switchPage('inventory')">Manage →</span>
               </div>
               <table class="mini-table">

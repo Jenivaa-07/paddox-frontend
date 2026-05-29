@@ -3261,39 +3261,146 @@ async function confirmDeleteProduct(id) {
 
 
 
-function updateAdminIdentity() {
+function safeJsonParseAdmin(value) {
+  try { return value ? JSON.parse(value) : null; } catch (err) { return null; }
+}
+
+function decodeAdminJwtPayload(token = '') {
   try {
-    const saved =
-      JSON.parse(localStorage.getItem('paddox_user') || '{}') ||
-      {};
+    const part = String(token).split('.')[1];
+    if (!part) return null;
+    const normalized = part.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), '=');
+    return JSON.parse(atob(padded));
+  } catch (err) {
+    return null;
+  }
+}
 
+function pickAdminIdentityFromStorage() {
+  const storageKeys = [
+    'paddox_user',
+    'paddoxUser',
+    'user',
+    'currentUser',
+    'adminUser',
+    'paddox_admin',
+    'profile'
+  ];
+
+  for (const key of storageKeys) {
+    const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+    const saved = safeJsonParseAdmin(raw);
+    if (!saved || typeof saved !== 'object') continue;
+
+    const nested = saved.user || saved.data?.user || saved.profile || saved.account || saved.data || saved;
+    const firstName = nested.firstName || nested.firstname || nested.given_name || '';
+    const lastName = nested.lastName || nested.lastname || nested.family_name || '';
     const name =
-      `${saved.firstName || ''} ${saved.lastName || ''}`.trim() ||
-      saved.name ||
-      'Admin';
+      `${firstName} ${lastName}`.trim() ||
+      nested.name ||
+      nested.fullName ||
+      nested.username ||
+      '';
+    const email = nested.email || nested.mail || nested.userEmail || '';
 
-    const email =
-      saved.email ||
-      'admin@paddox.com';
+    if (name || email) return { name, email };
+  }
 
-    document.querySelectorAll('.admin-profile-name, .adm-profile-name, .super-admin-name')
-      .forEach(el => el.textContent = name);
+  const tokenPayload = decodeAdminJwtPayload(getAdminToken());
+  if (tokenPayload) {
+    const name =
+      tokenPayload.name ||
+      `${tokenPayload.firstName || ''} ${tokenPayload.lastName || ''}`.trim() ||
+      tokenPayload.username ||
+      '';
+    const email = tokenPayload.email || tokenPayload.userEmail || '';
+    if (name || email) return { name, email };
+  }
 
-    document.querySelectorAll('.admin-profile-email, .adm-profile-email, .super-admin-email')
-      .forEach(el => el.textContent = email);
+  return { name: '', email: '' };
+}
 
-    document.querySelectorAll('.adm-user-box, .admin-user, .super-admin')
-      .forEach(box => {
-        const text = box.textContent || '';
-        if (text.includes('Super Admin')) {
-          box.childNodes.forEach(node => {
-            if (node.nodeType === Node.TEXT_NODE && node.textContent.includes('Super Admin')) {
-              node.textContent = node.textContent.replace('Super Admin', name);
-            }
-          });
-        }
+function setAdminIdentityUI(identity = {}, loaded = false) {
+  const cleanEmail = String(identity.email || '').trim();
+  const cleanName = String(identity.name || '').trim();
+  const displayName = cleanName || (cleanEmail ? cleanEmail.split('@')[0] : 'Signed-in Admin');
+  const displayEmail = cleanEmail || 'Admin account';
+
+  document.querySelectorAll('.admin-profile-name, .adm-profile-name, .super-admin-name, #admin-profile-name')
+    .forEach(el => el.textContent = displayName);
+
+  document.querySelectorAll('.admin-profile-email, .adm-profile-email, .super-admin-email, #admin-profile-email')
+    .forEach(el => el.textContent = displayEmail);
+
+  document.querySelectorAll('.adm-profile')
+    .forEach(el => {
+      el.classList.toggle('is-loaded', !!loaded || !!cleanEmail || !!cleanName);
+      el.classList.toggle('is-fallback', !cleanEmail && !cleanName);
+    });
+}
+
+async function fetchAdminIdentity() {
+  const token = getAdminToken();
+  if (!token) return null;
+
+  const endpoints = [
+    'https://paddox-backend.onrender.com/api/auth/me',
+    'https://paddox-backend.onrender.com/api/users/me',
+    'https://paddox-backend.onrender.com/api/user/me'
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-  } catch (err) {}
+      if (!res.ok) continue;
+      const data = await res.json().catch(() => ({}));
+      const user = data.user || data.data?.user || data.data || data;
+      if (!user || typeof user !== 'object') continue;
+
+      const name =
+        `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+        user.name ||
+        user.fullName ||
+        user.username ||
+        '';
+      const email = user.email || user.mail || user.userEmail || '';
+
+      if (name || email) {
+        localStorage.setItem('paddox_user', JSON.stringify(user));
+        return { name, email };
+      }
+    } catch (err) {
+      console.warn('Admin identity fetch skipped:', err.message);
+    }
+  }
+
+  return null;
+}
+
+function updateAdminTopbarDate() {
+  const sub = document.querySelector('.adm-topbar-sub');
+  if (!sub) return;
+  const dateText = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+  sub.textContent = `${dateText} · Paddox Admin Panel`;
+}
+
+async function updateAdminIdentity() {
+  const localIdentity = pickAdminIdentityFromStorage();
+  setAdminIdentityUI(localIdentity, !!(localIdentity.name || localIdentity.email));
+  updateAdminTopbarDate();
+
+  const remoteIdentity = await fetchAdminIdentity();
+  if (remoteIdentity && (remoteIdentity.name || remoteIdentity.email)) {
+    setAdminIdentityUI(remoteIdentity, true);
+  }
 }
 
 
@@ -4464,11 +4571,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   updateOverviewRealtime();
   updateAdminSidebarBadges();
-  updateAdminIdentity();
+  await updateAdminIdentity();
 });
 
 /* ══ INIT LOG ══ */
-console.log('%c⚙️ PADDOX — Admin Dashboard Ready', 'color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%c⚙️ PADDOX — Admin Dashboard Ready · A2.1', 'color:#e8002d;font-size:14px;font-weight:bold;');
 /* ══════════════════════════════════════
    PHASE 9 — ADMIN ORDERS + ANALYTICS POLISH
    Real orders only · clean admin controls
