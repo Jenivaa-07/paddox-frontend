@@ -3854,12 +3854,34 @@ async function submitSecurityPassword() {
   }
 }
 
+function setSecuritySummaryClass(el, className) {
+  if (!el) return;
+  el.classList.remove('status-good', 'status-on', 'status-off', 'status-strong', 'status-watch', 'status-warn');
+  if (className) el.classList.add(className);
+}
+
+function updateSecurityTips(enabled) {
+  const tip = document.getElementById('security-2fa-tip');
+  const title = document.getElementById('security-2fa-tip-title');
+  const copy = document.getElementById('security-2fa-tip-copy');
+  if (!tip) return;
+  tip.classList.toggle('is-active', !!enabled);
+  tip.classList.toggle('needs-action', !enabled);
+  if (title) title.textContent = enabled ? '2FA active' : 'Secure sign-in';
+  if (copy) copy.textContent = enabled
+    ? 'Email verification is protecting your login.'
+    : 'Email verification adds an extra login check.';
+}
+
 function hydrateSecurityState(user = currentUser || {}) {
   const enabled = !!user.security?.twoFactor?.enabled;
   const status = document.getElementById('sec-2fa-status');
   const toggle = document.getElementById('security-2fa-toggle');
-  const chip = document.querySelector('.twofa-premium-box')?.closest('.security-card')?.querySelector('.security-chip');
-  if (status) status.textContent = enabled ? 'ON' : 'OFF';
+  const chip = document.getElementById('sec-protection-chip') || document.querySelector('.twofa-premium-box')?.closest('.security-card')?.querySelector('.security-chip');
+  if (status) {
+    status.textContent = enabled ? 'ON' : 'OFF';
+    setSecuritySummaryClass(status, enabled ? 'status-on' : 'status-off');
+  }
   if (toggle) toggle.checked = enabled;
   if (chip) {
     chip.textContent = enabled ? '2FA ACTIVE' : 'SAFE MODE';
@@ -3867,7 +3889,13 @@ function hydrateSecurityState(user = currentUser || {}) {
     chip.classList.toggle('muted', !enabled);
   }
   const safety = document.getElementById('sec-safety-status');
-  if (safety) safety.textContent = enabled ? 'Strong' : 'Good';
+  if (safety) {
+    safety.textContent = enabled ? 'Strong' : 'Good';
+    setSecuritySummaryClass(safety, enabled ? 'status-strong' : 'status-good');
+  }
+  const password = document.getElementById('sec-password-status');
+  setSecuritySummaryClass(password, 'status-good');
+  updateSecurityTips(enabled);
 }
 
 function prepareTwoFactorToggle(enable) {
@@ -3939,9 +3967,10 @@ function getSecurityBrowserName() {
   return 'Current browser';
 }
 
-async function refreshSecuritySessions() {
+async function refreshSecuritySessions(showFeedback = false) {
   const list = document.getElementById('security-session-list');
   const count = document.getElementById('sec-session-count');
+  const note = document.getElementById('security-session-note');
   if (!list) return;
 
   try {
@@ -3958,7 +3987,16 @@ async function refreshSecuritySessions() {
     });
 
     const sessions = data.data?.sessions || [];
-    if (count) count.textContent = `${sessions.length || 1} Active`;
+    const activeCount = sessions.length || 1;
+    if (count) {
+      count.textContent = `${activeCount} Active`;
+      setSecuritySummaryClass(count, activeCount > 1 ? 'status-warn' : 'status-good');
+    }
+    if (note) {
+      note.textContent = activeCount > 1
+        ? `${activeCount} trusted sessions are active. Revoke anything you do not recognize.`
+        : 'Only this browser is active right now.';
+    }
 
     if (!sessions.length) {
       const browser = getSecurityBrowserName();
@@ -3994,7 +4032,7 @@ async function refreshSecuritySessions() {
       `;
     }).join('');
 
-    showToast('✓ Sessions refreshed');
+    if (showFeedback) showToast('✓ Sessions refreshed');
   } catch (err) {
     console.error(err);
     list.innerHTML = `
@@ -4014,8 +4052,12 @@ async function refreshSecuritySessions() {
         </div>
       </div>
     `;
-    if (count) count.textContent = '1 Active';
-    showToast(`❌ ${err.message}`);
+    if (count) {
+      count.textContent = '1 Active';
+      setSecuritySummaryClass(count, 'status-watch');
+    }
+    if (note) note.textContent = 'Session sync could not refresh. Your current login is still active.';
+    if (showFeedback) showToast(`❌ ${err.message}`);
   }
 }
 

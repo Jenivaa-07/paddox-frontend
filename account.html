@@ -525,7 +525,7 @@
                 <div class="set-title"><span class="section-mini-icon shield-mini-icon" aria-hidden="true"></span> Account Protection</div>
                 <p>Review 2FA availability and trusted sessions.</p>
               </div>
-              <span class="security-chip muted">Safe Mode</span>
+              <span class="security-chip muted" id="sec-protection-chip">Safe Mode</span>
             </div>
 
             <div class="twofa-premium-box">
@@ -555,8 +555,11 @@
             </div>
 
             <div class="session-head-row">
-              <div class="set-title">Active Sessions</div>
-              <button class="revoke-btn" type="button" onclick="refreshSecuritySessions()">Refresh</button>
+              <div>
+                <div class="set-title">Active Sessions</div>
+                <small class="security-session-note" id="security-session-note">Only trusted devices should stay active.</small>
+              </div>
+              <button class="revoke-btn" type="button" onclick="refreshSecuritySessions(true)">Refresh</button>
             </div>
 
             <div class="session-premium-list" id="security-session-list">
@@ -571,10 +574,9 @@
               <div class="session-premium-card locked">
                 <span class="session-device-icon phone" aria-hidden="true"></span>
                 <div>
-                  <div class="sess-name">Other sessions</div>
-                  <div class="sess-meta">Session revoke needs backend session management.</div>
+                  <div class="sess-name">No other sessions</div>
+                  <div class="sess-meta">Open PADDOX on another browser to test revoke.</div>
                 </div>
-                <button class="revoke-btn" type="button" onclick="showToast('Session revoke backend is not connected yet')">Locked</button>
               </div>
             </div>
           </section>
@@ -591,7 +593,7 @@
             <div class="security-tip"><span></span><b>Use 8+ characters</b><small>Mix uppercase, lowercase, numbers and symbols.</small></div>
             <div class="security-tip"><span></span><b>Avoid reused passwords</b><small>Keep PADDOX unique from other accounts.</small></div>
             <div class="security-tip"><span></span><b>Check sessions</b><small>Review unknown browsers or devices regularly.</small></div>
-            <div class="security-tip"><span></span><b>Enable 2FA later</b><small>Turn on email two-factor auth from Account Protection.</small></div>
+            <div class="security-tip" id="security-2fa-tip"><span></span><b id="security-2fa-tip-title">Secure sign-in</b><small id="security-2fa-tip-copy">Email verification adds an extra login check.</small></div>
           </div>
         </section>
       </div>
