@@ -65,6 +65,61 @@ async function checkAdminAccess() {
   }
 }
 
+
+
+/* ══════════════════════════════════════
+   PADDOX CLOUDINARY IMAGE UPLOAD BRIDGE
+   Reusable for Product, Fan Quotes, Fan Drivers, and User Profile images.
+══════════════════════════════════════ */
+const PADDOX_UPLOAD_API = 'https://paddox-backend.onrender.com/api/uploads/image';
+
+function dataUrlToFile(dataUrl, filename = 'paddox-image.jpg') {
+  const parts = String(dataUrl || '').split(',');
+  const mimeMatch = parts[0]?.match(/data:(.*?);base64/);
+  const mime = mimeMatch?.[1] || 'image/jpeg';
+  const binary = atob(parts[1] || '');
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new File([bytes], filename, { type: mime });
+}
+
+async function uploadImageToCloudinaryBridge(fileOrDataUrl, context = 'admin') {
+  if (!fileOrDataUrl) return '';
+
+  if (typeof fileOrDataUrl === 'string' && /^https?:\/\//i.test(fileOrDataUrl)) {
+    return fileOrDataUrl;
+  }
+
+  const file =
+    typeof fileOrDataUrl === 'string'
+      ? dataUrlToFile(fileOrDataUrl, `paddox-${context}-${Date.now()}.jpg`)
+      : fileOrDataUrl;
+
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('context', context);
+
+  const res = await fetch(PADDOX_UPLOAD_API, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getAdminToken()}`
+    },
+    body: formData
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || data.success === false) {
+    throw new Error(data.message || 'Cloudinary upload failed');
+  }
+
+  return data.data?.url || data.url || data.secure_url || '';
+}
+
 /* ══════════════════════════════════════
    REALTIME ADMIN NOTIFICATION BRIDGE
 ══════════════════════════════════════ */
@@ -4160,11 +4215,14 @@ function bindQuoteAvatarUpload() {
           quality: 0.82
         });
 
-        avatarInput.value = dataUrl;
-        renderQuoteAvatarPreview(dataUrl);
+        showToast('☁️ Uploading quote driver image to Cloudinary...');
+        const cloudinaryUrl = await uploadImageToCloudinaryBridge(dataUrl, 'fan-quotes');
+
+        avatarInput.value = cloudinaryUrl || dataUrl;
+        renderQuoteAvatarPreview(avatarInput.value);
         renderAdminQuoteCardPreview();
 
-        showToast('✅ Cropped quote driver image ready');
+        showToast('✅ Quote driver image saved to Cloudinary');
 
       } catch (err) {
         showToast(`❌ ${err.message}`);
@@ -4669,9 +4727,13 @@ function ensureDriverProfileModal() {
         outputSize: 520,
         quality: 0.82
       });
-      modal.querySelector('#dp-image').value = dataUrl;
-      renderDriverProfilePreview(dataUrl);
-      showToast('✅ Cropped driver headshot ready');
+
+      showToast('☁️ Uploading driver headshot to Cloudinary...');
+      const cloudinaryUrl = await uploadImageToCloudinaryBridge(dataUrl, 'fan-drivers');
+
+      modal.querySelector('#dp-image').value = cloudinaryUrl || dataUrl;
+      renderDriverProfilePreview(modal.querySelector('#dp-image').value);
+      showToast('✅ Driver headshot saved to Cloudinary');
     } catch (err) {
       showToast(`❌ ${err.message}`);
     } finally {
