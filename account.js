@@ -1930,14 +1930,15 @@ function openOrderReceipt(orderId) {
               </div>
             </div>
             <div class="avatar-crop-wrap" id="avatar-crop-wrap">
-              <div class="avatar-crop-help">Drag the image to position your face. Use zoom for a tighter or wider profile crop.</div>
+              <div class="avatar-crop-help">The white circle is your final profile photo. Drag the image until the face sits inside the circle, then zoom if needed.</div>
               <div class="avatar-stage" id="avatar-stage">
                 <img id="avatar-crop-img" alt="Crop profile preview" draggable="false"/>
                 <div class="avatar-crop-ring" aria-hidden="true"></div>
               </div>
               <div class="avatar-controls">
-                <label class="avatar-zoom">Zoom <input id="avatar-zoom" type="range" min="1" max="3.5" step="0.01" value="1"/></label>
-                <button class="avatar-reset-btn" id="avatar-reset-btn" type="button">Center Image</button>
+                <label class="avatar-zoom">Zoom <input id="avatar-zoom" type="range" min="1" max="4" step="0.01" value="1"/></label>
+                <button class="avatar-reset-btn" id="avatar-reset-btn" type="button">Fit Image</button>
+                <button class="avatar-face-btn" id="avatar-face-btn" type="button">Face Crop</button>
                 <button class="avatar-change-btn" id="avatar-change-btn" type="button">Choose Different</button>
               </div>
             </div>
@@ -1975,6 +1976,7 @@ function openOrderReceipt(orderId) {
     const changeBtn = document.getElementById('avatar-change-btn');
     const closeBtn = document.getElementById('avatar-studio-close');
     const resetBtn = document.getElementById('avatar-reset-btn');
+    const faceBtn = document.getElementById('avatar-face-btn');
     const saveBtn = document.getElementById('avatar-save-btn');
     const zoom = document.getElementById('avatar-zoom');
     const stage = document.getElementById('avatar-stage');
@@ -1982,10 +1984,12 @@ function openOrderReceipt(orderId) {
     pickBtn?.addEventListener('click', () => fileInput?.click());
     changeBtn?.addEventListener('click', () => fileInput?.click());
     closeBtn?.addEventListener('click', closeAvatarStudio);
-    resetBtn?.addEventListener('click', resetAvatarCrop);
+    resetBtn?.addEventListener('click', fitAvatarCrop);
+    faceBtn?.addEventListener('click', faceAvatarCrop);
     saveBtn?.addEventListener('click', saveCroppedAvatar);
     zoom?.addEventListener('input', () => {
       cropState.zoom = Number(zoom.value || 1);
+      clampAvatarPan();
       renderAvatarCrop();
       renderAvatarPreview();
     });
@@ -2025,6 +2029,7 @@ function openOrderReceipt(orderId) {
       if (!cropState.dragging) return;
       cropState.panX = cropState.startPanX + e.clientX - cropState.startX;
       cropState.panY = cropState.startPanY + e.clientY - cropState.startY;
+      clampAvatarPan();
       renderAvatarCrop();
       renderAvatarPreview();
     });
@@ -2038,8 +2043,9 @@ function openOrderReceipt(orderId) {
     stage?.addEventListener('wheel', e => {
       if (!cropState.img) return;
       e.preventDefault();
-      const nextZoom = Math.min(3.5, Math.max(1, cropState.zoom + (e.deltaY < 0 ? .08 : -.08)));
+      const nextZoom = Math.min(4, Math.max(1, cropState.zoom + (e.deltaY < 0 ? .08 : -.08)));
       cropState.zoom = nextZoom;
+      clampAvatarPan();
       if (zoom) zoom.value = String(nextZoom);
       renderAvatarCrop();
       renderAvatarPreview();
@@ -2093,6 +2099,27 @@ function openOrderReceipt(orderId) {
     return true;
   }
 
+
+  const CROP_RING_SIZE = 300;
+
+  function getStageSize() {
+    const stage = document.getElementById('avatar-stage');
+    return stage ? stage.getBoundingClientRect().width : 380;
+  }
+
+  function clampAvatarPan() {
+    if (!cropState.img) return;
+    const stageSize = getStageSize();
+    const ringSize = Math.min(CROP_RING_SIZE, stageSize - 54);
+    const scale = cropState.baseScale * cropState.zoom;
+    const drawnW = cropState.img.naturalWidth * scale;
+    const drawnH = cropState.img.naturalHeight * scale;
+    const maxX = Math.max(0, (drawnW - ringSize) / 2);
+    const maxY = Math.max(0, (drawnH - ringSize) / 2);
+    cropState.panX = Math.max(-maxX, Math.min(maxX, cropState.panX));
+    cropState.panY = Math.max(-maxY, Math.min(maxY, cropState.panY));
+  }
+
   function loadAvatarFile(file) {
     ensureAvatarStudio();
     if (!validateAvatarFile(file)) return;
@@ -2107,7 +2134,7 @@ function openOrderReceipt(orderId) {
       cropState.zoom = 1;
       cropState.panX = 0;
       cropState.panY = 0;
-      cropState.baseScale = 260 / Math.min(img.naturalWidth, img.naturalHeight);
+      cropState.baseScale = CROP_RING_SIZE / Math.min(img.naturalWidth, img.naturalHeight);
       const cropImg = document.getElementById('avatar-crop-img');
       if (cropImg) {
         cropImg.src = cropState.objectUrl;
@@ -2117,6 +2144,7 @@ function openOrderReceipt(orderId) {
       const zoom = document.getElementById('avatar-zoom');
       if (zoom) zoom.value = '1';
       showAvatarCropMode();
+      clampAvatarPan();
       renderAvatarCrop();
       renderAvatarPreview();
       const saveBtn = document.getElementById('avatar-save-btn');
@@ -2141,7 +2169,7 @@ function openOrderReceipt(orderId) {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#080808';
     ctx.fillRect(0, 0, size, size);
-    const outputScale = size / 260;
+    const outputScale = size / CROP_RING_SIZE;
     ctx.save();
     ctx.translate(size / 2 + cropState.panX * outputScale, size / 2 + cropState.panY * outputScale);
     ctx.scale(cropState.baseScale * cropState.zoom * outputScale, cropState.baseScale * cropState.zoom * outputScale);
@@ -2164,12 +2192,24 @@ function openOrderReceipt(orderId) {
     }, 'image/png', .95);
   }
 
-  function resetAvatarCrop() {
+  function fitAvatarCrop() {
     cropState.zoom = 1;
     cropState.panX = 0;
     cropState.panY = 0;
     const zoom = document.getElementById('avatar-zoom');
     if (zoom) zoom.value = '1';
+    clampAvatarPan();
+    renderAvatarCrop();
+    renderAvatarPreview();
+  }
+
+  function faceAvatarCrop() {
+    cropState.zoom = 1.35;
+    cropState.panX = 0;
+    cropState.panY = 0;
+    const zoom = document.getElementById('avatar-zoom');
+    if (zoom) zoom.value = '1.35';
+    clampAvatarPan();
     renderAvatarCrop();
     renderAvatarPreview();
   }
@@ -2252,9 +2292,18 @@ function openOrderReceipt(orderId) {
     cta.innerHTML = 'Sign Up <span class="cta-arrow" aria-hidden="true"></span>';
   }
 
+  function accountDashboardIsVisible() {
+    const auth = document.getElementById('auth-screen');
+    const acc = document.getElementById('acc-screen');
+    if (!acc) return false;
+    const authVisible = auth && getComputedStyle(auth).display !== 'none';
+    const accVisible = getComputedStyle(acc).display !== 'none';
+    return accVisible && !authVisible;
+  }
+
   function syncNavUserProfile(user = currentUser || {}) {
     const cta = document.querySelector('.nav-cta-btn');
-    if (!cta || !user || !profileToken()) {
+    if (!cta || !user || !profileToken() || !accountDashboardIsVisible()) {
       resetNavSignup();
       return;
     }
@@ -2263,7 +2312,7 @@ function openOrderReceipt(orderId) {
     cta.setAttribute('aria-label', 'Preview my profile picture');
     cta.href = 'account.html';
     cta.innerHTML = avatarUrl
-      ? `<img class="nav-profile-img" src="${avatarUrl}" alt="Profile">`
+      ? `<img class="nav-profile-img" src="${avatarUrl}" alt="Profile picture">`
       : `<span class="nav-profile-fallback" aria-hidden="true"></span>`;
     cta.onclick = e => {
       e.preventDefault();
