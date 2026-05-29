@@ -189,10 +189,10 @@ let pendingTwoFactorToken = '';
 let pendingTwoFactorAction = 'enable';
 const PADDOX_API_BASE = 'https://paddox-backend.onrender.com/api';
 
-/* Phase 20.12B.2 — Auth compatibility safety
-   Keeps login/register/logout/getMe working even when older PADDOX auth helpers
-   are missing from cache or from previous builds. */
-const TokenManager = window.TokenManager || {
+/* Phase 20.12B.3 — Auth helper non-conflict safety
+   js/api.js already defines TokenManager/AuthAPI on some builds. Do NOT redeclare
+   those names here because that stops the whole account page script. */
+window.TokenManager = window.TokenManager || (typeof TokenManager !== 'undefined' ? TokenManager : {
   getAccess() {
     return localStorage.getItem('token') || localStorage.getItem('paddox_access_token') || localStorage.getItem('accessToken') || '';
   },
@@ -207,9 +207,9 @@ const TokenManager = window.TokenManager || {
     localStorage.removeItem('paddox_access_token');
     localStorage.removeItem('accessToken');
   }
-};
+});
 
-const AuthAPI = window.AuthAPI || {
+window.AuthAPI = window.AuthAPI || (typeof AuthAPI !== 'undefined' ? AuthAPI : {
   login(payload) {
     return authFetch('/auth/login', {
       method: 'POST',
@@ -223,22 +223,19 @@ const AuthAPI = window.AuthAPI || {
     });
   },
   logout() {
-    const token = TokenManager.getAccess();
+    const token = window.TokenManager.getAccess();
     return authFetch('/auth/logout', {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     }).catch(() => ({ success: true }));
   },
   getMe() {
-    const token = TokenManager.getAccess();
+    const token = window.TokenManager.getAccess();
     return authFetch('/auth/me', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
   }
-};
-
-window.TokenManager = TokenManager;
-window.AuthAPI = AuthAPI;
+});
 
 /* TAB SWITCH */
 document.querySelectorAll('.auth-tab').forEach(tab => {
