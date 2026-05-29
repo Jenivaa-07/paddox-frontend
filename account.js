@@ -426,6 +426,46 @@ function wishlistPrice(product) {
   );
 }
 
+function wishlistImageMode(product) {
+  const text = `${product.name || ''} ${product.category || ''} ${product.team || ''}`.toLowerCase();
+
+  if (
+    text.includes('shirt') ||
+    text.includes('t-shirt') ||
+    text.includes('tee') ||
+    text.includes('jersey') ||
+    text.includes('hoodie') ||
+    text.includes('cap') ||
+    text.includes('helmet')
+  ) {
+    return 'contain';
+  }
+
+  return 'cover';
+}
+
+function wishlistCategory(product) {
+  return product.team || product.category || 'Paddox';
+}
+
+function updateWishlistSummaryStrip() {
+  const countEl = document.getElementById('wl-summary-count');
+  const valueEl = document.getElementById('wl-summary-value');
+  const teamEl = document.getElementById('wl-summary-teams');
+  const statusEl = document.getElementById('wl-summary-status');
+
+  if (!countEl || !valueEl || !teamEl || !statusEl) return;
+
+  const count = REAL_WISHLIST.length;
+  const total = REAL_WISHLIST.reduce((sum, product) => sum + wishlistPrice(product), 0);
+  const teams = new Set(REAL_WISHLIST.map(wishlistCategory).filter(Boolean));
+
+  countEl.textContent = count;
+  valueEl.textContent = formatMoney(total);
+  teamEl.textContent = teams.size || 0;
+  statusEl.textContent = count ? 'Active' : 'Ready';
+}
+
 async function loadWishlist() {
   try {
     const token = profileToken();
@@ -503,6 +543,7 @@ function updateWishlistStats() {
   const statNums = document.querySelectorAll('.ds-card .ds-num');
   if (statNums[1]) statNums[1].textContent = count;
 
+  updateWishlistSummaryStrip();
   updateDashboardSavedItems();
 }
 
@@ -549,17 +590,15 @@ function renderWishlist(){
 
   if (!grid) return;
 
+  updateWishlistSummaryStrip();
+
   if (!REAL_WISHLIST.length) {
     grid.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        padding:40px;
-        text-align:center;
-        color:#777;
-        border:1px solid rgba(255,255,255,.08);
-        background:#0d0d0d;
-      ">
-        No wishlist items yet. Go to Shop and click ♥ on any product.
+      <div class="wishlist-empty-state">
+        <span class="wishlist-empty-icon" aria-hidden="true"></span>
+        <h3>No saved items yet</h3>
+        <p>Start building your PADDOX garage by saving racewear, posters, and digital collectibles from the shop.</p>
+        <a href="shop.html" class="wishlist-empty-btn">Go to Shop <span aria-hidden="true">→</span></a>
       </div>
     `;
 
@@ -570,27 +609,42 @@ function renderWishlist(){
 
   grid.innerHTML = REAL_WISHLIST.map(product => {
     const image = wishlistProductImage(product);
+    const mode = wishlistImageMode(product);
+    const category = wishlistCategory(product);
+    const safeId = product._id || product.id || '';
 
     return `
-      <div class="wl-card">
-        <div class="wl-card-img" style="background:#111">
+      <article class="wl-card wl-premium-card">
+        <button
+          class="wl-remove-btn"
+          onclick="removeWishlistProduct('${safeId}')"
+          title="Remove from wishlist"
+          aria-label="Remove ${product.name || 'product'} from wishlist"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+
+        <div class="wl-card-img wl-premium-img wl-img-${mode}">
           ${
             image
-              ? `<img src="${image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover">`
-              : '<span class="order-thumb-fallback" aria-hidden="true"></span>'
+              ? `<img src="${image}" alt="${product.name || 'PADDOX product'}" loading="lazy">`
+              : '<span class="wishlist-thumb-fallback" aria-hidden="true"></span>'
           }
         </div>
 
-        <div class="wl-card-info">
-          <div class="wl-card-team">
-            ${product.team || product.category || 'Paddox'}
-          </div>
+        <div class="wl-card-info wl-premium-info">
+          <div class="wl-card-team">${category}</div>
 
           <div class="wl-card-name">
-            ${product.name || 'Product'}
+            ${product.name || 'PADDOX Product'}
           </div>
 
-          <div class="wl-card-foot">
+          <div class="wl-card-meta-row">
+            <span class="wl-stock-dot"></span>
+            <span>Saved to garage</span>
+          </div>
+
+          <div class="wl-card-foot wl-premium-foot">
             <span class="wl-card-price">
               ${formatMoney(wishlistPrice(product))}
             </span>
@@ -599,19 +653,11 @@ function renderWishlist(){
               class="wl-card-btn"
               onclick="window.location.href='shop.html'"
             >
-              View in Shop
-            </button>
-
-            <button
-              class="wi-rm"
-              onclick="removeWishlistProduct('${product._id}')"
-              title="Remove"
-            >
-              ✕
+              View in Shop <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
-      </div>
+      </article>
     `;
   }).join('');
 

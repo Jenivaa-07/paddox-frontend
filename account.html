@@ -281,8 +281,36 @@
 
       <!-- WISHLIST -->
       <div class="acc-page" id="page-wishlist">
-        <div class="page-header"><div class="page-label">Saved Items</div><div class="page-title">MY <span class="accent">WISHLIST</span></div></div>
-        <div class="wl-grid" id="wl-grid"></div>
+        <div class="page-header wishlist-page-head">
+          <div>
+            <div class="page-label">Saved Items</div>
+            <div class="page-title">MY <span class="accent">WISHLIST</span></div>
+          </div>
+          <a href="shop.html" class="wishlist-shop-top">Explore Shop <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="wishlist-premium-shell">
+          <div class="wishlist-command-strip" id="wishlist-summary-strip">
+            <div class="wishlist-command-card">
+              <span>Saved Items</span>
+              <strong id="wl-summary-count">0</strong>
+            </div>
+            <div class="wishlist-command-card">
+              <span>Total Value</span>
+              <strong id="wl-summary-value">₹0</strong>
+            </div>
+            <div class="wishlist-command-card">
+              <span>Teams / Categories</span>
+              <strong id="wl-summary-teams">0</strong>
+            </div>
+            <div class="wishlist-command-card">
+              <span>Garage Status</span>
+              <strong id="wl-summary-status">Ready</strong>
+            </div>
+          </div>
+
+          <div class="wl-grid" id="wl-grid"></div>
+        </div>
       </div>
 
       <!-- DOWNLOADS -->
