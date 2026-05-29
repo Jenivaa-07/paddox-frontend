@@ -150,17 +150,17 @@
           <label class="form-label"><span class="form-label-icon form-team-icon" aria-hidden="true"></span>Favourite Team</label>
           <select class="form-input" id="ri-team">
             <option value="">Select your team…</option>
-            <option>Mercedes</option>
-            <option>Ferrari</option>
-            <option>McLaren</option>
-            <option>Red Bull Racing</option>
-            <option>Alpine</option>
-            <option>Racing Bulls</option>
+            <option>Scuderia Ferrari</option>
+            <option>Oracle Red Bull Racing</option>
+            <option>Mercedes-AMG Petronas</option>
+            <option>McLaren F1 Team</option>
+            <option>Aston Martin F1</option>
+            <option>BWT Alpine F1</option>
+            <option>Williams Racing</option>
             <option>Haas F1 Team</option>
-            <option>Williams</option>
-            <option>Audi</option>
-            <option>Cadillac</option>
-            <option>Aston Martin</option>
+            <option>RB F1 Team</option>
+            <option>Audi F1 Team</option>
+            <option>Cadillac F1 Team</option>
           </select>
         </div>
         <div class="form-check">
@@ -365,43 +365,61 @@
           </div>
           <div class="set-card reveal-up delay-1">
             <div class="set-title"><span class="section-mini-icon address-mini-icon" aria-hidden="true"></span> Shipping Address</div>
-            <div class="profile-card-note">Saved address is mirrored locally so checkout can offer “Use saved address” in the next sync phase.</div>
             <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="pf-address" placeholder="12, Mylapore Main Road"/></div>
             <div class="form-row"><div class="form-group"><label class="form-label">City</label><input class="form-input" id="pf-city" placeholder="Chennai"/></div><div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" id="pf-pin" placeholder="600004"/></div></div>
             <div class="form-group"><label class="form-label">State</label><input class="form-input" id="pf-state" placeholder="Tamil Nadu"/></div>
             <button class="save-btn" onclick="saveAddress()">Save Address ✓</button>
           </div>
-          <div class="set-card set-card-fan reveal-up delay-2">
+          <div class="set-card reveal-up delay-2">
             <div class="set-title"><span class="section-mini-icon fanpref-mini-icon" aria-hidden="true"></span> Fan Preferences</div>
-            <div class="profile-card-note">
-              Pick your garage identity. These choices can power fan polls, recommendations, quotes, and PADDOX personalization.
-            </div>
-
-            <div class="fan-pref-summary" id="fan-pref-summary">
-              <div><span>Team</span><strong id="fan-summary-team">Select one</strong></div>
-              <div><span>Driver</span><strong id="fan-summary-driver">Select one</strong></div>
-            </div>
-
             <div class="form-group">
               <label class="form-label">Favourite Team</label>
-              <div class="team-pref-grid team-pref-grid-premium" id="team-pref"></div>
+              <div class="team-pref-grid" id="team-pref"></div>
             </div>
-
             <div class="form-group">
               <label class="form-label">Favourite Driver</label>
-              <select class="form-input driver-select-premium" id="pf-driver"></select>
-              <div class="field-hint">All 22 current grid drivers are available in this dropdown.</div>
+              <select class="form-input" id="pf-driver"><option>Max Verstappen</option><option>Charles Leclerc</option><option>Lewis Hamilton</option><option>Lando Norris</option><option>Oscar Piastri</option><option>Carlos Sainz</option></select>
             </div>
-
             <button class="save-btn" onclick="savePreferences()">Save Preferences ✓</button>
           </div>
-          <div class="set-card reveal-up delay-3">
+          <div class="set-card reveal-up delay-3 notification-control-card">
             <div class="set-title"><span class="section-mini-icon notifications-mini-icon" aria-hidden="true"></span> Notifications</div>
-            <div class="toggle-row"><div><div class="tlbl">Race Day Alerts</div><div class="tsub">Before every race weekend</div></div><label class="toggle"><input type="checkbox" checked><span class="tgl-sl"></span></label></div>
-            <div class="toggle-row"><div><div class="tlbl">New Drops</div><div class="tsub">Exclusive product launches</div></div><label class="toggle"><input type="checkbox" checked><span class="tgl-sl"></span></label></div>
-            <div class="toggle-row"><div><div class="tlbl">Order Updates</div><div class="tsub">Shipping & delivery</div></div><label class="toggle"><input type="checkbox" checked><span class="tgl-sl"></span></label></div>
-            <div class="toggle-row"><div><div class="tlbl">Fan Points</div><div class="tsub">Milestones & rewards</div></div><label class="toggle"><input type="checkbox"><span class="tgl-sl"></span></label></div>
-            <button class="save-btn" onclick="showToast('✓ Notification settings saved!')">Save Settings ✓</button>
+            <p class="notification-help-text">Changes sync instantly to your PADDOX account and are restored on every login.</p>
+
+            <div class="notification-summary-strip" id="notification-summary-strip">
+              <div><span>Active Alerts</span><strong id="notif-active-count">0</strong></div>
+              <div><span>Order Updates</span><strong id="notif-order-status">Off</strong></div>
+              <div><span>Fan Hub</span><strong id="notif-community-status">Off</strong></div>
+            </div>
+
+            <div class="notification-control-list" id="notification-control-list">
+              <div class="notification-setting-card" data-notification-card="raceAlerts">
+                <span class="notification-card-icon notif-race-icon" aria-hidden="true"></span>
+                <div class="notification-copy"><div class="tlbl">Race Day Alerts</div><div class="tsub">Before every race weekend and session reminder.</div></div>
+                <label class="toggle notification-toggle"><input type="checkbox" id="nt-raceAlerts" data-notification-key="raceAlerts" checked><span class="tgl-sl"></span></label>
+              </div>
+              <div class="notification-setting-card" data-notification-card="newDrops">
+                <span class="notification-card-icon notif-drop-icon" aria-hidden="true"></span>
+                <div class="notification-copy"><div class="tlbl">New Drops</div><div class="tsub">Limited merchandise launches and digital asset drops.</div></div>
+                <label class="toggle notification-toggle"><input type="checkbox" id="nt-newDrops" data-notification-key="newDrops" checked><span class="tgl-sl"></span></label>
+              </div>
+              <div class="notification-setting-card" data-notification-card="orderUpdates">
+                <span class="notification-card-icon notif-order-icon" aria-hidden="true"></span>
+                <div class="notification-copy"><div class="tlbl">Order Updates</div><div class="tsub">Order placed, shipping, delivery and receipt activity.</div></div>
+                <label class="toggle notification-toggle"><input type="checkbox" id="nt-orderUpdates" data-notification-key="orderUpdates" checked><span class="tgl-sl"></span></label>
+              </div>
+              <div class="notification-setting-card" data-notification-card="fanPoints">
+                <span class="notification-card-icon notif-points-icon" aria-hidden="true"></span>
+                <div class="notification-copy"><div class="tlbl">Fan Points</div><div class="tsub">Rewards, milestones and tier progress updates.</div></div>
+                <label class="toggle notification-toggle"><input type="checkbox" id="nt-fanPoints" data-notification-key="fanPoints"><span class="tgl-sl"></span></label>
+              </div>
+              <div class="notification-setting-card" data-notification-card="community">
+                <span class="notification-card-icon notif-community-icon" aria-hidden="true"></span>
+                <div class="notification-copy"><div class="tlbl">Community Updates</div><div class="tsub">Fan Hub polls, trivia, quote activity and community moments.</div></div>
+                <label class="toggle notification-toggle"><input type="checkbox" id="nt-community" data-notification-key="community"><span class="tgl-sl"></span></label>
+              </div>
+            </div>
+            <div class="notification-sync-row"><span id="notification-sync-status">Synced with profile</span><button class="save-btn notification-save-btn" id="notification-save-btn" onclick="saveNotifications()">Save Settings ✓</button></div>
           </div>
         </div>
       </div>
