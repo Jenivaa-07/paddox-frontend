@@ -283,12 +283,16 @@
         <!-- ── ORDERS ── -->
         <div class="adm-page" id="adm-orders">
           <div class="orders-command-strip reveal-up">
-            <div>
+            <div class="orders-command-copy">
               <div class="orders-live-kicker"><span class="live-pulse"></span> LIVE ORDER CONTROL</div>
               <div class="orders-command-title">Fulfilment Command Center</div>
               <div class="orders-command-sub">Track paid orders, customer details, receipt access and fulfilment status from one premium PADDOX workspace.</div>
             </div>
-            <button class="orders-export-btn" onclick="exportAdminOrdersCSV()">Export CSV</button>
+            <div class="orders-command-actions">
+              <div class="orders-sync-pill" id="orders-sync-pill">Live backend sync</div>
+              <button class="orders-refresh-btn" type="button" onclick="adminA31RefreshOrders()">Refresh</button>
+              <button class="orders-export-btn" type="button" onclick="exportAdminOrdersCSV()">Export CSV</button>
+            </div>
           </div>
 
           <div class="page-toolbar orders-toolbar">

@@ -7082,3 +7082,135 @@ window.addEventListener('load', () => {
 });
 
 console.log('%c🔔 PADDOX — Admin Notification Bell Live · A2.5', 'color:#e8002d;font-size:13px;font-weight:bold;');
+
+/* ══════════════════════════════════════
+   ADMIN PHASE A3.1 — ORDERS FINAL POLISH + LIVE BACKEND SYNC
+   - Removes the empty topbar CTA on Orders
+   - Keeps one export button inside the Orders command strip
+   - Tightens row/action alignment
+   - Auto-refreshes Orders from backend while Orders page is open
+══════════════════════════════════════ */
+function adminA31IsOrdersPage() {
+  return document.getElementById('adm-orders')?.classList.contains('on');
+}
+
+function adminA31SetSyncText(text) {
+  const el = document.getElementById('orders-sync-pill');
+  if (el) el.textContent = text;
+}
+
+function adminA31SyncTopbarAction() {
+  const btn = document.getElementById('adm-action-btn');
+  if (!btn) return;
+  const activeId = document.querySelector('.adm-page.on')?.id || '';
+  const shouldHide = activeId === 'adm-overview' || activeId === 'adm-orders' || !btn.textContent.trim();
+  btn.hidden = shouldHide;
+  btn.classList.toggle('is-hidden', shouldHide);
+  btn.style.display = shouldHide ? 'none' : '';
+}
+
+async function adminA31RefreshOrders(silent = false) {
+  if (!silent) showToast('⏳ Syncing orders...');
+  adminA31SetSyncText('Syncing live orders...');
+  try {
+    await loadOrders();
+    const stamp = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    adminA31SetSyncText(`Live backend sync · ${stamp}`);
+    if (!silent) showToast('🔥 Orders synced');
+  } catch (err) {
+    adminA31SetSyncText('Sync paused · retrying');
+    if (!silent) showToast('❌ Order sync failed');
+  }
+}
+
+function renderOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  if (!tbody) return;
+
+  const orders = adminPhase9FilteredOrders();
+  adminPhase9RenderOrderSummaryChips(orders);
+  adminA31SyncTopbarAction();
+
+  if (!orders.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          <div class="admin-empty-state orders-empty-state">
+            <div class="orders-empty-icon">✓</div>
+            <strong>No matching orders</strong>
+            <span>Change the filter/search or wait for the next live order.</span>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(order => {
+    const c = adminPhase9Customer(order);
+    const items = order.items || [];
+    const itemLabel = items.length
+      ? `${items.length} item${items.length > 1 ? 's' : ''} · ${items.slice(0, 1).map(i => i.name || 'Product').join(', ')}${items.length > 1 ? ' +' + (items.length - 1) : ''}`
+      : 'No items';
+    const payStatus = adminPhase9PaymentStatus(order);
+    const statusLabel = String(order.status || 'placed').replaceAll('_', ' ');
+
+    return `
+      <tr class="admin-order-row">
+        <td>
+          <div class="admin-order-code">#${adminPhase9Text(order.orderNumber || order._id)}</div>
+          <div class="admin-order-sub">${adminPhase9Text(order._id || '')}</div>
+        </td>
+        <td>
+          <div class="admin-customer-name">${adminPhase9Text(c.name)}</div>
+          <div class="admin-customer-meta">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
+        </td>
+        <td>
+          <span class="admin-items-pill admin-items-pill-clean" title="${adminPhase9Text((items || []).map(i => i.name || 'Product').join(', '))}">
+            <span class="admin-items-dot"></span>${adminPhase9Text(itemLabel)}
+          </span>
+        </td>
+        <td class="admin-date-cell">${adminPhase9Date(order.createdAt)}</td>
+        <td>
+          <span class="admin-pay-badge admin-pay-${adminPhase9Text(payStatus)}">
+            ${payStatus === 'paid' ? '✓' : '•'} ${adminPhase9Text(adminPhase9PaymentMethod(order))}
+          </span>
+        </td>
+        <td class="admin-amount-cell">${money(adminPhase9OrderTotal(order))}</td>
+        <td><span class="sb ${adminPhase9StatusClass(order.status)}">${adminPhase9Text(statusLabel)}</span></td>
+        <td>
+          <div class="admin-order-actions admin-order-actions-final">
+            <div class="admin-order-btn-row">
+              <button class="admin-mini-btn red" onclick="openOrderDetails('${order._id}')">View</button>
+              <button class="admin-mini-btn" onclick="adminPhase9OpenReceipt('${order._id}')">Receipt</button>
+            </div>
+            <div class="admin-inline-status-wrap">
+              <select class="admin-inline-status" id="admin-status-${order._id}" aria-label="Update order status">
+                ${adminPhase9StatusOptions(order.status)}
+              </select>
+              <button class="admin-mini-btn" onclick="updateOrderStatus('${order._id}', document.getElementById('admin-status-${order._id}')?.value, false)">Update</button>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+(function adminA31InitOrdersLiveSync(){
+  const sync = () => setTimeout(adminA31SyncTopbarAction, 0);
+  document.querySelectorAll('.adm-nav-item').forEach(item => item.addEventListener('click', sync));
+  window.addEventListener('load', sync);
+  setTimeout(sync, 0);
+
+  let lastOrdersRefresh = 0;
+  setInterval(() => {
+    if (!adminA31IsOrdersPage()) return;
+    const now = Date.now();
+    if (now - lastOrdersRefresh < 25000) return;
+    lastOrdersRefresh = now;
+    adminA31RefreshOrders(true);
+  }, 30000);
+})();
+
+window.adminA31RefreshOrders = adminA31RefreshOrders;
