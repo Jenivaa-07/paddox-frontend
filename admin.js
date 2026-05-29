@@ -2569,308 +2569,282 @@ function normaliseCategory(value) {
 }
 
 /* ══════════════════════════════════════
-   LIVE PRODUCT EDIT SYSTEM
+   LIVE PRODUCT EDIT SYSTEM — Phase A4.1.5
+   Mirrors Add Product UX: sticky modal, 10-image drag/drop, Cloudinary FormData.
 ══════════════════════════════════════ */
 
 let EDIT_PRODUCT_ID = null;
+let EDIT_PRODUCT_IMAGE_FILES = [];
+
+function getProductImageList(product) {
+  if (!product) return [];
+  if (Array.isArray(product.images)) {
+    return product.images
+      .map(img => img?.url || img)
+      .filter(Boolean)
+      .slice(0, 10);
+  }
+  return product.image ? [product.image] : [];
+}
+
+function syncEditProductFileInput() {
+  const input = document.getElementById('edit-product-images');
+  if (!input) return;
+  const transfer = new DataTransfer();
+  EDIT_PRODUCT_IMAGE_FILES.slice(0, 10).forEach(file => transfer.items.add(file));
+  input.files = transfer.files;
+}
+
+function setEditProductImageFiles(files, append = false) {
+  const incoming = Array.from(files || []).filter(file => file && file.type && file.type.startsWith('image/'));
+  const combined = append ? [...EDIT_PRODUCT_IMAGE_FILES, ...incoming] : incoming;
+  const unique = [];
+  const seen = new Set();
+
+  combined.forEach(file => {
+    const key = `${file.name}-${file.size}-${file.lastModified}`;
+    if (!seen.has(key) && unique.length < 10) {
+      seen.add(key);
+      unique.push(file);
+    }
+  });
+
+  EDIT_PRODUCT_IMAGE_FILES = unique;
+  syncEditProductFileInput();
+  updateEditProductImageCount();
+}
+
+function removeEditProductImage(index) {
+  EDIT_PRODUCT_IMAGE_FILES.splice(index, 1);
+  syncEditProductFileInput();
+  updateEditProductImageCount();
+}
+window.removeEditProductImage = removeEditProductImage;
+
+function renderEditProductCurrentImages(product) {
+  const wrap = document.getElementById('edit-product-current-images');
+  if (!wrap) return;
+
+  const images = getProductImageList(product);
+
+  if (!images.length) {
+    wrap.innerHTML = `<div class="edit-current-empty">No current Cloudinary images</div>`;
+    return;
+  }
+
+  wrap.innerHTML = images.map((src, index) => `
+    <div class="edit-current-image-tile">
+      <img src="${escapeProductHTML(src)}" alt="Current product image ${index + 1}">
+      ${index === 0 ? '<span>Cover</span>' : `<span>${index + 1}</span>`}
+    </div>
+  `).join('');
+}
+
+function updateEditProductImageCount() {
+  const countEl = document.getElementById('edit-product-image-count');
+  const preview = document.getElementById('edit-product-image-preview');
+
+  if (!countEl) return;
+
+  const files = EDIT_PRODUCT_IMAGE_FILES;
+
+  if (!files.length) {
+    countEl.textContent = 'No replacement images selected';
+    if (preview) preview.innerHTML = '';
+    return;
+  }
+
+  countEl.textContent = `${files.length}/10 replacement image${files.length > 1 ? 's' : ''} selected`;
+
+  if (!preview) return;
+
+  preview.innerHTML = files.map((file, index) => `
+    <div class="product-image-preview-tile">
+      <img src="${URL.createObjectURL(file)}" alt="Replacement preview ${index + 1}">
+      <button type="button" onclick="removeEditProductImage(${index})">×</button>
+      ${index === 0 ? '<span>New cover</span>' : ''}
+    </div>
+  `).join('');
+}
+
+function initEditProductDropzone() {
+  const zone = document.getElementById('edit-product-dropzone');
+  const input = document.getElementById('edit-product-images');
+
+  if (!zone || !input || zone.dataset.bound === 'true') return;
+  zone.dataset.bound = 'true';
+
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      input.click();
+    }
+  });
+
+  ['dragenter', 'dragover'].forEach(type => {
+    zone.addEventListener(type, e => {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(type => {
+    zone.addEventListener(type, e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+    });
+  });
+
+  zone.addEventListener('drop', e => {
+    setEditProductImageFiles(e.dataTransfer?.files || [], true);
+  });
+}
 
 function ensureProductEditModal() {
   if (document.getElementById('product-edit-modal')) return;
 
   const modal = document.createElement('div');
-
   modal.id = 'product-edit-modal';
+  modal.className = 'product-edit-modal-shell';
 
   modal.innerHTML = `
-    <div class="preview-overlay" id="product-edit-overlay">
-      <div class="preview-card" style="
-        max-width:720px;
-        width:92vw;
-        padding:28px;
-        color:#fff;
-        text-align:left;
-      ">
-        <button class="preview-close" id="product-edit-close">
-          ✕
-        </button>
-
-        <div style="
-          font-family:var(--font-d);
-          letter-spacing:4px;
-          font-size:1.8rem;
-          margin-bottom:8px;
-        ">
-          EDIT PRODUCT
+    <div class="product-edit-overlay" id="product-edit-overlay">
+      <div class="product-edit-card">
+        <div class="product-edit-head">
+          <div>
+            <div class="product-edit-kicker">MONGODB PRODUCT · CLOUDINARY MEDIA</div>
+            <h2>EDIT PRODUCT</h2>
+          </div>
+          <button class="product-edit-close" id="product-edit-close" type="button">✕</button>
         </div>
 
-        <div style="
-          color:var(--red);
-          font-family:var(--font-c);
-          letter-spacing:2px;
-          margin-bottom:22px;
-        ">
-          MONGODB PRODUCT
-        </div>
+        <div class="product-edit-body">
+          <div class="product-edit-grid">
+            <label class="product-edit-field">
+              <span>Name</span>
+              <input id="edit-product-name" class="edit-product-input">
+            </label>
 
-        <div style="
-          display:grid;
-          grid-template-columns:1fr 1fr;
-          gap:14px;
-        ">
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">NAME</span>
-            <input id="edit-product-name" class="edit-product-input">
-          </label>
-
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span>
-            <select id="edit-product-team" class="edit-product-input">
+            <label class="product-edit-field">
+              <span>Team</span>
+              <select id="edit-product-team" class="edit-product-input">
 ${getProductTeamOptionsHTML()}
-            </select>
-          </label>
+              </select>
+            </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">CATEGORY</span>
-            <select id="edit-product-category" class="edit-product-input">
-              <option value="apparel">apparel</option>
-              <option value="collectibles">collectibles</option>
-              <option value="accessories">accessories</option>
-              <option value="posters">posters</option>
-              <option value="custom">custom</option>
-            </select>
-          </label>
+            <label class="product-edit-field">
+              <span>Category</span>
+              <select id="edit-product-category" class="edit-product-input">
+                <option value="apparel">Apparel</option>
+                <option value="collectibles">Collectibles</option>
+                <option value="accessories">Accessories</option>
+                <option value="posters">Posters</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">BADGE</span>
-            <select id="edit-product-badge" class="edit-product-input">
-              <option value="">none</option>
-              <option value="new">new</option>
-              <option value="hot">hot</option>
-              <option value="sale">sale</option>
-              <option value="ltd">ltd</option>
-              <option value="featured">featured</option>
-            </select>
-          </label>
+            <label class="product-edit-field">
+              <span>Badge</span>
+              <select id="edit-product-badge" class="edit-product-input">
+                <option value="">None</option>
+                <option value="new">New</option>
+                <option value="hot">Hot</option>
+                <option value="sale">Sale</option>
+                <option value="ltd">Limited</option>
+                <option value="featured">Featured</option>
+              </select>
+            </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">PRICE</span>
-            <input id="edit-product-price" type="number" min="0" class="edit-product-input">
-          </label>
+            <label class="product-edit-field">
+              <span>Price ₹</span>
+              <input id="edit-product-price" type="number" min="0" class="edit-product-input">
+            </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">SALE PRICE</span>
-            <input id="edit-product-sale-price" type="number" min="0" class="edit-product-input">
-          </label>
+            <label class="product-edit-field">
+              <span>Sale Price ₹</span>
+              <input id="edit-product-sale-price" type="number" min="0" class="edit-product-input" placeholder="Optional">
+            </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">STOCK</span>
-            <input id="edit-product-stock" type="number" min="0" class="edit-product-input">
-          </label>
+            <label class="product-edit-field">
+              <span>Stock</span>
+              <input id="edit-product-stock" type="number" min="0" class="edit-product-input">
+            </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">RATING</span>
-            <select id="edit-product-rating" class="edit-product-input">
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
-              <option value="0">0 Stars</option>
-            </select>
-          </label>
+            <label class="product-edit-field">
+              <span>Rating</span>
+              <select id="edit-product-rating" class="edit-product-input">
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+                <option value="0">0 Stars</option>
+              </select>
+            </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">STATUS</span>
-            <select id="edit-product-active" class="edit-product-input">
-              <option value="true">active</option>
-              <option value="false">inactive</option>
-            </select>
+            <label class="product-edit-field">
+              <span>Status</span>
+              <select id="edit-product-active" class="edit-product-input">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="product-edit-media-block">
+            <div class="product-edit-section-title">Current Cloudinary Images</div>
+            <div id="edit-product-current-images" class="edit-current-image-grid"></div>
+          </div>
+
+          <div class="product-edit-media-block">
+            <div class="product-edit-section-title">Replace / Upload Images</div>
+            <div class="product-image-dropzone edit-product-dropzone" id="edit-product-dropzone" role="button" tabindex="0">
+              <input id="edit-product-images" type="file" accept="image/*" multiple hidden>
+              <div class="product-drop-icon">＋</div>
+              <div>
+                <strong>Drag & drop replacement images here</strong>
+                <span>or click to browse · Max 10 images · First image becomes cover</span>
+              </div>
+            </div>
+            <div class="product-image-meta-row">
+              <small>Leave empty to keep the current Cloudinary images.</small>
+              <div id="edit-product-image-count" class="product-image-count">No replacement images selected</div>
+            </div>
+            <div id="edit-product-image-preview" class="product-image-preview-grid"></div>
+          </div>
+
+          <label class="product-edit-field product-edit-description">
+            <span>Description</span>
+            <textarea id="edit-product-description" class="edit-product-input" rows="4"></textarea>
           </label>
         </div>
 
-        <label style="
-          display:flex;
-          flex-direction:column;
-          gap:6px;
-          margin-top:14px;
-        ">
-          <span style="color:#777;font-size:.75rem;letter-spacing:2px">UPLOAD NEW IMAGE</span>
-          <input id="edit-product-image-file" type="file" accept="image/*" class="edit-product-input">
-          <small style="color:#777">Leave empty to keep current image.</small>
-        </label>
-
-        <label style="
-          display:flex;
-          flex-direction:column;
-          gap:6px;
-          margin-top:14px;
-        ">
-          <span style="color:#777;font-size:.75rem;letter-spacing:2px">DESCRIPTION</span>
-          <textarea id="edit-product-description" class="edit-product-input" rows="4"></textarea>
-        </label>
-
-        <button
-          class="act-btn"
-          id="save-product-edit"
-          style="
-            width:100%;
-            padding:14px;
-            margin-top:20px;
-            background:var(--red);
-            color:white;
-            border:0;
-            font-weight:800;
-            letter-spacing:3px;
-          "
-        >
-          SAVE PRODUCT
-        </button>
+        <div class="product-edit-footer">
+          <button class="adm-btn-ghost" type="button" onclick="closeProductEditModal()">Cancel</button>
+          <button class="adm-btn-red" id="save-product-edit" type="button">Save Product</button>
+        </div>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
 
-  const style = document.createElement('style');
-  style.id = 'product-edit-style';
-  style.textContent = `
-    .edit-product-input {
-      width:100%;
-      background:#151515;
-      color:#fff;
-      border:1px solid rgba(255,255,255,.15);
-      padding:11px 12px;
-      outline:none;
-      font-family:var(--font-b);
-    }
-    .edit-product-input:focus {
-      border-color:var(--red);
-    }
-    @media(max-width:700px) {
-      #product-edit-modal .preview-card > div[style*="grid-template-columns"] {
-        grid-template-columns:1fr !important;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-
-  modal.querySelector('#product-edit-close').onclick =
-    closeProductEditModal;
-
+  modal.querySelector('#product-edit-close').onclick = closeProductEditModal;
   modal.querySelector('#product-edit-overlay').onclick = e => {
-    if (e.target.id === 'product-edit-overlay') {
-      closeProductEditModal();
-    }
+    if (e.target.id === 'product-edit-overlay') closeProductEditModal();
   };
-
-  modal.querySelector('#save-product-edit').onclick =
-    saveProductEdit;
+  modal.querySelector('#save-product-edit').onclick = saveProductEdit;
+  modal.querySelector('#edit-product-images').addEventListener('change', e => {
+    setEditProductImageFiles(e.target.files, false);
+  });
+  initEditProductDropzone();
 }
-
-
-function getProductImageList(product) {
-  if (!product) return [];
-
-  if (Array.isArray(product.images)) {
-    return product.images
-      .map(img => img?.url || img)
-      .filter(Boolean);
-  }
-
-  return product.image ? [product.image] : [];
-}
-
-function renderEditProductCurrentImages(product) {
-  const wrap = document.getElementById('edit-product-current-images');
-
-  if (!wrap) return;
-
-  const images = getProductImageList(product);
-
-  if (!images.length) {
-    wrap.innerHTML = `<div style="color:#777">No images</div>`;
-    return;
-  }
-
-  wrap.innerHTML = images.map((src, index) => `
-    <div style="
-      width:74px;
-      height:54px;
-      border:1px solid rgba(255,255,255,.12);
-      background:#191919;
-      position:relative;
-      overflow:hidden;
-    ">
-      <img
-        src="${src}"
-        alt="Image ${index + 1}"
-        style="width:100%;height:100%;object-fit:cover"
-      >
-      <span style="
-        position:absolute;
-        top:3px;
-        left:3px;
-        background:var(--red);
-        color:white;
-        font-size:.65rem;
-        padding:1px 5px;
-      ">
-        ${index + 1}
-      </span>
-    </div>
-  `).join('');
-}
-
-function updateEditProductImageCount() {
-  const input = document.getElementById('edit-product-images');
-  const countEl = document.getElementById('edit-product-image-count');
-
-  if (!input || !countEl) return;
-
-  const files = Array.from(input.files || []);
-
-  if (!files.length) {
-    countEl.textContent = 'No new images selected';
-    return;
-  }
-
-  if (files.length > 3) {
-    countEl.textContent = `Selected ${files.length} images. Only first 3 will be saved.`;
-    return;
-  }
-
-  countEl.textContent =
-    `${files.length} new image${files.length > 1 ? 's' : ''} selected`;
-}
-
-async function readMultipleImagesFromInput(inputId) {
-  const files =
-    Array.from(document.getElementById(inputId)?.files || [])
-      .slice(0, 3);
-
-  if (!files.length) return [];
-
-  showToast(`🖼️ Preparing ${files.length} image${files.length > 1 ? 's' : ''}...`);
-
-  return Promise.all(
-    files.map(async (file, index) => ({
-      url: await readImageFileAsDataUrl(file),
-      alt: `Product image ${index + 1}`
-    }))
-  );
-}
-
-document.addEventListener('change', e => {
-  if (e.target?.id === 'edit-product-images') {
-    updateEditProductImageCount();
-  }
-});
 
 function openProductEditModal(productId) {
   ensureProductEditModal();
 
-  const product =
-    REAL_PRODUCTS.find(p => String(p._id) === String(productId));
+  const product = REAL_PRODUCTS.find(p => String(p._id) === String(productId));
 
   if (!product) {
     showToast('❌ Product not found');
@@ -2878,146 +2852,96 @@ function openProductEditModal(productId) {
   }
 
   EDIT_PRODUCT_ID = productId;
+  EDIT_PRODUCT_IMAGE_FILES = [];
+  syncEditProductFileInput();
 
-  const image =
-    product.images?.[0]?.url ||
-    product.image ||
-    '';
+  document.getElementById('edit-product-name').value = product.name || '';
+  document.getElementById('edit-product-team').value = canonicalProductTeam(product.team || 'Ferrari');
+  document.getElementById('edit-product-category').value = String(product.category || 'apparel').toLowerCase();
+  document.getElementById('edit-product-badge').value = String(product.badge || '').toLowerCase();
+  document.getElementById('edit-product-price').value = Number(product.price || 0);
+  document.getElementById('edit-product-sale-price').value = product.salePrice || '';
+  document.getElementById('edit-product-stock').value = Number(product.stock || 0);
+  document.getElementById('edit-product-rating').value = String(Math.round(Number(product.ratings?.average || product.rating || 5)));
+  document.getElementById('edit-product-active').value = String(product.isActive !== false);
+  document.getElementById('edit-product-description').value = product.description || '';
 
-  document.getElementById('edit-product-name').value =
-    product.name || '';
+  renderEditProductCurrentImages(product);
+  updateEditProductImageCount();
 
-  document.getElementById('edit-product-team').value =
-    product.team || '';
-
-  document.getElementById('edit-product-category').value =
-    String(product.category || 'apparel').toLowerCase();
-
-  document.getElementById('edit-product-badge').value =
-    String(product.badge || '').toLowerCase();
-
-  document.getElementById('edit-product-price').value =
-    Number(product.price || 0);
-
-  document.getElementById('edit-product-sale-price').value =
-    product.salePrice || '';
-
-  document.getElementById('edit-product-stock').value =
-    Number(product.stock || 0);
-
-  document.getElementById('edit-product-rating').value =
-    String(Math.round(Number(product.ratings?.average || 5)));
-
-  document.getElementById('edit-product-active').value =
-    String(product.isActive !== false);
-
-  const editImageFile = document.getElementById('edit-product-image-file');
-  if (editImageFile) editImageFile.value = '';
-
-  document.getElementById('edit-product-description').value =
-    product.description || '';
-
-  document
-    .getElementById('product-edit-modal')
-    ?.classList.add('show');
+  document.getElementById('product-edit-modal')?.classList.add('show');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeProductEditModal() {
-  document
-    .getElementById('product-edit-modal')
-    ?.classList.remove('show');
-
+  document.getElementById('product-edit-modal')?.classList.remove('show');
   EDIT_PRODUCT_ID = null;
-
-  const editImageInput = document.getElementById('edit-product-images');
-  if (editImageInput) {
-    editImageInput.value = '';
-  }
-
+  EDIT_PRODUCT_IMAGE_FILES = [];
+  syncEditProductFileInput();
   updateEditProductImageCount();
+  document.body.style.overflow = '';
 }
 
 async function saveProductEdit() {
   if (!EDIT_PRODUCT_ID) return;
 
   try {
-    const price =
-      Number(document.getElementById('edit-product-price').value);
+    const name = document.getElementById('edit-product-name').value.trim();
+    const team = canonicalProductTeam(document.getElementById('edit-product-team').value.trim());
+    const category = normaliseCategory(document.getElementById('edit-product-category').value);
+    const badge = normaliseBadge(document.getElementById('edit-product-badge').value);
+    const price = Number(document.getElementById('edit-product-price').value);
+    const salePriceRaw = document.getElementById('edit-product-sale-price').value;
+    const stock = Number(document.getElementById('edit-product-stock').value);
+    const rating = Number(document.getElementById('edit-product-rating').value || 5);
+    const isActive = document.getElementById('edit-product-active').value === 'true';
+    const description = document.getElementById('edit-product-description').value.trim();
 
-    const salePriceRaw =
-      document.getElementById('edit-product-sale-price').value;
+    if (!name) return showToast('❌ Product name required');
+    if (Number.isNaN(price) || price < 0) return showToast('❌ Valid price required');
+    if (Number.isNaN(stock) || stock < 0) return showToast('❌ Valid stock required');
 
-    const stock =
-      Number(document.getElementById('edit-product-stock').value);
-
-    const rating =
-      Number(document.getElementById('edit-product-rating').value || 5);
-
-    if (!document.getElementById('edit-product-name').value.trim()) {
-      showToast('❌ Product name required');
-      return;
-    }
-
-    if (Number.isNaN(price) || price < 0) {
-      showToast('❌ Valid price required');
-      return;
-    }
-
-    if (Number.isNaN(stock) || stock < 0) {
-      showToast('❌ Valid stock required');
-      return;
-    }
-
-    const imageFile =
-      document.getElementById('edit-product-image-file')?.files?.[0] || null;
-
-    const imageUrl =
-      imageFile ? await readImageFileAsDataUrl(imageFile) : '';
-
-    const body = {
-      name: document.getElementById('edit-product-name').value.trim(),
-      team: document.getElementById('edit-product-team').value.trim(),
-      category: normaliseCategory(document.getElementById('edit-product-category').value),
-      badge: normaliseBadge(document.getElementById('edit-product-badge').value),
-      isFeatured: normaliseBadge(document.getElementById('edit-product-badge').value) === 'featured',
-      price,
-      stock,
-      isActive: document.getElementById('edit-product-active').value === 'true',
-      description: document.getElementById('edit-product-description').value.trim(),
-      ratings: {
-        average: rating,
-        count: rating > 0 ? 1 : 0
-      }
-    };
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('team', team);
+    formData.append('category', category);
+    formData.append('badge', badge);
+    formData.append('isFeatured', String(badge === 'featured'));
+    formData.append('price', String(price));
+    formData.append('stock', String(stock));
+    formData.append('isActive', String(isActive));
+    formData.append('description', description);
+    formData.append('shortDesc', description.slice(0, 180));
+    formData.append('rating', String(rating));
+    formData.append('ratings[average]', String(rating));
+    formData.append('ratings[count]', String(rating > 0 ? 1 : 0));
 
     if (salePriceRaw !== '') {
-      body.salePrice = Number(salePriceRaw);
-      body.onSale = Number(salePriceRaw) > 0 && Number(salePriceRaw) < price;
+      const salePrice = Number(salePriceRaw);
+      formData.append('salePrice', String(salePrice));
+      formData.append('onSale', String(salePrice > 0 && salePrice < price));
     } else {
-      body.salePrice = null;
-      body.onSale = false;
+      formData.append('salePrice', '');
+      formData.append('onSale', 'false');
     }
 
-    if (uploadedEditImages.length) {
-      body.images = uploadedEditImages.map(img => ({
-        ...img,
-        alt: body.name
-      }));
-    }
+    EDIT_PRODUCT_IMAGE_FILES.slice(0, 10).forEach(file => {
+      formData.append('images', file);
+    });
 
-    showToast('⏳ Saving product...');
-
-    const res = await fetch(
-      `${PRODUCT_API_BASE}/${EDIT_PRODUCT_ID}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAdminToken()}`
-        },
-        body: JSON.stringify(body)
-      }
+    showToast(
+      EDIT_PRODUCT_IMAGE_FILES.length
+        ? `☁️ Updating product and uploading ${EDIT_PRODUCT_IMAGE_FILES.length} image${EDIT_PRODUCT_IMAGE_FILES.length > 1 ? 's' : ''}...`
+        : '⏳ Updating product...'
     );
+
+    const res = await fetch(`${PRODUCT_API_BASE}/${EDIT_PRODUCT_ID}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${getAdminToken()}`
+      },
+      body: formData
+    });
 
     const data = await res.json().catch(() => ({}));
 
@@ -3026,9 +2950,7 @@ async function saveProductEdit() {
     }
 
     showToast('🔥 Product updated');
-
     closeProductEditModal();
-
     await loadProducts();
     updateOverviewRealtime();
 
@@ -3037,7 +2959,6 @@ async function saveProductEdit() {
     showToast(`❌ ${err.message}`);
   }
 }
-
 
 /* ══════════════════════════════════════
    LIVE ADD PRODUCT SYSTEM
