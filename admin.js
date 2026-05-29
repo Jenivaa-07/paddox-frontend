@@ -4582,7 +4582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ══ INIT LOG ══ */
-console.log('%c⚙️ PADDOX — Admin Dashboard Ready · A2.2', 'color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%c⚙️ PADDOX — Admin Dashboard Ready · A2.3', 'color:#e8002d;font-size:14px;font-weight:bold;');
 /* ══════════════════════════════════════
    PHASE 9 — ADMIN ORDERS + ANALYTICS POLISH
    Real orders only · clean admin controls
@@ -6478,3 +6478,127 @@ async function deleteFanTriviaAdmin(id) {
 document.addEventListener('input', e => {
   if (e.target?.id === 'trivia-search-admin') renderFanTriviaAdmin();
 });
+
+
+/* ============================================================
+   ADMIN PHASE A2.3 — Overview realtime category + premium sync
+   ============================================================ */
+function adminA23NormalizeCategory(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return 'Other';
+  return raw
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, ch => ch.toUpperCase());
+}
+
+function adminA23ProductForItem(item = {}) {
+  const products = REAL_PRODUCTS || [];
+  const productId = String(item.product?._id || item.product || item.productId || item.id || '');
+  const itemName = String(item.name || item.product?.name || '').toLowerCase();
+
+  return products.find(product => {
+    const pId = String(product._id || product.id || '');
+    const pName = String(product.name || '').toLowerCase();
+    return (productId && pId && productId === pId) || (itemName && pName && itemName === pName);
+  }) || null;
+}
+
+function adminA23ItemCategory(item = {}) {
+  const matched = adminA23ProductForItem(item);
+  return adminA23NormalizeCategory(
+    item.category ||
+    item.product?.category ||
+    matched?.category ||
+    matched?.type ||
+    'Other'
+  );
+}
+
+function updateOverviewCategoryChart() {
+  const svg = document.getElementById('overview-category-svg');
+  const legend = document.getElementById('overview-category-legend');
+  const sub = document.getElementById('overview-category-sub');
+  if (!svg || !legend) return;
+
+  const categoryTotals = {};
+  (REAL_ORDERS || []).forEach(order => {
+    (order.items || []).forEach(item => {
+      const category = adminA23ItemCategory(item);
+      const amount = Number(item.price || item.product?.price || 0) * Number(item.quantity || 1);
+      const fallbackQtyValue = Number(item.quantity || 1);
+      categoryTotals[category] = (categoryTotals[category] || 0) + (amount > 0 ? amount : fallbackQtyValue);
+    });
+  });
+
+  let entries = Object.entries(categoryTotals).filter(([, value]) => Number(value) > 0);
+  entries.sort((a, b) => b[1] - a[1]);
+
+  if (entries.length > 4) {
+    const top = entries.slice(0, 3);
+    const otherTotal = entries.slice(3).reduce((sum, [, value]) => sum + value, 0);
+    entries = [...top, ['Other', otherTotal]];
+  }
+
+  const total = entries.reduce((sum, [, value]) => sum + value, 0);
+  const palette = ['#e8002d', '#c9a84c', '#0088ff', '#00b400'];
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
+  if (!total) {
+    svg.innerHTML = `
+      <circle cx="75" cy="75" r="54" fill="none" stroke="#1e1e1e" stroke-width="22"/>
+      <text x="75" y="72" text-anchor="middle" fill="#fff" font-family="Bebas Neue" font-size="22">0%</text>
+      <text x="75" y="88" text-anchor="middle" fill="#888" font-family="Inter" font-size="8">No data</text>
+    `;
+    legend.innerHTML = '<div class="overview-empty-note">Waiting for live order categories</div>';
+    if (sub) sub.textContent = 'Live category mix will appear after orders load';
+    return;
+  }
+
+  const mainPercent = Math.round((entries[0][1] / total) * 100);
+  const mainLabel = entries[0][0];
+
+  const arcs = entries.map(([label, value], index) => {
+    const dash = (value / total) * circumference;
+    const circle = `
+      <circle class="category-arc" cx="75" cy="75" r="54" fill="none"
+        stroke="${palette[index % palette.length]}" stroke-width="22"
+        stroke-dasharray="${dash.toFixed(2)} ${(circumference - dash).toFixed(2)}"
+        stroke-dashoffset="${(-offset).toFixed(2)}"
+        transform="rotate(-90 75 75)"/>`;
+    offset += dash;
+    return circle;
+  }).join('');
+
+  svg.innerHTML = `
+    <circle cx="75" cy="75" r="54" fill="none" stroke="#1e1e1e" stroke-width="22"/>
+    ${arcs}
+    <circle cx="75" cy="75" r="34" fill="#101012" opacity=".96"/>
+    <text x="75" y="72" text-anchor="middle" fill="#fff" font-family="Bebas Neue" font-size="22">${mainPercent}%</text>
+    <text x="75" y="88" text-anchor="middle" fill="#888" font-family="Inter" font-size="8">${mainLabel.slice(0, 11)}</text>
+  `;
+
+  legend.innerHTML = entries.map(([label, value], index) => {
+    const percent = Math.round((value / total) * 100);
+    return `
+      <div class="leg-item">
+        <div class="leg-dot" style="background:${palette[index % palette.length]}"></div>
+        <span class="leg-lbl">${label}</span>
+        <span class="leg-val">${percent}%</span>
+      </div>
+    `;
+  }).join('');
+
+  if (sub) sub.textContent = `Live category mix · ${entries.length} active ${entries.length === 1 ? 'category' : 'categories'}`;
+}
+
+function updateOverviewRealtime() {
+  updateOverviewCards();
+  updateOverviewRecentOrders();
+  updateOverviewLowStock();
+  updateOverviewRevenueChart();
+  updateOverviewCategoryChart();
+  renderAnalyticsRealtime();
+  updateAdminSidebarBadges();
+}

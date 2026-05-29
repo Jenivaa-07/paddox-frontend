@@ -184,6 +184,19 @@
 
         <!-- ── OVERVIEW ── -->
         <div class="adm-page on" id="adm-overview">
+          <div class="overview-command-strip reveal-up">
+            <div class="overview-command-copy">
+              <div class="overview-live-kicker"><span class="live-pulse"></span> LIVE PADDOX COMMAND CENTER</div>
+              <div class="overview-command-title">Realtime store performance overview</div>
+              <div class="overview-command-sub">Orders, revenue, paid status, recent activity and inventory alerts are synced from live backend data.</div>
+            </div>
+            <div class="overview-command-chips">
+              <span>Orders API</span>
+              <span>Products API</span>
+              <span>Inventory Watch</span>
+            </div>
+          </div>
+
           <div class="kpi-grid overview-kpi-grid">
             <div class="kpi-card kpi-red reveal-up">
               <div class="kpi-icon animate-icon"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-rupee"></use></svg></div>
@@ -219,22 +232,15 @@
             </div>
             <div class="chart-card reveal-up delay-1">
               <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-polls"></use></svg></span> Sales by Category</div>
-              <div class="chart-sub">This month's breakdown</div>
-              <div class="donut-wrap">
-                <svg width="140" height="140" viewBox="0 0 140 140" class="donut-svg">
-                  <circle cx="70" cy="70" r="52" fill="none" stroke="#1e1e1e" stroke-width="22"/>
-                  <circle cx="70" cy="70" r="52" fill="none" stroke="#e8002d" stroke-width="22" stroke-dasharray="130 197" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
-                  <circle cx="70" cy="70" r="52" fill="none" stroke="#c9a84c" stroke-width="22" stroke-dasharray="65 262" stroke-dashoffset="-130" transform="rotate(-90 70 70)"/>
-                  <circle cx="70" cy="70" r="52" fill="none" stroke="#0088ff" stroke-width="22" stroke-dasharray="52 275" stroke-dashoffset="-195" transform="rotate(-90 70 70)"/>
-                  <circle cx="70" cy="70" r="52" fill="none" stroke="#00b400" stroke-width="22" stroke-dasharray="80 247" stroke-dashoffset="-247" transform="rotate(-90 70 70)"/>
-                  <text x="70" y="66" text-anchor="middle" fill="#fff" font-family="Bebas Neue" font-size="18">40%</text>
-                  <text x="70" y="80" text-anchor="middle" fill="#888" font-family="Inter" font-size="8">Apparel</text>
+              <div class="chart-sub" id="overview-category-sub">Live category mix from paid/order items</div>
+              <div class="donut-wrap overview-donut-wrap" id="overview-category-chart">
+                <svg width="150" height="150" viewBox="0 0 150 150" class="donut-svg" id="overview-category-svg" aria-label="Sales by category chart">
+                  <circle cx="75" cy="75" r="54" fill="none" stroke="#1e1e1e" stroke-width="22"/>
+                  <text x="75" y="72" text-anchor="middle" fill="#fff" font-family="Bebas Neue" font-size="22">0%</text>
+                  <text x="75" y="88" text-anchor="middle" fill="#888" font-family="Inter" font-size="8">No data</text>
                 </svg>
-                <div class="donut-legend">
-                  <div class="leg-item"><div class="leg-dot" style="background:#e8002d"></div><span class="leg-lbl">Apparel</span><span class="leg-val">40%</span></div>
-                  <div class="leg-item"><div class="leg-dot" style="background:#c9a84c"></div><span class="leg-lbl">Collectibles</span><span class="leg-val">20%</span></div>
-                  <div class="leg-item"><div class="leg-dot" style="background:#0088ff"></div><span class="leg-lbl">Accessories</span><span class="leg-val">16%</span></div>
-                  <div class="leg-item"><div class="leg-dot" style="background:#00b400"></div><span class="leg-lbl">Digital</span><span class="leg-val">24%</span></div>
+                <div class="donut-legend" id="overview-category-legend">
+                  <div class="overview-empty-note">Waiting for live order categories</div>
                 </div>
               </div>
             </div>
