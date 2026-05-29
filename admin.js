@@ -4587,7 +4587,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ══ INIT LOG ══ */
-console.log('%c⚙️ PADDOX — Admin Dashboard Ready · A2.3', 'color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%c⚙️ PADDOX — Admin Dashboard Ready · A2.5', 'color:#e8002d;font-size:14px;font-weight:bold;');
 /* ══════════════════════════════════════
    PHASE 9 — ADMIN ORDERS + ANALYTICS POLISH
    Real orders only · clean admin controls
@@ -6750,3 +6750,334 @@ function updateOverviewLowStock() {
     </tr>
   `).join('');
 }
+
+/* ══════════════════════════════════════
+   ADMIN PHASE A2.5 — LIVE NOTIFICATION BELL
+   - Clickable bell panel
+   - New order polling fallback
+   - Low stock alerts
+   - Fan activity socket listeners when backend emits them
+══════════════════════════════════════ */
+const ADMIN_NOTIF_STORAGE_KEY = 'paddox_admin_notifications_v1';
+const ADMIN_NOTIF_SEEN_ORDER_KEY = 'paddox_admin_seen_order_ids_v1';
+let ADMIN_NOTIFICATIONS = [];
+let adminNotifPanelReady = false;
+let adminNotifPollingStarted = false;
+let adminNotifLastSync = 0;
+
+function adminNotifLoad() {
+  try {
+    ADMIN_NOTIFICATIONS = JSON.parse(localStorage.getItem(ADMIN_NOTIF_STORAGE_KEY) || '[]');
+    if (!Array.isArray(ADMIN_NOTIFICATIONS)) ADMIN_NOTIFICATIONS = [];
+  } catch (_) {
+    ADMIN_NOTIFICATIONS = [];
+  }
+}
+
+function adminNotifSave() {
+  localStorage.setItem(ADMIN_NOTIF_STORAGE_KEY, JSON.stringify(ADMIN_NOTIFICATIONS.slice(0, 40)));
+}
+
+function adminNotifSeenOrders() {
+  try {
+    const ids = JSON.parse(localStorage.getItem(ADMIN_NOTIF_SEEN_ORDER_KEY) || '[]');
+    return new Set(Array.isArray(ids) ? ids : []);
+  } catch (_) {
+    return new Set();
+  }
+}
+
+function adminNotifSaveSeenOrders(set) {
+  localStorage.setItem(ADMIN_NOTIF_SEEN_ORDER_KEY, JSON.stringify([...set].slice(0, 300)));
+}
+
+function adminNotifTimeAgo(ts) {
+  const diff = Math.max(0, Date.now() - Number(ts || Date.now()));
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return 'Just now';
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hr ago`;
+  const d = Math.floor(hr / 24);
+  return `${d} day${d > 1 ? 's' : ''} ago`;
+}
+
+function adminNotifIcon(type) {
+  if (type === 'order') return 'OD';
+  if (type === 'stock') return 'ST';
+  if (type === 'fan') return 'FH';
+  return 'AL';
+}
+
+function adminNotifAdd(item = {}, options = {}) {
+  const id = item.id || `${item.type || 'system'}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  if (ADMIN_NOTIFICATIONS.some(n => n.id === id)) return;
+
+  ADMIN_NOTIFICATIONS.unshift({
+    id,
+    type: item.type || 'system',
+    title: item.title || 'Admin alert',
+    message: item.message || 'New activity detected.',
+    createdAt: item.createdAt || Date.now(),
+    unread: options.unread !== false,
+    ref: item.ref || ''
+  });
+
+  ADMIN_NOTIFICATIONS = ADMIN_NOTIFICATIONS.slice(0, 40);
+  adminNotifSave();
+  adminNotifRender();
+  if (options.toast) showToast(options.toast);
+}
+
+function adminNotifUnreadCount() {
+  return ADMIN_NOTIFICATIONS.filter(n => n.unread).length;
+}
+
+function adminNotifEnsurePanel() {
+  if (adminNotifPanelReady) return;
+  const bell = document.querySelector('.adm-notif');
+  if (!bell) return;
+
+  if (!bell.querySelector('.adm-notif-count')) {
+    const count = document.createElement('span');
+    count.className = 'adm-notif-count';
+    count.textContent = '0';
+    bell.appendChild(count);
+  }
+
+  const panel = document.createElement('div');
+  panel.id = 'admin-notification-panel';
+  panel.className = 'admin-notification-panel';
+  panel.innerHTML = `
+    <div class="admin-notification-head">
+      <div>
+        <div class="admin-notification-kicker">Live Alerts</div>
+        <div class="admin-notification-title">Admin Notifications</div>
+        <div class="admin-notification-sub">Orders, inventory health and Fan Hub activity appear here.</div>
+      </div>
+      <button class="admin-notification-close" type="button" aria-label="Close notifications">×</button>
+    </div>
+    <div class="admin-notification-list" id="admin-notification-list"></div>
+    <div class="admin-notification-foot">
+      <div class="admin-notification-status" id="admin-notification-status">Realtime watch active</div>
+      <button class="admin-notification-clear" id="admin-notification-clear" type="button">Clear Read</button>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  bell.addEventListener('click', event => {
+    event.stopPropagation();
+    panel.classList.toggle('show');
+    if (panel.classList.contains('show')) {
+      ADMIN_NOTIFICATIONS = ADMIN_NOTIFICATIONS.map(n => ({ ...n, unread: false }));
+      adminNotifSave();
+      adminNotifRender();
+    }
+  });
+
+  panel.querySelector('.admin-notification-close')?.addEventListener('click', () => panel.classList.remove('show'));
+  panel.addEventListener('click', event => event.stopPropagation());
+  document.addEventListener('click', () => panel.classList.remove('show'));
+  panel.querySelector('#admin-notification-clear')?.addEventListener('click', () => {
+    ADMIN_NOTIFICATIONS = ADMIN_NOTIFICATIONS.filter(n => n.unread);
+    adminNotifSave();
+    adminNotifRender();
+  });
+
+  adminNotifPanelReady = true;
+}
+
+function adminNotifRender() {
+  adminNotifEnsurePanel();
+  const bell = document.querySelector('.adm-notif');
+  const countEl = bell?.querySelector('.adm-notif-count');
+  const list = document.getElementById('admin-notification-list');
+  const status = document.getElementById('admin-notification-status');
+  const unread = adminNotifUnreadCount();
+
+  if (bell) bell.classList.toggle('has-unread', unread > 0);
+  if (countEl) countEl.textContent = unread > 9 ? '9+' : String(unread);
+  if (status) status.textContent = `Realtime watch active · ${ADMIN_NOTIFICATIONS.length} alert${ADMIN_NOTIFICATIONS.length === 1 ? '' : 's'}`;
+
+  if (!list) return;
+
+  if (!ADMIN_NOTIFICATIONS.length) {
+    list.innerHTML = `
+      <div class="admin-notification-empty">
+        <div class="admin-notification-empty-icon">✓</div>
+        <div class="admin-notification-empty-title">No alerts yet</div>
+        <div class="admin-notification-empty-sub">New paid orders and low stock alerts will appear here automatically.</div>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = ADMIN_NOTIFICATIONS.slice(0, 20).map(n => `
+    <div class="admin-notification-item ${n.type || 'system'} ${n.unread ? 'unread' : ''}">
+      <div class="admin-notification-icon">${adminNotifIcon(n.type)}</div>
+      <div>
+        <div class="admin-notification-name">${escapeAdminText(n.title)}</div>
+        <div class="admin-notification-msg">${escapeAdminText(n.message)}</div>
+        <div class="admin-notification-time">${adminNotifTimeAgo(n.createdAt)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function adminNotifPrimeFromExistingOrders() {
+  const seen = adminNotifSeenOrders();
+  const orders = (REAL_ORDERS || []).slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  orders.forEach(order => {
+    const id = String(order._id || order.orderNumber || '');
+    if (id) seen.add(id);
+  });
+  adminNotifSaveSeenOrders(seen);
+
+  if (!ADMIN_NOTIFICATIONS.length && orders.length) {
+    orders.slice(0, 3).forEach(order => {
+      const total = adminPhase9OrderTotal ? adminPhase9OrderTotal(order) : getOverviewTotal(order);
+      adminNotifAdd({
+        id: `recent-order-${order._id || order.orderNumber}`,
+        type: 'order',
+        title: `Recent order #${order.orderNumber || String(order._id || '').slice(-5)}`,
+        message: `${getOverviewCustomer(order)} · ${money(total)} · ${(order.status || 'placed').replaceAll('_', ' ')}`,
+        createdAt: order.createdAt ? new Date(order.createdAt).getTime() : Date.now(),
+        ref: order._id || ''
+      }, { unread: false });
+    });
+  }
+}
+
+async function adminNotifPollOrders() {
+  const token = getAdminToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return;
+
+    const orders = data.data || data.orders || [];
+    const seen = adminNotifSeenOrders();
+    let newCount = 0;
+
+    orders
+      .slice()
+      .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
+      .forEach(order => {
+        const id = String(order._id || order.orderNumber || '');
+        if (!id || seen.has(id)) return;
+        seen.add(id);
+        newCount += 1;
+        const total = adminPhase9OrderTotal ? adminPhase9OrderTotal(order) : getOverviewTotal(order);
+        adminNotifAdd({
+          id: `order-${id}`,
+          type: 'order',
+          title: `New order #${order.orderNumber || id.slice(-5)}`,
+          message: `${getOverviewCustomer(order)} placed an order worth ${money(total)}.`,
+          createdAt: order.createdAt ? new Date(order.createdAt).getTime() : Date.now(),
+          ref: id
+        }, { toast: '🔔 New order received' });
+      });
+
+    if (newCount) {
+      REAL_ORDERS = orders;
+      updateOverviewRealtime();
+      updateAdminSidebarBadges();
+    }
+
+    adminNotifSaveSeenOrders(seen);
+    adminNotifLastSync = Date.now();
+  } catch (err) {
+    console.warn('Admin notification order poll failed:', err.message);
+  }
+}
+
+function adminNotifCheckLowStock() {
+  const low = (REAL_PRODUCTS || []).filter(product => Number(product.stock || 0) <= 5);
+  low.slice(0, 5).forEach(product => {
+    const id = String(product._id || product.id || product.name);
+    adminNotifAdd({
+      id: `stock-${id}-${Number(product.stock || 0)}`,
+      type: 'stock',
+      title: 'Low stock alert',
+      message: `${product.name || 'Product'} has only ${Number(product.stock || 0)} item${Number(product.stock || 0) === 1 ? '' : 's'} left.`,
+      createdAt: Date.now(),
+      ref: id
+    }, { unread: false });
+  });
+}
+
+function adminNotifBindSocketListeners() {
+  try {
+    initAdminNotificationSocket();
+    if (!adminSocket || adminSocket.__paddoxNotifBound) return;
+    adminSocket.__paddoxNotifBound = true;
+
+    const addFan = (title, payload = {}) => adminNotifAdd({
+      type: 'fan',
+      title,
+      message: payload.message || payload.title || payload.text || 'New Fan Hub activity detected.',
+      createdAt: Date.now(),
+      ref: payload.ref || payload.id || ''
+    }, { toast: '🔔 New Fan Hub activity' });
+
+    adminSocket.on('admin:new-order', payload => adminNotifAdd({
+      type: 'order',
+      title: payload?.title || 'New order received',
+      message: payload?.message || 'A customer placed a new order.',
+      createdAt: Date.now(),
+      ref: payload?.orderId || payload?._id || ''
+    }, { toast: '🔔 New order received' }));
+
+    adminSocket.on('order:new', payload => addFan('Store activity', { message: payload?.message || 'New order activity detected.', ...payload }));
+    adminSocket.on('order:created', payload => adminNotifAdd({ type:'order', title:'New order received', message: payload?.message || 'A customer placed a new order.', createdAt: Date.now(), ref: payload?.orderId || '' }, { toast:'🔔 New order received' }));
+    adminSocket.on('fan:new-post', payload => addFan('New Fan Hub post', payload));
+    adminSocket.on('fan:new-comment', payload => addFan('New Fan Hub comment', payload));
+    adminSocket.on('fan:poll-vote', payload => addFan('New poll vote', payload));
+    adminSocket.on('fan:trivia-answer', payload => addFan('New trivia answer', payload));
+    adminSocket.on('fan:activity', payload => addFan('Fan Hub activity', payload));
+    adminSocket.on('admin:notification', payload => adminNotifAdd({
+      type: payload?.type || 'system',
+      title: payload?.title || 'Admin alert',
+      message: payload?.message || 'New admin notification.',
+      createdAt: Date.now(),
+      ref: payload?.ref || ''
+    }, { toast: '🔔 New admin alert' }));
+  } catch (err) {
+    console.warn('Admin notification socket bind failed:', err.message);
+  }
+}
+
+function adminNotifStartRealtimeWatch() {
+  if (adminNotifPollingStarted) return;
+  adminNotifPollingStarted = true;
+
+  adminNotifLoad();
+  adminNotifEnsurePanel();
+  adminNotifRender();
+  adminNotifPrimeFromExistingOrders();
+  adminNotifCheckLowStock();
+  adminNotifBindSocketListeners();
+  adminNotifRender();
+
+  setTimeout(adminNotifPollOrders, 1500);
+  setInterval(adminNotifPollOrders, 30000);
+  setInterval(() => {
+    adminNotifCheckLowStock();
+    adminNotifBindSocketListeners();
+    adminNotifRender();
+  }, 60000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(adminNotifStartRealtimeWatch, 1800);
+});
+window.addEventListener('load', () => {
+  setTimeout(adminNotifStartRealtimeWatch, 2200);
+});
+
+console.log('%c🔔 PADDOX — Admin Notification Bell Live · A2.5', 'color:#e8002d;font-size:13px;font-weight:bold;');
