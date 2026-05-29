@@ -250,6 +250,7 @@ const PAGE_META = {
   overview:   { title:'OVERVIEW',        action:'',  fn:null, hideAction:true },
   orders:     { title:'ORDERS',          action:'', hideAction:true, fn:null },
   products:   { title:'PRODUCTS',        action:'', hideAction:true, fn:null },
+  coupons:    { title:'COUPONS',         action:'', hideAction:true, fn:null },
   inventory:  { title:'INVENTORY',       action:'Restock All',    fn:()=>showToast('✓ Restock request sent!') },
   assets: {
   title:'DIGITAL ASSETS',
@@ -286,6 +287,10 @@ function switchPage(id) {
   if (id === 'products') {
   bindProductAdminControls();
   loadProducts();
+}
+if (id === 'coupons') {
+  bindCouponAdminControls();
+  loadCoupons();
 }
 
 if (id === 'assets') {
@@ -7747,3 +7752,417 @@ function syncProductTeamSelects() {
   });
 }
 window.addEventListener('load', syncProductTeamSelects);
+
+
+/* ══════════════════════════════════════
+   COUPON CODE ADMIN SYSTEM — PHASE A4.3
+══════════════════════════════════════ */
+const COUPON_API_BASE = 'https://paddox-backend.onrender.com/api/coupons';
+let REAL_COUPONS = [];
+let EDIT_COUPON_ID = null;
+let couponControlsBound = false;
+
+function couponMoney(value) {
+  return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+}
+
+function formatCouponDate(value) {
+  if (!value) return 'No expiry';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'No expiry';
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function couponIsExpired(coupon) {
+  return coupon?.expiresAt && new Date(coupon.expiresAt).getTime() < Date.now();
+}
+
+function couponStatusLabel(coupon) {
+  if (couponIsExpired(coupon)) return 'expired';
+  return coupon?.isActive === false ? 'inactive' : 'active';
+}
+
+function couponDiscountText(coupon) {
+  const type = String(coupon?.type || coupon?.discountType || 'percent').toLowerCase();
+  const value = Number(coupon?.value ?? coupon?.discountValue ?? 0);
+  return type === 'fixed' ? `${couponMoney(value)} OFF` : `${value}% OFF`;
+}
+
+function couponAudienceLabel(coupon) {
+  const audience = String(coupon?.audience || 'all').toLowerCase();
+  if (audience === 'fans') return 'F1 Fans';
+  if (audience === 'new_users') return 'New Users';
+  if (audience === 'vip') return 'VIP / Admin Pick';
+  return 'All Users';
+}
+
+function getFilteredCoupons() {
+  const status = document.getElementById('coupon-status-filter')?.value || 'all';
+  const type = document.getElementById('coupon-type-filter')?.value || 'all';
+  const search = (document.getElementById('coupon-search-input')?.value || '').trim().toLowerCase();
+
+  return REAL_COUPONS.filter(coupon => {
+    const st = couponStatusLabel(coupon);
+    const couponType = String(coupon.type || coupon.discountType || 'percent').toLowerCase();
+    const haystack = [coupon.code, coupon.title, coupon.description, coupon.audience]
+      .join(' ')
+      .toLowerCase();
+
+    if (status !== 'all' && st !== status) return false;
+    if (type !== 'all' && couponType !== type) return false;
+    if (search && !haystack.includes(search)) return false;
+
+    return true;
+  });
+}
+
+function updateCouponStats() {
+  const total = REAL_COUPONS.length;
+  const active = REAL_COUPONS.filter(c => couponStatusLabel(c) === 'active').length;
+  const fanDeals = REAL_COUPONS.filter(c => String(c.audience || '').toLowerCase() === 'fans').length;
+  const usage = REAL_COUPONS.reduce((sum, c) => sum + Number(c.usedCount || 0), 0);
+
+  const values = {
+    'coupons-total-stat': total,
+    'coupons-active-stat': active,
+    'coupons-fan-stat': fanDeals,
+    'coupons-usage-stat': usage
+  };
+
+  Object.entries(values).forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  });
+}
+
+function renderCoupons() {
+  const tbody = document.getElementById('coupons-tbody');
+  if (!tbody) return;
+
+  updateCouponStats();
+  const coupons = getFilteredCoupons();
+
+  if (!coupons.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="coupon-empty-cell">
+          <div class="coupon-empty-state">
+            <strong>No coupon codes found</strong>
+            <span>Create your first PADDOX fan deal or adjust filters.</span>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = coupons.map(coupon => {
+    const status = couponStatusLabel(coupon);
+    const minOrder = Number(coupon.minOrderValue || 0);
+    const maxUses = Number(coupon.maxUses || 0);
+    const used = Number(coupon.usedCount || 0);
+
+    return `
+      <tr>
+        <td class="coupon-code-cell">
+          <div class="coupon-code-main">${coupon.code || 'COUPON'}</div>
+          <div class="coupon-code-sub">${coupon.title || coupon.description || 'PADDOX discount code'}</div>
+        </td>
+        <td>
+          <span class="coupon-discount-chip">${couponDiscountText(coupon)}</span>
+        </td>
+        <td>
+          <div class="coupon-limit-stack">
+            <span>Min: ${minOrder ? couponMoney(minOrder) : 'No minimum'}</span>
+            <span>Used: ${used}${maxUses ? ` / ${maxUses}` : ''}</span>
+          </div>
+        </td>
+        <td><span class="coupon-audience-pill">${couponAudienceLabel(coupon)}</span></td>
+        <td>${formatCouponDate(coupon.expiresAt)}</td>
+        <td><span class="coupon-status-pill ${status}">${status}</span></td>
+        <td class="coupon-actions-cell">
+          <button class="coupon-edit-btn" type="button" onclick="openCouponModal('${coupon._id}')">EDIT</button>
+          <button class="coupon-toggle-btn" type="button" onclick="toggleCouponStatus('${coupon._id}')">${coupon.isActive === false ? 'ENABLE' : 'DISABLE'}</button>
+          <button class="coupon-delete-btn" type="button" onclick="deleteCoupon('${coupon._id}')">DELETE</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function loadCoupons() {
+  try {
+    const res = await fetch(`${COUPON_API_BASE}/admin`, {
+      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) throw new Error(data.message || 'Failed to load coupons');
+
+    REAL_COUPONS = data.data || data.coupons || [];
+    renderCoupons();
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+function bindCouponAdminControls() {
+  if (couponControlsBound) return;
+  couponControlsBound = true;
+
+  ['coupon-status-filter', 'coupon-type-filter', 'coupon-search-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.couponBound) {
+      el.addEventListener(id === 'coupon-search-input' ? 'input' : 'change', renderCoupons);
+      el.dataset.couponBound = 'true';
+    }
+  });
+
+  const refresh = document.getElementById('coupons-refresh-btn');
+  if (refresh && !refresh.dataset.couponBound) {
+    refresh.addEventListener('click', () => loadCoupons().then(() => showToast('🔥 Coupons synced')));
+    refresh.dataset.couponBound = 'true';
+  }
+}
+
+function couponModalHTML() {
+  return `
+    <div class="coupon-modal-backdrop" onclick="closeCouponModal(event)">
+      <div class="coupon-modal-card" onclick="event.stopPropagation()">
+        <div class="coupon-modal-head">
+          <div>
+            <h2 id="coupon-modal-title">CREATE COUPON</h2>
+            <p>Build limited PADDOX fan deals for checkout.</p>
+          </div>
+          <button class="coupon-modal-close" type="button" onclick="closeCouponModal()">×</button>
+        </div>
+
+        <div class="coupon-modal-body">
+          <div class="coupon-form-grid">
+            <label>
+              <span>Coupon Code</span>
+              <input id="coupon-code" type="text" placeholder="PADDOX25" maxlength="24"/>
+            </label>
+            <label>
+              <span>Campaign Title</span>
+              <input id="coupon-title" type="text" placeholder="Race Weekend Fan Deal"/>
+            </label>
+            <label>
+              <span>Discount Type</span>
+              <select id="coupon-type">
+                <option value="percent">Percentage</option>
+                <option value="fixed">Fixed Amount</option>
+              </select>
+            </label>
+            <label>
+              <span>Discount Value</span>
+              <input id="coupon-value" type="number" min="1" placeholder="25"/>
+            </label>
+            <label>
+              <span>Minimum Order Value</span>
+              <input id="coupon-min-order" type="number" min="0" placeholder="999"/>
+            </label>
+            <label>
+              <span>Maximum Uses</span>
+              <input id="coupon-max-uses" type="number" min="0" placeholder="100"/>
+            </label>
+            <label>
+              <span>Expiry Date</span>
+              <input id="coupon-expiry" type="date"/>
+            </label>
+            <label>
+              <span>Audience</span>
+              <select id="coupon-audience">
+                <option value="all">All Users</option>
+                <option value="fans">F1 Fans</option>
+                <option value="new_users">New Users</option>
+                <option value="vip">VIP / Admin Pick</option>
+              </select>
+            </label>
+            <label>
+              <span>Status</span>
+              <select id="coupon-active">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </label>
+            <label class="coupon-form-wide">
+              <span>Description</span>
+              <textarea id="coupon-description" rows="3" placeholder="Short note for this coupon campaign..."></textarea>
+            </label>
+          </div>
+          <div id="coupon-preview" class="coupon-preview-card">Preview: enter discount details</div>
+        </div>
+
+        <div class="coupon-modal-actions">
+          <button type="button" class="coupon-cancel-btn" onclick="closeCouponModal()">CANCEL</button>
+          <button type="button" class="coupon-save-btn" onclick="saveCoupon()">SAVE COUPON</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function ensureCouponModal() {
+  if (!document.getElementById('coupon-modal')) {
+    const modal = document.createElement('div');
+    modal.id = 'coupon-modal';
+    modal.innerHTML = couponModalHTML();
+    document.body.appendChild(modal);
+  }
+
+  ['coupon-code', 'coupon-type', 'coupon-value', 'coupon-min-order'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.previewBound) {
+      el.addEventListener('input', updateCouponPreview);
+      el.addEventListener('change', updateCouponPreview);
+      el.dataset.previewBound = 'true';
+    }
+  });
+}
+
+function updateCouponPreview() {
+  const preview = document.getElementById('coupon-preview');
+  if (!preview) return;
+
+  const code = (document.getElementById('coupon-code')?.value || 'COUPON').trim().toUpperCase();
+  const type = document.getElementById('coupon-type')?.value || 'percent';
+  const value = Number(document.getElementById('coupon-value')?.value || 0);
+  const min = Number(document.getElementById('coupon-min-order')?.value || 0);
+
+  if (!value) {
+    preview.textContent = 'Preview: enter discount details';
+    return;
+  }
+
+  const discount = type === 'fixed' ? `${couponMoney(value)} OFF` : `${value}% OFF`;
+  preview.textContent = `${code} · ${discount}${min ? ` · min order ${couponMoney(min)}` : ''}`;
+}
+
+function setCouponField(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value ?? '';
+}
+
+function openCouponModal(couponId = null) {
+  ensureCouponModal();
+  EDIT_COUPON_ID = couponId;
+
+  const coupon = couponId ? REAL_COUPONS.find(c => String(c._id) === String(couponId)) : null;
+
+  document.getElementById('coupon-modal-title').textContent = coupon ? 'EDIT COUPON' : 'CREATE COUPON';
+  setCouponField('coupon-code', coupon?.code || '');
+  setCouponField('coupon-title', coupon?.title || '');
+  setCouponField('coupon-type', coupon?.type || coupon?.discountType || 'percent');
+  setCouponField('coupon-value', coupon?.value ?? coupon?.discountValue ?? '');
+  setCouponField('coupon-min-order', coupon?.minOrderValue ?? '');
+  setCouponField('coupon-max-uses', coupon?.maxUses ?? '');
+  setCouponField('coupon-audience', coupon?.audience || 'all');
+  setCouponField('coupon-active', String(coupon?.isActive !== false));
+  setCouponField('coupon-description', coupon?.description || '');
+
+  if (coupon?.expiresAt) {
+    const d = new Date(coupon.expiresAt);
+    setCouponField('coupon-expiry', Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10));
+  } else {
+    setCouponField('coupon-expiry', '');
+  }
+
+  updateCouponPreview();
+  document.getElementById('coupon-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCouponModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('coupon-modal')?.classList.remove('show');
+  document.body.style.overflow = '';
+  EDIT_COUPON_ID = null;
+}
+
+function getCouponPayload() {
+  const code = (document.getElementById('coupon-code')?.value || '').trim().toUpperCase();
+  const title = (document.getElementById('coupon-title')?.value || '').trim();
+  const type = document.getElementById('coupon-type')?.value || 'percent';
+  const value = Number(document.getElementById('coupon-value')?.value || 0);
+  const minOrderValue = Number(document.getElementById('coupon-min-order')?.value || 0);
+  const maxUses = Number(document.getElementById('coupon-max-uses')?.value || 0);
+  const expiresAt = document.getElementById('coupon-expiry')?.value || '';
+  const audience = document.getElementById('coupon-audience')?.value || 'all';
+  const isActive = document.getElementById('coupon-active')?.value !== 'false';
+  const description = (document.getElementById('coupon-description')?.value || '').trim();
+
+  if (!code || code.length < 3) throw new Error('Coupon code must be at least 3 characters');
+  if (!/^[A-Z0-9_-]+$/.test(code)) throw new Error('Coupon code can use only letters, numbers, hyphen and underscore');
+  if (!value || value <= 0) throw new Error('Discount value must be greater than 0');
+  if (type === 'percent' && value > 90) throw new Error('Percentage coupon cannot exceed 90%');
+  if (minOrderValue < 0 || maxUses < 0) throw new Error('Limits cannot be negative');
+
+  return { code, title, type, value, minOrderValue, maxUses, expiresAt, audience, isActive, description };
+}
+
+async function saveCoupon() {
+  try {
+    const payload = getCouponPayload();
+    const url = EDIT_COUPON_ID ? `${COUPON_API_BASE}/admin/${EDIT_COUPON_ID}` : `${COUPON_API_BASE}/admin`;
+    const method = EDIT_COUPON_ID ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAdminToken()}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Coupon save failed');
+
+    showToast(EDIT_COUPON_ID ? '🔥 Coupon updated' : '🔥 Coupon created');
+    closeCouponModal();
+    await loadCoupons();
+  } catch (err) {
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function toggleCouponStatus(id) {
+  const coupon = REAL_COUPONS.find(c => String(c._id) === String(id));
+  if (!coupon) return showToast('❌ Coupon not found');
+
+  try {
+    const res = await fetch(`${COUPON_API_BASE}/admin/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAdminToken()}`
+      },
+      body: JSON.stringify({ isActive: coupon.isActive === false })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Status update failed');
+    showToast('🔥 Coupon status updated');
+    await loadCoupons();
+  } catch (err) {
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function deleteCoupon(id) {
+  if (!confirm('Delete this coupon code?')) return;
+
+  try {
+    const res = await fetch(`${COUPON_API_BASE}/admin/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Delete failed');
+    showToast('🔥 Coupon deleted');
+    await loadCoupons();
+  } catch (err) {
+    showToast(`❌ ${err.message}`);
+  }
+}
