@@ -77,13 +77,18 @@ function demoLogin() {
 }
 
 async function authFetch(path, options = {}) {
+  const sessionId = localStorage.getItem('paddox_session_id') || '';
   const res = await fetch(`${PADDOX_API_BASE}${path}`, {
+    credentials: 'include',
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(sessionId ? { 'X-Paddox-Session-Id': sessionId } : {}),
       ...(options.headers || {})
     }
   });
+  const responseSessionId = res.headers.get('X-Paddox-Session-Id');
+  if (responseSessionId) localStorage.setItem('paddox_session_id', responseSessionId);
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) {
     throw new Error(data.message || 'Request failed');
@@ -138,6 +143,7 @@ function handleAuthSuccess(data) {
     showTwoFactorLogin(data.data.email);
     return;
   }
+  if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
   TokenManager.setAccess(data.data.accessToken);
   loginUser(data.data.user);
 }
@@ -170,6 +176,7 @@ async function verifyTwoFactorLoginCode() {
       body: JSON.stringify({ twoFactorToken: pendingTwoFactorToken, code })
     });
     cancelTwoFactorLogin();
+    if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
     TokenManager.setAccess(data.data.accessToken);
     loginUser(data.data.user);
     showToast('🔥 Secure login successful');
@@ -471,6 +478,7 @@ function loginUser(user) {
   loadDownloads();
   initOrderNotificationInbox(user);
   initOrderNotificationSocket();
+  setTimeout(refreshSecuritySessions, 500);
 }
 
 /* LOGOUT */
@@ -487,6 +495,7 @@ document
     TokenManager.clearAccess();
 
     localStorage.removeItem('paddox_user');
+    localStorage.removeItem('paddox_session_id');
 
     location.reload();
   });
@@ -2815,6 +2824,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadDownloads();
   initOrderNotificationInbox(currentUser);
   initOrderNotificationSocket();
+  setTimeout(refreshSecuritySessions, 500);
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
 
@@ -3828,6 +3838,7 @@ async function submitSecurityPassword() {
     showToast('✅ Password updated — please login again');
     TokenManager.clearAccess();
     localStorage.removeItem('paddox_user');
+    localStorage.removeItem('paddox_session_id');
     setTimeout(() => location.reload(), 1200);
   } catch (err) {
     console.error(err);
@@ -3921,15 +3932,128 @@ function getSecurityBrowserName() {
   return 'Current browser';
 }
 
-function refreshSecuritySessions() {
-  const name = document.getElementById('current-session-name');
-  const meta = document.getElementById('current-session-meta');
+async function refreshSecuritySessions() {
+  const list = document.getElementById('security-session-list');
   const count = document.getElementById('sec-session-count');
-  if (name) name.textContent = `${getSecurityBrowserName()} · Current device`;
-  if (meta) meta.textContent = 'Active now · Protected session';
-  if (count) count.textContent = '1 Active';
-  showToast('✓ Session details refreshed');
+  if (!list) return;
+
+  try {
+    list.innerHTML = `
+      <div class="session-premium-card current">
+        <span class="session-device-icon" aria-hidden="true"></span>
+        <div><div class="sess-name">Loading sessions...</div><div class="sess-meta">Checking trusted devices</div></div>
+      </div>
+    `;
+
+    const token = profileToken();
+    const data = await authFetch('/users/security/sessions', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+
+    const sessions = data.data?.sessions || [];
+    if (count) count.textContent = `${sessions.length || 1} Active`;
+
+    if (!sessions.length) {
+      const browser = getSecurityBrowserName();
+      list.innerHTML = `
+        <div class="session-premium-card current">
+          <span class="session-device-icon" aria-hidden="true"></span>
+          <div>
+            <div class="sess-name">${browser} · Current device</div>
+            <div class="sess-meta">Active now · Protected session</div>
+          </div>
+          <span class="sess-active">● Active</span>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = sessions.map(session => {
+      const current = !!session.current;
+      const deviceClass = /phone/i.test(session.device || '') ? 'phone' : '';
+      const activeCopy = current ? 'Active now · Protected session' : `Last active ${formatSessionTime(session.lastActiveAt)}`;
+      return `
+        <div class="session-premium-card ${current ? 'current' : ''}">
+          <span class="session-device-icon ${deviceClass}" aria-hidden="true"></span>
+          <div>
+            <div class="sess-name">${escapeHtml(session.browser || 'Browser')} · ${current ? 'Current device' : escapeHtml(session.device || 'Device')}</div>
+            <div class="sess-meta">${escapeHtml(activeCopy)}</div>
+          </div>
+          ${current
+            ? '<span class="sess-active">● Active</span>'
+            : `<button class="revoke-btn" type="button" onclick="revokeSecuritySession('${escapeAttr(session.sessionId)}')">Revoke</button>`
+          }
+        </div>
+      `;
+    }).join('');
+
+    showToast('✓ Sessions refreshed');
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = `
+      <div class="session-premium-card current">
+        <span class="session-device-icon" aria-hidden="true"></span>
+        <div>
+          <div class="sess-name">${getSecurityBrowserName()} · Current device</div>
+          <div class="sess-meta">Active now · Protected session</div>
+        </div>
+        <span class="sess-active">● Active</span>
+      </div>
+      <div class="session-premium-card locked">
+        <span class="session-device-icon phone" aria-hidden="true"></span>
+        <div>
+          <div class="sess-name">Session sync unavailable</div>
+          <div class="sess-meta">Try again after backend deploy is live.</div>
+        </div>
+      </div>
+    `;
+    if (count) count.textContent = '1 Active';
+    showToast(`❌ ${err.message}`);
+  }
 }
+
+function formatSessionTime(dateValue) {
+  if (!dateValue) return 'recently';
+  const diff = Date.now() - new Date(dateValue).getTime();
+  if (Number.isNaN(diff) || diff < 60000) return 'just now';
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  return `${Math.floor(hours / 24)} day ago`;
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(value = '') {
+  return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+async function revokeSecuritySession(sessionId) {
+  if (!sessionId) return;
+  try {
+    const token = profileToken();
+    await authFetch(`/users/security/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    showToast('✅ Session revoked');
+    refreshSecuritySessions();
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+window.revokeSecuritySession = revokeSecuritySession;
+window.refreshSecuritySessions = refreshSecuritySessions;
 
 document.addEventListener('DOMContentLoaded', () => {
   updateSecurityStrength();
