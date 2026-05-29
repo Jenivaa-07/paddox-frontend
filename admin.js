@@ -193,7 +193,7 @@ document.addEventListener('click', e => {
 /* ══ NAV PAGE SWITCHING ══ */
 const PAGE_META = {
   overview:   { title:'OVERVIEW',        action:'',  fn:null, hideAction:true },
-  orders:     { title:'ORDERS',          action:'Export CSV',     fn:()=>showToast('📥 Exporting orders…') },
+  orders:     { title:'ORDERS',          action:'', hideAction:true, fn:null },
   products:   { title:'PRODUCTS',        action:'+ Add Product',  fn:()=>openAddModal() },
   inventory:  { title:'INVENTORY',       action:'Restock All',    fn:()=>showToast('✓ Restock request sent!') },
   assets: {
@@ -240,6 +240,7 @@ if (id === 'homebranding') {
   setTimeout(drawHomeLogoCropCanvas, 50);
 }
 if (id === 'orders') {
+  adminPhase9BindOrderFilters?.();
   loadOrders();
 }
 if (id === 'inventory') {
@@ -4727,7 +4728,7 @@ function renderOrders() {
           <div class="admin-customer-name">${adminPhase9Text(c.name)}</div>
           <div class="admin-customer-meta">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
         </td>
-        <td><span class="admin-items-pill">📦 ${adminPhase9Text(itemLabel)}</span></td>
+        <td><span class="admin-items-pill admin-items-pill-clean"><span class="admin-items-dot"></span>${adminPhase9Text(itemLabel)}</span></td>
         <td style="color:var(--muted2)">${adminPhase9Date(order.createdAt)}</td>
         <td>
           <span class="admin-pay-badge admin-pay-${adminPhase9Text(payStatus)}">
@@ -5032,7 +5033,7 @@ function exportAdminOrdersCSV() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  showToast('📥 Orders CSV exported');
+  showToast('Orders CSV exported');
 }
 
 function updateOverviewCards() {

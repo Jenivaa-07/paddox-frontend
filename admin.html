@@ -282,18 +282,53 @@
 
         <!-- ── ORDERS ── -->
         <div class="adm-page" id="adm-orders">
-          <div class="page-toolbar">
-            <div class="toolbar-filters">
-              <select class="adm-select"><option>All Statuses</option><option>Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select>
-              <select class="adm-select"><option>All Time</option><option>Today</option><option>This Week</option><option>This Month</option></select>
-              <input class="adm-input" type="text" placeholder="Search order ID or customer…"/>
+          <div class="orders-command-strip reveal-up">
+            <div>
+              <div class="orders-live-kicker"><span class="live-pulse"></span> LIVE ORDER CONTROL</div>
+              <div class="orders-command-title">Fulfilment Command Center</div>
+              <div class="orders-command-sub">Track paid orders, customer details, receipt access and fulfilment status from one premium PADDOX workspace.</div>
             </div>
-            <button class="adm-btn-red" onclick="showToast('📥 Exporting orders to CSV…')">Export CSV</button>
+            <button class="orders-export-btn" onclick="exportAdminOrdersCSV()">Export CSV</button>
           </div>
-          <div class="data-table-wrap"><table class="data-table" id="orders-table">
-            <thead><tr><th><input type="checkbox"/></th><th>Order ID</th><th>Customer</th><th>Products</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="orders-tbody"></tbody>
-          </table></div>
+
+          <div class="page-toolbar orders-toolbar">
+            <div class="toolbar-filters orders-filters">
+              <select class="adm-select" id="admin-order-status-filter" aria-label="Filter orders by status">
+                <option value="all">All Statuses</option>
+                <option value="placed">Placed</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="out_for_delivery">Out for Delivery</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select class="adm-select" id="admin-order-time-filter" aria-label="Filter orders by date range">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              <input class="adm-input" id="admin-order-search" type="text" placeholder="Search order ID, customer, email or product…"/>
+            </div>
+          </div>
+
+          <div class="data-table-wrap orders-table-wrap">
+            <table class="data-table orders-table" id="orders-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Products</th>
+                  <th>Date</th>
+                  <th>Payment</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- ── PRODUCTS ── -->
