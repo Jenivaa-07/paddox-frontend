@@ -1291,6 +1291,43 @@ async function loadMyOrders() {
   }
 }
 
+
+function renderOrdersInsightBar(orders = []) {
+  const bar = document.getElementById('orders-insight-bar');
+  if (!bar) return;
+
+  if (!orders.length) {
+    bar.innerHTML = '';
+    bar.classList.remove('on');
+    return;
+  }
+
+  const totalOrders = orders.length;
+  const totalSpent = orders.reduce((sum, order) => sum + Number(order.pricing?.total || 0), 0);
+  const paidOrders = orders.filter(order => paymentStatusLabel(order).toLowerCase() === 'paid').length;
+  const latestOrder = [...orders].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+
+  bar.classList.add('on');
+  bar.innerHTML = `
+    <div class="orders-insight-card">
+      <span>Total Orders</span>
+      <strong>${totalOrders}</strong>
+    </div>
+    <div class="orders-insight-card">
+      <span>Paid Orders</span>
+      <strong>${paidOrders}</strong>
+    </div>
+    <div class="orders-insight-card">
+      <span>Total Spent</span>
+      <strong>${formatMoney(totalSpent)}</strong>
+    </div>
+    <div class="orders-insight-card">
+      <span>Latest Order</span>
+      <strong>${orderDateLabel(latestOrder?.createdAt)}</strong>
+    </div>
+  `;
+}
+
 function renderAccountOrders(orders) {
   const tbody =
     document.querySelector('.orders-table tbody');
@@ -1694,7 +1731,12 @@ function renderOrderTimeline(order = {}) {
 function renderOrderItemsMini(order = {}) {
   const items = order.items || [];
   if (!items.length) return `<div class="order-mini-empty">No products returned for this order.</div>`;
-  return items.slice(0, 3).map(item => `
+
+  /* Phase 20.8: the hero row already shows the first product.
+     Only show this preview strip when the order has additional products. */
+  if (items.length <= 1) return '';
+
+  return items.slice(1, 4).map(item => `
     <div class="order-mini-item">
       <div class="order-mini-img">${orderProductThumb(item)}</div>
       <div class="order-mini-info">
@@ -1707,7 +1749,44 @@ function renderOrderItemsMini(order = {}) {
       </div>
       <div class="order-mini-price">${formatMoney((item.price || 0) * (item.quantity || 1))}</div>
     </div>
-  `).join('') + (items.length > 3 ? `<div class="order-more-items">+${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}</div>` : '');
+  `).join('') + (items.length > 4 ? `<div class="order-more-items">+${items.length - 4} more item${items.length - 4 > 1 ? 's' : ''}</div>` : '');
+}
+
+
+function renderOrdersInsightBar(orders = []) {
+  const bar = document.getElementById('orders-insight-bar');
+  if (!bar) return;
+
+  if (!orders.length) {
+    bar.innerHTML = '';
+    bar.classList.remove('on');
+    return;
+  }
+
+  const totalOrders = orders.length;
+  const totalSpent = orders.reduce((sum, order) => sum + Number(order.pricing?.total || 0), 0);
+  const paidOrders = orders.filter(order => paymentStatusLabel(order).toLowerCase() === 'paid').length;
+  const latestOrder = [...orders].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+
+  bar.classList.add('on');
+  bar.innerHTML = `
+    <div class="orders-insight-card">
+      <span>Total Orders</span>
+      <strong>${totalOrders}</strong>
+    </div>
+    <div class="orders-insight-card">
+      <span>Paid Orders</span>
+      <strong>${paidOrders}</strong>
+    </div>
+    <div class="orders-insight-card">
+      <span>Total Spent</span>
+      <strong>${formatMoney(totalSpent)}</strong>
+    </div>
+    <div class="orders-insight-card">
+      <span>Latest Order</span>
+      <strong>${orderDateLabel(latestOrder?.createdAt)}</strong>
+    </div>
+  `;
 }
 
 function renderAccountOrders(orders) {
@@ -1715,6 +1794,7 @@ function renderAccountOrders(orders) {
   const tbody = document.querySelector('.orders-table tbody');
 
   window.USER_ACCOUNT_ORDERS = orders || [];
+  renderOrdersInsightBar(window.USER_ACCOUNT_ORDERS);
 
   if (tbody) tbody.innerHTML = '';
   if (!grid) return;
@@ -1771,9 +1851,11 @@ function renderAccountOrders(orders) {
 
         ${renderOrderTimeline(order)}
 
-        <div class="order-items-preview">
-          ${renderOrderItemsMini(order)}
-        </div>
+        ${renderOrderItemsMini(order) ? `
+          <div class="order-items-preview">
+            ${renderOrderItemsMini(order)}
+          </div>
+        ` : ''}
 
         <div class="order-card-actions">
           <button class="trk-btn order-action-main" onclick="showAccountOrderDetails('${safeOrderId}')">View Details</button>
