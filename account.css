@@ -3487,3 +3487,51 @@ button.r-order.r-order-card{color:inherit;}
     margin-left:52px!important;
   }
 }
+
+/* ============================================================
+   Phase 20.11C.5 — Notification chip cleanup
+   Fix: remove red underline/accent from notification icon chips
+   ============================================================ */
+.notification-setting-card::before{
+  display:none!important;
+  content:none!important;
+  opacity:0!important;
+  background:none!important;
+}
+.notification-setting-card.is-on::before{
+  display:none!important;
+  content:none!important;
+  opacity:0!important;
+  background:none!important;
+}
+.notification-card-icon::after{
+  display:none!important;
+  content:none!important;
+  opacity:0!important;
+  background:none!important;
+  box-shadow:none!important;
+}
+.notification-setting-card:hover .notification-card-icon::after,
+.notification-setting-card.is-on .notification-card-icon::after{
+  display:none!important;
+  opacity:0!important;
+  box-shadow:none!important;
+}
+.notification-setting-card{
+  border-left:1px solid rgba(255,255,255,.075)!important;
+}
+.notification-setting-card.is-on{
+  background:rgba(16,16,16,.9)!important;
+  border-color:rgba(255,255,255,.11)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;
+}
+.notification-setting-card:hover{
+  border-color:rgba(255,255,255,.16)!important;
+}
+.notification-setting-card:hover .notification-card-icon,
+.notification-setting-card.is-on .notification-card-icon{
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(255,255,255,.18)!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09)!important;
+}
