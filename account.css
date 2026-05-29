@@ -98,7 +98,7 @@ select.form-input option{background:var(--dark2)}
 .submit-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);transform:translateX(-100%) skew(-15deg);transition:transform .4s}
 .submit-btn:hover::before{transform:translateX(100%) skew(-15deg)}
 .submit-btn:hover{background:var(--red2);transform:translateY(-1px)}
-.btn-flag{font-size:1rem}
+.btn-flag{display:none!important}
 .forgot-link{text-align:center;font-size:.75rem;color:var(--red);cursor:pointer;margin-top:4px}
 .divider-or{display:flex;align-items:center;gap:10px;margin:16px 0;font-family:var(--font-c);font-size:.65rem;letter-spacing:2px;color:var(--muted)}
 .divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--gray2)}
@@ -438,8 +438,22 @@ input:checked+.tgl-sl::before{background:var(--red);transform:translateX(20px)}
 .auth-brand-lockup{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px;}
 .auth-brand-lockup .auth-logo{margin:0;line-height:1;}
 .auth-brand-icon{width:40px;height:40px;flex:0 0 40px;border-radius:50%;object-fit:contain;display:block;filter:drop-shadow(0 0 14px rgba(232,0,45,.25));}
-.btn-arrow{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;margin-left:8px;background:rgba(255,255,255,.16);font-weight:900;font-family:var(--font-b);line-height:1;transition:transform var(--tr),background var(--tr);}
-.submit-btn:hover .btn-arrow{transform:translateX(4px);background:rgba(255,255,255,.24);}
+/* Phase 20.5 — Account Auth Button Arrow Sync */
+.submit-btn > span{position:relative;z-index:1;}
+.auth-submit-arrow{
+  width:16px!important;
+  height:16px!important;
+  margin-left:2px!important;
+  color:#fff!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  --pdx-mask:var(--pdx-ico-arrow);
+  transition:transform var(--tr),opacity var(--tr)!important;
+}
+.submit-btn:hover .auth-submit-arrow{
+  transform:translateX(4px)!important;
+  opacity:1!important;
+}
 .team-pref-btn{display:flex;align-items:center;justify-content:center;gap:7px;}
 .team-pref-dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 12px rgba(232,0,45,.45);flex:0 0 7px;}
 @media(max-width:640px){.auth-brand-icon{width:34px;height:34px;flex-basis:34px}.auth-brand-lockup{gap:10px}}
