@@ -4018,3 +4018,89 @@ button.r-order.r-order-card{color:inherit;}
 .google-auth-btn.ready{border-color:rgba(255,255,255,.18);color:#fff}
 .google-auth-btn.ready:hover{border-color:var(--red);background:rgba(232,0,45,.08)}
 @media(max-width:620px){.twofa-code-row{grid-template-columns:1fr}.twofa-code-row .save-btn{width:100%}}
+
+/* ============================================================
+   Phase 20.12D.1 — Security Hero Icon Style Match
+   Match Security 2FA/session icons with Shop/FanHub compact hero chips
+   ============================================================ */
+.twofa-icon,
+.session-device-icon{
+  width:32px!important;
+  height:32px!important;
+  flex:0 0 32px!important;
+  border-radius:10px!important;
+  display:grid!important;
+  place-items:center!important;
+  position:relative!important;
+  overflow:hidden!important;
+  color:rgba(255,255,255,.86)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.018))!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+  transition:transform var(--tr),border-color var(--tr),background var(--tr),box-shadow var(--tr),color var(--tr)!important;
+}
+.twofa-premium-box:hover .twofa-icon,
+.session-premium-card:hover .session-device-icon,
+.session-premium-card.current .session-device-icon{
+  color:#fff!important;
+  border-color:rgba(232,0,45,.42)!important;
+  background:linear-gradient(180deg,rgba(232,0,45,.20),rgba(232,0,45,.055))!important;
+  box-shadow:0 10px 22px rgba(232,0,45,.12),inset 0 1px 0 rgba(255,255,255,.08)!important;
+  transform:translateY(-1px)!important;
+}
+.twofa-icon:before,
+.session-device-icon:before,
+.session-device-icon.phone:before{
+  content:''!important;
+  display:block!important;
+  position:relative!important;
+  inset:auto!important;
+  width:17px!important;
+  height:17px!important;
+  border:0!important;
+  border-radius:0!important;
+  opacity:1!important;
+  background:currentColor!important;
+  box-shadow:none!important;
+  -webkit-mask:center/contain no-repeat;
+  mask:center/contain no-repeat;
+}
+.twofa-icon:before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2 5 5v6c0 4.6 2.9 8.8 7 10 4.1-1.2 7-5.4 7-10V5l-7-3Zm0 2.2 5 2.1V11c0 3.5-2 6.8-5 7.9-3-1.1-5-4.4-5-7.9V6.3l5-2.1Zm-1 4.8h2v4h-2V9Zm0 5h2v2h-2v-2Z'/%3E%3C/svg%3E")!important;
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2 5 5v6c0 4.6 2.9 8.8 7 10 4.1-1.2 7-5.4 7-10V5l-7-3Zm0 2.2 5 2.1V11c0 3.5-2 6.8-5 7.9-3-1.1-5-4.4-5-7.9V6.3l5-2.1Zm-1 4.8h2v4h-2V9Zm0 5h2v2h-2v-2Z'/%3E%3C/svg%3E")!important;
+}
+.session-device-icon:before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 5h16v11H4V5Zm2 2v7h12V7H6Zm3 11h6v2H9v-2Z'/%3E%3C/svg%3E")!important;
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 5h16v11H4V5Zm2 2v7h12V7H6Zm3 11h6v2H9v-2Z'/%3E%3C/svg%3E")!important;
+}
+.session-device-icon.phone:before{
+  width:14px!important;
+  height:18px!important;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 3v14h10V5H7Zm4 15h2v1h-2v-1Z'/%3E%3C/svg%3E")!important;
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 3v14h10V5H7Zm4 15h2v1h-2v-1Z'/%3E%3C/svg%3E")!important;
+}
+.twofa-icon:after,
+.session-device-icon:after,
+.session-device-icon.phone:after{
+  content:''!important;
+  position:absolute!important;
+  left:8px!important;
+  right:8px!important;
+  bottom:6px!important;
+  width:auto!important;
+  height:1px!important;
+  background:rgba(232,0,45,.95)!important;
+  transform:none!important;
+  border:0!important;
+  opacity:.9!important;
+}
+.twofa-premium-box,
+.session-premium-card{
+  gap:14px!important;
+}
+@media(max-width:560px){
+  .twofa-icon,
+  .session-device-icon{width:30px!important;height:30px!important;flex-basis:30px!important;border-radius:9px!important;}
+  .twofa-icon:before,
+  .session-device-icon:before{width:16px!important;height:16px!important;}
+}
