@@ -7214,3 +7214,200 @@ function renderOrders() {
 })();
 
 window.adminA31RefreshOrders = adminA31RefreshOrders;
+
+/* ══════════════════════════════════════
+   ADMIN PHASE A3.2 — ORDERS ALIGNMENT + ORDER VIEW MODAL LOCK
+   - Final row/action alignment
+   - Realtime backend controls stay connected through loadOrders/updateOrderStatus
+   - Premium order details modal layout
+══════════════════════════════════════ */
+function adminA32CurrentSyncText() {
+  const stamp = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  return `Live backend sync · ${stamp}`;
+}
+
+function adminA32TouchSync(text = '') {
+  const el = document.getElementById('orders-sync-pill');
+  if (el) el.textContent = text || adminA32CurrentSyncText();
+}
+
+function renderOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  if (!tbody) return;
+
+  const orders = adminPhase9FilteredOrders();
+  adminPhase9RenderOrderSummaryChips(orders);
+  adminA31SyncTopbarAction?.();
+  adminA32TouchSync();
+
+  if (!orders.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          <div class="admin-empty-state orders-empty-state">
+            <div class="orders-empty-icon">✓</div>
+            <strong>No matching orders</strong>
+            <span>Change filters or wait for the next live backend order.</span>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(order => {
+    const c = adminPhase9Customer(order);
+    const items = order.items || [];
+    const fullItems = (items || []).map(i => i.name || i.product?.name || 'Product').join(', ');
+    const itemLabel = items.length
+      ? `${items.length} item${items.length > 1 ? 's' : ''} · ${items.slice(0, 1).map(i => i.name || i.product?.name || 'Product').join(', ')}${items.length > 1 ? ' +' + (items.length - 1) : ''}`
+      : 'No items';
+    const payStatus = adminPhase9PaymentStatus(order);
+    const statusLabel = String(order.status || 'placed').replaceAll('_', ' ');
+    const id = String(order._id || '');
+
+    return `
+      <tr class="admin-order-row">
+        <td>
+          <div class="admin-order-code">#${adminPhase9Text(order.orderNumber || id)}</div>
+          <div class="admin-order-sub" title="${adminPhase9Text(id)}">${adminPhase9Text(id)}</div>
+        </td>
+        <td>
+          <div class="admin-customer-name">${adminPhase9Text(c.name)}</div>
+          <div class="admin-customer-meta" title="${adminPhase9Text(c.email || c.phone || 'No contact')}">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
+        </td>
+        <td>
+          <span class="admin-items-pill admin-items-pill-clean" title="${adminPhase9Text(fullItems)}">
+            <span class="admin-items-dot"></span>${adminPhase9Text(itemLabel)}
+          </span>
+        </td>
+        <td class="admin-date-cell">${adminPhase9Date(order.createdAt)}</td>
+        <td>
+          <span class="admin-pay-badge admin-pay-${adminPhase9Text(payStatus)}" title="${adminPhase9Text(adminPhase9PaymentMethod(order))}">
+            ${payStatus === 'paid' ? '✓' : '•'} ${adminPhase9Text(adminPhase9PaymentMethod(order))}
+          </span>
+        </td>
+        <td class="admin-amount-cell">${money(adminPhase9OrderTotal(order))}</td>
+        <td><span class="sb ${adminPhase9StatusClass(order.status)}">${adminPhase9Text(statusLabel)}</span></td>
+        <td>
+          <div class="admin-order-actions admin-order-actions-final">
+            <div class="admin-order-btn-row">
+              <button class="admin-mini-btn red" onclick="openOrderDetails('${id}')">View</button>
+              <button class="admin-mini-btn" onclick="adminPhase9OpenReceipt('${id}')">Receipt</button>
+            </div>
+            <div class="admin-inline-status-wrap">
+              <select class="admin-inline-status" id="admin-status-${id}" aria-label="Update order status">
+                ${adminPhase9StatusOptions(order.status)}
+              </select>
+              <button class="admin-mini-btn" onclick="updateOrderStatus('${id}', document.getElementById('admin-status-${id}')?.value, false)">Update</button>
+            </div>
+            <span class="admin-row-sync-note">Backend connected</span>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openOrderDetails(orderId) {
+  ensureOrderModal();
+  const order = (REAL_ORDERS || []).find(o => String(o._id) === String(orderId));
+  if (!order) {
+    showToast('❌ Order not found');
+    return;
+  }
+
+  const c = adminPhase9Customer(order);
+  const items = order.items || [];
+  const address = order.shippingAddress || {};
+  const payStatus = adminPhase9PaymentStatus(order);
+  const payMethod = adminPhase9PaymentMethod(order);
+  const transactionId = order.payment?.transactionId || order.payment?.razorpayPaymentId || order.payment?.paymentId || order.payment?.reference || order.payment?.demoPaymentId || '-';
+  const statusText = String(order.status || 'placed').replaceAll('_',' ');
+
+  document.getElementById('od-title').textContent = `#${order.orderNumber || order._id}`;
+  document.getElementById('od-body').innerHTML = `
+    <div class="od-grid">
+      <div class="od-box">
+        <div class="od-label">Customer</div>
+        <div class="od-value"><strong>${adminPhase9Text(c.name)}</strong></div>
+        <div style="color:#888;margin-top:5px;line-height:1.45">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Order Date</div>
+        <div class="od-value"><strong>${adminPhase9DateTime(order.createdAt)}</strong></div>
+        <div style="color:#777;margin-top:5px">Live backend order record</div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Order Status</div>
+        <div class="od-value"><span class="sb ${adminPhase9StatusClass(order.status)}">${adminPhase9Text(statusText)}</span></div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Payment</div>
+        <div class="od-value"><span class="admin-pay-badge admin-pay-${adminPhase9Text(payStatus)}">${adminPhase9Text(payStatus.toUpperCase())}</span></div>
+        <div style="color:#888;margin-top:7px;line-height:1.45">${adminPhase9Text(payMethod)} · ${adminPhase9Text(transactionId)}</div>
+      </div>
+    </div>
+
+    <div class="od-box" style="margin-bottom:14px">
+      <div class="od-label">Fulfilment Timeline</div>
+      ${adminPhase9StatusTimeline(order.status)}
+    </div>
+
+    <div class="od-grid">
+      <div class="od-box">
+        <div class="od-label">Shipping Address</div>
+        <div class="od-value" style="line-height:1.7">
+          <strong>${adminPhase9Text(address.name || c.name)}</strong><br>
+          ${adminPhase9Text(address.line1 || address.address || '')}<br>
+          ${adminPhase9Text(address.city || '')}, ${adminPhase9Text(address.state || '')} - ${adminPhase9Text(address.pincode || '')}<br>
+          ${adminPhase9Text(address.country || 'India')} · ${adminPhase9Text(address.phone || '')}
+        </div>
+      </div>
+      <div class="od-box">
+        <div class="od-label">Amount Summary</div>
+        <div class="od-value" style="line-height:1.9">
+          Subtotal: <strong>${money(order.pricing?.subtotal)}</strong><br>
+          Shipping: <strong>${money(order.pricing?.shipping)}</strong><br>
+          Discount: <strong>${money(order.pricing?.discount)}</strong><br>
+          Tax: <strong>${money(order.pricing?.tax)}</strong><br>
+          <span style="display:inline-block;margin-top:4px;font-size:1.45rem;color:#fff;font-family:var(--font-d);letter-spacing:1px">Total: ${money(order.pricing?.total || adminPhase9OrderTotal(order))}</span>
+        </div>
+      </div>
+    </div>
+
+    <table class="od-items">
+      <thead><tr><th>Product</th><th>Size / Color</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        ${items.map(item => `
+          <tr>
+            <td>${adminPhase9Text(item.name || item.product?.name || 'Product')}</td>
+            <td>${adminPhase9Text([item.size, item.color].filter(Boolean).join(' / ') || '-')}</td>
+            <td>${Number(item.quantity || 1)}</td>
+            <td>${money(item.price)}</td>
+            <td>${money((item.price || 0) * (item.quantity || 1))}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="5" style="color:#777;text-align:center">No items</td></tr>'}
+      </tbody>
+    </table>
+
+    <div class="od-status-row">
+      <div class="od-label" style="margin:0;color:var(--red)">Update Status</div>
+      <select class="od-select" id="od-status-select">
+        ${adminPhase9StatusOptions(order.status)}
+      </select>
+      <button class="od-btn" onclick="updateOrderStatus('${order._id}')">Update</button>
+    </div>
+
+    <div class="admin-order-modal-actions">
+      <button class="admin-mini-btn red" onclick="adminPhase9OpenReceipt('${order._id}')">Open Receipt</button>
+      <button class="admin-mini-btn" onclick="window.print()">Print Admin View</button>
+      <button class="admin-mini-btn danger" onclick="deleteAdminOrder('${order._id}', '${(order.orderNumber || order._id)}')">Delete Order</button>
+    </div>
+  `;
+
+  document.getElementById('order-details-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+console.log('%c🏁 PADDOX — Admin Orders A3.2 alignment + modal lock', 'color:#e8002d;font-size:13px;font-weight:bold;');
