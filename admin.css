@@ -3765,3 +3765,161 @@ html,body{max-width:100%;overflow-x:hidden}
   .product-edit-footer .adm-btn-red,.product-edit-footer .adm-btn-ghost{width:100%;}
   .edit-current-image-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
+
+/* ============================================================
+   ADMIN PHASE A4.1.6 — PRODUCTS FINAL VISUAL LOCK
+   Fixes: table width math, right action cutoff, premium row spacing
+   ============================================================ */
+#adm-products{
+  --products-table-min: 1040px;
+}
+
+#adm-products .products-command-card{
+  border-top:1px solid rgba(255,255,255,.1);
+  border-right:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(232,0,45,.28);
+  box-shadow:0 28px 85px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+#adm-products .products-filter-row{
+  grid-template-columns:minmax(150px,180px) minmax(170px,220px) minmax(240px,1fr) minmax(120px,150px);
+  max-width:100%;
+}
+
+#adm-products .products-kpi-grid{
+  max-width:100%;
+}
+
+#adm-products .products-table-wrap{
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:visible;
+  border:1px solid rgba(255,255,255,.075)!important;
+  border-bottom:3px solid rgba(232,0,45,.85)!important;
+  background:linear-gradient(180deg, rgba(13,13,14,.97), rgba(8,8,9,.97))!important;
+}
+
+#adm-products .products-table{
+  width:100%!important;
+  min-width:var(--products-table-min)!important;
+  table-layout:fixed!important;
+}
+
+/* Corrected width total = 100%, so Delete no longer gets pushed outside */
+#adm-products .products-table th:nth-child(1){width:28%;}
+#adm-products .products-table th:nth-child(2){width:11%;}
+#adm-products .products-table th:nth-child(3){width:11%;}
+#adm-products .products-table th:nth-child(4){width:9%;}
+#adm-products .products-table th:nth-child(5){width:9%;}
+#adm-products .products-table th:nth-child(6){width:11%;}
+#adm-products .products-table th:nth-child(7){width:8%;}
+#adm-products .products-table th:nth-child(8){width:13%;}
+
+#adm-products .products-table th,
+#adm-products .products-table td{
+  padding:16px 16px!important;
+  vertical-align:middle!important;
+}
+
+#adm-products .products-table thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:rgba(12,12,13,.98);
+  border-bottom:1px solid rgba(255,255,255,.075);
+}
+
+#adm-products .products-table tbody tr{
+  background:linear-gradient(90deg, rgba(255,255,255,.012), transparent 42%);
+  border-bottom:1px solid rgba(255,255,255,.035);
+}
+
+#adm-products .products-table tbody tr:hover{
+  background:linear-gradient(90deg, rgba(232,0,45,.055), rgba(255,255,255,.014) 52%, transparent);
+}
+
+#adm-products .product-admin-cardline{
+  gap:12px;
+  max-width:100%;
+}
+
+#adm-products .product-admin-thumb{
+  width:58px;
+  height:58px;
+  flex-basis:58px;
+  border-radius:14px;
+}
+
+#adm-products .product-admin-meta strong{
+  max-width:245px;
+  letter-spacing:.1px;
+}
+
+#adm-products .product-admin-meta span{
+  max-width:235px;
+  opacity:.72;
+}
+
+#adm-products .product-category-pill,
+#adm-products .product-stock-pill,
+#adm-products .product-flag{
+  min-height:28px;
+  padding:6px 12px;
+}
+
+#adm-products .product-flag-stack{
+  max-width:100%;
+  gap:7px;
+}
+
+#adm-products .product-team-text{
+  max-width:100%;
+}
+
+#adm-products .product-price-stack,
+#adm-products td:nth-child(4){
+  white-space:nowrap;
+}
+
+#adm-products .product-row-actions{
+  justify-content:flex-start;
+  gap:8px;
+  min-width:0;
+}
+
+#adm-products .product-row-actions .act-btn{
+  min-width:58px;
+  padding:8px 12px;
+  font-size:.68rem;
+  letter-spacing:1.4px;
+  border-color:rgba(255,255,255,.16);
+  background:rgba(255,255,255,.018);
+}
+
+#adm-products .product-row-actions .act-btn:hover{
+  border-color:rgba(232,0,45,.55);
+  color:#fff;
+  background:rgba(232,0,45,.12);
+}
+
+#adm-products .product-delete-btn{
+  min-width:66px!important;
+  color:#ff6f82!important;
+  background:rgba(232,0,45,.025)!important;
+}
+
+#adm-products .products-table-wrap::-webkit-scrollbar{height:6px;}
+#adm-products .products-table-wrap::-webkit-scrollbar-track{background:rgba(255,255,255,.035);}
+#adm-products .products-table-wrap::-webkit-scrollbar-thumb{background:linear-gradient(90deg,var(--red),rgba(232,0,45,.55));border-radius:999px;}
+
+@media(max-width:1180px){
+  #adm-products{--products-table-min:1120px;}
+  #adm-products .product-admin-meta strong{max-width:220px;}
+}
+
+@media(max-width:760px){
+  #adm-products .products-filter-row{grid-template-columns:1fr;}
+  #adm-products .products-table th,
+  #adm-products .products-table td{padding:14px 12px!important;}
+  #adm-products .product-admin-thumb{width:52px;height:52px;flex-basis:52px;}
+}
