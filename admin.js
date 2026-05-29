@@ -194,7 +194,7 @@ document.addEventListener('click', e => {
 const PAGE_META = {
   overview:   { title:'OVERVIEW',        action:'',  fn:null, hideAction:true },
   orders:     { title:'ORDERS',          action:'', hideAction:true, fn:null },
-  products:   { title:'PRODUCTS',        action:'+ Add Product',  fn:()=>openAddModal() },
+  products:   { title:'PRODUCTS',        action:'', hideAction:true, fn:null },
   inventory:  { title:'INVENTORY',       action:'Restock All',    fn:()=>showToast('✓ Restock request sent!') },
   assets: {
   title:'DIGITAL ASSETS',
@@ -229,6 +229,7 @@ function switchPage(id) {
     actionBtn.classList.toggle('is-hidden', !!meta.hideAction);
   }
   if (id === 'products') {
+  bindProductAdminControls();
   loadProducts();
 }
 
@@ -1150,6 +1151,89 @@ async function loadProducts() {
   }
 }
 
+function escapeProductHTML(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function getProductCategoryLabel(value) {
+  const v = String(value || 'custom').toLowerCase();
+  return v.charAt(0).toUpperCase() + v.slice(1);
+}
+
+function getProductPrice(product) {
+  const price = Number(product.price || 0);
+  const sale = Number(product.salePrice || 0);
+
+  if (sale > 0 && sale < price) {
+    return `
+      <div class="product-price-stack">
+        <span class="product-sale-price">₹${sale.toLocaleString('en-IN')}</span>
+        <span class="product-mrp">₹${price.toLocaleString('en-IN')}</span>
+      </div>
+    `;
+  }
+
+  return `<span class="product-sale-price">₹${price.toLocaleString('en-IN')}</span>`;
+}
+
+function getProductStockPill(product) {
+  const stock = Number(product.stock || 0);
+  let cls = 'ok';
+  let label = `${stock} units`;
+
+  if (stock <= 0) {
+    cls = 'out';
+    label = 'Out';
+  } else if (stock <= 10) {
+    cls = 'low';
+    label = `${stock} low`;
+  }
+
+  return `<span class="product-stock-pill ${cls}">${label}</span>`;
+}
+
+function getFilteredProducts() {
+  const category = String(document.getElementById('product-category-filter')?.value || 'all').toLowerCase();
+  const team = String(document.getElementById('product-team-filter')?.value || 'all').toLowerCase();
+  const search = String(document.getElementById('product-search-input')?.value || '').toLowerCase().trim();
+
+  return REAL_PRODUCTS.filter(product => {
+    const productCategory = String(product.category || '').toLowerCase();
+    const productTeam = String(product.team || '').toLowerCase();
+    const haystack = [product.name, product.category, product.team, product.badge, product.description]
+      .map(v => String(v || '').toLowerCase())
+      .join(' ');
+
+    const categoryOk = category === 'all' || productCategory === category;
+    const teamOk = team === 'all' || productTeam === team;
+    const searchOk = !search || haystack.includes(search);
+
+    return categoryOk && teamOk && searchOk;
+  });
+}
+
+function updateProductStats() {
+  const total = REAL_PRODUCTS.length;
+  const featured = REAL_PRODUCTS.filter(product => product.isFeatured || String(product.badge || '').toLowerCase() === 'featured').length;
+  const low = REAL_PRODUCTS.filter(product => Number(product.stock || 0) <= 10).length;
+  const units = REAL_PRODUCTS.reduce((sum, product) => sum + Number(product.stock || 0), 0);
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+
+  setText('products-count-stat', total);
+  setText('products-featured-stat', featured);
+  setText('products-low-stat', low);
+  setText('products-stock-stat', units.toLocaleString('en-IN'));
+}
+
 function renderProducts() {
 
   const tbody =
@@ -1157,17 +1241,18 @@ function renderProducts() {
 
   if (!tbody) return;
 
-  if (!REAL_PRODUCTS.length) {
+  updateProductStats();
+
+  const products = getFilteredProducts();
+
+  if (!products.length) {
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="8"
-          style="
-            text-align:center;
-            padding:40px;
-            color:#777;
-          ">
-          No products yet
+        <td colspan="8" class="products-empty-state">
+          <div class="products-empty-icon">◇</div>
+          <strong>No matching products</strong>
+          <span>Adjust filters or add a new PADDOX product drop.</span>
         </td>
       </tr>
     `;
@@ -1176,83 +1261,80 @@ function renderProducts() {
   }
 
   tbody.innerHTML =
-    REAL_PRODUCTS.map(product => {
+    products.map(product => {
 
       const image =
         product.images?.[0]?.url ||
-        'https://via.placeholder.com/80';
+        'assets/paddox-logo-icon-official.png';
+
+      const isFeatured = product.isFeatured || String(product.badge || '').toLowerCase() === 'featured';
+      const badge = String(product.badge || '').toLowerCase();
+      const statusClass = product.isActive === false ? 's-out' : 's-act';
+      const statusText = product.isActive === false ? 'Inactive' : 'Active';
 
       return `
         <tr>
-
-          <td>
-            <input type="checkbox"/>
+          <td class="product-main-cell">
+            <div class="product-admin-cardline">
+              <img src="${escapeProductHTML(image)}" alt="${escapeProductHTML(product.name || 'Product')}" class="product-admin-thumb">
+              <div class="product-admin-meta">
+                <strong>${escapeProductHTML(product.name || 'Untitled product')}</strong>
+                <span>${escapeProductHTML(product._id || product.slug || 'Live MongoDB product')}</span>
+              </div>
+            </div>
           </td>
 
+          <td><span class="product-category-pill">${escapeProductHTML(getProductCategoryLabel(product.category))}</span></td>
+
+          <td><span class="product-team-text">${escapeProductHTML(product.team || 'Paddox')}</span></td>
+
+          <td>${getProductPrice(product)}</td>
+
+          <td>${getProductStockPill(product)}</td>
+
           <td>
-            <div style="
-              display:flex;
-              align-items:center;
-              gap:10px;
-            ">
-
-              <img
-                src="${image}"
-                style="
-                  width:42px;
-                  height:42px;
-                  object-fit:cover;
-                  border-radius:8px;
-                "
-              >
-
-              <span>${product.name}</span>
+            <div class="product-flag-stack">
+              ${isFeatured ? '<span class="product-flag featured">Featured</span>' : ''}
+              ${badge && badge !== 'featured' ? `<span class="product-flag">${escapeProductHTML(badge.toUpperCase())}</span>` : ''}
+              ${product.onSale ? '<span class="product-flag sale">Sale</span>' : ''}
+              ${!isFeatured && !badge && !product.onSale ? '<span class="product-flag muted">Standard</span>' : ''}
             </div>
           </td>
 
           <td>
-            ${product.category}
+            <span class="sb ${statusClass}">${statusText}</span>
           </td>
 
           <td>
-            ${product.team}
+            <div class="product-row-actions">
+              <button class="act-btn" onclick="openProductEditModal('${product._id}')">Edit</button>
+              <button class="act-btn product-delete-btn" onclick="deleteProduct('${product._id}')">Delete</button>
+            </div>
           </td>
-
-          <td>
-            ₹${product.price}
-          </td>
-
-          <td>
-            ${product.stock}
-          </td>
-
-          <td>
-            <span class="sb s-act">
-              Active
-            </span>
-          </td>
-
-          <td>
-
-            <button
-              class="act-btn"
-              onclick="openProductEditModal('${product._id}')"
-            >
-              Edit
-            </button>
-
-            <button
-              class="act-btn"
-              onclick="deleteProduct('${product._id}')"
-            >
-              Delete
-            </button>
-
-          </td>
-
         </tr>
       `;
     }).join('');
+}
+
+function bindProductAdminControls() {
+  ['product-category-filter', 'product-team-filter', 'product-search-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.productBound) {
+      const eventName = el.tagName === 'INPUT' ? 'input' : 'change';
+      el.addEventListener(eventName, renderProducts);
+      el.dataset.productBound = 'true';
+    }
+  });
+
+  const refresh = document.getElementById('products-refresh-btn');
+  if (refresh && !refresh.dataset.productBound) {
+    refresh.addEventListener('click', async () => {
+      showToast('⏳ Syncing products...');
+      await loadProducts();
+      showToast('🔥 Products synced');
+    });
+    refresh.dataset.productBound = 'true';
+  }
 }
 
 
@@ -2422,7 +2504,20 @@ function ensureProductEditModal() {
 
           <label style="display:flex;flex-direction:column;gap:6px">
             <span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span>
-            <input id="edit-product-team" class="edit-product-input">
+            <select id="edit-product-team" class="edit-product-input">
+              <option value="Ferrari">Ferrari</option>
+              <option value="Red Bull Racing">Red Bull Racing</option>
+              <option value="Mercedes">Mercedes</option>
+              <option value="McLaren">McLaren</option>
+              <option value="Aston Martin">Aston Martin</option>
+              <option value="Alpine">Alpine</option>
+              <option value="Williams">Williams</option>
+              <option value="RB">RB</option>
+              <option value="Sauber">Sauber</option>
+              <option value="Haas">Haas</option>
+              <option value="Paddox">Paddox</option>
+              <option value="Collector">Collector</option>
+            </select>
           </label>
 
           <label style="display:flex;flex-direction:column;gap:6px">
@@ -2444,6 +2539,7 @@ function ensureProductEditModal() {
               <option value="hot">hot</option>
               <option value="sale">sale</option>
               <option value="ltd">ltd</option>
+              <option value="featured">featured</option>
             </select>
           </label>
 
@@ -2774,6 +2870,7 @@ async function saveProductEdit() {
       team: document.getElementById('edit-product-team').value.trim(),
       category: normaliseCategory(document.getElementById('edit-product-category').value),
       badge: normaliseBadge(document.getElementById('edit-product-badge').value),
+      isFeatured: normaliseBadge(document.getElementById('edit-product-badge').value) === 'featured',
       price,
       stock,
       isActive: document.getElementById('edit-product-active').value === 'true',
@@ -2936,7 +3033,7 @@ async function saveNewProduct() {
       description,
       shortDesc: description.slice(0, 180),
       isActive: true,
-      isFeatured: false,
+      isFeatured: badge === 'featured',
       ratings: {
         average: rating,
         count: rating > 0 ? 1 : 0
@@ -7411,3 +7508,7 @@ function openOrderDetails(orderId) {
 console.log('%c🏁 PADDOX — Admin Orders A3.2 alignment + modal lock', 'color:#e8002d;font-size:13px;font-weight:bold;');
 
 console.log('%c🏁 PADDOX — Admin Orders A3.3 product alignment + modal cleanup', 'color:#e8002d;font-size:13px;font-weight:bold;');
+
+
+/* PADDOX Admin Phase A4.1 product controls bootstrap */
+document.addEventListener('DOMContentLoaded', bindProductAdminControls);
