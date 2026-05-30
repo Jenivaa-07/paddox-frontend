@@ -5639,3 +5639,153 @@ body.modal-open { overflow: hidden; }
   #sec-wallpapers .preview-bottom{flex-direction:column!important;align-items:stretch!important;}
   #sec-wallpapers .preview-download-btn{width:100%!important;min-width:0!important;}
 }
+
+
+/* ============================================================
+   PADDOX Phase A4.7A.9 — Wallpaper card visual lock
+   Removes customer copy lines and locks premium action layout.
+   ============================================================ */
+#sec-wallpapers .wp-grid,
+#sec-wallpapers .wp-grid-premium{
+  align-items:start!important;
+  gap:30px!important;
+}
+#sec-wallpapers .wp-card-premium{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:410px!important;
+  background:linear-gradient(180deg,rgba(14,14,14,.98),rgba(5,5,5,.99))!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.45)!important;
+  overflow:hidden!important;
+}
+#sec-wallpapers .wp-card-premium:hover{
+  border-color:rgba(232,0,45,.42)!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.62),0 0 0 1px rgba(232,0,45,.13) inset!important;
+}
+#sec-wallpapers .wp-media-wrap{
+  height:224px!important;
+  min-height:224px!important;
+  overflow:hidden!important;
+  border-bottom:1px solid rgba(255,255,255,.06)!important;
+}
+#sec-wallpapers .wp-card-premium .wp-img{
+  height:100%!important;
+  width:100%!important;
+  object-fit:cover!important;
+  filter:brightness(.8) contrast(1.06) saturate(.98)!important;
+}
+#sec-wallpapers .wp-info-panel{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  flex:1!important;
+  padding:22px 24px 20px!important;
+  min-height:184px!important;
+}
+#sec-wallpapers .wp-category{
+  margin:0!important;
+  font-size:.66rem!important;
+  letter-spacing:4px!important;
+  color:var(--red)!important;
+  line-height:1!important;
+}
+#sec-wallpapers .wp-title{
+  margin:0!important;
+  min-height:34px!important;
+  font-size:clamp(1.7rem,2.1vw,2.35rem)!important;
+  letter-spacing:1.2px!important;
+  line-height:.95!important;
+  color:#fff!important;
+  text-shadow:0 10px 28px rgba(0,0,0,.65)!important;
+}
+#sec-wallpapers .wp-device-row{
+  margin-top:2px!important;
+  gap:6px!important;
+}
+#sec-wallpapers .wp-device-row span{
+  height:24px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  padding:0 10px!important;
+  font-size:.58rem!important;
+  letter-spacing:1.8px!important;
+  border-radius:0!important;
+}
+#sec-wallpapers .wp-user-copy{
+  display:none!important;
+}
+#sec-wallpapers .wp-premium-strip{
+  margin-top:2px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  width:100%!important;
+  min-height:30px!important;
+  padding:8px 10px!important;
+  border-top:1px solid rgba(255,255,255,.06)!important;
+  border-bottom:1px solid rgba(255,255,255,.06)!important;
+  background:linear-gradient(90deg,rgba(255,255,255,.025),rgba(232,0,45,.035),rgba(255,255,255,.015))!important;
+}
+#sec-wallpapers .wp-premium-strip span,
+#sec-wallpapers .wp-premium-strip strong{
+  font-family:var(--font-c)!important;
+  font-size:.66rem!important;
+  letter-spacing:2.2px!important;
+  line-height:1!important;
+  text-transform:uppercase!important;
+}
+#sec-wallpapers .wp-premium-strip span{color:rgba(255,255,255,.56)!important;}
+#sec-wallpapers .wp-premium-strip strong{color:var(--gold)!important;}
+#sec-wallpapers .wp-downloads{
+  margin-top:auto!important;
+  padding-top:10px!important;
+  border-top:1px solid rgba(255,255,255,.055)!important;
+  color:rgba(255,255,255,.44)!important;
+  font-size:.76rem!important;
+}
+#sec-wallpapers .wp-hover-panel{
+  padding:22px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:stretch!important;
+  text-align:center!important;
+  background:linear-gradient(180deg,rgba(3,3,3,.2),rgba(3,3,3,.82))!important;
+}
+#sec-wallpapers .wp-hover-panel h4{
+  font-size:clamp(1.2rem,1.8vw,1.8rem)!important;
+  letter-spacing:2px!important;
+  margin-bottom:14px!important;
+  max-width:92%!important;
+  align-self:center!important;
+}
+#sec-wallpapers .wp-hover-actions{
+  width:min(360px,100%)!important;
+  margin-inline:auto!important;
+  gap:10px!important;
+}
+#sec-wallpapers .wp-hover-actions .wp-dl-btn,
+#sec-wallpapers .wp-hover-actions .wp-prev-btn{
+  min-height:44px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  letter-spacing:2.8px!important;
+  white-space:nowrap!important;
+}
+#sec-wallpapers .hub-tabs-bar,
+.hub-tabs-bar{
+  backdrop-filter:blur(18px)!important;
+  background:rgba(8,8,8,.94)!important;
+}
+@media(max-width:1180px){
+  #sec-wallpapers .wp-card-premium{min-height:390px!important;}
+  #sec-wallpapers .wp-media-wrap{height:210px!important;min-height:210px!important;}
+}
+@media(max-width:720px){
+  #sec-wallpapers .wp-card-premium{min-height:auto!important;}
+  #sec-wallpapers .wp-info-panel{min-height:0!important;padding:18px!important;}
+  #sec-wallpapers .wp-title{min-height:0!important;}
+}

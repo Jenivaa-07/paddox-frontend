@@ -2,7 +2,7 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX Phase 18.2.7 driver stats repair + final polish loaded');
+console.log('PADDOX A4.7A.9 wallpaper card visual lock loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
@@ -994,7 +994,10 @@ async function renderWallpapers() {
               <span class="${hasMobile ? 'on' : ''}">Mobile</span>
               <span>${wpEsc(String(asset.orientation || 'desktop').toUpperCase())}</span>
             </div>
-            <p class="wp-user-copy">${isPremium ? `Full-resolution wallpaper · ${priceText}` : 'Free full-resolution wallpaper'}</p>
+            <div class="wp-premium-strip">
+              <span>${isPremium ? 'FULL RESOLUTION' : 'FREE DOWNLOAD'}</span>
+              ${isPremium ? `<strong>${priceText}</strong>` : '<strong>HD</strong>'}
+            </div>
             <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
           </div>
         </article>
