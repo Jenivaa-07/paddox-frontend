@@ -282,6 +282,68 @@ document
   .getElementById('register-btn')
   ?.addEventListener('click', doRegister);
 
+/* FORGOT PASSWORD — A4.7C.1 Brevo live test */
+document
+  .querySelectorAll('.forgot-link')
+  .forEach(link => {
+    link.setAttribute('role', 'button');
+    link.setAttribute('tabindex', '0');
+    link.addEventListener('click', handleForgotPassword);
+    link.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleForgotPassword();
+      }
+    });
+  });
+
+async function handleForgotPassword() {
+  const emailInput = document.getElementById('li-email');
+  const existingEmail = String(emailInput?.value || '').trim();
+  const email = window.prompt('Enter your PADDOX account email for password reset:', existingEmail);
+
+  if (email === null) return;
+
+  const cleanEmail = String(email || '').trim().toLowerCase();
+
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    showToast('⚠️ Enter a valid email address');
+    return;
+  }
+
+  if (emailInput) emailInput.value = cleanEmail;
+
+  try {
+    showToast('📩 Sending reset email...');
+
+    const res = await fetch(`${PADDOX_API_BASE}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cleanEmail })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Password reset request failed');
+    }
+
+    const payload = data.data || data;
+
+    console.log('PADDOX forgot password response:', payload);
+
+    if (payload.emailSent === false) {
+      showToast('⚠️ Reset link generated, but email failed. Check Render/Brevo logs.');
+      return;
+    }
+
+    showToast(`✅ Reset email sent to ${payload.emailTo || cleanEmail}`);
+  } catch (err) {
+    console.error('PADDOX forgot password failed:', err);
+    showToast(`❌ ${err.message || 'Forgot password failed'}`);
+  }
+}
+
 /* ENTER KEY */
 document
   .getElementById('li-pass')

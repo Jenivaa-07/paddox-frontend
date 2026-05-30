@@ -4391,3 +4391,18 @@ button.r-order.r-order-card{color:inherit;}
   .twofactor-login-card{padding:24px 18px!important;}
   .twofactor-code-input{font-size:1.55rem!important;letter-spacing:6px!important;}
 }
+
+
+/* A4.7C.1 — Forgot password button reset */
+button.forgot-link{
+  display:block;
+  width:100%;
+  background:transparent;
+  border:0;
+  text-align:center;
+  font-family:var(--font-b);
+}
+button.forgot-link:focus-visible{
+  outline:1px solid var(--red);
+  outline-offset:4px;
+}
