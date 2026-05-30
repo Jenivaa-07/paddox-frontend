@@ -43,6 +43,11 @@ function orderIdFromUrl() {
   return new URLSearchParams(window.location.search).get('orderId') || '';
 }
 
+function receiptAdminModeFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('admin') === '1' || params.get('admin') === 'true';
+}
+
 function paymentMethodLabel(method = '') {
   const key = String(method || '').toLowerCase();
   const labels = {
@@ -91,7 +96,12 @@ async function loadReceipt() {
   }
 
   try {
-    const res = await fetch(`${RECEIPT_ORDER_API}/${encodeURIComponent(orderId)}`, {
+    const isAdminReceipt = receiptAdminModeFromUrl();
+    const receiptEndpoint = isAdminReceipt
+      ? `${RECEIPT_ORDER_API}/admin/${encodeURIComponent(orderId)}`
+      : `${RECEIPT_ORDER_API}/${encodeURIComponent(orderId)}`;
+
+    const res = await fetch(receiptEndpoint, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
