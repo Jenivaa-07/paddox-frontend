@@ -2,6 +2,11 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
+
+/* Phase A4.7A.1 — safety globals
+   Keep product state available for overview/inventory functions that can run
+   before the product module finishes loading. */
+let REAL_PRODUCTS = [];
 /* ══════════════════════════════════════
    ADMIN AUTH GUARD
 ══════════════════════════════════════ */
@@ -8480,4 +8485,14 @@ async function deleteCoupon(id) {
   } catch (err) {
     showToast(`❌ ${err.message}`);
   }
+}
+
+
+/* Phase A4.7A.1 — compatibility shim for older cached order modal helper names. */
+if (typeof window !== 'undefined' && typeof window.getOrderTimelineHTML !== 'function') {
+  window.getOrderTimelineHTML = function(status = '') {
+    if (typeof adminPhase9StatusTimeline === 'function') return adminPhase9StatusTimeline(status);
+    const safeStatus = String(status || 'placed').replaceAll('_', ' ').toUpperCase();
+    return `<div class="order-timeline-fallback">${safeStatus}</div>`;
+  };
 }
