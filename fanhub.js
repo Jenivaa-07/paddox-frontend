@@ -1127,7 +1127,14 @@ async function startPremiumWallpaperCheckout(assetId, format = 'desktop', token 
     }
 
     closePreview();
-    showToast('✅ Wallpaper unlocked. Receipt sent to your email.');
+    const email = info.email || {};
+    if (email.sent || info.emailSent) {
+      showToast(`✅ Wallpaper unlocked. Receipt sent to ${email.to || info.emailTo || 'your email'}.`);
+    } else {
+      const emailTo = email.to || info.emailTo || 'your email';
+      console.warn('PADDOX receipt email not sent:', email.error || info.emailError || 'Unknown email error');
+      showToast(`✅ Wallpaper unlocked. Email not sent to ${emailTo}. Check Render logs / Resend config.`);
+    }
 
     if (orderId) {
       setTimeout(() => {
