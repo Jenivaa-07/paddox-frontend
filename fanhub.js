@@ -977,7 +977,7 @@ async function renderWallpapers() {
             <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${accessText}</span>
             <span class="wp-res">${wpEsc(asset.resolution)}</span>
             <div class="wp-hover-panel">
-              <div class="wp-hover-kicker">${isPremium ? 'Full Resolution Access' : 'Free Full Resolution'}</div>
+              <div class="wp-hover-kicker">${isPremium ? 'Premium Wallpaper' : 'Wallpaper Download'}</div>
               <div class="wp-hover-title">${safeName}</div>
               <div class="wp-hover-actions">
                 ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${desktopLabel}</button>` : ''}
@@ -995,7 +995,7 @@ async function renderWallpapers() {
               <span>${wpEsc(String(asset.orientation || 'desktop').toUpperCase())}</span>
             </div>
             <div class="wp-premium-strip">
-              <span>${isPremium ? 'FULL RES' : 'HD DOWNLOAD'}</span>
+              <span>${isPremium ? 'FULL RESOLUTION' : 'HD DOWNLOAD'}</span>
               ${isPremium ? `<strong>${priceText}</strong>` : '<strong>FREE</strong>'}
             </div>
             <div class="wp-downloads">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
