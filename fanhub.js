@@ -977,12 +977,12 @@ async function renderWallpapers() {
             <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${accessText}</span>
             <span class="wp-res">${wpEsc(asset.resolution)}</span>
             <div class="wp-hover-panel">
-              <div class="wp-hover-kicker">${isPremium ? 'Full Resolution Unlock' : 'Free Download'}</div>
+              <div class="wp-hover-kicker">${isPremium ? 'Full Resolution Access' : 'Free Full Resolution'}</div>
               <div class="wp-hover-title">${safeName}</div>
               <div class="wp-hover-actions">
                 ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${desktopLabel}</button>` : ''}
                 ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}','mobile')">${mobileLabel}</button>` : ''}
-                <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">Preview</button>
+                <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">Low Res Preview</button>
               </div>
             </div>
           </div>
@@ -994,7 +994,7 @@ async function renderWallpapers() {
               <span class="${hasMobile ? 'on' : ''}">Mobile</span>
               <span>${wpEsc(String(asset.orientation || 'desktop').toUpperCase())}</span>
             </div>
-            <p>${isPremium ? `Unlock the full-resolution PADDOX wallpaper for ${priceText}.` : 'Choose Desktop or Mobile and download instantly.'}</p>
+            <p class="wp-user-copy">${isPremium ? `Full-resolution wallpaper · ${priceText}` : 'Free full-resolution wallpaper'}</p>
             <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
           </div>
         </article>
@@ -1026,7 +1026,7 @@ async function handleWpDownload(assetId, format = 'desktop') {
     }
 
     if (localAsset.type === 'premium') {
-      showToast(`🏁 Premium wallpaper unlock coming next: ₹${Number(localAsset.price || 0).toLocaleString('en-IN')}`);
+      showToast(`🏁 Premium wallpaper checkout coming next: ₹${Number(localAsset.price || 0).toLocaleString('en-IN')}`);
       return;
     }
 
@@ -1117,6 +1117,13 @@ image.style.pointerEvents = 'auto';
 
   if (title) title.textContent = name || 'Wallpaper Preview';
 
+  const assetForPreview = window.__PADDOX_ASSETS__?.[assetId] || {};
+  if (assetForPreview.type === 'premium') {
+    btn.textContent = `Unlock Full Resolution · ₹${Number(assetForPreview.price || 0).toLocaleString('en-IN')}`;
+  } else {
+    btn.textContent = 'Download Full Resolution';
+  }
+
   btn.onclick = () => {
     const asset = window.__PADDOX_ASSETS__?.[assetId] || {};
     const format = asset.desktop ? 'desktop' : 'mobile';
@@ -1150,7 +1157,7 @@ function makeCloudinaryPreviewUrl(url) {
   if (!url || typeof url !== 'string') return url;
 
   if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
-    return url.replace('/image/upload/', '/image/upload/w_1200,q_55,e_blur:80/');
+    return url.replace('/image/upload/', '/image/upload/w_1400,q_62,e_blur:35/');
   }
 
   return url;
@@ -3451,181 +3458,3 @@ loadNextRaceCountdown();
 loadLastResult();
 
 console.log('%cPADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
-
-
-/* ============================================================
-   PADDOX Admin Phase A4.7A.6 — Fan Hub Wallpaper Customer Lock
-   Cleaner customer cards, hover actions, protected preview.
-   ============================================================ */
-function paddoxWpAssetStore(assetList = []) {
-  window.__PADDOX_ASSETS__ = {};
-  assetList.forEach(w => {
-    const id = w._id || w.id;
-    window.__PADDOX_ASSETS__[id] = {
-      id,
-      name: w.name || 'PADDOX Wallpaper',
-      category: w.category || 'wallpaper',
-      cover: w.thumbnail?.url || w.image?.url || w.desktop?.url || w.mobile?.url || '',
-      desktop: w.desktop?.url || w.image?.url || '',
-      mobile: w.mobile?.url || '',
-      type: String(w.type || 'free').toLowerCase(),
-      price: Number(w.price || 0),
-      orientation: w.orientation || 'desktop',
-      resolution: w.resolution || w.desktop?.resolution || w.mobile?.resolution || 'HD',
-      downloads: Number(w.downloads || 0)
-    };
-  });
-}
-
-function paddoxWpCard(asset, index = 0) {
-  const isPremium = asset.type === 'premium';
-  const hasDesktop = !!asset.desktop;
-  const hasMobile = !!asset.mobile;
-  const safeName = wpEsc(asset.name || 'PADDOX Wallpaper');
-  const jsName = String(asset.name || 'Wallpaper').replace(/'/g, "\\'");
-  const priceText = `₹${Number(asset.price || 0).toLocaleString('en-IN')}`;
-  const tagText = isPremium ? `Premium · ${priceText}` : 'Free';
-  const formatLine = isPremium
-    ? `Unlock the full-resolution PADDOX wallpaper for ${priceText}.`
-    : 'Choose Desktop or Mobile and download instantly.';
-  const cardCategory = wpEsc(String(asset.category || 'wallpaper').toUpperCase());
-  const cover = asset.cover || asset.desktop || asset.mobile || '';
-  const desktopLabel = isPremium ? `Unlock Desktop · ${priceText}` : 'Download Desktop';
-  const mobileLabel = isPremium ? `Unlock Mobile · ${priceText}` : 'Download Mobile';
-
-  return `
-    <article class="wp-card wp-card-premium ${isPremium ? 'is-premium' : 'is-free'}" style="animation-delay:${index * 0.045}s">
-      <div class="wp-media-wrap" onclick="event.stopPropagation();openPreview('${cover}', '${asset.id}', '${jsName}')">
-        ${cover ? `<img class="wp-img" src="${cover}" data-full="${cover}" alt="${safeName}" loading="lazy" draggable="false"/>` : '<div class="wp-thumb">PADDOX</div>'}
-        <span class="wp-tag ${isPremium ? 'wt-prem' : 'wt-free'}">${tagText}</span>
-        <span class="wp-res">${wpEsc(asset.resolution || 'HD')}</span>
-        <div class="wp-hover-panel">
-          <div class="wp-hover-kicker">${isPremium ? 'Full Resolution Unlock' : 'Free Download'}</div>
-          <div class="wp-hover-title">${safeName}</div>
-          <div class="wp-hover-actions">
-            ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${asset.id}','desktop')">${desktopLabel}</button>` : ''}
-            ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${asset.id}','mobile')">${mobileLabel}</button>` : ''}
-            <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${asset.id}', '${jsName}')">Preview</button>
-          </div>
-        </div>
-      </div>
-      <div class="wp-info-panel">
-        <div class="wp-category">${cardCategory}</div>
-        <h3>${safeName}</h3>
-        <div class="wp-device-row">
-          <span class="${hasDesktop ? 'on' : ''}">Desktop</span>
-          <span class="${hasMobile ? 'on' : ''}">Mobile</span>
-        </div>
-        <p>${formatLine}</p>
-        <div class="wp-download-count">↓ ${Number(asset.downloads || 0).toLocaleString()} downloads</div>
-      </div>
-    </article>
-  `;
-}
-
-async function renderWallpapers() {
-  const grid = document.getElementById('wp-grid');
-  if (!grid) return;
-
-  grid.classList.add('wp-grid-premium');
-  grid.innerHTML = `
-    <div class="fh-empty-state" style="grid-column:1/-1">
-      <div class="fh-empty-mark fh-mark-loading"></div>
-      <h3>Loading PADDOX wallpaper vault...</h3>
-      <p>Preparing premium previews and download formats.</p>
-    </div>
-  `;
-
-  try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/assets?limit=80');
-    const data = await res.json().catch(() => ({}));
-    const assets = data.data?.assets || data.data || data.assets || [];
-
-    if (!data.success || !assets.length) {
-      renderWallpapersFallback();
-      return;
-    }
-
-    const filtered = assets.filter(w => {
-      const cat = String(w.category || '').toLowerCase();
-      const type = String(w.type || 'free').toLowerCase();
-      return wpCat === 'all' || (wpCat === 'free' ? type === 'free' : cat === wpCat);
-    });
-
-    if (!filtered.length) {
-      grid.innerHTML = `
-        <div class="fh-empty-state" style="grid-column:1/-1">
-          <div class="fh-empty-mark fh-mark-wallpapers"></div>
-          <h3>No wallpapers in this filter yet</h3>
-          <p>Switch filter or check back after the next PADDOX digital drop.</p>
-        </div>
-      `;
-      return;
-    }
-
-    const mapped = filtered.map(w => ({
-      id: w._id || w.id,
-      name: w.name,
-      category: w.category || 'wallpaper',
-      cover: w.thumbnail?.url || w.image?.url || w.desktop?.url || w.mobile?.url || '',
-      desktop: w.desktop?.url || w.image?.url || '',
-      mobile: w.mobile?.url || '',
-      type: String(w.type || 'free').toLowerCase(),
-      price: Number(w.price || 0),
-      orientation: w.orientation || 'desktop',
-      resolution: w.resolution || w.desktop?.resolution || w.mobile?.resolution || 'HD',
-      downloads: Number(w.downloads || 0)
-    }));
-
-    paddoxWpAssetStore(filtered);
-    mapped.forEach(a => window.__PADDOX_ASSETS__[a.id] = a);
-
-    grid.innerHTML = mapped.map(paddoxWpCard).join('');
-  } catch (err) {
-    console.error('Wallpaper API failed:', err);
-    renderWallpapersFallback();
-  }
-}
-
-function makeCloudinaryPreviewUrl(url) {
-  if (!url || typeof url !== 'string') return url;
-  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
-    return url.replace('/image/upload/', '/image/upload/w_1280,q_62,e_blur:220/');
-  }
-  return url;
-}
-
-function openPreview(img, assetId, name) {
-  const modal = document.getElementById('preview-modal');
-  const image = document.getElementById('preview-image');
-  const title = document.getElementById('preview-title');
-  const btn   = document.getElementById('preview-download-btn');
-
-  if (!modal || !image || !btn) return;
-
-  image.src = makeCloudinaryPreviewUrl(img);
-  image.alt = name || 'Wallpaper Preview';
-  image.oncontextmenu = e => {
-    e.preventDefault();
-    showToast('🔒 Watermarked low-resolution preview only.');
-  };
-  image.draggable = false;
-  image.style.userSelect = 'none';
-  image.style.webkitUserDrag = 'none';
-
-  const asset = window.__PADDOX_ASSETS__?.[assetId] || {};
-  if (title) title.textContent = name || asset.name || 'Wallpaper Preview';
-
-  btn.textContent = asset.type === 'premium'
-    ? `Unlock Full Resolution ${asset.price ? '· ₹' + Number(asset.price).toLocaleString('en-IN') : ''}`
-    : 'Download Full Resolution';
-
-  btn.onclick = () => {
-    const format = asset.desktop ? 'desktop' : 'mobile';
-    handleWpDownload(assetId, format);
-  };
-
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-}
