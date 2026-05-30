@@ -531,18 +531,58 @@
 
         <!-- ── DIGITAL ASSETS ── -->
         <div class="adm-page" id="adm-assets">
-          <div class="upload-zone" id="upload-zone">
-            <div class="upload-icon animate-icon">☁️</div>
-            <div class="upload-text"><strong>Drag &amp; drop files here</strong><br/>or click to browse · PNG, JPG, SVG, MP4 · Max 50MB</div>
-          </div>
-          <div class="page-toolbar" style="margin-bottom:16px">
-            <div class="toolbar-filters">
-              <select class="adm-select"><option>All Assets</option><option>Cars</option><option>Drivers</option><option>Circuits</option><option>Abstract</option></select>
-              <select class="adm-select"><option>All Access</option><option>Free</option><option>Premium</option></select>
+          <div class="asset-command-hero reveal-up">
+            <div>
+              <div class="asset-live-dot">● LIVE DIGITAL DEPOT</div>
+              <h2>DIGITAL ASSETS COMMAND CENTER</h2>
+              <p>Upload desktop and mobile wallpapers, control free/premium access, and track PADDOX fan downloads from one premium workspace.</p>
             </div>
-            <span class="asset-meta-info">8 assets · 240 MB used</span>
+            <button class="adm-btn-red asset-hero-upload" type="button" onclick="openAssetModal()">+ Upload Wallpaper</button>
           </div>
-          <div class="assets-grid" id="assets-grid"></div>
+
+          <div class="asset-stat-grid reveal-up delay-1">
+            <div class="asset-stat-card"><span>Total Assets</span><strong id="asset-stat-total">0</strong></div>
+            <div class="asset-stat-card"><span>Free</span><strong id="asset-stat-free">0</strong></div>
+            <div class="asset-stat-card"><span>Premium</span><strong id="asset-stat-premium">0</strong></div>
+            <div class="asset-stat-card"><span>Downloads</span><strong id="asset-stat-downloads">0</strong></div>
+          </div>
+
+          <div class="upload-zone asset-dropzone-premium reveal-up delay-2" id="upload-zone" tabindex="0" role="button" aria-label="Upload digital asset">
+            <input id="quick-asset-file" type="file" accept="image/*,video/mp4,.svg" hidden/>
+            <div class="upload-icon animate-icon">☁</div>
+            <div class="upload-text">
+              <strong>Drag &amp; drop a wallpaper here</strong><br/>
+              Quick upload creates a free desktop wallpaper · use Upload Wallpaper for desktop + mobile variants
+            </div>
+            <button class="adm-btn-ghost" type="button">Browse File</button>
+          </div>
+
+          <div class="page-toolbar asset-toolbar-premium">
+            <div class="toolbar-filters">
+              <select class="adm-select" id="asset-category-filter">
+                <option value="all">All Assets</option>
+                <option value="cars">Cars</option>
+                <option value="drivers">Drivers</option>
+                <option value="circuits">Circuits</option>
+                <option value="art">Art</option>
+                <option value="abstract">Abstract</option>
+                <option value="wallpaper">Wallpaper</option>
+              </select>
+              <select class="adm-select" id="asset-access-filter">
+                <option value="all">All Access</option>
+                <option value="free">Free</option>
+                <option value="premium">Premium</option>
+              </select>
+              <input class="adm-input" id="asset-search" type="text" placeholder="Search assets..."/>
+            </div>
+            <button class="adm-btn-ghost" type="button" onclick="loadAssets()">Refresh</button>
+          </div>
+
+          <div class="asset-note-panel reveal-up delay-2">
+            <strong>Access rule:</strong> Free downloads now require login. Premium wallpapers are prepared for the paid unlock flow in the next phase.
+          </div>
+
+          <div class="assets-grid assets-grid-premium" id="assets-grid"></div>
         </div>
 
         <!-- ── HOME BRANDING ── -->
@@ -994,5 +1034,125 @@
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>
+
+  <!-- PADDOX Phase A4.7A — Digital Asset Upload Modal -->
+  <div class="asset-modal" id="asset-modal" aria-hidden="true">
+    <div class="asset-modal-card asset-modal-card-wide">
+      <div class="asset-modal-head">
+        <div>
+          <div class="asset-modal-kicker">DIGITAL ASSET UPLOAD</div>
+          <h3>Upload Wallpaper Pack</h3>
+          <p>Support desktop and mobile wallpapers from one admin upload.</p>
+        </div>
+        <button type="button" class="asset-modal-close" onclick="closeAssetModal()">✕</button>
+      </div>
+
+      <div class="asset-modal-grid">
+        <label class="asset-field">
+          <span>Asset Name</span>
+          <input id="asset-name" class="adm-input" type="text" placeholder="Ferrari Night Run Wallpaper"/>
+        </label>
+        <label class="asset-field">
+          <span>Category</span>
+          <select id="asset-category" class="adm-input">
+            <option value="wallpaper">Wallpaper</option>
+            <option value="cars">Cars</option>
+            <option value="drivers">Drivers</option>
+            <option value="circuits">Circuits</option>
+            <option value="art">Art</option>
+            <option value="abstract">Abstract</option>
+          </select>
+        </label>
+        <label class="asset-field">
+          <span>Access Type</span>
+          <select id="asset-type" class="adm-input">
+            <option value="free">Free</option>
+            <option value="premium">Premium</option>
+          </select>
+        </label>
+        <label class="asset-field">
+          <span>Premium Price</span>
+          <input id="asset-price" class="adm-input" type="number" min="0" value="0" placeholder="99"/>
+        </label>
+        <label class="asset-field">
+          <span>Desktop Resolution</span>
+          <input id="asset-desktop-resolution" class="adm-input" type="text" value="Desktop 4K" placeholder="3840×2160"/>
+        </label>
+        <label class="asset-field">
+          <span>Mobile Resolution</span>
+          <input id="asset-mobile-resolution" class="adm-input" type="text" value="Mobile HD" placeholder="1080×1920"/>
+        </label>
+        <label class="asset-field asset-field-full">
+          <span>Tags</span>
+          <input id="asset-tags" class="adm-input" type="text" placeholder="ferrari, rain, race-week"/>
+        </label>
+      </div>
+
+      <div class="asset-upload-grid">
+        <div class="asset-file-drop" data-target="asset-desktop-file" tabindex="0">
+          <input id="asset-desktop-file" type="file" accept="image/*,.svg" hidden/>
+          <strong>Desktop Wallpaper</strong>
+          <span>Drag/drop or click · 16:9 / 4K recommended</span>
+          <em id="asset-desktop-name">No file selected</em>
+        </div>
+        <div class="asset-file-drop" data-target="asset-mobile-file" tabindex="0">
+          <input id="asset-mobile-file" type="file" accept="image/*,.svg" hidden/>
+          <strong>Mobile Wallpaper</strong>
+          <span>Drag/drop or click · 9:16 recommended</span>
+          <em id="asset-mobile-name">No file selected</em>
+        </div>
+        <div class="asset-file-drop" data-target="asset-thumbnail-file" tabindex="0">
+          <input id="asset-thumbnail-file" type="file" accept="image/*,.svg" hidden/>
+          <strong>Thumbnail / Preview</strong>
+          <span>Optional cover image</span>
+          <em id="asset-thumbnail-name">No file selected</em>
+        </div>
+      </div>
+
+      <div class="asset-modal-actions">
+        <button type="button" class="adm-btn-ghost" onclick="closeAssetModal()">Cancel</button>
+        <button type="button" class="adm-btn-red" onclick="submitAssetUpload()">Upload Asset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PADDOX Phase A4.7A — Digital Asset Edit Modal -->
+  <div class="asset-modal" id="edit-asset-modal" aria-hidden="true">
+    <div class="asset-modal-card">
+      <div class="asset-modal-head">
+        <div>
+          <div class="asset-modal-kicker">EDIT DIGITAL ASSET</div>
+          <h3>Asset Details</h3>
+        </div>
+        <button type="button" class="asset-modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+
+      <label class="asset-field"><span>Name</span><input id="edit-asset-name" class="adm-input" type="text"/></label>
+      <label class="asset-field"><span>Category</span>
+        <select id="edit-asset-category" class="adm-input">
+          <option value="wallpaper">Wallpaper</option>
+          <option value="cars">Cars</option>
+          <option value="drivers">Drivers</option>
+          <option value="circuits">Circuits</option>
+          <option value="art">Art</option>
+          <option value="abstract">Abstract</option>
+        </select>
+      </label>
+      <label class="asset-field"><span>Access</span>
+        <select id="edit-asset-type" class="adm-input">
+          <option value="free">Free</option>
+          <option value="premium">Premium</option>
+        </select>
+      </label>
+      <label class="asset-field"><span>Price</span><input id="edit-asset-price" class="adm-input" type="number" min="0"/></label>
+      <label class="asset-field"><span>Resolution Label</span><input id="edit-asset-resolution" class="adm-input" type="text"/></label>
+
+      <div class="asset-modal-actions">
+        <button type="button" class="adm-btn-ghost" onclick="closeEditModal()">Cancel</button>
+        <button type="button" class="adm-btn-red" onclick="saveAssetEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

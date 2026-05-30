@@ -886,6 +886,35 @@ window.addEventListener('load', () => {
 
 /* ══ WALLPAPERS ══ */
 let wpCat = 'all';
+const FANHUB_ASSET_API_BASE = 'https://paddox-backend.onrender.com/api/assets';
+
+function fanhubToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+function fanhubAssetImage(asset = {}) {
+  return (
+    asset.thumbnail?.url ||
+    asset.image?.url ||
+    asset.desktopFile?.url ||
+    asset.mobileFile?.url ||
+    ''
+  );
+}
+
+function fanhubEsc(value = '') {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 async function renderWallpapers() {
   const grid = document.getElementById('wp-grid');
@@ -898,9 +927,10 @@ async function renderWallpapers() {
   `;
 
   try {
-    const data = await PaddoxAPI.asset.getAll({ limit: 20 });
+    const res = await fetch(`${FANHUB_ASSET_API_BASE}?limit=40`);
+    const data = await res.json().catch(() => ({}));
 
-    const assets = data.data?.assets || data.data || [];
+    const assets = data.data?.assets || data.data || data.assets || [];
 
     if (!data.success || !assets.length) {
       renderWallpapersFallback();
@@ -928,47 +958,66 @@ async function renderWallpapers() {
       window.__PADDOX_ASSETS__[w._id] = {
         id: w._id,
         name: w.name,
-        url: w.image?.url,
+        url: fanhubAssetImage(w),
+        desktopUrl: w.desktopFile?.url || w.image?.url || '',
+        mobileUrl: w.mobileFile?.url || '',
         type: w.type,
-        resolution: w.resolution
+        price: w.price || 0,
+        resolution: w.resolution,
+        desktopResolution: w.desktopFile?.resolution || 'Desktop',
+        mobileResolution: w.mobileFile?.resolution || 'Mobile'
       };
     });
 
-    grid.innerHTML = list.map((w, i) => `
-      <div class="wp-card" style="animation-delay:${i * 0.06}s">
-        <img class="wp-img"
-          src="${w.image?.url}"
-          alt="${w.name}"
-          loading="lazy"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-        />
-        <div class="wp-thumb" style="display:none"></div>
+    grid.innerHTML = list.map((w, i) => {
+      const img = fanhubAssetImage(w);
+      const isPremium = String(w.type || '').toLowerCase() === 'premium';
+      const hasDesktop = !!(w.desktopFile?.url || w.image?.url);
+      const hasMobile = !!w.mobileFile?.url;
+      const name = fanhubEsc(w.name || 'PADDOX Wallpaper');
 
-        <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">
-          ${w.type === 'free' ? 'Free' : 'Premium'}
-        </span>
+      return `
+        <div class="wp-card wp-card-digital" style="animation-delay:${i * 0.06}s">
+          <img class="wp-img"
+            src="${fanhubEsc(img)}"
+            alt="${name}"
+            loading="lazy"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+          />
+          <div class="wp-thumb" style="display:none"></div>
 
-        <span class="wp-res">${w.resolution || 'HD'}</span>
+          <span class="wp-tag wt-${!isPremium ? 'free' : 'prem'}">
+            ${!isPremium ? 'Free · Login Required' : `Premium ₹${Number(w.price || 0).toLocaleString('en-IN')}`}
+          </span>
 
-        <div class="wp-overlay">
-          <div class="wp-name">${w.name}</div>
+          <span class="wp-res">${fanhubEsc(w.resolution || 'HD')}</span>
 
-          <button class="wp-dl-btn"
-            onclick="event.stopPropagation();handleWpDownload('${w._id}')">
-            ${w.type === 'free' ? 'Download' : 'Unlock Premium'}
-          </button>
-
-          <button class="wp-prev-btn"
-            onclick="event.stopPropagation();openPreview('${w.image?.url}', '${w._id}', '${String(w.name || 'Wallpaper').replace(/'/g, "\\'")}')">
-            Preview
-          </button>
-
-          <div style="font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px">
-            ↓ ${(w.downloads || 0).toLocaleString()} downloads
+          <div class="wp-overlay">
+            <div class="wp-name">${name}</div>
+            <div class="wp-device-actions">
+              ${hasDesktop ? `
+                <button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}', 'desktop')">
+                  ${isPremium ? 'Unlock Desktop' : 'Desktop'}
+                </button>` : ''}
+              ${hasMobile ? `
+                <button class="wp-dl-btn wp-dl-btn-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}', 'mobile')">
+                  ${isPremium ? 'Unlock Mobile' : 'Mobile'}
+                </button>` : ''}
+            </div>
+            <button class="wp-prev-btn"
+              onclick="event.stopPropagation();openPreview('${fanhubEsc(img)}', '${w._id}', '${String(w.name || 'Wallpaper').replace(/'/g, "\\'")}')">
+              Preview
+            </button>
+            <div class="wp-download-note">
+              ${isPremium ? 'Paid unlock flow coming next' : 'Sign in required for every download'}
+            </div>
+            <div style="font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px">
+              ↓ ${(w.downloads || 0).toLocaleString()} downloads
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
   } catch (err) {
     console.error('Wallpaper API failed:', err);
@@ -976,30 +1025,52 @@ async function renderWallpapers() {
   }
 }
 
-async function handleWpDownload(assetId) {
+async function handleWpDownload(assetId, format = 'desktop') {
   try {
-    showToast('⏳ Preparing HD wallpaper...');
+    const token = fanhubToken();
+
+    if (!token) {
+      showToast('🔐 Login required to download PADDOX wallpapers');
+      setTimeout(() => {
+        window.location.href = `account.html?redirect=${encodeURIComponent('fanhub.html#wallpapers')}`;
+      }, 900);
+      return;
+    }
+
+    showToast(`⏳ Preparing ${format} wallpaper...`);
 
     const localAsset = window.__PADDOX_ASSETS__?.[assetId] || {};
-    let downloadUrl = localAsset.url;
     let name = localAsset.name || 'Paddox Wallpaper';
 
-    try {
-      const data = await PaddoxAPI.asset.download(assetId);
-      console.log('DOWNLOAD RESPONSE:', data);
+    const res = await fetch(`${FANHUB_ASSET_API_BASE}/${encodeURIComponent(assetId)}/download?format=${encodeURIComponent(format)}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      if (data?.success) {
-        const info = data.data || data;
-        downloadUrl =
-          info.downloadUrl ||
-          info.url ||
-          info.image?.url ||
-          downloadUrl;
-        name = info.name || name;
-      }
-    } catch (apiErr) {
-      console.warn('Download API failed, using local Cloudinary URL:', apiErr);
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 402 || data?.premium) {
+      showToast('🏁 Premium wallpaper checkout comes in the next phase');
+      return;
     }
+
+    if (res.status === 401 || res.status === 403) {
+      showToast('🔐 Please login again to download');
+      setTimeout(() => window.location.href = 'account.html', 900);
+      return;
+    }
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Download failed');
+    }
+
+    const info = data.data || data;
+    const downloadUrl =
+      info.downloadUrl ||
+      info.url ||
+      info.asset?.image?.url;
+
+    name = info.name || name;
 
     if (!downloadUrl) {
       showToast('❌ Download URL missing');
@@ -1007,7 +1078,7 @@ async function handleWpDownload(assetId) {
     }
 
     const finalUrl = makeCloudinaryDownloadUrl(downloadUrl);
-    const safeName = name.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'paddox_wallpaper';
+    const safeName = `${name}_${format}`.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'paddox_wallpaper';
 
     const link = document.createElement('a');
     link.href = finalUrl;
@@ -1020,14 +1091,12 @@ async function handleWpDownload(assetId) {
     document.body.removeChild(link);
 
     closePreview();
-    showToast(`✅ Downloading ${name}`);
-    setTimeout(() => {
-  renderWallpapers();
-}, 1200);
+    showToast(`✅ Downloading ${format} wallpaper`);
+    setTimeout(renderWallpapers, 1200);
 
   } catch (err) {
     console.error('Download failed:', err);
-    showToast('❌ Download failed. Please try again.');
+    showToast(`❌ ${err.message || 'Download failed. Please try again.'}`);
   }
 }
 
@@ -1052,25 +1121,21 @@ function openPreview(img, assetId, name) {
   if (!modal || !image || !btn) return;
 
   image.src = makeCloudinaryPreviewUrl(img);
-image.alt = name || 'Wallpaper Preview';
+  image.alt = name || 'Wallpaper Preview';
 
-/* Disable right click */
-image.oncontextmenu = e => {
-  e.preventDefault();
-  showToast('🔒 Preview image saving is disabled.');
-};
+  image.oncontextmenu = e => {
+    e.preventDefault();
+    showToast('🔒 Preview image saving is disabled.');
+  };
 
-/* Disable dragging */
-image.draggable = false;
-
-/* Disable selecting */
-image.style.userSelect = 'none';
-image.style.webkitUserDrag = 'none';
-image.style.pointerEvents = 'auto';
+  image.draggable = false;
+  image.style.userSelect = 'none';
+  image.style.webkitUserDrag = 'none';
+  image.style.pointerEvents = 'auto';
 
   if (title) title.textContent = name || 'Wallpaper Preview';
 
-  btn.onclick = () => handleWpDownload(assetId);
+  btn.onclick = () => handleWpDownload(assetId, 'desktop');
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
@@ -1095,19 +1160,6 @@ function closePreview() {
   document.body.style.overflow = '';
 }
 
-function makeCloudinaryPreviewUrl(url) {
-  if (!url || typeof url !== 'string') return url;
-
-  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
-    return url.replace('/image/upload/', '/image/upload/w_900,q_auto:low/');
-  }
-
-  return url;
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closePreview();
-});
 /* ═════════ PREVIEW PROTECTION ═════════ */
 document.addEventListener('contextmenu', e => {
   if (
@@ -1131,30 +1183,22 @@ function renderWallpapersFallback() {
     grid.innerHTML = `
       <div class="fh-empty-state">
         <div class="fh-empty-mark fh-mark-wallpapers"></div>
-        <h3>No wallpapers in this filter yet</h3>
-        <p>Try another category or upload new wallpapers from Admin.</p>
-      </div>
-    `;
+        <h3>No wallpapers in this filter</h3>
+        <p>Try another category.</p>
+      </div>`;
     return;
   }
 
-  grid.innerHTML = list.map((w, i) => `
-    <div class="wp-card" style="animation-delay:${i * 0.06}s">
-      <img class="wp-img" src="${w.img}" alt="${w.name}" loading="lazy"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <div class="wp-thumb" style="display:none">${w.emoji}</div>
-
-      <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">
-        ${w.type === 'free' ? 'Free' : 'Premium'}
-      </span>
-
+  grid.innerHTML = list.map(w => `
+    <div class="wp-card" onclick="openPreview('${w.img}', '', '${w.name}')">
+      <img class="wp-img" src="${w.img}" alt="${w.name}">
+      <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">${w.type === 'free' ? 'Free' : 'Premium'}</span>
       <span class="wp-res">${w.res}</span>
-
       <div class="wp-overlay">
         <div class="wp-name">${w.name}</div>
         <button class="wp-dl-btn"
-          onclick="event.stopPropagation();showToast('${w.type === 'free' ? 'Downloading...' : 'Sign in for premium'}')">
-          ${w.type === 'free' ? 'Download' : 'Unlock'}
+          onclick="event.stopPropagation();showToast('Login required for PADDOX downloads')">
+          ${w.type === 'free' ? 'Login to Download' : 'Unlock'}
         </button>
       </div>
     </div>
@@ -1171,6 +1215,7 @@ document.querySelectorAll('.wpf').forEach(btn => {
 });
 
 renderWallpapers();
+
 
 /* ══ DRIVER STATS ══ */
 let activeDriver=0;

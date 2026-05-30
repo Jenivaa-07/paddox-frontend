@@ -5281,3 +5281,37 @@ body.modal-open { overflow: hidden; }
   #sec-quotes .qf-dname,#sec-quotes .qf-dteam{max-width:210px!important;}
   #sec-quotes .qf-brand-final{align-self:flex-end!important;}
 }
+
+
+/* ============================================================
+   PADDOX Phase A4.7A — Wallpaper desktop/mobile download UI
+   ============================================================ */
+.wp-card-digital .wp-overlay{
+  gap:8px;
+}
+.wp-device-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+}
+.wp-device-actions .wp-dl-btn{
+  width:100%;
+  padding:10px 8px;
+  font-size:.68rem;
+}
+.wp-dl-btn-mobile{
+  background:rgba(255,255,255,.1)!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+}
+.wp-download-note{
+  font-size:.66rem;
+  color:rgba(255,255,255,.56);
+  letter-spacing:.5px;
+}
+.wp-tag.wt-free{
+  min-width:max-content;
+}
+@media (max-width:560px){
+  .wp-device-actions{grid-template-columns:1fr}
+}
