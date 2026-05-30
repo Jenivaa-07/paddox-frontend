@@ -5789,3 +5789,84 @@ body.modal-open { overflow: hidden; }
   #sec-wallpapers .wp-info-panel{min-height:0!important;padding:18px!important;}
   #sec-wallpapers .wp-title{min-height:0!important;}
 }
+
+
+/* ============================================================
+   PADDOX Phase A4.7A.10 — Wallpaper Title Visibility Final Fix
+   Locks wallpaper names so titles like Ferrari1 never disappear.
+   ============================================================ */
+#sec-wallpapers .wp-card-premium .wp-info-panel{
+  position:relative!important;
+  overflow:visible!important;
+  min-height:188px!important;
+}
+#sec-wallpapers .wp-card-premium .wp-title,
+#sec-wallpapers .wp-card-premium .wp-info-panel h3.wp-title{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  color:#fff!important;
+  font-family:var(--font-d)!important;
+  font-size:clamp(1.65rem,2vw,2.25rem)!important;
+  line-height:.95!important;
+  letter-spacing:1.35px!important;
+  min-height:0!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  text-shadow:0 12px 30px rgba(0,0,0,.72)!important;
+  -webkit-line-clamp:unset!important;
+  -webkit-box-orient:unset!important;
+}
+#sec-wallpapers .wp-card-premium .wp-category{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  margin-bottom:0!important;
+}
+#sec-wallpapers .wp-card-premium .wp-device-row{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  min-height:24px!important;
+}
+#sec-wallpapers .wp-card-premium .wp-premium-strip{
+  margin-top:2px!important;
+  min-height:32px!important;
+  background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(232,0,45,.045),rgba(255,255,255,.015))!important;
+}
+#sec-wallpapers .wp-card-premium.is-premium .wp-premium-strip{
+  border-color:rgba(201,168,76,.22)!important;
+  background:linear-gradient(90deg,rgba(201,168,76,.09),rgba(232,0,45,.045),rgba(255,255,255,.015))!important;
+}
+#sec-wallpapers .wp-card-premium.is-free .wp-premium-strip strong{
+  color:var(--green)!important;
+}
+#sec-wallpapers .wp-card-premium .wp-downloads,
+#sec-wallpapers .wp-card-premium .wp-download-count{
+  display:block!important;
+  margin-top:auto!important;
+  padding-top:10px!important;
+  border-top:1px solid rgba(255,255,255,.055)!important;
+  color:rgba(255,255,255,.46)!important;
+  font-size:.76rem!important;
+  line-height:1.2!important;
+}
+#sec-wallpapers .wp-card-premium .wp-download-count{display:none!important;}
+#sec-wallpapers .wp-hover-title{
+  display:block!important;
+  opacity:1!important;
+  color:#fff!important;
+}
+@media(max-width:720px){
+  #sec-wallpapers .wp-card-premium .wp-title,
+  #sec-wallpapers .wp-card-premium .wp-info-panel h3.wp-title{
+    white-space:normal!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+  }
+}

@@ -988,17 +988,17 @@ async function renderWallpapers() {
           </div>
           <div class="wp-info-panel">
             <div class="wp-category">${wpEsc(String(w.category || 'wallpaper').toUpperCase())}</div>
-            <h3>${safeName}</h3>
+            <h3 class="wp-title">${safeName}</h3>
             <div class="wp-device-row">
               <span class="${hasDesktop ? 'on' : ''}">Desktop</span>
               <span class="${hasMobile ? 'on' : ''}">Mobile</span>
               <span>${wpEsc(String(asset.orientation || 'desktop').toUpperCase())}</span>
             </div>
             <div class="wp-premium-strip">
-              <span>${isPremium ? 'FULL RESOLUTION' : 'FREE DOWNLOAD'}</span>
-              ${isPremium ? `<strong>${priceText}</strong>` : '<strong>HD</strong>'}
+              <span>${isPremium ? 'FULL RES' : 'HD DOWNLOAD'}</span>
+              ${isPremium ? `<strong>${priceText}</strong>` : '<strong>FREE</strong>'}
             </div>
-            <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
+            <div class="wp-downloads">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
           </div>
         </article>
       `;
