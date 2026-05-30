@@ -5190,6 +5190,12 @@ function renderOrders() {
   const tbody = document.getElementById('orders-tbody');
   if (!tbody) return;
 
+  /* Phase A4.6.1 — keep the orders table locked to the left edge.
+     Some browsers preserve horizontal scroll after deploy refresh, which
+     can visually cut the order number column. */
+  const ordersWrap = document.querySelector('#adm-orders .orders-table-wrap');
+  if (ordersWrap) ordersWrap.scrollLeft = 0;
+
   const orders = adminPhase9FilteredOrders();
   adminPhase9RenderOrderSummaryChips(orders);
 
@@ -7624,6 +7630,12 @@ function renderOrders() {
   const tbody = document.getElementById('orders-tbody');
   if (!tbody) return;
 
+  /* Phase A4.6.1 — keep the orders table locked to the left edge.
+     Some browsers preserve horizontal scroll after deploy refresh, which
+     can visually cut the order number column. */
+  const ordersWrap = document.querySelector('#adm-orders .orders-table-wrap');
+  if (ordersWrap) ordersWrap.scrollLeft = 0;
+
   const orders = adminPhase9FilteredOrders();
   adminPhase9RenderOrderSummaryChips(orders);
   adminA31SyncTopbarAction();
@@ -7692,6 +7704,11 @@ function renderOrders() {
       </tr>
     `;
   }).join('');
+
+  requestAnimationFrame(() => {
+    const ordersWrap = document.querySelector('#adm-orders .orders-table-wrap');
+    if (ordersWrap) ordersWrap.scrollLeft = 0;
+  });
 }
 
 (function adminA31InitOrdersLiveSync(){
@@ -7731,6 +7748,12 @@ function adminA32TouchSync(text = '') {
 function renderOrders() {
   const tbody = document.getElementById('orders-tbody');
   if (!tbody) return;
+
+  /* Phase A4.6.1 — keep the orders table locked to the left edge.
+     Some browsers preserve horizontal scroll after deploy refresh, which
+     can visually cut the order number column. */
+  const ordersWrap = document.querySelector('#adm-orders .orders-table-wrap');
+  if (ordersWrap) ordersWrap.scrollLeft = 0;
 
   const orders = adminPhase9FilteredOrders();
   adminPhase9RenderOrderSummaryChips(orders);
@@ -8343,417 +8366,3 @@ async function deleteCoupon(id) {
     showToast(`❌ ${err.message}`);
   }
 }
-
-
-/* ============================================================
-   PADDOX ADMIN PHASE A4.6 — ORDERS FINAL PRODUCTION POLISH
-   Premium fulfilment dashboard overrides
-   ============================================================ */
-
-const ADMIN_A46_STATUS_LABELS = {
-  placed: 'Placed',
-  processing: 'Processing',
-  shipped: 'Shipped',
-  out_for_delivery: 'Out for Delivery',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-  refunded: 'Refunded'
-};
-
-function adminA46StatusLabel(status = 'placed') {
-  const key = String(status || 'placed').toLowerCase();
-  return ADMIN_A46_STATUS_LABELS[key] || key.replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
-
-function adminA46Pricing(order = {}) {
-  const pricing = order.pricing || {};
-  const coupon = order.coupon || {};
-  const items = Array.isArray(order.items) ? order.items : [];
-
-  const effectiveSubtotal = items.reduce((sum, item) => {
-    const qty = Number(item.quantity || 1);
-    return sum + Number(item.price || 0) * qty;
-  }, 0);
-
-  const originalSubtotal = items.reduce((sum, item) => {
-    const qty = Number(item.quantity || 1);
-    const price = Number(item.price || 0);
-    const original = Math.max(Number(item.originalPrice || item.product?.price || price), price);
-    return sum + original * qty;
-  }, 0);
-
-  const subtotal = Number(
-    pricing.subtotal ??
-    (originalSubtotal || effectiveSubtotal)
-  );
-
-  const productDiscount = Number(
-    pricing.productDiscount ??
-    Math.max(0, originalSubtotal - effectiveSubtotal)
-  );
-
-  const couponDiscount = Number(
-    coupon.discount ??
-    pricing.discount ??
-    0
-  );
-
-  const totalDiscount = Number(
-    pricing.totalDiscount ??
-    (productDiscount + couponDiscount)
-  );
-
-  const shipping = Number(pricing.shipping || 0);
-  const tax = Number(pricing.tax || 0);
-  const total = Number(pricing.total ?? Math.max(0, subtotal - totalDiscount + shipping + tax));
-
-  return {
-    subtotal,
-    productDiscount,
-    couponDiscount,
-    totalDiscount,
-    shipping,
-    tax,
-    total,
-    couponCode: coupon.code || order.couponCode || ''
-  };
-}
-
-function adminA46PaymentStatus(order = {}) {
-  return String(order.payment?.status || order.paymentStatus || 'pending').toLowerCase();
-}
-
-function adminA46PaymentClass(order = {}) {
-  const status = adminA46PaymentStatus(order);
-  if (status === 'paid') return 'paid';
-  if (status === 'failed') return 'failed';
-  if (status === 'refunded') return 'refunded';
-  return 'pending';
-}
-
-function adminA46OrderHealth(order = {}) {
-  const status = String(order.status || 'placed').toLowerCase();
-  if (status === 'cancelled' || status === 'refunded') return 'danger';
-  if (status === 'delivered') return 'success';
-  if (status === 'shipped' || status === 'out_for_delivery') return 'warn';
-  return 'active';
-}
-
-function adminPhase9OpenReceipt(orderId) {
-  if (!orderId) return;
-  window.open(`receipt.html?orderId=${encodeURIComponent(orderId)}&admin=1`, '_blank');
-}
-
-function adminPhase9RenderOrderSummaryChips(orders = []) {
-  const page = document.getElementById('adm-orders');
-  if (!page) return;
-
-  let strip = document.getElementById('admin-order-summary-chips');
-  if (!strip) {
-    strip = document.createElement('div');
-    strip.id = 'admin-order-summary-chips';
-    strip.className = 'admin-kpi-inline admin-a46-kpi-grid';
-    const toolbar = page.querySelector('.page-toolbar');
-    toolbar?.insertAdjacentElement('afterend', strip);
-  }
-
-  const paidOrders = orders.filter(order => adminA46PaymentStatus(order) === 'paid');
-  const active = orders.filter(order => !['delivered','cancelled','refunded'].includes(String(order.status || '').toLowerCase()));
-  const shipped = orders.filter(order => ['shipped','out_for_delivery'].includes(String(order.status || '').toLowerCase()));
-  const discounts = orders.reduce((sum, order) => sum + adminA46Pricing(order).totalDiscount, 0);
-  const revenue = paidOrders.reduce((sum, order) => sum + adminA46Pricing(order).total, 0);
-
-  strip.innerHTML = `
-    <div class="admin-kpi-chip admin-a46-chip">
-      <span>Orders</span><strong>${orders.length}</strong><em>Filtered list</em>
-    </div>
-    <div class="admin-kpi-chip admin-a46-chip">
-      <span>Paid Revenue</span><strong>${money(revenue)}</strong><em>Paid orders only</em>
-    </div>
-    <div class="admin-kpi-chip admin-a46-chip">
-      <span>Active Fulfilment</span><strong>${active.length}</strong><em>Needs action</em>
-    </div>
-    <div class="admin-kpi-chip admin-a46-chip">
-      <span>In Transit</span><strong>${shipped.length}</strong><em>Shipping flow</em>
-    </div>
-    <div class="admin-kpi-chip admin-a46-chip">
-      <span>Discounts Given</span><strong>${money(discounts)}</strong><em>Product + coupon</em>
-    </div>
-  `;
-}
-
-function renderOrders() {
-  const tbody = document.getElementById('orders-tbody');
-  if (!tbody) return;
-
-  const orders = adminPhase9FilteredOrders();
-  adminPhase9RenderOrderSummaryChips(orders);
-
-  if (!orders.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8">
-          <div class="admin-empty-state admin-a46-empty">
-            <strong>No matching orders</strong>
-            Adjust filters or wait for the next PADDOX checkout.
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = orders.map(order => {
-    const c = adminPhase9Customer(order);
-    const pricing = adminA46Pricing(order);
-    const items = order.items || [];
-    const itemLabel = items.length
-      ? `${items.length} item${items.length > 1 ? 's' : ''} · ${items.slice(0, 2).map(i => i.name || i.product?.name || 'Product').join(', ')}${items.length > 2 ? ' +' + (items.length - 2) : ''}`
-      : 'No items';
-    const statusKey = String(order.status || 'placed').toLowerCase();
-    const health = adminA46OrderHealth(order);
-    const payStatus = adminA46PaymentStatus(order);
-
-    return `
-      <tr class="admin-order-row admin-a46-order-row ${health}">
-        <td>
-          <div class="admin-order-code">#${adminPhase9Text(order.orderNumber || order._id)}</div>
-          <div class="admin-order-sub">${adminPhase9Text(String(order._id || '').slice(-12))}</div>
-        </td>
-        <td>
-          <div class="admin-customer-name">${adminPhase9Text(c.name)}</div>
-          <div class="admin-customer-meta">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
-        </td>
-        <td>
-          <span class="admin-items-pill admin-items-pill-clean">
-            <span class="admin-items-dot"></span>${adminPhase9Text(itemLabel)}
-          </span>
-          ${pricing.couponCode ? `<div class="admin-a46-coupon-pill">Coupon · ${adminPhase9Text(pricing.couponCode)}</div>` : ''}
-        </td>
-        <td style="color:var(--muted2)">${adminPhase9Date(order.createdAt)}</td>
-        <td>
-          <span class="admin-pay-badge admin-pay-${adminPhase9Text(adminA46PaymentClass(order))}">
-            ${payStatus === 'paid' ? '✓' : '•'} ${adminPhase9Text(adminPhase9PaymentMethod(order))}
-          </span>
-          <div class="admin-a46-pay-sub">${adminPhase9Text(payStatus)}</div>
-        </td>
-        <td>
-          <div class="admin-a46-total">${money(pricing.total)}</div>
-          ${pricing.totalDiscount ? `<div class="admin-a46-save">Saved ${money(pricing.totalDiscount)}</div>` : ''}
-        </td>
-        <td>
-          <span class="sb ${adminPhase9StatusClass(statusKey)}">${adminPhase9Text(adminA46StatusLabel(statusKey))}</span>
-        </td>
-        <td>
-          <div class="admin-order-actions admin-order-actions-wide admin-a46-actions">
-            <button class="admin-mini-btn red" onclick="openOrderDetails('${order._id}')">View</button>
-            <button class="admin-mini-btn" onclick="adminPhase9OpenReceipt('${order._id}')">Receipt</button>
-            <div class="admin-inline-status-wrap">
-              <select class="admin-inline-status" id="admin-status-${order._id}">
-                ${adminPhase9StatusOptions(statusKey)}
-              </select>
-              <button class="admin-mini-btn" onclick="updateOrderStatus('${order._id}', document.getElementById('admin-status-${order._id}')?.value, false)">Update</button>
-            </div>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function adminPhase9StatusTimeline(status = '') {
-  const current = String(status || 'placed').toLowerCase();
-  const isCancelled = current === 'cancelled' || current === 'refunded';
-  let currentIndex = ADMIN_PHASE9_STATUS_FLOW.indexOf(current);
-  if (currentIndex < 0) currentIndex = 0;
-
-  if (isCancelled) {
-    return `
-      <div class="admin-a46-timeline is-cancelled">
-        <div class="admin-a46-step danger">
-          <span></span><strong>${adminA46StatusLabel(current)}</strong><em>Order flow stopped</em>
-        </div>
-      </div>`;
-  }
-
-  return `
-    <div class="admin-a46-timeline">
-      ${ADMIN_PHASE9_STATUS_FLOW.map((step, index) => `
-        <div class="admin-a46-step ${index < currentIndex ? 'done' : index === currentIndex ? 'now' : ''}">
-          <span></span>
-          <strong>${adminA46StatusLabel(step)}</strong>
-          <em>${index < currentIndex ? 'Completed' : index === currentIndex ? 'Current' : 'Pending'}</em>
-        </div>
-      `).join('')}
-    </div>`;
-}
-
-function openOrderDetails(orderId) {
-  ensureOrderModal();
-  const order = (REAL_ORDERS || []).find(o => String(o._id) === String(orderId));
-  if (!order) {
-    showToast('❌ Order not found');
-    return;
-  }
-
-  const c = adminPhase9Customer(order);
-  const items = order.items || [];
-  const address = order.shippingAddress || {};
-  const pricing = adminA46Pricing(order);
-  const payStatus = adminA46PaymentStatus(order);
-  const payMethod = adminPhase9PaymentMethod(order);
-  const transactionId = order.payment?.transactionId || order.payment?.razorpayPaymentId || order.payment?.paymentId || order.payment?.reference || order.payment?.demoPaymentId || '-';
-
-  document.getElementById('od-title').textContent = `#${order.orderNumber || order._id}`;
-  document.getElementById('od-body').innerHTML = `
-    <div class="admin-a46-modal-grid">
-      <div class="od-box admin-a46-box">
-        <div class="od-label">Customer</div>
-        <div class="od-value">${adminPhase9Text(c.name)}</div>
-        <div class="admin-a46-muted">${adminPhase9Text(c.email || c.phone || 'No contact')}</div>
-      </div>
-      <div class="od-box admin-a46-box">
-        <div class="od-label">Order Date</div>
-        <div class="od-value">${adminPhase9DateTime(order.createdAt)}</div>
-        <div class="admin-a46-muted">Live backend order record</div>
-      </div>
-      <div class="od-box admin-a46-box">
-        <div class="od-label">Order Status</div>
-        <div class="od-value"><span class="sb ${adminPhase9StatusClass(order.status)}">${adminPhase9Text(adminA46StatusLabel(order.status))}</span></div>
-      </div>
-      <div class="od-box admin-a46-box">
-        <div class="od-label">Payment</div>
-        <div class="od-value"><span class="admin-pay-badge admin-pay-${adminPhase9Text(adminA46PaymentClass(order))}">${adminPhase9Text(payStatus.toUpperCase())}</span></div>
-        <div class="admin-a46-muted">${adminPhase9Text(payMethod)} · ${adminPhase9Text(transactionId)}</div>
-      </div>
-    </div>
-
-    <div class="od-box admin-a46-box">
-      <div class="od-label">Fulfilment Timeline</div>
-      ${adminPhase9StatusTimeline(order.status)}
-    </div>
-
-    <div class="admin-a46-detail-columns">
-      <div class="od-box admin-a46-box">
-        <div class="od-label">Shipping Address</div>
-        <div class="od-value admin-a46-address">
-          ${adminPhase9Text(address.name || c.name)}<br>
-          ${adminPhase9Text(address.line1 || address.address || '')}${address.line2 ? '<br>' + adminPhase9Text(address.line2) : ''}<br>
-          ${adminPhase9Text(address.city || '')}, ${adminPhase9Text(address.state || '')} - ${adminPhase9Text(address.pincode || '')}<br>
-          ${adminPhase9Text(address.country || 'India')} · ${adminPhase9Text(address.phone || '')}
-        </div>
-      </div>
-      <div class="od-box admin-a46-box">
-        <div class="od-label">Amount Summary</div>
-        <div class="admin-a46-price-lines">
-          <div><span>Subtotal</span><strong>${money(pricing.subtotal)}</strong></div>
-          ${pricing.productDiscount ? `<div class="discount"><span>Product Discount</span><strong>-${money(pricing.productDiscount)}</strong></div>` : ''}
-          ${pricing.couponDiscount ? `<div class="discount"><span>Coupon Discount${pricing.couponCode ? ` · ${adminPhase9Text(pricing.couponCode)}` : ''}</span><strong>-${money(pricing.couponDiscount)}</strong></div>` : ''}
-          <div><span>Shipping</span><strong>${money(pricing.shipping)}</strong></div>
-          <div><span>Tax</span><strong>${money(pricing.tax)}</strong></div>
-          <div class="grand"><span>Total</span><strong>${money(pricing.total)}</strong></div>
-        </div>
-      </div>
-    </div>
-
-    <table class="od-items admin-a46-items">
-      <thead><tr><th>Product</th><th>Size/Color</th><th>Qty</th><th>Price</th><th>Saved</th><th>Total</th></tr></thead>
-      <tbody>
-        ${items.map(item => {
-          const qty = Number(item.quantity || 1);
-          const price = Number(item.price || 0);
-          const original = Math.max(Number(item.originalPrice || item.product?.price || price), price);
-          const saved = Math.max(0, original - price) * qty;
-          return `
-            <tr>
-              <td>${adminPhase9Text(item.name || item.product?.name || 'Product')}</td>
-              <td>${adminPhase9Text([item.size, item.color].filter(Boolean).join(' / ') || '-')}</td>
-              <td>${qty}</td>
-              <td>${money(price)}</td>
-              <td>${saved ? '-' + money(saved) : '-'}</td>
-              <td>${money(price * qty)}</td>
-            </tr>
-          `;
-        }).join('') || '<tr><td colspan="6" style="color:#777;text-align:center">No items</td></tr>'}
-      </tbody>
-    </table>
-
-    <div class="od-status-row admin-a46-status-row">
-      <div>
-        <div class="od-label" style="margin:0;color:var(--red)">Update Fulfilment Status</div>
-        <div class="admin-a46-muted">Customer notifications and order history stay synced.</div>
-      </div>
-      <select class="od-select" id="od-status-select">
-        ${adminPhase9StatusOptions(order.status)}
-      </select>
-      <button class="od-btn" onclick="updateOrderStatus('${order._id}')">Update</button>
-    </div>
-
-    <div class="admin-order-modal-actions admin-a46-modal-actions">
-      <button class="admin-mini-btn red" onclick="adminPhase9OpenReceipt('${order._id}')">Open Receipt</button>
-      <button class="admin-mini-btn" onclick="exportAdminOrdersCSV()">Export Current View</button>
-      <button class="admin-mini-btn danger" onclick="deleteAdminOrder('${order._id}', '${(order.orderNumber || order._id)}')">Delete Order</button>
-    </div>
-  `;
-
-  document.getElementById('order-details-modal').classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
-
-function exportAdminOrdersCSV() {
-  const orders = adminPhase9FilteredOrders();
-  if (!orders.length) {
-    showToast('No orders to export');
-    return;
-  }
-
-  const rows = [[
-    'Order Number','Order ID','Customer','Email','Phone','Date','Payment Method','Payment Status','Order Status',
-    'Subtotal','Product Discount','Coupon Code','Coupon Discount','Total Discount','Shipping','Tax','Total','Items'
-  ]];
-
-  orders.forEach(order => {
-    const c = adminPhase9Customer(order);
-    const pricing = adminA46Pricing(order);
-    rows.push([
-      order.orderNumber || '',
-      order._id || '',
-      c.name,
-      c.email,
-      c.phone,
-      adminPhase9DateTime(order.createdAt),
-      adminPhase9PaymentMethod(order),
-      adminA46PaymentStatus(order),
-      order.status || 'placed',
-      pricing.subtotal,
-      pricing.productDiscount,
-      pricing.couponCode,
-      pricing.couponDiscount,
-      pricing.totalDiscount,
-      pricing.shipping,
-      pricing.tax,
-      pricing.total,
-      (order.items || []).map(item => `${item.name || 'Product'} x ${item.quantity || 1}`).join(' | ')
-    ]);
-  });
-
-  const csv = rows.map(row => row.map(cell => `"${String(cell ?? '').replaceAll('"','""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `paddox-orders-a4-6-${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-  showToast('Orders CSV exported with discounts and coupons');
-}
-
-function adminA46RefreshOrders() {
-  if (typeof loadOrders === 'function') {
-    showToast('Refreshing fulfilment command center...');
-    loadOrders();
-  }
-}
-window.adminA31RefreshOrders = adminA46RefreshOrders;
