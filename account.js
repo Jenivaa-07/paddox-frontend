@@ -137,6 +137,12 @@ window.AuthAPI = {
       body: JSON.stringify(payload || {})
     });
   },
+  forgotPassword(email) {
+    return authFetch('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email: String(email || '').trim() })
+    });
+  },
   logout() {
     const token = window.TokenManager.getAccess();
     return authFetch('/auth/logout', {
@@ -310,6 +316,12 @@ window.AuthAPI = {
       body: JSON.stringify(payload || {})
     });
   },
+  forgotPassword(email) {
+    return authFetch('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email: String(email || '').trim() })
+    });
+  },
   logout() {
     const token = window.TokenManager.getAccess();
     return authFetch('/auth/logout', {
@@ -355,6 +367,11 @@ document
 document
   .getElementById('register-btn')
   ?.addEventListener('click', doRegister);
+
+/* FORGOT PASSWORD */
+document
+  .querySelector('.forgot-link')
+  ?.addEventListener('click', doForgotPassword);
 
 /* ENTER KEY */
 document
@@ -406,6 +423,37 @@ async function doLogin() {
   } catch (err) {
     console.error('PADDOX login failed:', err);
     showToast(`❌ ${safeErrorMessage(err, 'Login failed')}`);
+  }
+}
+
+/* FORGOT PASSWORD FUNCTION */
+async function doForgotPassword() {
+  const fieldEmail = document.getElementById('li-email')?.value.trim() || '';
+  const email = fieldEmail || prompt('Enter your PADDOX account email');
+
+  if (!email) {
+    showToast('⚠️ Enter your email first');
+    return;
+  }
+
+  try {
+    showToast('📧 Sending reset link...');
+    const data = await authFetch('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email: String(email).trim() })
+    });
+
+    const sent = data?.data?.emailSent ?? data?.emailSent;
+    if (sent === false) {
+      showToast('⚠️ Reset created, but email delivery failed. Check backend mail config.');
+      console.warn('PADDOX forgot password mail status:', data);
+      return;
+    }
+
+    showToast('✅ Password reset email sent');
+  } catch (err) {
+    console.error('PADDOX forgot password failed:', err);
+    showToast(`❌ ${safeErrorMessage(err, 'Could not send reset email')}`);
   }
 }
 
