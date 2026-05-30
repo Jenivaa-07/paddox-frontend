@@ -886,50 +886,23 @@ window.addEventListener('load', () => {
 
 /* ══ WALLPAPERS ══ */
 let wpCat = 'all';
-const FANHUB_ASSET_API_BASE = 'https://paddox-backend.onrender.com/api/assets';
-
-function fanhubToken() {
-  return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('accessToken') ||
-    ''
-  );
-}
-
-function fanhubAssetImage(asset = {}) {
-  return (
-    asset.thumbnail?.url ||
-    asset.image?.url ||
-    asset.desktopFile?.url ||
-    asset.mobileFile?.url ||
-    ''
-  );
-}
-
-function fanhubEsc(value = '') {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
 
 async function renderWallpapers() {
   const grid = document.getElementById('wp-grid');
   if (!grid) return;
 
+  grid.classList.add('wp-grid-premium');
   grid.innerHTML = `
-    <div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted)">
-      Loading wallpapers...
+    <div class="fh-empty-state" style="grid-column:1/-1">
+      <div class="fh-empty-mark fh-mark-loading"></div>
+      <h3>Loading PADDOX wallpaper vault...</h3>
+      <p>Checking desktop, mobile and premium access data.</p>
     </div>
   `;
 
   try {
-    const res = await fetch(`${FANHUB_ASSET_API_BASE}?limit=40`);
+    const res = await fetch('https://paddox-backend.onrender.com/api/assets?limit=60');
     const data = await res.json().catch(() => ({}));
-
     const assets = data.data?.assets || data.data || data.assets || [];
 
     if (!data.success || !assets.length) {
@@ -937,14 +910,15 @@ async function renderWallpapers() {
       return;
     }
 
-    const list = assets.filter(w =>
-      wpCat === 'all' ||
-      (wpCat === 'free' ? w.type === 'free' : w.category === wpCat)
-    );
+    const list = assets.filter(w => {
+      const cat = String(w.category || '').toLowerCase();
+      const type = String(w.type || 'free').toLowerCase();
+      return wpCat === 'all' || (wpCat === 'free' ? type === 'free' : cat === wpCat);
+    });
 
     if (!list.length) {
       grid.innerHTML = `
-        <div class="fh-empty-state">
+        <div class="fh-empty-state" style="grid-column:1/-1">
           <div class="fh-empty-mark fh-mark-wallpapers"></div>
           <h3>No wallpapers in this filter yet</h3>
           <p>Switch to All or add more digital assets from Admin → Digital Assets.</p>
@@ -958,64 +932,47 @@ async function renderWallpapers() {
       window.__PADDOX_ASSETS__[w._id] = {
         id: w._id,
         name: w.name,
-        url: fanhubAssetImage(w),
-        desktopUrl: w.desktopFile?.url || w.image?.url || '',
-        mobileUrl: w.mobileFile?.url || '',
-        type: w.type,
-        price: w.price || 0,
-        resolution: w.resolution,
-        desktopResolution: w.desktopFile?.resolution || 'Desktop',
-        mobileResolution: w.mobileFile?.resolution || 'Mobile'
+        cover: w.thumbnail?.url || w.image?.url || w.desktop?.url || w.mobile?.url,
+        desktop: w.desktop?.url || w.image?.url,
+        mobile: w.mobile?.url,
+        type: String(w.type || 'free').toLowerCase(),
+        price: Number(w.price || 0),
+        orientation: w.orientation || 'desktop',
+        resolution: w.resolution || 'HD'
       };
     });
 
     grid.innerHTML = list.map((w, i) => {
-      const img = fanhubAssetImage(w);
-      const isPremium = String(w.type || '').toLowerCase() === 'premium';
-      const hasDesktop = !!(w.desktopFile?.url || w.image?.url);
-      const hasMobile = !!w.mobileFile?.url;
-      const name = fanhubEsc(w.name || 'PADDOX Wallpaper');
-
+      const asset = window.__PADDOX_ASSETS__[w._id];
+      const isPremium = asset.type === 'premium';
+      const hasDesktop = !!asset.desktop;
+      const hasMobile = !!asset.mobile;
+      const cover = asset.cover || asset.desktop || asset.mobile || '';
+      const safeName = String(w.name || 'Wallpaper').replace(/'/g, "\\'");
       return `
-        <div class="wp-card wp-card-digital" style="animation-delay:${i * 0.06}s">
-          <img class="wp-img"
-            src="${fanhubEsc(img)}"
-            alt="${name}"
-            loading="lazy"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-          />
-          <div class="wp-thumb" style="display:none"></div>
-
-          <span class="wp-tag wt-${!isPremium ? 'free' : 'prem'}">
-            ${!isPremium ? 'Free · Login Required' : `Premium ₹${Number(w.price || 0).toLocaleString('en-IN')}`}
-          </span>
-
-          <span class="wp-res">${fanhubEsc(w.resolution || 'HD')}</span>
-
-          <div class="wp-overlay">
-            <div class="wp-name">${name}</div>
-            <div class="wp-device-actions">
-              ${hasDesktop ? `
-                <button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}', 'desktop')">
-                  ${isPremium ? 'Unlock Desktop' : 'Desktop'}
-                </button>` : ''}
-              ${hasMobile ? `
-                <button class="wp-dl-btn wp-dl-btn-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}', 'mobile')">
-                  ${isPremium ? 'Unlock Mobile' : 'Mobile'}
-                </button>` : ''}
-            </div>
-            <button class="wp-prev-btn"
-              onclick="event.stopPropagation();openPreview('${fanhubEsc(img)}', '${w._id}', '${String(w.name || 'Wallpaper').replace(/'/g, "\\'")}')">
-              Preview
-            </button>
-            <div class="wp-download-note">
-              ${isPremium ? 'Paid unlock flow coming next' : 'Sign in required for every download'}
-            </div>
-            <div style="font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px">
-              ↓ ${(w.downloads || 0).toLocaleString()} downloads
-            </div>
+        <article class="wp-card wp-card-premium ${isPremium ? 'is-premium' : 'is-free'}" style="animation-delay:${i * 0.06}s">
+          <div class="wp-media-wrap">
+            ${cover ? `<img class="wp-img" src="${cover}" alt="${w.name}" loading="lazy"/>` : '<div class="wp-thumb"></div>'}
+            <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${isPremium ? `Premium · ₹${Number(asset.price || 0).toLocaleString('en-IN')}` : 'Free · Login Required'}</span>
+            <span class="wp-res">${asset.resolution}</span>
           </div>
-        </div>
+          <div class="wp-info-panel">
+            <div class="wp-category">${String(w.category || 'wallpaper').toUpperCase()}</div>
+            <h3>${w.name || 'PADDOX Wallpaper'}</h3>
+            <div class="wp-device-row">
+              <span class="${hasDesktop ? 'on' : ''}">Desktop</span>
+              <span class="${hasMobile ? 'on' : ''}">Mobile</span>
+              <span>${String(asset.orientation || 'desktop').toUpperCase()}</span>
+            </div>
+            <p>${isPremium ? 'Unlock this premium PADDOX wallpaper pack after purchase.' : 'Sign in required for every PADDOX wallpaper download.'}</p>
+            <div class="wp-action-grid ${hasDesktop && hasMobile ? 'two' : ''}">
+              ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${isPremium ? 'Buy Desktop' : 'Desktop'}</button>` : ''}
+              ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}','mobile')">${isPremium ? 'Buy Mobile' : 'Mobile'}</button>` : ''}
+              <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${safeName}')">Preview</button>
+            </div>
+            <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
+          </div>
+        </article>
       `;
     }).join('');
 
@@ -1027,36 +984,37 @@ async function renderWallpapers() {
 
 async function handleWpDownload(assetId, format = 'desktop') {
   try {
-    const token = fanhubToken();
+    const localAsset = window.__PADDOX_ASSETS__?.[assetId] || {};
+    const token = (
+      localStorage.getItem('token') ||
+      localStorage.getItem('paddox_access_token') ||
+      localStorage.getItem('accessToken') ||
+      ''
+    );
 
     if (!token) {
-      showToast('🔐 Login required to download PADDOX wallpapers');
+      showToast('🔒 Please login to download PADDOX wallpapers');
       setTimeout(() => {
-        window.location.href = `account.html?redirect=${encodeURIComponent('fanhub.html#wallpapers')}`;
+        window.location.href = `account.html?redirect=${encodeURIComponent('fanhub.html#sec-wallpapers')}`;
       }, 900);
+      return;
+    }
+
+    if (localAsset.type === 'premium') {
+      showToast(`🏁 Premium wallpaper checkout coming next: ₹${Number(localAsset.price || 0).toLocaleString('en-IN')}`);
       return;
     }
 
     showToast(`⏳ Preparing ${format} wallpaper...`);
 
-    const localAsset = window.__PADDOX_ASSETS__?.[assetId] || {};
-    let name = localAsset.name || 'Paddox Wallpaper';
-
-    const res = await fetch(`${FANHUB_ASSET_API_BASE}/${encodeURIComponent(assetId)}/download?format=${encodeURIComponent(format)}`, {
-      method: 'GET',
+    const res = await fetch(`https://paddox-backend.onrender.com/api/assets/${assetId}/download?format=${encodeURIComponent(format)}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-
     const data = await res.json().catch(() => ({}));
 
-    if (res.status === 402 || data?.premium) {
-      showToast('🏁 Premium wallpaper checkout comes in the next phase');
-      return;
-    }
-
-    if (res.status === 401 || res.status === 403) {
-      showToast('🔐 Please login again to download');
-      setTimeout(() => window.location.href = 'account.html', 900);
+    if (res.status === 401) {
+      showToast('🔒 Please login to download PADDOX wallpapers');
+      setTimeout(() => window.location.href = 'account.html?redirect=fanhub.html%23sec-wallpapers', 900);
       return;
     }
 
@@ -1065,12 +1023,8 @@ async function handleWpDownload(assetId, format = 'desktop') {
     }
 
     const info = data.data || data;
-    const downloadUrl =
-      info.downloadUrl ||
-      info.url ||
-      info.asset?.image?.url;
-
-    name = info.name || name;
+    const downloadUrl = info.downloadUrl || info.url || localAsset[format] || localAsset.desktop || localAsset.cover;
+    const name = info.name || localAsset.name || 'Paddox Wallpaper';
 
     if (!downloadUrl) {
       showToast('❌ Download URL missing');
@@ -1085,18 +1039,17 @@ async function handleWpDownload(assetId, format = 'desktop') {
     link.download = `${safeName}.jpg`;
     link.target = '_blank';
     link.rel = 'noopener';
-
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     closePreview();
     showToast(`✅ Downloading ${format} wallpaper`);
-    setTimeout(renderWallpapers, 1200);
+    setTimeout(() => renderWallpapers(), 1200);
 
   } catch (err) {
     console.error('Download failed:', err);
-    showToast(`❌ ${err.message || 'Download failed. Please try again.'}`);
+    showToast(`❌ ${err.message || 'Download failed'}`);
   }
 }
 
@@ -1121,21 +1074,25 @@ function openPreview(img, assetId, name) {
   if (!modal || !image || !btn) return;
 
   image.src = makeCloudinaryPreviewUrl(img);
-  image.alt = name || 'Wallpaper Preview';
+image.alt = name || 'Wallpaper Preview';
 
-  image.oncontextmenu = e => {
-    e.preventDefault();
-    showToast('🔒 Preview image saving is disabled.');
-  };
+/* Disable right click */
+image.oncontextmenu = e => {
+  e.preventDefault();
+  showToast('🔒 Preview image saving is disabled.');
+};
 
-  image.draggable = false;
-  image.style.userSelect = 'none';
-  image.style.webkitUserDrag = 'none';
-  image.style.pointerEvents = 'auto';
+/* Disable dragging */
+image.draggable = false;
+
+/* Disable selecting */
+image.style.userSelect = 'none';
+image.style.webkitUserDrag = 'none';
+image.style.pointerEvents = 'auto';
 
   if (title) title.textContent = name || 'Wallpaper Preview';
 
-  btn.onclick = () => handleWpDownload(assetId, 'desktop');
+  btn.onclick = () => handleWpDownload(assetId);
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
@@ -1160,6 +1117,19 @@ function closePreview() {
   document.body.style.overflow = '';
 }
 
+function makeCloudinaryPreviewUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    return url.replace('/image/upload/', '/image/upload/w_900,q_auto:low/');
+  }
+
+  return url;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePreview();
+});
 /* ═════════ PREVIEW PROTECTION ═════════ */
 document.addEventListener('contextmenu', e => {
   if (
@@ -1183,22 +1153,30 @@ function renderWallpapersFallback() {
     grid.innerHTML = `
       <div class="fh-empty-state">
         <div class="fh-empty-mark fh-mark-wallpapers"></div>
-        <h3>No wallpapers in this filter</h3>
-        <p>Try another category.</p>
-      </div>`;
+        <h3>No wallpapers in this filter yet</h3>
+        <p>Try another category or upload new wallpapers from Admin.</p>
+      </div>
+    `;
     return;
   }
 
-  grid.innerHTML = list.map(w => `
-    <div class="wp-card" onclick="openPreview('${w.img}', '', '${w.name}')">
-      <img class="wp-img" src="${w.img}" alt="${w.name}">
-      <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">${w.type === 'free' ? 'Free' : 'Premium'}</span>
+  grid.innerHTML = list.map((w, i) => `
+    <div class="wp-card" style="animation-delay:${i * 0.06}s">
+      <img class="wp-img" src="${w.img}" alt="${w.name}" loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <div class="wp-thumb" style="display:none">${w.emoji}</div>
+
+      <span class="wp-tag wt-${w.type === 'free' ? 'free' : 'prem'}">
+        ${w.type === 'free' ? 'Free' : 'Premium'}
+      </span>
+
       <span class="wp-res">${w.res}</span>
+
       <div class="wp-overlay">
         <div class="wp-name">${w.name}</div>
         <button class="wp-dl-btn"
-          onclick="event.stopPropagation();showToast('Login required for PADDOX downloads')">
-          ${w.type === 'free' ? 'Login to Download' : 'Unlock'}
+          onclick="event.stopPropagation();showToast('${w.type === 'free' ? 'Downloading...' : 'Sign in for premium'}')">
+          ${w.type === 'free' ? 'Download' : 'Unlock'}
         </button>
       </div>
     </div>
@@ -1215,7 +1193,6 @@ document.querySelectorAll('.wpf').forEach(btn => {
 });
 
 renderWallpapers();
-
 
 /* ══ DRIVER STATS ══ */
 let activeDriver=0;

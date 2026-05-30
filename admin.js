@@ -3,10 +3,12 @@
    ============================================================ */
 'use strict';
 
-/* Phase A4.7A.1 — safety globals
-   Keep product state available for overview/inventory functions that can run
-   before the product module finishes loading. */
-let REAL_PRODUCTS = [];
+/* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
+var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
+var ASSET_API_BASE = window.ASSET_API_BASE || 'https://paddox-backend.onrender.com/api/assets';
+var REAL_PRODUCTS = window.REAL_PRODUCTS || [];
+var REAL_ASSETS = window.REAL_ASSETS || [];
+
 /* ══════════════════════════════════════
    ADMIN AUTH GUARD
 ══════════════════════════════════════ */
@@ -1214,6 +1216,8 @@ async function loadProducts() {
     console.error(err);
 
     showToast('❌ Failed to load products');
+    REAL_PRODUCTS = Array.isArray(REAL_PRODUCTS) ? REAL_PRODUCTS : [];
+    renderProducts?.();
   }
 }
 
@@ -1805,98 +1809,85 @@ async function bulkRestockLowStock() {
 /* ══ DIGITAL ASSETS GRID ══ */
 /* ═══════════════════════════════════════
    REAL DIGITAL ASSETS SYSTEM
-   Phase A4.7A — Admin polish + desktop/mobile upload foundation
 ═══════════════════════════════════════ */
 
-const ASSET_API_BASE = 'https://paddox-backend.onrender.com/api/assets';
-const PRODUCT_API_BASE =
-  'https://paddox-backend.onrender.com/api/products';
+/* A4.7A.2: API bases and REAL_PRODUCTS are declared at top for hoist-safe loading. */
+var PADDOX_PRODUCT_TEAMS = [
+  { value: 'Ferrari', label: 'Ferrari', aliases: ['ferrari', 'scuderia ferrari'] },
+  { value: 'Red Bull Racing', label: 'Red Bull Racing', aliases: ['red bull', 'red bull racing', 'oracle red bull', 'oracle red bull racing'] },
+  { value: 'Mercedes', label: 'Mercedes', aliases: ['mercedes', 'mercedes-amg', 'mercedes amg'] },
+  { value: 'McLaren', label: 'McLaren', aliases: ['mclaren', 'mclaren f1'] },
+  { value: 'Aston Martin', label: 'Aston Martin', aliases: ['aston martin'] },
+  { value: 'Alpine', label: 'Alpine', aliases: ['alpine', 'bwt alpine'] },
+  { value: 'Williams', label: 'Williams', aliases: ['williams'] },
+  { value: 'Haas F1 Team', label: 'Haas F1 Team', aliases: ['haas', 'haas f1', 'haas f1 team'] },
+  { value: 'Racing Bulls', label: 'Racing Bulls', aliases: ['racing bulls', 'rb', 'visa cash app rb', 'vcarb'] },
+  { value: 'Audi', label: 'Audi', aliases: ['audi', 'kick sauber', 'sauber', 'stake sauber'] },
+  { value: 'Cadillac', label: 'Cadillac', aliases: ['cadillac'] },
+  { value: 'PADDOX Original', label: 'PADDOX Original', aliases: ['paddox', 'paddox original', 'paddox originals'] },
+  { value: 'Collector', label: 'Collector', aliases: ['collector', 'collectors'] }
+];
 
-let REAL_ASSETS = [];
-let EDIT_ASSET_ID = null;
-let ASSET_FILTERS_BOUND = false;
+function getProductTeamOptionsHTML(selected = '') {
+  const selectedKey = String(selected || '').toLowerCase();
+  const optionHtml = PADDOX_PRODUCT_TEAMS.map(team => {
+    const aliases = [team.value, team.label, ...(team.aliases || [])].map(v => String(v).toLowerCase());
+    const isSelected = aliases.includes(selectedKey);
+    return `<option value="${team.value}" ${isSelected ? 'selected' : ''}>${team.label}</option>`;
+  }).join('');
 
-function assetAdminHeaders(json = false) {
-  const headers = {};
-  const token = getAdminToken?.() || '';
-  if (json) headers['Content-Type'] = 'application/json';
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return headers;
+  return `
+    <optgroup label="Shop Team Categories">
+      ${optionHtml.split('</option>').slice(0, 11).filter(Boolean).map(x => x + '</option>').join('')}
+    </optgroup>
+    <optgroup label="PADDOX Collections">
+      ${optionHtml.split('</option>').slice(11).filter(Boolean).map(x => x + '</option>').join('')}
+    </optgroup>
+  `;
 }
 
-function safeAssetText(value = '') {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+function teamMatchesProductFilter(productTeam, selectedTeam) {
+  const wanted = String(selectedTeam || 'all').toLowerCase();
+  if (wanted === 'all') return true;
 
-function assetImage(asset = {}) {
-  return (
-    asset.thumbnail?.url ||
-    asset.image?.url ||
-    asset.desktopFile?.url ||
-    asset.mobileFile?.url ||
-    asset.previewUrl ||
-    asset.url ||
-    'https://via.placeholder.com/800x450?text=PADDOX'
+  const productValue = String(productTeam || '').toLowerCase();
+  const team = PADDOX_PRODUCT_TEAMS.find(item =>
+    [item.value, item.label, ...(item.aliases || [])]
+      .map(v => String(v).toLowerCase())
+      .includes(wanted)
   );
+
+  if (!team) return productValue === wanted;
+
+  return [team.value, team.label, ...(team.aliases || [])]
+    .map(v => String(v).toLowerCase())
+    .some(alias => productValue === alias || productValue.includes(alias));
 }
 
-function assetFileName(id) {
-  const input = document.getElementById(id);
-  return input?.files?.[0]?.name || '';
+function canonicalProductTeam(value = '') {
+  const key = String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  if (!key) return 'PADDOX Original';
+
+  const found = PADDOX_PRODUCT_TEAMS.find(team =>
+    [team.value, team.label, ...(team.aliases || [])]
+      .map(v => String(v).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim())
+      .some(alias => key === alias || key.includes(alias) || alias.includes(key))
+  );
+
+  return found ? found.value : String(value || 'PADDOX Original').trim();
 }
 
-function setAssetFileName(inputId) {
-  const fileName = assetFileName(inputId) || 'No file selected';
-  const labelId =
-    inputId === 'asset-desktop-file'
-      ? 'asset-desktop-name'
-      : inputId === 'asset-mobile-file'
-        ? 'asset-mobile-name'
-        : 'asset-thumbnail-name';
-  const label = document.getElementById(labelId);
-  if (label) label.textContent = fileName;
-}
 
-function updateAssetStats() {
-  const total = REAL_ASSETS.length;
-  const free = REAL_ASSETS.filter(a => String(a.type || 'free').toLowerCase() === 'free').length;
-  const premium = REAL_ASSETS.filter(a => String(a.type || '').toLowerCase() === 'premium').length;
-  const downloads = REAL_ASSETS.reduce((sum, a) => sum + Number(a.downloads || 0), 0);
-
-  const set = (id, value) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = Number(value || 0).toLocaleString('en-IN');
-  };
-
-  set('asset-stat-total', total);
-  set('asset-stat-free', free);
-  set('asset-stat-premium', premium);
-  set('asset-stat-downloads', downloads);
-
-  const info = document.querySelector('.asset-meta-info');
-  if (info) info.textContent = `${total} assets · ${downloads.toLocaleString('en-IN')} downloads`;
-}
-
+/* A4.7A.2: REAL_ASSETS declared at top. */
+let EDIT_ASSET_ID = null;
 /* LOAD ASSETS */
 async function loadAssets() {
   try {
     const res = await fetch(ASSET_API_BASE);
     const data = await res.json();
 
-    REAL_ASSETS =
-      data.data?.assets ||
-      data.data ||
-      data.assets ||
-      [];
+    REAL_ASSETS = Array.isArray(data.data) ? data.data : (Array.isArray(data.assets) ? data.assets : []);
 
-    if (!Array.isArray(REAL_ASSETS)) REAL_ASSETS = [];
-
-    bindAssetAdminControls();
     renderAssets();
 
   } catch (err) {
@@ -1905,136 +1896,136 @@ async function loadAssets() {
   }
 }
 
-function filteredAssets() {
-  const category = document.getElementById('asset-category-filter')?.value || 'all';
-  const access = document.getElementById('asset-access-filter')?.value || 'all';
-  const search = String(document.getElementById('asset-search')?.value || '').toLowerCase().trim();
-
-  return REAL_ASSETS.filter(asset => {
-    const assetCategory = String(asset.category || '').toLowerCase();
-    const assetType = String(asset.type || 'free').toLowerCase();
-    const haystack = [
-      asset.name,
-      asset.description,
-      asset.category,
-      asset.type,
-      asset.resolution,
-      ...(asset.tags || [])
-    ].join(' ').toLowerCase();
-
-    return (
-      (category === 'all' || assetCategory === category) &&
-      (access === 'all' || assetType === access) &&
-      (!search || haystack.includes(search))
-    );
-  });
-}
-
 /* RENDER ASSETS */
 function renderAssets() {
+
   const grid = document.getElementById('assets-grid');
+
   if (!grid) return;
 
-  updateAssetStats();
-
-  const list = filteredAssets();
-
-  if (!list.length) {
+  if (!REAL_ASSETS.length) {
     grid.innerHTML = `
-      <div class="asset-empty-state">
-        <div class="asset-empty-icon">▧</div>
-        <h3>No digital assets found</h3>
-        <p>Upload a desktop or mobile wallpaper pack to start building the PADDOX download library.</p>
-        <button class="adm-btn-red" type="button" onclick="openAssetModal()">Upload Wallpaper</button>
+      <div style="
+        padding:40px;
+        color:#888;
+        font-family:'Barlow Condensed';
+        letter-spacing:2px;
+      ">
+        No assets uploaded yet.
       </div>
     `;
     return;
   }
 
-  grid.innerHTML = list.map(asset => {
-    const image = assetImage(asset);
+  grid.innerHTML = REAL_ASSETS.map(asset => {
+
+    const image =
+      asset.previewUrl ||
+      asset.image?.url ||
+      asset.image ||
+      asset.url ||
+      'https://via.placeholder.com/400x300?text=Paddox';
+
     const name = asset.name || asset.title || 'Untitled';
-    const category = asset.category || 'wallpaper';
-    const access = String(asset.type || 'free').toLowerCase();
-    const isPremium = access === 'premium';
-    const hasDesktop = !!(asset.desktopFile?.url || asset.image?.url);
-    const hasMobile = !!asset.mobileFile?.url;
-    const downloads = Number(asset.downloads || 0).toLocaleString('en-IN');
-    const resolution = asset.resolution || [
-      asset.desktopFile?.resolution,
-      asset.mobileFile?.resolution
-    ].filter(Boolean).join(' + ') || 'HD';
+    const category = asset.category || 'Wallpaper';
+    const access = asset.type || asset.access || 'Free';
 
     return `
-      <div class="asset-card asset-card-premium">
+      <div class="asset-card">
+
         <div class="asset-thumb">
-          <img src="${safeAssetText(image)}" alt="${safeAssetText(name)}">
-          <span class="asset-access-badge ${isPremium ? 'premium' : 'free'}">${isPremium ? 'Premium' : 'Free'}</span>
+          <img src="${image}" alt="${name}">
         </div>
 
         <div class="asset-info">
-          <div class="asset-name">${safeAssetText(name)}</div>
-          <div class="asset-meta">${safeAssetText(category)} · ${safeAssetText(resolution)}</div>
 
-          <div class="asset-device-row">
-            <span class="${hasDesktop ? 'on' : ''}">Desktop</span>
-            <span class="${hasMobile ? 'on' : ''}">Mobile</span>
-            ${isPremium ? `<span class="price">₹${Number(asset.price || 0).toLocaleString('en-IN')}</span>` : ''}
+          <div class="asset-name">
+            ${name}
           </div>
 
-          <div class="asset-dl">↓ ${downloads} downloads</div>
+          <div class="asset-meta">
+            ${category} ·
+            ${access}
+          </div>
+
+          <div class="asset-dl">
+            ↓ ${(asset.downloads || 0).toLocaleString()} downloads
+          </div>
 
           <div class="asset-actions">
-            <button class="asset-btn" onclick="previewAsset('${encodeURIComponent(image)}')">Preview</button>
-            <button class="asset-btn" onclick="editAsset('${asset._id}')">Edit</button>
-            <button class="asset-btn danger" onclick="deleteAsset('${asset._id}')">Delete</button>
+
+            <button
+              class="asset-btn"
+              onclick="previewAsset('${encodeURIComponent(image)}')"
+            >
+              Preview
+            </button>
+<button
+  class="asset-btn"
+  onclick="editAsset(
+    '${asset._id}',
+    '${name}',
+    '${category}',
+    '${access}',
+    '${asset.resolution || '4K'}'
+  )"
+>
+  Edit
+</button>
+            <button
+              class="asset-btn"
+              onclick="deleteAsset('${asset._id}')"
+            >
+              Delete
+            </button>
+
           </div>
+
         </div>
+
       </div>
     `;
+
   }).join('');
 }
 
 /* DELETE ASSET */
 async function deleteAsset(id) {
-  if (!confirm('Delete this asset from PADDOX Digital Assets?')) return;
+
+  if (!confirm('Delete this asset?')) return;
 
   try {
+
     const res = await fetch(`${ASSET_API_BASE}/${id}`, {
-      method: 'DELETE',
-      headers: assetAdminHeaders()
+      method: 'DELETE'
     });
 
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json();
 
-    if (!res.ok || data.success === false) {
+    if (!res.ok) {
       throw new Error(data.message || 'Delete failed');
     }
 
     showToast('🗑️ Asset deleted');
+
     loadAssets();
+    setInterval(loadAssets, 15000);
 
   } catch (err) {
+
     console.error(err);
-    showToast(`❌ ${err.message || 'Failed to delete asset'}`);
+
+    showToast('❌ Failed to delete asset');
+
   }
 }
-
-function editAsset(id) {
-  const asset = REAL_ASSETS.find(a => String(a._id) === String(id));
-  if (!asset) {
-    showToast('❌ Asset not found');
-    return;
-  }
-
+function editAsset(id, name, category, type, resolution = '4K') {
   EDIT_ASSET_ID = id;
 
-  document.getElementById('edit-asset-name').value = asset.name || '';
-  document.getElementById('edit-asset-category').value = String(asset.category || 'wallpaper').toLowerCase();
-  document.getElementById('edit-asset-type').value = String(asset.type || 'free').toLowerCase();
-  document.getElementById('edit-asset-resolution').value = asset.resolution || 'HD';
-  const priceInput = document.getElementById('edit-asset-price');
-  if (priceInput) priceInput.value = Number(asset.price || 0);
+  document.getElementById('edit-asset-name').value = name || '';
+  document.getElementById('edit-asset-category').value = String(category || 'cars').toLowerCase();
+  document.getElementById('edit-asset-type').value = String(type || 'free').toLowerCase();
+  document.getElementById('edit-asset-resolution').value = resolution || '4K';
 
   document.getElementById('edit-asset-modal')?.classList.add('show');
 }
@@ -2050,23 +2041,20 @@ async function saveAssetEdit() {
   try {
     showToast('✏️ Updating asset...');
 
-    const type = document.getElementById('edit-asset-type').value;
-
     const res = await fetch(`${ASSET_API_BASE}/${EDIT_ASSET_ID}`, {
       method: 'PUT',
-      headers: assetAdminHeaders(true),
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: document.getElementById('edit-asset-name').value.trim(),
         category: document.getElementById('edit-asset-category').value,
-        type,
-        price: type === 'premium' ? Number(document.getElementById('edit-asset-price')?.value || 0) : 0,
-        resolution: document.getElementById('edit-asset-resolution').value.trim() || 'HD'
+        type: document.getElementById('edit-asset-type').value,
+        resolution: document.getElementById('edit-asset-resolution').value.trim() || '4K'
       })
     });
 
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json();
 
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Update failed');
+    if (!res.ok) throw new Error(data.message || 'Update failed');
 
     showToast('🔥 Asset updated');
     closeEditModal();
@@ -2074,254 +2062,151 @@ async function saveAssetEdit() {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err.message || 'Update failed'}`);
+    showToast('❌ Update failed');
   }
 }
-
 /* PREVIEW */
 function previewAsset(encodedImageUrl) {
+
   const imageUrl = decodeURIComponent(encodedImageUrl || '');
 
   const modal = document.createElement('div');
 
   modal.innerHTML = `
     <div class="preview-overlay">
+
       <div class="preview-card">
-        <button class="preview-close">✕</button>
-        <img src="${safeAssetText(imageUrl)}" class="preview-image" />
-        <div class="preview-watermark">PADDOX PREVIEW</div>
+
+        <button class="preview-close">
+          ✕
+        </button>
+
+        <img
+          src="${imageUrl}"
+          class="preview-image"
+        />
+
+        <div class="preview-watermark">
+          PADDOX
+        </div>
+
       </div>
+
     </div>
   `;
 
   document.body.appendChild(modal);
 
-  modal.querySelector('.preview-close').onclick = () => modal.remove();
+  modal.querySelector('.preview-close')
+    .onclick = () => modal.remove();
 
-  modal.querySelector('.preview-overlay').onclick = e => {
-    if (e.target.classList.contains('preview-overlay')) modal.remove();
-  };
+  modal.querySelector('.preview-overlay')
+    .onclick = e => {
+      if (e.target.classList.contains('preview-overlay')) {
+        modal.remove();
+      }
+    };
 }
 
-/* UPLOAD MODAL SYSTEM */
+/* UPLOAD */
+/* ═══════════════════════════════════
+   ASSET MODAL SYSTEM
+═══════════════════════════════════ */
+
 function openAssetModal() {
-  document.getElementById('asset-modal')?.classList.add('show');
-  resetAssetModal(false);
+  document
+    .getElementById('asset-modal')
+    ?.classList.add('show');
 }
 
 function closeAssetModal() {
-  document.getElementById('asset-modal')?.classList.remove('show');
-}
-
-function resetAssetModal(clearText = true) {
-  if (clearText) {
-    ['asset-name', 'asset-tags'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-  }
-
-  ['asset-desktop-file', 'asset-mobile-file', 'asset-thumbnail-file'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-    setAssetFileName(id);
-  });
+  document
+    .getElementById('asset-modal')
+    ?.classList.remove('show');
 }
 
 async function submitAssetUpload() {
-  const desktopFile = document.getElementById('asset-desktop-file')?.files?.[0] || null;
-  const mobileFile = document.getElementById('asset-mobile-file')?.files?.[0] || null;
-  const thumbnailFile = document.getElementById('asset-thumbnail-file')?.files?.[0] || null;
 
-  if (!desktopFile && !mobileFile && !thumbnailFile) {
-    showToast('❌ Select desktop or mobile wallpaper file');
+  const file =
+    document.getElementById('asset-file').files[0];
+
+  if (!file) {
+    showToast('❌ Select a file');
     return;
   }
 
   const formData = new FormData();
 
-  if (desktopFile) {
-    formData.append('asset', desktopFile);
-    formData.append('desktopAsset', desktopFile);
-  }
-  if (mobileFile) formData.append('mobileAsset', mobileFile);
-  if (thumbnailFile) formData.append('thumbnail', thumbnailFile);
+  formData.append('asset', file);
 
-  const type = document.getElementById('asset-type')?.value || 'free';
+  formData.append(
+    'name',
+    document.getElementById('asset-name').value
+  );
 
-  formData.append('name', document.getElementById('asset-name')?.value || desktopFile?.name || mobileFile?.name || 'PADDOX Wallpaper');
-  formData.append('category', document.getElementById('asset-category')?.value || 'wallpaper');
-  formData.append('type', type);
-  formData.append('price', type === 'premium' ? Number(document.getElementById('asset-price')?.value || 0) : 0);
-  formData.append('resolution', [
-    document.getElementById('asset-desktop-resolution')?.value || '',
-    document.getElementById('asset-mobile-resolution')?.value || ''
-  ].filter(Boolean).join(' + '));
-  formData.append('desktopResolution', document.getElementById('asset-desktop-resolution')?.value || 'Desktop 4K');
-  formData.append('mobileResolution', document.getElementById('asset-mobile-resolution')?.value || 'Mobile HD');
-  formData.append('tags', document.getElementById('asset-tags')?.value || '');
-  formData.append('description', 'Uploaded from PADDOX Admin digital assets panel');
+  formData.append(
+    'category',
+    document.getElementById('asset-category').value
+  );
+
+  formData.append(
+    'type',
+    document.getElementById('asset-type').value
+  );
+
+  formData.append(
+    'resolution',
+    document.getElementById('asset-resolution').value
+  );
+
+  formData.append(
+    'description',
+    'Uploaded from PADDOX Admin'
+  );
 
   try {
-    showToast('⬆ Uploading digital asset...');
 
-    const res = await fetch(`${ASSET_API_BASE}/upload`, {
-      method: 'POST',
-      headers: assetAdminHeaders(),
-      body: formData
-    });
+    showToast('⬆ Uploading...');
 
-    const data = await res.json().catch(() => ({}));
+    const res = await fetch(
+      `${ASSET_API_BASE}/upload`,
+      {
+        method:'POST',
+        body:formData
+      }
+    );
 
-    if (!res.ok || data.success === false) {
-      throw new Error(data.message || 'Upload failed');
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message);
     }
 
     const createdAsset = data.data?.asset || data.asset || data.data || {};
 
     showToast('🔥 Wallpaper uploaded');
 
-    emitAdminDropNotification?.('asset', {
-      id: createdAsset._id || createdAsset.id || document.getElementById('asset-name')?.value,
-      name: createdAsset.name || document.getElementById('asset-name')?.value || 'New digital asset',
-      category: createdAsset.category || document.getElementById('asset-category')?.value || 'Digital Asset',
+    emitAdminDropNotification('asset', {
+      id: createdAsset._id || createdAsset.id || document.getElementById('asset-name').value,
+      name: createdAsset.name || document.getElementById('asset-name').value || 'New digital asset',
+      category: createdAsset.category || document.getElementById('asset-category').value || 'Digital Asset',
       title: 'New digital asset',
-      message: `${createdAsset.name || document.getElementById('asset-name')?.value || 'A new PADDOX asset'} is now available.`
+      message: `${createdAsset.name || document.getElementById('asset-name').value || 'A new PADDOX asset'} is now available.`
     });
 
     closeAssetModal();
-    resetAssetModal();
+
     loadAssets();
 
   } catch(err) {
+
     console.error(err);
-    showToast(`❌ ${err.message || 'Upload failed'}`);
+
+    showToast('❌ Upload failed');
   }
 }
-
-async function quickUploadAsset(file) {
-  if (!file) return;
-
-  const name = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
-
-  const formData = new FormData();
-  formData.append('asset', file);
-  formData.append('desktopAsset', file);
-  formData.append('name', name || 'PADDOX Wallpaper');
-  formData.append('category', 'wallpaper');
-  formData.append('type', 'free');
-  formData.append('resolution', 'Desktop HD');
-  formData.append('desktopResolution', 'Desktop HD');
-  formData.append('description', 'Quick uploaded from PADDOX Admin drag drop');
-
-  try {
-    showToast('⬆ Quick uploading wallpaper...');
-
-    const res = await fetch(`${ASSET_API_BASE}/upload`, {
-      method: 'POST',
-      headers: assetAdminHeaders(),
-      body: formData
-    });
-
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Quick upload failed');
-
-    showToast('🔥 Quick upload complete');
-    loadAssets();
-  } catch (err) {
-    console.error(err);
-    showToast(`❌ ${err.message || 'Quick upload failed'}`);
-  }
-}
-
-function bindAssetDropBox(box) {
-  const targetId = box.dataset.target;
-  const input = document.getElementById(targetId);
-  if (!input || box.dataset.bound === 'true') return;
-  box.dataset.bound = 'true';
-
-  box.addEventListener('click', () => input.click());
-  box.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      input.click();
-    }
-  });
-
-  input.addEventListener('change', () => {
-    setAssetFileName(targetId);
-    box.classList.toggle('has-file', !!input.files?.length);
-  });
-
-  ['dragenter', 'dragover'].forEach(type => {
-    box.addEventListener(type, e => {
-      e.preventDefault();
-      box.classList.add('drag-over');
-    });
-  });
-
-  ['dragleave', 'drop'].forEach(type => {
-    box.addEventListener(type, e => {
-      e.preventDefault();
-      box.classList.remove('drag-over');
-    });
-  });
-
-  box.addEventListener('drop', e => {
-    const file = e.dataTransfer?.files?.[0];
-    if (!file) return;
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    input.files = dt.files;
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-}
-
-function bindAssetAdminControls() {
-  if (!ASSET_FILTERS_BOUND) {
-    ['asset-category-filter', 'asset-access-filter'].forEach(id => {
-      document.getElementById(id)?.addEventListener('change', renderAssets);
-    });
-    document.getElementById('asset-search')?.addEventListener('input', renderAssets);
-    ASSET_FILTERS_BOUND = true;
-  }
-
-  const quickZone = document.getElementById('upload-zone');
-  const quickInput = document.getElementById('quick-asset-file');
-
-  if (quickZone && quickInput && quickZone.dataset.bound !== 'true') {
-    quickZone.dataset.bound = 'true';
-    quickZone.addEventListener('click', e => {
-      if (e.target?.tagName !== 'BUTTON' && e.target?.id !== 'quick-asset-file') quickInput.click();
-    });
-    quickZone.querySelector('button')?.addEventListener('click', e => {
-      e.stopPropagation();
-      quickInput.click();
-    });
-    quickInput.addEventListener('change', () => quickUploadAsset(quickInput.files?.[0]));
-    ['dragenter', 'dragover'].forEach(type => {
-      quickZone.addEventListener(type, e => {
-        e.preventDefault();
-        quickZone.classList.add('drag-over');
-      });
-    });
-    ['dragleave', 'drop'].forEach(type => {
-      quickZone.addEventListener(type, e => {
-        e.preventDefault();
-        quickZone.classList.remove('drag-over');
-      });
-    });
-    quickZone.addEventListener('drop', e => quickUploadAsset(e.dataTransfer?.files?.[0]));
-  }
-
-  document.querySelectorAll('.asset-file-drop').forEach(bindAssetDropBox);
-}
-
-window.addEventListener('load', bindAssetAdminControls);
-
 /* INIT */
 loadAssets();
-
 
 /* ══════════════════════════════════════
    LIVE USERS SYSTEM
@@ -8488,11 +8373,226 @@ async function deleteCoupon(id) {
 }
 
 
-/* Phase A4.7A.1 — compatibility shim for older cached order modal helper names. */
-if (typeof window !== 'undefined' && typeof window.getOrderTimelineHTML !== 'function') {
-  window.getOrderTimelineHTML = function(status = '') {
-    if (typeof adminPhase9StatusTimeline === 'function') return adminPhase9StatusTimeline(status);
-    const safeStatus = String(status || 'placed').replaceAll('_', ' ').toUpperCase();
-    return `<div class="order-timeline-fallback">${safeStatus}</div>`;
+/* ============================================================
+   PADDOX Admin Phase A4.7A.2 — Digital Assets Final Polish
+   Fixes product-state crashes and upgrades wallpaper upload UX.
+   ============================================================ */
+(function(){
+  window.REAL_PRODUCTS = REAL_PRODUCTS;
+  window.REAL_ASSETS = REAL_ASSETS;
+
+  function assetToken() { return getAdminToken?.() || ''; }
+  function assetMoney(n) { return `₹${Number(n || 0).toLocaleString('en-IN')}`; }
+  function assetEsc(v='') { return String(v ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function assetFileUrl(asset, kind='desktop') {
+    return asset?.[kind]?.url || asset?.thumbnail?.url || asset?.image?.url || asset?.url || '';
+  }
+
+  function ensureAssetModalMarkup() {
+    if (!document.getElementById('asset-modal')) {
+      const modal = document.createElement('div');
+      modal.id = 'asset-modal';
+      modal.className = 'asset-modal-shell';
+      modal.innerHTML = `
+        <div class="asset-modal-backdrop" onclick="closeAssetModal(event)">
+          <div class="asset-modal-card" onclick="event.stopPropagation()">
+            <button class="asset-modal-close" type="button" onclick="closeAssetModal()">×</button>
+            <div class="asset-modal-kicker">DIGITAL ASSET UPLOAD</div>
+            <h2>WALLPAPER COMMAND UPLOAD</h2>
+            <p class="asset-modal-sub">Upload desktop and mobile wallpaper variants, set free/premium access and display pricing from one PADDOX workspace.</p>
+
+            <div class="asset-form-grid">
+              <label><span>Wallpaper Title</span><input id="asset-name" class="adm-input" placeholder="Mercedes Silverstone Win"/></label>
+              <label><span>Category</span><select id="asset-category" class="adm-select"><option value="cars">Cars</option><option value="drivers">Drivers</option><option value="circuits">Circuits</option><option value="abstract art">Abstract Art</option><option value="wallpaper">Wallpaper</option></select></label>
+              <label><span>Access Type</span><select id="asset-type" class="adm-select" onchange="toggleAssetPriceField()"><option value="free">Free</option><option value="premium">Premium</option></select></label>
+              <label><span>Premium Price</span><input id="asset-price" class="adm-input" type="number" min="0" value="0" placeholder="99" disabled/></label>
+              <label><span>Wallpaper Type</span><select id="asset-orientation" class="adm-select"><option value="desktop">Desktop only</option><option value="mobile">Mobile only</option><option value="both">Desktop + Mobile</option></select></label>
+              <label><span>Display Resolution</span><input id="asset-resolution" class="adm-input" value="4K" placeholder="4K / 8K / HD"/></label>
+            </div>
+
+            <div class="asset-upload-grid-modal">
+              <label class="asset-drop-mini" id="asset-desktop-drop"><input id="asset-desktop-file" type="file" accept="image/*" hidden/><strong>Desktop Wallpaper</strong><span>16:9 / 4K recommended</span><em id="asset-desktop-name">No file selected</em></label>
+              <label class="asset-drop-mini" id="asset-mobile-drop"><input id="asset-mobile-file" type="file" accept="image/*" hidden/><strong>Mobile Wallpaper</strong><span>9:16 / phone lockscreen</span><em id="asset-mobile-name">No file selected</em></label>
+              <label class="asset-drop-mini" id="asset-thumb-drop"><input id="asset-thumb-file" type="file" accept="image/*" hidden/><strong>Thumbnail</strong><span>Optional preview cover</span><em id="asset-thumb-name">No file selected</em></label>
+            </div>
+
+            <label class="asset-desc-label"><span>Description / Tags</span><textarea id="asset-description" class="adm-input" rows="3" placeholder="Short description, tags, collection info"></textarea></label>
+
+            <div class="asset-modal-actions">
+              <button class="adm-btn-ghost" type="button" onclick="closeAssetModal()">Cancel</button>
+              <button class="adm-btn-red" type="button" onclick="submitAssetUpload()">Upload Wallpaper</button>
+            </div>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+    bindAssetMiniDrops();
+    toggleAssetPriceField();
+  }
+
+  function bindAssetMiniDrops() {
+    [
+      ['asset-desktop-file','asset-desktop-name'],
+      ['asset-mobile-file','asset-mobile-name'],
+      ['asset-thumb-file','asset-thumb-name']
+    ].forEach(([inputId, labelId]) => {
+      const input = document.getElementById(inputId);
+      const label = document.getElementById(labelId);
+      if (!input || input.dataset.bound) return;
+      input.dataset.bound = '1';
+      input.addEventListener('change', () => {
+        label.textContent = input.files?.[0]?.name || 'No file selected';
+      });
+    });
+  }
+
+  window.toggleAssetPriceField = function toggleAssetPriceField() {
+    const type = document.getElementById('asset-type')?.value || 'free';
+    const price = document.getElementById('asset-price');
+    if (price) {
+      price.disabled = type !== 'premium';
+      if (type !== 'premium') price.value = '0';
+    }
   };
-}
+
+  window.openAssetModal = function openAssetModal() {
+    ensureAssetModalMarkup();
+    document.getElementById('asset-modal')?.classList.add('show');
+  };
+
+  window.closeAssetModal = function closeAssetModal(event) {
+    if (event && !event.target.classList.contains('asset-modal-backdrop')) return;
+    document.getElementById('asset-modal')?.classList.remove('show');
+  };
+
+  window.submitAssetUpload = async function submitAssetUpload() {
+    try {
+      ensureAssetModalMarkup();
+      const desktop = document.getElementById('asset-desktop-file')?.files?.[0] || null;
+      const mobile = document.getElementById('asset-mobile-file')?.files?.[0] || null;
+      const thumb = document.getElementById('asset-thumb-file')?.files?.[0] || null;
+      if (!desktop && !mobile) return showToast('❌ Upload desktop or mobile wallpaper');
+
+      const formData = new FormData();
+      if (desktop) formData.append('desktop', desktop);
+      if (mobile) formData.append('mobile', mobile);
+      if (thumb) formData.append('thumbnail', thumb);
+      formData.append('name', document.getElementById('asset-name')?.value || desktop?.name || mobile?.name || 'PADDOX Wallpaper');
+      formData.append('category', document.getElementById('asset-category')?.value || 'wallpaper');
+      formData.append('type', document.getElementById('asset-type')?.value || 'free');
+      formData.append('price', document.getElementById('asset-price')?.value || '0');
+      formData.append('orientation', document.getElementById('asset-orientation')?.value || (desktop && mobile ? 'both' : mobile ? 'mobile' : 'desktop'));
+      formData.append('resolution', document.getElementById('asset-resolution')?.value || '4K');
+      formData.append('description', document.getElementById('asset-description')?.value || 'Uploaded from PADDOX Admin');
+
+      showToast('⬆ Uploading wallpaper...');
+      const res = await fetch(`${ASSET_API_BASE}/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${assetToken()}` },
+        body: formData
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) throw new Error(data.message || 'Upload failed');
+      closeAssetModal();
+      showToast('🔥 Wallpaper uploaded');
+      await loadAssets();
+    } catch (err) {
+      console.error(err);
+      showToast(`❌ ${err.message}`);
+    }
+  };
+
+  window.loadAssets = async function loadAssets() {
+    try {
+      const res = await fetch(`${ASSET_API_BASE}?limit=80`);
+      const data = await res.json().catch(() => ({}));
+      REAL_ASSETS = data.data?.assets || data.data || data.assets || [];
+      window.REAL_ASSETS = REAL_ASSETS;
+      renderAssets();
+    } catch (err) {
+      console.error(err);
+      showToast('❌ Failed to load assets');
+      REAL_ASSETS = [];
+      renderAssets();
+    }
+  };
+
+  window.renderAssets = function renderAssets() {
+    const grid = document.getElementById('assets-grid');
+    if (!grid) return;
+    const totalEl = document.querySelector('.asset-meta-info');
+    if (totalEl) {
+      const premium = REAL_ASSETS.filter(a => a.type === 'premium').length;
+      totalEl.textContent = `${REAL_ASSETS.length} assets · ${premium} premium · desktop/mobile ready`;
+    }
+    if (!REAL_ASSETS.length) {
+      grid.innerHTML = `<div class="asset-empty-premium"><strong>No digital assets yet</strong><span>Upload desktop and mobile wallpaper versions from the command center.</span></div>`;
+      return;
+    }
+    grid.innerHTML = REAL_ASSETS.map(asset => {
+      const cover = asset.thumbnail?.url || asset.image?.url || asset.desktop?.url || asset.mobile?.url || '';
+      const isPremium = asset.type === 'premium';
+      const hasDesktop = !!(asset.desktop?.url || asset.image?.url);
+      const hasMobile = !!asset.mobile?.url;
+      return `
+        <article class="asset-card asset-card-pro ${isPremium ? 'is-premium' : 'is-free'}">
+          <div class="asset-thumb asset-thumb-pro">
+            ${cover ? `<img src="${assetEsc(cover)}" alt="${assetEsc(asset.name)}"/>` : '<div class="asset-no-preview">PADDOX</div>'}
+            <span class="asset-access-badge ${isPremium ? 'premium' : 'free'}">${isPremium ? `Premium · ${assetMoney(asset.price)}` : 'Free · Login required'}</span>
+            <span class="asset-format-badge">${String(asset.orientation || 'desktop').toUpperCase()}</span>
+          </div>
+          <div class="asset-info asset-info-pro">
+            <div class="asset-name">${assetEsc(asset.name || 'Untitled Wallpaper')}</div>
+            <div class="asset-meta">${assetEsc(asset.category || 'wallpaper')} · ${assetEsc(asset.resolution || 'HD')}</div>
+            <div class="asset-variant-row">
+              <span class="${hasDesktop ? 'on' : ''}">Desktop</span>
+              <span class="${hasMobile ? 'on' : ''}">Mobile</span>
+              <span>${Number(asset.downloads || 0).toLocaleString()} downloads</span>
+            </div>
+            <div class="asset-actions asset-actions-pro">
+              <button class="asset-btn" onclick="previewAsset('${assetEsc(cover)}')">Preview</button>
+              <button class="asset-btn" onclick="openEditAsset('${asset._id}','${assetEsc(asset.name)}','${assetEsc(asset.category)}','${assetEsc(asset.type)}','${assetEsc(asset.resolution)}')">Edit</button>
+              <button class="asset-btn danger" onclick="deleteAsset('${asset._id}')">Delete</button>
+            </div>
+          </div>
+        </article>`;
+    }).join('');
+  };
+
+  window.bindDigitalAssetPolish = function bindDigitalAssetPolish() {
+    ensureAssetModalMarkup();
+    const zone = document.getElementById('upload-zone');
+    if (!zone || zone.dataset.a47a2Bound) return;
+    zone.dataset.a47a2Bound = '1';
+    zone.addEventListener('click', () => openAssetModal());
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('drag-over'); }));
+    ['dragleave','drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('drag-over'); }));
+    zone.addEventListener('drop', e => {
+      openAssetModal();
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) return;
+      const input = document.getElementById('asset-desktop-file');
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      document.getElementById('asset-desktop-name').textContent = file.name;
+      if (!document.getElementById('asset-name').value) document.getElementById('asset-name').value = file.name.replace(/\.[^.]+$/, '');
+    });
+  };
+
+  const oldSwitchPage = window.switchPage || switchPage;
+  if (typeof oldSwitchPage === 'function') {
+    window.switchPage = function patchedSwitchPage(id) {
+      oldSwitchPage(id);
+      if (id === 'assets') {
+        bindDigitalAssetPolish();
+        loadAssets();
+      }
+    };
+  }
+
+  window.addEventListener('load', () => {
+    ensureAssetModalMarkup();
+    bindDigitalAssetPolish();
+  });
+})();
