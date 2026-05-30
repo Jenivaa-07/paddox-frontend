@@ -76,6 +76,13 @@ function demoLogin() {
   showToast('Social sign-in will be available soon. Please use email login.');
 }
 
+function safeErrorMessage(err, fallback = 'Something went wrong') {
+  if (!err) return fallback;
+  if (typeof err === 'string') return err;
+  return safeErrorMessage(err) || err.error || err.statusText || fallback;
+}
+
+
 async function authFetch(path, options = {}) {
   const sessionId = localStorage.getItem('paddox_session_id') || '';
   const existingHeaders = options.headers || {};
@@ -278,7 +285,7 @@ window.TokenManager = window.TokenManager || (typeof TokenManager !== 'undefined
   }
 });
 
-window.AuthAPI = window.AuthAPI || (typeof AuthAPI !== 'undefined' ? AuthAPI : {
+window.AuthAPI = {
   login(payload) {
     return authFetch('/auth/login', {
       method: 'POST',
@@ -304,7 +311,7 @@ window.AuthAPI = window.AuthAPI || (typeof AuthAPI !== 'undefined' ? AuthAPI : {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
   }
-});
+};
 
 /* TAB SWITCH */
 document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -348,54 +355,45 @@ document
 
 /* LOGIN FUNCTION */
 async function doLogin() {
-
-  const email =
-    document
-      .getElementById('li-email')
-      .value
-      .trim();
-
-  const password =
-    document
-      .getElementById('li-pass')
-      .value;
+  const email = document.getElementById('li-email')?.value.trim() || '';
+  const password = document.getElementById('li-pass')?.value || '';
 
   if (!email || !password) {
-
     showToast('⚠️ Fill all fields');
-
     return;
   }
 
   try {
-
     showToast('🏁 Signing in...');
 
-    const data =
-      await AuthAPI.login({
-        email,
-        password
-      });
+    const data = await authFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
 
-    if (!data || !data.success) {
+    const auth = normaliseAuthPayload(data);
 
-      throw new Error(
-        data.message ||
-        'Login failed'
-      );
+    if (auth.requires2FA) {
+      pendingTwoFactorToken = auth.twoFactorToken;
+      showTwoFactorLogin(auth.email || email);
+      showToast('🔐 Verification code sent');
+      return;
     }
 
-    handleAuthSuccess(data);
+    if (!auth.accessToken || !auth.user) {
+      console.warn('Unexpected login response:', data);
+      showToast('❌ Login response missing user session');
+      return;
+    }
 
-    showToast(data.data?.requires2FA ? '🔐 Verification code sent' : '🔥 Login successful');
+    if (auth.payload?.sessionId) localStorage.setItem('paddox_session_id', auth.payload.sessionId);
+    window.TokenManager.setAccess(auth.accessToken);
+    loginUser(auth.user);
+    showToast('🔥 Login successful');
 
   } catch (err) {
-
-    console.error(err);
-
-    showToast(
-      `❌ ${err?.message || 'Something went wrong'}`
-    );
+    console.error('PADDOX login failed:', err);
+    showToast(`❌ ${safeErrorMessage(err, 'Login failed')}`);
   }
 }
 
@@ -463,7 +461,7 @@ async function doRegister() {
     if (!data || !data.success) {
 
       throw new Error(
-        data.message ||
+        data?.message ||
         'Registration failed'
       );
     }
@@ -1860,7 +1858,7 @@ function initOrderNotificationSocket() {
 
   accountSocket.on('connect_error', err => {
     orderSocketConnected = false;
-    console.warn('Order notification socket failed:', err.message);
+    console.warn('Order notification socket failed:', safeErrorMessage(err));
   });
 }
 
@@ -3625,7 +3623,7 @@ function openOrderReceipt(orderId) {
         closeAvatarStudio();
       } catch (err) {
         console.error(err);
-        showToast(`❌ ${err.message || 'Avatar save failed'}`);
+        showToast(`❌ ${safeErrorMessage(err) || 'Avatar save failed'}`);
       } finally {
         if (saveBtn) saveBtn.disabled = false;
       }
