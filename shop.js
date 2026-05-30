@@ -19,6 +19,9 @@ const WISHLIST_API_BASE =
 const ORDER_API_BASE =
   'https://paddox-backend.onrender.com/api/orders';
 
+const COUPON_API_BASE =
+  'https://paddox-backend.onrender.com/api/coupons';
+
 const SHOP_USER_PROFILE_API =
   'https://paddox-backend.onrender.com/api/users/profile';
 
@@ -91,6 +94,132 @@ function loadCartState() {
 }
 
 let cart = loadCartState();
+let checkoutCoupon = null;
+
+function resetCheckoutCoupon() {
+  checkoutCoupon = null;
+}
+
+function getCheckoutPricingSnapshot() {
+  const subtotal = getCartSubtotal();
+  const shipping = cartShippingAmount(subtotal);
+  const discount = Math.max(0, Math.min(Number(checkoutCoupon?.discount || 0), subtotal));
+  const discountedSubtotal = Math.max(0, subtotal - discount);
+  const tax = Math.round(discountedSubtotal * 0.05);
+  const total = discountedSubtotal + shipping + tax;
+
+  return { subtotal, shipping, discount, tax, total };
+}
+
+function renderCheckoutSummary(modal = document.getElementById('paddox-checkout-modal')) {
+  if (!modal) return;
+
+  const summary = modal.querySelector('#pdx-checkout-summary');
+  if (!summary) return;
+
+  const pricing = getCheckoutPricingSnapshot();
+  const coupon = checkoutCoupon;
+
+  summary.innerHTML = `
+    <div class="pdx-checkout-items">
+      ${cart.map(item => `
+        <div class="pdx-checkout-item">
+          <span>${escapeCheckoutText(item.name)}${item.size ? ' · ' + escapeCheckoutText(item.size) : ''} × ${Number(item.qty || 1)}</span>
+          <strong>₹${(Number(item.price || 0) * Number(item.qty || 1)).toLocaleString('en-IN')}</strong>
+        </div>
+      `).join('')}
+    </div>
+    <div><span>Items</span><strong>${getCartQuantity()}</strong></div>
+    <div><span>Subtotal</span><strong>₹${pricing.subtotal.toLocaleString('en-IN')}</strong></div>
+    <div><span>Shipping</span><strong>${pricing.shipping ? `₹${pricing.shipping.toLocaleString('en-IN')}` : 'FREE'}</strong></div>
+    ${coupon ? `
+      <div class="pdx-checkout-discount-row">
+        <span>Coupon ${escapeCheckoutText(coupon.code)}</span>
+        <strong>-₹${pricing.discount.toLocaleString('en-IN')}</strong>
+      </div>` : ''}
+    <div><span>Tax</span><strong>₹${pricing.tax.toLocaleString('en-IN')}</strong></div>
+    <div class="pdx-checkout-total"><span>Total</span><strong>₹${pricing.total.toLocaleString('en-IN')}</strong></div>
+  `;
+}
+
+function updateCouponPanel(message = '', state = '') {
+  const modal = document.getElementById('paddox-checkout-modal');
+  const panel = modal?.querySelector('#pdx-coupon-feedback');
+  const removeBtn = modal?.querySelector('#pdx-remove-coupon');
+  const input = modal?.querySelector('#co-coupon-code');
+
+  if (panel) {
+    panel.textContent = message;
+    panel.className = `pdx-coupon-feedback ${state || ''}`.trim();
+  }
+
+  if (removeBtn) removeBtn.style.display = checkoutCoupon ? 'inline-flex' : 'none';
+  if (input && checkoutCoupon) input.value = checkoutCoupon.code;
+}
+
+async function applyCheckoutCoupon() {
+  const modal = document.getElementById('paddox-checkout-modal');
+  const input = modal?.querySelector('#co-coupon-code');
+  const applyBtn = modal?.querySelector('#pdx-apply-coupon');
+  const code = String(input?.value || '').trim().toUpperCase();
+
+  if (!code) {
+    updateCouponPanel('Enter a coupon code first.', 'error');
+    input?.focus();
+    return;
+  }
+
+  try {
+    if (applyBtn) {
+      applyBtn.disabled = true;
+      applyBtn.textContent = 'Checking...';
+    }
+
+    const res = await fetch(`${COUPON_API_BASE}/validate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, orderTotal: getCartSubtotal() })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Coupon could not be applied');
+    }
+
+    const coupon = data.coupon || data.data?.coupon || {};
+
+    checkoutCoupon = {
+      id: coupon.id || coupon._id || '',
+      code: coupon.code || code,
+      type: coupon.type || '',
+      value: Number(coupon.value || 0),
+      discount: Number(coupon.discount || data.pricing?.discount || 0)
+    };
+
+    updateCouponPanel(`${checkoutCoupon.code} applied. You saved ₹${checkoutCoupon.discount.toLocaleString('en-IN')}.`, 'success');
+    renderCheckoutSummary(modal);
+    showToast(`Coupon ${checkoutCoupon.code} applied`);
+  } catch (err) {
+    checkoutCoupon = null;
+    renderCheckoutSummary(modal);
+    updateCouponPanel(err.message || 'Coupon could not be applied', 'error');
+  } finally {
+    if (applyBtn) {
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Apply';
+    }
+  }
+}
+
+function removeCheckoutCoupon() {
+  checkoutCoupon = null;
+  const modal = document.getElementById('paddox-checkout-modal');
+  const input = modal?.querySelector('#co-coupon-code');
+  if (input) input.value = '';
+  updateCouponPanel('Coupon removed.', '');
+  renderCheckoutSummary(modal);
+}
 
 async function loadShopProducts() {
   try {
@@ -791,6 +920,7 @@ function renderPagination(total) {
 ══════════════════════════════════════ */
 
 function saveCart() {
+  resetCheckoutCoupon();
   const payload = JSON.stringify(cart);
   localStorage.setItem('paddox_cart', payload);
   sessionStorage.setItem('paddox_cart', payload);
@@ -1196,6 +1326,21 @@ function ensureCheckoutModal() {
         </label>
         <div class="pdx-payment-note">Choose a payment mode to complete your PADDOX order.</div>
 
+        <div class="pdx-coupon-box">
+          <div class="pdx-coupon-head">
+            <div>
+              <span>FAN DEAL CODE</span>
+              <strong>Apply Coupon</strong>
+            </div>
+            <button id="pdx-remove-coupon" class="pdx-remove-coupon" type="button" style="display:none">Remove</button>
+          </div>
+          <div class="pdx-coupon-row">
+            <input id="co-coupon-code" maxlength="24" autocomplete="off" placeholder="LAUNCH10 / RACEWEEK20">
+            <button id="pdx-apply-coupon" type="button">Apply</button>
+          </div>
+          <div class="pdx-coupon-feedback" id="pdx-coupon-feedback">Enter an active PADDOX coupon code before placing order.</div>
+        </div>
+
         <div class="pdx-checkout-summary" id="pdx-checkout-summary"></div>
 
         <button class="pdx-checkout-pay" type="submit">
@@ -1213,6 +1358,14 @@ function ensureCheckoutModal() {
 
   modal.querySelector('#paddox-checkout-form')?.addEventListener('submit', submitCheckoutForm);
   modal.querySelector('#pdx-use-saved-address')?.addEventListener('click', applySavedCheckoutAddress);
+  modal.querySelector('#pdx-apply-coupon')?.addEventListener('click', applyCheckoutCoupon);
+  modal.querySelector('#pdx-remove-coupon')?.addEventListener('click', removeCheckoutCoupon);
+  modal.querySelector('#co-coupon-code')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applyCheckoutCoupon();
+    }
+  });
 
   return modal;
 }
@@ -1235,29 +1388,11 @@ function openCheckoutModal() {
 
   const modal = ensureCheckoutModal();
   refreshSavedAddressPanel(modal);
-  const subtotal = getCartSubtotal();
-  const shipping = cartShippingAmount(subtotal);
-  const tax = Math.round(subtotal * 0.05);
-  const total = subtotal + shipping + tax;
-
-  const summary = modal.querySelector('#pdx-checkout-summary');
-  if (summary) {
-    summary.innerHTML = `
-      <div class="pdx-checkout-items">
-        ${cart.map(item => `
-          <div class="pdx-checkout-item">
-            <span>${escapeCheckoutText(item.name)}${item.size ? ' · ' + escapeCheckoutText(item.size) : ''} × ${Number(item.qty || 1)}</span>
-            <strong>₹${(Number(item.price || 0) * Number(item.qty || 1)).toLocaleString('en-IN')}</strong>
-          </div>
-        `).join('')}
-      </div>
-      <div><span>Items</span><strong>${getCartQuantity()}</strong></div>
-      <div><span>Subtotal</span><strong>₹${subtotal.toLocaleString('en-IN')}</strong></div>
-      <div><span>Shipping</span><strong>${shipping ? `₹${shipping.toLocaleString('en-IN')}` : 'FREE'}</strong></div>
-      <div><span>Tax</span><strong>₹${tax.toLocaleString('en-IN')}</strong></div>
-      <div class="pdx-checkout-total"><span>Total</span><strong>₹${total.toLocaleString('en-IN')}</strong></div>
-    `;
-  }
+  resetCheckoutCoupon();
+  const couponInput = modal.querySelector('#co-coupon-code');
+  if (couponInput) couponInput.value = '';
+  updateCouponPanel('Enter an active PADDOX coupon code before placing order.', '');
+  renderCheckoutSummary(modal);
 
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -1339,7 +1474,10 @@ async function submitCheckoutForm(e) {
         })),
         shippingAddress,
         paymentMethod,
-        notes: 'Checkout from shop page'
+        couponCode: checkoutCoupon?.code || '',
+        notes: checkoutCoupon?.code
+          ? `Checkout from shop page · Coupon ${checkoutCoupon.code}`
+          : 'Checkout from shop page'
       })
     });
 

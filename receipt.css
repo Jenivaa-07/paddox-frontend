@@ -398,3 +398,10 @@ html,body{background:#fff!important;}
   .receipt-brand .receipt-logo-icon-clean{width:40px!important;height:40px!important;flex-basis:40px!important;}
   .receipt-logo-word{font-size:1.82rem!important;letter-spacing:5px!important;}
 }
+
+/* ============================================================
+   Phase A4.4 — Receipt Coupon Sync
+   ============================================================ */
+.receipt-coupon-line strong{color:var(--red)!important;letter-spacing:.8px}
+.receipt-total-box .receipt-coupon-total strong{color:#0a8f42!important}
+.receipt-total-box .receipt-coupon-total span{color:#3f6b4f!important}

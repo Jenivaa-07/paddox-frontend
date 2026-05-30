@@ -117,6 +117,9 @@ function renderReceipt(order) {
   const address = order.shippingAddress || {};
   const payment = order.payment || {};
   const pricing = order.pricing || {};
+  const coupon = order.coupon || {};
+  const couponCode = coupon.code || order.couponCode || '';
+  const couponDiscount = Number(coupon.discount || pricing.discount || 0);
   const status = String(payment.status || order.paymentStatus || 'pending').toLowerCase();
   const paymentLabel = paymentStatusLabel(status);
   const methodLabel = paymentMethodLabel(payment.method || order.paymentMethod);
@@ -184,6 +187,7 @@ function renderReceipt(order) {
         <div class="receipt-line"><span>Order ID</span><strong>#${esc(orderNo)}</strong></div>
         <div class="receipt-line"><span>Order Status</span><strong>${esc(order.status || 'placed')}</strong></div>
         <div class="receipt-line"><span>Payment Method</span><strong>${esc(methodLabel)}</strong></div>
+        ${couponCode ? `<div class="receipt-line receipt-coupon-line"><span>Coupon Used</span><strong>${esc(couponCode)}</strong></div>` : ''}
       </div>
       <div class="receipt-box">
         <h3>DELIVERY DETAILS</h3>
@@ -212,7 +216,7 @@ function renderReceipt(order) {
       <div class="receipt-total-box">
         <div><span>Subtotal</span><strong>${money(pricing.subtotal)}</strong></div>
         <div><span>Shipping</span><strong>${money(pricing.shipping)}</strong></div>
-        <div><span>Discount</span><strong>${money(pricing.discount)}</strong></div>
+        ${couponCode ? `<div class="receipt-coupon-total"><span>Coupon Discount · ${esc(couponCode)}</span><strong>-${money(couponDiscount)}</strong></div>` : `<div><span>Discount</span><strong>${money(pricing.discount)}</strong></div>`}
         <div><span>Tax</span><strong>${money(pricing.tax)}</strong></div>
         <div class="grand"><span>${status === 'paid' ? 'Total Paid' : 'Order Total'}</span><strong>${money(pricing.total)}</strong></div>
       </div>
