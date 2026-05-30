@@ -8712,3 +8712,175 @@ async function deleteCoupon(id) {
     bindDigitalAssetPolish();
   });
 })();
+
+
+/* ============================================================
+   PADDOX Admin Phase A4.7A.6 — Admin Digital Asset Vault Lock
+   Stat cards, tighter asset rendering, authenticated edit/delete.
+   ============================================================ */
+(function(){
+  function assetTokenA476(){ return getAdminToken?.() || ''; }
+  function assetEscA476(v='') { return String(v ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function assetMoneyA476(n){ return `₹${Number(n || 0).toLocaleString('en-IN')}`; }
+
+  function ensureAssetStatsA476() {
+    const page = document.getElementById('adm-assets');
+    if (!page || document.getElementById('asset-stat-grid')) return;
+    const toolbar = page.querySelector('.assets-toolbar-pro') || page.querySelector('.page-toolbar');
+    const stat = document.createElement('div');
+    stat.id = 'asset-stat-grid';
+    stat.className = 'asset-stat-grid reveal-up delay-2';
+    stat.innerHTML = `
+      <div class="asset-stat-card"><span>Total Assets</span><strong id="asset-stat-total">0</strong></div>
+      <div class="asset-stat-card"><span>Free</span><strong id="asset-stat-free">0</strong></div>
+      <div class="asset-stat-card"><span>Premium</span><strong id="asset-stat-premium">0</strong></div>
+      <div class="asset-stat-card"><span>Desktop</span><strong id="asset-stat-desktop">0</strong></div>
+      <div class="asset-stat-card"><span>Mobile</span><strong id="asset-stat-mobile">0</strong></div>
+      <div class="asset-stat-card"><span>Downloads</span><strong id="asset-stat-downloads">0</strong></div>
+    `;
+    if (toolbar) toolbar.parentNode.insertBefore(stat, toolbar);
+  }
+
+  function updateAssetStatsA476(list = []) {
+    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    set('asset-stat-total', list.length.toLocaleString('en-IN'));
+    set('asset-stat-free', list.filter(a => String(a.type || 'free').toLowerCase() === 'free').length.toLocaleString('en-IN'));
+    set('asset-stat-premium', list.filter(a => String(a.type || '').toLowerCase() === 'premium').length.toLocaleString('en-IN'));
+    set('asset-stat-desktop', list.filter(a => a.desktop?.url || a.image?.url).length.toLocaleString('en-IN'));
+    set('asset-stat-mobile', list.filter(a => a.mobile?.url).length.toLocaleString('en-IN'));
+    set('asset-stat-downloads', list.reduce((s,a)=>s+Number(a.downloads || 0),0).toLocaleString('en-IN'));
+  }
+
+  function currentAssetFiltersA476() {
+    return {
+      category: document.getElementById('asset-category-filter')?.value || 'all',
+      type: document.getElementById('asset-access-filter')?.value || 'all',
+      device: document.getElementById('asset-device-filter')?.value || 'all'
+    };
+  }
+
+  function filterAssetsA476(list = []) {
+    const f = currentAssetFiltersA476();
+    return list.filter(a => {
+      const cat = String(a.category || '').toLowerCase();
+      const type = String(a.type || 'free').toLowerCase();
+      const ori = String(a.orientation || 'desktop').toLowerCase();
+      const hasDesktop = !!(a.desktop?.url || a.image?.url);
+      const hasMobile = !!a.mobile?.url;
+      const categoryOk = f.category === 'all' || cat === f.category;
+      const typeOk = f.type === 'all' || type === f.type;
+      const deviceOk =
+        f.device === 'all' ||
+        (f.device === 'desktop' && hasDesktop) ||
+        (f.device === 'mobile' && hasMobile) ||
+        (f.device === 'both' && (ori === 'both' || (hasDesktop && hasMobile)));
+      return categoryOk && typeOk && deviceOk;
+    });
+  }
+
+  window.renderAssets = function renderAssets() {
+    ensureAssetStatsA476();
+    const grid = document.getElementById('assets-grid');
+    if (!grid) return;
+
+    const source = Array.isArray(REAL_ASSETS) ? REAL_ASSETS : [];
+    const list = filterAssetsA476(source);
+    updateAssetStatsA476(source);
+
+    const totalEl = document.querySelector('.asset-meta-info');
+    if (totalEl) {
+      const premium = source.filter(a => String(a.type || '').toLowerCase() === 'premium').length;
+      totalEl.textContent = `${source.length} assets · ${premium} premium · desktop/mobile ready`;
+    }
+
+    if (!list.length) {
+      grid.innerHTML = `<div class="asset-empty-premium"><strong>No assets in this view</strong><span>Adjust the filters or upload a new wallpaper drop.</span></div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(asset => {
+      const cover = asset.thumbnail?.url || asset.image?.url || asset.desktop?.url || asset.mobile?.url || '';
+      const isPremium = String(asset.type || 'free').toLowerCase() === 'premium';
+      const hasDesktop = !!(asset.desktop?.url || asset.image?.url);
+      const hasMobile = !!asset.mobile?.url;
+      const orientation = String(asset.orientation || (hasDesktop && hasMobile ? 'both' : hasMobile ? 'mobile' : 'desktop')).toUpperCase();
+      return `
+        <article class="asset-card asset-card-pro ${isPremium ? 'is-premium' : 'is-free'}">
+          <div class="asset-thumb asset-thumb-pro">
+            ${cover ? `<img src="${assetEscA476(cover)}" alt="${assetEscA476(asset.name)}" loading="lazy"/>` : '<div class="asset-no-preview">PADDOX</div>'}
+            <span class="asset-access-badge ${isPremium ? 'premium' : 'free'}">${isPremium ? `Premium · ${assetMoneyA476(asset.price)}` : 'Free'}</span>
+            <span class="asset-format-badge">${orientation}</span>
+          </div>
+          <div class="asset-info asset-info-pro">
+            <div class="asset-name">${assetEscA476(asset.name || 'Untitled Wallpaper')}</div>
+            <div class="asset-meta">${assetEscA476(asset.category || 'wallpaper')} · ${assetEscA476(asset.resolution || 'HD')}</div>
+            <div class="asset-variant-row">
+              <span class="${hasDesktop ? 'on' : ''}">Desktop</span>
+              <span class="${hasMobile ? 'on' : ''}">Mobile</span>
+              <span>${Number(asset.downloads || 0).toLocaleString('en-IN')} downloads</span>
+            </div>
+            <div class="asset-actions asset-actions-pro">
+              <button class="asset-btn" onclick="previewAsset('${assetEscA476(cover)}')">Preview</button>
+              <button class="asset-btn" onclick="openEditAsset('${asset._id || asset.id}')">Edit</button>
+              <button class="asset-btn danger" onclick="deleteAsset('${asset._id || asset.id}')">Delete</button>
+            </div>
+          </div>
+        </article>`;
+    }).join('');
+  };
+
+  window.loadAssets = async function loadAssets() {
+    try {
+      const res = await fetch(`${ASSET_API_BASE}?limit=100`);
+      const data = await res.json().catch(() => ({}));
+      REAL_ASSETS = data.data?.assets || data.data || data.assets || [];
+      window.REAL_ASSETS = REAL_ASSETS;
+      renderAssets();
+    } catch (err) {
+      console.error(err);
+      showToast('❌ Failed to load assets');
+      REAL_ASSETS = [];
+      renderAssets();
+    }
+  };
+
+  window.deleteAsset = async function deleteAsset(id) {
+    if (!confirm('Delete this digital asset?')) return;
+    try {
+      const res = await fetch(`${ASSET_API_BASE}/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${assetTokenA476()}` }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
+      showToast('🗑️ Asset deleted');
+      await loadAssets();
+    } catch (err) {
+      console.error(err);
+      showToast(`❌ ${err.message || 'Failed to delete asset'}`);
+    }
+  };
+
+  function bindAssetFiltersA476() {
+    ['asset-category-filter','asset-access-filter','asset-device-filter'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.dataset.a476Bound) {
+        el.dataset.a476Bound = '1';
+        el.addEventListener('change', () => renderAssets());
+      }
+    });
+  }
+
+  window.addEventListener('load', () => {
+    ensureAssetStatsA476();
+    bindAssetFiltersA476();
+    if (document.getElementById('adm-assets')?.classList.contains('on')) loadAssets();
+  });
+
+  const previousBind = window.bindDigitalAssetPolish;
+  window.bindDigitalAssetPolish = function bindDigitalAssetPolishA476() {
+    if (typeof previousBind === 'function') previousBind();
+    ensureAssetStatsA476();
+    bindAssetFiltersA476();
+  };
+})();
