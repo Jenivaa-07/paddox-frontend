@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — account.js   |   User Account Logic
+   PADDOX — account.js   |   User Account Logic | A4.7B.2 re-download fix
    ============================================================ */
 'use strict';
 /* ══ PARTICLES ══ */
@@ -859,24 +859,40 @@ async function loadDigitalOrderDownloads(token) {
     if (!res.ok || data.success === false) return [];
     const orders = data.data?.orders || data.data || data.orders || [];
     const digitalAssets = [];
+
     orders.forEach(order => {
       if (order.orderType !== 'digital') return;
       (order.items || []).forEach(item => {
-        const asset = item.asset || {};
-        const id = asset._id || item.asset || item.assetId;
+        const rawAsset = item.asset;
+        const asset = rawAsset && typeof rawAsset === 'object' ? rawAsset : {};
+        const id = asset._id || item.assetId || (typeof rawAsset === 'string' ? rawAsset : '');
         if (!id) return;
+
+        const format = String(item.format || order.digitalFormat || 'desktop').toLowerCase() === 'mobile'
+          ? 'mobile'
+          : 'desktop';
+
+        const directUrl =
+          item.downloadUrl ||
+          (format === 'mobile' ? asset.mobile?.url : asset.desktop?.url) ||
+          asset.desktop?.url ||
+          asset.mobile?.url ||
+          asset.image?.url ||
+          asset.thumbnail?.url ||
+          '';
+
         digitalAssets.push({
           ...asset,
           _id: id,
           name: asset.name || item.name || 'PADDOX Wallpaper',
-          image: asset.image || { url: item.image || asset.thumbnail?.url || asset.desktop?.url || asset.mobile?.url || '' },
-          fileSize: asset.fileSize || 'Digital',
+          image: asset.image || { url: item.image || asset.thumbnail?.url || asset.desktop?.url || asset.mobile?.url || directUrl || '' },
+          fileSize: asset.fileSize || (format === 'mobile' ? asset.mobile?.fileSize : asset.desktop?.fileSize) || 'Digital',
           type: asset.type || 'premium',
           category: asset.category || 'wallpaper',
           downloadedAt: order.createdAt,
           orderNumber: order.orderNumber,
-          format: item.format || 'desktop',
-          downloadUrl: item.downloadUrl || asset.desktop?.url || asset.mobile?.url || asset.image?.url || ''
+          format,
+          downloadUrl: directUrl
         });
       });
     });
@@ -1071,6 +1087,9 @@ function renderDownloads() {
     const name = asset.name || 'Paddox Digital Asset';
     const typeLabel = downloadAssetTypeLabel(asset);
     const metaLine = downloadAssetMetaLine(asset, downloadedAt);
+    const assetId = asset._id || asset.id || '';
+    const format = String(asset.format || 'desktop').toLowerCase() === 'mobile' ? 'mobile' : 'desktop';
+    const directUrl = asset.downloadUrl || asset.url || asset.desktop?.url || asset.mobile?.url || asset.image?.url || '';
 
     return `
       <div class="dl-card premium-download-card">
@@ -1090,7 +1109,7 @@ function renderDownloads() {
 
         <button
           class="dl-act download-action-btn"
-          onclick="downloadAccountAsset('${asset._id}')"
+          onclick="downloadAccountAsset('${escapeAttr(assetId)}', '${escapeAttr(format)}', '${escapeAttr(directUrl)}')"
           aria-label="Download ${name} again"
         >
           <span aria-hidden="true">↓</span>
@@ -1103,7 +1122,7 @@ function renderDownloads() {
   updateDownloadStats();
 }
 
-async function downloadAccountAsset(assetId) {
+async function downloadAccountAsset(assetId, format = 'desktop', directUrl = '') {
   try {
     const token = profileToken();
 
@@ -1112,26 +1131,51 @@ async function downloadAccountAsset(assetId) {
       return;
     }
 
+    const cleanId = String(assetId || '').trim();
+    const cleanFormat = String(format || 'desktop').toLowerCase() === 'mobile' ? 'mobile' : 'desktop';
+
+    if (!cleanId) {
+      if (directUrl) {
+        window.open(directUrl, '_blank');
+        showToast('✅ Downloading asset');
+        return;
+      }
+      throw new Error('Download asset id missing');
+    }
+
     showToast('⏳ Preparing download...');
 
-    const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download`, {
+    const res = await fetch(`${ACCOUNT_ASSETS_API}/${encodeURIComponent(cleanId)}/download?format=${encodeURIComponent(cleanFormat)}`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ format: cleanFormat })
     });
 
     const data = await res.json().catch(() => ({}));
 
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Download failed');
-    }
-
-    const info = data.data || data;
-    const downloadUrl =
+    let info = data.data || data;
+    let downloadUrl =
       info.downloadUrl ||
       info.url ||
-      info.image?.url;
+      info.asset?.downloadUrl ||
+      info.asset?.url ||
+      info.asset?.image?.url ||
+      directUrl ||
+      '';
+
+    if (!res.ok || !data.success) {
+      /* Some already-unlocked digital orders can still be downloaded from the saved order URL
+         even if the asset endpoint rejects the re-download. */
+      if (directUrl) {
+        window.open(directUrl, '_blank');
+        showToast('✅ Downloading saved asset');
+        return;
+      }
+      throw new Error(data.message || 'Download failed');
+    }
 
     if (!downloadUrl) {
       throw new Error('Download URL missing');
@@ -1139,7 +1183,7 @@ async function downloadAccountAsset(assetId) {
 
     window.open(downloadUrl, '_blank');
 
-    showToast(`✅ Downloading ${info.name || 'asset'}`);
+    showToast(`✅ Downloading ${info.name || info.asset?.name || 'asset'}`);
 
     await loadDownloads();
     await loadAccountProfile();
@@ -1149,6 +1193,7 @@ async function downloadAccountAsset(assetId) {
     showToast(`❌ ${err.message}`);
   }
 }
+
 
 /* ══ NOTIFICATIONS ══ */
 const NOTIFICATION_DEFAULTS = {
