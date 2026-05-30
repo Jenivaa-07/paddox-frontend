@@ -79,7 +79,19 @@ function demoLogin() {
 function safeErrorMessage(err, fallback = 'Something went wrong') {
   if (!err) return fallback;
   if (typeof err === 'string') return err;
-  return safeErrorMessage(err) || err.error || err.statusText || fallback;
+  if (err instanceof Error && err.message) return err.message;
+  if (typeof err === 'object') {
+    return (
+      err.message ||
+      err.error ||
+      err.statusText ||
+      err.data?.message ||
+      err.response?.message ||
+      err.response?.data?.message ||
+      fallback
+    );
+  }
+  return fallback;
 }
 
 
@@ -4025,6 +4037,21 @@ async function refreshSecuritySessions(showFeedback = false) {
   const list = document.getElementById('security-session-list');
   const count = document.getElementById('sec-session-count');
   const note = document.getElementById('security-session-note');
+  const token = profileToken();
+
+  /* Do not call protected session APIs while logged out. */
+  if (!token) {
+    if (list) list.innerHTML = `
+      <div class="session-premium-card current">
+        <span class="session-device-icon" aria-hidden="true"></span>
+        <div><div class="sess-name">Login required</div><div class="sess-meta">Security sessions appear after sign in.</div></div>
+      </div>
+    `;
+    if (count) count.textContent = '0 Active';
+    if (note) note.textContent = 'Sign in to view trusted sessions.';
+    return;
+  }
+
   if (!list) return;
 
   try {
@@ -4035,9 +4062,8 @@ async function refreshSecuritySessions(showFeedback = false) {
       </div>
     `;
 
-    const token = profileToken();
     const data = await authFetch('/users/security/sessions', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     const sessions = data.data?.sessions || [];
@@ -4160,6 +4186,6 @@ window.refreshSecuritySessions = refreshSecuritySessions;
 
 document.addEventListener('DOMContentLoaded', () => {
   updateSecurityStrength();
-  refreshSecuritySessions();
   hydrateSecurityState(JSON.parse(localStorage.getItem('paddox_user') || 'null') || currentUser || {});
+  if (profileToken()) refreshSecuritySessions();
 });
