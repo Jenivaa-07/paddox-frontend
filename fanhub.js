@@ -2,7 +2,7 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.7A.9 wallpaper card visual lock loaded');
+console.log('PADDOX A4.7B premium wallpaper checkout loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
@@ -1029,7 +1029,7 @@ async function handleWpDownload(assetId, format = 'desktop') {
     }
 
     if (localAsset.type === 'premium') {
-      showToast(`🏁 Premium wallpaper checkout coming next: ₹${Number(localAsset.price || 0).toLocaleString('en-IN')}`);
+      await startPremiumWallpaperCheckout(assetId, format, token);
       return;
     }
 
@@ -1078,6 +1078,67 @@ async function handleWpDownload(assetId, format = 'desktop') {
   } catch (err) {
     console.error('Download failed:', err);
     showToast(`❌ ${err.message || 'Download failed'}`);
+  }
+}
+
+
+async function startPremiumWallpaperCheckout(assetId, format = 'desktop', token = '') {
+  const localAsset = window.__PADDOX_ASSETS__?.[assetId] || {};
+  try {
+    showToast(`🏁 Unlocking ${format} wallpaper...`);
+
+    const res = await fetch(`https://paddox-backend.onrender.com/api/assets/${assetId}/purchase`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ format, paymentMethod: 'upi' })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401) {
+      showToast('🔒 Please login to unlock PADDOX wallpapers');
+      setTimeout(() => window.location.href = 'account.html?redirect=fanhub.html%23sec-wallpapers', 900);
+      return;
+    }
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Premium unlock failed');
+    }
+
+    const info = data.data || data;
+    const downloadUrl = info.downloadUrl || info.url || localAsset[format] || localAsset.desktop || localAsset.cover;
+    const orderId = info.order?._id || info.order?.id;
+    const name = info.asset?.name || localAsset.name || 'Paddox Wallpaper';
+
+    if (downloadUrl) {
+      const finalUrl = makeCloudinaryDownloadUrl(downloadUrl);
+      const safeName = `${name}_${format}`.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'paddox_wallpaper';
+      const link = document.createElement('a');
+      link.href = finalUrl;
+      link.download = `${safeName}.jpg`;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    closePreview();
+    showToast('✅ Wallpaper unlocked. Receipt sent to your email.');
+
+    if (orderId) {
+      setTimeout(() => {
+        window.location.href = `receipt.html?orderId=${encodeURIComponent(orderId)}`;
+      }, 1000);
+    } else {
+      setTimeout(() => renderWallpapers(), 800);
+    }
+  } catch (err) {
+    console.error('Premium wallpaper checkout failed:', err);
+    showToast(`❌ ${err.message || 'Premium unlock failed'}`);
   }
 }
 

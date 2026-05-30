@@ -126,6 +126,14 @@ async function startGoogleLogin() {
     });
   } catch (err) {
     console.error(err);
+    const token = profileToken();
+    const digitalOrders = token ? await loadDigitalOrderDownloads(token) : [];
+    if (digitalOrders.length) {
+      REAL_DOWNLOADS = digitalOrders;
+      renderDownloads();
+      updateDownloadStats();
+      return;
+    }
     showToast(`❌ ${err.message}`);
   }
 }
@@ -576,7 +584,8 @@ const ACCOUNT_DOWNLOADS_API =
   'https://paddox-backend.onrender.com/api/users/downloads';
 const ACCOUNT_ASSETS_API =
   'https://paddox-backend.onrender.com/api/assets';
-
+const ACCOUNT_DIGITAL_ORDERS_API =
+  'https://paddox-backend.onrender.com/api/orders';
 let REAL_WISHLIST = [];
 
 function wishlistProductImage(product) {
@@ -840,9 +849,50 @@ function renderWishlist(){
 /* ══ DOWNLOADS ══ */
 let REAL_DOWNLOADS = [];
 
+
+async function loadDigitalOrderDownloads(token) {
+  try {
+    const res = await fetch(`${ACCOUNT_DIGITAL_ORDERS_API}?limit=60`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) return [];
+    const orders = data.data?.orders || data.data || data.orders || [];
+    const digitalAssets = [];
+    orders.forEach(order => {
+      if (order.orderType !== 'digital') return;
+      (order.items || []).forEach(item => {
+        const asset = item.asset || {};
+        const id = asset._id || item.asset || item.assetId;
+        if (!id) return;
+        digitalAssets.push({
+          ...asset,
+          _id: id,
+          name: asset.name || item.name || 'PADDOX Wallpaper',
+          image: asset.image || { url: item.image || asset.thumbnail?.url || asset.desktop?.url || asset.mobile?.url || '' },
+          fileSize: asset.fileSize || 'Digital',
+          type: asset.type || 'premium',
+          category: asset.category || 'wallpaper',
+          downloadedAt: order.createdAt,
+          orderNumber: order.orderNumber,
+          format: item.format || 'desktop',
+          downloadUrl: item.downloadUrl || asset.desktop?.url || asset.mobile?.url || asset.image?.url || ''
+        });
+      });
+    });
+    return digitalAssets;
+  } catch (_) {
+    return [];
+  }
+}
+
 function assetImage(asset) {
   return (
     asset.image?.url ||
+    asset.thumbnail?.url ||
+    asset.desktop?.url ||
+    asset.mobile?.url ||
+    asset.downloadUrl ||
     asset.url ||
     ''
   );
@@ -876,17 +926,34 @@ async function loadDownloads() {
       throw new Error(data.message || 'Downloads load failed');
     }
 
-    REAL_DOWNLOADS =
+    const apiDownloads =
       data.data?.assets ||
       data.data?.downloads ||
       data.assets ||
       [];
+
+    const digitalOrders = await loadDigitalOrderDownloads(token);
+    const seen = new Set();
+    REAL_DOWNLOADS = [...digitalOrders, ...apiDownloads].filter(asset => {
+      const key = String(asset._id || asset.id || asset.name || Math.random());
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
     renderDownloads();
     updateDownloadStats();
 
   } catch (err) {
     console.error(err);
+    const token = profileToken();
+    const digitalOrders = token ? await loadDigitalOrderDownloads(token) : [];
+    if (digitalOrders.length) {
+      REAL_DOWNLOADS = digitalOrders;
+      renderDownloads();
+      updateDownloadStats();
+      return;
+    }
     showToast(`❌ ${err.message}`);
   }
 }

@@ -127,6 +127,7 @@ function renderReceipt(order) {
   const paidAt = formatDate(payment.paidAt || order.paidAt || order.createdAt);
   const orderNo = order.orderNumber || order._id || order.id || order.orderId;
   const items = Array.isArray(order.items) ? order.items : [];
+  const isDigitalOrder = order.orderType === 'digital' || items.some(item => item.itemType === 'digital' || item.asset || item.downloadUrl);
 
   const effectiveItemsSubtotal = items.reduce((sum, item) => {
     const qty = Number(item.quantity || 1);
@@ -159,9 +160,11 @@ function renderReceipt(order) {
     const meta = [
       item.size ? `Size: ${esc(item.size)}` : '',
       item.color ? `Color: ${esc(item.color)}` : '',
+      item.format ? `Format: ${esc(String(item.format).toUpperCase())}` : '',
+      item.itemType === 'digital' ? 'Digital wallpaper unlock' : '',
       itemSaved ? `Product discount: ${money(itemSaved)}` : ''
-    ].filter(Boolean).join(' · ') || 'Standard item';
-    const img = item.image || item.product?.images?.[0]?.url || item.product?.image || '';
+    ].filter(Boolean).join(' · ') || (isDigitalOrder ? 'Digital wallpaper' : 'Standard item');
+    const img = item.image || item.asset?.thumbnail?.url || item.asset?.image?.url || item.asset?.desktop?.url || item.product?.images?.[0]?.url || item.product?.image || '';
 
     return `
       <div class="receipt-item">
@@ -216,13 +219,20 @@ function renderReceipt(order) {
         ${couponCode ? `<div class="receipt-line receipt-coupon-line"><span>Coupon Used</span><strong>${esc(couponCode)}</strong></div>` : ''}
       </div>
       <div class="receipt-box">
-        <h3>DELIVERY DETAILS</h3>
+        <h3>${isDigitalOrder ? 'DIGITAL DELIVERY' : 'DELIVERY DETAILS'}</h3>
         <address>
-          <strong>${esc(address.name || '-')}</strong><br>
-          ${esc(address.line1 || address.address || '-')} ${address.line2 ? `<br>${esc(address.line2)}` : ''}<br>
-          ${esc([address.city, address.state, address.pincode].filter(Boolean).join(', ') || '-')}<br>
-          ${esc(address.country || 'India')}<br>
-          Phone: ${esc(address.phone || '-')}
+          ${isDigitalOrder ? `
+            <strong>${esc(address.name || '-')}</strong><br>
+            Premium wallpaper unlocked in your PADDOX account.<br>
+            Re-download anytime from Account → Downloads.<br>
+            Receipt copy has been sent to your email.
+          ` : `
+            <strong>${esc(address.name || '-')}</strong><br>
+            ${esc(address.line1 || address.address || '-')} ${address.line2 ? `<br>${esc(address.line2)}` : ''}<br>
+            ${esc([address.city, address.state, address.pincode].filter(Boolean).join(', ') || '-')}<br>
+            ${esc(address.country || 'India')}<br>
+            Phone: ${esc(address.phone || '-')}
+          `}
         </address>
       </div>
     </section>
@@ -237,7 +247,7 @@ function renderReceipt(order) {
     <section class="receipt-bottom">
       <div class="receipt-note">
         <strong>Thank you for shopping with PADDOX.</strong>
-        <span>This is a system-generated receipt. Keep it for order tracking and support.</span>
+        <span>${isDigitalOrder ? 'Your wallpaper is available in Account → Downloads.' : 'This is a system-generated receipt. Keep it for order tracking and support.'}</span>
       </div>
       <div class="receipt-total-box">
         <div><span>Subtotal</span><strong>${money(subtotalDisplay)}</strong></div>
