@@ -966,8 +966,8 @@ async function renderWallpapers() {
             </div>
             <p>${isPremium ? 'Unlock this premium PADDOX wallpaper pack after purchase.' : 'Sign in required for every PADDOX wallpaper download.'}</p>
             <div class="wp-action-grid ${hasDesktop && hasMobile ? 'two' : ''}">
-              ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${isPremium ? 'Buy Desktop' : 'Desktop'}</button>` : ''}
-              ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}','mobile')">${isPremium ? 'Buy Mobile' : 'Mobile'}</button>` : ''}
+              ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${isPremium ? `Buy Desktop · ₹${Number(asset.price || 0).toLocaleString('en-IN')}` : 'Download Desktop'}</button>` : ''}
+              ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}','mobile')">${isPremium ? `Buy Mobile · ₹${Number(asset.price || 0).toLocaleString('en-IN')}` : 'Download Mobile'}</button>` : ''}
               <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${safeName}')">Preview</button>
             </div>
             <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>

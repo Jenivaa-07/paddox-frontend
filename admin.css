@@ -4229,3 +4229,27 @@ html,body{max-width:100%;overflow-x:hidden}
 .asset-no-preview{height:100%;display:grid;place-items:center;font-family:var(--font-d);letter-spacing:5px;color:rgba(255,255,255,.3)}
 .asset-modal-shell{display:none;position:fixed;inset:0;z-index:99999}.asset-modal-shell.show{display:block}.asset-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px}.asset-modal-card{position:relative;width:min(920px,96vw);max-height:92vh;overflow:auto;background:#0b0b0d;border:1px solid rgba(255,255,255,.12);border-top:3px solid var(--red);box-shadow:0 30px 90px rgba(0,0,0,.7);padding:28px;color:#fff}.asset-modal-close{position:absolute;top:18px;right:18px;color:#fff;border:1px solid rgba(255,255,255,.12);width:38px;height:38px;font-size:1.4rem;background:#111}.asset-modal-kicker{font-family:var(--font-c);letter-spacing:4px;color:var(--red);font-size:.72rem;font-weight:900}.asset-modal-card h2{font-family:var(--font-d);letter-spacing:4px;font-size:2.1rem;margin:6px 0}.asset-modal-sub{color:var(--muted2);max-width:720px;margin-bottom:20px}.asset-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.asset-form-grid label,.asset-desc-label{display:flex;flex-direction:column;gap:7px}.asset-form-grid span,.asset-desc-label span{font-family:var(--font-c);letter-spacing:2px;color:var(--muted);font-size:.72rem;text-transform:uppercase}.asset-form-grid .adm-input,.asset-form-grid .adm-select,.asset-desc-label .adm-input{width:100%;background:#151515;border:1px solid rgba(255,255,255,.12);color:#fff}.asset-form-grid .adm-input:disabled{opacity:.45}.asset-upload-grid-modal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:18px 0}.asset-drop-mini{cursor:pointer;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.025);padding:16px;transition:all .24s ease}.asset-drop-mini:hover{border-color:var(--red);background:rgba(232,0,45,.06)}.asset-drop-mini strong{font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase}.asset-drop-mini span{font-size:.74rem;color:var(--muted2)}.asset-drop-mini em{font-size:.68rem;color:var(--gold);font-style:normal;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:18px}
 @media(max-width:900px){.assets-command-card{flex-direction:column;align-items:flex-start}.asset-form-grid,.asset-upload-grid-modal{grid-template-columns:1fr}.assets-grid-pro{grid-template-columns:1fr}.asset-modal-actions{flex-direction:column}.asset-modal-actions button{width:100%}}
+
+
+/* ============================================================
+   PADDOX Admin Phase A4.7A.3 — Digital Assets edit + premium alignment
+   ============================================================ */
+#adm-assets .asset-card-pro{min-height:300px;border-color:rgba(255,255,255,.08)!important;background:linear-gradient(145deg,rgba(17,17,17,.98),rgba(6,6,6,.99))!important}
+#adm-assets .asset-thumb-pro{height:150px!important;background:#080808!important;border-bottom:1px solid rgba(255,255,255,.06)}
+#adm-assets .asset-thumb-pro img{height:100%!important;object-fit:cover!important}
+#adm-assets .asset-info-pro{padding:15px 16px 16px!important}
+#adm-assets .asset-name{font-size:1.02rem!important;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#adm-assets .asset-meta{font-size:.74rem!important;color:var(--muted2)!important;text-transform:capitalize}
+#adm-assets .asset-variant-row{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin:10px 0 12px!important}
+#adm-assets .asset-variant-row span{font-family:var(--font-c);letter-spacing:1.6px;text-transform:uppercase;font-size:.62rem;border:1px solid rgba(255,255,255,.1);padding:4px 8px;color:#777;background:rgba(255,255,255,.025)}
+#adm-assets .asset-variant-row span.on{border-color:rgba(0,180,0,.35);color:var(--green);background:rgba(0,180,0,.075)}
+#adm-assets .asset-actions-pro{display:grid!important;grid-template-columns:1fr 1fr 1fr!important;gap:8px!important;margin-top:10px!important}
+#adm-assets .asset-btn{margin:0!important;width:100%;height:34px;display:flex!important;align-items:center;justify-content:center}
+#adm-assets .asset-access-badge{font-size:.62rem!important;letter-spacing:1.6px!important;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#adm-assets .asset-format-badge{font-size:.6rem!important;letter-spacing:1.5px!important;background:rgba(5,5,5,.88)!important}
+.asset-modal-card{width:min(880px,94vw)!important;max-height:90vh!important;overflow:auto!important}
+.asset-modal-card .adm-input,.asset-modal-card .adm-select{width:100%!important}
+.asset-upload-grid-modal{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.asset-drop-mini{min-height:126px!important}
+.asset-modal-actions{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(10,10,10,.2),rgba(10,10,10,.98));padding-top:14px}
+@media(max-width:780px){.asset-upload-grid-modal{grid-template-columns:1fr!important}#adm-assets .asset-actions-pro{grid-template-columns:1fr!important}.asset-form-grid{grid-template-columns:1fr!important}}

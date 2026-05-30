@@ -5322,3 +5322,29 @@ body.modal-open { overflow: hidden; }
 .wp-card-premium .wp-overlay{display:none!important;}
 @media(max-width:1180px){.wp-grid,.wp-grid-premium{grid-template-columns:repeat(2,minmax(0,1fr))!important;}.wp-action-grid.two{grid-template-columns:1fr 1fr!important;}.wp-action-grid.two .wp-prev-btn{grid-column:1/-1;}}
 @media(max-width:720px){#sec-wallpapers .sec-head{align-items:flex-start!important;flex-direction:column!important;}#sec-wallpapers .sec-title{text-align:left!important}.wp-grid,.wp-grid-premium{grid-template-columns:1fr!important}.wp-media-wrap{height:230px!important}.wp-action-grid,.wp-action-grid.two{grid-template-columns:1fr!important}}
+
+
+/* ============================================================
+   PADDOX Phase A4.7A.3 — Fan Hub wallpaper premium alignment fix
+   ============================================================ */
+#sec-wallpapers{max-width:1500px!important;margin-inline:auto!important;padding-inline:clamp(22px,4vw,64px)!important;}
+#sec-wallpapers .sec-head{display:grid!important;grid-template-columns:minmax(240px,1fr) auto!important;align-items:end!important;gap:24px!important;margin-bottom:28px!important;}
+#sec-wallpapers .sec-title{font-size:clamp(2.8rem,5vw,5.2rem)!important;line-height:.9!important;text-align:right!important;}
+#sec-wallpapers .wp-filter-bar{margin:0 0 34px!important;padding:18px!important;background:rgba(14,14,14,.86)!important;border:1px solid rgba(255,255,255,.075)!important;box-shadow:0 20px 60px rgba(0,0,0,.36)!important;}
+.wp-grid,.wp-grid-premium{display:grid!important;grid-template-columns:repeat(3,minmax(290px,1fr))!important;gap:28px!important;align-items:stretch!important;max-width:100%!important;}
+.wp-card-premium{min-height:0!important;height:auto!important;background:linear-gradient(145deg,rgba(18,18,18,.98),rgba(5,5,5,.99))!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 22px 70px rgba(0,0,0,.45)!important;}
+.wp-card-premium::before{opacity:.38!important;}
+.wp-card-premium .wp-media-wrap{height:230px!important;min-height:230px!important;overflow:hidden!important;background:#090909!important;}
+.wp-card-premium .wp-info-panel{padding:18px 20px 20px!important;display:flex!important;flex-direction:column!important;gap:10px!important;min-height:245px!important;}
+.wp-card-premium .wp-category{font-size:.62rem!important;letter-spacing:2.8px!important;color:var(--red)!important;font-weight:900!important;}
+.wp-card-premium h3{font-size:clamp(1.55rem,2vw,2rem)!important;letter-spacing:1.6px!important;line-height:1!important;margin:0!important;min-height:2.05em!important;}
+.wp-card-premium p{font-size:.86rem!important;line-height:1.55!important;color:#aaa!important;margin:0!important;min-height:42px!important;}
+.wp-card-premium .wp-device-row{display:flex!important;gap:7px!important;flex-wrap:wrap!important;margin:2px 0!important;}
+.wp-card-premium .wp-device-row span{font-size:.58rem!important;letter-spacing:1.5px!important;padding:4px 8px!important;}
+.wp-action-grid,.wp-action-grid.two{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;margin-top:auto!important;}
+.wp-card-premium .wp-dl-btn,.wp-card-premium .wp-prev-btn{min-height:46px!important;width:100%!important;max-width:100%!important;clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%)!important;font-size:.76rem!important;letter-spacing:2px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.wp-card-premium .wp-prev-btn{clip-path:none!important;border-color:rgba(255,255,255,.16)!important;background:rgba(255,255,255,.04)!important;}
+.wp-card-premium .wp-download-count{margin-top:2px!important;font-size:.76rem!important;color:#777!important;}
+.wp-card-premium .wp-tag{font-size:.62rem!important;letter-spacing:1.8px!important;max-width:70%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+@media(max-width:1180px){.wp-grid,.wp-grid-premium{grid-template-columns:repeat(2,minmax(280px,1fr))!important;}#sec-wallpapers .sec-head{grid-template-columns:1fr!important}#sec-wallpapers .sec-title{text-align:left!important}}
+@media(max-width:720px){#sec-wallpapers{padding-inline:18px!important}.wp-grid,.wp-grid-premium{grid-template-columns:1fr!important}.wp-card-premium .wp-media-wrap{height:210px!important}.wp-card-premium .wp-info-panel{min-height:0!important}#sec-wallpapers .sec-title{font-size:3rem!important}}

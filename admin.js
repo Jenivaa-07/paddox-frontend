@@ -6,6 +6,38 @@
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
 var ASSET_API_BASE = window.ASSET_API_BASE || 'https://paddox-backend.onrender.com/api/assets';
+
+/* A4.7A.3 safety helpers: keep Products page alive after cache/version changes. */
+function safeProductTeams() {
+  return (typeof PADDOX_PRODUCT_TEAMS !== 'undefined' && Array.isArray(PADDOX_PRODUCT_TEAMS))
+    ? PADDOX_PRODUCT_TEAMS
+    : [
+        { value:'ferrari', label:'Ferrari', aliases:['scuderia ferrari'] },
+        { value:'red bull racing', label:'Red Bull Racing', aliases:['red bull','oracle red bull'] },
+        { value:'mercedes', label:'Mercedes', aliases:['mercedes-amg'] },
+        { value:'mclaren', label:'McLaren', aliases:['mclaren f1'] },
+        { value:'aston martin', label:'Aston Martin', aliases:['aston'] },
+        { value:'alpine', label:'Alpine', aliases:['bwt alpine'] },
+        { value:'williams', label:'Williams', aliases:['williams racing'] },
+        { value:'haas f1 team', label:'Haas F1 Team', aliases:['haas'] },
+        { value:'racing bulls', label:'Racing Bulls', aliases:['rb','visa cash app rb'] },
+        { value:'audi', label:'Audi', aliases:['kick sauber','sauber'] },
+        { value:'cadillac', label:'Cadillac', aliases:[] },
+        { value:'paddox original', label:'PADDOX Original', aliases:['collector','original'] }
+      ];
+}
+function teamMatchesProductFilter(productTeam, selectedTeam) {
+  const wanted = String(selectedTeam || 'all').toLowerCase().trim();
+  if (!wanted || wanted === 'all') return true;
+  const productValue = String(productTeam || '').toLowerCase().trim();
+  const teams = safeProductTeams();
+  const team = teams.find(item => [item.value, item.label, ...(item.aliases || [])].map(v => String(v || '').toLowerCase()).includes(wanted));
+  if (!team) return productValue === wanted || productValue.includes(wanted);
+  return [team.value, team.label, ...(team.aliases || [])]
+    .map(v => String(v || '').toLowerCase())
+    .some(alias => productValue === alias || productValue.includes(alias));
+}
+
 var REAL_PRODUCTS = window.REAL_PRODUCTS || [];
 var REAL_ASSETS = window.REAL_ASSETS || [];
 
@@ -8457,12 +8489,14 @@ async function deleteCoupon(id) {
 
   window.openAssetModal = function openAssetModal() {
     ensureAssetModalMarkup();
+    resetAssetModalToUpload?.();
     document.getElementById('asset-modal')?.classList.add('show');
   };
 
   window.closeAssetModal = function closeAssetModal(event) {
     if (event && !event.target.classList.contains('asset-modal-backdrop')) return;
     document.getElementById('asset-modal')?.classList.remove('show');
+    resetAssetModalToUpload?.();
   };
 
   window.submitAssetUpload = async function submitAssetUpload() {
@@ -8495,6 +8529,88 @@ async function deleteCoupon(id) {
       if (!res.ok || data.success === false) throw new Error(data.message || 'Upload failed');
       closeAssetModal();
       showToast('🔥 Wallpaper uploaded');
+      await loadAssets();
+    } catch (err) {
+      console.error(err);
+      showToast(`❌ ${err.message}`);
+    }
+  };
+
+
+
+  function fillAssetModal(asset = {}) {
+    ensureAssetModalMarkup();
+    document.getElementById('asset-name').value = asset.name || '';
+    document.getElementById('asset-category').value = String(asset.category || 'cars').toLowerCase();
+    document.getElementById('asset-type').value = String(asset.type || 'free').toLowerCase();
+    document.getElementById('asset-price').value = Number(asset.price || 0);
+    document.getElementById('asset-orientation').value = String(asset.orientation || 'desktop').toLowerCase();
+    document.getElementById('asset-resolution').value = asset.resolution || '4K';
+    document.getElementById('asset-description').value = asset.description || '';
+    document.getElementById('asset-desktop-name').textContent = asset.desktop?.url || asset.image?.url ? 'Existing desktop file kept' : 'No file selected';
+    document.getElementById('asset-mobile-name').textContent = asset.mobile?.url ? 'Existing mobile file kept' : 'No file selected';
+    document.getElementById('asset-thumb-name').textContent = asset.thumbnail?.url ? 'Existing thumbnail kept' : 'No file selected';
+    toggleAssetPriceField();
+  }
+
+  window.openEditAsset = function openEditAsset(id) {
+    const asset = (REAL_ASSETS || []).find(a => String(a._id) === String(id));
+    if (!asset) return showToast('❌ Asset not found');
+    fillAssetModal(asset);
+    const modal = document.getElementById('asset-modal');
+    modal?.classList.add('show');
+    const title = modal?.querySelector('h2');
+    const sub = modal?.querySelector('.asset-modal-sub');
+    const submit = modal?.querySelector('.asset-modal-actions .adm-btn-red');
+    if (title) title.textContent = 'EDIT WALLPAPER ASSET';
+    if (sub) sub.textContent = 'Update title, category, device support, access, price, or replace desktop/mobile wallpaper files.';
+    if (submit) {
+      submit.textContent = 'Save Changes';
+      submit.onclick = () => submitAssetEdit(id);
+    }
+  };
+
+  window.resetAssetModalToUpload = function resetAssetModalToUpload() {
+    const modal = document.getElementById('asset-modal');
+    const title = modal?.querySelector('h2');
+    const sub = modal?.querySelector('.asset-modal-sub');
+    const submit = modal?.querySelector('.asset-modal-actions .adm-btn-red');
+    if (title) title.textContent = 'WALLPAPER COMMAND UPLOAD';
+    if (sub) sub.textContent = 'Upload desktop and mobile wallpaper variants, set free/premium access and display pricing from one PADDOX workspace.';
+    if (submit) {
+      submit.textContent = 'Upload Wallpaper';
+      submit.onclick = () => submitAssetUpload();
+    }
+  };
+
+  window.submitAssetEdit = async function submitAssetEdit(id) {
+    try {
+      const formData = new FormData();
+      const desktop = document.getElementById('asset-desktop-file')?.files?.[0] || null;
+      const mobile = document.getElementById('asset-mobile-file')?.files?.[0] || null;
+      const thumb = document.getElementById('asset-thumb-file')?.files?.[0] || null;
+      if (desktop) formData.append('desktop', desktop);
+      if (mobile) formData.append('mobile', mobile);
+      if (thumb) formData.append('thumbnail', thumb);
+      formData.append('name', document.getElementById('asset-name')?.value || 'PADDOX Wallpaper');
+      formData.append('category', document.getElementById('asset-category')?.value || 'wallpaper');
+      formData.append('type', document.getElementById('asset-type')?.value || 'free');
+      formData.append('price', document.getElementById('asset-price')?.value || '0');
+      formData.append('orientation', document.getElementById('asset-orientation')?.value || 'desktop');
+      formData.append('resolution', document.getElementById('asset-resolution')?.value || '4K');
+      formData.append('description', document.getElementById('asset-description')?.value || '');
+
+      showToast('⏳ Updating wallpaper asset...');
+      const res = await fetch(`${ASSET_API_BASE}/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${assetToken()}` },
+        body: formData
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) throw new Error(data.message || 'Asset update failed');
+      closeAssetModal();
+      resetAssetModalToUpload();
+      showToast('✅ Wallpaper asset updated');
       await loadAssets();
     } catch (err) {
       console.error(err);
@@ -8551,7 +8667,7 @@ async function deleteCoupon(id) {
             </div>
             <div class="asset-actions asset-actions-pro">
               <button class="asset-btn" onclick="previewAsset('${assetEsc(cover)}')">Preview</button>
-              <button class="asset-btn" onclick="openEditAsset('${asset._id}','${assetEsc(asset.name)}','${assetEsc(asset.category)}','${assetEsc(asset.type)}','${assetEsc(asset.resolution)}')">Edit</button>
+              <button class="asset-btn" onclick="openEditAsset('${asset._id}')">Edit</button>
               <button class="asset-btn danger" onclick="deleteAsset('${asset._id}')">Delete</button>
             </div>
           </div>
