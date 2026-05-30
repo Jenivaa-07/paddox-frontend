@@ -128,12 +128,38 @@ function renderReceipt(order) {
   const orderNo = order.orderNumber || order._id || order.id || order.orderId;
   const items = Array.isArray(order.items) ? order.items : [];
 
+  const effectiveItemsSubtotal = items.reduce((sum, item) => {
+    const qty = Number(item.quantity || 1);
+    const price = Number(item.price || item.salePrice || 0);
+    return sum + price * qty;
+  }, 0);
+
+  const originalItemsSubtotal = items.reduce((sum, item) => {
+    const qty = Number(item.quantity || 1);
+    const price = Number(item.price || item.salePrice || 0);
+    const productOriginal = Number(item.originalPrice || item.product?.price || price || 0);
+    return sum + Math.max(productOriginal, price) * qty;
+  }, 0);
+
+  const productDiscount = Number(
+    pricing.productDiscount ??
+    Math.max(0, originalItemsSubtotal - effectiveItemsSubtotal)
+  );
+  const subtotalDisplay = Number(
+    pricing.productDiscount !== undefined || productDiscount > 0
+      ? Math.max(Number(pricing.subtotal || 0), originalItemsSubtotal)
+      : Number(pricing.subtotal || originalItemsSubtotal || effectiveItemsSubtotal || 0)
+  );
+
   const itemsHtml = items.map(item => {
     const qty = Number(item.quantity || 1);
     const price = Number(item.price || item.salePrice || 0);
+    const originalPrice = Math.max(Number(item.originalPrice || item.product?.price || price), price);
+    const itemSaved = Math.max(0, originalPrice - price) * qty;
     const meta = [
       item.size ? `Size: ${esc(item.size)}` : '',
-      item.color ? `Color: ${esc(item.color)}` : ''
+      item.color ? `Color: ${esc(item.color)}` : '',
+      itemSaved ? `Product discount: ${money(itemSaved)}` : ''
     ].filter(Boolean).join(' · ') || 'Standard item';
     const img = item.image || item.product?.images?.[0]?.url || item.product?.image || '';
 
@@ -214,9 +240,10 @@ function renderReceipt(order) {
         <span>This is a system-generated receipt. Keep it for order tracking and support.</span>
       </div>
       <div class="receipt-total-box">
-        <div><span>Subtotal</span><strong>${money(pricing.subtotal)}</strong></div>
+        <div><span>Subtotal</span><strong>${money(subtotalDisplay)}</strong></div>
+        ${productDiscount ? `<div><span>Product Discount</span><strong>-${money(productDiscount)}</strong></div>` : ''}
         <div><span>Shipping</span><strong>${money(pricing.shipping)}</strong></div>
-        ${couponCode ? `<div class="receipt-coupon-total"><span>Coupon Discount · ${esc(couponCode)}</span><strong>-${money(couponDiscount)}</strong></div>` : `<div><span>Discount</span><strong>${money(pricing.discount)}</strong></div>`}
+        ${couponDiscount ? `<div class="receipt-coupon-total"><span>Coupon Discount${couponCode ? ` · ${esc(couponCode)}` : ''}</span><strong>-${money(couponDiscount)}</strong></div>` : ''}
         <div><span>Tax</span><strong>${money(pricing.tax)}</strong></div>
         <div class="grand"><span>${status === 'paid' ? 'Total Paid' : 'Order Total'}</span><strong>${money(pricing.total)}</strong></div>
       </div>

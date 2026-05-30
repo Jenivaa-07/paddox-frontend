@@ -100,15 +100,32 @@ function resetCheckoutCoupon() {
   checkoutCoupon = null;
 }
 
+function getCartOriginalSubtotal() {
+  return cart.reduce((s, x) => {
+    const original = Math.max(Number(x.originalPrice || x.price || 0), Number(x.price || 0));
+    return s + original * Number(x.qty || 1);
+  }, 0);
+}
+
+function getCartProductDiscount() {
+  return cart.reduce((s, x) => {
+    const original = Math.max(Number(x.originalPrice || x.price || 0), Number(x.price || 0));
+    const price = Number(x.price || 0);
+    return s + Math.max(0, original - price) * Number(x.qty || 1);
+  }, 0);
+}
+
 function getCheckoutPricingSnapshot() {
-  const subtotal = getCartSubtotal();
-  const shipping = cartShippingAmount(subtotal);
-  const discount = Math.max(0, Math.min(Number(checkoutCoupon?.discount || 0), subtotal));
-  const discountedSubtotal = Math.max(0, subtotal - discount);
+  const subtotal = getCartOriginalSubtotal();
+  const productDiscount = getCartProductDiscount();
+  const productDiscountedSubtotal = Math.max(0, subtotal - productDiscount);
+  const shipping = cartShippingAmount(productDiscountedSubtotal);
+  const discount = Math.max(0, Math.min(Number(checkoutCoupon?.discount || 0), productDiscountedSubtotal));
+  const discountedSubtotal = Math.max(0, productDiscountedSubtotal - discount);
   const tax = Math.round(discountedSubtotal * 0.05);
   const total = discountedSubtotal + shipping + tax;
 
-  return { subtotal, shipping, discount, tax, total };
+  return { subtotal, productDiscount, shipping, discount, tax, total };
 }
 
 function renderCheckoutSummary(modal = document.getElementById('paddox-checkout-modal')) {
@@ -131,6 +148,11 @@ function renderCheckoutSummary(modal = document.getElementById('paddox-checkout-
     </div>
     <div><span>Items</span><strong>${getCartQuantity()}</strong></div>
     <div><span>Subtotal</span><strong>₹${pricing.subtotal.toLocaleString('en-IN')}</strong></div>
+    ${pricing.productDiscount ? `
+      <div class="pdx-checkout-discount-row">
+        <span>Product discount</span>
+        <strong>-₹${pricing.productDiscount.toLocaleString('en-IN')}</strong>
+      </div>` : ''}
     <div><span>Shipping</span><strong>${pricing.shipping ? `₹${pricing.shipping.toLocaleString('en-IN')}` : 'FREE'}</strong></div>
     ${coupon ? `
       <div class="pdx-checkout-discount-row">
@@ -178,7 +200,7 @@ async function applyCheckoutCoupon() {
     const res = await fetch(`${COUPON_API_BASE}/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, orderTotal: getCartSubtotal() })
+      body: JSON.stringify({ code, orderTotal: Math.max(0, getCartOriginalSubtotal() - getCartProductDiscount()) })
     });
 
     const data = await res.json().catch(() => ({}));
@@ -228,18 +250,28 @@ async function loadShopProducts() {
 
     PRODUCTS = data.data || data.products || [];
 
-    PRODUCTS = PRODUCTS.map(p => ({
+    PRODUCTS = PRODUCTS.map(p => {
+      const originalPrice = Number(p.price || 0);
+      const effectivePrice = Number(
+        p.effectivePrice ??
+        (p.onSale && p.salePrice ? p.salePrice : p.price) ??
+        0
+      );
+      const safeOriginalPrice = Math.max(originalPrice, effectivePrice);
+
+      return {
       id: p._id,
       name: p.name,
       team: p.team,
       teamKey: canonicalShopTeam(p.team),
       cat: p.category,
-      price: p.effectivePrice || p.price,
+      price: effectivePrice,
+      originalPrice: safeOriginalPrice,
       rating: Number(p.ratings?.average || p.rating || 5),
       badge: p.badge,
       emoji: p.emoji || '',
       limited: !!p.isLimited,
-      sale: !!p.onSale,
+      sale: !!p.onSale || safeOriginalPrice > effectivePrice,
       isNew: p.badge === 'new',
       images: Array.isArray(p.images)
         ? p.images.map(img => img.url || img).filter(Boolean)
@@ -253,7 +285,8 @@ async function loadShopProducts() {
       isSizedProduct:
         ['apparel', 'clothing', 'shirts', 'tshirts', 't-shirts', 'hoodies', 'pants', 'jackets']
           .includes(String(p.category || '').toLowerCase())
-    }));
+      };
+    });
 
     renderProducts();
     updateShopHeroStats();
@@ -795,7 +828,9 @@ function renderProducts() {
 function cardHTML(p, i) {
   const roundedRating = Math.round(Number(p.rating || 0));
   const stars = '★'.repeat(roundedRating) + '☆'.repeat(5 - roundedRating);
-  const origPrice = p.sale ? `<span class="pcard-orig">₹${Math.round(p.price * 1.2).toLocaleString('en-IN')}</span>` : '';
+  const origPrice = p.sale && p.originalPrice > p.price
+    ? `<span class="pcard-orig">₹${Math.round(p.originalPrice).toLocaleString('en-IN')}</span>`
+    : '';
 
   return `
     <div class="pcard" data-id="${p.id}" role="button" tabindex="0" aria-label="View ${p.name}">
@@ -957,6 +992,8 @@ function addToCart(id, selectedSize = null, qtyToAdd = 1) {
       name: p.name,
       team: p.team,
       price: p.price,
+      originalPrice: p.originalPrice || p.price,
+      productDiscount: Math.max(0, Number(p.originalPrice || p.price) - Number(p.price || 0)),
       emoji: p.emoji,
       gradient: p.gradient,
       image: p.image,
@@ -1644,7 +1681,9 @@ function openModal(id) {
 
   /* Original price */
   const origEl = document.getElementById('modal-original');
-  if (origEl) origEl.textContent = p.sale ? `₹${Math.round(p.price * 1.2).toLocaleString('en-IN')}` : '';
+  if (origEl) origEl.textContent = p.sale && p.originalPrice > p.price
+    ? `₹${Math.round(p.originalPrice).toLocaleString('en-IN')}`
+    : '';
 
   /* Main image */
   const imgMain = document.getElementById('modal-img-main');
