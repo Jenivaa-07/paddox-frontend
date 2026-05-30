@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — account.js   |   User Account Logic | A4.7B.2 re-download fix
+   PADDOX — account.js   |   User Account Logic
    ============================================================ */
 'use strict';
 /* ══ PARTICLES ══ */
@@ -126,14 +126,6 @@ async function startGoogleLogin() {
     });
   } catch (err) {
     console.error(err);
-    const token = profileToken();
-    const digitalOrders = token ? await loadDigitalOrderDownloads(token) : [];
-    if (digitalOrders.length) {
-      REAL_DOWNLOADS = digitalOrders;
-      renderDownloads();
-      updateDownloadStats();
-      return;
-    }
     showToast(`❌ ${err.message}`);
   }
 }
@@ -231,7 +223,9 @@ window.TokenManager = window.TokenManager || (typeof TokenManager !== 'undefined
   }
 });
 
-window.AuthAPI = window.AuthAPI || (typeof AuthAPI !== 'undefined' ? AuthAPI : {
+/* A4.7B.6 — Force Account page to use the backend auth routes that are live now.
+   This avoids older js/api.js AuthAPI definitions shadowing login/register. */
+window.AuthAPI = {
   login(payload) {
     return authFetch('/auth/login', {
       method: 'POST',
@@ -253,11 +247,12 @@ window.AuthAPI = window.AuthAPI || (typeof AuthAPI !== 'undefined' ? AuthAPI : {
   },
   getMe() {
     const token = window.TokenManager.getAccess();
+    if (!token) return Promise.reject(new Error('No saved session'));
     return authFetch('/auth/me', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: { Authorization: `Bearer ${token}` }
     });
   }
-});
+};
 
 /* TAB SWITCH */
 document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -528,12 +523,9 @@ document
     const data =
       await AuthAPI.getMe();
 
-    if (
-      data.success &&
-      data.data
-    ) {
-
-      loginUser(data.data);
+    if (data.success && (data.data || data.user)) {
+      const restoredUser = data.data?.user || data.user || data.data;
+      loginUser(restoredUser);
     }
 
   } catch (err) {
@@ -584,8 +576,7 @@ const ACCOUNT_DOWNLOADS_API =
   'https://paddox-backend.onrender.com/api/users/downloads';
 const ACCOUNT_ASSETS_API =
   'https://paddox-backend.onrender.com/api/assets';
-const ACCOUNT_DIGITAL_ORDERS_API =
-  'https://paddox-backend.onrender.com/api/orders';
+
 let REAL_WISHLIST = [];
 
 function wishlistProductImage(product) {
@@ -849,66 +840,9 @@ function renderWishlist(){
 /* ══ DOWNLOADS ══ */
 let REAL_DOWNLOADS = [];
 
-
-async function loadDigitalOrderDownloads(token) {
-  try {
-    const res = await fetch(`${ACCOUNT_DIGITAL_ORDERS_API}?limit=60`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) return [];
-    const orders = data.data?.orders || data.data || data.orders || [];
-    const digitalAssets = [];
-
-    orders.forEach(order => {
-      if (order.orderType !== 'digital') return;
-      (order.items || []).forEach(item => {
-        const rawAsset = item.asset;
-        const asset = rawAsset && typeof rawAsset === 'object' ? rawAsset : {};
-        const id = asset._id || item.assetId || (typeof rawAsset === 'string' ? rawAsset : '');
-        if (!id) return;
-
-        const format = String(item.format || order.digitalFormat || 'desktop').toLowerCase() === 'mobile'
-          ? 'mobile'
-          : 'desktop';
-
-        const directUrl =
-          item.downloadUrl ||
-          (format === 'mobile' ? asset.mobile?.url : asset.desktop?.url) ||
-          asset.desktop?.url ||
-          asset.mobile?.url ||
-          asset.image?.url ||
-          asset.thumbnail?.url ||
-          '';
-
-        digitalAssets.push({
-          ...asset,
-          _id: id,
-          name: asset.name || item.name || 'PADDOX Wallpaper',
-          image: asset.image || { url: item.image || asset.thumbnail?.url || asset.desktop?.url || asset.mobile?.url || directUrl || '' },
-          fileSize: asset.fileSize || (format === 'mobile' ? asset.mobile?.fileSize : asset.desktop?.fileSize) || 'Digital',
-          type: asset.type || 'premium',
-          category: asset.category || 'wallpaper',
-          downloadedAt: order.createdAt,
-          orderNumber: order.orderNumber,
-          format,
-          downloadUrl: directUrl
-        });
-      });
-    });
-    return digitalAssets;
-  } catch (_) {
-    return [];
-  }
-}
-
 function assetImage(asset) {
   return (
     asset.image?.url ||
-    asset.thumbnail?.url ||
-    asset.desktop?.url ||
-    asset.mobile?.url ||
-    asset.downloadUrl ||
     asset.url ||
     ''
   );
@@ -942,34 +876,17 @@ async function loadDownloads() {
       throw new Error(data.message || 'Downloads load failed');
     }
 
-    const apiDownloads =
+    REAL_DOWNLOADS =
       data.data?.assets ||
       data.data?.downloads ||
       data.assets ||
       [];
-
-    const digitalOrders = await loadDigitalOrderDownloads(token);
-    const seen = new Set();
-    REAL_DOWNLOADS = [...digitalOrders, ...apiDownloads].filter(asset => {
-      const key = String(asset._id || asset.id || asset.name || Math.random());
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
 
     renderDownloads();
     updateDownloadStats();
 
   } catch (err) {
     console.error(err);
-    const token = profileToken();
-    const digitalOrders = token ? await loadDigitalOrderDownloads(token) : [];
-    if (digitalOrders.length) {
-      REAL_DOWNLOADS = digitalOrders;
-      renderDownloads();
-      updateDownloadStats();
-      return;
-    }
     showToast(`❌ ${err.message}`);
   }
 }
@@ -1087,9 +1004,6 @@ function renderDownloads() {
     const name = asset.name || 'Paddox Digital Asset';
     const typeLabel = downloadAssetTypeLabel(asset);
     const metaLine = downloadAssetMetaLine(asset, downloadedAt);
-    const assetId = asset._id || asset.id || '';
-    const format = String(asset.format || 'desktop').toLowerCase() === 'mobile' ? 'mobile' : 'desktop';
-    const directUrl = asset.downloadUrl || asset.url || asset.desktop?.url || asset.mobile?.url || asset.image?.url || '';
 
     return `
       <div class="dl-card premium-download-card">
@@ -1109,7 +1023,7 @@ function renderDownloads() {
 
         <button
           class="dl-act download-action-btn"
-          onclick="downloadAccountAsset('${escapeAttr(assetId)}', '${escapeAttr(format)}', '${escapeAttr(directUrl)}')"
+          onclick="downloadAccountAsset('${asset._id}')"
           aria-label="Download ${name} again"
         >
           <span aria-hidden="true">↓</span>
@@ -1122,7 +1036,7 @@ function renderDownloads() {
   updateDownloadStats();
 }
 
-async function downloadAccountAsset(assetId, format = 'desktop', directUrl = '') {
+async function downloadAccountAsset(assetId) {
   try {
     const token = profileToken();
 
@@ -1131,51 +1045,26 @@ async function downloadAccountAsset(assetId, format = 'desktop', directUrl = '')
       return;
     }
 
-    const cleanId = String(assetId || '').trim();
-    const cleanFormat = String(format || 'desktop').toLowerCase() === 'mobile' ? 'mobile' : 'desktop';
-
-    if (!cleanId) {
-      if (directUrl) {
-        window.open(directUrl, '_blank');
-        showToast('✅ Downloading asset');
-        return;
-      }
-      throw new Error('Download asset id missing');
-    }
-
     showToast('⏳ Preparing download...');
 
-    const res = await fetch(`${ACCOUNT_ASSETS_API}/${encodeURIComponent(cleanId)}/download?format=${encodeURIComponent(cleanFormat)}`, {
+    const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ format: cleanFormat })
+        Authorization: `Bearer ${token}`
+      }
     });
 
     const data = await res.json().catch(() => ({}));
 
-    let info = data.data || data;
-    let downloadUrl =
-      info.downloadUrl ||
-      info.url ||
-      info.asset?.downloadUrl ||
-      info.asset?.url ||
-      info.asset?.image?.url ||
-      directUrl ||
-      '';
-
     if (!res.ok || !data.success) {
-      /* Some already-unlocked digital orders can still be downloaded from the saved order URL
-         even if the asset endpoint rejects the re-download. */
-      if (directUrl) {
-        window.open(directUrl, '_blank');
-        showToast('✅ Downloading saved asset');
-        return;
-      }
       throw new Error(data.message || 'Download failed');
     }
+
+    const info = data.data || data;
+    const downloadUrl =
+      info.downloadUrl ||
+      info.url ||
+      info.image?.url;
 
     if (!downloadUrl) {
       throw new Error('Download URL missing');
@@ -1183,7 +1072,7 @@ async function downloadAccountAsset(assetId, format = 'desktop', directUrl = '')
 
     window.open(downloadUrl, '_blank');
 
-    showToast(`✅ Downloading ${info.name || info.asset?.name || 'asset'}`);
+    showToast(`✅ Downloading ${info.name || 'asset'}`);
 
     await loadDownloads();
     await loadAccountProfile();
@@ -1193,7 +1082,6 @@ async function downloadAccountAsset(assetId, format = 'desktop', directUrl = '')
     showToast(`❌ ${err.message}`);
   }
 }
-
 
 /* ══ NOTIFICATIONS ══ */
 const NOTIFICATION_DEFAULTS = {
@@ -2945,7 +2833,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initOrderNotificationSocket();
   setTimeout(refreshSecuritySessions, 500);
 });
-console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
+console.log('%c👤 PADDOX — Account Page Loaded · A4.7B.6 auth recovery','color:#e8002d;font-size:14px;font-weight:bold;');
 
 function clearStarterDashboard() {
   updateDashboardSavedItems();
@@ -4085,6 +3973,25 @@ async function refreshSecuritySessions(showFeedback = false) {
   const note = document.getElementById('security-session-note');
   if (!list) return;
 
+  const token = profileToken();
+  if (!token) {
+    if (count) {
+      count.textContent = 'Login required';
+      setSecuritySummaryClass(count, 'status-warn');
+    }
+    if (note) note.textContent = 'Sign in to review trusted sessions.';
+    list.innerHTML = `
+      <div class="session-premium-card locked">
+        <span class="session-device-icon" aria-hidden="true"></span>
+        <div>
+          <div class="sess-name">No active login session</div>
+          <div class="sess-meta">Sign in to manage trusted devices.</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   try {
     list.innerHTML = `
       <div class="session-premium-card current">
@@ -4093,9 +4000,8 @@ async function refreshSecuritySessions(showFeedback = false) {
       </div>
     `;
 
-    const token = profileToken();
     const data = await authFetch('/users/security/sessions', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     const sessions = data.data?.sessions || [];
@@ -4218,6 +4124,6 @@ window.refreshSecuritySessions = refreshSecuritySessions;
 
 document.addEventListener('DOMContentLoaded', () => {
   updateSecurityStrength();
-  refreshSecuritySessions();
+  if (TokenManager.getAccess()) refreshSecuritySessions();
   hydrateSecurityState(JSON.parse(localStorage.getItem('paddox_user') || 'null') || currentUser || {});
 });
