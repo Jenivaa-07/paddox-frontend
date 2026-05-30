@@ -887,6 +887,15 @@ window.addEventListener('load', () => {
 /* ══ WALLPAPERS ══ */
 let wpCat = 'all';
 
+function wpEsc(value = '') {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function renderWallpapers() {
   const grid = document.getElementById('wp-grid');
   if (!grid) return;
@@ -932,13 +941,15 @@ async function renderWallpapers() {
       window.__PADDOX_ASSETS__[w._id] = {
         id: w._id,
         name: w.name,
+        category: w.category || 'wallpaper',
         cover: w.thumbnail?.url || w.image?.url || w.desktop?.url || w.mobile?.url,
         desktop: w.desktop?.url || w.image?.url,
         mobile: w.mobile?.url,
         type: String(w.type || 'free').toLowerCase(),
         price: Number(w.price || 0),
         orientation: w.orientation || 'desktop',
-        resolution: w.resolution || 'HD'
+        resolution: w.resolution || 'HD',
+        downloads: Number(w.downloads || 0)
       };
     });
 
@@ -948,28 +959,42 @@ async function renderWallpapers() {
       const hasDesktop = !!asset.desktop;
       const hasMobile = !!asset.mobile;
       const cover = asset.cover || asset.desktop || asset.mobile || '';
-      const safeName = String(w.name || 'Wallpaper').replace(/'/g, "\\'");
+      const previewCover = makeCloudinaryPreviewUrl(cover);
+      const safeName = wpEsc(w.name || 'PADDOX Wallpaper');
+      const jsName = String(w.name || 'Wallpaper').replace(/'/g, "\\'");
+      const priceText = `₹${Number(asset.price || 0).toLocaleString('en-IN')}`;
+      const accessText = isPremium ? `Premium · ${priceText}` : 'Free · Login Required';
+      const desktopLabel = isPremium ? `Buy Desktop · ${priceText}` : 'Download Desktop';
+      const mobileLabel = isPremium ? `Buy Mobile · ${priceText}` : 'Download Mobile';
       return `
         <article class="wp-card wp-card-premium ${isPremium ? 'is-premium' : 'is-free'}" style="animation-delay:${i * 0.06}s">
-          <div class="wp-media-wrap">
-            ${cover ? `<img class="wp-img" src="${cover}" alt="${w.name}" loading="lazy"/>` : '<div class="wp-thumb"></div>'}
-            <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${isPremium ? `Premium · ₹${Number(asset.price || 0).toLocaleString('en-IN')}` : 'Free · Login Required'}</span>
-            <span class="wp-res">${asset.resolution}</span>
+          <div class="wp-media-wrap" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">
+            ${cover ? `<img class="wp-img" src="${previewCover}" data-full="${cover}" alt="${safeName}" loading="lazy" draggable="false"/>` : '<div class="wp-thumb"></div>'}
+            <div class="wp-preview-watermark" aria-hidden="true">
+              <img src="assets/paddox-logo-icon-official.png" alt=""/>
+              <span>PADDOX LOW RES PREVIEW</span>
+            </div>
+            <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${accessText}</span>
+            <span class="wp-res">${wpEsc(asset.resolution)}</span>
+            <div class="wp-hover-panel">
+              <div class="wp-hover-kicker">${isPremium ? 'Premium Wallpaper' : 'Login Required'}</div>
+              <div class="wp-hover-title">${safeName}</div>
+              <div class="wp-hover-actions">
+                ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${desktopLabel}</button>` : ''}
+                ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}','mobile')">${mobileLabel}</button>` : ''}
+                <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">Low Res Preview</button>
+              </div>
+            </div>
           </div>
           <div class="wp-info-panel">
-            <div class="wp-category">${String(w.category || 'wallpaper').toUpperCase()}</div>
-            <h3>${w.name || 'PADDOX Wallpaper'}</h3>
+            <div class="wp-category">${wpEsc(String(w.category || 'wallpaper').toUpperCase())}</div>
+            <h3>${safeName}</h3>
             <div class="wp-device-row">
               <span class="${hasDesktop ? 'on' : ''}">Desktop</span>
               <span class="${hasMobile ? 'on' : ''}">Mobile</span>
-              <span>${String(asset.orientation || 'desktop').toUpperCase()}</span>
+              <span>${wpEsc(String(asset.orientation || 'desktop').toUpperCase())}</span>
             </div>
-            <p>${isPremium ? 'Unlock this premium PADDOX wallpaper pack after purchase.' : 'Sign in required for every PADDOX wallpaper download.'}</p>
-            <div class="wp-action-grid ${hasDesktop && hasMobile ? 'two' : ''}">
-              ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${isPremium ? `Buy Desktop · ₹${Number(asset.price || 0).toLocaleString('en-IN')}` : 'Download Desktop'}</button>` : ''}
-              ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}','mobile')">${isPremium ? `Buy Mobile · ₹${Number(asset.price || 0).toLocaleString('en-IN')}` : 'Download Mobile'}</button>` : ''}
-              <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${safeName}')">Preview</button>
-            </div>
+            <p>${isPremium ? `Unlock this premium PADDOX wallpaper pack for ${priceText}.` : 'Sign in required for every PADDOX wallpaper download.'}</p>
             <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
           </div>
         </article>
@@ -1092,7 +1117,11 @@ image.style.pointerEvents = 'auto';
 
   if (title) title.textContent = name || 'Wallpaper Preview';
 
-  btn.onclick = () => handleWpDownload(assetId);
+  btn.onclick = () => {
+    const asset = window.__PADDOX_ASSETS__?.[assetId] || {};
+    const format = asset.desktop ? 'desktop' : 'mobile';
+    handleWpDownload(assetId, format);
+  };
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
@@ -1121,7 +1150,7 @@ function makeCloudinaryPreviewUrl(url) {
   if (!url || typeof url !== 'string') return url;
 
   if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
-    return url.replace('/image/upload/', '/image/upload/w_900,q_auto:low/');
+    return url.replace('/image/upload/', '/image/upload/w_900,q_auto:low,e_blur:1200/');
   }
 
   return url;

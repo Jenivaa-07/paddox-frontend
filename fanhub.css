@@ -5348,3 +5348,50 @@ body.modal-open { overflow: hidden; }
 .wp-card-premium .wp-tag{font-size:.62rem!important;letter-spacing:1.8px!important;max-width:70%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
 @media(max-width:1180px){.wp-grid,.wp-grid-premium{grid-template-columns:repeat(2,minmax(280px,1fr))!important;}#sec-wallpapers .sec-head{grid-template-columns:1fr!important}#sec-wallpapers .sec-title{text-align:left!important}}
 @media(max-width:720px){#sec-wallpapers{padding-inline:18px!important}.wp-grid,.wp-grid-premium{grid-template-columns:1fr!important}.wp-card-premium .wp-media-wrap{height:210px!important}.wp-card-premium .wp-info-panel{min-height:0!important}#sec-wallpapers .sec-title{font-size:3rem!important}}
+
+
+/* ============================================================
+   PADDOX Phase A4.7A.4 — Wallpaper hover actions + protected low-res preview
+   Fix: old aspect-ratio card rule was hiding the premium info/actions panel.
+   ============================================================ */
+#sec-wallpapers{max-width:1480px!important;margin-inline:auto!important;padding-inline:clamp(18px,4vw,64px)!important;}
+#sec-wallpapers .sec-head{display:grid!important;grid-template-columns:minmax(260px,1fr) auto!important;align-items:end!important;gap:28px!important;margin-bottom:30px!important;}
+#sec-wallpapers .sec-title{text-align:right!important;font-size:clamp(3rem,5vw,5.6rem)!important;letter-spacing:2px!important;line-height:.9!important;}
+#sec-wallpapers .wp-filter-bar{padding:18px!important;margin-bottom:34px!important;background:linear-gradient(145deg,rgba(18,18,18,.9),rgba(7,7,7,.98))!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 18px 60px rgba(0,0,0,.42)!important;}
+.wp-grid,.wp-grid-premium{display:grid!important;grid-template-columns:repeat(3,minmax(290px,1fr))!important;gap:28px!important;align-items:stretch!important;}
+.wp-card.wp-card-premium{aspect-ratio:auto!important;min-height:455px!important;height:auto!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;background:linear-gradient(145deg,#111,#050505)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 24px 75px rgba(0,0,0,.5)!important;cursor:default!important;}
+.wp-card.wp-card-premium:hover{transform:translateY(-6px)!important;border-color:rgba(232,0,45,.42)!important;box-shadow:0 34px 95px rgba(0,0,0,.68),0 0 0 1px rgba(232,0,45,.14)!important;}
+.wp-card-premium .wp-media-wrap{position:relative!important;height:245px!important;min-height:245px!important;overflow:hidden!important;background:#080808!important;cursor:pointer!important;}
+.wp-card-premium .wp-img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;filter:brightness(.72) saturate(.82) contrast(1.08)!important;user-select:none!important;-webkit-user-drag:none!important;transition:transform .55s ease,filter .35s ease!important;}
+.wp-card-premium:hover .wp-img{transform:scale(1.055)!important;filter:brightness(.88) saturate(.95) contrast(1.1)!important;}
+.wp-card-premium .wp-media-wrap::after{content:''!important;position:absolute!important;inset:0!important;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.66))!important;z-index:2!important;pointer-events:none!important;}
+.wp-preview-watermark{position:absolute!important;inset:0!important;z-index:3!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;opacity:.23!important;pointer-events:none!important;transform:rotate(-10deg)!important;}
+.wp-preview-watermark img{width:44px!important;height:44px!important;border-radius:50%!important;filter:grayscale(.15) contrast(1.1)!important;}
+.wp-preview-watermark span{font-family:var(--font-c)!important;font-size:1rem!important;letter-spacing:4px!important;font-weight:900!important;color:#fff!important;text-shadow:0 0 22px rgba(0,0,0,.8)!important;white-space:nowrap!important;}
+.wp-card-premium .wp-tag{position:absolute!important;z-index:6!important;top:14px!important;left:14px!important;font-size:.64rem!important;letter-spacing:2px!important;padding:6px 12px!important;max-width:72%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.wp-card-premium .wt-free{background:rgba(0,180,0,.94)!important;color:#fff!important;}
+.wp-card-premium .wt-prem{background:var(--gold)!important;color:#080808!important;}
+.wp-card-premium .wp-res{position:absolute!important;z-index:6!important;right:14px!important;bottom:14px!important;background:rgba(0,0,0,.74)!important;border:1px solid rgba(255,255,255,.18)!important;color:#fff!important;padding:5px 9px!important;font-family:var(--font-c)!important;letter-spacing:2px!important;font-weight:900!important;}
+.wp-hover-panel{position:absolute!important;inset:0!important;z-index:5!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;text-align:center!important;gap:12px!important;padding:34px 24px!important;background:radial-gradient(circle at center,rgba(232,0,45,.16),rgba(0,0,0,.78) 62%,rgba(0,0,0,.9))!important;opacity:0!important;transform:translateY(10px)!important;transition:opacity .28s ease,transform .28s ease!important;}
+.wp-card-premium:hover .wp-hover-panel{opacity:1!important;transform:translateY(0)!important;}
+.wp-hover-kicker{font-family:var(--font-c)!important;letter-spacing:3px!important;text-transform:uppercase!important;color:var(--red)!important;font-weight:900!important;font-size:.72rem!important;}
+.wp-hover-title{font-family:var(--font-d)!important;font-size:2rem!important;letter-spacing:2px!important;color:#fff!important;line-height:1!important;max-width:100%!important;}
+.wp-hover-actions{width:min(360px,100%)!important;display:grid!important;grid-template-columns:1fr!important;gap:9px!important;}
+.wp-hover-actions .wp-dl-btn,.wp-hover-actions .wp-prev-btn{position:static!important;width:100%!important;min-height:45px!important;display:flex!important;align-items:center!important;justify-content:center!important;margin:0!important;border:1px solid rgba(255,255,255,.16)!important;font-family:var(--font-c)!important;letter-spacing:2.4px!important;text-transform:uppercase!important;font-weight:900!important;font-size:.78rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.wp-hover-actions .wp-dl-btn{background:var(--red)!important;color:#fff!important;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)!important;}
+.wp-hover-actions .wp-dl-mobile{background:#fff!important;color:#090909!important;}
+.wp-hover-actions .wp-prev-btn{background:rgba(255,255,255,.05)!important;color:#fff!important;}
+.wp-card-premium .wp-info-panel{position:relative!important;z-index:4!important;display:flex!important;flex-direction:column!important;gap:10px!important;min-height:210px!important;padding:18px 20px 20px!important;background:linear-gradient(180deg,rgba(14,14,14,.98),rgba(6,6,6,1))!important;}
+.wp-card-premium .wp-category{font-family:var(--font-c)!important;letter-spacing:3px!important;font-size:.64rem!important;color:var(--red)!important;font-weight:900!important;}
+.wp-card-premium .wp-info-panel h3{font-family:var(--font-d)!important;font-size:clamp(1.55rem,2vw,2rem)!important;line-height:1!important;letter-spacing:1.7px!important;min-height:2em!important;margin:0!important;color:#fff!important;}
+.wp-card-premium .wp-device-row{display:flex!important;flex-wrap:wrap!important;gap:7px!important;}
+.wp-card-premium .wp-device-row span{font-size:.58rem!important;letter-spacing:1.5px!important;padding:4px 8px!important;border:1px solid rgba(255,255,255,.12)!important;color:#777!important;font-family:var(--font-c)!important;text-transform:uppercase!important;}
+.wp-card-premium .wp-device-row span.on{color:var(--green)!important;border-color:rgba(0,180,0,.35)!important;background:rgba(0,180,0,.08)!important;}
+.wp-card-premium .wp-info-panel p{font-size:.84rem!important;line-height:1.5!important;color:#aaa!important;margin:0!important;}
+.wp-card-premium .wp-download-count{margin-top:auto!important;color:#777!important;font-size:.75rem!important;}
+.preview-image-wrap::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(-28deg,rgba(255,255,255,.035) 0 1px,transparent 1px 76px);}
+.preview-watermark{display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;opacity:.28!important;}
+.preview-watermark::before{content:'';width:48px;height:48px;border-radius:50%;background:url('assets/paddox-logo-icon-official.png') center/cover no-repeat;display:inline-block;filter:grayscale(.1) contrast(1.1);}
+@media(hover:none){.wp-hover-panel{opacity:1!important;position:relative!important;inset:auto!important;transform:none!important;background:rgba(0,0,0,.2)!important;padding:12px!important}.wp-hover-title,.wp-hover-kicker{display:none!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card.wp-card-premium{min-height:0!important}}
+@media(max-width:1180px){.wp-grid,.wp-grid-premium{grid-template-columns:repeat(2,minmax(280px,1fr))!important;}#sec-wallpapers .sec-head{grid-template-columns:1fr!important}#sec-wallpapers .sec-title{text-align:left!important}}
+@media(max-width:720px){#sec-wallpapers{padding-inline:18px!important}.wp-grid,.wp-grid-premium{grid-template-columns:1fr!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card-premium .wp-info-panel{min-height:0!important}#sec-wallpapers .sec-title{font-size:3rem!important}.wp-preview-watermark span{font-size:.8rem!important;letter-spacing:2.4px!important}}
