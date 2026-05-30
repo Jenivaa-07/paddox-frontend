@@ -76,30 +76,11 @@ function demoLogin() {
   showToast('Social sign-in will be available soon. Please use email login.');
 }
 
-function safeErrorMessage(err, fallback = 'Something went wrong') {
-  if (!err) return fallback;
-  if (typeof err === 'string') return err;
-  if (err instanceof Error && err.message) return err.message;
-  if (typeof err === 'object') {
-    return (
-      err.message ||
-      err.error ||
-      err.statusText ||
-      err.data?.message ||
-      err.response?.message ||
-      err.response?.data?.message ||
-      fallback
-    );
-  }
-  return fallback;
-}
-
-
 async function authFetch(path, options = {}) {
   const sessionId = localStorage.getItem('paddox_session_id') || '';
   const existingHeaders = options.headers || {};
   const hasAuthHeader = Object.keys(existingHeaders).some(k => k.toLowerCase() === 'authorization');
-  const accessToken = window.TokenManager?.getAccess?.() || '';
+  const accessToken = window.TokenManager?.getAccess?.() || profileToken?.() || '';
 
   const res = await fetch(`${PADDOX_API_BASE}${path}`, {
     credentials: 'include',
@@ -117,46 +98,10 @@ async function authFetch(path, options = {}) {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) {
-    const message = data?.message || data?.error || `Request failed (${res.status})`;
-    throw new Error(message);
+    throw new Error(data.message || 'Request failed');
   }
   return data;
 }
-
-/* A4.7B.7 — force Account login to use the correct live backend response shape. */
-window.AuthAPI = {
-  login(payload) {
-    return authFetch('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(payload || {})
-    });
-  },
-  register(payload) {
-    return authFetch('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(payload || {})
-    });
-  },
-  forgotPassword(email) {
-    return authFetch('/auth/forgot-password', {
-      method: 'POST',
-      body: JSON.stringify({ email: String(email || '').trim() })
-    });
-  },
-  logout() {
-    const token = window.TokenManager.getAccess();
-    return authFetch('/auth/logout', {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    }).catch(() => ({ success: true }));
-  },
-  getMe() {
-    const token = window.TokenManager.getAccess();
-    return authFetch('/auth/me', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-  }
-};
 
 async function startGoogleLogin() {
   try {
@@ -181,7 +126,7 @@ async function startGoogleLogin() {
     });
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -195,42 +140,19 @@ async function handleGoogleCredential(response) {
     handleAuthSuccess(data);
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
-function normaliseAuthPayload(data = {}) {
-  const payload = data.data || data;
-  const user = payload.user || data.user || null;
-  const accessToken = payload.accessToken || data.accessToken || payload.token || data.token || '';
-  return {
-    payload,
-    user,
-    accessToken,
-    requires2FA: !!(payload.requires2FA || data.requires2FA),
-    twoFactorToken: payload.twoFactorToken || data.twoFactorToken || '',
-    email: payload.email || user?.email || ''
-  };
-}
-
-function handleAuthSuccess(data = {}) {
-  const auth = normaliseAuthPayload(data);
-
-  if (auth.requires2FA) {
-    pendingTwoFactorToken = auth.twoFactorToken;
-    showTwoFactorLogin(auth.email);
+function handleAuthSuccess(data) {
+  if (data.data?.requires2FA) {
+    pendingTwoFactorToken = data.data.twoFactorToken;
+    showTwoFactorLogin(data.data.email);
     return;
   }
-
-  if (auth.payload?.sessionId) localStorage.setItem('paddox_session_id', auth.payload.sessionId);
-
-  if (!auth.accessToken || !auth.user) {
-    console.warn('Unexpected login response:', data);
-    throw new Error(data?.message || 'Login response missing user session');
-  }
-
-  TokenManager.setAccess(auth.accessToken);
-  loginUser(auth.user);
+  if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
+  TokenManager.setAccess(data.data.accessToken);
+  loginUser(data.data.user);
 }
 
 function showTwoFactorLogin(email) {
@@ -261,15 +183,13 @@ async function verifyTwoFactorLoginCode() {
       body: JSON.stringify({ twoFactorToken: pendingTwoFactorToken, code })
     });
     cancelTwoFactorLogin();
-    const auth = normaliseAuthPayload(data);
-    if (auth.payload?.sessionId) localStorage.setItem('paddox_session_id', auth.payload.sessionId);
-    if (!auth.accessToken || !auth.user) throw new Error('Secure login response missing user session');
-    TokenManager.setAccess(auth.accessToken);
-    loginUser(auth.user);
+    if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
+    TokenManager.setAccess(data.data.accessToken);
+    loginUser(data.data.user);
     showToast('🔥 Secure login successful');
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -303,7 +223,7 @@ window.TokenManager = window.TokenManager || (typeof TokenManager !== 'undefined
   }
 });
 
-window.AuthAPI = {
+window.AuthAPI = window.AuthAPI || (typeof AuthAPI !== 'undefined' ? AuthAPI : {
   login(payload) {
     return authFetch('/auth/login', {
       method: 'POST',
@@ -314,12 +234,6 @@ window.AuthAPI = {
     return authFetch('/auth/register', {
       method: 'POST',
       body: JSON.stringify(payload || {})
-    });
-  },
-  forgotPassword(email) {
-    return authFetch('/auth/forgot-password', {
-      method: 'POST',
-      body: JSON.stringify({ email: String(email || '').trim() })
     });
   },
   logout() {
@@ -335,7 +249,7 @@ window.AuthAPI = {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
   }
-};
+});
 
 /* TAB SWITCH */
 document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -368,11 +282,6 @@ document
   .getElementById('register-btn')
   ?.addEventListener('click', doRegister);
 
-/* FORGOT PASSWORD */
-document
-  .querySelector('.forgot-link')
-  ?.addEventListener('click', doForgotPassword);
-
 /* ENTER KEY */
 document
   .getElementById('li-pass')
@@ -384,76 +293,54 @@ document
 
 /* LOGIN FUNCTION */
 async function doLogin() {
-  const email = document.getElementById('li-email')?.value.trim() || '';
-  const password = document.getElementById('li-pass')?.value || '';
+
+  const email =
+    document
+      .getElementById('li-email')
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById('li-pass')
+      .value;
 
   if (!email || !password) {
+
     showToast('⚠️ Fill all fields');
+
     return;
   }
 
   try {
+
     showToast('🏁 Signing in...');
 
-    const data = await authFetch('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password })
-    });
+    const data =
+      await AuthAPI.login({
+        email,
+        password
+      });
 
-    const auth = normaliseAuthPayload(data);
+    if (!data || !data.success) {
 
-    if (auth.requires2FA) {
-      pendingTwoFactorToken = auth.twoFactorToken;
-      showTwoFactorLogin(auth.email || email);
-      showToast('🔐 Verification code sent');
-      return;
+      throw new Error(
+        data.message ||
+        'Login failed'
+      );
     }
 
-    if (!auth.accessToken || !auth.user) {
-      console.warn('Unexpected login response:', data);
-      showToast('❌ Login response missing user session');
-      return;
-    }
+    handleAuthSuccess(data);
 
-    if (auth.payload?.sessionId) localStorage.setItem('paddox_session_id', auth.payload.sessionId);
-    window.TokenManager.setAccess(auth.accessToken);
-    loginUser(auth.user);
-    showToast('🔥 Login successful');
+    showToast(data.data?.requires2FA ? '🔐 Verification code sent' : '🔥 Login successful');
 
   } catch (err) {
-    console.error('PADDOX login failed:', err);
-    showToast(`❌ ${safeErrorMessage(err, 'Login failed')}`);
-  }
-}
 
-/* FORGOT PASSWORD FUNCTION */
-async function doForgotPassword() {
-  const fieldEmail = document.getElementById('li-email')?.value.trim() || '';
-  const email = fieldEmail || prompt('Enter your PADDOX account email');
+    console.error(err);
 
-  if (!email) {
-    showToast('⚠️ Enter your email first');
-    return;
-  }
-
-  try {
-    showToast('📧 Sending reset link...');
-    const data = await authFetch('/auth/forgot-password', {
-      method: 'POST',
-      body: JSON.stringify({ email: String(email).trim() })
-    });
-
-    const sent = data?.data?.emailSent ?? data?.emailSent;
-    if (sent === false) {
-      showToast('⚠️ Reset created, but email delivery failed. Check backend mail config.');
-      console.warn('PADDOX forgot password mail status:', data);
-      return;
-    }
-
-    showToast('✅ Password reset email sent');
-  } catch (err) {
-    console.error('PADDOX forgot password failed:', err);
-    showToast(`❌ ${safeErrorMessage(err, 'Could not send reset email')}`);
+    showToast(
+      `❌ ${err.message}`
+    );
   }
 }
 
@@ -521,7 +408,7 @@ async function doRegister() {
     if (!data || !data.success) {
 
       throw new Error(
-        data?.message ||
+        data.message ||
         'Registration failed'
       );
     }
@@ -535,19 +422,13 @@ async function doRegister() {
     console.error(err);
 
     showToast(
-      `❌ ${err?.message || 'Something went wrong'}`
+      `❌ ${err.message}`
     );
   }
 }
 
 /* LOGIN USER */
 function loginUser(user) {
-
-  if (!user || typeof user !== 'object') {
-    console.warn('loginUser called without user:', user);
-    showToast('❌ Login session could not be loaded');
-    return;
-  }
 
   currentUser = user;
 
@@ -556,13 +437,14 @@ function loginUser(user) {
     JSON.stringify(user)
   );
 
-  const authScreen = document.getElementById('auth-screen');
-  if (authScreen) authScreen.style.display = 'none';
+  document
+    .getElementById('auth-screen')
+    .style.display = 'none';
 
   const accScreen =
     document.getElementById('acc-screen');
 
-  if (accScreen) accScreen.style.display = 'grid';
+  accScreen.style.display = 'grid';
 
   const fullName =
     `${user.firstName || ''} ${user.lastName || ''}`.trim();
@@ -570,23 +452,24 @@ function loginUser(user) {
   setProfileAvatar(user);
   hydrateSecurityState(user);
 
-  const profName = document.getElementById('prof-name');
-  if (profName) profName.textContent = fullName;
+  document.getElementById('prof-name')
+    .textContent = fullName;
 
-  const profEmail = document.getElementById('prof-email');
-  if (profEmail) profEmail.textContent = user.email || '';
+  document.getElementById('prof-email')
+    .textContent = user.email;
 
-  const dashGreeting = document.getElementById('dash-greeting');
-  if (dashGreeting) dashGreeting.textContent = `HEY, ${(user.firstName || 'FAN').toUpperCase()}`;
+  document.getElementById('dash-greeting')
+    .textContent =
+      `HEY, ${(user.firstName || 'FAN').toUpperCase()}`;
 
-  const pfFn = document.getElementById('pf-fn');
-  if (pfFn) pfFn.value = user.firstName || '';
+  document.getElementById('pf-fn')
+    .value = user.firstName || '';
 
-  const pfLn = document.getElementById('pf-ln');
-  if (pfLn) pfLn.value = user.lastName || '';
+  document.getElementById('pf-ln')
+    .value = user.lastName || '';
 
-  const pfEm = document.getElementById('pf-em');
-  if (pfEm) pfEm.value = user.email || '';
+  document.getElementById('pf-em')
+    .value = user.email || '';
 
   renderWishlist();
   renderNotifications();
@@ -637,9 +520,12 @@ document
     const data =
       await AuthAPI.getMe();
 
-    if (data.success) {
-      const restored = data.data?.user || data.user || data.data;
-      if (restored) loginUser(restored);
+    if (
+      data.success &&
+      data.data
+    ) {
+
+      loginUser(data.data);
     }
 
   } catch (err) {
@@ -778,7 +664,7 @@ async function loadWishlist() {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -814,7 +700,7 @@ async function removeWishlistProduct(productId) {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -1001,7 +887,7 @@ async function loadDownloads() {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -1150,7 +1036,66 @@ function renderDownloads() {
   updateDownloadStats();
 }
 
-async function downloadAccountAsset(assetId) {
+function accountCloudinaryDownloadUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+    if (url.includes('/image/upload/fl_attachment/')) return url;
+    return url.replace('/image/upload/', '/image/upload/fl_attachment/');
+  }
+
+  return url;
+}
+
+function accountAssetVariantUrl(asset = {}, format = 'desktop') {
+  if (!asset || typeof asset !== 'object') return '';
+
+  const key = String(format || 'desktop').toLowerCase();
+  const direct = asset[key];
+
+  if (typeof direct === 'string' && direct) return direct;
+  if (direct && typeof direct === 'object' && direct.url) return direct.url;
+
+  if (key === 'mobile' && asset.mobile?.url) return asset.mobile.url;
+  if (key === 'desktop' && asset.desktop?.url) return asset.desktop.url;
+
+  return (
+    asset.downloadUrl ||
+    asset.url ||
+    asset.fileUrl ||
+    asset.desktop?.url ||
+    asset.mobile?.url ||
+    asset.image?.url ||
+    asset.thumbnail?.url ||
+    ''
+  );
+}
+
+function accountAssetDownloadFormat(asset = {}, preferredFormat = '') {
+  const raw =
+    preferredFormat ||
+    asset.format ||
+    asset.downloadFormat ||
+    asset.selectedFormat ||
+    asset.meta?.format ||
+    asset.purchase?.format ||
+    asset.lastDownload?.format ||
+    '';
+
+  const cleaned = String(raw || '').toLowerCase().trim();
+  if (['desktop', 'mobile'].includes(cleaned)) return cleaned;
+
+  const orientation = String(asset.orientation || '').toLowerCase().trim();
+  if (orientation === 'mobile') return 'mobile';
+  if (orientation === 'desktop') return 'desktop';
+
+  if (asset.desktop?.url || typeof asset.desktop === 'string') return 'desktop';
+  if (asset.mobile?.url || typeof asset.mobile === 'string') return 'mobile';
+
+  return 'desktop';
+}
+
+async function downloadAccountAsset(assetId, preferredFormat = '') {
   try {
     const token = profileToken();
 
@@ -1159,41 +1104,63 @@ async function downloadAccountAsset(assetId) {
       return;
     }
 
+    const asset = (REAL_DOWNLOADS || []).find(item => String(item?._id || item?.id || item?.assetId || '') === String(assetId));
+    const format = accountAssetDownloadFormat(asset || {}, preferredFormat);
+    const localUrl = accountAssetVariantUrl(asset || {}, format);
+    const name = asset?.name || asset?.title || 'PADDOX Wallpaper';
+
     showToast('⏳ Preparing download...');
 
-    const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download`, {
+    /* Use the saved asset URL first. This makes Account → Downloads work for
+       both free wallpapers and already-unlocked premium wallpapers, even when
+       the protected API refuses a premium direct download. */
+    if (localUrl) {
+      const finalUrl = accountCloudinaryDownloadUrl(localUrl);
+      window.open(finalUrl, '_blank', 'noopener');
+      showToast(`✅ Downloading ${name}`);
+
+      /* Best-effort backend sync for free downloads. Never block the user. */
+      fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download?format=${encodeURIComponent(format)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => null);
+
+      return;
+    }
+
+    const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download?format=${encodeURIComponent(format)}`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Download failed');
+      throw new Error(data?.message || 'Download failed');
     }
 
     const info = data.data || data;
     const downloadUrl =
       info.downloadUrl ||
       info.url ||
+      info.desktop?.url ||
+      info.mobile?.url ||
       info.image?.url;
 
     if (!downloadUrl) {
       throw new Error('Download URL missing');
     }
 
-    window.open(downloadUrl, '_blank');
+    window.open(accountCloudinaryDownloadUrl(downloadUrl), '_blank', 'noopener');
 
-    showToast(`✅ Downloading ${info.name || 'asset'}`);
+    showToast(`✅ Downloading ${info.name || name}`);
 
     await loadDownloads();
     await loadAccountProfile();
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err?.message || 'Download failed'}`);
   }
 }
 
@@ -1918,7 +1885,7 @@ function initOrderNotificationSocket() {
 
   accountSocket.on('connect_error', err => {
     orderSocketConnected = false;
-    console.warn('Order notification socket failed:', safeErrorMessage(err));
+    console.warn('Order notification socket failed:', err.message);
   });
 }
 
@@ -2007,7 +1974,7 @@ async function saveNotifications(options = {}) {
     if (currentUser) currentUser.notifications = previous;
     hydrateNotificationControls(previous);
     setNotificationStatus('Sync failed — restored previous settings', 'error');
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   } finally {
     notificationSaving = false;
   }
@@ -2339,7 +2306,7 @@ async function uploadProfileAvatar(file) {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -2463,7 +2430,7 @@ async function saveProfile(){
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -2502,7 +2469,7 @@ async function saveAddress() {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -2543,7 +2510,7 @@ async function savePreferences() {
 
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -3683,7 +3650,7 @@ function openOrderReceipt(orderId) {
         closeAvatarStudio();
       } catch (err) {
         console.error(err);
-        showToast(`❌ ${safeErrorMessage(err) || 'Avatar save failed'}`);
+        showToast(`❌ ${err.message || 'Avatar save failed'}`);
       } finally {
         if (saveBtn) saveBtn.disabled = false;
       }
@@ -3814,7 +3781,7 @@ function openOrderReceipt(orderId) {
       await loadAccountProfile();
     } catch (err) {
       console.error(err);
-      showToast(`❌ ${err?.message || 'Something went wrong'}`);
+      showToast(`❌ ${err.message}`);
     }
   }
 
@@ -3964,7 +3931,7 @@ async function submitSecurityPassword() {
   } catch (err) {
     console.error(err);
     if (btn) btn.textContent = 'Update Password ✓';
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -4040,7 +4007,7 @@ async function sendSecurityTwoFactorCode() {
     showToast('✅ Verification code sent');
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -4068,7 +4035,7 @@ async function verifySecurityTwoFactorCode() {
     showToast(data.message || '✅ Two-factor settings updated');
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -4085,21 +4052,6 @@ async function refreshSecuritySessions(showFeedback = false) {
   const list = document.getElementById('security-session-list');
   const count = document.getElementById('sec-session-count');
   const note = document.getElementById('security-session-note');
-  const token = profileToken();
-
-  /* Do not call protected session APIs while logged out. */
-  if (!token) {
-    if (list) list.innerHTML = `
-      <div class="session-premium-card current">
-        <span class="session-device-icon" aria-hidden="true"></span>
-        <div><div class="sess-name">Login required</div><div class="sess-meta">Security sessions appear after sign in.</div></div>
-      </div>
-    `;
-    if (count) count.textContent = '0 Active';
-    if (note) note.textContent = 'Sign in to view trusted sessions.';
-    return;
-  }
-
   if (!list) return;
 
   try {
@@ -4110,8 +4062,9 @@ async function refreshSecuritySessions(showFeedback = false) {
       </div>
     `;
 
+    const token = profileToken();
     const data = await authFetch('/users/security/sessions', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
 
     const sessions = data.data?.sessions || [];
@@ -4185,7 +4138,7 @@ async function refreshSecuritySessions(showFeedback = false) {
       setSecuritySummaryClass(count, 'status-watch');
     }
     if (note) note.textContent = 'Session sync could not refresh. Your current login is still active.';
-    if (showFeedback) showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    if (showFeedback) showToast(`❌ ${err.message}`);
   }
 }
 
@@ -4225,7 +4178,7 @@ async function revokeSecuritySession(sessionId) {
     refreshSecuritySessions();
   } catch (err) {
     console.error(err);
-    showToast(`❌ ${err?.message || 'Something went wrong'}`);
+    showToast(`❌ ${err.message}`);
   }
 }
 
@@ -4234,6 +4187,6 @@ window.refreshSecuritySessions = refreshSecuritySessions;
 
 document.addEventListener('DOMContentLoaded', () => {
   updateSecurityStrength();
+  refreshSecuritySessions();
   hydrateSecurityState(JSON.parse(localStorage.getItem('paddox_user') || 'null') || currentUser || {});
-  if (profileToken()) refreshSecuritySessions();
 });
