@@ -959,11 +959,11 @@ async function renderWallpapers() {
       const hasDesktop = !!asset.desktop;
       const hasMobile = !!asset.mobile;
       const cover = asset.cover || asset.desktop || asset.mobile || '';
-      const previewCover = makeCloudinaryPreviewUrl(cover);
+      const previewCover = cover; // User-facing cards stay sharp; only modal preview is low-res/watermarked
       const safeName = wpEsc(w.name || 'PADDOX Wallpaper');
       const jsName = String(w.name || 'Wallpaper').replace(/'/g, "\\'");
       const priceText = `₹${Number(asset.price || 0).toLocaleString('en-IN')}`;
-      const accessText = isPremium ? `Premium · ${priceText}` : 'Free · Login Required';
+      const accessText = isPremium ? `Premium · ${priceText}` : 'Free';
       const desktopLabel = isPremium ? `Buy Desktop · ${priceText}` : 'Download Desktop';
       const mobileLabel = isPremium ? `Buy Mobile · ${priceText}` : 'Download Mobile';
       return `
@@ -977,7 +977,7 @@ async function renderWallpapers() {
             <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${accessText}</span>
             <span class="wp-res">${wpEsc(asset.resolution)}</span>
             <div class="wp-hover-panel">
-              <div class="wp-hover-kicker">${isPremium ? 'Premium Wallpaper' : 'Login Required'}</div>
+              <div class="wp-hover-kicker">${isPremium ? 'Premium Wallpaper' : 'Free Wallpaper'}</div>
               <div class="wp-hover-title">${safeName}</div>
               <div class="wp-hover-actions">
                 ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${desktopLabel}</button>` : ''}
@@ -994,7 +994,7 @@ async function renderWallpapers() {
               <span class="${hasMobile ? 'on' : ''}">Mobile</span>
               <span>${wpEsc(String(asset.orientation || 'desktop').toUpperCase())}</span>
             </div>
-            <p>${isPremium ? `Unlock this premium PADDOX wallpaper pack for ${priceText}.` : 'Sign in required for every PADDOX wallpaper download.'}</p>
+            <p>${isPremium ? `Unlock this PADDOX wallpaper pack for ${priceText}.` : 'Choose a PADDOX wallpaper format to download.'}</p>
             <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
           </div>
         </article>
@@ -1150,7 +1150,7 @@ function makeCloudinaryPreviewUrl(url) {
   if (!url || typeof url !== 'string') return url;
 
   if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
-    return url.replace('/image/upload/', '/image/upload/w_900,q_auto:low,e_blur:1200/');
+    return url.replace('/image/upload/', '/image/upload/w_1200,q_55,e_blur:80/');
   }
 
   return url;
@@ -1183,7 +1183,7 @@ function renderWallpapersFallback() {
       <div class="fh-empty-state">
         <div class="fh-empty-mark fh-mark-wallpapers"></div>
         <h3>No wallpapers in this filter yet</h3>
-        <p>Try another category or upload new wallpapers from Admin.</p>
+        <p>Try another category or check back for new drops.</p>
       </div>
     `;
     return;

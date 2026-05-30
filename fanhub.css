@@ -5395,3 +5395,91 @@ body.modal-open { overflow: hidden; }
 @media(hover:none){.wp-hover-panel{opacity:1!important;position:relative!important;inset:auto!important;transform:none!important;background:rgba(0,0,0,.2)!important;padding:12px!important}.wp-hover-title,.wp-hover-kicker{display:none!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card.wp-card-premium{min-height:0!important}}
 @media(max-width:1180px){.wp-grid,.wp-grid-premium{grid-template-columns:repeat(2,minmax(280px,1fr))!important;}#sec-wallpapers .sec-head{grid-template-columns:1fr!important}#sec-wallpapers .sec-title{text-align:left!important}}
 @media(max-width:720px){#sec-wallpapers{padding-inline:18px!important}.wp-grid,.wp-grid-premium{grid-template-columns:1fr!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card-premium .wp-info-panel{min-height:0!important}#sec-wallpapers .sec-title{font-size:3rem!important}.wp-preview-watermark span{font-size:.8rem!important;letter-spacing:2.4px!important}}
+
+
+/* ============================================================
+   PADDOX Phase A4.7A.5 — Fan Hub wallpaper customer polish
+   Clean user labels, sharp gallery cards, reliable hover CTAs,
+   and visible low-res preview with PADDOX watermark.
+   ============================================================ */
+#sec-wallpapers .wp-card-premium .wp-img{
+  filter:brightness(.9) saturate(1.02) contrast(1.08)!important;
+  transform:none!important;
+}
+#sec-wallpapers .wp-card-premium:hover .wp-img,
+#sec-wallpapers .wp-card-premium .wp-media-wrap:hover .wp-img{
+  filter:brightness(1) saturate(1.08) contrast(1.1)!important;
+  transform:scale(1.045)!important;
+}
+#sec-wallpapers .wp-preview-watermark{
+  opacity:.13!important;
+  mix-blend-mode:screen!important;
+}
+#sec-wallpapers .wp-preview-watermark span{
+  font-size:.82rem!important;
+  letter-spacing:3px!important;
+}
+#sec-wallpapers .wp-card-premium .wp-tag{
+  max-width:68%!important;
+  letter-spacing:2.2px!important;
+}
+#sec-wallpapers .wp-card-premium .wt-free::after{content:''!important;}
+#sec-wallpapers .wp-hover-panel{
+  pointer-events:auto!important;
+  z-index:9!important;
+  background:radial-gradient(circle at center,rgba(232,0,45,.18),rgba(0,0,0,.72) 58%,rgba(0,0,0,.92))!important;
+}
+#sec-wallpapers .wp-card-premium:hover .wp-hover-panel,
+#sec-wallpapers .wp-card-premium .wp-media-wrap:hover .wp-hover-panel,
+#sec-wallpapers .wp-card-premium:focus-within .wp-hover-panel{
+  opacity:1!important;
+  visibility:visible!important;
+  transform:translateY(0)!important;
+}
+#sec-wallpapers .wp-hover-actions .wp-dl-btn,
+#sec-wallpapers .wp-hover-actions .wp-prev-btn{
+  box-shadow:0 14px 34px rgba(0,0,0,.35)!important;
+}
+#sec-wallpapers .wp-hover-actions .wp-prev-btn{
+  border-color:rgba(255,255,255,.22)!important;
+  background:rgba(255,255,255,.08)!important;
+}
+#sec-wallpapers .wp-info-panel p{
+  color:#9b9b9b!important;
+}
+#sec-wallpapers .wp-device-row span:not(.on){
+  display:none!important;
+}
+.preview-card{
+  width:min(860px,94vw)!important;
+  border-top:2px solid var(--red)!important;
+}
+.preview-image-wrap{
+  background:#050505!important;
+  min-height:360px!important;
+}
+.preview-image{
+  height:min(58vh,560px)!important;
+  object-fit:cover!important;
+  filter:brightness(.82) saturate(.9) contrast(1.02)!important;
+}
+.preview-watermark{
+  opacity:.32!important;
+  transform:rotate(-13deg)!important;
+  pointer-events:none!important;
+}
+.preview-watermark span::after{
+  content:'LOW RES PREVIEW';
+  margin-left:10px;
+  font-family:var(--font-c);
+  letter-spacing:4px;
+  font-weight:900;
+  color:rgba(255,255,255,.88);
+  text-shadow:0 0 24px rgba(0,0,0,.9);
+}
+.preview-lowres{letter-spacing:2px!important;color:#aaa!important;}
+@media(max-width:720px){
+  .preview-image-wrap{min-height:240px!important;}
+  .preview-image{height:42vh!important;}
+  .preview-watermark span::after{font-size:.78rem;letter-spacing:2px;}
+}
