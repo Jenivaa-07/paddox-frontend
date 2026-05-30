@@ -5934,3 +5934,67 @@ body.modal-open { overflow: hidden; }
   .assets-grid-pro{grid-template-columns:1fr!important;}
   .asset-stat-grid{grid-template-columns:repeat(2,1fr)!important;}
 }
+
+
+/* ============================================================
+   PADDOX Admin Phase A4.7A.7 — Customer Copy + CTA Polish
+   User-facing wallpaper cards: clean labels, visible art, premium CTAs.
+   ============================================================ */
+#sec-wallpapers .wp-card-premium .wp-preview-watermark{
+  opacity:0!important;
+  pointer-events:none!important;
+}
+#sec-wallpapers .wp-card-premium:hover .wp-preview-watermark{
+  opacity:.16!important;
+}
+#sec-wallpapers .wp-card-premium .wp-img{
+  filter:brightness(.82) saturate(.95) contrast(1.08)!important;
+}
+#sec-wallpapers .wp-card-premium:hover .wp-img{
+  filter:brightness(.98) saturate(1.02) contrast(1.1)!important;
+}
+#sec-wallpapers .wp-info-panel{
+  min-height:188px!important;
+  padding:18px 20px 24px!important;
+  justify-content:flex-start!important;
+}
+#sec-wallpapers .wp-card-premium p{
+  min-height:0!important;
+  color:#b6b6b6!important;
+  font-size:.86rem!important;
+}
+#sec-wallpapers .wp-download-count{
+  margin-top:auto!important;
+  padding-top:12px!important;
+  color:#858585!important;
+  display:block!important;
+  opacity:1!important;
+}
+#sec-wallpapers .wp-hover-kicker{
+  color:var(--red)!important;
+  font-family:var(--font-c)!important;
+  letter-spacing:3px!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+}
+#sec-wallpapers .wp-hover-title{
+  color:#fff!important;
+  text-shadow:0 10px 30px rgba(0,0,0,.75)!important;
+}
+#sec-wallpapers .wp-dl-btn{
+  background:var(--red)!important;
+  color:#fff!important;
+}
+#sec-wallpapers .wp-prev-btn{
+  color:#fff!important;
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+}
+#preview-modal .preview-card,
+.wp-preview-modal .preview-card{
+  box-shadow:0 35px 110px rgba(0,0,0,.85),0 0 0 1px rgba(232,0,45,.28)!important;
+}
+#preview-download-btn{
+  min-width:230px!important;
+  letter-spacing:2.5px!important;
+}

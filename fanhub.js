@@ -964,8 +964,8 @@ async function renderWallpapers() {
       const jsName = String(w.name || 'Wallpaper').replace(/'/g, "\\'");
       const priceText = `₹${Number(asset.price || 0).toLocaleString('en-IN')}`;
       const accessText = isPremium ? `Premium · ${priceText}` : 'Free';
-      const desktopLabel = isPremium ? `Buy Desktop · ${priceText}` : 'Download Desktop';
-      const mobileLabel = isPremium ? `Buy Mobile · ${priceText}` : 'Download Mobile';
+      const desktopLabel = isPremium ? `Unlock Desktop · ${priceText}` : 'Download Desktop';
+      const mobileLabel = isPremium ? `Unlock Mobile · ${priceText}` : 'Download Mobile';
       return `
         <article class="wp-card wp-card-premium ${isPremium ? 'is-premium' : 'is-free'}" style="animation-delay:${i * 0.06}s">
           <div class="wp-media-wrap" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">
@@ -977,12 +977,12 @@ async function renderWallpapers() {
             <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${accessText}</span>
             <span class="wp-res">${wpEsc(asset.resolution)}</span>
             <div class="wp-hover-panel">
-              <div class="wp-hover-kicker">${isPremium ? 'Premium Wallpaper' : 'Free Wallpaper'}</div>
+              <div class="wp-hover-kicker">${isPremium ? 'Full Resolution Unlock' : 'Free Download'}</div>
               <div class="wp-hover-title">${safeName}</div>
               <div class="wp-hover-actions">
                 ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${w._id}','desktop')">${desktopLabel}</button>` : ''}
                 ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${w._id}','mobile')">${mobileLabel}</button>` : ''}
-                <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">Low Res Preview</button>
+                <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">Preview</button>
               </div>
             </div>
           </div>
@@ -994,7 +994,7 @@ async function renderWallpapers() {
               <span class="${hasMobile ? 'on' : ''}">Mobile</span>
               <span>${wpEsc(String(asset.orientation || 'desktop').toUpperCase())}</span>
             </div>
-            <p>${isPremium ? `Unlock this PADDOX wallpaper pack for ${priceText}.` : 'Choose a PADDOX wallpaper format to download.'}</p>
+            <p>${isPremium ? `Unlock the full-resolution PADDOX wallpaper for ${priceText}.` : 'Choose Desktop or Mobile and download instantly.'}</p>
             <div class="wp-download-count">↓ ${(w.downloads || 0).toLocaleString()} downloads</div>
           </div>
         </article>
@@ -1026,7 +1026,7 @@ async function handleWpDownload(assetId, format = 'desktop') {
     }
 
     if (localAsset.type === 'premium') {
-      showToast(`🏁 Premium wallpaper checkout coming next: ₹${Number(localAsset.price || 0).toLocaleString('en-IN')}`);
+      showToast(`🏁 Premium wallpaper unlock coming next: ₹${Number(localAsset.price || 0).toLocaleString('en-IN')}`);
       return;
     }
 
@@ -3486,12 +3486,12 @@ function paddoxWpCard(asset, index = 0) {
   const priceText = `₹${Number(asset.price || 0).toLocaleString('en-IN')}`;
   const tagText = isPremium ? `Premium · ${priceText}` : 'Free';
   const formatLine = isPremium
-    ? `Unlock this PADDOX wallpaper pack for ${priceText}.`
-    : 'Choose a PADDOX wallpaper format to download.';
+    ? `Unlock the full-resolution PADDOX wallpaper for ${priceText}.`
+    : 'Choose Desktop or Mobile and download instantly.';
   const cardCategory = wpEsc(String(asset.category || 'wallpaper').toUpperCase());
   const cover = asset.cover || asset.desktop || asset.mobile || '';
-  const desktopLabel = isPremium ? `Buy Desktop · ${priceText}` : 'Download Desktop';
-  const mobileLabel = isPremium ? `Buy Mobile · ${priceText}` : 'Download Mobile';
+  const desktopLabel = isPremium ? `Unlock Desktop · ${priceText}` : 'Download Desktop';
+  const mobileLabel = isPremium ? `Unlock Mobile · ${priceText}` : 'Download Mobile';
 
   return `
     <article class="wp-card wp-card-premium ${isPremium ? 'is-premium' : 'is-free'}" style="animation-delay:${index * 0.045}s">
@@ -3500,12 +3500,12 @@ function paddoxWpCard(asset, index = 0) {
         <span class="wp-tag ${isPremium ? 'wt-prem' : 'wt-free'}">${tagText}</span>
         <span class="wp-res">${wpEsc(asset.resolution || 'HD')}</span>
         <div class="wp-hover-panel">
-          <div class="wp-hover-kicker">${isPremium ? 'Premium Drop' : 'Wallpaper Drop'}</div>
+          <div class="wp-hover-kicker">${isPremium ? 'Full Resolution Unlock' : 'Free Download'}</div>
           <div class="wp-hover-title">${safeName}</div>
           <div class="wp-hover-actions">
             ${hasDesktop ? `<button class="wp-dl-btn" onclick="event.stopPropagation();handleWpDownload('${asset.id}','desktop')">${desktopLabel}</button>` : ''}
             ${hasMobile ? `<button class="wp-dl-btn wp-dl-mobile" onclick="event.stopPropagation();handleWpDownload('${asset.id}','mobile')">${mobileLabel}</button>` : ''}
-            <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${asset.id}', '${jsName}')">Low Res Preview</button>
+            <button class="wp-prev-btn" onclick="event.stopPropagation();openPreview('${cover}', '${asset.id}', '${jsName}')">Preview</button>
           </div>
         </div>
       </div>
@@ -3617,8 +3617,8 @@ function openPreview(img, assetId, name) {
   if (title) title.textContent = name || asset.name || 'Wallpaper Preview';
 
   btn.textContent = asset.type === 'premium'
-    ? `Unlock HD ${asset.price ? '· ₹' + Number(asset.price).toLocaleString('en-IN') : ''}`
-    : 'Download HD';
+    ? `Unlock Full Resolution ${asset.price ? '· ₹' + Number(asset.price).toLocaleString('en-IN') : ''}`
+    : 'Download Full Resolution';
 
   btn.onclick = () => {
     const format = asset.desktop ? 'desktop' : 'mobile';
