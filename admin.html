@@ -470,17 +470,63 @@
 
         <!-- ── INVENTORY ── -->
         <div class="adm-page" id="adm-inventory">
-          <div class="page-toolbar">
-            <div class="toolbar-filters">
-              <select class="adm-select"><option>All Stock</option><option>In Stock</option><option>Low Stock</option><option>Out of Stock</option></select>
-              <input class="adm-input" type="text" placeholder="Search inventory…"/>
+          <div class="inventory-hero reveal-up">
+            <div>
+              <div class="inventory-kicker">LIVE STOCK CONTROL</div>
+              <h2>Inventory Command Center</h2>
+              <p>Track stock health, restock low items, mark products out of stock and keep Shop availability synced from one premium workspace.</p>
             </div>
-            <button class="adm-btn-red" onclick="showToast('✓ Restock request sent to supplier!')">Restock All Low</button>
+            <button class="adm-btn-red inventory-hero-btn" id="inventory-restock-low-btn" type="button">Restock All Low</button>
           </div>
-          <div class="data-table-wrap"><table class="data-table">
-            <thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Level</th><th>Reorder Pt.</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="inventory-tbody"></tbody>
-          </table></div>
+
+          <div class="inventory-stats-grid reveal-up delay-1">
+            <div class="inventory-stat-card inv-red">
+              <span>Total Products</span>
+              <strong id="inventory-total-products">0</strong>
+            </div>
+            <div class="inventory-stat-card inv-green">
+              <span>Total Units</span>
+              <strong id="inventory-total-units">0</strong>
+            </div>
+            <div class="inventory-stat-card inv-gold">
+              <span>Low Stock</span>
+              <strong id="inventory-low-count">0</strong>
+            </div>
+            <div class="inventory-stat-card inv-red">
+              <span>Out of Stock</span>
+              <strong id="inventory-out-count">0</strong>
+            </div>
+          </div>
+
+          <div class="page-toolbar inventory-toolbar reveal-up delay-2">
+            <div class="toolbar-filters">
+              <select class="adm-select" id="inventory-stock-filter">
+                <option value="all">All Stock</option>
+                <option value="in">In Stock</option>
+                <option value="low">Low Stock</option>
+                <option value="out">Out of Stock</option>
+              </select>
+              <input class="adm-input" id="inventory-search-input" type="text" placeholder="Search inventory…"/>
+            </div>
+            <button class="adm-btn-ghost" id="inventory-refresh-btn" type="button">Refresh</button>
+          </div>
+
+          <div class="data-table-wrap inventory-table-wrap reveal-up delay-3">
+            <table class="data-table inventory-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Stock</th>
+                  <th>Level</th>
+                  <th>Reorder Pt.</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-tbody"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- ── DIGITAL ASSETS ── -->

@@ -251,7 +251,7 @@ const PAGE_META = {
   orders:     { title:'ORDERS',          action:'', hideAction:true, fn:null },
   products:   { title:'PRODUCTS',        action:'', hideAction:true, fn:null },
   coupons:    { title:'COUPONS',         action:'', hideAction:true, fn:null },
-  inventory:  { title:'INVENTORY',       action:'Restock All',    fn:()=>showToast('✓ Restock request sent!') },
+  inventory:  { title:'INVENTORY',       action:'Restock Low',    fn:()=>bulkRestockLowStock?.() },
   assets: {
   title:'DIGITAL ASSETS',
   action:'+ Upload Asset',
@@ -305,6 +305,7 @@ if (id === 'orders') {
   loadOrders();
 }
 if (id === 'inventory') {
+  bindInventoryAdminControls();
   loadProducts();
 }
 if (id === 'users') {
@@ -1420,27 +1421,46 @@ function bindProductAdminControls() {
 
 
 /* ══ INVENTORY TABLE — REALTIME ══ */
+const INVENTORY_REORDER_POINT = 10;
+const INVENTORY_RESTOCK_TARGET = 30;
+let INVENTORY_EDIT_ID = null;
+
+function getInventoryStock(product = {}) {
+  return Math.max(0, Number(product.stock || 0));
+}
+
+function getInventoryReorderPoint(product = {}) {
+  return Math.max(1, Number(product.lowStockThreshold || product.reorderPoint || INVENTORY_REORDER_POINT));
+}
+
 function getProductStockStatus(product) {
-  const stock = Number(product.stock || 0);
+  const stock = getInventoryStock(product);
+  const reorderPoint = getInventoryReorderPoint(product);
 
   if (stock <= 0) {
     return {
+      key: 'out',
       cls: 's-out',
+      row: 'inventory-row-out',
       label: 'Out of Stock',
       bar: 'var(--red)'
     };
   }
 
-  if (stock <= 10) {
+  if (stock <= reorderPoint) {
     return {
+      key: 'low',
       cls: 's-low',
+      row: 'inventory-row-low',
       label: 'Low Stock',
       bar: 'var(--orange)'
     };
   }
 
   return {
+    key: 'in',
     cls: 's-act',
+    row: 'inventory-row-ok',
     label: 'In Stock',
     bar: 'var(--green)'
   };
@@ -1449,12 +1469,53 @@ function getProductStockStatus(product) {
 function productSku(product, index) {
   if (product.sku) return product.sku;
 
-  const category =
-    String(product.category || 'PRD')
-      .slice(0, 3)
-      .toUpperCase();
+  const category = String(product.category || 'PRD')
+    .replace(/[^a-z0-9]/gi, '')
+    .slice(0, 3)
+    .toUpperCase() || 'PRD';
 
   return `PDX-${category}-${String(index + 1).padStart(3, '0')}`;
+}
+
+function getInventoryProducts() {
+  const stockFilter = String(document.getElementById('inventory-stock-filter')?.value || 'all').toLowerCase();
+  const search = String(document.getElementById('inventory-search-input')?.value || '').toLowerCase().trim();
+
+  return (REAL_PRODUCTS || []).filter(product => {
+    const status = getProductStockStatus(product);
+    const haystack = [
+      product.name,
+      product.category,
+      product.team,
+      product.sku,
+      product._id,
+      productSku(product, REAL_PRODUCTS.indexOf(product)),
+      status.label
+    ].map(v => String(v || '').toLowerCase()).join(' ');
+
+    const stockOk = stockFilter === 'all' || status.key === stockFilter;
+    const searchOk = !search || haystack.includes(search);
+
+    return stockOk && searchOk;
+  });
+}
+
+function updateInventoryStats() {
+  const products = REAL_PRODUCTS || [];
+  const totalProducts = products.length;
+  const totalUnits = products.reduce((sum, product) => sum + getInventoryStock(product), 0);
+  const lowCount = products.filter(product => getProductStockStatus(product).key === 'low').length;
+  const outCount = products.filter(product => getProductStockStatus(product).key === 'out').length;
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+
+  setText('inventory-total-products', totalProducts.toLocaleString('en-IN'));
+  setText('inventory-total-units', totalUnits.toLocaleString('en-IN'));
+  setText('inventory-low-count', lowCount.toLocaleString('en-IN'));
+  setText('inventory-out-count', outCount.toLocaleString('en-IN'));
 }
 
 function renderInventory() {
@@ -1462,96 +1523,130 @@ function renderInventory() {
 
   if (!tbody) return;
 
-  if (!REAL_PRODUCTS.length) {
+  updateInventoryStats();
+
+  const products = getInventoryProducts();
+
+  if (!products.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center;padding:40px;color:#777">
-          No inventory records yet
+        <td colspan="7" class="inventory-empty-state">
+          <div class="inventory-empty-icon">▣</div>
+          <strong>No inventory records found</strong>
+          <span>Try another filter or sync your products again.</span>
         </td>
       </tr>
     `;
     return;
   }
 
-  tbody.innerHTML = REAL_PRODUCTS.map((product, index) => {
-    const stock = Number(product.stock || 0);
-    const maxStock = Math.max(100, stock, Number(product.originalStock || 0));
-    const pct = Math.min(100, Math.round((stock / maxStock) * 100));
+  tbody.innerHTML = products.map((product, filteredIndex) => {
+    const originalIndex = REAL_PRODUCTS.indexOf(product);
+    const stock = getInventoryStock(product);
+    const reorderPoint = getInventoryReorderPoint(product);
+    const capacity = Math.max(INVENTORY_RESTOCK_TARGET, reorderPoint * 3, stock);
+    const pct = stock <= 0 ? 0 : Math.max(4, Math.min(100, Math.round((stock / capacity) * 100)));
     const status = getProductStockStatus(product);
 
-    const image =
-      product.images?.[0]?.url ||
-      product.image ||
-      '';
+    const image = product.images?.[0]?.url || product.image || 'assets/paddox-logo-icon-official.png';
 
     return `
-      <tr>
+      <tr class="${status.row}">
         <td>
-          <div style="display:flex;align-items:center;gap:10px">
-            ${
-              image
-                ? `<img src="${image}" style="width:34px;height:34px;object-fit:cover;border-radius:8px">`
-                : `<span style="font-size:1.2rem">📦</span>`
-            }
-            <div>
-              <div style="font-weight:700;color:#fff">
-                ${product.name || 'Product'}
-              </div>
-              <div style="font-size:.72rem;color:#777">
-                ${product.category || '-'} · ${product.team || '-'}
-              </div>
+          <div class="inventory-product-line">
+            <img src="${escapeProductHTML(image)}" alt="${escapeProductHTML(product.name || 'Product')}" class="inventory-thumb">
+            <div class="inventory-product-copy">
+              <strong>${escapeProductHTML(product.name || 'Product')}</strong>
+              <span>${escapeProductHTML(product.category || '-')} · ${escapeProductHTML(product.team || '-')}</span>
             </div>
           </div>
         </td>
 
-        <td style="font-family:var(--font-c);letter-spacing:1px;color:var(--muted2)">
-          ${productSku(product, index)}
-        </td>
+        <td><span class="inventory-sku">${escapeProductHTML(productSku(product, originalIndex >= 0 ? originalIndex : filteredIndex))}</span></td>
 
-        <td style="font-weight:700;color:${stock <= 0 ? 'var(--red)' : stock <= 10 ? 'var(--orange)' : 'var(--white)'}">
-          ${stock} units
+        <td>
+          <div class="inventory-stock-count ${status.key}">${stock} units</div>
+          ${stock <= reorderPoint && stock > 0 ? '<small class="inventory-warning">Needs restock</small>' : ''}
         </td>
 
         <td>
-          <div class="stk-bar-wrap">
-            <div
-              class="stk-bar"
-              style="width:${pct}%;background:${status.bar}"
-            ></div>
+          <div class="inventory-level-wrap" title="${pct}% stock health">
+            <div class="inventory-level-bar" style="width:${pct}%;background:${status.bar}"></div>
           </div>
+          <div class="inventory-level-note">${pct}% capacity</div>
         </td>
 
-        <td style="color:var(--muted)">
-          10 units
-        </td>
+        <td><span class="inventory-reorder-pill">${reorderPoint} units</span></td>
+
+        <td><span class="sb ${status.cls}">${status.label}</span></td>
 
         <td>
-          <span class="sb ${status.cls}">
-            ${status.label}
-          </span>
-        </td>
-
-        <td>
-          <button
-            class="act-btn"
-            onclick="openRestockPrompt('${product._id}')"
-          >
-            Restock
-          </button>
-
-          <button
-            class="act-btn"
-            onclick="quickSetStock('${product._id}', 0)"
-          >
-            Mark Out
-          </button>
+          <div class="inventory-actions">
+            <button class="act-btn" onclick="openRestockModal('${product._id}')">Restock</button>
+            <button class="act-btn" onclick="quickSetStock('${product._id}', 0)">Mark Out</button>
+          </div>
         </td>
       </tr>
     `;
   }).join('');
 }
 
-function openRestockPrompt(productId) {
+function bindInventoryAdminControls() {
+  ['inventory-stock-filter', 'inventory-search-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.inventoryBound) {
+      const eventName = el.tagName === 'INPUT' ? 'input' : 'change';
+      el.addEventListener(eventName, renderInventory);
+      el.dataset.inventoryBound = 'true';
+    }
+  });
+
+  const refreshBtn = document.getElementById('inventory-refresh-btn');
+  if (refreshBtn && !refreshBtn.dataset.inventoryBound) {
+    refreshBtn.addEventListener('click', async () => {
+      showToast('⏳ Syncing inventory...');
+      await loadProducts();
+      showToast('🔥 Inventory synced');
+    });
+    refreshBtn.dataset.inventoryBound = 'true';
+  }
+
+  const restockLowBtn = document.getElementById('inventory-restock-low-btn');
+  if (restockLowBtn && !restockLowBtn.dataset.inventoryBound) {
+    restockLowBtn.addEventListener('click', bulkRestockLowStock);
+    restockLowBtn.dataset.inventoryBound = 'true';
+  }
+}
+
+function ensureRestockModal() {
+  if (document.getElementById('inventory-restock-modal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'inventory-restock-modal';
+  modal.className = 'inventory-modal';
+  modal.innerHTML = `
+    <div class="inventory-modal-backdrop" onclick="closeRestockModal(event)">
+      <div class="inventory-modal-card" onclick="event.stopPropagation()">
+        <button class="inventory-modal-close" type="button" onclick="closeRestockModal()">✕</button>
+        <div class="inventory-modal-kicker">STOCK UPDATE</div>
+        <h3 id="inventory-modal-title">Restock Product</h3>
+        <p id="inventory-modal-sub">Set a new stock quantity for this product.</p>
+        <label class="inventory-modal-label" for="inventory-modal-stock">New stock quantity</label>
+        <input id="inventory-modal-stock" class="inventory-modal-input" type="number" min="0" step="1" value="30">
+        <div class="inventory-modal-actions">
+          <button class="adm-btn-ghost" type="button" onclick="closeRestockModal()">Cancel</button>
+          <button class="adm-btn-red" type="button" onclick="submitRestockModal()">Update Stock</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function openRestockModal(productId) {
+  ensureRestockModal();
+
   const product = REAL_PRODUCTS.find(p => String(p._id) === String(productId));
 
   if (!product) {
@@ -1559,27 +1654,59 @@ function openRestockPrompt(productId) {
     return;
   }
 
-  const currentStock = Number(product.stock || 0);
+  INVENTORY_EDIT_ID = productId;
 
-  const amount = prompt(
-    `Enter new stock quantity for ${product.name}`,
-    String(Math.max(currentStock, 10))
-  );
+  const currentStock = getInventoryStock(product);
+  const targetStock = Math.max(currentStock, INVENTORY_RESTOCK_TARGET);
 
-  if (amount === null) return;
+  const modal = document.getElementById('inventory-restock-modal');
+  const title = document.getElementById('inventory-modal-title');
+  const sub = document.getElementById('inventory-modal-sub');
+  const input = document.getElementById('inventory-modal-stock');
 
-  const stock = Number(amount);
+  if (title) title.textContent = product.name || 'Restock Product';
+  if (sub) sub.textContent = `Current stock: ${currentStock} units · Reorder point: ${getInventoryReorderPoint(product)} units`;
+  if (input) {
+    input.value = String(targetStock);
+    setTimeout(() => input.focus(), 60);
+  }
 
-  if (Number.isNaN(stock) || stock < 0) {
+  modal?.classList.add('show');
+}
+
+function closeRestockModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('inventory-restock-modal')?.classList.remove('show');
+  INVENTORY_EDIT_ID = null;
+}
+
+async function submitRestockModal() {
+  const input = document.getElementById('inventory-modal-stock');
+  const stock = Number(input?.value || 0);
+
+  if (!INVENTORY_EDIT_ID) {
+    showToast('❌ Product not selected');
+    return;
+  }
+
+  if (!Number.isFinite(stock) || stock < 0) {
     showToast('❌ Enter a valid stock number');
     return;
   }
 
-  updateProductStock(productId, stock);
+  await updateProductStock(INVENTORY_EDIT_ID, stock);
+  closeRestockModal();
+}
+
+function openRestockPrompt(productId) {
+  openRestockModal(productId);
 }
 
 async function quickSetStock(productId, stock) {
-  if (!confirm(`Set stock to ${stock}?`)) return;
+  const product = REAL_PRODUCTS.find(p => String(p._id) === String(productId));
+  const name = product?.name || 'this product';
+
+  if (!confirm(`Mark ${name} as out of stock?`)) return;
 
   await updateProductStock(productId, stock);
 }
@@ -1589,29 +1716,79 @@ async function updateProductStock(productId, stock) {
     showToast('⏳ Updating stock...');
 
     const res = await fetch(
-      `${PRODUCT_API_BASE}/${productId}`,
+      `${PRODUCT_API_BASE}/admin/${productId}/stock`,
       {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getAdminToken()}`
         },
-        body: JSON.stringify({
-          stock: Number(stock)
-        })
+        body: JSON.stringify({ stock: Number(stock) })
       }
     );
 
     const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
+    if (!res.ok || data.success === false) {
       throw new Error(data.message || 'Stock update failed');
+    }
+
+    const updated = data.data?.product || data.product;
+    const index = REAL_PRODUCTS.findIndex(product => String(product._id) === String(productId));
+
+    if (updated && index >= 0) {
+      REAL_PRODUCTS[index] = updated;
+      renderProducts();
+      renderInventory();
+      updateOverviewRealtime();
+    } else {
+      await loadProducts();
     }
 
     showToast('🔥 Stock updated');
 
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function bulkRestockLowStock() {
+  const lowProducts = (REAL_PRODUCTS || []).filter(product => {
+    const status = getProductStockStatus(product);
+    return status.key === 'low' || status.key === 'out';
+  });
+
+  if (!lowProducts.length) {
+    showToast('✅ Inventory already healthy');
+    return;
+  }
+
+  if (!confirm(`Restock ${lowProducts.length} low/out-of-stock products to ${INVENTORY_RESTOCK_TARGET} units?`)) return;
+
+  try {
+    showToast('⏳ Restocking low stock products...');
+
+    const res = await fetch(
+      `${PRODUCT_API_BASE}/admin/inventory/restock-low`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAdminToken()}`
+        },
+        body: JSON.stringify({ targetStock: INVENTORY_RESTOCK_TARGET, threshold: INVENTORY_REORDER_POINT })
+      }
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Bulk restock failed');
+    }
+
+    showToast(`🔥 Restocked ${data.data?.modifiedCount ?? data.modifiedCount ?? lowProducts.length} products`);
     await loadProducts();
-    updateOverviewRealtime();
 
   } catch (err) {
     console.error(err);
