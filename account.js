@@ -147,8 +147,8 @@ async function handleGoogleCredential(response) {
 function handleAuthSuccess(data) {
   if (data.data?.requires2FA) {
     pendingTwoFactorToken = data.data.twoFactorToken || '';
-    showTwoFactorLogin(data.data.email, true);
-    requestLoginTwoFactorCode(pendingTwoFactorToken, data.data.email);
+    showTwoFactorLogin(data.data.email, false);
+    showToast('📩 Verification code sent');
     return;
   }
   if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
