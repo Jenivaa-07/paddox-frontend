@@ -146,8 +146,9 @@ async function handleGoogleCredential(response) {
 
 function handleAuthSuccess(data) {
   if (data.data?.requires2FA) {
-    pendingTwoFactorToken = data.data.twoFactorToken;
-    showTwoFactorLogin(data.data.email);
+    pendingTwoFactorToken = data.data.twoFactorToken || '';
+    showTwoFactorLogin(data.data.email, true);
+    requestLoginTwoFactorCode(pendingTwoFactorToken, data.data.email);
     return;
   }
   if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
@@ -155,14 +156,50 @@ function handleAuthSuccess(data) {
   loginUser(data.data.user);
 }
 
-function showTwoFactorLogin(email) {
+function showTwoFactorLogin(email, sending = false) {
   const modal = document.getElementById('twofactor-login-modal');
   const copy = document.getElementById('twofactor-login-copy');
   const code = document.getElementById('twofactor-login-code');
-  if (copy) copy.textContent = `We sent a 6-digit code to ${email || 'your email'}.`;
+  if (copy) {
+    copy.textContent = sending
+      ? `Sending a 6-digit code to ${email || 'your email'}...`
+      : `We sent a 6-digit code to ${email || 'your email'}.`;
+  }
   if (code) code.value = '';
   modal?.classList.add('show');
   setTimeout(() => code?.focus(), 80);
+}
+
+async function requestLoginTwoFactorCode(twoFactorToken = '', email = '') {
+  const copy = document.getElementById('twofactor-login-copy');
+
+  if (!twoFactorToken) {
+    if (copy) copy.textContent = 'Your secure login session expired. Please login again.';
+    showToast('⚠️ Login security session expired. Please login again.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${PADDOX_API_BASE}/users/security/2fa/login/send`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ twoFactorToken })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Could not send verification code');
+    }
+
+    const sentTo = data.data?.emailTo || email || 'your email';
+    if (copy) copy.textContent = `We sent a 6-digit code to ${sentTo}.`;
+    showToast('📩 Verification code sent');
+  } catch (err) {
+    console.error('PADDOX login 2FA send failed:', err);
+    if (copy) copy.textContent = 'Could not send the code. Please cancel and login again.';
+    showToast(`❌ ${err.message || '2FA code send failed'}`);
+  }
 }
 
 function cancelTwoFactorLogin() {
@@ -394,7 +431,7 @@ async function doLogin() {
 
     handleAuthSuccess(data);
 
-    showToast(data.data?.requires2FA ? '🔐 Verification code sent' : '🔥 Login successful');
+    showToast(data.data?.requires2FA ? '🔐 Security check opened' : '🔥 Login successful');
 
   } catch (err) {
 
