@@ -4425,50 +4425,126 @@ function readQuoteImageAsDataUrl(file) {
   });
 }
 
+function setQuoteAvatarDropState(isOn = false) {
+  const zone = document.getElementById('quote-avatar-dropzone');
+  if (zone) zone.classList.toggle('is-dragging', !!isOn);
+}
+
+async function processQuoteAvatarFile(file) {
+  const avatarInput = document.getElementById('quote-avatar');
+  const status = document.getElementById('quote-avatar-status');
+  const urlDisplay = document.getElementById('quote-avatar-url-display');
+
+  if (!file) return;
+
+  try {
+    if (status) status.textContent = 'Opening premium cropper...';
+    showToast('🖼️ Opening quote driver image cropper...');
+
+    const dataUrl = await openPremiumImageCropper(file, {
+      title: 'CROP QUOTE DRIVER IMAGE',
+      outputSize: 560,
+      quality: 0.86
+    });
+
+    if (status) status.textContent = 'Uploading to Cloudinary...';
+    showToast('☁️ Uploading quote driver image to Cloudinary...');
+
+    const cloudinaryUrl = await uploadImageToCloudinaryBridge(dataUrl, 'fan-quotes');
+    const finalUrl = cloudinaryUrl || dataUrl;
+
+    if (avatarInput) avatarInput.value = finalUrl;
+    if (urlDisplay) urlDisplay.value = finalUrl;
+
+    renderQuoteAvatarPreview(finalUrl);
+    renderAdminQuoteCardPreview();
+
+    if (status) status.textContent = 'Cloudinary image saved successfully.';
+    showToast('✅ Quote driver image saved to Cloudinary');
+  } catch (err) {
+    if (status) status.textContent = err.message || 'Image upload failed.';
+    showToast(`❌ ${err.message}`);
+  } finally {
+    setQuoteAvatarDropState(false);
+  }
+}
+
 function bindQuoteAvatarUpload() {
   const uploadBtn = document.getElementById('quote-avatar-upload');
   const fileInput = document.getElementById('quote-avatar-file');
   const avatarInput = document.getElementById('quote-avatar');
+  const dropzone = document.getElementById('quote-avatar-dropzone');
+  const urlDisplay = document.getElementById('quote-avatar-url-display');
 
-  if (uploadBtn && fileInput) {
+  if (uploadBtn && fileInput && !uploadBtn.dataset.bound) {
+    uploadBtn.dataset.bound = '1';
     uploadBtn.onclick = () => fileInput.click();
+  }
 
+  if (fileInput && !fileInput.dataset.bound) {
+    fileInput.dataset.bound = '1';
     fileInput.onchange = async () => {
-      try {
-        const file = fileInput.files?.[0];
-
-        if (!file) return;
-
-        showToast('🖼️ Opening quote driver image cropper...');
-
-        const dataUrl = await openPremiumImageCropper(file, {
-          title: 'CROP QUOTE DRIVER IMAGE',
-          outputSize: 520,
-          quality: 0.82
-        });
-
-        showToast('☁️ Uploading quote driver image to Cloudinary...');
-        const cloudinaryUrl = await uploadImageToCloudinaryBridge(dataUrl, 'fan-quotes');
-
-        avatarInput.value = cloudinaryUrl || dataUrl;
-        renderQuoteAvatarPreview(avatarInput.value);
-        renderAdminQuoteCardPreview();
-
-        showToast('✅ Quote driver image saved to Cloudinary');
-
-      } catch (err) {
-        showToast(`❌ ${err.message}`);
-      } finally {
-        fileInput.value = '';
-      }
+      const file = fileInput.files?.[0];
+      await processQuoteAvatarFile(file);
+      fileInput.value = '';
     };
   }
 
-  if (avatarInput) {
-    avatarInput.oninput = () => {
-      renderQuoteAvatarPreview(avatarInput.value.trim() || '🏎️');
-    renderAdminQuoteCardPreview();
-    };
+  if (dropzone && fileInput && !dropzone.dataset.bound) {
+    dropzone.dataset.bound = '1';
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        event.stopPropagation();
+        setQuoteAvatarDropState(true);
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (eventName === 'dragleave' && dropzone.contains(event.relatedTarget)) return;
+        setQuoteAvatarDropState(false);
+      });
+    });
+
+    dropzone.addEventListener('drop', async event => {
+      const file = event.dataTransfer?.files?.[0];
+      await processQuoteAvatarFile(file);
+    });
+
+    dropzone.addEventListener('click', event => {
+      if (event.target.closest('button')) return;
+      fileInput.click();
+    });
+
+    dropzone.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        fileInput.click();
+      }
+    });
+  }
+
+  if (avatarInput && !avatarInput.dataset.bound) {
+    avatarInput.dataset.bound = '1';
+    avatarInput.addEventListener('input', () => {
+      const value = avatarInput.value.trim() || '🏎️';
+      if (urlDisplay && urlDisplay.value !== value) urlDisplay.value = value;
+      renderQuoteAvatarPreview(value);
+      renderAdminQuoteCardPreview();
+    });
+  }
+
+  if (urlDisplay && avatarInput && !urlDisplay.dataset.bound) {
+    urlDisplay.dataset.bound = '1';
+    urlDisplay.addEventListener('input', () => {
+      avatarInput.value = urlDisplay.value.trim();
+      renderQuoteAvatarPreview(avatarInput.value || '🏎️');
+      renderAdminQuoteCardPreview();
+    });
   }
 }
 
@@ -4519,56 +4595,40 @@ function ensureQuoteModal() {
   if (document.getElementById('quote-modal')) return;
 
   const modal = document.createElement('div');
-
   modal.id = 'quote-modal';
 
   modal.innerHTML = `
-    <div class="preview-overlay" id="quote-overlay">
-      <div class="preview-card" style="
-        max-width:760px;
-        width:92vw;
-        padding:28px;
-        color:#fff;
-        text-align:left;
-      ">
-        <button class="preview-close" id="quote-close" type="button" onclick="closeQuoteModal()">✕</button>
+    <div class="preview-overlay pdx-quote-overlay" id="quote-overlay">
+      <div class="preview-card pdx-quote-modal-card">
+        <button class="preview-close pdx-quote-close" id="quote-close" type="button" onclick="closeQuoteModal()">✕</button>
 
-        <div style="
-          font-family:var(--font-d);
-          letter-spacing:4px;
-          font-size:1.8rem;
-          margin-bottom:8px;
-        " id="quote-modal-title">
-          ADD QUOTE
+        <div class="pdx-quote-modal-head">
+          <div>
+            <div class="pdx-quote-kicker">FAN HUB QUOTE LIBRARY</div>
+            <h2 id="quote-modal-title">ADD QUOTE</h2>
+            <p>Upload a driver image, crop it cleanly, and save it to Cloudinary for Fan Hub quote cards.</p>
+          </div>
+          <div class="pdx-quote-status-pill">CLOUDINARY READY</div>
         </div>
 
-        <div style="
-          color:var(--red);
-          font-family:var(--font-c);
-          letter-spacing:2px;
-          margin-bottom:22px;
-        ">
-          FAN HUB QUOTE LIBRARY
-        </div>
-
-        <label style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
-          <span style="color:#777;font-size:.75rem;letter-spacing:2px">QUOTE TEXT</span>
-          <textarea id="quote-text" class="edit-product-input" rows="4" maxlength="500"></textarea>
-        </label>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER</span>
-            <input id="quote-driver" class="edit-product-input">
+        <div class="pdx-quote-form-grid">
+          <label class="pdx-quote-field pdx-quote-wide">
+            <span>QUOTE TEXT</span>
+            <textarea id="quote-text" class="edit-product-input" rows="4" maxlength="500" placeholder="Enter the racing quote..."></textarea>
           </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span>
-            <input id="quote-team" class="edit-product-input">
+          <label class="pdx-quote-field">
+            <span>DRIVER</span>
+            <input id="quote-driver" class="edit-product-input" placeholder="Ayrton Senna">
           </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">ERA</span>
+          <label class="pdx-quote-field">
+            <span>TEAM</span>
+            <input id="quote-team" class="edit-product-input" placeholder="McLaren / Ferrari / Mercedes">
+          </label>
+
+          <label class="pdx-quote-field">
+            <span>ERA</span>
             <select id="quote-era" class="edit-product-input">
               <option value="current">current</option>
               <option value="legend">legend</option>
@@ -4577,77 +4637,43 @@ function ensureQuoteModal() {
             </select>
           </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">CATEGORY</span>
+          <label class="pdx-quote-field">
+            <span>CATEGORY</span>
             <input id="quote-category" class="edit-product-input" placeholder="motivation, champions, racecraft">
           </label>
 
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER IMAGE / EMOJI</span>
+          <div class="pdx-quote-field pdx-quote-upload-field">
+            <span>DRIVER IMAGE</span>
+            <div class="pdx-quote-upload-row">
+              <div id="quote-avatar-preview" class="pdx-quote-avatar-preview">🏎️</div>
 
-            <div style="display:flex;gap:10px;align-items:center">
-              <div id="quote-avatar-preview" style="
-                width:54px;
-                height:54px;
-                border-radius:50%;
-                background:#151515;
-                border:1px solid rgba(255,255,255,.12);
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                overflow:hidden;
-                font-size:1.45rem;
-                flex-shrink:0;
-              ">🏎️</div>
-
-              <div style="flex:1">
+              <div id="quote-avatar-dropzone" class="pdx-quote-dropzone" tabindex="0" role="button" aria-label="Upload driver image">
                 <input id="quote-avatar-file" type="file" accept="image/*" style="display:none">
-                <button type="button" class="act-btn" id="quote-avatar-upload" style="width:100%;padding:10px">
-                  Upload / Crop Driver Image
-                </button>
-                <input id="quote-avatar" class="edit-product-input" placeholder="or emoji like 🏎️" style="margin-top:8px">
+                <input id="quote-avatar" type="hidden" value="🏎️">
+                <div class="pdx-drop-icon">☁</div>
+                <div class="pdx-drop-title">Drag & drop driver image</div>
+                <div class="pdx-drop-sub">or click to upload, crop, zoom, and save to Cloudinary</div>
+                <button type="button" class="act-btn pdx-drop-btn" id="quote-avatar-upload">Upload / Crop Image</button>
               </div>
             </div>
+            <input id="quote-avatar-url-display" class="edit-product-input pdx-quote-url-input" placeholder="Cloudinary URL appears here after upload">
+            <small id="quote-avatar-status">JPG / PNG supported. Best result: clear driver headshot.</small>
+          </div>
 
-            <span style="color:#777;font-size:.72rem">
-              JPG / PNG supported. Drag + zoom cropper saves a clean circular driver image for Fan Hub.
-            </span>
-          </label>
-
-          <label style="display:flex;flex-direction:column;gap:6px">
-            <span style="color:#777;font-size:.75rem;letter-spacing:2px">SOURCE</span>
+          <label class="pdx-quote-field">
+            <span>SOURCE</span>
             <input id="quote-source" class="edit-product-input" placeholder="optional">
           </label>
 
-          <label style="display:flex;align-items:center;gap:10px;color:#aaa;margin-top:8px">
-            <input id="quote-featured" type="checkbox">
-            Featured quote
-          </label>
-
-          <label style="display:flex;align-items:center;gap:10px;color:#aaa;margin-top:8px">
-            <input id="quote-active" type="checkbox" checked>
-            Active
-          </label>
+          <div class="pdx-quote-checks pdx-quote-wide">
+            <label><input id="quote-featured" type="checkbox"> <span>Featured quote</span></label>
+            <label><input id="quote-active" type="checkbox" checked> <span>Active</span></label>
+          </div>
         </div>
 
-        <div id="quote-card-live-preview"></div>
+        <div id="quote-card-live-preview" class="pdx-quote-live-preview"></div>
 
-        <button
-          class="act-btn"
-          id="quote-save"
-          style="
-            width:100%;
-            padding:14px;
-            margin-top:22px;
-            background:var(--red);
-            color:white;
-            border:0;
-            font-weight:800;
-            letter-spacing:3px;
-          "
-        >
-          SAVE QUOTE
-        </button>
+        <button class="act-btn pdx-quote-save" id="quote-save">SAVE QUOTE</button>
       </div>
     </div>
   `;
@@ -4665,7 +4691,6 @@ function ensureQuoteModal() {
   bindQuoteAvatarUpload();
   bindQuoteLivePreview();
 }
-
 
 function openQuoteModal(id = null) {
   ensureQuoteModal();
@@ -4686,6 +4711,12 @@ function openQuoteModal(id = null) {
   document.getElementById('quote-era').value = quote?.era || 'current';
   document.getElementById('quote-category').value = quote?.category || 'motivation';
   document.getElementById('quote-avatar').value = quote?.avatar || '🏎️';
+  const quoteAvatarUrlDisplay = document.getElementById('quote-avatar-url-display');
+  if (quoteAvatarUrlDisplay) quoteAvatarUrlDisplay.value = quote?.avatar || '';
+  const quoteAvatarStatus = document.getElementById('quote-avatar-status');
+  if (quoteAvatarStatus) quoteAvatarStatus.textContent = isQuoteAvatarImage(quote?.avatar || '')
+    ? 'Cloudinary image loaded for this quote.'
+    : 'JPG / PNG supported. Best result: clear driver headshot.';
   renderQuoteAvatarPreview(quote?.avatar || '🏎️');
   document.getElementById('quote-source').value = quote?.source || '';
   document.getElementById('quote-featured').checked = !!quote?.isFeatured;
