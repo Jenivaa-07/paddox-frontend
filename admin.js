@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8C Fan Polls premium polish loaded');
+console.log('PADDOX A4.8C.1 Fan Polls syntax emergency fix loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -6583,7 +6583,7 @@ function resetFanPollForm(clear = true) {
   if (clear) setPollAdminStatus('Create a live Fan Hub poll with 2–5 premium options and clean team logos.');
 }
 
-async async function loadFanPollsAdmin() {
+async function loadFanPollsAdmin() {
   const tbody = document.getElementById('fan-polls-tbody');
 
   if (tbody) {
