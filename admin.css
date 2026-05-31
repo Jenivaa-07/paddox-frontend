@@ -6331,3 +6331,19 @@ html,body{max-width:100%;overflow-x:hidden}
 @media(max-width:720px){
   .users-action-bar{grid-template-columns:110px minmax(0,1fr) 62px;}
 }
+
+
+/* A4.8F.2 — Users delete control polish */
+.users-action-stack .act-btn.delete,
+.users-modal-actions .adm-btn-ghost.danger{
+  color:#ff6f84!important;
+  border-color:rgba(232,0,45,.5)!important;
+  background:rgba(232,0,45,.08)!important;
+}
+.users-action-stack .act-btn.delete:hover,
+.users-modal-actions .adm-btn-ghost.danger:hover{
+  color:#fff!important;
+  border-color:var(--red)!important;
+  background:rgba(232,0,45,.18)!important;
+  box-shadow:0 0 22px rgba(232,0,45,.16);
+}

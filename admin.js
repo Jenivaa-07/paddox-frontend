@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8F.1 Users fan points guide correction loaded');
+console.log('PADDOX A4.8F.2 Users delete control loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -2438,6 +2438,58 @@ async function makeUserAdmin(userId) {
   }
 }
 
+
+async function deleteUserAdmin(userId) {
+  try {
+    const user = REAL_USERS.find(u => String(u._id) === String(userId));
+    if (!user) {
+      showToast('❌ User not found');
+      return;
+    }
+
+    const name = getUserName(user);
+    const role = String(user.role || (user.isAdmin ? 'admin' : 'user')).toLowerCase();
+    const isAdminUser = role === 'admin';
+
+    const firstConfirm = isAdminUser
+      ? `DELETE ADMIN USER permanently?\n\n${name}\n${user.email || ''}\n\nThis will delete the admin account too.`
+      : `Delete this user permanently?\n\n${name}\n${user.email || ''}`;
+
+    if (!confirm(firstConfirm)) return;
+
+    const typed = prompt(`Type DELETE to confirm permanent deletion of ${name}`);
+    if (String(typed || '').trim().toUpperCase() !== 'DELETE') {
+      showToast('Delete cancelled');
+      return;
+    }
+
+    showToast('⏳ Deleting user...');
+
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${getAdminToken()}`
+      }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'User delete failed');
+    }
+
+    document.getElementById('user-view-overlay')?.remove();
+    showToast(isAdminUser ? '🔥 Admin user deleted' : '🔥 User deleted');
+    await loadUsers();
+    updateOverviewRealtime?.();
+    updateAdminSidebarBadges?.();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
 async function fetchUserPointSummary(userId) {
   const panel = document.getElementById('user-points-summary');
   if (panel) panel.innerHTML = '<div class="users-points-loading">Loading point activity…</div>';
@@ -2643,6 +2695,7 @@ function openUserView(userId) {
           <button class="adm-btn-red" onclick="openUserPointsModal('${user._id}'); document.getElementById('user-view-overlay')?.remove();">Manage Points</button>
           <button class="adm-btn-ghost" onclick="toggleUserBan('${user._id}'); document.getElementById('user-view-overlay')?.remove();">${user.isBanned ? 'Unban User' : 'Ban User'}</button>
           <button class="adm-btn-ghost" onclick="makeUserAdmin('${user._id}'); document.getElementById('user-view-overlay')?.remove();">Make Admin</button>
+          <button class="adm-btn-ghost danger" onclick="deleteUserAdmin('${user._id}')">Delete User</button>
         </div>
       </div>
     </div>
@@ -2716,6 +2769,7 @@ function renderUsers() {
             <button class="act-btn" onclick="openUserView('${user._id}')">View</button>
             <button class="act-btn points" onclick="openUserPointsModal('${user._id}')">Points</button>
             <button class="act-btn danger" onclick="toggleUserBan('${user._id}')">${user.isBanned ? 'Unban' : 'Ban'}</button>
+            <button class="act-btn delete" onclick="deleteUserAdmin('${user._id}')">Delete</button>
           </div>
         </td>
       </tr>
