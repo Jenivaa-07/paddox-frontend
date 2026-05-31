@@ -4321,3 +4321,25 @@ document.addEventListener('DOMContentLoaded', () => {
   hydrateSecurityState(JSON.parse(localStorage.getItem('paddox_user') || 'null') || currentUser || {});
   scheduleSecuritySessionsRefresh(900);
 });
+
+
+
+/* A4.7C.10 — Account deep-link polish for receipt buttons.
+   Allows receipt.html to open Account directly on #orders or #downloads. */
+(function initAccountDeepLinks(){
+  function activateAccountHash(){
+    const page = String(window.location.hash || '').replace('#', '').trim().toLowerCase();
+    if (!page) return;
+
+    const allowed = new Set(['dashboard','orders','wishlist','downloads','profile','security','notifications']);
+    if (!allowed.has(page)) return;
+
+    const item = document.querySelector(`.acc-nav-item[data-page="${page}"]`);
+    if (item) {
+      setTimeout(() => item.click(), 180);
+    }
+  }
+
+  window.addEventListener('load', activateAccountHash);
+  window.addEventListener('hashchange', activateAccountHash);
+})();

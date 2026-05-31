@@ -4406,3 +4406,20 @@ button.forgot-link:focus-visible{
   outline:1px solid var(--red);
   outline-offset:4px;
 }
+
+
+/* A4.7C.10 — Final Account Downloads polish */
+.premium-download-card .download-type-pill{
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+}
+.premium-download-card .download-actions,
+.dl-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.premium-download-card .download-again-btn{
+  white-space:nowrap;
+}

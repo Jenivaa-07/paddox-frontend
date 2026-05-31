@@ -405,3 +405,22 @@ html,body{background:#fff!important;}
 .receipt-coupon-line strong{color:var(--red)!important;letter-spacing:.8px}
 .receipt-total-box .receipt-coupon-total strong{color:#0a8f42!important}
 .receipt-total-box .receipt-coupon-total span{color:#3f6b4f!important}
+
+
+/* A4.7C.10 — Final receipt polish for digital + merchandise receipts */
+.receipt-screen-actions a[href*="#downloads"],
+.receipt-screen-actions a[href*="#orders"]{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+.receipt-note strong{display:block;margin-bottom:6px}
+.receipt-item-info span{line-height:1.45}
+@media (max-width: 640px){
+  .receipt-card{padding:24px 18px 22px;min-height:auto}
+  .receipt-summary{grid-template-columns:1fr 1fr}
+  .receipt-two-col{grid-template-columns:1fr}
+  .receipt-items-head,.receipt-item{grid-template-columns:64px 1fr 42px 78px}
+  .receipt-title-wrap{text-align:left}
+  .receipt-head{flex-direction:column}
+}

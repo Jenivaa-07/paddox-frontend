@@ -105,7 +105,24 @@ async function loadReceipt() {
     if (!order) throw new Error('Order not found');
 
     renderReceipt(order);
-    if (actions) actions.style.display = 'flex';
+    if (actions) {
+      const items = Array.isArray(order.items) ? order.items : [];
+      const isDigitalOrder = order.orderType === 'digital' || items.some(item => item.itemType === 'digital' || item.asset || item.downloadUrl);
+      const primaryLink = actions.querySelector('a[href="account.html"]');
+      const secondaryLink = actions.querySelector('a[href="shop.html"]');
+
+      if (primaryLink) {
+        primaryLink.href = isDigitalOrder ? 'account.html#downloads' : 'account.html#orders';
+        primaryLink.textContent = isDigitalOrder ? 'My Downloads' : 'My Orders';
+      }
+
+      if (secondaryLink) {
+        secondaryLink.href = isDigitalOrder ? 'fanhub.html' : 'shop.html';
+        secondaryLink.textContent = isDigitalOrder ? 'Fan Hub' : 'Shop';
+      }
+
+      actions.style.display = 'flex';
+    }
   } catch (err) {
     console.error(err);
     card.innerHTML = `<div class="receipt-loading"><p>${esc(err.message)}</p></div>`;
