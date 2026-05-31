@@ -4800,13 +4800,27 @@ function cleanDriverKey(profile = {}) {
     .replace(/[^a-z0-9]+/g, '-');
 }
 
+
+function escapeDriverImageSrc(value = '') {
+  return String(value || '')
+    .trim()
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function driverImageFallbackHTML(profile = {}) {
+  const initials = String(profile.code || profile.name || 'PX').slice(0, 3).toUpperCase();
+  return `<span class="driver-avatar-fallback">${escapeAdminText(initials)}</span>`;
+}
+
 function driverProfileImageHTML(profile = {}) {
   const image = String(profile.image || '').trim();
   if (image && isDriverImageValue(image)) {
-    return `<img src="${escapeAdminAttr(image)}" alt="${escapeAdminAttr(profile.name || 'Driver')}"/>`;
+    return `<img src="${escapeDriverImageSrc(image)}" alt="" loading="lazy" onerror="this.outerHTML='${driverImageFallbackHTML(profile).replace(/'/g, '&apos;')}'">`;
   }
-  const initials = String(profile.code || profile.name || 'PX').slice(0, 3).toUpperCase();
-  return `<span class="driver-avatar-fallback">${escapeAdminText(initials)}</span>`;
+  return driverImageFallbackHTML(profile);
 }
 
 function driverStorageBadge(profile = {}) {
@@ -5043,7 +5057,7 @@ function renderDriverProfilePreview(value = '') {
   if (!box) return;
 
   if (value && isDriverImageValue(value)) {
-    box.innerHTML = `<img src="${escapeAdminAttr(value)}" alt="Driver preview">`;
+    box.innerHTML = `<img src="${escapeDriverImageSrc(value)}" alt="Driver preview" onerror="this.style.display='none'; this.parentElement.innerHTML='<span>PX</span>';">`;
   } else {
     const code = document.getElementById('dp-code')?.value?.trim()?.slice(0, 3).toUpperCase() || 'PX';
     box.innerHTML = `<span>${escapeAdminText(code)}</span>`;
