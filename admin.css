@@ -537,45 +537,7 @@ select.form-input option{background:var(--dark2)}
   min-width: 76px;
 }
 
-/* ══════════════════════════════════════
-   HOME BRANDING / MARQUEE LOGO MANAGER
-══════════════════════════════════════ */
-.home-branding-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:18px;align-items:start}
-.home-branding-card{background:rgba(17,17,17,.86);border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 50px rgba(0,0,0,.28);padding:20px;position:relative;overflow:hidden}
-.home-branding-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,0,45,.08),transparent 34%);pointer-events:none}
-.hb-title{font-family:var(--font-d);font-size:1.7rem;letter-spacing:3px;color:#fff;margin-bottom:8px;position:relative}
-.hb-help{color:var(--muted2);font-size:.85rem;line-height:1.6;margin-bottom:18px;position:relative}
-.hb-form-grid{display:grid;grid-template-columns:1fr 140px 150px 190px;gap:12px;margin-bottom:16px;position:relative}
-.hb-form-grid label span,.hb-controls label{display:block;font-family:var(--font-c);font-size:.64rem;letter-spacing:2px;color:var(--muted2);text-transform:uppercase;margin-bottom:6px}
-.hb-check-row{display:flex!important;align-items:center;gap:9px;padding-top:23px;color:#fff;font-size:.86rem}
-.hb-check-row span{margin:0!important;color:#fff!important;letter-spacing:1px!important}
-.hb-upload-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;position:relative}
-.adm-btn-ghost{padding:11px 18px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#fff;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-weight:700;transition:all var(--tr)}
-.adm-btn-ghost:hover{border-color:var(--red);background:rgba(232,0,45,.08)}
-.hb-crop-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;position:relative}
-.hb-crop-panel{background:#050505;border:1px solid rgba(255,255,255,.08);min-height:300px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;flex-direction:column}
-#home-logo-canvas{width:100%;height:auto;display:block;background:#050505;cursor:crosshair;touch-action:none;user-select:none}
-.hb-controls{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);padding:14px;display:flex;flex-direction:column;gap:14px}
-.hb-controls input[type=range]{width:100%;accent-color:var(--red)}
-.hb-crop-help{width:100%;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.55);color:var(--muted2);font-size:.78rem;line-height:1.4;text-align:center}
-.hb-controls-easy label{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);padding:12px}
-.hb-crop-tip{border:1px solid rgba(232,0,45,.22);background:rgba(232,0,45,.06);padding:13px;color:var(--muted2);font-size:.8rem;line-height:1.45}
-.hb-crop-tip strong{display:block;color:#fff;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
-.hb-crop-tip span{display:block}
-.hb-logo-preview{min-height:104px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:var(--muted2);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;padding:10px;overflow:hidden}
-.hb-logo-preview img{max-width:100%;max-height:92px;object-fit:contain}
-.hb-mini-logo{width:84px;height:44px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:5px}
-.hb-mini-logo img{max-width:100%;max-height:100%;object-fit:contain}
-.hb-status{display:inline-flex;padding:4px 9px;border:1px solid rgba(255,255,255,.12);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-size:.65rem;color:#fff}
-.hb-status.on{border-color:rgba(0,180,0,.45);color:#59ff75;background:rgba(0,180,0,.08)}
-.hb-status.off{border-color:rgba(255,255,255,.12);color:var(--muted2)}
-.hb-actions{display:flex;gap:8px;flex-wrap:wrap}
-.hb-actions button{padding:7px 10px;border:1px solid rgba(255,255,255,.12);color:#fff;font-family:var(--font-c);letter-spacing:1px;text-transform:uppercase;font-weight:700}
-.hb-actions button:hover{border-color:var(--red);color:var(--red)}
-.hb-actions .danger:hover{background:rgba(232,0,45,.1)}
-@media(max-width:1100px){.home-branding-grid,.hb-crop-grid{grid-template-columns:1fr}.hb-form-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.hb-form-grid{grid-template-columns:1fr}.hb-check-row{padding-top:0}.home-branding-card{padding:16px}}
-
+/* Phase A4.8A — Home Branding admin styles removed. */
 
 /* ============================================================
    PADDOX PHASE 16 — Admin Fan Quote Upload Polish
