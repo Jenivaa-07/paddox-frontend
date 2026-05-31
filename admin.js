@@ -6352,6 +6352,13 @@ function escapeAdminText(value='') {
   return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
+function escapeAdminAttr(value = '') {
+  return escapeAdminText(value)
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9_\-:.]/g, '')
+    .toLowerCase();
+}
+
 function pollLogoKey(value = '') {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
