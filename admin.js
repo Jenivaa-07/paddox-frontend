@@ -296,6 +296,7 @@ const PAGE_META = {
   action:'+ Upload Asset',
   fn:()=>openAssetModal()
 },
+  homebranding: { title:'HOME BRANDING', action:'+ Add Logo', fn:()=>resetHomeLogoForm() },
   fanquotes:  { title:'FAN QUOTES',      action:'+ Add Quote',   fn:()=>openQuoteModal() },
   fanpolls:   { title:'FAN POLLS',       action:'+ New Poll',    fn:()=>resetFanPollForm() },
   fantrivia:  { title:'FAN TRIVIA',      action:'+ New Trivia',  fn:()=>resetFanTriviaForm() },
@@ -333,6 +334,10 @@ if (id === 'coupons') {
 
 if (id === 'assets') {
   loadAssets();
+}
+if (id === 'homebranding') {
+  loadHomeMarqueeLogosAdmin();
+  setTimeout(drawHomeLogoCropCanvas, 50);
 }
 if (id === 'orders') {
   adminPhase9BindOrderFilters?.();
@@ -4028,12 +4033,22 @@ function renderAdminQuotes() {
   if (!tbody) return;
 
   const list = getFilteredAdminQuotes();
+  const totalEl = document.getElementById('quote-stat-total');
+  const featuredEl = document.getElementById('quote-stat-featured');
+  const activeEl = document.getElementById('quote-stat-active');
+  if (totalEl) totalEl.textContent = String(REAL_QUOTES_ADMIN.length || 0);
+  if (featuredEl) featuredEl.textContent = String(REAL_QUOTES_ADMIN.filter(q => q.isFeatured).length || 0);
+  if (activeEl) activeEl.textContent = String(REAL_QUOTES_ADMIN.filter(q => q.isActive !== false).length || 0);
 
   if (!list.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center;padding:30px;color:#777">
-          No quotes found
+        <td colspan="7" class="quote-empty-cell">
+          <div class="quote-empty-state">
+            <div class="quote-empty-mark">”</div>
+            <strong>No quotes found</strong>
+            <span>Add a premium driver quote or adjust your filters.</span>
+          </div>
         </td>
       </tr>
     `;
@@ -4041,59 +4056,30 @@ function renderAdminQuotes() {
   }
 
   tbody.innerHTML = list.map(q => `
-    <tr>
+    <tr class="quote-admin-row">
       <td>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="
-            width:32px;
-            height:32px;
-            border-radius:50%;
-            overflow:hidden;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            background:#151515;
-            font-size:1.4rem;
-            flex-shrink:0;
-          ">${adminQuoteAvatarHTML(q.avatar)}</span>
-          <div>
-            <div style="font-weight:800;color:#fff">${q.driver}</div>
-            <div style="color:#777;font-size:.75rem">${q.team || '-'}</div>
+        <div class="quote-driver-cell">
+          <span class="quote-driver-avatar">${adminQuoteAvatarHTML(q.avatar || q.driverImage || q.image)}</span>
+          <div class="quote-driver-meta">
+            <strong>${escapeAdminText(q.driver || 'Driver')}</strong>
+            <span>${escapeAdminText(q.team || '-')}</span>
           </div>
         </div>
       </td>
 
-      <td style="max-width:380px;color:#ccc;line-height:1.45">
-        "${q.text}"
-      </td>
-
       <td>
-        <span class="sb s-pr">
-          ${q.era || 'current'}
-        </span>
+        <div class="quote-text-cell">“${escapeAdminText(q.text || '')}”</div>
       </td>
 
-      <td style="color:#aaa">
-        ${q.category || '-'}
-      </td>
-
+      <td><span class="quote-era-pill quote-era-${escapeAdminAttr(q.era || 'current')}">${escapeAdminText(q.era || 'current')}</span></td>
+      <td><span class="quote-category-pill">${escapeAdminText(q.category || '-')}</span></td>
+      <td>${q.isFeatured ? '<span class="quote-featured-pill">★ Yes</span>' : '<span class="quote-muted-dash">—</span>'}</td>
+      <td><span class="quote-status-pill ${q.isActive !== false ? 'is-active' : 'is-inactive'}">${q.isActive !== false ? 'Active' : 'Inactive'}</span></td>
       <td>
-        ${q.isFeatured ? '⭐ Yes' : '—'}
-      </td>
-
-      <td>
-        <span class="sb ${q.isActive ? 's-act' : 's-out'}">
-          ${q.isActive ? 'Active' : 'Inactive'}
-        </span>
-      </td>
-
-      <td>
-        <button class="act-btn" onclick="openQuoteModal('${q._id}')">
-          Edit
-        </button>
-        <button class="act-btn" onclick="deleteQuote('${q._id}')">
-          Delete
-        </button>
+        <div class="quote-action-stack">
+          <button class="quote-mini-btn" onclick="openQuoteModal('${q._id}')">Edit</button>
+          <button class="quote-mini-btn quote-danger" onclick="deleteQuote('${q._id}')">Delete</button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -4158,32 +4144,23 @@ function renderAdminQuoteCardPreview() {
   const category = document.getElementById('quote-category')?.value?.trim() || 'motivation';
   const avatar = document.getElementById('quote-avatar')?.value?.trim() || '🏎️';
   const avatarHtml = isQuoteAvatarImage(avatar)
-    ? `<img src="${avatar}" alt="${driver}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`
-    : avatar;
+    ? `<img src="${avatar}" alt="${escapeAdminAttr(driver)}" class="quote-preview-avatar-img">`
+    : `<span>${escapeAdminText(avatar)}</span>`;
 
   preview.innerHTML = `
-    <div style="
-      margin-top:18px;
-      padding:18px;
-      border-radius:22px;
-      background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-      border:1px solid rgba(255,255,255,.1);
-      border-top:2px solid var(--red);
-      box-shadow:0 18px 45px rgba(0,0,0,.28);
-    ">
-      <div style="display:flex;align-items:center;gap:8px;color:var(--red);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-size:.72rem;margin-bottom:12px">
-        <span>${era}</span><span style="color:#555">•</span><span>${category}</span>
-      </div>
-      <div style="font-size:1.35rem;line-height:1.45;color:#fff;margin-bottom:18px">“${text}”</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div style="display:flex;align-items:center;gap:12px;min-width:0">
-          <div style="width:48px;height:48px;border-radius:50%;overflow:hidden;background:#151515;border:1px solid rgba(232,0,45,.45);display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0">${avatarHtml}</div>
-          <div style="min-width:0">
-            <div style="font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${driver}</div>
-            <div style="color:#999;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${team}</div>
+    <div class="quote-live-card">
+      <div class="quote-live-glow"></div>
+      <div class="quote-live-tags"><span>${escapeAdminText(era)}</span><i></i><span>${escapeAdminText(category)}</span></div>
+      <div class="quote-live-text">“${escapeAdminText(text)}”</div>
+      <div class="quote-live-foot">
+        <div class="quote-live-driver">
+          <div class="quote-live-avatar">${avatarHtml}</div>
+          <div>
+            <strong>${escapeAdminText(driver)}</strong>
+            <span>${escapeAdminText(team)}</span>
           </div>
         </div>
-        <button type="button" class="act-btn" style="padding:9px 12px;white-space:nowrap">Share Image</button>
+        <button type="button" class="quote-share-preview-btn">Share Image</button>
       </div>
     </div>
   `;
@@ -4425,47 +4402,34 @@ function readQuoteImageAsDataUrl(file) {
   });
 }
 
-function setQuoteAvatarDropState(isOn = false) {
-  const zone = document.getElementById('quote-avatar-dropzone');
-  if (zone) zone.classList.toggle('is-dragging', !!isOn);
-}
-
-async function processQuoteAvatarFile(file) {
+async function handleQuoteAvatarFile(file) {
   const avatarInput = document.getElementById('quote-avatar');
   const status = document.getElementById('quote-avatar-status');
-  const urlDisplay = document.getElementById('quote-avatar-url-display');
-
-  if (!file) return;
+  if (!file || !avatarInput) return;
 
   try {
-    if (status) status.textContent = 'Opening premium cropper...';
+    if (status) status.textContent = 'Opening cropper...';
     showToast('🖼️ Opening quote driver image cropper...');
 
     const dataUrl = await openPremiumImageCropper(file, {
       title: 'CROP QUOTE DRIVER IMAGE',
-      outputSize: 560,
-      quality: 0.86
+      outputSize: 520,
+      quality: 0.82
     });
 
     if (status) status.textContent = 'Uploading to Cloudinary...';
     showToast('☁️ Uploading quote driver image to Cloudinary...');
-
     const cloudinaryUrl = await uploadImageToCloudinaryBridge(dataUrl, 'fan-quotes');
-    const finalUrl = cloudinaryUrl || dataUrl;
 
-    if (avatarInput) avatarInput.value = finalUrl;
-    if (urlDisplay) urlDisplay.value = finalUrl;
-
-    renderQuoteAvatarPreview(finalUrl);
+    avatarInput.value = cloudinaryUrl || dataUrl;
+    renderQuoteAvatarPreview(avatarInput.value);
     renderAdminQuoteCardPreview();
 
-    if (status) status.textContent = 'Cloudinary image saved successfully.';
+    if (status) status.textContent = cloudinaryUrl ? 'Cloudinary image ready ✓' : 'Local image ready ✓';
     showToast('✅ Quote driver image saved to Cloudinary');
   } catch (err) {
-    if (status) status.textContent = err.message || 'Image upload failed.';
+    if (status) status.textContent = err.message || 'Image upload failed';
     showToast(`❌ ${err.message}`);
-  } finally {
-    setQuoteAvatarDropState(false);
   }
 }
 
@@ -4473,78 +4437,43 @@ function bindQuoteAvatarUpload() {
   const uploadBtn = document.getElementById('quote-avatar-upload');
   const fileInput = document.getElementById('quote-avatar-file');
   const avatarInput = document.getElementById('quote-avatar');
-  const dropzone = document.getElementById('quote-avatar-dropzone');
-  const urlDisplay = document.getElementById('quote-avatar-url-display');
+  const dropZone = document.getElementById('quote-avatar-drop');
 
-  if (uploadBtn && fileInput && !uploadBtn.dataset.bound) {
-    uploadBtn.dataset.bound = '1';
+  if (uploadBtn && fileInput) {
     uploadBtn.onclick = () => fileInput.click();
-  }
-
-  if (fileInput && !fileInput.dataset.bound) {
-    fileInput.dataset.bound = '1';
     fileInput.onchange = async () => {
       const file = fileInput.files?.[0];
-      await processQuoteAvatarFile(file);
+      if (file) await handleQuoteAvatarFile(file);
       fileInput.value = '';
     };
   }
 
-  if (dropzone && fileInput && !dropzone.dataset.bound) {
-    dropzone.dataset.bound = '1';
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropzone.addEventListener(eventName, event => {
-        event.preventDefault();
-        event.stopPropagation();
-        setQuoteAvatarDropState(true);
+  if (dropZone && fileInput && !dropZone.dataset.bound) {
+    dropZone.dataset.bound = '1';
+    dropZone.addEventListener('click', () => fileInput.click());
+    ['dragenter','dragover'].forEach(evt => {
+      dropZone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropZone.classList.add('is-dragging');
       });
     });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropzone.addEventListener(eventName, event => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (eventName === 'dragleave' && dropzone.contains(event.relatedTarget)) return;
-        setQuoteAvatarDropState(false);
+    ['dragleave','drop'].forEach(evt => {
+      dropZone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropZone.classList.remove('is-dragging');
       });
     });
-
-    dropzone.addEventListener('drop', async event => {
-      const file = event.dataTransfer?.files?.[0];
-      await processQuoteAvatarFile(file);
-    });
-
-    dropzone.addEventListener('click', event => {
-      if (event.target.closest('button')) return;
-      fileInput.click();
-    });
-
-    dropzone.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        fileInput.click();
-      }
+    dropZone.addEventListener('drop', async e => {
+      const file = e.dataTransfer?.files?.[0];
+      if (file) await handleQuoteAvatarFile(file);
     });
   }
 
-  if (avatarInput && !avatarInput.dataset.bound) {
-    avatarInput.dataset.bound = '1';
-    avatarInput.addEventListener('input', () => {
-      const value = avatarInput.value.trim() || '🏎️';
-      if (urlDisplay && urlDisplay.value !== value) urlDisplay.value = value;
-      renderQuoteAvatarPreview(value);
+  if (avatarInput) {
+    avatarInput.oninput = () => {
+      renderQuoteAvatarPreview(avatarInput.value.trim() || '🏎️');
       renderAdminQuoteCardPreview();
-    });
-  }
-
-  if (urlDisplay && avatarInput && !urlDisplay.dataset.bound) {
-    urlDisplay.dataset.bound = '1';
-    urlDisplay.addEventListener('input', () => {
-      avatarInput.value = urlDisplay.value.trim();
-      renderQuoteAvatarPreview(avatarInput.value || '🏎️');
-      renderAdminQuoteCardPreview();
-    });
+    };
   }
 }
 
@@ -4553,18 +4482,13 @@ function adminQuoteAvatarHTML(value) {
     return `
       <img
         src="${value}"
-        style="
-          width:28px;
-          height:28px;
-          object-fit:cover;
-          border-radius:50%;
-          display:block;
-        "
+        alt="Driver"
+        class="quote-table-avatar-img"
       />
     `;
   }
 
-  return value || '🏎️';
+  return `<span class="quote-table-avatar-emoji">${escapeAdminText(value || '🏎️')}</span>`;
 }
 
 
@@ -4596,38 +4520,29 @@ function ensureQuoteModal() {
 
   const modal = document.createElement('div');
   modal.id = 'quote-modal';
-
   modal.innerHTML = `
-    <div class="preview-overlay pdx-quote-overlay" id="quote-overlay">
-      <div class="preview-card pdx-quote-modal-card">
-        <button class="preview-close pdx-quote-close" id="quote-close" type="button" onclick="closeQuoteModal()">✕</button>
+    <div class="preview-overlay quote-overlay-premium" id="quote-overlay">
+      <div class="preview-card quote-modal-card-premium">
+        <button class="preview-close quote-modal-close" id="quote-close" type="button" onclick="closeQuoteModal()">✕</button>
 
-        <div class="pdx-quote-modal-head">
+        <div class="quote-modal-head">
           <div>
-            <div class="pdx-quote-kicker">FAN HUB QUOTE LIBRARY</div>
-            <h2 id="quote-modal-title">ADD QUOTE</h2>
-            <p>Upload a driver image, crop it cleanly, and save it to Cloudinary for Fan Hub quote cards.</p>
+            <div class="quote-admin-kicker">FAN HUB QUOTE LIBRARY</div>
+            <div class="quote-modal-title" id="quote-modal-title">ADD QUOTE</div>
           </div>
-          <div class="pdx-quote-status-pill">CLOUDINARY READY</div>
+          <div class="quote-modal-badge">Cloudinary Upload</div>
         </div>
 
-        <div class="pdx-quote-form-grid">
-          <label class="pdx-quote-field pdx-quote-wide">
+        <div class="quote-form-premium">
+          <label class="quote-field quote-field-full">
             <span>QUOTE TEXT</span>
-            <textarea id="quote-text" class="edit-product-input" rows="4" maxlength="500" placeholder="Enter the racing quote..."></textarea>
+            <textarea id="quote-text" class="edit-product-input quote-textarea" rows="4" maxlength="500" placeholder="Write a sharp motorsport quote..."></textarea>
           </label>
 
-          <label class="pdx-quote-field">
-            <span>DRIVER</span>
-            <input id="quote-driver" class="edit-product-input" placeholder="Ayrton Senna">
-          </label>
+          <label class="quote-field"><span>DRIVER</span><input id="quote-driver" class="edit-product-input" placeholder="Ayrton Senna"></label>
+          <label class="quote-field"><span>TEAM</span><input id="quote-team" class="edit-product-input" placeholder="McLaren / Lotus / Williams"></label>
 
-          <label class="pdx-quote-field">
-            <span>TEAM</span>
-            <input id="quote-team" class="edit-product-input" placeholder="McLaren / Ferrari / Mercedes">
-          </label>
-
-          <label class="pdx-quote-field">
+          <label class="quote-field">
             <span>ERA</span>
             <select id="quote-era" class="edit-product-input">
               <option value="current">current</option>
@@ -4637,60 +4552,51 @@ function ensureQuoteModal() {
             </select>
           </label>
 
-          <label class="pdx-quote-field">
-            <span>CATEGORY</span>
-            <input id="quote-category" class="edit-product-input" placeholder="motivation, champions, racecraft">
-          </label>
+          <label class="quote-field"><span>CATEGORY</span><input id="quote-category" class="edit-product-input" placeholder="motivation, champions, racecraft"></label>
 
-          <div class="pdx-quote-field pdx-quote-upload-field">
-            <span>DRIVER IMAGE</span>
-            <div class="pdx-quote-upload-row">
-              <div id="quote-avatar-preview" class="pdx-quote-avatar-preview">🏎️</div>
-
-              <div id="quote-avatar-dropzone" class="pdx-quote-dropzone" tabindex="0" role="button" aria-label="Upload driver image">
-                <input id="quote-avatar-file" type="file" accept="image/*" style="display:none">
-                <input id="quote-avatar" type="hidden" value="🏎️">
-                <div class="pdx-drop-icon">☁</div>
-                <div class="pdx-drop-title">Drag & drop driver image</div>
-                <div class="pdx-drop-sub">or click to upload, crop, zoom, and save to Cloudinary</div>
-                <button type="button" class="act-btn pdx-drop-btn" id="quote-avatar-upload">Upload / Crop Image</button>
+          <div class="quote-upload-panel quote-field-full">
+            <div class="quote-upload-left">
+              <div id="quote-avatar-preview" class="quote-avatar-preview-premium">🏎️</div>
+              <div>
+                <span class="quote-upload-title">Driver Image</span>
+                <p>Drag image here or click upload. Cropper saves a clean circular Cloudinary avatar.</p>
+                <div id="quote-avatar-status" class="quote-upload-status">No image selected</div>
               </div>
             </div>
-            <input id="quote-avatar-url-display" class="edit-product-input pdx-quote-url-input" placeholder="Cloudinary URL appears here after upload">
-            <small id="quote-avatar-status">JPG / PNG supported. Best result: clear driver headshot.</small>
+            <div class="quote-upload-right" id="quote-avatar-drop">
+              <input id="quote-avatar-file" type="file" accept="image/*" style="display:none">
+              <button type="button" class="quote-upload-btn" id="quote-avatar-upload">Upload / Crop Image</button>
+              <div class="quote-drop-hint">Drop JPG / PNG here</div>
+              <input id="quote-avatar" class="edit-product-input quote-avatar-hidden-input" placeholder="Cloudinary URL or emoji fallback">
+            </div>
           </div>
 
-          <label class="pdx-quote-field">
-            <span>SOURCE</span>
-            <input id="quote-source" class="edit-product-input" placeholder="optional">
-          </label>
+          <label class="quote-field"><span>SOURCE</span><input id="quote-source" class="edit-product-input" placeholder="optional"></label>
 
-          <div class="pdx-quote-checks pdx-quote-wide">
-            <label><input id="quote-featured" type="checkbox"> <span>Featured quote</span></label>
-            <label><input id="quote-active" type="checkbox" checked> <span>Active</span></label>
+          <div class="quote-check-row">
+            <label><input id="quote-featured" type="checkbox"> Featured quote</label>
+            <label><input id="quote-active" type="checkbox" checked> Active</label>
           </div>
         </div>
 
-        <div id="quote-card-live-preview" class="pdx-quote-live-preview"></div>
+        <div id="quote-card-live-preview"></div>
 
-        <button class="act-btn pdx-quote-save" id="quote-save">SAVE QUOTE</button>
+        <button class="quote-save-premium" id="quote-save" type="button">SAVE QUOTE</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
-
   modal.querySelector('#quote-close').onclick = closeQuoteModal;
-
   modal.querySelector('#quote-overlay').onclick = e => {
     if (e.target.id === 'quote-overlay') closeQuoteModal();
   };
-
   modal.querySelector('#quote-save').onclick = saveQuote;
 
   bindQuoteAvatarUpload();
   bindQuoteLivePreview();
 }
+
 
 function openQuoteModal(id = null) {
   ensureQuoteModal();
@@ -4711,13 +4617,9 @@ function openQuoteModal(id = null) {
   document.getElementById('quote-era').value = quote?.era || 'current';
   document.getElementById('quote-category').value = quote?.category || 'motivation';
   document.getElementById('quote-avatar').value = quote?.avatar || '🏎️';
-  const quoteAvatarUrlDisplay = document.getElementById('quote-avatar-url-display');
-  if (quoteAvatarUrlDisplay) quoteAvatarUrlDisplay.value = quote?.avatar || '';
-  const quoteAvatarStatus = document.getElementById('quote-avatar-status');
-  if (quoteAvatarStatus) quoteAvatarStatus.textContent = isQuoteAvatarImage(quote?.avatar || '')
-    ? 'Cloudinary image loaded for this quote.'
-    : 'JPG / PNG supported. Best result: clear driver headshot.';
   renderQuoteAvatarPreview(quote?.avatar || '🏎️');
+  const qStatus = document.getElementById('quote-avatar-status');
+  if (qStatus) qStatus.textContent = isQuoteAvatarImage(quote?.avatar || '') ? 'Cloudinary image ready ✓' : 'Emoji fallback active';
   document.getElementById('quote-source').value = quote?.source || '';
   document.getElementById('quote-featured').checked = !!quote?.isFeatured;
   document.getElementById('quote-active').checked = quote?.isActive !== false;
@@ -5742,11 +5644,553 @@ document.addEventListener('DOMContentLoaded', () => {
   adminPhase9BindOrderFilters();
 });
 
-/* Phase A4.8A — Home Branding admin module removed. */
+/* ══════════════════════════════════════
+   HOME BRANDING — MARQUEE LOGO MANAGER
+   Easy freestyle visual cropper
+══════════════════════════════════════ */
+const HOME_MARQUEE_API = 'https://paddox-backend.onrender.com/api/fan/admin/home-marquee-logos';
+let ADMIN_HOME_LOGOS = [];
+let HOME_LOGO_EDIT_ID = null;
+let HOME_LOGO_SOURCE = '';
+let HOME_LOGO_CROPPED = '';
+let HOME_LOGO_IMG = null;
+let HOME_LOGO_BIND_DONE = false;
+
+let HOME_CROP = {
+  x: 90,
+  y: 90,
+  w: 360,
+  h: 150,
+  zoom: 1,
+  dragging: false,
+  mode: '',
+  startX: 0,
+  startY: 0,
+  ox: 0,
+  oy: 0,
+  ow: 0,
+  oh: 0,
+  imgBox: null
+};
+
+function homeLogoTokenHeaders() {
+  const token = typeof getAdminToken === 'function' ? getAdminToken() : '';
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  };
+}
+
+function resetHomeLogoCrop() {
+  const canvas = document.getElementById('home-logo-canvas');
+  const w = canvas?.width || 880;
+  const h = canvas?.height || 430;
+  HOME_CROP = {
+    ...HOME_CROP,
+    x: Math.round(w * .30),
+    y: Math.round(h * .30),
+    w: Math.round(w * .40),
+    h: Math.round(h * .22),
+    zoom: Number(document.getElementById('home-crop-zoom')?.value || 100) / 100,
+    dragging: false,
+    mode: '',
+    imgBox: null
+  };
+  drawHomeLogoCropCanvas();
+}
+
+function resetHomeLogoForm() {
+  HOME_LOGO_EDIT_ID = null;
+  HOME_LOGO_SOURCE = '';
+  HOME_LOGO_CROPPED = '';
+  HOME_LOGO_IMG = null;
+
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  };
+
+  set('home-logo-name', '');
+  set('home-logo-order', String((ADMIN_HOME_LOGOS || []).length + 1));
+  set('home-logo-color', '#e8002d');
+  set('home-crop-zoom', '100');
+
+  const active = document.getElementById('home-logo-active');
+  if (active) active.checked = true;
+
+  const file = document.getElementById('home-logo-upload');
+  if (file) file.value = '';
+
+  const preview = document.getElementById('home-logo-preview');
+  if (preview) preview.textContent = 'Preview';
+
+  resetHomeLogoCrop();
+  bindHomeLogoCropper();
+
+  if (typeof switchPage === 'function') {
+    document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('on'));
+    document.querySelectorAll('.adm-nav-item').forEach(n=>n.classList.remove('on'));
+    document.getElementById('adm-homebranding')?.classList.add('on');
+    document.querySelector('.adm-nav-item[data-page="homebranding"]')?.classList.add('on');
+    const titleEl = document.getElementById('adm-topbar-title');
+    if (titleEl) titleEl.textContent = 'HOME BRANDING';
+  }
+}
+
+async function loadHomeMarqueeLogosAdmin() {
+  const tbody = document.getElementById('home-logos-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading marquee logos…</td></tr>';
+
+  try {
+    const res = await fetch(HOME_MARQUEE_API, { headers: homeLogoTokenHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Failed to load logos');
+
+    ADMIN_HOME_LOGOS = data.data?.logos || data.logos || [];
+    renderHomeLogosAdmin();
+    bindHomeLogoCropper();
+
+  } catch (err) {
+    console.error(err);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Could not load marquee logos</td></tr>';
+    if (typeof showToast === 'function') showToast('❌ Failed to load marquee logos');
+  }
+}
+
+function renderHomeLogosAdmin() {
+  const tbody = document.getElementById('home-logos-tbody');
+  if (!tbody) return;
+
+  const q = String(document.getElementById('home-logo-search')?.value || '').toLowerCase().trim();
+  const list = (ADMIN_HOME_LOGOS || [])
+    .filter(item => !q || String(item.name || '').toLowerCase().includes(q))
+    .sort((a,b) => Number(a.order || 0) - Number(b.order || 0));
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No marquee logos added yet</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(item => `
+    <tr>
+      <td><div class="hb-mini-logo"><img src="${item.image || ''}" alt="${item.name || 'Logo'}"/></div></td>
+      <td><strong>${item.name || 'Logo'}</strong><div style="color:#777;font-size:.75rem">${item.slug || ''}</div></td>
+      <td>${Number(item.order || 0)}</td>
+      <td><span class="hb-status ${item.isActive === false ? 'off' : 'on'}">${item.isActive === false ? 'Hidden' : 'Active'}</span></td>
+      <td>
+        <div class="hb-actions">
+          <button onclick="editHomeMarqueeLogo('${item._id}')">Edit</button>
+          <button class="danger" onclick="deleteHomeMarqueeLogo('${item._id}', '${String(item.name || 'logo').replace(/'/g, '')}')">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function editHomeMarqueeLogo(id) {
+  const item = (ADMIN_HOME_LOGOS || []).find(x => String(x._id) === String(id));
+  if (!item) return;
+
+  HOME_LOGO_EDIT_ID = item._id;
+  HOME_LOGO_SOURCE = item.image || '';
+  HOME_LOGO_CROPPED = item.image || '';
+
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  };
+
+  set('home-logo-name', item.name || '');
+  set('home-logo-order', Number(item.order || 0));
+  set('home-logo-color', item.color || '#e8002d');
+  set('home-crop-zoom', '100');
+
+  const active = document.getElementById('home-logo-active');
+  if (active) active.checked = item.isActive !== false;
+
+  const preview = document.getElementById('home-logo-preview');
+  if (preview) preview.innerHTML = item.image ? `<img src="${item.image}" alt="${item.name || 'Logo'}"/>` : 'Preview';
+
+  loadHomeLogoImage(item.image || '');
+  if (typeof showToast === 'function') showToast('✏️ Logo loaded for editing');
+}
+
+function loadHomeLogoImage(src) {
+  if (!src) {
+    HOME_LOGO_IMG = null;
+    drawHomeLogoCropCanvas();
+    return;
+  }
+
+  const img = new Image();
+  img.onload = () => {
+    HOME_LOGO_IMG = img;
+    resetHomeLogoCrop();
+    cropHomeLogoPreview(false);
+  };
+  img.onerror = () => {
+    HOME_LOGO_IMG = null;
+    drawHomeLogoCropCanvas();
+  };
+  img.src = src;
+}
+
+function getHomeCropCanvasPoint(event) {
+  const canvas = document.getElementById('home-logo-canvas');
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * (canvas.width / rect.width),
+    y: (event.clientY - rect.top) * (canvas.height / rect.height)
+  };
+}
+
+function homeCropHitMode(px, py) {
+  const { x, y, w, h } = HOME_CROP;
+  const handle = 18;
+  const nearLeft = Math.abs(px - x) <= handle;
+  const nearRight = Math.abs(px - (x + w)) <= handle;
+  const nearTop = Math.abs(py - y) <= handle;
+  const nearBottom = Math.abs(py - (y + h)) <= handle;
+
+  if (nearLeft && nearTop) return 'nw';
+  if (nearRight && nearTop) return 'ne';
+  if (nearLeft && nearBottom) return 'sw';
+  if (nearRight && nearBottom) return 'se';
+  if (px >= x && px <= x + w && py >= y && py <= y + h) return 'move';
+  return 'new';
+}
+
+function bindHomeLogoCropper() {
+  const canvas = document.getElementById('home-logo-canvas');
+  if (!canvas || HOME_LOGO_BIND_DONE) return;
+  HOME_LOGO_BIND_DONE = true;
+
+  canvas.addEventListener('pointerdown', event => {
+    if (!HOME_LOGO_IMG) return;
+    canvas.setPointerCapture(event.pointerId);
+    const p = getHomeCropCanvasPoint(event);
+    HOME_CROP.dragging = true;
+    HOME_CROP.mode = homeCropHitMode(p.x, p.y);
+    HOME_CROP.startX = p.x;
+    HOME_CROP.startY = p.y;
+    HOME_CROP.ox = HOME_CROP.x;
+    HOME_CROP.oy = HOME_CROP.y;
+    HOME_CROP.ow = HOME_CROP.w;
+    HOME_CROP.oh = HOME_CROP.h;
+
+    if (HOME_CROP.mode === 'new') {
+      HOME_CROP.x = p.x;
+      HOME_CROP.y = p.y;
+      HOME_CROP.w = 1;
+      HOME_CROP.h = 1;
+    }
+    drawHomeLogoCropCanvas();
+  });
+
+  canvas.addEventListener('pointermove', event => {
+    if (!HOME_LOGO_IMG) return;
+    const p = getHomeCropCanvasPoint(event);
+
+    if (!HOME_CROP.dragging) {
+      canvas.style.cursor =
+        homeCropHitMode(p.x, p.y) === 'move' ? 'move' :
+        ['nw','se'].includes(homeCropHitMode(p.x, p.y)) ? 'nwse-resize' :
+        ['ne','sw'].includes(homeCropHitMode(p.x, p.y)) ? 'nesw-resize' :
+        'crosshair';
+      return;
+    }
+
+    const dx = p.x - HOME_CROP.startX;
+    const dy = p.y - HOME_CROP.startY;
+    const minW = 60;
+    const minH = 40;
+    const maxW = canvas.width;
+    const maxH = canvas.height;
+
+    if (HOME_CROP.mode === 'move') {
+      HOME_CROP.x = Math.max(0, Math.min(maxW - HOME_CROP.ow, HOME_CROP.ox + dx));
+      HOME_CROP.y = Math.max(0, Math.min(maxH - HOME_CROP.oh, HOME_CROP.oy + dy));
+    } else if (HOME_CROP.mode === 'new') {
+      HOME_CROP.x = Math.min(HOME_CROP.startX, p.x);
+      HOME_CROP.y = Math.min(HOME_CROP.startY, p.y);
+      HOME_CROP.w = Math.abs(p.x - HOME_CROP.startX);
+      HOME_CROP.h = Math.abs(p.y - HOME_CROP.startY);
+    } else {
+      let x = HOME_CROP.ox;
+      let y = HOME_CROP.oy;
+      let w = HOME_CROP.ow;
+      let h = HOME_CROP.oh;
+
+      if (HOME_CROP.mode.includes('e')) w = HOME_CROP.ow + dx;
+      if (HOME_CROP.mode.includes('s')) h = HOME_CROP.oh + dy;
+      if (HOME_CROP.mode.includes('w')) { x = HOME_CROP.ox + dx; w = HOME_CROP.ow - dx; }
+      if (HOME_CROP.mode.includes('n')) { y = HOME_CROP.oy + dy; h = HOME_CROP.oh - dy; }
+
+      if (w < minW) { if (HOME_CROP.mode.includes('w')) x -= minW - w; w = minW; }
+      if (h < minH) { if (HOME_CROP.mode.includes('n')) y -= minH - h; h = minH; }
+
+      HOME_CROP.x = Math.max(0, Math.min(maxW - minW, x));
+      HOME_CROP.y = Math.max(0, Math.min(maxH - minH, y));
+      HOME_CROP.w = Math.max(minW, Math.min(maxW - HOME_CROP.x, w));
+      HOME_CROP.h = Math.max(minH, Math.min(maxH - HOME_CROP.y, h));
+    }
+
+    drawHomeLogoCropCanvas();
+  });
+
+  const endDrag = () => {
+    if (!HOME_CROP.dragging) return;
+    HOME_CROP.dragging = false;
+    cropHomeLogoPreview(false);
+    drawHomeLogoCropCanvas();
+  };
+
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('pointerleave', () => {
+    if (HOME_CROP.dragging) return;
+    canvas.style.cursor = 'crosshair';
+  });
+}
+
+function drawHomeLogoCropCanvas() {
+  const canvas = document.getElementById('home-logo-canvas');
+  if (!canvas) return;
+
+  bindHomeLogoCropper();
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const bg = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+  bg.addColorStop(0, '#050505');
+  bg.addColorStop(1, '#111');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.06)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvas.width; x += 44) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += 44) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
+  if (!HOME_LOGO_IMG) {
+    ctx.fillStyle = '#999';
+    ctx.font = '26px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Upload a logo sheet or single logo', canvas.width/2, canvas.height/2 - 8);
+    ctx.fillStyle = '#666';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('Then drag and resize the red crop box visually', canvas.width/2, canvas.height/2 + 24);
+    return;
+  }
+
+  const img = HOME_LOGO_IMG;
+  const zoom = Number(document.getElementById('home-crop-zoom')?.value || 100) / 100;
+  HOME_CROP.zoom = zoom;
+
+  const fit = Math.min(canvas.width / img.width, canvas.height / img.height) * zoom;
+  const dw = img.width * fit;
+  const dh = img.height * fit;
+  const dx = (canvas.width - dw) / 2;
+  const dy = (canvas.height - dh) / 2;
+  HOME_CROP.imgBox = { dx, dy, dw, dh, fit };
+
+  ctx.drawImage(img, dx, dy, dw, dh);
+
+  const { x, y, w, h } = HOME_CROP;
+
+  ctx.fillStyle = 'rgba(0,0,0,.56)';
+  ctx.fillRect(0,0,canvas.width,y);
+  ctx.fillRect(0,y,x,h);
+  ctx.fillRect(x+w,y,canvas.width-(x+w),h);
+  ctx.fillRect(0,y+h,canvas.width,canvas.height-(y+h));
+
+  ctx.strokeStyle = '#e8002d';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(x, y, w, h);
+
+  ctx.fillStyle = 'rgba(232,0,45,.98)';
+  ctx.fillRect(x, Math.max(0, y-30), 158, 30);
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 13px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('SELECTED LOGO', x+12, Math.max(20, y-10));
+
+  const handles = [
+    [x,y], [x+w,y], [x,y+h], [x+w,y+h]
+  ];
+  handles.forEach(([hx, hy]) => {
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#e8002d';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  });
+}
+
+function cropHomeLogoPreview(showToastMessage = true) {
+  if (!HOME_LOGO_IMG) {
+    if (showToastMessage && typeof showToast === 'function') showToast('Upload an image first');
+    return;
+  }
+
+  const img = HOME_LOGO_IMG;
+  const canvas = document.getElementById('home-logo-canvas');
+  if (!canvas) return;
+
+  const box = HOME_CROP.imgBox;
+  if (!box) {
+    drawHomeLogoCropCanvas();
+    return;
+  }
+
+  const crop = {
+    x: Math.max(HOME_CROP.x, box.dx),
+    y: Math.max(HOME_CROP.y, box.dy),
+    r: Math.min(HOME_CROP.x + HOME_CROP.w, box.dx + box.dw),
+    b: Math.min(HOME_CROP.y + HOME_CROP.h, box.dy + box.dh)
+  };
+
+  const visibleW = crop.r - crop.x;
+  const visibleH = crop.b - crop.y;
+
+  if (visibleW < 8 || visibleH < 8) {
+    if (showToastMessage && typeof showToast === 'function') showToast('Move crop box over the logo');
+    return;
+  }
+
+  const sx = (crop.x - box.dx) / box.fit;
+  const sy = (crop.y - box.dy) / box.fit;
+  const sw = visibleW / box.fit;
+  const sh = visibleH / box.fit;
+
+  const out = document.createElement('canvas');
+  out.width = 760;
+  out.height = 280;
+
+  const octx = out.getContext('2d');
+  octx.clearRect(0,0,out.width,out.height);
+  octx.fillStyle = '#050505';
+  octx.fillRect(0,0,out.width,out.height);
+
+  const outFit = Math.min(out.width / sw, out.height / sh) * .88;
+  const dw = sw * outFit;
+  const dh = sh * outFit;
+  const dx = (out.width - dw) / 2;
+  const dy = (out.height - dh) / 2;
+
+  octx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+
+  HOME_LOGO_CROPPED = out.toDataURL('image/png', .94);
+
+  const preview = document.getElementById('home-logo-preview');
+  if (preview) preview.innerHTML = `<img src="${HOME_LOGO_CROPPED}" alt="Logo preview"/>`;
+
+  if (showToastMessage && typeof showToast === 'function') showToast('✓ Crop preview ready');
+}
+
+async function saveHomeMarqueeLogo() {
+  const name = String(document.getElementById('home-logo-name')?.value || '').trim();
+  if (!name) {
+    if (typeof showToast === 'function') showToast('Enter team/brand name');
+    return;
+  }
+
+  if (HOME_LOGO_IMG) cropHomeLogoPreview(false);
+
+  if (!HOME_LOGO_CROPPED) {
+    if (HOME_LOGO_SOURCE) HOME_LOGO_CROPPED = HOME_LOGO_SOURCE;
+    else {
+      if (typeof showToast === 'function') showToast('Upload and crop logo first');
+      return;
+    }
+  }
+
+  const payload = {
+    name,
+    image: HOME_LOGO_CROPPED,
+    order: Number(document.getElementById('home-logo-order')?.value || 0),
+    color: String(document.getElementById('home-logo-color')?.value || '#e8002d').trim(),
+    isActive: !!document.getElementById('home-logo-active')?.checked,
+  };
+
+  try {
+    const res = await fetch(HOME_LOGO_EDIT_ID ? `${HOME_MARQUEE_API}/${HOME_LOGO_EDIT_ID}` : HOME_MARQUEE_API, {
+      method: HOME_LOGO_EDIT_ID ? 'PUT' : 'POST',
+      headers: homeLogoTokenHeaders(),
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Save failed');
+
+    if (typeof showToast === 'function') showToast('✓ Marquee logo saved');
+    resetHomeLogoForm();
+    loadHomeMarqueeLogosAdmin();
+
+  } catch (err) {
+    console.error(err);
+    if (typeof showToast === 'function') showToast(`❌ ${err.message}`);
+  }
+}
+
+async function deleteHomeMarqueeLogo(id, name = 'logo') {
+  if (!confirm(`Delete ${name} from home marquee?`)) return;
+
+  try {
+    const res = await fetch(`${HOME_MARQUEE_API}/${id}`, { method:'DELETE', headers: homeLogoTokenHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
+
+    if (typeof showToast === 'function') showToast('✓ Marquee logo deleted');
+    loadHomeMarqueeLogosAdmin();
+
+  } catch (err) {
+    console.error(err);
+    if (typeof showToast === 'function') showToast(`❌ ${err.message}`);
+  }
+}
+
+document.addEventListener('input', e => {
+  if (e.target?.id === 'home-crop-zoom') {
+    drawHomeLogoCropCanvas();
+    cropHomeLogoPreview(false);
+  }
+  if (e.target?.id === 'home-logo-search') renderHomeLogosAdmin();
+});
+
+document.addEventListener('change', e => {
+  if (e.target?.id !== 'home-logo-upload') return;
+
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    HOME_LOGO_SOURCE = String(reader.result || '');
+    HOME_LOGO_CROPPED = '';
+    loadHomeLogoImage(HOME_LOGO_SOURCE);
+  };
+  reader.readAsDataURL(file);
+});
+
+
 
 /* ══════════════════════════════════════
    FAN POLLS ADMIN MANAGER — Phase 17.6
-   Realtime MongoDB polls + team logo dropdown
+   Realtime MongoDB polls + Home Branding logo dropdown
 ══════════════════════════════════════ */
 const FAN_POLLS_ADMIN_API = 'https://paddox-backend.onrender.com/api/fan/admin/polls';
 let ADMIN_FAN_POLLS = [];
