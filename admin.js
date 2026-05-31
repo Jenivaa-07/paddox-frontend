@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8F Users premium fan points control loaded');
+console.log('PADDOX A4.8F.1 Users fan points guide correction loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -2465,10 +2465,14 @@ function renderUserPointSummary(actions = []) {
   if (!panel) return;
 
   const presets = [
+    { action:'purchase', label:'Signup Bonus', points:100 },
     { action:'poll_vote', label:'Poll Vote', points:50 },
-    { action:'trivia_correct', label:'Trivia Correct', points:100 },
-    { action:'download', label:'Download', points:30 },
-    { action:'admin_adjust', label:'Admin Reward', points:0 }
+    { action:'trivia', label:'Trivia Correct', points:100 },
+    { action:'download', label:'Wallpaper Download', points:10 },
+    { action:'fan_post', label:'Fan Post / Comment', points:20 },
+    { action:'admin_adjust', label:'Admin Reward', points:0 },
+    { action:'admin_deduct', label:'Admin Deduction', points:0 },
+    { action:'admin_reset', label:'Admin Reset', points:0 }
   ];
 
   const merged = presets.map(item => {
