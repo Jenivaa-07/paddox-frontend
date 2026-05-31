@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8C.5 Fan Polls results table alignment fix loaded');
+console.log('PADDOX A4.8C.6 Fan Polls table alignment rescue loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -6587,28 +6587,21 @@ function renderFanPollsAdmin() {
     const total = opts.reduce((s,o)=>s+Number(o.votes||0),0);
 
     return `
-      <tr class="fan-poll-result-row">
-        <td class="poll-result-question-cell">
-          <strong>${escapeAdminText(p.question || 'Untitled poll')}</strong>
-        </td>
-        <td class="poll-result-options-cell">
+      <tr>
+        <td style="max-width:360px"><strong>${escapeAdminText(p.question || 'Untitled poll')}</strong></td>
+        <td>
           <div class="poll-admin-table-options">
-            ${opts.map(o => {
-              const optionLabel = escapeAdminText(o.label || o.text || 'Option');
-              return `
-                <span class="poll-admin-mini-option" title="${optionLabel}">
-                  ${adminPollMiniLogoHTML(o)}
-                  <span class="poll-mini-label">${optionLabel}</span>
-                </span>
-              `;
-            }).join('')}
+            ${opts.map(o => `
+              <span class="poll-admin-mini-option">
+                ${adminPollMiniLogoHTML(o)}
+                <span>${escapeAdminText(o.label || o.text || '')}</span>
+              </span>
+            `).join('')}
           </div>
         </td>
-        <td class="poll-result-votes-cell">${total.toLocaleString('en-IN')}</td>
-        <td class="poll-result-status-cell">
-          <span class="sb ${p.isActive !== false ? 's-ok' : 's-pr'}">${p.isActive !== false ? 'Active' : 'Inactive'}</span>
-        </td>
-        <td class="poll-result-actions-cell">
+        <td>${total.toLocaleString('en-IN')}</td>
+        <td><span class="sb ${p.isActive !== false ? 's-ok' : 's-pr'}">${p.isActive !== false ? 'Active' : 'Inactive'}</span></td>
+        <td>
           <button class="act-btn" onclick="editFanPollAdmin('${p._id || p.id}')">Edit</button>
           <button class="act-btn" onclick="setFanPollActive('${p._id || p.id}')">Set Active</button>
           <button class="act-btn danger" onclick="deleteFanPollAdmin('${p._id || p.id}')">Delete</button>
