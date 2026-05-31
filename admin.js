@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8B.4 Fan Quotes final premium polish loaded');
+console.log('PADDOX A4.8C.4 Fan Polls select alignment hotfix loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
