@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8E Fan Drivers Cloudinary drag upload loaded');
+console.log('PADDOX A4.8E.2 Fan Drivers final visual polish loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -4817,9 +4817,17 @@ function driverImageFallbackHTML(profile = {}) {
 
 function driverProfileImageHTML(profile = {}) {
   const image = String(profile.image || '').trim();
+  const initials = escapeAdminText(String(profile.code || profile.name || 'PX').slice(0, 3).toUpperCase());
+
   if (image && isDriverImageValue(image)) {
-    return `<img src="${escapeDriverImageSrc(image)}" alt="" loading="lazy" onerror="this.outerHTML='${driverImageFallbackHTML(profile).replace(/'/g, '&apos;')}'">`;
+    return `
+      <span class="driver-avatar-media">
+        <span class="driver-avatar-fallback driver-avatar-fallback-bg">${initials}</span>
+        <img src="${escapeDriverImageSrc(image)}" alt="" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()">
+      </span>
+    `;
   }
+
   return driverImageFallbackHTML(profile);
 }
 
@@ -4830,6 +4838,20 @@ function driverStorageBadge(profile = {}) {
   if (/^https?:\/\//i.test(image)) return `<span class="driver-storage-pill url">URL</span>`;
   return `<span class="driver-storage-pill empty">No image</span>`;
 }
+
+function driverCleanCell(value = '', fallback = 'Not set') {
+  const clean = String(value || '').trim();
+  if (!clean || clean === '-') return `<span class="driver-muted-cell">${escapeAdminText(fallback)}</span>`;
+  return escapeAdminText(clean);
+}
+
+function driverFlagCountryCell(profile = {}) {
+  const flag = String(profile.flagEmoji || '').trim();
+  const country = String(profile.country || '').trim();
+  if (!flag && !country) return '<span class="driver-muted-cell">Not set</span>';
+  return `<span class="driver-country-cell">${escapeAdminText(flag)} ${escapeAdminText(country || 'Not set')}</span>`;
+}
+
 
 function updateDriverProfileStats() {
   const total = REAL_DRIVER_PROFILES_ADMIN.length;
@@ -4890,7 +4912,7 @@ function renderAdminDriverProfiles() {
   }
 
   tbody.innerHTML = list.map(profile => `
-    <tr class="driver-profile-row">
+    <tr class="driver-profile-row driver-premium-row">
       <td>
         <div class="driver-admin-cell">
           <span class="driver-admin-avatar">
@@ -4902,9 +4924,9 @@ function renderAdminDriverProfiles() {
           </div>
         </div>
       </td>
-      <td><span class="driver-code-pill">${escapeAdminText(profile.code || '-')}</span></td>
-      <td>${escapeAdminText(profile.team || '-')}</td>
-      <td>${escapeAdminText(profile.flagEmoji || '')} ${escapeAdminText(profile.country || '-')}</td>
+      <td><span class="driver-code-pill">${escapeAdminText(profile.code || 'PX')}</span></td>
+      <td>${driverCleanCell(profile.team)}</td>
+      <td>${driverFlagCountryCell(profile)}</td>
       <td>${driverStorageBadge(profile)}</td>
       <td><span class="sb ${profile.isActive !== false ? 's-act' : 's-out'}">${profile.isActive !== false ? 'Active' : 'Inactive'}</span></td>
       <td>
@@ -4955,7 +4977,7 @@ function ensureDriverProfileModal() {
               <strong>Drag & drop driver headshot</strong>
               <span>or click to upload and crop. JPG / PNG supported. Saved to Cloudinary.</span>
             </div>
-            <input id="dp-image" class="edit-product-input driver-image-url" placeholder="Cloudinary URL appears here after upload">
+            <input id="dp-image" class="edit-product-input driver-image-url" placeholder="Paste image URL or upload above">
             <small id="dp-upload-status" class="driver-upload-status">Ready for Cloudinary upload</small>
           </div>
         </div>
@@ -4974,6 +4996,7 @@ function ensureDriverProfileModal() {
   modal.querySelector('#dp-save').onclick = saveDriverProfile;
   bindDriverProfileUploadControls(modal);
   modal.querySelector('#dp-image').oninput = e => renderDriverProfilePreview(e.target.value.trim());
+  modal.querySelector('#dp-code')?.addEventListener('input', () => renderDriverProfilePreview(modal.querySelector('#dp-image')?.value?.trim() || ''));
 }
 
 function setDriverUploadStatus(text, mood = '') {
