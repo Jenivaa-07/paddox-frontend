@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8E.2 Fan Drivers final visual polish loaded');
+console.log('PADDOX A4.8F Users premium fan points control loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -2237,13 +2237,21 @@ async function submitAssetUpload() {
 loadAssets();
 
 /* ══════════════════════════════════════
-   LIVE USERS SYSTEM
+   LIVE USERS SYSTEM — A4.8F Premium Users + Fan Points Controls
 ══════════════════════════════════════ */
 
 const ADMIN_USERS_API =
   'https://paddox-backend.onrender.com/api/admin/users';
+const ADMIN_USER_POINTS_API =
+  'https://paddox-backend.onrender.com/api/users';
 
 let REAL_USERS = [];
+let usersControlsBound = false;
+
+function escapeUserText(value = '') {
+  if (typeof escapeAdminText === 'function') return escapeAdminText(value);
+  return String(value ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
 
 function getUserName(user) {
   return (
@@ -2253,30 +2261,90 @@ function getUserName(user) {
   );
 }
 
+function getUserInitials(user) {
+  const name = getUserName(user).trim();
+  if (!name) return 'PX';
+  return name.split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'PX';
+}
+
+function getUserAvatarUrl(user) {
+  return user.avatar?.url || user.profileImage || user.image || '';
+}
+
 function getUserTier(user) {
-  if (user.fanTier) return user.fanTier;
   if (user.role === 'admin' || user.isAdmin) return 'Admin';
-  if ((user.fanPoints || 0) >= 4000) return 'Pro Fan';
-  if ((user.fanPoints || 0) >= 1000) return 'Regular';
-  return 'New';
+  if (user.fanTier) return user.fanTier;
+  if ((user.fanPoints || 0) >= 10000) return 'Legend';
+  if ((user.fanPoints || 0) >= 5000) return 'Elite Fan';
+  if ((user.fanPoints || 0) >= 1000) return 'Pro Fan';
+  return 'Regular';
+}
+
+function getUserTierClass(tier = '') {
+  const key = String(tier).toLowerCase();
+  if (key.includes('admin')) return 'tier-admin';
+  if (key.includes('legend')) return 'tier-legend';
+  if (key.includes('elite')) return 'tier-elite';
+  if (key.includes('pro')) return 'tier-pro';
+  return 'tier-regular';
 }
 
 function getUserStatus(user) {
   if (user.isBanned) {
-    return {
-      cls: 's-out',
-      text: 'Banned'
-    };
+    return { cls: 's-out', text: 'Banned' };
   }
+  return { cls: 's-act', text: 'Active' };
+}
 
-  return {
-    cls: 's-act',
-    text: 'Active'
-  };
+function bindUsersControls() {
+  if (usersControlsBound) return;
+  usersControlsBound = true;
+
+  ['users-search-input', 'users-tier-filter', 'users-status-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const ev = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(ev, renderUsers);
+  });
+}
+
+function getFilteredUsers() {
+  const query = String(document.getElementById('users-search-input')?.value || '').toLowerCase().trim();
+  const tierFilter = String(document.getElementById('users-tier-filter')?.value || 'all').toLowerCase();
+  const statusFilter = String(document.getElementById('users-status-filter')?.value || 'all').toLowerCase();
+
+  return REAL_USERS.filter(user => {
+    const tier = getUserTier(user).toLowerCase();
+    const status = user.isBanned ? 'banned' : 'active';
+    const haystack = [getUserName(user), user.email, tier, status, user.role]
+      .join(' ')
+      .toLowerCase();
+
+    if (query && !haystack.includes(query)) return false;
+    if (tierFilter !== 'all' && !tier.includes(tierFilter)) return false;
+    if (statusFilter !== 'all' && status !== statusFilter) return false;
+    return true;
+  });
+}
+
+function updateUserStats() {
+  const total = REAL_USERS.length;
+  const active = REAL_USERS.filter(user => !user.isBanned).length;
+  const points = REAL_USERS.reduce((sum, user) => sum + Number(user.fanPoints || 0), 0);
+
+  const totalEl = document.getElementById('users-stat-total');
+  const activeEl = document.getElementById('users-stat-active');
+  const pointsEl = document.getElementById('users-stat-points');
+
+  if (totalEl) totalEl.textContent = total.toLocaleString();
+  if (activeEl) activeEl.textContent = active.toLocaleString();
+  if (pointsEl) pointsEl.textContent = points.toLocaleString('en-IN');
 }
 
 async function loadUsers() {
   try {
+    bindUsersControls();
+
     const res = await fetch(
       `${ADMIN_USERS_API}?limit=100`,
       {
@@ -2297,11 +2365,9 @@ async function loadUsers() {
       throw new Error(data.message || 'Failed to load users');
     }
 
-    REAL_USERS =
-      data.data ||
-      data.users ||
-      [];
+    REAL_USERS = data.data || data.users || [];
 
+    updateUserStats();
     renderUsers();
 
   } catch (err) {
@@ -2331,7 +2397,6 @@ async function toggleUserBan(userId) {
     }
 
     showToast('🔥 User status updated');
-
     await loadUsers();
 
   } catch (err) {
@@ -2354,9 +2419,7 @@ async function makeUserAdmin(userId) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getAdminToken()}`
         },
-        body: JSON.stringify({
-          role: 'admin'
-        })
+        body: JSON.stringify({ role: 'admin' })
       }
     );
 
@@ -2367,7 +2430,174 @@ async function makeUserAdmin(userId) {
     }
 
     showToast('🔥 User promoted to admin');
+    await loadUsers();
 
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
+async function fetchUserPointSummary(userId) {
+  const panel = document.getElementById('user-points-summary');
+  if (panel) panel.innerHTML = '<div class="users-points-loading">Loading point activity…</div>';
+
+  try {
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/fan-points/summary`, {
+      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Point summary unavailable');
+    }
+
+    const actions = data.data?.actions || data.actions || [];
+    renderUserPointSummary(actions);
+  } catch (err) {
+    console.warn(err.message);
+    renderUserPointSummary([]);
+  }
+}
+
+function renderUserPointSummary(actions = []) {
+  const panel = document.getElementById('user-points-summary');
+  if (!panel) return;
+
+  const presets = [
+    { action:'poll_vote', label:'Poll Vote', points:50 },
+    { action:'trivia_correct', label:'Trivia Correct', points:100 },
+    { action:'download', label:'Download', points:30 },
+    { action:'admin_adjust', label:'Admin Reward', points:0 }
+  ];
+
+  const merged = presets.map(item => {
+    const found = actions.find(a => String(a.action || '').toLowerCase() === item.action);
+    return {
+      label: found?.label || item.label,
+      points: Number(found?.points ?? found?.totalPoints ?? item.points ?? 0),
+      count: Number(found?.count || 0)
+    };
+  });
+
+  const max = Math.max(100, ...merged.map(item => Math.abs(item.points)));
+
+  panel.innerHTML = merged.map(item => `
+    <div class="users-modal-point-row">
+      <span>${escapeUserText(item.label)}</span>
+      <div><i style="width:${Math.max(8, Math.min(100, (Math.abs(item.points) / max) * 100))}%"></i></div>
+      <strong>${item.points > 0 ? '+' : ''}${item.points.toLocaleString('en-IN')}</strong>
+      <em>${item.count}x</em>
+    </div>
+  `).join('');
+}
+
+function openUserPointsModal(userId) {
+  const user = REAL_USERS.find(u => String(u._id) === String(userId));
+
+  if (!user) {
+    showToast('❌ User not found');
+    return;
+  }
+
+  const name = getUserName(user);
+  const modal = document.createElement('div');
+
+  modal.innerHTML = `
+    <div class="preview-overlay users-points-overlay" id="user-points-overlay">
+      <div class="users-points-modal">
+        <button class="preview-close users-points-close" id="user-points-close">✕</button>
+
+        <div class="users-modal-kicker">FAN POINTS CONTROL</div>
+        <h2>${escapeUserText(name)}</h2>
+        <p>${escapeUserText(user.email || 'No email')}</p>
+
+        <div class="users-modal-current">
+          <span>Current Fan Points</span>
+          <strong>${Number(user.fanPoints || 0).toLocaleString('en-IN')}</strong>
+          <em>${escapeUserText(getUserTier(user))}</em>
+        </div>
+
+        <div class="users-points-form">
+          <label>
+            <span>Action</span>
+            <select id="user-points-mode">
+              <option value="add">Add points</option>
+              <option value="deduct">Deduct points</option>
+              <option value="reset">Reset to zero</option>
+            </select>
+          </label>
+          <label>
+            <span>Points</span>
+            <input id="user-points-amount" type="number" min="0" step="1" placeholder="Example: 100" value="100"/>
+          </label>
+          <label class="wide">
+            <span>Reason / action note</span>
+            <input id="user-points-reason" type="text" placeholder="Example: Admin reward, correction, event bonus"/>
+          </label>
+        </div>
+
+        <div class="users-modal-chart-head">
+          <span>Action = points added</span>
+          <strong>Recent / default point map</strong>
+        </div>
+        <div class="users-modal-point-chart" id="user-points-summary"></div>
+
+        <div class="users-modal-actions">
+          <button class="adm-btn-red" type="button" onclick="submitUserPointAdjustment('${user._id}')">Apply Points Update</button>
+          <button class="adm-btn-ghost" type="button" onclick="document.getElementById('user-points-overlay')?.remove()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#user-points-close').onclick = () => modal.remove();
+  modal.querySelector('#user-points-overlay').onclick = e => {
+    if (e.target.id === 'user-points-overlay') modal.remove();
+  };
+
+  modal.querySelector('#user-points-mode')?.addEventListener('change', e => {
+    const amount = modal.querySelector('#user-points-amount');
+    if (amount) amount.disabled = e.target.value === 'reset';
+  });
+
+  fetchUserPointSummary(user._id);
+}
+
+async function submitUserPointAdjustment(userId) {
+  try {
+    const mode = document.getElementById('user-points-mode')?.value || 'add';
+    const amount = Number(document.getElementById('user-points-amount')?.value || 0);
+    const reason = document.getElementById('user-points-reason')?.value || '';
+
+    if (mode !== 'reset' && (!Number.isFinite(amount) || amount <= 0)) {
+      showToast('❌ Enter a valid points amount');
+      return;
+    }
+
+    if (mode === 'reset' && !confirm('Reset this user fan points to 0?')) return;
+
+    showToast('⏳ Updating fan points...');
+
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/fan-points/adjust`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAdminToken()}`
+      },
+      body: JSON.stringify({ mode, amount, reason })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'Fan points update failed');
+    }
+
+    document.getElementById('user-points-overlay')?.remove();
+    showToast('🔥 Fan points updated');
     await loadUsers();
 
   } catch (err) {
@@ -2384,206 +2614,139 @@ function openUserView(userId) {
     return;
   }
 
-  const modal = document.createElement('div');
+  const status = getUserStatus(user);
+  const name = getUserName(user);
 
+  const modal = document.createElement('div');
   modal.innerHTML = `
     <div class="preview-overlay" id="user-view-overlay">
-      <div class="preview-card" style="
-        max-width:620px;
-        width:92vw;
-        padding:28px;
-        color:#fff;
-        text-align:left;
-      ">
+      <div class="users-view-modal">
         <button class="preview-close" id="user-view-close">✕</button>
+        <div class="users-modal-kicker">USER DETAILS</div>
+        <h2>${escapeUserText(name)}</h2>
+        <p>${escapeUserText(user.email || 'No email')}</p>
 
-        <div style="
-          font-family:var(--font-d);
-          letter-spacing:4px;
-          font-size:1.8rem;
-          margin-bottom:8px;
-        ">
-          USER DETAILS
+        <div class="users-detail-grid">
+          <div><span>Role</span><strong>${escapeUserText(user.role || (user.isAdmin ? 'admin' : 'user'))}</strong></div>
+          <div><span>Tier</span><strong>${escapeUserText(getUserTier(user))}</strong></div>
+          <div><span>Fan Points</span><strong class="red">${Number(user.fanPoints || 0).toLocaleString('en-IN')}</strong></div>
+          <div><span>Joined</span><strong>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</strong></div>
+          <div><span>Status</span><strong><span class="sb ${status.cls}">${status.text}</span></strong></div>
+          <div><span>Orders</span><strong>${Number(user.ordersCount || user.totalOrders || 0).toLocaleString()}</strong></div>
         </div>
 
-        <div style="
-          color:var(--red);
-          font-family:var(--font-c);
-          letter-spacing:2px;
-          margin-bottom:22px;
-        ">
-          ${getUserName(user)}
-        </div>
-
-        <div style="
-          display:grid;
-          grid-template-columns:1fr 1fr;
-          gap:14px;
-        ">
-          <div>
-            <div style="color:#777;font-size:.75rem;letter-spacing:2px">EMAIL</div>
-            <div style="font-weight:700">${user.email || '-'}</div>
-          </div>
-
-          <div>
-            <div style="color:#777;font-size:.75rem;letter-spacing:2px">ROLE</div>
-            <div style="font-weight:700">${user.role || (user.isAdmin ? 'admin' : 'user')}</div>
-          </div>
-
-          <div>
-            <div style="color:#777;font-size:.75rem;letter-spacing:2px">FAN POINTS</div>
-            <div style="font-family:var(--font-d);font-size:1.3rem;color:var(--red)">
-              ${(user.fanPoints || 0).toLocaleString()}
-            </div>
-          </div>
-
-          <div>
-            <div style="color:#777;font-size:.75rem;letter-spacing:2px">JOINED</div>
-            <div style="font-weight:700">
-              ${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
-            </div>
-          </div>
-        </div>
-
-        <div style="
-          margin-top:22px;
-          display:flex;
-          gap:10px;
-          flex-wrap:wrap;
-        ">
-          <button
-            class="act-btn"
-            onclick="toggleUserBan('${user._id}'); document.getElementById('user-view-overlay')?.remove();"
-          >
-            ${user.isBanned ? 'Unban User' : 'Ban User'}
-          </button>
-
-          <button
-            class="act-btn"
-            onclick="makeUserAdmin('${user._id}'); document.getElementById('user-view-overlay')?.remove();"
-          >
-            Make Admin
-          </button>
+        <div class="users-modal-actions">
+          <button class="adm-btn-red" onclick="openUserPointsModal('${user._id}'); document.getElementById('user-view-overlay')?.remove();">Manage Points</button>
+          <button class="adm-btn-ghost" onclick="toggleUserBan('${user._id}'); document.getElementById('user-view-overlay')?.remove();">${user.isBanned ? 'Unban User' : 'Ban User'}</button>
+          <button class="adm-btn-ghost" onclick="makeUserAdmin('${user._id}'); document.getElementById('user-view-overlay')?.remove();">Make Admin</button>
         </div>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
-
   modal.querySelector('#user-view-close').onclick = () => modal.remove();
-
   modal.querySelector('#user-view-overlay').onclick = e => {
-    if (e.target.id === 'user-view-overlay') {
-      modal.remove();
-    }
+    if (e.target.id === 'user-view-overlay') modal.remove();
   };
 }
 
-/* ══ USERS TABLE ══ */
 function renderUsers() {
   const tbody = document.getElementById('users-tbody');
-
   if (!tbody) return;
 
-  if (!REAL_USERS.length) {
+  updateUserStats();
+  const users = getFilteredUsers();
+
+  if (!users.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" style="text-align:center;padding:40px;color:#777">
-          No users yet
+        <td colspan="9" class="users-empty-state">
+          <strong>No users found</strong>
+          <span>Try clearing the search or filters.</span>
         </td>
       </tr>
     `;
     return;
   }
 
-  tbody.innerHTML = REAL_USERS.map(user => {
+  tbody.innerHTML = users.map(user => {
     const status = getUserStatus(user);
     const name = getUserName(user);
     const tier = getUserTier(user);
-    const orders =
-      user.ordersCount ||
-      user.totalOrders ||
-      0;
+    const tierClass = getUserTierClass(tier);
+    const orders = user.ordersCount || user.totalOrders || 0;
+    const avatar = getUserAvatarUrl(user);
+    const initials = getUserInitials(user);
 
     return `
-      <tr>
-        <td>
-          <input type="checkbox"/>
-        </td>
+      <tr class="users-admin-row">
+        <td><input type="checkbox"/></td>
 
         <td>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="
-              width:30px;
-              height:30px;
-              border-radius:50%;
-              background:linear-gradient(135deg,var(--red),#800016);
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              font-size:.8rem;
-              flex-shrink:0;
-            ">
-              👤
+          <div class="users-member-cell">
+            <div class="users-avatar-ring">
+              ${avatar ? `<img src="${escapeUserText(avatar)}" alt="${escapeUserText(name)}" onerror="this.remove();this.parentElement.classList.add('fallback')"/>` : `<span>${escapeUserText(initials)}</span>`}
             </div>
-            ${name}
+            <div>
+              <strong>${escapeUserText(name)}</strong>
+              <span>${escapeUserText(user.role || (user.isAdmin ? 'admin' : 'member'))}</span>
+            </div>
           </div>
         </td>
 
-        <td style="color:var(--muted2);font-size:.76rem">
-          ${user.email || '-'}
-        </td>
+        <td class="users-email-cell">${escapeUserText(user.email || '-')}</td>
+
+        <td><span class="users-tier-pill ${tierClass}">${escapeUserText(tier)}</span></td>
+
+        <td class="users-number-cell">${Number(orders).toLocaleString()}</td>
+
+        <td class="users-points-cell">${Number(user.fanPoints || 0).toLocaleString('en-IN')}</td>
+
+        <td class="users-date-cell">${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</td>
+
+        <td><span class="sb ${status.cls}">${status.text}</span></td>
 
         <td>
-          <span style="
-            font-family:var(--font-c);
-            font-size:.6rem;
-            padding:2px 8px;
-            background:rgba(201,168,76,.1);
-            border:1px solid rgba(201,168,76,.2);
-            color:var(--gold);
-          ">
-            ${tier}
-          </span>
-        </td>
-
-        <td style="text-align:center">
-          ${orders}
-        </td>
-
-        <td style="font-family:var(--font-d);font-size:1.1rem;color:var(--red)">
-          ${(user.fanPoints || 0).toLocaleString()}
-        </td>
-
-        <td style="color:var(--muted2);font-size:.76rem">
-          ${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
-        </td>
-
-        <td>
-          <span class="sb ${status.cls}">
-            ${status.text}
-          </span>
-        </td>
-
-        <td>
-          <button
-            class="act-btn"
-            onclick="openUserView('${user._id}')"
-          >
-            View
-          </button>
-
-          <button
-            class="act-btn"
-            onclick="toggleUserBan('${user._id}')"
-          >
-            ${user.isBanned ? 'Unban' : 'Ban'}
-          </button>
+          <div class="users-action-stack">
+            <button class="act-btn" onclick="openUserView('${user._id}')">View</button>
+            <button class="act-btn points" onclick="openUserPointsModal('${user._id}')">Points</button>
+            <button class="act-btn danger" onclick="toggleUserBan('${user._id}')">${user.isBanned ? 'Unban' : 'Ban'}</button>
+          </div>
         </td>
       </tr>
     `;
   }).join('');
+}
+
+function exportUsersCsv() {
+  if (!REAL_USERS.length) {
+    showToast('No users to export');
+    return;
+  }
+
+  const rows = [
+    ['Name', 'Email', 'Role', 'Tier', 'Fan Points', 'Status', 'Joined'],
+    ...REAL_USERS.map(user => [
+      getUserName(user),
+      user.email || '',
+      user.role || (user.isAdmin ? 'admin' : 'user'),
+      getUserTier(user),
+      user.fanPoints || 0,
+      user.isBanned ? 'Banned' : 'Active',
+      user.createdAt ? new Date(user.createdAt).toLocaleDateString() : ''
+    ])
+  ];
+
+  const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `paddox-users-${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 Users exported');
 }
 
 /* ══ ANALYTICS METRICS — REALTIME CLEANUP ══ */

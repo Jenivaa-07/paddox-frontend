@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Admin Dashboard</title>
-  <link rel="stylesheet" href="admin.css?v=A4_8E_2"/>
+  <link rel="stylesheet" href="admin.css?v=A4_8F"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
 <style>
@@ -555,18 +555,83 @@
 
         <!-- ── USERS ── -->
         <div class="adm-page" id="adm-users">
-          <div class="page-toolbar">
-            <div class="toolbar-filters">
-              <select class="adm-select"><option>All Users</option><option>Pro Fan</option><option>Regular</option><option>New</option></select>
-              <select class="adm-select"><option>All Regions</option><option>India</option><option>UK</option><option>Japan</option></select>
-              <input class="adm-input" type="text" placeholder="Search users…"/>
+          <div class="users-command-hero reveal-up">
+            <div>
+              <div class="users-hero-kicker">PADDOX MEMBER CONTROL</div>
+              <h2>Members, fan points and account actions.</h2>
+              <p>Manage PADDOX users with realtime fan points controls, member status, account actions and activity rewards.</p>
             </div>
-            <button class="adm-btn-red" onclick="showToast('📥 Exporting users…')">Export Users</button>
+            <button class="users-hero-action adm-btn-red" type="button" onclick="exportUsersCsv()">Export Users</button>
           </div>
-          <div class="data-table-wrap"><table class="data-table">
-            <thead><tr><th><input type="checkbox"/></th><th>User</th><th>Email</th><th>Tier</th><th>Orders</th><th>Fan Pts</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="users-tbody"></tbody>
-          </table></div>
+
+          <div class="users-stat-grid reveal-up delay-1">
+            <div class="users-stat-card"><span>Total Users</span><strong id="users-stat-total">0</strong></div>
+            <div class="users-stat-card"><span>Active Members</span><strong id="users-stat-active">0</strong></div>
+            <div class="users-stat-card"><span>Total Fan Points</span><strong id="users-stat-points">0</strong></div>
+          </div>
+
+          <div class="users-info-grid reveal-up delay-2">
+            <div class="users-action-chart-card">
+              <div class="users-chart-head">
+                <div>
+                  <span>Fan Point Action Map</span>
+                  <strong>How many points each action adds</strong>
+                </div>
+                <em>Admin guide</em>
+              </div>
+              <div class="users-action-chart" id="users-action-chart">
+                <div class="users-action-bar"><span>Poll Vote</span><div><i style="width:50%"></i></div><strong>+50</strong></div>
+                <div class="users-action-bar"><span>Trivia Correct</span><div><i style="width:75%"></i></div><strong>+75–150</strong></div>
+                <div class="users-action-bar"><span>Download</span><div><i style="width:30%"></i></div><strong>+30</strong></div>
+                <div class="users-action-bar"><span>Admin Reward</span><div><i style="width:100%"></i></div><strong>Custom</strong></div>
+              </div>
+            </div>
+            <div class="users-quick-card">
+              <span>Controls</span>
+              <strong>Add, deduct or reset points</strong>
+              <p>Use the Points button beside any user. The table refreshes immediately after each action.</p>
+            </div>
+          </div>
+
+          <div class="users-toolbar reveal-up delay-3">
+            <div class="toolbar-filters">
+              <select class="adm-select" id="users-tier-filter">
+                <option value="all">All Users</option>
+                <option value="legend">Legend</option>
+                <option value="elite fan">Elite Fan</option>
+                <option value="pro fan">Pro Fan</option>
+                <option value="regular">Regular</option>
+                <option value="admin">Admin</option>
+              </select>
+              <select class="adm-select" id="users-status-filter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="banned">Banned</option>
+              </select>
+              <input class="adm-input" id="users-search-input" type="text" placeholder="Search users, emails…"/>
+            </div>
+            <button class="adm-btn-ghost" type="button" onclick="loadUsers()">Refresh</button>
+          </div>
+
+          <div class="users-table-shell reveal-up delay-3">
+            <div class="users-table-topline"></div>
+            <table class="data-table users-admin-table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox"/></th>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Tier</th>
+                  <th>Orders</th>
+                  <th>Fan Pts</th>
+                  <th>Joined</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- ── ANALYTICS ── -->
