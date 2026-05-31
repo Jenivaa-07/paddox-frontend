@@ -578,7 +578,7 @@ function loginUser(user) {
   loadDownloads();
   initOrderNotificationInbox(user);
   initOrderNotificationSocket();
-  setTimeout(refreshSecuritySessions, 500);
+  scheduleSecuritySessionsRefresh(800);
 }
 
 /* LOGOUT */
@@ -2254,6 +2254,22 @@ function profileToken() {
   );
 }
 
+
+function hasProfileToken() {
+  return !!String(profileToken() || '').trim();
+}
+
+function scheduleSecuritySessionsRefresh(delay = 650, showFeedback = false) {
+  window.clearTimeout(window.__paddoxSecuritySessionTimer);
+  window.__paddoxSecuritySessionTimer = window.setTimeout(() => {
+    if (!hasProfileToken()) {
+      console.log('PADDOX sessions sync skipped until auth token is ready');
+      return;
+    }
+    refreshSecuritySessions(showFeedback);
+  }, delay);
+}
+
 function setFieldValue(id, value = '') {
   const el = document.getElementById(id);
   if (el) el.value = value || '';
@@ -3005,7 +3021,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadDownloads();
   initOrderNotificationInbox(currentUser);
   initOrderNotificationSocket();
-  setTimeout(refreshSecuritySessions, 500);
+  scheduleSecuritySessionsRefresh(900);
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
 
@@ -4156,8 +4172,29 @@ async function refreshSecuritySessions(showFeedback = false) {
     `;
 
     const token = profileToken();
+
+    if (!token) {
+      if (count) {
+        count.textContent = 'Login Required';
+        setSecuritySummaryClass(count, 'status-warn');
+      }
+      if (note) {
+        note.textContent = 'Secure session sync will start after login is completed.';
+      }
+      list.innerHTML = `
+        <div class="session-premium-card current">
+          <span class="session-device-icon" aria-hidden="true"></span>
+          <div>
+            <div class="sess-name">Session sync waiting</div>
+            <div class="sess-meta">Login token not ready yet</div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
     const data = await authFetch('/users/security/sessions', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     const sessions = data.data?.sessions || [];
@@ -4268,7 +4305,7 @@ async function revokeSecuritySession(sessionId) {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
     showToast('✅ Session revoked');
-    refreshSecuritySessions();
+    scheduleSecuritySessionsRefresh(300, true);
   } catch (err) {
     console.error(err);
     showToast(`❌ ${err.message}`);
@@ -4277,9 +4314,10 @@ async function revokeSecuritySession(sessionId) {
 
 window.revokeSecuritySession = revokeSecuritySession;
 window.refreshSecuritySessions = refreshSecuritySessions;
+window.scheduleSecuritySessionsRefresh = scheduleSecuritySessionsRefresh;
 
 document.addEventListener('DOMContentLoaded', () => {
   updateSecurityStrength();
-  refreshSecuritySessions();
   hydrateSecurityState(JSON.parse(localStorage.getItem('paddox_user') || 'null') || currentUser || {});
+  scheduleSecuritySessionsRefresh(900);
 });
