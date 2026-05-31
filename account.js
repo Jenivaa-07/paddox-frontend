@@ -180,19 +180,13 @@ async function requestLoginTwoFactorCode(twoFactorToken = '', email = '') {
   }
 
   try {
-    const res = await fetch(`${PADDOX_API_BASE}/users/security/2fa/login/send`, {
+    const data = await authFetch('/auth/2fa/send', {
       method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ twoFactorToken })
     });
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) {
-      throw new Error(data.message || 'Could not send verification code');
-    }
-
-    const sentTo = data.data?.emailTo || email || 'your email';
+    pendingTwoFactorToken = data.data?.twoFactorToken || pendingTwoFactorToken;
+    const sentTo = data.data?.emailTo || data.data?.email || email || 'your email';
     if (copy) copy.textContent = `We sent a 6-digit code to ${sentTo}.`;
     showToast('📩 Verification code sent');
   } catch (err) {
@@ -431,7 +425,7 @@ async function doLogin() {
 
     handleAuthSuccess(data);
 
-    showToast(data.data?.requires2FA ? '🔐 Security check opened' : '🔥 Login successful');
+    showToast(data.data?.requires2FA ? '🔐 Verification code sent' : '🔥 Login successful');
 
   } catch (err) {
 
