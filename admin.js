@@ -296,7 +296,6 @@ const PAGE_META = {
   action:'+ Upload Asset',
   fn:()=>openAssetModal()
 },
-  homebranding: { title:'HOME BRANDING', action:'+ Add Logo', fn:()=>resetHomeLogoForm() },
   fanquotes:  { title:'FAN QUOTES',      action:'+ Add Quote',   fn:()=>openQuoteModal() },
   fanpolls:   { title:'FAN POLLS',       action:'+ New Poll',    fn:()=>resetFanPollForm() },
   fantrivia:  { title:'FAN TRIVIA',      action:'+ New Trivia',  fn:()=>resetFanTriviaForm() },
@@ -334,10 +333,6 @@ if (id === 'coupons') {
 
 if (id === 'assets') {
   loadAssets();
-}
-if (id === 'homebranding') {
-  loadHomeMarqueeLogosAdmin();
-  setTimeout(drawHomeLogoCropCanvas, 50);
 }
 if (id === 'orders') {
   adminPhase9BindOrderFilters?.();
@@ -3943,6 +3938,8 @@ async function updateAdminIdentity() {
 ══════════════════════════════════════ */
 const ADMIN_QUOTES_API =
   'https://paddox-backend.onrender.com/api/fan/admin/quotes';
+const PUBLIC_QUOTES_API =
+  'https://paddox-backend.onrender.com/api/fan/quotes';
 
 let REAL_QUOTES_ADMIN = [];
 let EDIT_QUOTE_ID = null;
@@ -3961,48 +3958,77 @@ async function loadAdminQuotes() {
 
   tbody.innerHTML = `
     <tr>
-      <td colspan="7" style="text-align:center;padding:30px;color:#777">
-        Loading quotes...
+      <td colspan="7" class="quote-empty-cell">
+        <div class="quote-empty-state">
+          <div class="quote-empty-mark">⌁</div>
+          <strong>Loading quote library...</strong>
+          <span>Checking admin quote route and public fallback.</span>
+        </div>
       </td>
     </tr>
   `;
 
-  try {
-    const res = await fetch(ADMIN_QUOTES_API, {
-      headers: {
-        Authorization: `Bearer ${getAdminToken()}`
+  const token = getAdminToken();
+  const endpoints = [
+    { url: ADMIN_QUOTES_API, admin: true, label: 'admin' },
+    { url: `${PUBLIC_QUOTES_API}?limit=200`, admin: false, label: 'public' }
+  ];
+
+  let lastError = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint.url, {
+        headers: endpoint.admin
+          ? { Authorization: `Bearer ${token}` }
+          : {}
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 401 || res.status === 403) {
+        lastError = new Error('Admin quote session rejected');
+        continue;
       }
-    });
 
-    if (res.status === 401 || res.status === 403) {
-      redirectToLogin('Admin session expired. Please login again.');
+      if (!res.ok || data.success === false) {
+        throw new Error(data.message || `${endpoint.label} quote route failed`);
+      }
+
+      const quotes =
+        data.data?.quotes ||
+        data.quotes ||
+        (Array.isArray(data.data) ? data.data : null) ||
+        (Array.isArray(data) ? data : null) ||
+        [];
+
+      REAL_QUOTES_ADMIN = Array.isArray(quotes) ? quotes : [];
+
+      console.log(`PADDOX admin quotes loaded from ${endpoint.label} route:`, REAL_QUOTES_ADMIN.length);
+      renderAdminQuotes();
       return;
+
+    } catch (err) {
+      lastError = err;
+      console.warn(`PADDOX ${endpoint.label} quote load failed:`, err.message);
     }
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || data.success === false) {
-      throw new Error(data.message || 'Quotes load failed');
-    }
-
-    REAL_QUOTES_ADMIN =
-      data.data?.quotes ||
-      data.quotes ||
-      [];
-
-    renderAdminQuotes();
-
-  } catch (err) {
-    console.error(err);
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align:center;padding:30px;color:#777">
-          Failed to load quotes
-        </td>
-      </tr>
-    `;
   }
+
+  console.error(lastError);
+  REAL_QUOTES_ADMIN = [];
+  renderAdminQuotes();
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="7" class="quote-empty-cell">
+        <div class="quote-empty-state">
+          <div class="quote-empty-mark">!</div>
+          <strong>Failed to load quotes</strong>
+          <span>${escapeAdminText(lastError?.message || 'Check /api/fan/admin/quotes route')}</span>
+        </div>
+      </td>
+    </tr>
+  `;
 }
 
 function getFilteredAdminQuotes() {
