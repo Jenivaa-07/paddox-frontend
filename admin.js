@@ -6349,6 +6349,24 @@ function setPollAdminStatus(message = '') {
   if (el) el.textContent = message;
 }
 
+function updateFanPollStats() {
+  const polls = Array.isArray(ADMIN_FAN_POLLS) ? ADMIN_FAN_POLLS : [];
+  const total = polls.length;
+  const active = polls.filter(p => p.isActive !== false).length;
+  const votes = polls.reduce((sum, poll) => {
+    const opts = Array.isArray(poll.options) ? poll.options : [];
+    return sum + opts.reduce((s, option) => s + Number(option.votes || 0), 0);
+  }, 0);
+
+  const totalEl = document.getElementById('poll-stat-total');
+  const activeEl = document.getElementById('poll-stat-active');
+  const votesEl = document.getElementById('poll-stat-votes');
+
+  if (totalEl) totalEl.textContent = total.toLocaleString('en-IN');
+  if (activeEl) activeEl.textContent = active.toLocaleString('en-IN');
+  if (votesEl) votesEl.textContent = votes.toLocaleString('en-IN');
+}
+
 function escapeAdminText(value='') {
   return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
@@ -6561,6 +6579,7 @@ async function loadFanPollsAdmin() {
   } catch (err) {
     console.warn(err);
     ADMIN_FAN_POLLS = [];
+    updateFanPollStats();
 
     if (tbody) {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:34px;color:#777">${escapeAdminText(err.message)}. Check backend route /api/fan/admin/polls.</td></tr>`;
@@ -6574,8 +6593,17 @@ function renderFanPollsAdmin() {
   const tbody = document.getElementById('fan-polls-tbody');
   if (!tbody) return;
 
+  updateFanPollStats();
+
   const q = String(document.getElementById('poll-search-admin')?.value || '').toLowerCase().trim();
-  const list = ADMIN_FAN_POLLS.filter(p => !q || String(p.question || '').toLowerCase().includes(q));
+  const list = ADMIN_FAN_POLLS.filter(p => {
+    if (!q) return true;
+    const optionsText = (Array.isArray(p.options) ? p.options : [])
+      .map(o => `${o.label || o.text || ''} ${o.teamName || ''} ${o.logoKey || ''}`)
+      .join(' ')
+      .toLowerCase();
+    return String(p.question || '').toLowerCase().includes(q) || optionsText.includes(q);
+  });
 
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No polls created yet</td></tr>';
@@ -6585,11 +6613,12 @@ function renderFanPollsAdmin() {
   tbody.innerHTML = list.map(p => {
     const opts = Array.isArray(p.options) ? p.options : [];
     const total = opts.reduce((s,o)=>s+Number(o.votes||0),0);
+    const id = p._id || p.id;
 
     return `
       <tr>
-        <td style="max-width:360px"><strong>${escapeAdminText(p.question || 'Untitled poll')}</strong></td>
-        <td>
+        <td class="poll-question-cell"><strong>${escapeAdminText(p.question || 'Untitled poll')}</strong></td>
+        <td class="poll-options-cell">
           <div class="poll-admin-table-options">
             ${opts.map(o => `
               <span class="poll-admin-mini-option">
@@ -6599,12 +6628,14 @@ function renderFanPollsAdmin() {
             `).join('')}
           </div>
         </td>
-        <td>${total.toLocaleString('en-IN')}</td>
-        <td><span class="sb ${p.isActive !== false ? 's-ok' : 's-pr'}">${p.isActive !== false ? 'Active' : 'Inactive'}</span></td>
-        <td>
-          <button class="act-btn" onclick="editFanPollAdmin('${p._id || p.id}')">Edit</button>
-          <button class="act-btn" onclick="setFanPollActive('${p._id || p.id}')">Set Active</button>
-          <button class="act-btn danger" onclick="deleteFanPollAdmin('${p._id || p.id}')">Delete</button>
+        <td class="poll-votes-cell">${total.toLocaleString('en-IN')}</td>
+        <td class="poll-status-cell"><span class="sb ${p.isActive !== false ? 's-ok' : 's-pr'}">${p.isActive !== false ? 'Active' : 'Inactive'}</span></td>
+        <td class="poll-action-cell">
+          <div class="poll-action-stack">
+            <button class="act-btn" onclick="editFanPollAdmin('${id}')">Edit</button>
+            <button class="act-btn" onclick="setFanPollActive('${id}')">Set Active</button>
+            <button class="act-btn danger" onclick="deleteFanPollAdmin('${id}')">Delete</button>
+          </div>
         </td>
       </tr>`;
   }).join('');
