@@ -2,6 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
+console.log('PADDOX A4.8B.4 Fan Quotes final premium polish loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -4094,7 +4095,7 @@ function renderAdminQuotes() {
       </td>
 
       <td>
-        <div class="quote-text-cell">“${escapeAdminText(q.text || '')}”</div>
+        <div class="quote-text-cell" title="${escapeAdminAttr(q.text || '')}">“${escapeAdminText(q.text || '')}”</div>
       </td>
 
       <td><span class="quote-era-pill quote-era-${escapeAdminAttr(q.era || 'current')}">${escapeAdminText(q.era || 'current')}</span></td>
@@ -4103,8 +4104,8 @@ function renderAdminQuotes() {
       <td><span class="quote-status-pill ${q.isActive !== false ? 'is-active' : 'is-inactive'}">${q.isActive !== false ? 'Active' : 'Inactive'}</span></td>
       <td>
         <div class="quote-action-stack">
-          <button class="quote-mini-btn" onclick="openQuoteModal('${q._id}')">Edit</button>
-          <button class="quote-mini-btn quote-danger" onclick="deleteQuote('${q._id}')">Delete</button>
+          <button class="quote-mini-btn" aria-label="Edit ${escapeAdminAttr(q.driver || 'quote')} quote" onclick="openQuoteModal('${q._id}')">Edit</button>
+          <button class="quote-mini-btn quote-danger" aria-label="Delete ${escapeAdminAttr(q.driver || 'quote')} quote" onclick="deleteQuote('${q._id}')">Delete</button>
         </div>
       </td>
     </tr>

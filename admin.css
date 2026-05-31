@@ -4291,3 +4291,290 @@ html,body{max-width:100%;overflow-x:hidden}
 
 #quote-modal.show{display:block!important}.quote-overlay-premium{display:flex!important;align-items:center;justify-content:center;padding:22px;backdrop-filter:blur(13px);background:rgba(0,0,0,.76)!important}.quote-modal-card-premium{position:relative;width:min(96vw,860px)!important;max-height:88vh;overflow:auto;padding:28px!important;text-align:left!important;background:linear-gradient(145deg,rgba(18,18,18,.98),rgba(8,8,8,.99))!important;border:1px solid rgba(255,255,255,.1)!important;border-top:2px solid var(--red)!important;box-shadow:0 36px 110px rgba(0,0,0,.74),0 0 80px rgba(232,0,45,.08)!important}.quote-modal-card-premium::-webkit-scrollbar{width:4px}.quote-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:20px}.quote-modal-title{font-family:var(--font-d);letter-spacing:4px;font-size:2rem;line-height:1;color:#fff;margin-top:7px}.quote-modal-badge{border:1px solid rgba(232,0,45,.25);background:rgba(232,0,45,.07);color:#ff8da1;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-size:.65rem;font-weight:900;padding:7px 10px;margin-right:44px}.quote-modal-close{background:#161616!important;border:1px solid rgba(255,255,255,.12)!important;color:#fff!important}.quote-form-premium{display:grid;grid-template-columns:1fr 1fr;gap:14px}.quote-field{display:flex;flex-direction:column;gap:7px}.quote-field span,.quote-upload-title{font-family:var(--font-c);font-size:.72rem;letter-spacing:2.2px;text-transform:uppercase;color:#777;font-weight:800}.quote-field-full{grid-column:1/-1}.quote-textarea{min-height:100px!important;resize:vertical}.quote-form-premium .edit-product-input,#quote-modal input,#quote-modal textarea,#quote-modal select{background:#151515!important;border:1px solid rgba(255,255,255,.13)!important;color:#fff!important;outline:none!important}.quote-form-premium .edit-product-input:focus,#quote-modal textarea:focus,#quote-modal select:focus{border-color:rgba(232,0,45,.55)!important;box-shadow:0 0 0 3px rgba(232,0,45,.08)}.quote-upload-panel{display:grid;grid-template-columns:1fr 1.1fr;gap:14px;align-items:stretch;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);padding:14px}.quote-upload-left{display:flex;gap:14px;align-items:center}.quote-upload-left p{color:#8a8a8a;font-size:.82rem;line-height:1.45;margin:4px 0}.quote-avatar-preview-premium{width:72px;height:72px;border-radius:50%;background:#111;border:1px solid rgba(232,0,45,.42);box-shadow:0 0 0 5px rgba(232,0,45,.055),0 16px 34px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.55rem;flex-shrink:0}.quote-avatar-preview-premium img{width:100%;height:100%;object-fit:cover;display:block}.quote-upload-status{color:#aaa;font-size:.76rem;margin-top:4px}.quote-upload-right{border:1px dashed rgba(255,255,255,.18);background:linear-gradient(135deg,rgba(232,0,45,.045),rgba(255,255,255,.018));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:112px;padding:14px;transition:all var(--tr);cursor:pointer}.quote-upload-right:hover,.quote-upload-right.is-dragging{border-color:var(--red);background:rgba(232,0,45,.09);box-shadow:inset 0 0 34px rgba(232,0,45,.07)}.quote-upload-btn{padding:10px 18px}.quote-drop-hint{color:#777;font-size:.75rem}.quote-avatar-hidden-input{position:absolute!important;left:-9999px!important;opacity:0!important;pointer-events:none!important}.quote-check-row{display:flex;align-items:center;gap:28px;color:#bbb;font-size:.95rem;padding-top:22px}.quote-check-row input{accent-color:var(--red);margin-right:7px}.quote-live-card{position:relative;overflow:hidden;margin-top:20px;padding:20px 20px 18px;border-radius:20px;background:linear-gradient(145deg,rgba(24,24,24,.96),rgba(10,10,10,.98));border:1px solid rgba(255,255,255,.1);border-top:2px solid var(--red);box-shadow:0 18px 55px rgba(0,0,0,.42)}.quote-live-glow{position:absolute;right:-90px;top:-120px;width:260px;height:220px;background:radial-gradient(circle,rgba(232,0,45,.2),transparent 70%);pointer-events:none}.quote-live-tags{position:relative;display:flex;align-items:center;gap:8px;color:var(--red);font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-size:.7rem;margin-bottom:13px}.quote-live-tags i{width:4px;height:4px;border-radius:50%;background:#555}.quote-live-text{position:relative;font-size:1.45rem;line-height:1.38;color:#fff;font-weight:700;margin-bottom:20px}.quote-live-foot{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px}.quote-live-driver{display:flex;align-items:center;gap:13px;min-width:0}.quote-preview-avatar-img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.quote-live-driver strong{display:block;color:#fff;font-weight:900}.quote-live-driver span{display:block;color:#999;font-size:.84rem;margin-top:2px}.quote-share-preview-btn{padding:9px 12px;border:1px solid rgba(255,255,255,.12);background:#111;color:#aaa;font-family:var(--font-c);letter-spacing:1.5px;text-transform:uppercase;font-size:.66rem}.quote-save-premium{width:100%;padding:15px 18px;margin-top:22px;letter-spacing:3px}.quote-modal-card-premium .preview-close{top:20px;right:20px}
 @media(max-width:900px){.quote-admin-hero,.quote-admin-toolbar{align-items:flex-start;flex-direction:column}.quote-admin-stats{grid-template-columns:1fr}.quote-search-input{width:100%!important}.quote-filter-stack{width:100%;flex-direction:column}.quote-filter-stack>*{width:100%!important}.quote-form-premium,.quote-upload-panel{grid-template-columns:1fr}.quote-modal-card-premium{padding:22px!important}.quote-live-foot{align-items:flex-start;flex-direction:column}.quote-hero-btn{width:100%;text-align:center}.quote-toolbar-note{font-size:.74rem}}
+
+/* ============================================================
+   PADDOX Admin Phase A4.8B.4 — Fan Quotes Final Premium Table Polish
+   Final visual-only pass. Keeps Home Branding removed and preserves quote loader.
+   ============================================================ */
+#adm-fanquotes{
+  --quote-border:rgba(255,255,255,.075);
+  --quote-soft:rgba(255,255,255,.035);
+  --quote-red-soft:rgba(232,0,45,.075);
+}
+#adm-fanquotes .quote-admin-hero{
+  margin-top:2px;
+  margin-bottom:18px;
+  padding:28px 32px;
+  border-color:rgba(255,255,255,.085);
+  background:
+    radial-gradient(circle at 86% 0%,rgba(232,0,45,.19),transparent 34%),
+    linear-gradient(135deg,rgba(18,18,18,.97),rgba(8,8,8,.985));
+  box-shadow:0 26px 78px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.035);
+}
+#adm-fanquotes .quote-admin-hero h2{
+  max-width:760px;
+  font-size:clamp(1.9rem,2.4vw,2.55rem);
+  letter-spacing:2.8px;
+}
+#adm-fanquotes .quote-admin-hero p{
+  color:#a7a7a7;
+  font-size:.96rem;
+}
+#adm-fanquotes .quote-hero-btn{
+  padding:14px 30px;
+  min-width:156px;
+  text-align:center;
+  box-shadow:0 16px 42px rgba(232,0,45,.18);
+}
+#adm-fanquotes .quote-admin-stats{
+  gap:16px;
+  margin-bottom:18px;
+}
+#adm-fanquotes .quote-stat-card{
+  min-height:94px;
+  border-color:var(--quote-border);
+  background:
+    radial-gradient(circle at 84% 16%,rgba(232,0,45,.08),transparent 40%),
+    linear-gradient(145deg,rgba(19,19,19,.96),rgba(8,8,8,.99));
+  box-shadow:0 18px 45px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.025);
+}
+#adm-fanquotes .quote-stat-card:hover{
+  border-color:rgba(232,0,45,.24);
+  transform:translateY(-2px);
+  transition:all .28s ease;
+}
+#adm-fanquotes .quote-stat-card strong{
+  font-size:2.15rem;
+}
+#adm-fanquotes .quote-admin-toolbar{
+  margin-bottom:18px;
+  padding:14px 16px;
+  align-items:center;
+  background:linear-gradient(135deg,rgba(18,18,18,.82),rgba(10,10,10,.9));
+  border-color:var(--quote-border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+#adm-fanquotes .quote-filter-stack{
+  align-items:center;
+}
+#adm-fanquotes .quote-filter-select,
+#adm-fanquotes .quote-search-input{
+  height:42px;
+  border-color:rgba(255,255,255,.09)!important;
+  background:rgba(22,22,22,.96)!important;
+}
+#adm-fanquotes .quote-filter-select:focus,
+#adm-fanquotes .quote-search-input:focus{
+  border-color:rgba(232,0,45,.5)!important;
+  box-shadow:0 0 0 3px rgba(232,0,45,.08);
+}
+#adm-fanquotes .quote-toolbar-note{
+  max-width:360px;
+  padding-left:14px;
+  border-left:1px solid rgba(232,0,45,.18);
+  line-height:1.45;
+  color:#888;
+}
+#adm-fanquotes .quote-table-shell{
+  border-color:rgba(255,255,255,.085);
+  border-radius:0 0 18px 18px;
+  overflow:auto;
+  background:
+    radial-gradient(circle at 16% 0%,rgba(232,0,45,.065),transparent 30%),
+    linear-gradient(145deg,rgba(15,15,15,.97),rgba(5,5,5,.99));
+  box-shadow:0 28px 82px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.025);
+}
+#adm-fanquotes .quote-table-topline{
+  width:36%;
+  height:2px;
+  box-shadow:0 0 24px rgba(232,0,45,.5);
+}
+#adm-fanquotes .quote-admin-table{
+  min-width:1140px;
+  border-spacing:0;
+}
+#adm-fanquotes .quote-admin-table th{
+  position:sticky;
+  top:0;
+  z-index:3;
+  padding:17px 18px!important;
+  background:rgba(11,11,11,.96)!important;
+  color:rgba(255,255,255,.42)!important;
+  border-bottom:1px solid rgba(232,0,45,.22)!important;
+}
+#adm-fanquotes .quote-admin-table td{
+  padding:17px 18px!important;
+  border-bottom:1px solid rgba(255,255,255,.045)!important;
+}
+#adm-fanquotes .quote-admin-row{
+  position:relative;
+}
+#adm-fanquotes .quote-admin-row:after{
+  content:'';
+  position:absolute;
+  left:0;
+  top:8px;
+  bottom:8px;
+  width:2px;
+  background:var(--red);
+  opacity:0;
+  transition:opacity .25s ease;
+}
+#adm-fanquotes .quote-admin-row:hover:after{opacity:1}
+#adm-fanquotes .quote-admin-row:hover td{
+  background:linear-gradient(90deg,rgba(232,0,45,.055),rgba(255,255,255,.018))!important;
+}
+#adm-fanquotes .quote-driver-cell{
+  gap:15px;
+  min-width:235px;
+}
+#adm-fanquotes .quote-driver-avatar{
+  width:50px;
+  height:50px;
+  border:1px solid rgba(232,0,45,.52);
+  box-shadow:0 0 0 4px rgba(232,0,45,.055),0 10px 24px rgba(0,0,0,.38);
+  background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.12),rgba(10,10,10,.96));
+}
+#adm-fanquotes .quote-driver-avatar:before{
+  content:'';
+  position:absolute;
+  inset:3px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.05);
+  pointer-events:none;
+}
+#adm-fanquotes .quote-driver-meta strong{
+  font-size:.9rem;
+  letter-spacing:.1px;
+}
+#adm-fanquotes .quote-driver-meta span{
+  max-width:185px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#adm-fanquotes .quote-text-cell{
+  max-width:520px;
+  color:#e2e2e2;
+  line-height:1.55;
+  font-size:.92rem;
+  letter-spacing:.05px;
+  -webkit-line-clamp:2;
+}
+#adm-fanquotes .quote-era-pill,
+#adm-fanquotes .quote-category-pill,
+#adm-fanquotes .quote-status-pill,
+#adm-fanquotes .quote-featured-pill{
+  min-height:24px;
+  padding:4px 10px;
+  border-radius:2px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+#adm-fanquotes .quote-category-pill{
+  max-width:118px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#adm-fanquotes .quote-action-stack{
+  gap:8px;
+  justify-content:flex-end;
+  min-width:112px;
+}
+#adm-fanquotes .quote-mini-btn{
+  min-width:48px;
+  padding:7px 11px;
+  border-color:rgba(255,255,255,.13);
+  background:linear-gradient(180deg,rgba(23,23,23,.98),rgba(12,12,12,.98));
+}
+#adm-fanquotes .quote-mini-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 22px rgba(0,0,0,.3);
+}
+#adm-fanquotes .quote-danger:hover{
+  border-color:rgba(232,0,45,.55);
+  color:#ff8aa0;
+}
+#adm-fanquotes .quote-empty-state{
+  min-height:140px;
+  border:1px dashed rgba(232,0,45,.2);
+  background:rgba(232,0,45,.025);
+}
+.quote-modal-card-premium{
+  width:min(860px,94vw)!important;
+  border-radius:22px!important;
+  border:1px solid rgba(255,255,255,.1)!important;
+  border-top:2px solid var(--red)!important;
+  background:
+    radial-gradient(circle at 90% 0%,rgba(232,0,45,.18),transparent 32%),
+    linear-gradient(145deg,rgba(18,18,18,.98),rgba(8,8,8,.99))!important;
+  box-shadow:0 30px 120px rgba(0,0,0,.72)!important;
+}
+.quote-modal-head{
+  align-items:center;
+  padding-bottom:18px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.quote-modal-title{
+  font-size:2rem!important;
+  letter-spacing:4px!important;
+}
+.quote-modal-badge{
+  border:1px solid rgba(0,180,0,.26);
+  background:rgba(0,180,0,.06);
+  color:#79ff8f;
+  padding:7px 10px;
+  font-family:var(--font-c);
+  font-size:.66rem;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+.quote-form-premium{
+  gap:14px!important;
+}
+.quote-field span,
+.quote-upload-title{
+  letter-spacing:2.5px!important;
+}
+.quote-upload-panel{
+  border:1px solid rgba(255,255,255,.09)!important;
+  background:linear-gradient(135deg,rgba(16,16,16,.96),rgba(9,9,9,.98))!important;
+}
+.quote-upload-right{
+  border:1px dashed rgba(232,0,45,.24);
+  background:rgba(232,0,45,.025);
+  padding:12px;
+}
+.quote-upload-right.is-dragover{
+  border-color:var(--red)!important;
+  background:rgba(232,0,45,.09)!important;
+}
+.quote-live-card{
+  border-radius:20px!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.035);
+}
+.quote-save-premium{
+  min-height:46px;
+  margin-top:12px;
+}
+@media(max-width:1100px){
+  #adm-fanquotes .quote-admin-table{min-width:1040px}
+  #adm-fanquotes .quote-text-cell{max-width:420px}
+  #adm-fanquotes .quote-admin-hero{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:900px){
+  #adm-fanquotes .quote-admin-hero{padding:22px}
+  #adm-fanquotes .quote-admin-toolbar{gap:12px}
+  #adm-fanquotes .quote-toolbar-note{border-left:0;padding-left:0}
+  #adm-fanquotes .quote-table-shell{border-radius:0 0 14px 14px}
+  #adm-fanquotes .quote-admin-table{min-width:940px}
+  .quote-modal-card-premium{width:96vw!important;max-height:92vh!important;overflow:auto!important}
+}
+@media(max-width:620px){
+  #adm-fanquotes .quote-admin-hero h2{font-size:1.85rem}
+  #adm-fanquotes .quote-stat-card{min-height:82px;padding:15px 16px}
+  #adm-fanquotes .quote-stat-card strong{font-size:1.85rem}
+  #adm-fanquotes .quote-filter-stack{gap:8px}
+  .quote-modal-title{font-size:1.65rem!important}
+}
+
