@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8C.7 Fan Polls stable alignment rescue loaded');
+console.log('PADDOX A4.8D Fan Trivia premium polish loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -6770,6 +6770,21 @@ function setTriviaAdminStatus(message = '') {
   if (el) el.textContent = message;
 }
 
+function updateFanTriviaStats() {
+  const totalEl = document.getElementById('trivia-stat-total');
+  const activeEl = document.getElementById('trivia-stat-active');
+  const pointsEl = document.getElementById('trivia-stat-points');
+  if (!totalEl && !activeEl && !pointsEl) return;
+
+  const list = Array.isArray(ADMIN_FAN_TRIVIA) ? ADMIN_FAN_TRIVIA : [];
+  const activeCount = list.filter(item => item.isActive !== false).length;
+  const pointsTotal = list.reduce((sum, item) => sum + Number(item.points || 0), 0);
+
+  if (totalEl) totalEl.textContent = String(list.length);
+  if (activeEl) activeEl.textContent = String(activeCount);
+  if (pointsEl) pointsEl.textContent = String(pointsTotal.toLocaleString('en-IN'));
+}
+
 function escapeTriviaAdminText(value = '') {
   if (typeof escapeAdminText === 'function') return escapeAdminText(value);
   return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -6832,6 +6847,7 @@ async function loadFanTriviaAdmin() {
   } catch (err) {
     console.warn(err);
     ADMIN_FAN_TRIVIA = [];
+    updateFanTriviaStats();
     if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:34px;color:#777">${escapeTriviaAdminText(err.message)}. Backend route may need to be added.</td></tr>`;
     setTriviaAdminStatus('Backend endpoint expected: /api/fan/admin/trivia');
   }
@@ -6846,6 +6862,8 @@ function renderFanTriviaAdmin() {
     const text = `${item.question || ''} ${(item.options || []).join(' ')} ${item.category || ''} ${item.difficulty || ''}`.toLowerCase();
     return !q || text.includes(q);
   });
+
+  updateFanTriviaStats();
 
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No trivia questions created yet</td></tr>';

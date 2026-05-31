@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Admin Dashboard</title>
-  <link rel="stylesheet" href="admin.css?v=A4_8C_7"/>
+  <link rel="stylesheet" href="admin.css?v=A4_8D"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
 <style>
@@ -694,16 +694,46 @@
 
         <!-- ── FAN TRIVIA ── -->
         <div class="adm-page" id="adm-fantrivia">
-          <div class="page-toolbar">
-            <div class="toolbar-filters">
-              <input class="adm-input" id="trivia-search-admin" type="text" placeholder="Search trivia…"/>
+          <section class="trivia-command-hero reveal-up">
+            <div>
+              <div class="trivia-hero-kicker">Fan Hub Trivia Control</div>
+              <h2>Questions, Answers and Racing Knowledge.</h2>
+              <p>Build premium trivia cards with clean options, point rewards, difficulty tags and Fan Hub-ready answer states.</p>
             </div>
-            <button class="adm-btn-red" onclick="resetFanTriviaForm()">+ New Trivia</button>
+            <button class="adm-btn-red trivia-hero-action" onclick="resetFanTriviaForm()">+ New Trivia</button>
+          </section>
+
+          <div class="trivia-stat-grid reveal-up delay-1">
+            <div class="trivia-stat-card">
+              <span>Total Questions</span>
+              <strong id="trivia-stat-total">0</strong>
+            </div>
+            <div class="trivia-stat-card">
+              <span>Active</span>
+              <strong id="trivia-stat-active">0</strong>
+            </div>
+            <div class="trivia-stat-card">
+              <span>Point Pool</span>
+              <strong id="trivia-stat-points">0</strong>
+            </div>
           </div>
 
-          <div class="fan-trivia-admin-grid">
+          <div class="page-toolbar trivia-toolbar reveal-up delay-1">
+            <div class="toolbar-filters">
+              <input class="adm-input" id="trivia-search-admin" type="text" placeholder="Search question, answer, category…"/>
+            </div>
+            <div class="trivia-toolbar-note">Trivia manager connected to Fan Hub questions.</div>
+          </div>
+
+          <div class="fan-trivia-admin-grid reveal-up delay-2">
             <div class="fan-trivia-editor adm-panel-card">
-              <div class="adm-panel-title">Create / Edit Trivia</div>
+              <div class="trivia-editor-head">
+                <div>
+                  <div class="trivia-card-kicker">Builder</div>
+                  <div class="adm-panel-title">Create / Edit Trivia</div>
+                </div>
+                <span class="trivia-mode-pill">Live</span>
+              </div>
               <input type="hidden" id="trivia-edit-id"/>
 
               <label class="adm-mini-label">Question</label>
@@ -750,12 +780,20 @@
                 <label><input type="checkbox" id="trivia-active" checked/> Active question</label>
               </div>
 
-              <button class="adm-btn-red" type="button" onclick="saveFanTriviaAdmin()">Save Trivia</button>
-              <button class="adm-btn-ghost" type="button" onclick="resetFanTriviaForm()">Clear</button>
+              <div class="trivia-form-actions">
+                <button class="adm-btn-red" type="button" onclick="saveFanTriviaAdmin()">Save Trivia</button>
+                <button class="adm-btn-ghost" type="button" onclick="resetFanTriviaForm()">Clear</button>
+              </div>
               <div class="admin-hint" id="trivia-admin-status">Create active trivia questions for Fan Hub.</div>
             </div>
 
             <div class="data-table-wrap fan-trivia-table-wrap">
+              <div class="trivia-table-topline">
+                <div>
+                  <span>Question Library</span>
+                  <strong>Answer key and reward meta</strong>
+                </div>
+              </div>
               <table class="data-table">
                 <thead>
                   <tr>
@@ -940,7 +978,7 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script src="admin.js?v=A4_8C_4"></script>
+  <script src="admin.js?v=A4_8D"></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>
