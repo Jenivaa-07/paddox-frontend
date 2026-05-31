@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8C.1 Fan Polls syntax emergency fix loaded');
+console.log('PADDOX A4.8C.2 admin emergency restore loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -6499,68 +6499,22 @@ function addFanPollOption(value = '', logoKey = '') {
   const wrap = document.getElementById('poll-options-admin');
   if (!wrap) return;
 
-  const rowCount = wrap.querySelectorAll('.poll-admin-option-row').length;
-  if (rowCount >= 5) {
-    setPollAdminStatus('Maximum 5 poll options allowed.');
-    return;
-  }
-
   const row = document.createElement('div');
-  row.className = 'poll-admin-option-row fanpolls-option-card';
+  row.className = 'poll-admin-option-row';
   row.innerHTML = `
-    <div class="poll-option-index">${rowCount + 1}</div>
-    <div class="poll-admin-logo-cell fanpolls-logo-cell">
-      <div class="poll-logo-preview fanpolls-logo-preview"><span>PX</span></div>
-      <select class="adm-input poll-logo-select fanpolls-logo-select" onchange="updatePollLogoPreview(this.closest('.poll-admin-option-row'))">
+    <div class="poll-admin-logo-cell">
+      <div class="poll-logo-preview"><span>PX</span></div>
+      <select class="adm-input poll-logo-select" onchange="updatePollLogoPreview(this.closest('.poll-admin-option-row'))">
         ${pollLogoOptionsHTML(logoKey)}
       </select>
     </div>
-    <input class="adm-input poll-option-input fanpolls-option-input" type="text" placeholder="Poll option name" value="${escapeAdminText(value)}"/>
-    <button type="button" class="fanpolls-remove-btn" onclick="removeFanPollOptionRow(this)">Remove</button>
+    <input class="adm-input poll-option-input" type="text" placeholder="Poll option" value="${escapeAdminText(value)}"/>
+    <button type="button" class="adm-btn-ghost danger" onclick="this.closest('.poll-admin-option-row').remove()">Remove</button>
   `;
 
   wrap.appendChild(row);
   updatePollLogoPreview(row);
-  refreshFanPollOptionIndexes();
   loadFanPollLogoOptions();
-}
-
-
-function updateFanPollAdminStats() {
-  const polls = Array.isArray(ADMIN_FAN_POLLS) ? ADMIN_FAN_POLLS : [];
-  const total = polls.length;
-  const active = polls.filter(p => p.isActive !== false).length;
-  const votes = polls.reduce((sum, poll) => {
-    const opts = Array.isArray(poll.options) ? poll.options : [];
-    return sum + opts.reduce((s, o) => s + Number(o.votes || 0), 0);
-  }, 0);
-
-  const set = (id, value) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = Number(value || 0).toLocaleString('en-IN');
-  };
-
-  set('fanpoll-stat-total', total);
-  set('fanpoll-stat-active', active);
-  set('fanpoll-stat-votes', votes);
-}
-
-
-function refreshFanPollOptionIndexes() {
-  document.querySelectorAll('.poll-admin-option-row').forEach((row, index) => {
-    const badge = row.querySelector('.poll-option-index');
-    if (badge) badge.textContent = index + 1;
-  });
-}
-
-function removeFanPollOptionRow(button) {
-  const rows = document.querySelectorAll('.poll-admin-option-row');
-  if (rows.length <= 2) {
-    setPollAdminStatus('At least 2 options are required.');
-    return;
-  }
-  button?.closest('.poll-admin-option-row')?.remove();
-  refreshFanPollOptionIndexes();
 }
 
 function resetFanPollForm(clear = true) {
@@ -6575,19 +6529,19 @@ function resetFanPollForm(clear = true) {
   const wrap = document.getElementById('poll-options-admin');
   if (wrap) {
     wrap.innerHTML = '';
-    addFanPollOption('', 'mclaren');
-    addFanPollOption('', 'ferrari');
+    addFanPollOption('');
+    addFanPollOption('');
   }
 
   loadFanPollLogoOptions();
-  if (clear) setPollAdminStatus('Create a live Fan Hub poll with 2–5 premium options and clean team logos.');
+  if (clear) setPollAdminStatus('Create a live Fan Hub poll with 2–5 options and optional team logos.');
 }
 
 async function loadFanPollsAdmin() {
   const tbody = document.getElementById('fan-polls-tbody');
 
   if (tbody) {
-    tbody.innerHTML = '<tr><td colspan="5" class="fanpolls-empty-cell"><div class="fanpoll-empty-mark">⌛</div><strong>Loading polls…</strong><span>Connecting to Fan Hub poll API</span></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading polls…</td></tr>';
   }
 
   await loadFanPollLogoOptions();
@@ -6602,16 +6556,14 @@ async function loadFanPollsAdmin() {
 
     ADMIN_FAN_POLLS = data.data?.polls || data.polls || data.data || [];
     renderFanPollsAdmin();
-    updateFanPollAdminStats();
     setPollAdminStatus('Poll manager connected. Active poll reflects on Fan Hub.');
 
   } catch (err) {
     console.warn(err);
     ADMIN_FAN_POLLS = [];
-    updateFanPollAdminStats();
 
     if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="5" class="fanpolls-empty-cell"><div class="fanpoll-empty-mark">!</div><strong>Failed to load polls</strong><span>${escapeAdminText(err.message)} · Check /api/fan/admin/polls</span></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:34px;color:#777">${escapeAdminText(err.message)}. Check backend route /api/fan/admin/polls.</td></tr>`;
     }
 
     setPollAdminStatus('Backend endpoint expected: /api/fan/admin/polls');
@@ -6622,62 +6574,37 @@ function renderFanPollsAdmin() {
   const tbody = document.getElementById('fan-polls-tbody');
   if (!tbody) return;
 
-  updateFanPollAdminStats();
-
   const q = String(document.getElementById('poll-search-admin')?.value || '').toLowerCase().trim();
-  const list = ADMIN_FAN_POLLS.filter(p => {
-    const opts = Array.isArray(p.options) ? p.options : [];
-    const haystack = [
-      p.question || '',
-      ...opts.map(o => `${o.label || o.text || ''} ${o.teamName || ''} ${o.logoKey || ''}`)
-    ].join(' ').toLowerCase();
-    return !q || haystack.includes(q);
-  });
+  const list = ADMIN_FAN_POLLS.filter(p => !q || String(p.question || '').toLowerCase().includes(q));
 
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="fanpolls-empty-cell"><div class="fanpoll-empty-mark">🏁</div><strong>No polls found</strong><span>Create a race-week poll to start collecting Fan Hub votes.</span></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:#777">No polls created yet</td></tr>';
     return;
   }
 
   tbody.innerHTML = list.map(p => {
     const opts = Array.isArray(p.options) ? p.options : [];
     const total = opts.reduce((s,o)=>s+Number(o.votes||0),0);
-    const active = p.isActive !== false;
-    const id = escapeAdminText(p._id || p.id || '');
 
     return `
-      <tr class="fanpoll-row ${active ? 'is-active' : ''}">
-        <td class="fanpoll-question-cell">
-          <div class="fanpoll-question-title">${escapeAdminText(p.question || 'Untitled poll')}</div>
-          <div class="fanpoll-question-meta">${opts.length} options · ${total.toLocaleString('en-IN')} votes</div>
-        </td>
+      <tr>
+        <td style="max-width:360px"><strong>${escapeAdminText(p.question || 'Untitled poll')}</strong></td>
         <td>
-          <div class="poll-admin-table-options fanpoll-mini-options">
-            ${opts.map(o => {
-              const votes = Number(o.votes || 0);
-              const percent = total ? Math.round((votes / total) * 100) : 0;
-              return `
-                <span class="poll-admin-mini-option fanpoll-mini-option" title="${escapeAdminText(o.label || o.text || '')}">
-                  <span class="fanpoll-mini-logo">${adminPollMiniLogoHTML(o)}</span>
-                  <span class="fanpoll-mini-text">${escapeAdminText(o.label || o.text || 'Option')}</span>
-                  <span class="fanpoll-mini-percent">${percent}%</span>
-                </span>`;
-            }).join('')}
+          <div class="poll-admin-table-options">
+            ${opts.map(o => `
+              <span class="poll-admin-mini-option">
+                ${adminPollMiniLogoHTML(o)}
+                <span>${escapeAdminText(o.label || o.text || '')}</span>
+              </span>
+            `).join('')}
           </div>
         </td>
-        <td class="fanpoll-votes-cell">
-          <strong>${total.toLocaleString('en-IN')}</strong>
-          <span>votes</span>
-        </td>
+        <td>${total.toLocaleString('en-IN')}</td>
+        <td><span class="sb ${p.isActive !== false ? 's-ok' : 's-pr'}">${p.isActive !== false ? 'Active' : 'Inactive'}</span></td>
         <td>
-          <span class="fanpoll-status-pill ${active ? 'active' : 'inactive'}">${active ? 'Active' : 'Inactive'}</span>
-        </td>
-        <td>
-          <div class="fanpoll-actions">
-            <button class="act-btn fanpoll-action" onclick="editFanPollAdmin('${id}')">Edit</button>
-            <button class="act-btn fanpoll-action" onclick="setFanPollActive('${id}')">Set Active</button>
-            <button class="act-btn fanpoll-action danger" onclick="deleteFanPollAdmin('${id}')">Delete</button>
-          </div>
+          <button class="act-btn" onclick="editFanPollAdmin('${p._id || p.id}')">Edit</button>
+          <button class="act-btn" onclick="setFanPollActive('${p._id || p.id}')">Set Active</button>
+          <button class="act-btn danger" onclick="deleteFanPollAdmin('${p._id || p.id}')">Delete</button>
         </td>
       </tr>`;
   }).join('');
@@ -6702,11 +6629,9 @@ function editFanPollAdmin(id) {
       o.label || o.text || '',
       o.logoKey || o.slug || o.teamName || ''
     ));
-    refreshFanPollOptionIndexes();
   }
 
-  document.querySelector('.fanpolls-editor-card')?.scrollIntoView({ behavior:'smooth', block:'start' });
-  setPollAdminStatus('Editing existing poll. Save to push changes to Fan Hub.');
+  setPollAdminStatus('Editing existing poll.');
 }
 
 function collectFanPollOptions() {

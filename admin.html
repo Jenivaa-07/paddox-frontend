@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Admin Dashboard</title>
-  <link rel="stylesheet" href="admin.css?v=A4_8C_1"/>
+  <link rel="stylesheet" href="admin.css?v=A4_8C_2"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
 <style>
@@ -648,97 +648,45 @@
 
 
         <!-- ── FAN POLLS ── -->
-        
         <div class="adm-page" id="adm-fanpolls">
-          <section class="fanpolls-premium-hero reveal-up">
-            <div>
-              <div class="fanpolls-kicker">Fan Hub Poll Control</div>
-              <h2>Live decisions, team battles and race-week votes.</h2>
-              <p>Create premium Fan Hub polls with clean team logos, active-state control, and realtime vote visibility.</p>
+          <div class="page-toolbar">
+            <div class="toolbar-filters">
+              <input class="adm-input" id="poll-search-admin" type="text" placeholder="Search polls…"/>
             </div>
-            <button class="fanpolls-hero-btn" type="button" onclick="resetFanPollForm()">+ New Poll</button>
-          </section>
-
-          <section class="fanpolls-stats-grid reveal-up delay-1">
-            <article class="fanpoll-stat-card">
-              <span>Total Polls</span>
-              <strong id="fanpoll-stat-total">0</strong>
-            </article>
-            <article class="fanpoll-stat-card">
-              <span>Active Polls</span>
-              <strong id="fanpoll-stat-active">0</strong>
-            </article>
-            <article class="fanpoll-stat-card">
-              <span>Total Votes</span>
-              <strong id="fanpoll-stat-votes">0</strong>
-            </article>
-          </section>
-
-          <div class="fanpolls-toolbar reveal-up delay-1">
-            <div class="toolbar-filters fanpolls-filter-wrap">
-              <input class="adm-input fanpolls-search" id="poll-search-admin" type="text" placeholder="Search question, option, team..."/>
-            </div>
-            <div class="fanpolls-toolbar-note">Active poll reflects instantly on Fan Hub after save.</div>
+            <button class="adm-btn-red" onclick="resetFanPollForm()">+ New Poll</button>
           </div>
 
-          <div class="fan-poll-admin-grid fanpolls-premium-grid reveal-up delay-2">
-            <div class="fan-poll-editor adm-panel-card fanpolls-editor-card">
-              <div class="fanpolls-card-head">
-                <div>
-                  <div class="fanpolls-kicker small">Create / Edit</div>
-                  <h3>Poll Builder</h3>
-                </div>
-                <span class="fanpolls-live-pill">Live Fan Hub</span>
-              </div>
-
+          <div class="fan-poll-admin-grid">
+            <div class="fan-poll-editor adm-panel-card">
+              <div class="adm-panel-title">Create / Edit Poll</div>
               <input type="hidden" id="poll-edit-id"/>
-
-              <label class="adm-mini-label fanpolls-label">Question</label>
-              <input class="adm-input fanpolls-question-input" id="poll-question" type="text" placeholder="Who will win this weekend?"/>
-
-              <div class="fanpolls-options-head">
-                <label class="adm-mini-label fanpolls-label">Options</label>
-                <button class="fanpoll-mini-add" type="button" onclick="addFanPollOption()">+ Add Option</button>
-              </div>
-
-              <div id="poll-options-admin" class="poll-options-admin fanpolls-options-stack"></div>
-
-              <div class="poll-admin-row fanpolls-toggle-row">
+              <label class="adm-mini-label">Question</label>
+              <input class="adm-input" id="poll-question" type="text" placeholder="Who will win this weekend?"/>
+              <label class="adm-mini-label">Options</label>
+              <div id="poll-options-admin" class="poll-options-admin"></div>
+              <button class="adm-btn-ghost" type="button" onclick="addFanPollOption()">+ Add Option</button>
+              <div class="poll-admin-row">
                 <label><input type="checkbox" id="poll-active" checked/> Active poll</label>
                 <label><input type="checkbox" id="poll-reset-votes"/> Reset votes on save</label>
               </div>
-
-              <div class="fanpolls-form-actions">
-                <button class="adm-btn-red" type="button" onclick="saveFanPollAdmin()">Save Poll</button>
-                <button class="adm-btn-ghost" type="button" onclick="resetFanPollForm()">Clear</button>
-              </div>
-
-              <div class="admin-hint fanpolls-status" id="poll-admin-status">Create a live Fan Hub poll with 2–5 premium options.</div>
+              <button class="adm-btn-red" type="button" onclick="saveFanPollAdmin()">Save Poll</button>
+              <button class="adm-btn-ghost" type="button" onclick="resetFanPollForm()">Clear</button>
+              <div class="admin-hint" id="poll-admin-status">Polls use the Fan Hub realtime poll API.</div>
             </div>
 
-            <div class="fanpolls-table-card">
-              <div class="fanpolls-table-head">
-                <div>
-                  <div class="fanpolls-kicker small">Poll Library</div>
-                  <h3>Saved Polls</h3>
-                </div>
-                <button class="fanpolls-refresh-btn" type="button" onclick="loadFanPollsAdmin()">Refresh</button>
-              </div>
-
-              <div class="data-table-wrap fan-poll-table-wrap fanpolls-table-wrap-premium">
-                <table class="data-table fanpolls-table">
-                  <thead>
-                    <tr>
-                      <th>Question</th>
-                      <th>Options</th>
-                      <th>Total Votes</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="fan-polls-tbody"></tbody>
-                </table>
-              </div>
+            <div class="data-table-wrap fan-poll-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Options</th>
+                    <th>Total Votes</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="fan-polls-tbody"></tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -992,7 +940,7 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script src="admin.js?v=A4_8C_1"></script>
+  <script src="admin.js?v=A4_8C_2"></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>
