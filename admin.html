@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Admin Dashboard</title>
-  <link rel="stylesheet" href="admin.css?v=A4_8D"/>
+  <link rel="stylesheet" href="admin.css?v=A4_8E"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
 <style>
@@ -852,24 +852,49 @@
           </div>
         </div>
 
-
         <!-- ── FAN DRIVERS ── -->
         <div class="adm-page" id="adm-fandrivers">
-          <div class="page-toolbar">
+          <section class="driver-command-hero reveal-up">
+            <div>
+              <span class="driver-kicker">Fan Hub Driver Garage</span>
+              <h2>Driver portraits, headshots and Cloudinary control.</h2>
+              <p>Manage clean driver avatars with drag upload, Cloudinary storage, active status and Fan Hub-ready visuals.</p>
+            </div>
+            <button class="adm-btn-red" onclick="openDriverProfileModal()">+ Add Driver Image</button>
+          </section>
+
+          <div class="driver-stat-grid reveal-up delay-1">
+            <div class="driver-stat-card"><span>Total Drivers</span><strong id="driver-stat-total">0</strong></div>
+            <div class="driver-stat-card"><span>Cloudinary</span><strong id="driver-stat-cloudinary">0</strong></div>
+            <div class="driver-stat-card"><span>Active</span><strong id="driver-stat-active">0</strong></div>
+          </div>
+
+          <div class="page-toolbar driver-toolbar reveal-up delay-2">
             <div class="toolbar-filters">
               <input class="adm-input" id="driver-profile-search" type="text" placeholder="Search driver profile…"/>
             </div>
-            <button class="adm-btn-red" onclick="openDriverProfileModal()">+ Add Driver Image</button>
+            <div class="driver-toolbar-actions">
+              <button class="adm-btn-ghost" type="button" onclick="migrateDriverProfilesToCloudinary()">Migrate Base64 Images</button>
+              <button class="adm-btn-red" type="button" onclick="openDriverProfileModal()">+ Add Driver Image</button>
+            </div>
           </div>
 
-          <div class="data-table-wrap">
-            <table class="data-table">
+          <div class="data-table-wrap driver-profiles-table-wrap reveal-up delay-3">
+            <div class="driver-table-topline">
+              <div>
+                <span>Driver Image Library</span>
+                <strong>Images added here power Fan Hub driver portraits.</strong>
+              </div>
+              <em>Future uploads save to Cloudinary</em>
+            </div>
+            <table class="data-table driver-profiles-table">
               <thead>
                 <tr>
                   <th>Driver</th>
                   <th>Code</th>
                   <th>Team</th>
                   <th>Country</th>
+                  <th>Storage</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>

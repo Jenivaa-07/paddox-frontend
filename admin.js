@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8D Fan Trivia premium polish loaded');
+console.log('PADDOX A4.8E Fan Drivers Cloudinary drag upload loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -4767,14 +4767,16 @@ async function deleteQuote(id) {
 }
 
 
+
 /* ══════════════════════════════════════
-   ADMIN FAN DRIVERS — IMAGE OVERRIDES
+   ADMIN FAN DRIVERS — CLOUDINARY DRAG UPLOAD + PREMIUM UI
 ══════════════════════════════════════ */
 const ADMIN_DRIVER_PROFILES_API =
   'https://paddox-backend.onrender.com/api/fan/admin/driver-profiles';
 
 let REAL_DRIVER_PROFILES_ADMIN = [];
 let EDIT_DRIVER_PROFILE_ID = null;
+let DRIVER_DRAG_BOUND = false;
 
 function driverProfileHeaders() {
   return {
@@ -4783,18 +4785,56 @@ function driverProfileHeaders() {
   };
 }
 
-function driverProfileImageHTML(profile) {
-  if (profile.image && (profile.image.startsWith('http://') || profile.image.startsWith('https://') || profile.image.startsWith('data:image/'))) {
-    return `<img src="${profile.image}" style="width:36px;height:36px;border-radius:50%;object-fit:cover"/>`;
+function isCloudinaryUrl(value = '') {
+  return /^https?:\/\/res\.cloudinary\.com\//i.test(String(value || '')) || /cloudinary\.com/i.test(String(value || ''));
+}
+
+function isDriverImageValue(value = '') {
+  return /^https?:\/\//i.test(String(value || '')) || /^data:image\//i.test(String(value || ''));
+}
+
+function cleanDriverKey(profile = {}) {
+  return String(profile.driverKey || profile.code || profile.name || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-');
+}
+
+function driverProfileImageHTML(profile = {}) {
+  const image = String(profile.image || '').trim();
+  if (image && isDriverImageValue(image)) {
+    return `<img src="${escapeAdminAttr(image)}" alt="${escapeAdminAttr(profile.name || 'Driver')}"/>`;
   }
-  return profile.flagEmoji || '🏎️';
+  const initials = String(profile.code || profile.name || 'PX').slice(0, 3).toUpperCase();
+  return `<span class="driver-avatar-fallback">${escapeAdminText(initials)}</span>`;
+}
+
+function driverStorageBadge(profile = {}) {
+  const image = String(profile.image || '').trim();
+  if (isCloudinaryUrl(image)) return `<span class="driver-storage-pill cloud">Cloudinary</span>`;
+  if (/^data:image\//i.test(image)) return `<span class="driver-storage-pill warn">Base64</span>`;
+  if (/^https?:\/\//i.test(image)) return `<span class="driver-storage-pill url">URL</span>`;
+  return `<span class="driver-storage-pill empty">No image</span>`;
+}
+
+function updateDriverProfileStats() {
+  const total = REAL_DRIVER_PROFILES_ADMIN.length;
+  const active = REAL_DRIVER_PROFILES_ADMIN.filter(p => p.isActive !== false).length;
+  const cloudinary = REAL_DRIVER_PROFILES_ADMIN.filter(p => isCloudinaryUrl(p.image)).length;
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+  set('driver-stat-total', total);
+  set('driver-stat-active', active);
+  set('driver-stat-cloudinary', cloudinary);
 }
 
 async function loadAdminDriverProfiles() {
   const tbody = document.getElementById('driver-profiles-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#777">Loading driver profiles...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" class="driver-empty-state">Loading driver profiles...</td></tr>`;
 
   try {
     const res = await fetch(ADMIN_DRIVER_PROFILES_API, {
@@ -4810,11 +4850,12 @@ async function loadAdminDriverProfiles() {
     if (!res.ok || data.success === false) throw new Error(data.message || 'Driver profiles load failed');
 
     REAL_DRIVER_PROFILES_ADMIN = data.data?.profiles || data.profiles || [];
+    updateDriverProfileStats();
     renderAdminDriverProfiles();
 
   } catch (err) {
     console.error(err);
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#777">Failed to load driver profiles</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="driver-empty-state">Failed to load driver profiles</td></tr>`;
   }
 }
 
@@ -4824,34 +4865,39 @@ function renderAdminDriverProfiles() {
 
   const search = document.getElementById('driver-profile-search')?.value?.trim()?.toLowerCase() || '';
   const list = REAL_DRIVER_PROFILES_ADMIN.filter(profile =>
-    !search || `${profile.name} ${profile.code} ${profile.team} ${profile.country}`.toLowerCase().includes(search)
+    !search || `${profile.name || ''} ${profile.code || ''} ${profile.team || ''} ${profile.country || ''} ${profile.driverKey || ''}`.toLowerCase().includes(search)
   );
 
+  updateDriverProfileStats();
+
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#777">No driver images added yet. Add driver profile images here.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="driver-empty-state">No driver images found. Add clean Cloudinary driver portraits here.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = list.map(profile => `
-    <tr>
+    <tr class="driver-profile-row">
       <td>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="width:38px;height:38px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#151515;border:1px solid rgba(255,255,255,.12)">
+        <div class="driver-admin-cell">
+          <span class="driver-admin-avatar">
             ${driverProfileImageHTML(profile)}
           </span>
-          <div>
-            <div style="font-weight:800;color:#fff">${profile.name}</div>
-            <div style="color:#777;font-size:.75rem">${profile.driverKey}</div>
+          <div class="driver-admin-copy">
+            <strong>${escapeAdminText(profile.name || 'Driver')}</strong>
+            <small>${escapeAdminText(profile.driverKey || cleanDriverKey(profile) || '-')}</small>
           </div>
         </div>
       </td>
-      <td>${profile.code || '-'}</td>
-      <td>${profile.team || '-'}</td>
-      <td>${profile.flagEmoji || ''} ${profile.country || '-'}</td>
-      <td><span class="sb ${profile.isActive ? 's-act' : 's-out'}">${profile.isActive ? 'Active' : 'Inactive'}</span></td>
+      <td><span class="driver-code-pill">${escapeAdminText(profile.code || '-')}</span></td>
+      <td>${escapeAdminText(profile.team || '-')}</td>
+      <td>${escapeAdminText(profile.flagEmoji || '')} ${escapeAdminText(profile.country || '-')}</td>
+      <td>${driverStorageBadge(profile)}</td>
+      <td><span class="sb ${profile.isActive !== false ? 's-act' : 's-out'}">${profile.isActive !== false ? 'Active' : 'Inactive'}</span></td>
       <td>
-        <button class="act-btn" onclick="openDriverProfileModal('${profile._id}')">Edit</button>
-        <button class="act-btn" onclick="deleteDriverProfile('${profile._id}')">Delete</button>
+        <div class="driver-action-stack">
+          <button class="act-btn" onclick="openDriverProfileModal('${escapeAdminAttr(profile._id)}')">Edit</button>
+          <button class="act-btn" onclick="deleteDriverProfile('${escapeAdminAttr(profile._id)}')">Delete</button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -4869,33 +4915,38 @@ function ensureDriverProfileModal() {
 
   modal.innerHTML = `
     <div class="preview-overlay" id="driver-profile-overlay">
-      <div class="preview-card" style="max-width:760px;width:92vw;padding:28px;color:#fff;text-align:left">
-        <button class="preview-close" type="button" onclick="closeDriverProfileModal()">✕</button>
-        <div style="font-family:var(--font-d);letter-spacing:4px;font-size:1.8rem;margin-bottom:8px" id="driver-profile-title">ADD DRIVER IMAGE</div>
-        <div style="color:var(--red);font-family:var(--font-c);letter-spacing:2px;margin-bottom:22px">FAN HUB DRIVER STATS IMAGE OVERRIDE</div>
+      <div class="preview-card driver-profile-modal-card">
+        <button class="preview-close driver-modal-close" type="button" onclick="closeDriverProfileModal()">✕</button>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER NAME</span><input id="dp-name" class="edit-product-input" placeholder="George Russell"></label>
-          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">DRIVER CODE</span><input id="dp-code" class="edit-product-input" placeholder="RUS"></label>
-          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">TEAM</span><input id="dp-team" class="edit-product-input" placeholder="Mercedes"></label>
-          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">COUNTRY</span><input id="dp-country" class="edit-product-input" placeholder="British"></label>
-          <label style="display:flex;flex-direction:column;gap:6px"><span style="color:#777;font-size:.75rem;letter-spacing:2px">FLAG EMOJI</span><input id="dp-flag" class="edit-product-input" placeholder="🇬🇧"></label>
-          <label style="display:flex;align-items:center;gap:10px;color:#aaa;margin-top:26px"><input id="dp-active" type="checkbox" checked> Active</label>
+        <div class="driver-modal-head">
+          <span>Fan Hub Driver Garage</span>
+          <h2 id="driver-profile-title">ADD DRIVER IMAGE</h2>
+          <p>Drag a headshot, crop it, and save a clean Cloudinary driver portrait for Fan Hub.</p>
         </div>
 
-        <div style="margin-top:16px">
-          <span style="display:block;color:#777;font-size:.75rem;letter-spacing:2px;margin-bottom:8px">DRIVER IMAGE</span>
-          <div style="display:flex;gap:12px;align-items:center">
-            <div id="dp-preview" style="width:72px;height:72px;border-radius:50%;background:#151515;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.6rem;flex-shrink:0">🏎️</div>
-            <div style="flex:1">
-              <input id="dp-file" type="file" accept="image/*" style="display:none">
-              <button type="button" class="act-btn" id="dp-upload" style="width:100%;padding:12px">Upload & Crop Headshot</button>
-              <input id="dp-image" class="edit-product-input" placeholder="or paste image URL / cropped image data" style="margin-top:8px">
+        <div class="driver-modal-grid">
+          <label class="driver-field"><span>DRIVER NAME</span><input id="dp-name" class="edit-product-input" placeholder="George Russell"></label>
+          <label class="driver-field"><span>DRIVER CODE</span><input id="dp-code" class="edit-product-input" placeholder="RUS"></label>
+          <label class="driver-field"><span>TEAM</span><input id="dp-team" class="edit-product-input" placeholder="Mercedes"></label>
+          <label class="driver-field"><span>COUNTRY</span><input id="dp-country" class="edit-product-input" placeholder="British"></label>
+          <label class="driver-field"><span>FLAG EMOJI</span><input id="dp-flag" class="edit-product-input" placeholder="🇬🇧"></label>
+          <label class="driver-active-toggle"><input id="dp-active" type="checkbox" checked> Active</label>
+        </div>
+
+        <div class="driver-upload-panel">
+          <div id="dp-preview" class="driver-upload-preview">PX</div>
+          <div class="driver-upload-main">
+            <input id="dp-file" type="file" accept="image/*" style="display:none">
+            <div id="dp-dropzone" class="driver-dropzone" role="button" tabindex="0">
+              <strong>Drag & drop driver headshot</strong>
+              <span>or click to upload and crop. JPG / PNG supported. Saved to Cloudinary.</span>
             </div>
+            <input id="dp-image" class="edit-product-input driver-image-url" placeholder="Cloudinary URL appears here after upload">
+            <small id="dp-upload-status" class="driver-upload-status">Ready for Cloudinary upload</small>
           </div>
         </div>
 
-        <button class="act-btn" id="dp-save" style="width:100%;padding:14px;margin-top:22px;background:var(--red);color:white;border:0;font-weight:800;letter-spacing:3px">SAVE DRIVER IMAGE</button>
+        <button class="act-btn driver-save-btn" id="dp-save">SAVE DRIVER IMAGE</button>
       </div>
     </div>
   `;
@@ -4907,43 +4958,95 @@ function ensureDriverProfileModal() {
   };
 
   modal.querySelector('#dp-save').onclick = saveDriverProfile;
-  modal.querySelector('#dp-upload').onclick = () => modal.querySelector('#dp-file').click();
-
-  modal.querySelector('#dp-file').onchange = async () => {
-    try {
-      const file = modal.querySelector('#dp-file').files?.[0];
-      if (!file) return;
-      showToast('🖼️ Opening headshot cropper...');
-      const dataUrl = await openPremiumImageCropper(file, {
-        title: 'CROP DRIVER HEADSHOT',
-        outputSize: 520,
-        quality: 0.82
-      });
-
-      showToast('☁️ Uploading driver headshot to Cloudinary...');
-      const cloudinaryUrl = await uploadImageToCloudinaryBridge(dataUrl, 'fan-drivers');
-
-      modal.querySelector('#dp-image').value = cloudinaryUrl || dataUrl;
-      renderDriverProfilePreview(modal.querySelector('#dp-image').value);
-      showToast('✅ Driver headshot saved to Cloudinary');
-    } catch (err) {
-      showToast(`❌ ${err.message}`);
-    } finally {
-      modal.querySelector('#dp-file').value = '';
-    }
-  };
-
+  bindDriverProfileUploadControls(modal);
   modal.querySelector('#dp-image').oninput = e => renderDriverProfilePreview(e.target.value.trim());
+}
+
+function setDriverUploadStatus(text, mood = '') {
+  const el = document.getElementById('dp-upload-status');
+  if (!el) return;
+  el.textContent = text;
+  el.dataset.mood = mood;
+}
+
+async function processDriverImageFile(file) {
+  if (!file) return;
+  const modal = document.getElementById('driver-profile-modal');
+  if (!modal) return;
+  try {
+    showToast('🖼️ Opening headshot cropper...');
+    setDriverUploadStatus('Opening cropper...', 'loading');
+    const dataUrl = await openPremiumImageCropper(file, {
+      title: 'CROP DRIVER HEADSHOT',
+      outputSize: 560,
+      quality: 0.86
+    });
+
+    renderDriverProfilePreview(dataUrl);
+    showToast('☁️ Uploading driver headshot to Cloudinary...');
+    setDriverUploadStatus('Uploading to Cloudinary...', 'loading');
+    const cloudinaryUrl = await uploadImageToCloudinaryBridge(dataUrl, 'fan-drivers');
+
+    modal.querySelector('#dp-image').value = cloudinaryUrl || dataUrl;
+    renderDriverProfilePreview(modal.querySelector('#dp-image').value);
+    setDriverUploadStatus(cloudinaryUrl ? 'Saved as Cloudinary URL' : 'Saved as cropped image data', cloudinaryUrl ? 'success' : 'warn');
+    showToast(cloudinaryUrl ? '✅ Driver headshot saved to Cloudinary' : '⚠️ Driver image kept as cropped data');
+  } catch (err) {
+    console.error(err);
+    setDriverUploadStatus(err.message || 'Upload failed', 'error');
+    showToast(`❌ ${err.message}`);
+  } finally {
+    const input = modal.querySelector('#dp-file');
+    if (input) input.value = '';
+  }
+}
+
+function bindDriverProfileUploadControls(modal) {
+  if (!modal || DRIVER_DRAG_BOUND) return;
+  DRIVER_DRAG_BOUND = true;
+
+  const fileInput = modal.querySelector('#dp-file');
+  const upload = modal.querySelector('#dp-dropzone');
+  if (!fileInput || !upload) return;
+
+  const openPicker = () => fileInput.click();
+  upload.addEventListener('click', openPicker);
+  upload.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openPicker();
+    }
+  });
+
+  fileInput.addEventListener('change', () => processDriverImageFile(fileInput.files?.[0]));
+
+  ['dragenter', 'dragover'].forEach(type => {
+    upload.addEventListener(type, e => {
+      e.preventDefault();
+      upload.classList.add('drag-over');
+    });
+  });
+  ['dragleave', 'dragend', 'drop'].forEach(type => {
+    upload.addEventListener(type, e => {
+      e.preventDefault();
+      if (type !== 'dragenter' && type !== 'dragover') upload.classList.remove('drag-over');
+    });
+  });
+  upload.addEventListener('drop', e => {
+    const file = e.dataTransfer?.files?.[0];
+    processDriverImageFile(file);
+  });
 }
 
 function renderDriverProfilePreview(value = '') {
   const box = document.getElementById('dp-preview');
   if (!box) return;
 
-  if (value && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/'))) {
-    box.innerHTML = `<img src="${value}" style="width:100%;height:100%;object-fit:cover">`;
+  if (value && isDriverImageValue(value)) {
+    box.innerHTML = `<img src="${escapeAdminAttr(value)}" alt="Driver preview">`;
   } else {
-    box.textContent = '🏎️';
+    const code = document.getElementById('dp-code')?.value?.trim()?.slice(0, 3).toUpperCase() || 'PX';
+    box.innerHTML = `<span>${escapeAdminText(code)}</span>`;
   }
 }
 
@@ -4963,6 +5066,9 @@ function openDriverProfileModal(id = null) {
   document.getElementById('dp-active').checked = profile?.isActive !== false;
 
   renderDriverProfilePreview(profile?.image || '');
+  if (isCloudinaryUrl(profile?.image)) setDriverUploadStatus('Current image is already stored on Cloudinary', 'success');
+  else if (/^data:image\//i.test(profile?.image || '')) setDriverUploadStatus('Base64 image detected. Saving will migrate it to Cloudinary.', 'warn');
+  else setDriverUploadStatus('Ready for Cloudinary upload', '');
 
   const modal = document.getElementById('driver-profile-modal');
   modal.style.display = 'block';
@@ -4999,6 +5105,15 @@ async function saveDriverProfile() {
 
     showToast('⏳ Saving driver image...');
 
+    if (/^data:image\//i.test(body.image)) {
+      showToast('☁️ Migrating driver image to Cloudinary...');
+      setDriverUploadStatus('Migrating base64 image to Cloudinary...', 'loading');
+      body.image = await uploadImageToCloudinaryBridge(body.image, 'fan-drivers');
+      document.getElementById('dp-image').value = body.image;
+      renderDriverProfilePreview(body.image);
+      setDriverUploadStatus('Migrated to Cloudinary', 'success');
+    }
+
     const res = await fetch(
       EDIT_DRIVER_PROFILE_ID ? `${ADMIN_DRIVER_PROFILES_API}/${EDIT_DRIVER_PROFILE_ID}` : ADMIN_DRIVER_PROFILES_API,
       {
@@ -5011,7 +5126,7 @@ async function saveDriverProfile() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'Save failed');
 
-    showToast('🔥 Driver image saved');
+    showToast(isCloudinaryUrl(body.image) ? '🔥 Driver image saved to Cloudinary' : '🔥 Driver profile saved');
     closeDriverProfileModal();
     await loadAdminDriverProfiles();
 
@@ -5020,6 +5135,49 @@ async function saveDriverProfile() {
     showToast(`❌ ${err.message}`);
   }
 }
+
+async function migrateDriverProfilesToCloudinary() {
+  const pending = REAL_DRIVER_PROFILES_ADMIN.filter(profile => /^data:image\//i.test(String(profile.image || '')));
+  if (!pending.length) {
+    showToast('✅ No base64 driver images to migrate');
+    return;
+  }
+  if (!confirm(`Migrate ${pending.length} base64 driver image(s) to Cloudinary now?`)) return;
+
+  let ok = 0;
+  let failed = 0;
+
+  for (const profile of pending) {
+    try {
+      showToast(`☁️ Migrating ${profile.name || 'driver'}...`);
+      const image = await uploadImageToCloudinaryBridge(profile.image, 'fan-drivers');
+      const body = {
+        name: profile.name || '',
+        code: profile.code || '',
+        team: profile.team || '',
+        country: profile.country || '',
+        flagEmoji: profile.flagEmoji || '',
+        image,
+        isActive: profile.isActive !== false
+      };
+      const res = await fetch(`${ADMIN_DRIVER_PROFILES_API}/${profile._id}`, {
+        method: 'PUT',
+        headers: driverProfileHeaders(),
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) throw new Error(data.message || 'Migration save failed');
+      ok += 1;
+    } catch (err) {
+      failed += 1;
+      console.error('Driver image migration failed:', profile?.name, err);
+    }
+  }
+
+  await loadAdminDriverProfiles();
+  showToast(`✅ Migrated ${ok}. Failed ${failed}.`);
+}
+window.migrateDriverProfilesToCloudinary = migrateDriverProfilesToCloudinary;
 
 async function deleteDriverProfile(id) {
   try {
