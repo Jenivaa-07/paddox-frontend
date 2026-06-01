@@ -3563,3 +3563,183 @@ loadNextRaceCountdown();
 loadLastResult();
 
 console.log('%cPADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
+
+
+/* ══════════════════════════════════════
+   PHASE A4.11B — PADDOX AI FAN STUDIO UI
+   Frontend preview only. Real generation arrives in A4.11C.
+══════════════════════════════════════ */
+const AI_STUDIO_STATE = {
+  style: 'VIP Paddock',
+  tone: 'Luxury paddock access, glass card, carbon shadows',
+  photoUrl: ''
+};
+
+function aiStudioToken() {
+  return (
+    localStorage.getItem('token') ||
+    localStorage.getItem('paddox_access_token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+async function loadAiCreditBalance() {
+  const balanceEl = document.getElementById('ai-credit-balance');
+  if (!balanceEl) return;
+
+  const token = aiStudioToken();
+  if (!token) {
+    balanceEl.textContent = '50';
+    return;
+  }
+
+  try {
+    const res = await fetch('https://paddox-backend.onrender.com/api/users/ai-credits', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json().catch(() => ({}));
+    const credits =
+      data.data?.aiCredits ??
+      data.aiCredits ??
+      data.user?.aiCredits ??
+      data.data?.user?.aiCredits ??
+      50;
+
+    balanceEl.textContent = Number(credits || 0).toLocaleString('en-IN');
+  } catch (err) {
+    console.warn('AI credits balance unavailable:', err);
+    balanceEl.textContent = '50';
+  }
+}
+
+function updateAiStudioPreview() {
+  const fanName = document.getElementById('ai-fan-name')?.value?.trim() || 'PADDOX FAN';
+  const driver = document.getElementById('ai-driver-inspo')?.value?.trim() || 'Driver-inspired';
+  const team = document.getElementById('ai-team-mood')?.value || 'PADDOX Red';
+  const format = document.getElementById('ai-output-format')?.value || 'Portrait 4:5';
+  const prompt = document.getElementById('ai-creative-prompt')?.value?.trim();
+
+  const styleEl = document.getElementById('ai-preview-style');
+  const nameEl = document.getElementById('ai-preview-name');
+  const lineEl = document.getElementById('ai-preview-line');
+  const teamEl = document.getElementById('ai-preview-team');
+  const formatEl = document.getElementById('ai-preview-format');
+
+  if (styleEl) styleEl.textContent = AI_STUDIO_STATE.style;
+  if (nameEl) nameEl.textContent = fanName.toUpperCase();
+  if (lineEl) {
+    lineEl.textContent = prompt
+      ? prompt
+      : `${driver} motorsport poster with ${team} energy.`;
+  }
+  if (teamEl) teamEl.textContent = team;
+  if (formatEl) formatEl.textContent = format;
+
+  const poster = document.getElementById('ai-poster-preview');
+  if (poster) {
+    poster.classList.remove('ai-format-square','ai-format-wide');
+    if (format.includes('Square')) poster.classList.add('ai-format-square');
+    if (format.includes('Wallpaper')) poster.classList.add('ai-format-wide');
+  }
+}
+
+function initAiStudioStyles() {
+  document.querySelectorAll('.ai-style-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.ai-style-card').forEach(item => item.classList.remove('on'));
+      card.classList.add('on');
+      AI_STUDIO_STATE.style = card.dataset.style || 'VIP Paddock';
+      AI_STUDIO_STATE.tone = card.dataset.tone || '';
+      updateAiStudioPreview();
+    });
+  });
+}
+
+function initAiStudioPhotoUpload() {
+  const input = document.getElementById('ai-photo-input');
+  const img = document.getElementById('ai-photo-preview');
+  const frame = document.getElementById('ai-photo-frame');
+  const uploadBox = document.getElementById('ai-upload-box');
+  if (!input || !img || !frame) return;
+
+  input.addEventListener('change', () => {
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload a valid image file');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      AI_STUDIO_STATE.photoUrl = String(reader.result || '');
+      img.src = AI_STUDIO_STATE.photoUrl;
+      frame.classList.add('has-photo');
+      uploadBox?.classList.add('has-photo');
+      showToast('Fan photo added to preview');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function initAiStudioInputs() {
+  ['ai-fan-name','ai-driver-inspo','ai-team-mood','ai-output-format','ai-creative-prompt'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', updateAiStudioPreview);
+    el.addEventListener('change', updateAiStudioPreview);
+  });
+
+  document.getElementById('ai-generate-preview')?.addEventListener('click', () => {
+    updateAiStudioPreview();
+    const poster = document.getElementById('ai-poster-preview');
+    poster?.classList.remove('preview-pulse');
+    void poster?.offsetWidth;
+    poster?.classList.add('preview-pulse');
+    showToast('Preview ready. Real AI generation connects in A4.11C');
+  });
+
+  document.getElementById('ai-reset-studio')?.addEventListener('click', () => {
+    const name = document.getElementById('ai-fan-name');
+    const driver = document.getElementById('ai-driver-inspo');
+    const team = document.getElementById('ai-team-mood');
+    const format = document.getElementById('ai-output-format');
+    const prompt = document.getElementById('ai-creative-prompt');
+    const input = document.getElementById('ai-photo-input');
+    const img = document.getElementById('ai-photo-preview');
+    const frame = document.getElementById('ai-photo-frame');
+    const uploadBox = document.getElementById('ai-upload-box');
+
+    if (name) name.value = '';
+    if (driver) driver.value = '';
+    if (team) team.value = 'PADDOX Red';
+    if (format) format.value = 'Portrait 4:5';
+    if (prompt) prompt.value = '';
+    if (input) input.value = '';
+    if (img) img.removeAttribute('src');
+    frame?.classList.remove('has-photo');
+    uploadBox?.classList.remove('has-photo');
+
+    document.querySelectorAll('.ai-style-card').forEach((card, index) => card.classList.toggle('on', index === 0));
+    AI_STUDIO_STATE.style = 'VIP Paddock';
+    AI_STUDIO_STATE.tone = 'Luxury paddock access, glass card, carbon shadows';
+    AI_STUDIO_STATE.photoUrl = '';
+
+    updateAiStudioPreview();
+    showToast('AI Studio reset');
+  });
+}
+
+function initPaddoxAiStudio() {
+  if (!document.getElementById('sec-ai-studio')) return;
+  initAiStudioStyles();
+  initAiStudioPhotoUpload();
+  initAiStudioInputs();
+  updateAiStudioPreview();
+  loadAiCreditBalance();
+}
+
+window.addEventListener('load', initPaddoxAiStudio);
