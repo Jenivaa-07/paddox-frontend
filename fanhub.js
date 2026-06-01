@@ -3769,7 +3769,7 @@ async function generateAiPoster() {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), 65000);
 
     const res = await fetch(`${AI_STUDIO_API_BASE}/generate`, {
       method: 'POST',
@@ -3803,7 +3803,14 @@ async function generateAiPoster() {
 
     if (generatedImg) generatedImg.src = imageUrl;
     preview?.classList.add('has-generated');
-    if (status) status.textContent = `Generated · ${payload.cost || 15} credits used`;
+    if (status) {
+      const modeText = payload.providerMode === 'live'
+        ? 'Gemini Live'
+        : payload.providerMode === 'live-fallback'
+          ? 'Fallback Generated'
+          : 'Preview Generated';
+      status.textContent = `${modeText} · ${payload.cost || 15} credits used`;
+    }
 
     const newCredits = payload.aiCredits ?? payload.remainingCredits;
     const balanceEl = document.getElementById('ai-credit-balance');
@@ -3823,7 +3830,7 @@ async function generateAiPoster() {
     showToast(data.message || 'AI poster generated and saved');
   } catch (err) {
     const message = err?.name === 'AbortError'
-      ? 'Generation timed out. Backend may still be deploying — try again after Render is live.'
+      ? 'Generation timed out. Real AI can take longer or Render may still be deploying — try again.'
       : (err.message || 'AI generation failed');
     showToast(message);
   } finally {
