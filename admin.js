@@ -3160,12 +3160,13 @@ window.downloadAnalyticsReport = downloadAnalyticsReport;
    MODERATION — Phase A4.9B Premium Community Safety
    Reads admin moderation endpoint when available, then Fan Hub feed fallback.
 ══════════════════════════════════════ */
-const MODERATION_ADMIN_API = 'https://paddox-backend.onrender.com/api/admin/moderation';
+const MODERATION_ADMIN_API = 'https://paddox-backend.onrender.com/api/fan/admin/moderation';
 const MODERATION_FAN_FEED_API = 'https://paddox-backend.onrender.com/api/fan/feed';
 
 /* A4.9B.1 — The Fan Hub post endpoint changed across phases.
    Moderation now probes the real likely routes instead of relying on one old path. */
 const MODERATION_FEED_ENDPOINTS = [
+  'https://paddox-backend.onrender.com/api/fan/admin/moderation',
   'https://paddox-backend.onrender.com/api/fan/feed',
   'https://paddox-backend.onrender.com/api/fan/posts',
   'https://paddox-backend.onrender.com/api/fan/community',
@@ -3293,8 +3294,14 @@ async function loadAdminModerationQueue() {
   const res = await fetch(MODERATION_ADMIN_API, { headers: moderationHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) throw new Error(data.message || 'Admin moderation endpoint unavailable');
-  const queue = data.data?.items || data.data?.queue || data.queue || data.items || [];
-  return Array.isArray(queue) ? queue.map(item => normalizeModerationItem(item, item.type || 'system')) : [];
+  const queue = data.data?.items || data.data?.queue || data.queue || data.items || data.data?.posts || data.posts || [];
+  if (!Array.isArray(queue)) return [];
+  /* A4.9B.2: backend may return posts directly; convert posts + embedded comments into queue items. */
+  if (queue.some(item => Array.isArray(item?.comments) || item?.text)) {
+    const looksLikePosts = queue.some(item => Array.isArray(item?.comments) || item?.isApproved !== undefined || item?.isFlagged !== undefined);
+    if (looksLikePosts && !queue.some(item => item?.type)) return moderationItemsFromFeed(queue);
+  }
+  return queue.map(item => normalizeModerationItem(item, item.type || 'system'));
 }
 
 function extractModerationPosts(data = {}) {
@@ -3330,7 +3337,7 @@ async function loadFanFeedModerationFallback() {
   for (const url of MODERATION_FEED_ENDPOINTS) {
     try {
       const items = await fetchModerationFeedEndpoint(url);
-      setModerationStatus(`Live Fan Hub source connected`);
+      setModerationStatus(url.includes('/admin/moderation') ? 'Exact admin moderation source connected' : 'Live Fan Hub source connected');
       return items;
     } catch (err) {
       errors.push(`${url} => ${err.message}`);
