@@ -10023,3 +10023,301 @@ async function deleteCoupon(id) {
     });
   });
 })();
+
+
+/* ============================================================
+   PADDOX ADMIN PHASE A4.10A — NOTIFICATION CENTER FINAL POLISH
+   - Bell dropdown with filters, mark read, clear all, manual sync
+   - Realtime/poll sync for orders, low stock, moderation, coupons, digital assets
+   - Frontend-safe: no backend change required when A4.9B.2 moderation route exists
+   ============================================================ */
+var ADMIN_NOTIF_FILTER = 'all';
+var ADMIN_NOTIF_SEEN_MOD_KEY = 'paddox_admin_seen_moderation_ids_v1';
+var ADMIN_NOTIF_SEEN_COUPON_KEY = 'paddox_admin_seen_coupon_usage_v1';
+var ADMIN_NOTIF_SEEN_ASSET_KEY = 'paddox_admin_seen_asset_ids_v1';
+var ADMIN_NOTIF_SYNCING = false;
+
+function adminNotifStorageSet(key) {
+  try {
+    const ids = JSON.parse(localStorage.getItem(key) || '[]');
+    return new Set(Array.isArray(ids) ? ids : []);
+  } catch (_) {
+    return new Set();
+  }
+}
+function adminNotifSaveStorageSet(key, set, limit = 400) {
+  try { localStorage.setItem(key, JSON.stringify([...set].slice(0, limit))); } catch (_) {}
+}
+function adminNotifIcon(type) {
+  if (type === 'order') return 'OD';
+  if (type === 'stock') return 'ST';
+  if (type === 'fan') return 'FH';
+  if (type === 'moderation') return 'MD';
+  if (type === 'coupon') return 'CP';
+  if (type === 'digital') return 'DG';
+  return 'AL';
+}
+function adminNotifTypeLabel(type) {
+  return ({ order:'Orders', stock:'Stock', fan:'Fan Hub', moderation:'Moderation', coupon:'Coupons', digital:'Digital' })[type] || 'System';
+}
+function adminNotifJumpTarget(type) {
+  if (type === 'order') return 'orders';
+  if (type === 'stock') return 'inventory';
+  if (type === 'fan' || type === 'moderation') return 'moderation';
+  if (type === 'coupon') return 'coupons';
+  if (type === 'digital') return 'assets';
+  return 'overview';
+}
+function adminNotifEnsurePanel() {
+  const bell = document.querySelector('.adm-notif');
+  if (!bell) return;
+
+  if (!bell.querySelector('.adm-notif-count')) {
+    const count = document.createElement('span');
+    count.className = 'adm-notif-count';
+    count.textContent = '0';
+    bell.appendChild(count);
+  }
+
+  let panel = document.getElementById('admin-notification-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'admin-notification-panel';
+    document.body.appendChild(panel);
+  }
+  panel.className = 'admin-notification-panel a410a-panel';
+  panel.innerHTML = `
+    <div class="admin-notification-head">
+      <div>
+        <div class="admin-notification-kicker">Command Center</div>
+        <div class="admin-notification-title">Notification Center</div>
+        <div class="admin-notification-sub">Live orders, moderation, inventory, coupons and digital sales signals.</div>
+      </div>
+      <button class="admin-notification-close" type="button" aria-label="Close notifications">×</button>
+    </div>
+    <div class="admin-notification-actions">
+      ${['all','order','moderation','stock','coupon','digital'].map(type => `<button class="notif-filter-chip ${ADMIN_NOTIF_FILTER === type ? 'on' : ''}" data-notif-filter="${type}" type="button">${type === 'all' ? 'All' : adminNotifTypeLabel(type)}</button>`).join('')}
+      <button class="admin-notification-read" id="admin-notification-read" type="button">Mark Read</button>
+      <button class="admin-notification-refresh" id="admin-notification-refresh" type="button">Sync</button>
+    </div>
+    <div class="admin-notification-list" id="admin-notification-list"></div>
+    <div class="admin-notification-foot">
+      <div class="admin-notification-status" id="admin-notification-status"><span class="a410a-live-pulse"></span>Realtime watch active</div>
+      <button class="admin-notification-clear" id="admin-notification-clear" type="button">Clear All</button>
+    </div>
+  `;
+
+  if (!bell.dataset.a410aBound) {
+    bell.dataset.a410aBound = 'true';
+    bell.addEventListener('click', event => {
+      event.stopPropagation();
+      adminNotifEnsurePanel();
+      const livePanel = document.getElementById('admin-notification-panel');
+      livePanel?.classList.toggle('show');
+      if (livePanel?.classList.contains('show')) adminNotifRender();
+    });
+    document.addEventListener('click', () => document.getElementById('admin-notification-panel')?.classList.remove('show'));
+  }
+
+  panel.addEventListener('click', event => event.stopPropagation());
+  panel.querySelector('.admin-notification-close')?.addEventListener('click', () => panel.classList.remove('show'));
+  panel.querySelectorAll('[data-notif-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ADMIN_NOTIF_FILTER = btn.dataset.notifFilter || 'all';
+      adminNotifEnsurePanel();
+      adminNotifRender();
+      document.getElementById('admin-notification-panel')?.classList.add('show');
+    });
+  });
+  panel.querySelector('#admin-notification-read')?.addEventListener('click', () => {
+    ADMIN_NOTIFICATIONS = ADMIN_NOTIFICATIONS.map(n => ({ ...n, unread:false }));
+    adminNotifSave();
+    adminNotifRender();
+  });
+  panel.querySelector('#admin-notification-clear')?.addEventListener('click', () => {
+    ADMIN_NOTIFICATIONS = [];
+    adminNotifSave();
+    adminNotifRender();
+  });
+  panel.querySelector('#admin-notification-refresh')?.addEventListener('click', () => adminNotifFullSync(true));
+  adminNotifPanelReady = true;
+}
+function adminNotifRender() {
+  adminNotifEnsurePanel();
+  const bell = document.querySelector('.adm-notif');
+  const countEl = bell?.querySelector('.adm-notif-count');
+  const list = document.getElementById('admin-notification-list');
+  const status = document.getElementById('admin-notification-status');
+  const unread = adminNotifUnreadCount();
+  const filtered = ADMIN_NOTIF_FILTER === 'all'
+    ? ADMIN_NOTIFICATIONS
+    : ADMIN_NOTIFICATIONS.filter(n => n.type === ADMIN_NOTIF_FILTER);
+
+  if (bell) bell.classList.toggle('has-unread', unread > 0);
+  if (countEl) countEl.textContent = unread > 9 ? '9+' : String(unread);
+  if (status) {
+    const syncLabel = adminNotifLastSync ? `Last sync ${adminNotifTimeAgo(adminNotifLastSync)}` : 'Realtime watch active';
+    status.innerHTML = `<span class="a410a-live-pulse"></span>${syncLabel} · ${ADMIN_NOTIFICATIONS.length} total · ${unread} unread`;
+  }
+  document.querySelectorAll('[data-notif-filter]').forEach(btn => btn.classList.toggle('on', (btn.dataset.notifFilter || 'all') === ADMIN_NOTIF_FILTER));
+  if (!list) return;
+
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="admin-notification-empty">
+        <div class="admin-notification-empty-icon">✓</div>
+        <div class="admin-notification-empty-title">No ${ADMIN_NOTIF_FILTER === 'all' ? '' : adminNotifTypeLabel(ADMIN_NOTIF_FILTER)} alerts</div>
+        <div class="admin-notification-empty-sub">New live signals will appear here after orders, posts, comments, coupon usage or stock changes.</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.slice(0, 30).map(n => {
+    const target = adminNotifJumpTarget(n.type);
+    return `
+      <div class="admin-notification-item ${n.type || 'system'} ${n.unread ? 'unread' : ''}">
+        <div class="admin-notification-icon">${adminNotifIcon(n.type)}</div>
+        <div>
+          <div class="admin-notification-name">${escapeAdminText(n.title)}</div>
+          <div class="admin-notification-msg">${escapeAdminText(n.message)}</div>
+          <div class="admin-notification-meta">
+            <span class="admin-notification-time">${adminNotifTimeAgo(n.createdAt)}</span>
+            <button class="admin-notification-jump" type="button" onclick="switchPage('${target}');document.getElementById('admin-notification-panel')?.classList.remove('show')">Open ${adminNotifTypeLabel(n.type)}</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+async function adminNotifPollModeration() {
+  const token = getAdminToken();
+  if (!token) return;
+  try {
+    const res = await fetch('https://paddox-backend.onrender.com/api/fan/admin/moderation', { headers:{ Authorization:`Bearer ${token}` } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return;
+    const items = data.data || data.items || data.posts || [];
+    const seen = adminNotifStorageSet(ADMIN_NOTIF_SEEN_MOD_KEY);
+    const normalized = Array.isArray(items) ? items : [];
+    normalized.slice().reverse().forEach(item => {
+      const id = String(item.id || item._id || item.postId || `${item.type || 'moderation'}-${item.createdAt || ''}-${item.text || item.content || ''}`);
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      const kind = String(item.type || item.kind || 'post').replaceAll('_',' ');
+      const user = item.user?.firstName || item.user?.name || item.userName || item.author || 'Fan';
+      const text = item.text || item.content || item.message || 'Fan Hub activity needs review.';
+      adminNotifAdd({
+        id:`mod-${id}`,
+        type:'moderation',
+        title:`New ${kind} for review`,
+        message:`${user}: ${String(text).slice(0, 96)}`,
+        createdAt:item.createdAt ? new Date(item.createdAt).getTime() : Date.now(),
+        ref:id
+      }, { toast:'🔔 New moderation item' });
+    });
+    adminNotifSaveStorageSet(ADMIN_NOTIF_SEEN_MOD_KEY, seen);
+  } catch (err) { console.warn('A4.10A moderation notification sync failed:', err.message); }
+}
+async function adminNotifPollCoupons() {
+  const token = getAdminToken();
+  if (!token) return;
+  try {
+    if (typeof loadCoupons === 'function' && (!Array.isArray(REAL_COUPONS) || !REAL_COUPONS.length)) await loadCoupons();
+    const seen = adminNotifStorageSet(ADMIN_NOTIF_SEEN_COUPON_KEY);
+    (REAL_COUPONS || []).forEach(coupon => {
+      const used = Number(coupon.usedCount || coupon.usageCount || 0);
+      if (!used) return;
+      const id = `${coupon._id || coupon.code}-${used}`;
+      if (seen.has(id)) return;
+      seen.add(id);
+      adminNotifAdd({
+        id:`coupon-${id}`,
+        type:'coupon',
+        title:'Coupon usage updated',
+        message:`${coupon.code || 'Coupon'} has been used ${used} time${used === 1 ? '' : 's'}.`,
+        createdAt:Date.now(),
+        ref:coupon._id || coupon.code || ''
+      }, { unread:false });
+    });
+    adminNotifSaveStorageSet(ADMIN_NOTIF_SEEN_COUPON_KEY, seen);
+  } catch (err) { console.warn('A4.10A coupon notification sync failed:', err.message); }
+}
+async function adminNotifPollDigitalAssets() {
+  try {
+    if (typeof loadAssets === 'function' && (!Array.isArray(REAL_ASSETS) || !REAL_ASSETS.length)) await loadAssets();
+    const seen = adminNotifStorageSet(ADMIN_NOTIF_SEEN_ASSET_KEY);
+    (REAL_ASSETS || []).forEach(asset => {
+      const downloads = Number(asset.downloads || asset.downloadCount || asset.soldCount || 0);
+      const isPremium = asset.isPremium || Number(asset.price || 0) > 0;
+      if (!isPremium && !downloads) return;
+      const id = `${asset._id || asset.id || asset.name}-${downloads}`;
+      if (seen.has(id)) return;
+      seen.add(id);
+      adminNotifAdd({
+        id:`digital-${id}`,
+        type:'digital',
+        title: isPremium ? 'Digital asset signal' : 'Wallpaper download signal',
+        message:`${asset.name || asset.title || 'Digital asset'} ${downloads ? `has ${downloads} download${downloads === 1 ? '' : 's'}` : 'is listed as premium'}.`,
+        createdAt:Date.now(),
+        ref:asset._id || asset.id || ''
+      }, { unread:false });
+    });
+    adminNotifSaveStorageSet(ADMIN_NOTIF_SEEN_ASSET_KEY, seen);
+  } catch (err) { console.warn('A4.10A digital notification sync failed:', err.message); }
+}
+async function adminNotifFullSync(manual = false) {
+  if (ADMIN_NOTIF_SYNCING) return;
+  ADMIN_NOTIF_SYNCING = true;
+  try {
+    if (manual) showToast('⏳ Syncing notification center...');
+    await Promise.allSettled([
+      adminNotifPollOrders(),
+      adminNotifPollModeration(),
+      adminNotifPollCoupons(),
+      adminNotifPollDigitalAssets()
+    ]);
+    adminNotifCheckLowStock();
+    adminNotifLastSync = Date.now();
+    adminNotifRender();
+    if (manual) showToast('🔥 Notification center synced');
+  } finally {
+    ADMIN_NOTIF_SYNCING = false;
+  }
+}
+function adminNotifBindSocketListeners() {
+  try {
+    initAdminNotificationSocket();
+    if (!adminSocket || adminSocket.__paddoxNotifBoundA410A) return;
+    adminSocket.__paddoxNotifBoundA410A = true;
+    const addLive = (type, title, payload = {}) => adminNotifAdd({
+      type,
+      title,
+      message: payload.message || payload.title || payload.text || payload.content || 'New live activity detected.',
+      createdAt: Date.now(),
+      ref: payload.ref || payload.id || payload._id || payload.orderId || ''
+    }, { toast:'🔔 New admin notification' });
+    adminSocket.on('admin:new-order', payload => addLive('order','New order received',payload));
+    adminSocket.on('order:new', payload => addLive('order','New order received',payload));
+    adminSocket.on('order:created', payload => addLive('order','New order received',payload));
+    adminSocket.on('fan:new-post', payload => addLive('moderation','New Fan Hub post',payload));
+    adminSocket.on('fan:new-comment', payload => addLive('moderation','New Fan Hub comment',payload));
+    adminSocket.on('fan:poll-vote', payload => addLive('fan','New poll vote',payload));
+    adminSocket.on('fan:trivia-answer', payload => addLive('fan','New trivia answer',payload));
+    adminSocket.on('coupon:used', payload => addLive('coupon','Coupon used',payload));
+    adminSocket.on('asset:purchased', payload => addLive('digital','Digital asset purchased',payload));
+    adminSocket.on('admin:notification', payload => addLive(payload?.type || 'system', payload?.title || 'Admin alert', payload));
+  } catch (err) { console.warn('A4.10A notification socket bind failed:', err.message); }
+}
+function adminNotifStartRealtimeWatch() {
+  if (adminNotifPollingStarted) return;
+  adminNotifPollingStarted = true;
+  adminNotifLoad();
+  adminNotifEnsurePanel();
+  adminNotifPrimeFromExistingOrders();
+  adminNotifCheckLowStock();
+  adminNotifBindSocketListeners();
+  adminNotifRender();
+  setTimeout(() => adminNotifFullSync(false), 1800);
+  setInterval(() => adminNotifFullSync(false), 30000);
+  setInterval(() => { adminNotifBindSocketListeners(); adminNotifRender(); }, 60000);
+}
+console.log('%c🔔 PADDOX — Admin Notification Center Final · A4.10A', 'color:#e8002d;font-size:13px;font-weight:bold;');
