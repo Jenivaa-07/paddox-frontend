@@ -10382,3 +10382,175 @@ console.log('%c🔔 PADDOX — Admin Notification Center Final · A4.10A', 'colo
 })();
 
 console.log('%c🔔 PADDOX — A4.10A.1 Notification Bell Click Fix loaded', 'color:#e8002d;font-size:13px;font-weight:bold;');
+
+
+/* ============================================================
+   PADDOX — Phase A4.10A.2
+   Notification Bell Force Click + Panel Layer Fix
+   ------------------------------------------------------------
+   Some deploy/cache orders can leave the bell visible but bind the
+   earlier notification handler to an older panel state. This patch
+   creates/opens the panel directly from the click target, using a
+   document-level capture listener and a global inline fallback.
+   ============================================================ */
+(function paddoxNotificationForceClickLayerFix(){
+  function ensureForcePanel(){
+    try {
+      if (typeof adminNotifLoad === 'function') adminNotifLoad();
+      if (typeof adminNotifEnsurePanel === 'function') adminNotifEnsurePanel();
+      let panel = document.getElementById('admin-notification-panel');
+
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'admin-notification-panel';
+        panel.className = 'admin-notification-panel a410a-panel';
+        panel.innerHTML = `
+          <div class="admin-notification-head">
+            <div>
+              <div class="admin-notification-kicker">Live Alerts</div>
+              <div class="admin-notification-title">Admin Notifications</div>
+              <div class="admin-notification-sub">Orders, Fan Hub moderation, stock, coupons and digital signals appear here.</div>
+            </div>
+            <button class="admin-notification-close" type="button" aria-label="Close notifications">×</button>
+          </div>
+          <div class="admin-notification-actions">
+            <button class="notif-filter-chip on" type="button" data-notif-filter="all">All</button>
+            <button class="notif-filter-chip" type="button" data-notif-filter="order">Orders</button>
+            <button class="notif-filter-chip" type="button" data-notif-filter="moderation">Moderation</button>
+            <button class="notif-filter-chip" type="button" data-notif-filter="stock">Stock</button>
+            <button class="notif-filter-chip" type="button" data-notif-filter="coupon">Coupons</button>
+            <button class="notif-filter-chip" type="button" data-notif-filter="digital">Digital</button>
+            <button class="admin-notification-refresh" id="admin-notification-refresh" type="button">Sync</button>
+            <button class="admin-notification-read" id="admin-notification-read" type="button">Mark Read</button>
+          </div>
+          <div class="admin-notification-list" id="admin-notification-list"></div>
+          <div class="admin-notification-foot">
+            <div class="admin-notification-status" id="admin-notification-status"><span class="a410a-live-pulse"></span>Realtime watch active</div>
+            <button class="admin-notification-clear" id="admin-notification-clear" type="button">Clear All</button>
+          </div>`;
+        document.body.appendChild(panel);
+      }
+
+      panel.classList.add('a410a-panel');
+      panel.style.position = 'fixed';
+      panel.style.top = '72px';
+      panel.style.right = '28px';
+      panel.style.zIndex = '1000001';
+
+      panel.querySelector('.admin-notification-close')?.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        closeForcePanel();
+      }, { once:false });
+
+      panel.querySelector('#admin-notification-refresh')?.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof adminNotifFullSync === 'function') adminNotifFullSync(true);
+        else if (typeof adminNotifRender === 'function') adminNotifRender();
+      }, { once:false });
+
+      panel.querySelector('#admin-notification-read')?.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if (Array.isArray(window.ADMIN_NOTIFICATIONS)) {
+          window.ADMIN_NOTIFICATIONS = window.ADMIN_NOTIFICATIONS.map(n => ({...n, unread:false}));
+        }
+        try { ADMIN_NOTIFICATIONS = (ADMIN_NOTIFICATIONS || []).map(n => ({...n, unread:false})); } catch(_) {}
+        if (typeof adminNotifSave === 'function') adminNotifSave();
+        if (typeof adminNotifRender === 'function') adminNotifRender();
+      }, { once:false });
+
+      panel.querySelector('#admin-notification-clear')?.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        try { ADMIN_NOTIFICATIONS = []; } catch(_) {}
+        if (typeof adminNotifSave === 'function') adminNotifSave();
+        if (typeof adminNotifRender === 'function') adminNotifRender();
+      }, { once:false });
+
+      panel.addEventListener('click', function(e){ e.stopPropagation(); }, true);
+      return panel;
+    } catch (err) {
+      console.warn('A4.10A.2 ensureForcePanel failed:', err.message);
+      return null;
+    }
+  }
+
+  function openForcePanel(event){
+    try {
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+      event?.stopImmediatePropagation?.();
+
+      const panel = ensureForcePanel();
+      if (!panel) return false;
+
+      const willOpen = !panel.classList.contains('show') && !panel.classList.contains('pdx-force-show');
+      panel.classList.toggle('show', willOpen);
+      panel.classList.toggle('pdx-force-show', willOpen);
+      document.body.classList.toggle('pdx-notif-debug-open', willOpen);
+
+      if (willOpen) {
+        if (typeof adminNotifStartRealtimeWatch === 'function') adminNotifStartRealtimeWatch();
+        if (typeof adminNotifFullSync === 'function') setTimeout(() => adminNotifFullSync(false), 150);
+        if (typeof adminNotifRender === 'function') adminNotifRender();
+      }
+      return false;
+    } catch (err) {
+      console.warn('A4.10A.2 openForcePanel failed:', err.message);
+      return false;
+    }
+  }
+
+  function closeForcePanel(){
+    const panel = document.getElementById('admin-notification-panel');
+    if (panel) {
+      panel.classList.remove('show');
+      panel.classList.remove('pdx-force-show');
+    }
+    document.body.classList.remove('pdx-notif-debug-open');
+  }
+
+  function bindBellForce(){
+    const bell = document.querySelector('#adm-notif-btn, .adm-notif');
+    if (!bell) return;
+    bell.id = bell.id || 'adm-notif-btn';
+    bell.style.pointerEvents = 'auto';
+    bell.style.cursor = 'pointer';
+    bell.setAttribute('role','button');
+    bell.setAttribute('tabindex','0');
+    bell.setAttribute('aria-label','Open admin notifications');
+    bell.onclick = openForcePanel;
+    if (!bell.dataset.a410a2Bound) {
+      bell.dataset.a410a2Bound = 'true';
+      bell.addEventListener('click', openForcePanel, true);
+      bell.addEventListener('mousedown', function(e){ e.stopPropagation(); }, true);
+      bell.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' ') openForcePanel(e);
+      }, true);
+    }
+  }
+
+  window.paddoxForceOpenAdminNotifications = openForcePanel;
+
+  document.addEventListener('click', function(e){
+    const bell = e.target.closest?.('#adm-notif-btn, .adm-notif');
+    if (bell) return openForcePanel(e);
+    const panel = e.target.closest?.('#admin-notification-panel');
+    if (!panel) closeForcePanel();
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    bindBellForce();
+    setTimeout(bindBellForce, 500);
+    setTimeout(bindBellForce, 1500);
+  });
+  window.addEventListener('load', function(){
+    bindBellForce();
+    setTimeout(bindBellForce, 1000);
+  });
+  bindBellForce();
+})();
+
+console.log('%c🔔 PADDOX — A4.10A.2 Notification Force Click Fix loaded', 'color:#e8002d;font-size:13px;font-weight:bold;');
