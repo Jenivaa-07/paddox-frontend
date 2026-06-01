@@ -10321,3 +10321,64 @@ function adminNotifStartRealtimeWatch() {
   setInterval(() => { adminNotifBindSocketListeners(); adminNotifRender(); }, 60000);
 }
 console.log('%c🔔 PADDOX — Admin Notification Center Final · A4.10A', 'color:#e8002d;font-size:13px;font-weight:bold;');
+
+/* ============================================================
+   PADDOX — Phase A4.10A.1
+   Notification Bell Click Boot Fix
+   ------------------------------------------------------------
+   A4.10A added the notification center functions but the boot
+   call can be missed after cache/merge order changes. This
+   guarded bootstrap always binds the bell and starts live sync.
+   ============================================================ */
+(function paddoxAdminNotificationBellBootFix(){
+  function bootNotificationCenterFix(){
+    try {
+      if (typeof adminNotifStartRealtimeWatch === 'function') {
+        adminNotifStartRealtimeWatch();
+      }
+
+      const bell = document.querySelector('.adm-notif');
+      if (!bell) return;
+
+      bell.style.pointerEvents = 'auto';
+      bell.style.cursor = 'pointer';
+      bell.setAttribute('role', 'button');
+      bell.setAttribute('tabindex', '0');
+      bell.setAttribute('aria-label', 'Open admin notification center');
+
+      if (!bell.dataset.a410a1FallbackBound) {
+        bell.dataset.a410a1FallbackBound = 'true';
+
+        const openPanel = function(event){
+          event.preventDefault();
+          event.stopPropagation();
+
+          if (typeof adminNotifEnsurePanel === 'function') adminNotifEnsurePanel();
+          const panel = document.getElementById('admin-notification-panel');
+          if (!panel) return;
+
+          panel.classList.toggle('show');
+          if (panel.classList.contains('show') && typeof adminNotifRender === 'function') {
+            adminNotifRender();
+          }
+        };
+
+        bell.addEventListener('click', openPanel, true);
+        bell.addEventListener('keydown', function(event){
+          if (event.key === 'Enter' || event.key === ' ') openPanel(event);
+        });
+      }
+    } catch (err) {
+      console.warn('A4.10A.1 notification bell boot fix failed:', err.message);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootNotificationCenterFix);
+  } else {
+    bootNotificationCenterFix();
+  }
+  window.addEventListener('load', bootNotificationCenterFix);
+})();
+
+console.log('%c🔔 PADDOX — A4.10A.1 Notification Bell Click Fix loaded', 'color:#e8002d;font-size:13px;font-weight:bold;');
