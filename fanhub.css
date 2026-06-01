@@ -6690,3 +6690,248 @@ body.modal-open { overflow: hidden; }
   .ai-poster-preview.ai-format-wide .ai-photo-frame{width:70%;height:46%;left:50%;top:46%}
   .ai-poster-preview.ai-format-wide .ai-poster-copy{right:22px;bottom:62px}
 }
+
+
+/* ══════════════════════════════════════
+   PHASE A4.11B.1 — AI FAN STUDIO PREMIUM POLISH
+══════════════════════════════════════ */
+#sec-ai-studio{
+  padding-top:48px;
+}
+#sec-ai-studio .sec-header{
+  margin-bottom:28px;
+}
+.ai-studio-header{
+  padding:0 0 10px;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.ai-studio-sub{
+  max-width:740px;
+  font-size:.94rem;
+}
+.ai-credit-wallet{
+  min-width:260px;
+  padding:18px 20px;
+  border-color:rgba(255,226,138,.42);
+  background:
+    linear-gradient(135deg,rgba(201,168,76,.16),rgba(232,0,45,.09) 42%,rgba(10,10,10,.96)),
+    repeating-linear-gradient(120deg,transparent 0 18px,rgba(255,255,255,.035) 19px,transparent 21px);
+  box-shadow:0 20px 55px rgba(0,0,0,.44),0 0 30px rgba(201,168,76,.10),inset 0 1px 0 rgba(255,255,255,.09);
+  position:relative;
+  overflow:hidden;
+}
+.ai-credit-wallet:after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.08) 42%,transparent 70%);
+  transform:translateX(-120%);
+  animation:aiWalletSweep 6s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes aiWalletSweep{
+  0%,62%{transform:translateX(-120%)}
+  78%,100%{transform:translateX(120%)}
+}
+.ai-credit-coin{
+  box-shadow:0 0 28px rgba(201,168,76,.32),0 8px 26px rgba(0,0,0,.38),inset 0 0 0 3px rgba(0,0,0,.20);
+}
+.ai-wallet-label{
+  color:rgba(255,255,255,.68);
+}
+.ai-wallet-sub{
+  display:block;
+  margin-top:5px;
+  color:rgba(255,255,255,.48);
+  font-size:.66rem;
+  line-height:1.35;
+}
+.ai-studio-grid{
+  gap:22px;
+}
+.ai-studio-panel,.ai-preview-panel{
+  padding:26px;
+  border-color:rgba(255,255,255,.09);
+}
+.ai-studio-panel:after,.ai-preview-panel:after{
+  content:'';
+  position:absolute;
+  left:0;right:0;top:0;height:2px;
+  background:linear-gradient(90deg,var(--red),rgba(201,168,76,.75),transparent 72%);
+  opacity:.9;
+}
+.ai-panel-head,.ai-preview-toolbar{
+  margin-bottom:18px;
+}
+.ai-cost-pill,#ai-preview-format{
+  border-color:rgba(255,226,138,.40);
+  background:linear-gradient(135deg,rgba(201,168,76,.14),rgba(232,0,45,.05));
+}
+.ai-style-grid{
+  gap:10px;
+  margin-bottom:18px;
+}
+.ai-style-card{
+  min-height:94px;
+  padding:15px;
+  background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+}
+.ai-style-card.on{
+  box-shadow:0 0 0 1px rgba(232,0,45,.14),0 14px 32px rgba(232,0,45,.08);
+}
+.ai-form-grid{
+  gap:12px;
+}
+.ai-field input,.ai-field select,.ai-field textarea{
+  background:rgba(255,255,255,.04);
+}
+.ai-field textarea{
+  min-height:82px;
+}
+.ai-upload-box{
+  min-height:112px;
+  border:1px solid rgba(255,255,255,.09);
+  outline:1px dashed rgba(201,168,76,.32);
+  outline-offset:-9px;
+  background:
+    radial-gradient(circle at 50% 0,rgba(232,0,45,.12),transparent 44%),
+    linear-gradient(145deg,rgba(18,18,18,.9),rgba(8,8,8,.95));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055);
+}
+.ai-upload-box:hover,.ai-upload-box.has-photo{
+  outline-color:rgba(232,0,45,.48);
+  border-color:rgba(232,0,45,.32);
+  background:
+    radial-gradient(circle at 50% 0,rgba(232,0,45,.18),transparent 46%),
+    linear-gradient(145deg,rgba(22,12,14,.92),rgba(8,8,8,.96));
+}
+.ai-upload-icon{
+  width:32px;
+  height:32px;
+  background:linear-gradient(180deg,#ffe28a,var(--red));
+}
+.ai-actions-row{
+  margin-top:16px;
+}
+.ai-safe-note{
+  background:rgba(201,168,76,.045);
+  border:1px solid rgba(201,168,76,.12);
+  border-left:2px solid rgba(201,168,76,.68);
+  padding:11px 13px;
+}
+.ai-poster-preview{
+  max-width:400px;
+  border-color:rgba(255,255,255,.16);
+  border-radius:4px;
+  box-shadow:0 34px 90px rgba(0,0,0,.68),0 0 55px rgba(232,0,45,.18),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.ai-poster-preview:before{
+  content:'';
+  position:absolute;
+  inset:10px;
+  border:1px solid rgba(255,255,255,.07);
+  z-index:2;
+  pointer-events:none;
+}
+.ai-poster-bg{
+  background:
+    radial-gradient(circle at 18% 8%,rgba(232,0,45,.52),transparent 26%),
+    radial-gradient(circle at 82% 34%,rgba(201,168,76,.28),transparent 30%),
+    linear-gradient(135deg,#070707 0%,#1b1012 42%,#060606 100%);
+}
+.ai-poster-bg:after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.78) 0%,rgba(0,0,0,.15) 48%,rgba(0,0,0,.35) 100%);
+}
+.ai-poster-brand{
+  top:20px;
+  left:20px;
+  right:20px;
+  z-index:4;
+}
+.ai-poster-brand img{
+  width:42px;
+  height:42px;
+  box-shadow:0 0 24px rgba(232,0,45,.28);
+}
+.ai-poster-brand span{
+  font-size:.6rem;
+  letter-spacing:2.4px;
+}
+.ai-photo-frame{
+  top:43%;
+  width:68%;
+  height:43%;
+  z-index:3;
+  border-color:rgba(255,255,255,.16);
+  background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
+  box-shadow:0 22px 70px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.10);
+}
+.ai-photo-frame:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(232,0,45,.16),transparent 45%,rgba(201,168,76,.10));
+  pointer-events:none;
+  z-index:2;
+}
+.ai-photo-placeholder{
+  font-size:2rem;
+  color:rgba(255,255,255,.20);
+}
+.ai-poster-copy{
+  left:24px;
+  right:24px;
+  bottom:66px;
+  z-index:4;
+}
+.ai-poster-copy span{
+  background:linear-gradient(90deg,var(--red),#9b001f);
+  box-shadow:0 10px 25px rgba(232,0,45,.22);
+}
+.ai-poster-copy h4{
+  font-size:2.55rem;
+}
+.ai-poster-footer{
+  left:24px;
+  right:24px;
+  bottom:22px;
+  z-index:4;
+}
+.ai-preview-actions{
+  gap:10px;
+}
+.ai-locked-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  min-width:150px;
+  opacity:.62!important;
+  background:rgba(255,255,255,.035);
+  border-color:rgba(255,255,255,.10);
+}
+.ai-locked-btn small{
+  display:block;
+  color:rgba(201,168,76,.72);
+  font-size:.55rem;
+  letter-spacing:1.5px;
+  line-height:1;
+}
+.ai-next-phase-card{
+  border-color:rgba(232,0,45,.22);
+  background:linear-gradient(135deg,rgba(232,0,45,.08),rgba(201,168,76,.04));
+}
+@media(max-width:1020px){
+  #sec-ai-studio{padding-top:36px}
+  .ai-studio-grid{grid-template-columns:1fr}
+  .ai-preview-panel{order:2}
+}
+@media(max-width:620px){
+  .ai-style-grid,.ai-form-grid{grid-template-columns:1fr}
+  .ai-credit-wallet{min-width:0;width:100%}
+  .ai-poster-copy h4{font-size:2.1rem}
+  .ai-poster-preview{max-width:340px}
+}

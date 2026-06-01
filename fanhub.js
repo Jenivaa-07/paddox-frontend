@@ -3699,7 +3699,7 @@ function initAiStudioInputs() {
     poster?.classList.remove('preview-pulse');
     void poster?.offsetWidth;
     poster?.classList.add('preview-pulse');
-    showToast('Preview ready. Real AI generation connects in A4.11C');
+    showToast('Premium preview ready. Real AI generation connects in A4.11C');
   });
 
   document.getElementById('ai-reset-studio')?.addEventListener('click', () => {

@@ -190,10 +190,10 @@
     <section class="hub-section" id="sec-ai-studio">
       <div class="sec-header reveal-up ai-studio-header">
         <div>
-          <div class="section-label"><span class="section-mark"></span> Creative Garage</div>
+          <div class="section-label"><span class="section-mark"></span> AI Creative Garage</div>
           <h2 class="section-title">AI FAN <span class="accent">STUDIO</span></h2>
           <p class="ai-studio-sub">
-            Reimagine yourself inside a premium motorsport poster inspired by your favorite driver, team colors and race-weekend mood.
+            Build a fictional premium motorsport fan poster with your photo, driver inspiration, team color mood and PADDOX race-weekend energy.
           </p>
         </div>
         <div class="ai-credit-wallet" id="ai-credit-wallet">
@@ -201,6 +201,7 @@
           <div>
             <span class="ai-wallet-label">PADDOX Credits</span>
             <strong id="ai-credit-balance">--</strong>
+            <small class="ai-wallet-sub">Available balance · 15 credits/poster</small>
           </div>
         </div>
       </div>
@@ -212,7 +213,7 @@
               <div class="ai-kicker">Poster Builder</div>
               <h3>Create your fan artwork</h3>
             </div>
-            <span class="ai-cost-pill"><span class="ai-credit-coin mini" aria-hidden="true"></span> 15 credits</span>
+            <span class="ai-cost-pill"><span class="ai-credit-coin mini" aria-hidden="true"></span> Standard · 15 credits</span>
           </div>
 
           <div class="ai-style-grid" id="ai-style-grid">
@@ -281,18 +282,18 @@
             <input id="ai-photo-input" type="file" accept="image/*"/>
             <span class="ai-upload-icon" aria-hidden="true"></span>
             <strong>Upload fan photo</strong>
-            <small>Optional for preview now. Real AI generation comes in the next backend phase.</small>
+            <small>Optional preview image now. A4.11C will generate the final AI poster and store it in your gallery.</small>
           </label>
 
           <div class="ai-actions-row">
             <button class="ai-generate-btn" id="ai-generate-preview" type="button">
-              Generate Preview
+              Generate Live Preview
             </button>
             <button class="ai-secondary-btn" id="ai-reset-studio" type="button">Reset</button>
           </div>
 
           <div class="ai-safe-note">
-            Fictional AI fan art only. Final generation will create motorsport-inspired posters, not real photos or official driver endorsements.
+            Fictional fan artwork only. PADDOX will generate motorsport-inspired posters, not real photos or official driver endorsements.
           </div>
         </div>
 
@@ -309,7 +310,7 @@
             <div class="ai-poster-bg"></div>
             <div class="ai-poster-brand">
               <img src="assets/paddox-logo-icon-web.png?v=A4_10C_3" alt="PADDOX" loading="lazy"/>
-              <span>PADDOX AI STUDIO</span>
+              <span>PADDOX AI STUDIO · FAN POSTER</span>
             </div>
             <div class="ai-photo-frame" id="ai-photo-frame">
               <span class="ai-photo-placeholder">FAN PHOTO</span>
@@ -321,20 +322,20 @@
               <p id="ai-preview-line">Driver-inspired motorsport poster with PADDOX red energy.</p>
             </div>
             <div class="ai-poster-footer">
-              <span>Fictional fan artwork</span>
+              <span>Fictional fan artwork · Preview</span>
               <strong id="ai-preview-team">PADDOX Red</strong>
             </div>
           </div>
 
           <div class="ai-preview-actions">
-            <button class="ai-secondary-btn disabled" type="button" disabled>Save to Gallery</button>
-            <button class="ai-secondary-btn disabled" type="button" disabled>Share Poster</button>
+            <button class="ai-secondary-btn disabled ai-locked-btn" type="button" disabled>Save to Gallery <small>Coming A4.11C</small></button>
+            <button class="ai-secondary-btn disabled ai-locked-btn" type="button" disabled>Share Poster <small>Coming A4.11C</small></button>
           </div>
 
           <div class="ai-next-phase-card">
             <span class="ai-next-icon" aria-hidden="true"></span>
             <div>
-              <strong>Next Phase Ready</strong>
+              <strong>A4.11C Backend Ready Next</strong>
               <p>A4.11C will connect real AI image generation, deduct credits and save generated posters to Cloudinary.</p>
             </div>
           </div>
