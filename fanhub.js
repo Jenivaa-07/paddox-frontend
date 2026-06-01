@@ -3621,7 +3621,7 @@ function getAiStudioPayload() {
   return {
     style: AI_STUDIO_STATE.style,
     tone: AI_STUDIO_STATE.tone,
-    fanName: document.getElementById('ai-fan-name')?.value?.trim() || 'PADDOX FAN',
+    fanName: document.getElementById('ai-fan-name')?.value?.trim() || '',
     driverInspiration: document.getElementById('ai-driver-inspo')?.value?.trim() || 'Driver-inspired',
     teamMood: document.getElementById('ai-team-mood')?.value || 'PADDOX Red',
     outputFormat: document.getElementById('ai-output-format')?.value || 'Portrait 4:5',
@@ -3639,7 +3639,7 @@ function updateAiStudioPreview() {
   const formatEl = document.getElementById('ai-preview-format');
 
   if (styleEl) styleEl.textContent = payload.style;
-  if (nameEl) nameEl.textContent = payload.fanName.toUpperCase();
+  if (nameEl) nameEl.textContent = (payload.fanName || 'PADDOX FAN').toUpperCase();
   if (lineEl) {
     lineEl.textContent = payload.creativePrompt
       ? payload.creativePrompt
