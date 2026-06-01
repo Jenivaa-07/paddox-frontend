@@ -4479,3 +4479,79 @@ button.forgot-link:focus-visible{
     min-height:42px!important;
   }
 }
+
+/* ============================================================
+   Phase A4.11A.1 — AI Credits Icon Polish
+   Replaces the plain gold block with a premium PADDOX AI credit coin.
+   ============================================================ */
+:root{
+  --pdx-ico-ai-credit:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2 20 6.5v9L12 22 4 15.5v-9L12 2Zm0 2.35 5.8 3.28v6.74L12 19.25l-5.8-4.88V7.63L12 4.35Zm-4.35 10.8h1.5l.48-1.23h4.74l.48 1.23h1.5L12.78 8.7h-1.56l-3.57 6.45Zm2.47-2.48L12 10.28l1.88 2.39h-3.76Zm7.03-3.97h-1.35v6.45h1.35V8.7Z'/%3E%3C/svg%3E");
+}
+.ai-credits-box{
+  position:relative!important;
+  overflow:hidden!important;
+  padding:12px 12px 12px 54px!important;
+  text-align:left!important;
+  background:
+    radial-gradient(circle at 18% 50%,rgba(201,168,76,.22),transparent 24%),
+    linear-gradient(135deg,rgba(201,168,76,.13),rgba(232,0,45,.055),rgba(0,0,0,.18))!important;
+  border-color:rgba(201,168,76,.34)!important;
+}
+.ai-credits-box::before{
+  content:'';
+  position:absolute;
+  left:14px;
+  top:50%;
+  width:27px;
+  height:27px;
+  transform:translateY(-50%);
+  background:linear-gradient(135deg,#fff1a8,var(--gold) 46%,#8c6a18 100%);
+  -webkit-mask:var(--pdx-ico-ai-credit) center/contain no-repeat;
+  mask:var(--pdx-ico-ai-credit) center/contain no-repeat;
+  filter:drop-shadow(0 0 14px rgba(201,168,76,.45));
+}
+.ai-credits-box::after{
+  content:'';
+  position:absolute;
+  right:-22px;
+  top:-24px;
+  width:74px;
+  height:74px;
+  border-radius:50%;
+  border:1px solid rgba(201,168,76,.12);
+  background:radial-gradient(circle,rgba(201,168,76,.09),transparent 62%);
+  pointer-events:none;
+}
+.ai-credits-num{color:var(--gold)!important;text-shadow:0 0 18px rgba(201,168,76,.22)}
+.ai-credit-dash-card{
+  border-color:rgba(201,168,76,.30)!important;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(201,168,76,.12),transparent 36%),
+    linear-gradient(145deg,rgba(18,18,18,.96),rgba(6,6,6,.98))!important;
+}
+.ai-credit-dash-card:hover{border-color:rgba(201,168,76,.48)!important;box-shadow:0 22px 70px rgba(0,0,0,.48),0 0 34px rgba(201,168,76,.10)!important}
+.ds-ai-icon{
+  width:42px!important;
+  height:42px!important;
+  color:var(--gold)!important;
+  border-radius:50%!important;
+  background:
+    radial-gradient(circle at 32% 28%,rgba(255,255,255,.32),transparent 26%),
+    linear-gradient(135deg,rgba(255,229,139,.22),rgba(201,168,76,.10),rgba(232,0,45,.045))!important;
+  border:1px solid rgba(201,168,76,.38)!important;
+  box-shadow:inset 0 0 18px rgba(201,168,76,.08),0 0 22px rgba(201,168,76,.22)!important;
+  opacity:1!important;
+}
+.ds-ai-icon::before{
+  content:''!important;
+  width:68%!important;
+  height:68%!important;
+  background:linear-gradient(135deg,#fff2ad,var(--gold) 52%,#9b741e)!important;
+  -webkit-mask:var(--pdx-ico-ai-credit) center/contain no-repeat!important;
+  mask:var(--pdx-ico-ai-credit) center/contain no-repeat!important;
+}
+.ds-card:hover .ds-ai-icon{
+  color:var(--gold)!important;
+  transform:translateY(-3px) scale(1.08)!important;
+  filter:drop-shadow(0 0 22px rgba(201,168,76,.42))!important;
+}
