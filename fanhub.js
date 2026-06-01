@@ -2,7 +2,7 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.7B premium wallpaper checkout loaded');
+console.log('PADDOX A4.10D.3 quote share final premium layout loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
@@ -1909,10 +1909,8 @@ async function buildQuoteShareCanvas(q = {}) {
   const ctx = canvas.getContext('2d');
 
   const brandRed = '#e8002d';
-  const redDark = '#4d0010';
-  const redDeep = '#120006';
-  const chrome = '#f4f4f4';
-  const muted = 'rgba(255,255,255,.62)';
+  const deepRed = '#230008';
+  const chrome = '#f6f6f6';
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
   const driverImg = await loadQuoteImageForCanvas(quoteImageValue(q));
 
@@ -1944,22 +1942,23 @@ async function buildQuoteShareCanvas(q = {}) {
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.clip();
-    ctx.fillStyle = '#08090c';
+    ctx.fillStyle = '#090a0d';
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
     if (image) drawImageCover(image, cx - r, cy - r, r * 2, r * 2);
     else {
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = '78px Bebas Neue, Arial Black, sans-serif';
+      ctx.font = '72px Bebas Neue, Arial Black, sans-serif';
       ctx.fillText(fallbackText, cx, cy + 4);
     }
     ctx.restore();
   }
 
-  function drawLogoIcon(image, x, y, size) {
+  function drawLogoIcon(image, x, y, size, alpha = 1) {
     if (!image) return;
     ctx.save();
+    ctx.globalAlpha = alpha;
     ctx.drawImage(image, x, y, size, size);
     ctx.restore();
   }
@@ -1980,20 +1979,19 @@ async function buildQuoteShareCanvas(q = {}) {
     return String(v || fallback).toUpperCase();
   }
 
-  // Outer premium background
+  // Background: clean black/red motorsport poster, no heavy watermark over text.
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#040406');
-  bg.addColorStop(.48, '#07080c');
-  bg.addColorStop(1, '#250009');
+  bg.addColorStop(0, '#030305');
+  bg.addColorStop(.55, '#07080b');
+  bg.addColorStop(1, '#160006');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle red grid, much cleaner than before
   ctx.save();
-  ctx.globalAlpha = .12;
+  ctx.globalAlpha = .10;
   ctx.strokeStyle = brandRed;
   ctx.lineWidth = 1;
-  for (let x = -1000; x < W + 1000; x += 74) {
+  for (let x = -900; x < W + 900; x += 86) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x + H, H);
@@ -2002,105 +2000,122 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.restore();
 
   ctx.save();
-  ctx.filter = 'blur(80px)';
-  ctx.globalAlpha = .46;
-  ctx.fillStyle = redDark;
-  ctx.beginPath(); ctx.arc(140, 160, 260, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(910, 1120, 330, 0, Math.PI * 2); ctx.fill();
+  ctx.filter = 'blur(90px)';
+  ctx.globalAlpha = .42;
+  ctx.fillStyle = deepRed;
+  ctx.beginPath(); ctx.arc(900, 1150, 360, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(110, 160, 240, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   ctx.filter = 'none';
 
-  // Main card
+  // Main card shell
   const cardX = 70;
-  const cardY = 78;
+  const cardY = 74;
   const cardW = 940;
-  const cardH = 1194;
-  roundedRect(ctx, cardX, cardY, cardW, cardH, 40);
+  const cardH = 1196;
+  roundedRect(ctx, cardX, cardY, cardW, cardH, 42);
   const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
-  cardGrad.addColorStop(0, '#0b0c10');
-  cardGrad.addColorStop(.60, '#06070a');
-  cardGrad.addColorStop(1, '#10070b');
+  cardGrad.addColorStop(0, '#0d0e12');
+  cardGrad.addColorStop(.58, '#07080b');
+  cardGrad.addColorStop(1, '#0b0508');
   ctx.fillStyle = cardGrad;
   ctx.fill();
-  ctx.lineWidth = 2.2;
-  ctx.strokeStyle = 'rgba(255,255,255,.13)';
+  ctx.lineWidth = 2.4;
+  ctx.strokeStyle = 'rgba(255,255,255,.12)';
   ctx.stroke();
 
-  // Top motorsport stripe and inner glow
   ctx.fillStyle = brandRed;
-  ctx.fillRect(cardX, cardY, cardW, 9);
-  line(cardX + 42, cardY + 122, cardX + cardW - 42, cardY + 122, 'rgba(255,255,255,.10)', 1, 1);
+  ctx.fillRect(cardX, cardY, cardW, 8);
+  line(cardX + 40, cardY + 164, cardX + cardW - 40, cardY + 164, 'rgba(255,255,255,.10)', 1, 1);
 
-  ctx.save();
-  ctx.globalAlpha = .05;
-  ctx.font = '290px Bebas Neue, Impact, sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('PADDOX', 116, 685);
-  ctx.restore();
-
-  // Header brand block
-  drawLogoIcon(brandLogo, 112, 120, 82);
-  drawPaddoxWordmark(213, 180, 57, 7);
-  ctx.font = '24px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.58)';
-  ctx.fillText('FAN HUB  •  DRIVER QUOTE', 214, 212);
-
-  // Driver image medallion: clean, smaller, no crowding
-  const imgCX = 805;
-  const imgCY = 270;
-  const imgR = 124;
-  ctx.save();
-  ctx.shadowColor = 'rgba(232,0,45,.55)';
-  ctx.shadowBlur = 34;
-  ctx.beginPath(); ctx.arc(imgCX, imgCY, imgR + 15, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(232,0,45,.92)'; ctx.lineWidth = 7; ctx.stroke();
-  ctx.restore();
-  ctx.beginPath(); ctx.arc(imgCX, imgCY, imgR + 26, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255,255,255,.10)'; ctx.lineWidth = 2; ctx.stroke();
-  drawCircleImage(driverImg, imgCX, imgCY, imgR, driverInitials(q.driver || 'F1'));
-
-  ctx.textAlign = 'center';
-  ctx.font = '24px Barlow Condensed, Arial, sans-serif';
+  // Header brand: compact and crisp.
+  drawLogoIcon(brandLogo, 118, 112, 70);
+  drawPaddoxWordmark(206, 168, 54, 7);
+  ctx.font = '23px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.54)';
-  ctx.fillText(safeUpper(q.era, 'CURRENT'), imgCX, imgCY + imgR + 54);
+  ctx.fillText('FAN HUB  •  QUOTE POSTER', 207, 200);
+
+  // Right header chip, no portrait here to avoid quote overlap.
+  roundedRect(ctx, 744, 118, 188, 50, 18);
+  ctx.fillStyle = 'rgba(232,0,45,.10)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(232,0,45,.42)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.font = '22px Barlow Condensed, Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,.76)';
+  ctx.fillText(safeUpper(q.era, 'CURRENT'), 838, 150);
   ctx.textAlign = 'left';
 
-  // Quote content
-  ctx.font = '144px Georgia, serif';
-  ctx.fillStyle = 'rgba(232,0,45,.78)';
-  ctx.fillText('“', 120, 412);
+  // Quote area: full-width, no image overlap, no huge watermark under text.
+  ctx.font = '136px Georgia, serif';
+  ctx.fillStyle = 'rgba(232,0,45,.82)';
+  ctx.fillText('“', 116, 365);
 
   const quote = String(q.text || 'Every race begins with belief.');
   const quoteLen = quote.length;
-  const quoteFont = quoteLen > 210 ? 45 : quoteLen > 150 ? 50 : quoteLen > 90 ? 56 : 66;
-  const quoteLine = quoteFont + 15;
+  const quoteFont = quoteLen > 220 ? 43 : quoteLen > 165 ? 48 : quoteLen > 115 ? 55 : 64;
+  const quoteLine = Math.round(quoteFont * 1.32);
   ctx.font = `${quoteFont}px Barlow Condensed, Arial, sans-serif`;
-  ctx.fillStyle = '#f6f6f6';
-  const quoteBottom = wrapCanvasText(ctx, quote, 145, 455, 780, quoteLine, 7);
+  ctx.fillStyle = '#f7f7f7';
+  const quoteBottom = wrapCanvasText(ctx, quote, 128, 420, 820, quoteLine, 6);
 
-  // Driver info zone: fixed vertical spacing, no overlaps
-  const driverBlockY = Math.max(820, Math.min(quoteBottom + 118, 865));
-  line(145, driverBlockY - 42, 294, driverBlockY - 42, brandRed, 6, 1);
-
-  ctx.font = '57px Bebas Neue, Arial Black, sans-serif';
+  // Soft decorative word hidden behind lower area only, not under quote.
+  ctx.save();
+  ctx.globalAlpha = .035;
+  ctx.font = '220px Bebas Neue, Impact, sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(safeUpper(q.driver, 'F1 DRIVER'), 145, driverBlockY + 22);
+  ctx.fillText('PADDOX', 126, 835);
+  ctx.restore();
 
-  ctx.font = '31px Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.70)';
-  ctx.fillText(String(q.team || 'PADDOX Quote Library'), 145, driverBlockY + 72);
+  // Lower driver panel: portrait lives here, away from the quote.
+  const panelY = Math.max(770, Math.min(quoteBottom + 115, 835));
+  const panelH = 250;
+  roundedRect(ctx, 110, panelY, 860, panelH, 30);
+  const panelGrad = ctx.createLinearGradient(110, panelY, 970, panelY + panelH);
+  panelGrad.addColorStop(0, 'rgba(255,255,255,.045)');
+  panelGrad.addColorStop(.65, 'rgba(255,255,255,.025)');
+  panelGrad.addColorStop(1, 'rgba(232,0,45,.10)');
+  ctx.fillStyle = panelGrad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.085)';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
 
-  const chipText = `${safeUpper(q.era, 'CURRENT')}  •  ${safeUpper(q.category, 'MOTIVATION')}`;
-  ctx.font = '24px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.46)';
-  ctx.fillText(chipText, 145, driverBlockY + 112);
+  line(145, panelY + 50, 295, panelY + 50, brandRed, 6, 1);
+
+  ctx.font = '58px Bebas Neue, Arial Black, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(safeUpper(q.driver, 'F1 DRIVER'), 145, panelY + 120);
+
+  ctx.font = '30px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.68)';
+  ctx.fillText(String(q.team || 'PADDOX Quote Library'), 145, panelY + 170);
+
+  ctx.font = '23px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.48)';
+  ctx.fillText(`${safeUpper(q.era, 'CURRENT')}  •  ${safeUpper(q.category, 'MOTIVATION')}`, 145, panelY + 208);
+
+  const imgCX = 820;
+  const imgCY = panelY + 126;
+  const imgR = 98;
+  ctx.save();
+  ctx.shadowColor = 'rgba(232,0,45,.48)';
+  ctx.shadowBlur = 26;
+  ctx.beginPath(); ctx.arc(imgCX, imgCY, imgR + 12, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(232,0,45,.92)'; ctx.lineWidth = 6; ctx.stroke();
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(imgCX, imgCY, imgR + 23, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,.10)'; ctx.lineWidth = 2; ctx.stroke();
+  drawCircleImage(driverImg, imgCX, imgCY, imgR, driverInitials(q.driver || 'F1'));
 
   // Footer brand bar
-  const footerY = 1148;
+  const footerY = 1144;
   roundedRect(ctx, 110, footerY, 860, 92, 26);
   const footerGrad = ctx.createLinearGradient(110, footerY, 970, footerY + 92);
-  footerGrad.addColorStop(0, 'rgba(255,255,255,.070)');
-  footerGrad.addColorStop(.55, 'rgba(255,255,255,.045)');
+  footerGrad.addColorStop(0, 'rgba(255,255,255,.075)');
+  footerGrad.addColorStop(.62, 'rgba(255,255,255,.045)');
   footerGrad.addColorStop(1, 'rgba(232,0,45,.13)');
   ctx.fillStyle = footerGrad;
   ctx.fill();
@@ -2108,12 +2123,12 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.strokeStyle = 'rgba(255,255,255,.10)';
   ctx.stroke();
 
-  ctx.font = '29px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.78)';
+  ctx.font = '28px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.76)';
   ctx.fillText('SAVE  •  SHARE  •  SUPPORT YOUR GRID', 145, footerY + 58);
 
-  drawLogoIcon(brandLogo, 742, footerY + 23, 46);
-  drawPaddoxWordmark(798, footerY + 60, 34, 5);
+  drawLogoIcon(brandLogo, 744, footerY + 23, 46);
+  drawPaddoxWordmark(800, footerY + 60, 33, 5);
 
   return canvas;
 }
