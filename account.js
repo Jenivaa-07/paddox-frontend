@@ -2306,7 +2306,7 @@ function setProfileAvatar(user = {}) {
       />
     `;
   } else {
-    avatarEl.innerHTML = `<img src="assets/paddox-logo-icon-official.png?v=20_6_1" alt="PADDOX profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"/>`;
+    avatarEl.innerHTML = `<img src="assets/paddox-logo-icon-web.png?v=A4_10C_4" alt="PADDOX profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"/>`;
   }
 }
 
@@ -3407,7 +3407,7 @@ function openOrderReceipt(orderId) {
    Phase 20.6.1 — Profile-only navbar avatar + free crop studio
    ============================================================ */
 (function(){
-  const DEFAULT_PROFILE_IMG = 'assets/paddox-logo-icon-official.png?v=20_6_1';
+  const DEFAULT_PROFILE_IMG = 'assets/paddox-logo-icon-web.png?v=A4_10C_4';
   let cropState = {
     img: null,
     fileName: 'paddox-avatar.png',

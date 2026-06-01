@@ -2809,3 +2809,57 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   height:100%!important;
   align-items:center!important;
 }
+
+
+/* ============================================================
+   PADDOX Phase A4.10C.4 — Circular Logo Fit Fix
+   Keeps the new circular badge proportional across remaining pages.
+   Receipt page intentionally untouched.
+   ============================================================ */
+.helmet-wrap{
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  aspect-ratio:1/1!important;
+  padding:0!important;
+  overflow:visible!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  border-radius:50%!important;
+}
+.brand-logo-icon{
+  display:block!important;
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  aspect-ratio:1/1!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  transform:none!important;
+  filter:drop-shadow(0 0 10px rgba(232,0,45,.28))!important;
+}
+.nav-logo:hover .helmet-wrap,
+.helmet-wrap:hover{
+  transform:rotate(-7deg) scale(1.08)!important;
+  box-shadow:none!important;
+}
+#navbar.scrolled .helmet-wrap,
+#navbar.scrolled .brand-logo-icon{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+}
+@media(max-width:768px){
+  .helmet-wrap,
+  .brand-logo-icon{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+  }
+}

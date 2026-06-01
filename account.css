@@ -489,7 +489,7 @@ input:checked+.tgl-sl::before{background:var(--red);transform:translateX(20px)}
 .dc-title,.set-title{display:flex!important;align-items:center!important;gap:0!important;}
 .nav-cta-btn.nav-profile-only{width:52px!important;height:42px!important;min-width:52px!important;padding:0!important;gap:0!important;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)!important;background:var(--red)!important;}
 .nav-cta-btn.nav-profile-only .nav-profile-img{width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;border:1px solid rgba(255,255,255,.28);box-shadow:0 0 18px rgba(0,0,0,.35);position:relative;z-index:1;}
-.nav-cta-btn.nav-profile-only .nav-profile-fallback{width:34px;height:34px;border-radius:50%;display:block;background:center/cover no-repeat url('assets/paddox-logo-icon-official.png?v=20_6_1');position:relative;z-index:1;border:1px solid rgba(255,255,255,.24);}
+.nav-cta-btn.nav-profile-only .nav-profile-fallback{width:34px;height:34px;border-radius:50%;display:block;background:center/cover no-repeat url('assets/paddox-logo-icon-web.png?v=A4_10C_4');position:relative;z-index:1;border:1px solid rgba(255,255,255,.24);}
 .avatar-studio-overlay{position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.86);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:18px;}
 .avatar-studio-overlay.on{display:flex;}
 .avatar-studio-modal{width:min(860px,96vw);max-height:92vh;overflow:auto;background:linear-gradient(145deg,rgba(15,15,15,.98),rgba(6,6,6,.98));border:1px solid rgba(255,255,255,.12);border-top:3px solid var(--red);box-shadow:0 35px 100px rgba(0,0,0,.75);padding:24px;position:relative;}
@@ -546,7 +546,7 @@ input:checked+.tgl-sl::before{background:var(--red);transform:translateX(20px)}
   background-color:#111!important;
 }
 .nav-cta-btn.nav-profile-only .nav-profile-fallback{
-  background:center/cover no-repeat url('assets/paddox-logo-icon-official.png?v=20_6_2')!important;
+  background:center/cover no-repeat url('assets/paddox-logo-icon-web.png?v=A4_10C_4')!important;
 }
 .avatar-studio-modal{width:min(940px,96vw)!important;}
 .avatar-studio-sub{max-width:680px;}
@@ -4422,4 +4422,58 @@ button.forgot-link:focus-visible{
 }
 .premium-download-card .download-again-btn{
   white-space:nowrap;
+}
+
+
+/* ============================================================
+   PADDOX Phase A4.10C.4 — Circular Logo Fit Fix
+   Keeps the new circular badge proportional across remaining pages.
+   Receipt page intentionally untouched.
+   ============================================================ */
+.helmet-wrap{
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  aspect-ratio:1/1!important;
+  padding:0!important;
+  overflow:visible!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  border-radius:50%!important;
+}
+.brand-logo-icon{
+  display:block!important;
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  aspect-ratio:1/1!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  transform:none!important;
+  filter:drop-shadow(0 0 10px rgba(232,0,45,.28))!important;
+}
+.nav-logo:hover .helmet-wrap,
+.helmet-wrap:hover{
+  transform:rotate(-7deg) scale(1.08)!important;
+  box-shadow:none!important;
+}
+#navbar.scrolled .helmet-wrap,
+#navbar.scrolled .brand-logo-icon{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+}
+@media(max-width:768px){
+  .helmet-wrap,
+  .brand-logo-icon{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+  }
 }
