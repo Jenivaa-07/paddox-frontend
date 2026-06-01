@@ -3162,6 +3162,19 @@ window.downloadAnalyticsReport = downloadAnalyticsReport;
 ══════════════════════════════════════ */
 const MODERATION_ADMIN_API = 'https://paddox-backend.onrender.com/api/admin/moderation';
 const MODERATION_FAN_FEED_API = 'https://paddox-backend.onrender.com/api/fan/feed';
+
+/* A4.9B.1 — The Fan Hub post endpoint changed across phases.
+   Moderation now probes the real likely routes instead of relying on one old path. */
+const MODERATION_FEED_ENDPOINTS = [
+  'https://paddox-backend.onrender.com/api/fan/feed',
+  'https://paddox-backend.onrender.com/api/fan/posts',
+  'https://paddox-backend.onrender.com/api/fan/community',
+  'https://paddox-backend.onrender.com/api/fan/community/posts',
+  'https://paddox-backend.onrender.com/api/fan/fan-feed',
+  'https://paddox-backend.onrender.com/api/fan/admin/feed',
+  'https://paddox-backend.onrender.com/api/fan/admin/posts'
+];
+let MODERATION_ACTIVE_FEED_API = MODERATION_FAN_FEED_API;
 let ADM_MODERATION_QUEUE = window.ADM_MODERATION_QUEUE || [];
 let MODERATION_LAST_SYNC = null;
 let MODERATION_AUTO_TIMER = null;
@@ -3284,12 +3297,47 @@ async function loadAdminModerationQueue() {
   return Array.isArray(queue) ? queue.map(item => normalizeModerationItem(item, item.type || 'system')) : [];
 }
 
-async function loadFanFeedModerationFallback() {
-  const res = await fetch(MODERATION_FAN_FEED_API, { headers: moderationHeaders() });
+function extractModerationPosts(data = {}) {
+  const candidates = [
+    data?.data?.posts,
+    data?.data?.feed,
+    data?.data?.items,
+    data?.posts,
+    data?.feed,
+    data?.items,
+    data?.fanPosts,
+    data?.communityPosts,
+    Array.isArray(data?.data) ? data.data : null,
+    Array.isArray(data) ? data : null
+  ];
+  return candidates.find(Array.isArray) || [];
+}
+
+async function fetchModerationFeedEndpoint(url) {
+  const res = await fetch(url, { headers: moderationHeaders() });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.success === false) throw new Error(data.message || 'Fan feed unavailable');
-  const posts = data.data?.posts || data.posts || [];
-  return moderationItemsFromFeed(Array.isArray(posts) ? posts : []);
+  if (!res.ok || data.success === false) {
+    throw new Error(data.message || `Feed route failed: ${res.status}`);
+  }
+  const posts = extractModerationPosts(data);
+  if (!Array.isArray(posts)) return [];
+  MODERATION_ACTIVE_FEED_API = url;
+  return moderationItemsFromFeed(posts);
+}
+
+async function loadFanFeedModerationFallback() {
+  const errors = [];
+  for (const url of MODERATION_FEED_ENDPOINTS) {
+    try {
+      const items = await fetchModerationFeedEndpoint(url);
+      setModerationStatus(`Live Fan Hub source connected`);
+      return items;
+    } catch (err) {
+      errors.push(`${url} => ${err.message}`);
+    }
+  }
+  console.warn('Moderation feed endpoints failed:', errors);
+  throw new Error('Fan Hub post feed unavailable');
 }
 
 function setModerationStatus(message = '') {
@@ -3312,7 +3360,7 @@ async function refreshModerationQueue(silent = false) {
     MODERATION_LAST_SYNC = new Date();
     renderModeration();
     updateAdminSidebarBadges?.();
-    if (!silent) setModerationStatus('Live moderation queue synced');
+    if (!silent) setModerationStatus(ADM_MODERATION_QUEUE.length ? 'Live moderation queue synced' : 'Connected, but no posts/comments returned from feed');
   } catch (err) {
     console.error(err);
     ADM_MODERATION_QUEUE = [];
@@ -3438,10 +3486,11 @@ async function moderationDeleteItem(key) {
   if (!confirm(`Delete this ${item.type} from Fan Hub?`)) return;
   try {
     let url = '';
+    const base = MODERATION_ACTIVE_FEED_API || MODERATION_FAN_FEED_API;
     if (item.type === 'post') {
-      url = `${MODERATION_FAN_FEED_API}/${encodeURIComponent(item.postId || item.id)}`;
+      url = `${base}/${encodeURIComponent(item.postId || item.id)}`;
     } else if (item.type === 'comment') {
-      url = `${MODERATION_FAN_FEED_API}/${encodeURIComponent(item.postId)}/comments/${encodeURIComponent(item.commentId || item.id)}`;
+      url = `${base}/${encodeURIComponent(item.postId)}/comments/${encodeURIComponent(item.commentId || item.id)}`;
     }
     if (!url) throw new Error('Delete endpoint not available for this item');
     const res = await fetch(url, { method:'DELETE', headers: moderationHeaders(true) });

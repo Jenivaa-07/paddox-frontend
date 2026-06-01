@@ -1078,7 +1078,73 @@
 
         <!-- ── MODERATION ── -->
         <div class="adm-page" id="adm-moderation">
-          <div class="mod-list" id="mod-list"></div>
+          <div class="moderation-command-hero reveal-up">
+            <div>
+              <div class="moderation-kicker">PADDOX COMMUNITY CONTROL</div>
+              <h2>Review Fan Posts, Comments And Reports In One Clean Grid.</h2>
+              <p>Moderation scans live Fan Hub activity, highlights risky content, lets admins review, watch users, and remove posts/comments when needed.</p>
+            </div>
+            <div class="moderation-hero-actions">
+              <button class="adm-btn-ghost" type="button" onclick="refreshModerationQueue(false)">Refresh Queue</button>
+              <button class="adm-btn-red" type="button" onclick="moderationClearReviewed()">Clear Reviewed</button>
+            </div>
+          </div>
+
+          <div class="moderation-stat-grid reveal-up delay-1">
+            <div class="moderation-stat-card"><span>Total Items</span><strong id="mod-stat-total">0</strong></div>
+            <div class="moderation-stat-card"><span>Pending Review</span><strong id="mod-stat-pending">0</strong></div>
+            <div class="moderation-stat-card risk"><span>High Risk</span><strong id="mod-stat-risk">0</strong></div>
+            <div class="moderation-stat-card"><span>Reviewed</span><strong id="mod-stat-reviewed">0</strong></div>
+          </div>
+
+          <div class="moderation-policy-grid reveal-up delay-2">
+            <div class="moderation-policy-card">
+              <span>Auto Scanner</span>
+              <strong>Links, spam, toxic words and repeated-character abuse are flagged.</strong>
+              <p>This works even before a dedicated moderation backend is added.</p>
+            </div>
+            <div class="moderation-policy-card">
+              <span>Live Source</span>
+              <strong id="mod-sync-status">Waiting for sync</strong>
+              <p id="mod-last-sync">Fan Hub feed endpoints are checked automatically.</p>
+            </div>
+          </div>
+
+          <div class="moderation-toolbar reveal-up delay-2">
+            <div class="toolbar-filters">
+              <select class="adm-select" id="mod-type-filter">
+                <option value="all">All Types</option>
+                <option value="post">Posts</option>
+                <option value="comment">Comments</option>
+                <option value="review">Reviews</option>
+                <option value="system">System</option>
+              </select>
+              <select class="adm-select" id="mod-status-filter">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="reviewed">Reviewed</option>
+              </select>
+              <select class="adm-select" id="mod-risk-filter">
+                <option value="all">All Risk</option>
+                <option value="high">High Risk</option>
+                <option value="medium">Medium Risk</option>
+                <option value="low">Low Risk</option>
+              </select>
+              <input class="adm-input" id="mod-search-input" placeholder="Search user, text, reason..."/>
+            </div>
+            <div class="moderation-toolbar-note" id="mod-queue-subtitle">0 pending · 0 high risk · 0 reviewed</div>
+          </div>
+
+          <div class="moderation-board reveal-up delay-3">
+            <div class="moderation-board-head">
+              <div>
+                <span>Moderation Queue</span>
+                <strong>Posts and comments from Fan Hub appear here for admin action.</strong>
+              </div>
+              <em>Auto refresh: 30s</em>
+            </div>
+            <div class="mod-list" id="mod-list"></div>
+          </div>
         </div>
 
       </div><!-- /adm-pages -->
