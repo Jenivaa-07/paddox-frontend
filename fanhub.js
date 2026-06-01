@@ -6,7 +6,7 @@ console.log('PADDOX A4.7B premium wallpaper checkout loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-official.png?v=18_2_3';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=A4_10C';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -971,7 +971,7 @@ async function renderWallpapers() {
           <div class="wp-media-wrap" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">
             ${cover ? `<img class="wp-img" src="${previewCover}" data-full="${cover}" alt="${safeName}" loading="lazy" draggable="false"/>` : '<div class="wp-thumb"></div>'}
             <div class="wp-preview-watermark" aria-hidden="true">
-              <img src="assets/paddox-logo-icon-official.png" alt=""/>
+              <img src="assets/paddox-logo-icon-web.png?v=A4_10C" alt=""/>
               <span>PADDOX LOW RES PREVIEW</span>
             </div>
             <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${accessText}</span>

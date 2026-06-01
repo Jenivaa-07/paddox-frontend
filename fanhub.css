@@ -5391,7 +5391,7 @@ body.modal-open { overflow: hidden; }
 .wp-card-premium .wp-download-count{margin-top:auto!important;color:#777!important;font-size:.75rem!important;}
 .preview-image-wrap::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(-28deg,rgba(255,255,255,.035) 0 1px,transparent 1px 76px);}
 .preview-watermark{display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;opacity:.28!important;}
-.preview-watermark::before{content:'';width:48px;height:48px;border-radius:50%;background:url('assets/paddox-logo-icon-official.png') center/cover no-repeat;display:inline-block;filter:grayscale(.1) contrast(1.1);}
+.preview-watermark::before{content:'';width:48px;height:48px;border-radius:50%;background:url('assets/paddox-logo-icon-web.png?v=A4_10C') center/cover no-repeat;display:inline-block;filter:grayscale(.1) contrast(1.1);}
 @media(hover:none){.wp-hover-panel{opacity:1!important;position:relative!important;inset:auto!important;transform:none!important;background:rgba(0,0,0,.2)!important;padding:12px!important}.wp-hover-title,.wp-hover-kicker{display:none!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card.wp-card-premium{min-height:0!important}}
 @media(max-width:1180px){.wp-grid,.wp-grid-premium{grid-template-columns:repeat(2,minmax(280px,1fr))!important;}#sec-wallpapers .sec-head{grid-template-columns:1fr!important}#sec-wallpapers .sec-title{text-align:left!important}}
 @media(max-width:720px){#sec-wallpapers{padding-inline:18px!important}.wp-grid,.wp-grid-premium{grid-template-columns:1fr!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card-premium .wp-info-panel{min-height:0!important}#sec-wallpapers .sec-title{font-size:3rem!important}.wp-preview-watermark span{font-size:.8rem!important;letter-spacing:2.4px!important}}
@@ -6073,4 +6073,18 @@ body.modal-open { overflow: hidden; }
   #sec-wallpapers .wp-card-premium .wp-media-wrap{height:220px!important;min-height:220px!important;flex-basis:220px!important;}
   #sec-wallpapers .wp-card-premium .wp-info-panel{min-height:auto!important;padding:20px!important;}
   #sec-wallpapers .wp-card-premium .wp-title,#sec-wallpapers .wp-card-premium .wp-info-panel h3.wp-title{font-size:2.1rem!important;min-height:auto!important;}
+}
+
+
+/* ============================================================
+   PADDOX Phase A4.10C — New Global Website Logo Icon
+   Applies the new circular helmet badge to Fan Hub nav, quote brand,
+   and wallpaper preview/watermark usage. Receipt branding untouched.
+   ============================================================ */
+.nav-logo .brand-logo-icon,
+.qf-brand-final .qf-brand-icon,
+.wp-preview-watermark img{
+  object-fit:contain!important;
+  object-position:center!important;
+  background:transparent!important;
 }

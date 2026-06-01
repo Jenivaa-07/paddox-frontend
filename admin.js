@@ -1383,7 +1383,7 @@ function renderProducts() {
 
       const image =
         product.images?.[0]?.url ||
-        'assets/paddox-logo-icon-official.png';
+        'assets/paddox-logo-icon-web.png?v=A4_10C';
 
       const isFeatured = product.isFeatured || String(product.badge || '').toLowerCase() === 'featured';
       const badge = String(product.badge || '').toLowerCase();
@@ -1585,7 +1585,7 @@ function renderInventory() {
     const pct = stock <= 0 ? 0 : Math.max(4, Math.min(100, Math.round((stock / capacity) * 100)));
     const status = getProductStockStatus(product);
 
-    const image = product.images?.[0]?.url || product.image || 'assets/paddox-logo-icon-official.png';
+    const image = product.images?.[0]?.url || product.image || 'assets/paddox-logo-icon-web.png?v=A4_10C';
 
     return `
       <tr class="${status.row}">
@@ -7338,7 +7338,7 @@ const ADMIN_POLL_FALLBACK_LOGOS = ADMIN_POLL_REAL_TEAM_LOGOS.map(team => ({
   color: team.color,
   image: team.image
 })).concat([
-  { name:'PADDOX', slug:'paddox', color:'#e8002d', image:'assets/paddox-logo-icon.png' }
+  { name:'PADDOX', slug:'paddox', color:'#e8002d', image:'assets/paddox-logo-icon-web.png?v=A4_10C' }
 ]);
 
 function pollAdminHeaders(json = false) {

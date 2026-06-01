@@ -6479,3 +6479,17 @@ html,body{max-width:100%;overflow-x:hidden}
 .mod-reviewed-banner{margin-top:10px;color:#78d98a;font-family:var(--font-c);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;}
 @media(max-width:1180px){.moderation-stat-grid{grid-template-columns:repeat(2,1fr)}.moderation-policy-grid{grid-template-columns:1fr}.mod-item.mod-premium{grid-template-columns:1fr}.mod-actions{justify-content:flex-start;min-width:0}}
 @media(max-width:760px){#adm-moderation .moderation-command-hero{align-items:flex-start;flex-direction:column;padding:26px 22px}#adm-moderation .moderation-command-hero h2{font-size:2.05rem}.moderation-stat-grid{grid-template-columns:1fr}.moderation-toolbar .toolbar-filters{width:100%}.moderation-toolbar .adm-select,.moderation-toolbar .adm-input{width:100%}.moderation-board-head{align-items:flex-start;flex-direction:column}.mod-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}.mod-actions .act-btn{width:100%}}
+
+
+/* ============================================================
+   PADDOX Phase A4.10C — New Global Website Logo Icon
+   Keeps the new circular helmet badge crisp in small admin slots.
+   Receipt branding intentionally untouched.
+   ============================================================ */
+.adm-logo-icon-official,
+.product-admin-thumb,
+.inventory-thumb{
+  object-fit:contain!important;
+  object-position:center!important;
+  background:transparent!important;
+}
