@@ -6493,3 +6493,31 @@ html,body{max-width:100%;overflow-x:hidden}
   object-position:center!important;
   background:transparent!important;
 }
+
+
+/* ============================================================
+   PADDOX PHASE A4.10C.2 — Exact PNG Logo Replacement Polish
+   Scope: Admin sidebar + product/inventory fallbacks only.
+   Receipt page intentionally untouched.
+   ============================================================ */
+.adm-helmet{
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  border-radius:50%!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:radial-gradient(circle at 50% 50%,rgba(232,0,45,.18),rgba(7,7,7,.82) 66%)!important;
+  border:1px solid rgba(232,0,45,.32)!important;
+  box-shadow:0 0 22px rgba(232,0,45,.12)!important;
+}
+.adm-logo-icon-official{
+  width:48px!important;
+  height:48px!important;
+  max-width:48px!important;
+  max-height:48px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  display:block!important;
+}

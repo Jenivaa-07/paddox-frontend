@@ -6,7 +6,7 @@ console.log('PADDOX A4.7B premium wallpaper checkout loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=A4_10C';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=A4_10C_2_2';
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -971,7 +971,7 @@ async function renderWallpapers() {
           <div class="wp-media-wrap" onclick="event.stopPropagation();openPreview('${cover}', '${w._id}', '${jsName}')">
             ${cover ? `<img class="wp-img" src="${previewCover}" data-full="${cover}" alt="${safeName}" loading="lazy" draggable="false"/>` : '<div class="wp-thumb"></div>'}
             <div class="wp-preview-watermark" aria-hidden="true">
-              <img src="assets/paddox-logo-icon-web.png?v=A4_10C" alt=""/>
+              <img src="assets/paddox-logo-icon-web.png?v=A4_10C_2_2" alt=""/>
               <span>PADDOX LOW RES PREVIEW</span>
             </div>
             <span class="wp-tag wt-${isPremium ? 'prem' : 'free'}">${accessText}</span>
@@ -1958,7 +1958,7 @@ async function buildQuoteShareCanvas(q = {}) {
 
   const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  drawPaddoxAlignedBrand(ctx, 110, 108, brandLogo, { size: 52, fontSize: 49, gap: 14, letterGap: 5 });
+  drawPaddoxAlignedBrand(ctx, 110, 104, brandLogo, { size: 64, fontSize: 52, gap: 16, letterGap: 5 });
 
   ctx.font = '24px Inter, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.62)';

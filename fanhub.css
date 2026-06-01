@@ -5391,7 +5391,7 @@ body.modal-open { overflow: hidden; }
 .wp-card-premium .wp-download-count{margin-top:auto!important;color:#777!important;font-size:.75rem!important;}
 .preview-image-wrap::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(-28deg,rgba(255,255,255,.035) 0 1px,transparent 1px 76px);}
 .preview-watermark{display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;opacity:.28!important;}
-.preview-watermark::before{content:'';width:48px;height:48px;border-radius:50%;background:url('assets/paddox-logo-icon-web.png?v=A4_10C') center/cover no-repeat;display:inline-block;filter:grayscale(.1) contrast(1.1);}
+.preview-watermark::before{content:'';width:48px;height:48px;border-radius:50%;background:url('assets/paddox-logo-icon-web.png?v=A4_10C_2_2') center/cover no-repeat;display:inline-block;filter:grayscale(.1) contrast(1.1);}
 @media(hover:none){.wp-hover-panel{opacity:1!important;position:relative!important;inset:auto!important;transform:none!important;background:rgba(0,0,0,.2)!important;padding:12px!important}.wp-hover-title,.wp-hover-kicker{display:none!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card.wp-card-premium{min-height:0!important}}
 @media(max-width:1180px){.wp-grid,.wp-grid-premium{grid-template-columns:repeat(2,minmax(280px,1fr))!important;}#sec-wallpapers .sec-head{grid-template-columns:1fr!important}#sec-wallpapers .sec-title{text-align:left!important}}
 @media(max-width:720px){#sec-wallpapers{padding-inline:18px!important}.wp-grid,.wp-grid-premium{grid-template-columns:1fr!important}.wp-card-premium .wp-media-wrap{height:220px!important}.wp-card-premium .wp-info-panel{min-height:0!important}#sec-wallpapers .sec-title{font-size:3rem!important}.wp-preview-watermark span{font-size:.8rem!important;letter-spacing:2.4px!important}}
@@ -6087,4 +6087,94 @@ body.modal-open { overflow: hidden; }
   object-fit:contain!important;
   object-position:center!important;
   background:transparent!important;
+}
+
+
+/* ============================================================
+   PADDOX PHASE A4.10C.2 — Exact PNG Logo Replacement Polish
+   Scope: Fan Hub navbar, quote card/share, wallpaper watermark only.
+   Receipt page intentionally untouched.
+   ============================================================ */
+.nav-logo .helmet-wrap{
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  border-radius:50%!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:radial-gradient(circle at 50% 50%,rgba(232,0,45,.18),rgba(7,7,7,.88) 68%)!important;
+  border:1px solid rgba(232,0,45,.34)!important;
+  box-shadow:0 0 22px rgba(232,0,45,.13)!important;
+}
+.nav-logo .brand-logo-icon{
+  width:48px!important;
+  height:48px!important;
+  max-width:48px!important;
+  max-height:48px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  display:block!important;
+}
+#navbar.scrolled .nav-logo .helmet-wrap{
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+}
+#navbar.scrolled .nav-logo .brand-logo-icon{
+  width:42px!important;
+  height:42px!important;
+  max-width:42px!important;
+  max-height:42px!important;
+}
+.qf-brand-icon-wrap{
+  width:44px!important;
+  height:44px!important;
+  flex:0 0 44px!important;
+  background:radial-gradient(circle at 50% 50%,rgba(232,0,45,.18),rgba(7,7,7,.84) 68%)!important;
+  border:1px solid rgba(232,0,45,.38)!important;
+  box-shadow:0 0 24px rgba(232,0,45,.14)!important;
+}
+.qf-brand-icon{
+  width:44px!important;
+  height:44px!important;
+  max-width:44px!important;
+  max-height:44px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:50%!important;
+}
+.wp-preview-watermark img{
+  width:58px!important;
+  height:58px!important;
+  max-width:58px!important;
+  max-height:58px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-radius:50%!important;
+  filter:grayscale(.05) contrast(1.12) brightness(1.04)!important;
+  opacity:.95!important;
+}
+.preview-watermark::before{
+  width:64px!important;
+  height:64px!important;
+  background:url('assets/paddox-logo-icon-web.png?v=A4_10C_2') center/cover no-repeat!important;
+}
+@media(max-width:700px){
+  .nav-logo .helmet-wrap,
+  .nav-logo .brand-logo-icon{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    max-width:42px!important;
+    max-height:42px!important;
+  }
+  .qf-brand-icon-wrap,
+  .qf-brand-icon{
+    width:38px!important;
+    height:38px!important;
+    max-width:38px!important;
+    max-height:38px!important;
+    flex-basis:38px!important;
+  }
 }
