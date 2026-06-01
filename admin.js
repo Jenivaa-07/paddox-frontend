@@ -2,7 +2,7 @@
    PADDOX — admin.js   |   Admin Dashboard Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.8F.2 Users delete control loaded');
+console.log('PADDOX A4.9A Admin Analytics Premium loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
 var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
@@ -302,7 +302,7 @@ const PAGE_META = {
   fantrivia:  { title:'FAN TRIVIA',      action:'+ New Trivia',  fn:()=>resetFanTriviaForm() },
   fandrivers: { title:'FAN DRIVERS',     action:'+ Add Image',   fn:()=>openDriverProfileModal() },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
-  analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>showToast('📊 Report downloaded!') },
+  analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>downloadAnalyticsReport() },
   moderation: { title:'MODERATION',      action:'Clear All',      fn:()=>showToast('✓ All items reviewed!') },
 };
 
@@ -347,7 +347,7 @@ if (id === 'users') {
   loadUsers();
 }
 if (id === 'analytics') {
-  renderAnalyticsRealtime();
+  loadAnalyticsDashboard();
 }
 if (id === 'fanquotes') {
   loadAdminQuotes();
@@ -2807,14 +2807,84 @@ function exportUsersCsv() {
   showToast('📥 Users exported');
 }
 
-/* ══ ANALYTICS METRICS — REALTIME CLEANUP ══ */
+/* ══ ANALYTICS METRICS — PREMIUM REALTIME DASHBOARD — A4.9A ══ */
+let analyticsLoading = false;
+let analyticsLastSnapshot = null;
+
+function analyticsEscape(value = '') {
+  if (typeof escapeProductHTML === 'function') return escapeProductHTML(value);
+  return String(value ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function analyticsMoney(value = 0) {
+  return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+}
+
+function getOrderTotal(order = {}) {
+  return Number(
+    order?.pricing?.total ??
+    order?.pricing?.grandTotal ??
+    order?.total ??
+    order?.amount ??
+    0
+  );
+}
+
+function getOrderStatus(order = {}) {
+  return String(order.status || order.orderStatus || 'placed').toLowerCase().replace(/\s+/g, '_');
+}
+
+function isDeliveredStatus(status = '') {
+  return ['delivered', 'fulfilled', 'completed'].includes(String(status).toLowerCase());
+}
+
+function isCancelledStatus(status = '') {
+  return ['cancelled', 'canceled', 'failed', 'refunded'].includes(String(status).toLowerCase());
+}
+
+function isPaidOrder(order = {}) {
+  const status = getOrderStatus(order);
+  const pay = String(order.paymentStatus || order.payment?.status || '').toLowerCase();
+  return !isCancelledStatus(status) && (pay === 'paid' || getOrderTotal(order) > 0 || isDeliveredStatus(status));
+}
+
+function getAnalyticsRangeOrders() {
+  const range = document.getElementById('analytics-range')?.value || 'all';
+  const statusFilter = document.getElementById('analytics-status')?.value || 'all';
+  const now = Date.now();
+
+  return (REAL_ORDERS || []).filter(order => {
+    const created = order.createdAt || order.created_at || order.date;
+    if (range !== 'all') {
+      if (!created) return false;
+      const t = new Date(created).getTime();
+      if (Number.isNaN(t)) return false;
+      if (range === 'today') {
+        const d = new Date(t);
+        const n = new Date();
+        if (d.toDateString() !== n.toDateString()) return false;
+      } else {
+        const days = Number(range || 0);
+        if (days && now - t > days * 24 * 60 * 60 * 1000) return false;
+      }
+    }
+
+    const status = getOrderStatus(order);
+    if (statusFilter === 'paid') return isPaidOrder(order);
+    if (statusFilter === 'delivered') return isDeliveredStatus(status);
+    if (statusFilter === 'cancelled') return isCancelledStatus(status);
+    if (statusFilter === 'pending') return !isDeliveredStatus(status) && !isCancelledStatus(status);
+    return true;
+  });
+}
+
 function renderMetList(id, data) {
   const el = document.getElementById(id);
   if (!el) return;
 
-  if (!data.length) {
+  if (!Array.isArray(data) || !data.length) {
     el.innerHTML = `
-      <div style="padding:22px;color:#777;text-align:center">
+      <div class="analytics-empty-state">
         No data yet
       </div>
     `;
@@ -2823,115 +2893,268 @@ function renderMetList(id, data) {
 
   el.innerHTML = data.map(d => `
     <div class="met-row">
-      <span class="met-name">${d.name}</span>
+      <span class="met-name">${analyticsEscape(d.name)}</span>
       <div class="met-bar-wrap">
-        <div class="met-bar" style="width:0%;background:${d.color}" data-w="${d.pct}%"></div>
+        <div class="met-bar" style="width:0%;background:${d.color || 'var(--red)'}" data-w="${Math.max(0, Math.min(100, Number(d.pct || 0)))}%"></div>
       </div>
-      <span class="met-val">${d.val || d.pct + '%'}</span>
+      <span class="met-val">${analyticsEscape(d.val || `${d.pct || 0}%`)}</span>
     </div>
   `).join('');
 
   setTimeout(() => {
     el.querySelectorAll('.met-bar').forEach(b => {
-      b.style.transition = 'width 1s ease';
+      b.style.transition = 'width 1s cubic-bezier(.34,1.56,.64,1)';
       b.style.width = b.dataset.w;
     });
-  }, 200);
+  }, 120);
+}
+
+async function loadAnalyticsDashboard(force = false) {
+  if (analyticsLoading) return;
+  analyticsLoading = true;
+
+  try {
+    const tasks = [];
+    if (force || !Array.isArray(REAL_ORDERS) || !REAL_ORDERS.length) tasks.push(loadOrders?.());
+    if (force || !Array.isArray(REAL_PRODUCTS) || !REAL_PRODUCTS.length) tasks.push(loadProducts?.());
+    if (force || !Array.isArray(REAL_ASSETS) || !REAL_ASSETS.length) tasks.push(loadAssets?.());
+    if (force || !Array.isArray(REAL_USERS) || !REAL_USERS.length) tasks.push(loadUsers?.());
+
+    await Promise.allSettled(tasks.filter(Boolean));
+    renderAnalyticsRealtime();
+    if (force) showToast('Analytics refreshed');
+  } catch (err) {
+    console.error(err);
+    renderAnalyticsRealtime();
+  } finally {
+    analyticsLoading = false;
+  }
+}
+window.loadAnalyticsDashboard = loadAnalyticsDashboard;
+
+function getMonthKey(order = {}) {
+  const date = new Date(order.createdAt || order.created_at || order.date || Date.now());
+  return date.toLocaleString('en-US', { month:'short' });
+}
+
+function renderAnalyticsRevenueChart(orders) {
+  const el = document.getElementById('analytics-revenue-chart');
+  if (!el) return;
+
+  const monthMap = new Map();
+  const now = new Date();
+  for (let i = 5; i >= 0; i -= 1) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    monthMap.set(d.toLocaleString('en-US', { month:'short' }), 0);
+  }
+
+  orders.forEach(order => {
+    const key = getMonthKey(order);
+    monthMap.set(key, (monthMap.get(key) || 0) + getOrderTotal(order));
+  });
+
+  const data = Array.from(monthMap.entries()).map(([month, value]) => ({ month, value }));
+  const max = Math.max(...data.map(d => d.value), 1);
+
+  el.innerHTML = data.map(item => `
+    <div class="analytics-revenue-col">
+      <div class="analytics-revenue-bar-wrap">
+        <div class="analytics-revenue-bar" data-h="${Math.max(4, Math.round((item.value / max) * 100))}%" data-v="${analyticsMoney(item.value)}"></div>
+      </div>
+      <span>${analyticsEscape(item.month)}</span>
+    </div>
+  `).join('');
+
+  setTimeout(() => {
+    el.querySelectorAll('.analytics-revenue-bar').forEach(bar => {
+      bar.style.height = bar.dataset.h;
+    });
+  }, 140);
+}
+
+function renderAnalyticsStatus(orders) {
+  const total = orders.length || 0;
+  const counts = orders.reduce((acc, order) => {
+    const status = getOrderStatus(order);
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const delivered = Object.entries(counts).reduce((sum, [status, count]) => sum + (isDeliveredStatus(status) ? count : 0), 0);
+  const cancelled = Object.entries(counts).reduce((sum, [status, count]) => sum + (isCancelledStatus(status) ? count : 0), 0);
+  const open = Math.max(0, total - delivered - cancelled);
+  const fulfilledPct = total ? Math.round((delivered / total) * 100) : 0;
+
+  const ring = document.getElementById('analytics-status-ring');
+  const meta = document.getElementById('analytics-status-meta');
+  if (ring) {
+    ring.style.setProperty('--ring-pct', `${fulfilledPct}%`);
+    ring.innerHTML = `<span>${fulfilledPct}%</span>`;
+  }
+  if (meta) meta.textContent = total ? `${delivered} delivered from ${total} orders` : 'No orders yet';
+
+  renderMetList('analytics-status-list', [
+    { name:'Delivered', val:String(delivered), pct: total ? Math.round((delivered / total) * 100) : 0, color:'var(--green)' },
+    { name:'Open / Processing', val:String(open), pct: total ? Math.round((open / total) * 100) : 0, color:'var(--gold)' },
+    { name:'Cancelled', val:String(cancelled), pct: total ? Math.round((cancelled / total) * 100) : 0, color:'var(--red)' }
+  ]);
+}
+
+function getProductStock(product = {}) {
+  return Number(product.stock ?? product.inventory ?? product.quantity ?? product.availableStock ?? 0);
 }
 
 function renderAnalyticsRealtime() {
-  const totalOrders = REAL_ORDERS.length || 0;
-  const totalRevenue = REAL_ORDERS.reduce(
-    (sum, order) => sum + Number(order?.pricing?.total || order?.total || 0),
-    0
-  );
+  const orders = getAnalyticsRangeOrders();
+  const totalOrders = orders.length || 0;
+  const totalRevenue = orders.reduce((sum, order) => sum + getOrderTotal(order), 0);
+  const aov = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
+
+  const deliveredOrders = orders.filter(order => isDeliveredStatus(getOrderStatus(order))).length;
+  const paidOrders = orders.filter(isPaidOrder).length;
+  const conversionHealth = totalOrders ? Math.round((deliveredOrders / totalOrders) * 100) : 0;
+
+  const products = Array.isArray(REAL_PRODUCTS) ? REAL_PRODUCTS : [];
+  const assets = Array.isArray(REAL_ASSETS) ? REAL_ASSETS : [];
+  const users = Array.isArray(REAL_USERS) ? REAL_USERS : [];
+
+  const lowStock = products.filter(p => getProductStock(p) > 0 && getProductStock(p) <= 5).length;
+  const outStock = products.filter(p => getProductStock(p) <= 0).length;
+  const activeProducts = products.filter(p => p.isActive !== false && p.status !== 'inactive').length;
+  const digitalPaid = assets.filter(a => String(a.type || a.access || '').toLowerCase().includes('premium') || Number(a.price || 0) > 0).length;
+
+  const totalFanPoints = users.reduce((sum, user) => sum + Number(user.fanPoints || 0), 0);
+  const avgFanPoints = users.length ? Math.round(totalFanPoints / users.length) : 0;
 
   const productSales = {};
-  REAL_ORDERS.forEach(order => {
+  orders.forEach(order => {
     (order.items || []).forEach(item => {
-      const name = item.name || 'Product';
-      productSales[name] = (productSales[name] || 0) + Number(item.quantity || 1);
+      const name = item.name || item.title || 'Product';
+      productSales[name] = (productSales[name] || 0) + Number(item.quantity || item.qty || 1);
     });
   });
 
-  const topProducts = Object.entries(productSales)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4);
+  const topProducts = Object.entries(productSales).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxProductQty = Math.max(...topProducts.map(([, qty]) => qty), 1);
 
-  const maxProductQty =
-    Math.max(...topProducts.map(([, qty]) => qty), 1);
+  const cityCount = {};
+  orders.forEach(order => {
+    const city = order.shippingAddress?.city || order.address?.city || order.city || 'Unknown';
+    cityCount[city] = (cityCount[city] || 0) + 1;
+  });
+  const geoRows = Object.entries(cityCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxGeo = Math.max(...geoRows.map(([, count]) => count), 1);
 
-  renderMetList(
-    'top-products-list',
-    topProducts.map(([name, qty]) => ({
-      name,
-      val: `${qty} sold`,
-      pct: Math.max(8, Math.round((qty / maxProductQty) * 100)),
-      color: 'var(--red)'
-    }))
-  );
+  const couponOrders = orders.filter(order => order.coupon || order.couponCode || order.pricing?.coupon || Number(order.pricing?.discount || order.discount || 0) > 0).length;
+  const discountTotal = orders.reduce((sum, order) => sum + Number(order.pricing?.discount || order.discount || 0), 0);
 
-  renderMetList(
-    'traffic-list',
-    [
-      {
-        name: 'Orders',
-        val: String(totalOrders),
-        pct: totalOrders ? 100 : 0,
-        color: 'var(--red)'
-      },
-      {
-        name: 'Revenue',
-        val: `₹${totalRevenue.toLocaleString('en-IN')}`,
-        pct: totalRevenue ? 100 : 0,
-        color: 'var(--gold)'
-      },
-      {
-        name: 'Products',
-        val: String(REAL_PRODUCTS.length || 0),
-        pct: REAL_PRODUCTS.length ? 100 : 0,
-        color: 'var(--blue)'
-      },
-      {
-        name: 'Digital Assets',
-        val: String(REAL_ASSETS.length || 0),
-        pct: REAL_ASSETS.length ? 100 : 0,
-        color: 'var(--green)'
-      }
-    ]
-  );
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
 
-  renderMetList(
-    'geo-list',
-    [
-      {
-        name: 'India',
-        val: 'Primary market',
-        pct: totalOrders ? 100 : 0,
-        color: 'var(--red)'
-      }
-    ]
-  );
+  setText('analytics-total-revenue', analyticsMoney(totalRevenue));
+  setText('analytics-total-orders', String(totalOrders));
+  setText('analytics-aov', analyticsMoney(aov));
+  setText('analytics-health', `${conversionHealth}%`);
+  setText('analytics-revenue-sub', `${paidOrders} paid / ${totalOrders} selected`);
+  setText('analytics-orders-sub', `${orders.length} live records`);
+  setText('analytics-aov-sub', totalOrders ? 'Calculated from selected orders' : 'Waiting for first order');
+  setText('analytics-health-sub', `${deliveredOrders} delivered orders`);
 
-  renderMetList(
-    'engagement-list',
-    [
-      {
-        name: 'Wishlist / Downloads',
-        val: 'Active modules',
-        pct: 100,
-        color: 'var(--green)'
-      },
-      {
-        name: 'Checkout Flow',
-        val: 'Live',
-        pct: 100,
-        color: 'var(--red)'
-      }
-    ]
-  );
+  renderAnalyticsRevenueChart(orders);
+  renderAnalyticsStatus(orders);
+
+  renderMetList('top-products-list', topProducts.map(([name, qty]) => ({
+    name,
+    val: `${qty} sold`,
+    pct: Math.max(8, Math.round((qty / maxProductQty) * 100)),
+    color:'var(--gold)'
+  })));
+
+  renderMetList('traffic-list', [
+    { name:'Checkout Orders', val:String(totalOrders), pct: totalOrders ? 100 : 0, color:'var(--red)' },
+    { name:'Paid Signals', val:String(paidOrders), pct: totalOrders ? Math.round((paidOrders / totalOrders) * 100) : 0, color:'var(--green)' },
+    { name:'Catalogue Views Ready', val:String(activeProducts), pct: products.length ? Math.round((activeProducts / products.length) * 100) : 0, color:'var(--blue)' },
+    { name:'Digital Downloads Ready', val:String(assets.length), pct: assets.length ? 100 : 0, color:'var(--gold)' }
+  ]);
+
+  renderMetList('geo-list', geoRows.map(([name, count]) => ({
+    name,
+    val: `${count} orders`,
+    pct: Math.max(8, Math.round((count / maxGeo) * 100)),
+    color:'var(--blue)'
+  })));
+
+  renderMetList('engagement-list', [
+    { name:'Registered Fans', val:String(users.length), pct: users.length ? 100 : 0, color:'var(--red)' },
+    { name:'Avg Fan Points', val:String(avgFanPoints), pct: Math.min(100, Math.round(avgFanPoints / 10)), color:'var(--gold)' },
+    { name:'Digital Assets', val:String(assets.length), pct: assets.length ? 100 : 0, color:'var(--green)' },
+    { name:'Products Listed', val:String(products.length), pct: products.length ? 100 : 0, color:'var(--blue)' }
+  ]);
+
+  renderMetList('analytics-inventory-list', [
+    { name:'Active Products', val:String(activeProducts), pct: products.length ? Math.round((activeProducts / products.length) * 100) : 0, color:'var(--green)' },
+    { name:'Low Stock Alerts', val:String(lowStock), pct: products.length ? Math.round((lowStock / products.length) * 100) : 0, color:'var(--orange)' },
+    { name:'Out of Stock', val:String(outStock), pct: products.length ? Math.round((outStock / products.length) * 100) : 0, color:'var(--red)' }
+  ]);
+
+  renderMetList('analytics-commerce-list', [
+    { name:'Coupon Orders', val:String(couponOrders), pct: totalOrders ? Math.round((couponOrders / totalOrders) * 100) : 0, color:'var(--red)' },
+    { name:'Discount Given', val:analyticsMoney(discountTotal), pct: totalRevenue ? Math.min(100, Math.round((discountTotal / totalRevenue) * 100)) : 0, color:'var(--gold)' },
+    { name:'Premium Digital Assets', val:String(digitalPaid), pct: assets.length ? Math.round((digitalPaid / assets.length) * 100) : 0, color:'var(--blue)' }
+  ]);
+
+  analyticsLastSnapshot = {
+    totalRevenue,
+    totalOrders,
+    aov,
+    conversionHealth,
+    paidOrders,
+    deliveredOrders,
+    products: products.length,
+    activeProducts,
+    users: users.length,
+    assets: assets.length,
+    lowStock,
+    outStock,
+    couponOrders,
+    discountTotal
+  };
 }
+window.renderAnalyticsRealtime = renderAnalyticsRealtime;
 
+function downloadAnalyticsReport() {
+  renderAnalyticsRealtime();
+  const snap = analyticsLastSnapshot || {};
+  const rows = [
+    ['Metric', 'Value'],
+    ['Total Revenue', snap.totalRevenue || 0],
+    ['Total Orders', snap.totalOrders || 0],
+    ['Average Order Value', snap.aov || 0],
+    ['Conversion Health %', snap.conversionHealth || 0],
+    ['Paid Orders', snap.paidOrders || 0],
+    ['Delivered Orders', snap.deliveredOrders || 0],
+    ['Products Listed', snap.products || 0],
+    ['Active Products', snap.activeProducts || 0],
+    ['Registered Users', snap.users || 0],
+    ['Digital Assets', snap.assets || 0],
+    ['Low Stock Alerts', snap.lowStock || 0],
+    ['Out of Stock', snap.outStock || 0],
+    ['Coupon Orders', snap.couponOrders || 0],
+    ['Discount Given', snap.discountTotal || 0]
+  ];
+  const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `paddox-analytics-report-${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Analytics report downloaded');
+}
+window.downloadAnalyticsReport = downloadAnalyticsReport;
 
 /* ══ MODERATION — CLEAN EMPTY STATE ══ */
 function renderModeration() {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Admin Dashboard</title>
-  <link rel="stylesheet" href="admin.css?v=A4_8F_2"/>
+  <link rel="stylesheet" href="admin.css?v=A4_9A"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
 <style>
@@ -639,27 +639,131 @@
 
         <!-- ── ANALYTICS ── -->
         <div class="adm-page" id="adm-analytics">
-          <div class="analytics-kpis">
-            <div class="kpi-card kpi-red reveal-up"><div class="kpi-label">Conversion Rate</div><div class="kpi-value" style="font-size:2rem">3.84%</div><div class="kpi-change kpi-up">↑ 0.4% this month</div></div>
-            <div class="kpi-card kpi-blue reveal-up delay-1"><div class="kpi-label">Avg. Order Value</div><div class="kpi-value" style="font-size:2rem">₹4,820</div><div class="kpi-change kpi-up">↑ ₹320 this month</div></div>
-            <div class="kpi-card kpi-green reveal-up delay-2"><div class="kpi-label">Customer Retention</div><div class="kpi-value" style="font-size:2rem">68.2%</div><div class="kpi-change kpi-up">↑ 3.1% this month</div></div>
+          <section class="analytics-command-hero reveal-up">
+            <div>
+              <span class="analytics-kicker">PADDOX Intelligence Hub</span>
+              <h2>Revenue, orders, fans and product performance in one cockpit.</h2>
+              <p>Live analytics powered by orders, products, inventory, digital assets and user data from the admin system.</p>
+            </div>
+            <div class="analytics-hero-actions">
+              <button class="adm-btn-ghost" type="button" onclick="loadAnalyticsDashboard(true)">Refresh Live Data</button>
+              <button class="adm-btn-red" type="button" onclick="downloadAnalyticsReport()">Download Report</button>
+            </div>
+          </section>
+
+          <div class="analytics-filter-strip reveal-up delay-1">
+            <div>
+              <span>View Mode</span>
+              <strong>Realtime admin snapshot</strong>
+            </div>
+            <div class="analytics-filter-actions">
+              <select class="adm-select" id="analytics-range" onchange="renderAnalyticsRealtime()">
+                <option value="all">All Time</option>
+                <option value="30">Last 30 Days</option>
+                <option value="7">Last 7 Days</option>
+                <option value="today">Today</option>
+              </select>
+              <select class="adm-select" id="analytics-status" onchange="renderAnalyticsRealtime()">
+                <option value="all">All Orders</option>
+                <option value="paid">Paid Orders</option>
+                <option value="delivered">Delivered</option>
+                <option value="pending">Open / Pending</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
           </div>
-          <div class="analytics-charts">
-            <div class="chart-card reveal-up">
+
+          <div class="analytics-kpis analytics-kpis-premium reveal-up delay-1">
+            <div class="kpi-card kpi-red analytics-kpi-card">
+              <div class="kpi-label">Total Revenue</div>
+              <div class="kpi-value" id="analytics-total-revenue">₹0</div>
+              <div class="kpi-change" id="analytics-revenue-sub">Live order value</div>
+            </div>
+            <div class="kpi-card kpi-blue analytics-kpi-card">
+              <div class="kpi-label">Orders</div>
+              <div class="kpi-value" id="analytics-total-orders">0</div>
+              <div class="kpi-change" id="analytics-orders-sub">Placed in selected range</div>
+            </div>
+            <div class="kpi-card kpi-green analytics-kpi-card">
+              <div class="kpi-label">Avg. Order Value</div>
+              <div class="kpi-value" id="analytics-aov">₹0</div>
+              <div class="kpi-change" id="analytics-aov-sub">Revenue per order</div>
+            </div>
+            <div class="kpi-card kpi-gold analytics-kpi-card">
+              <div class="kpi-label">Conversion Health</div>
+              <div class="kpi-value" id="analytics-health">0%</div>
+              <div class="kpi-change" id="analytics-health-sub">Delivered vs total orders</div>
+            </div>
+          </div>
+
+          <div class="analytics-deck-grid reveal-up delay-2">
+            <div class="analytics-panel analytics-wide-panel">
+              <div class="analytics-panel-head">
+                <div>
+                  <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-analytics"></use></svg></span> Revenue Trend</div>
+                  <div class="chart-sub">Monthly order revenue from real PADDOX orders</div>
+                </div>
+                <span class="analytics-live-pill">Live</span>
+              </div>
+              <div class="analytics-bar-chart" id="analytics-revenue-chart"></div>
+            </div>
+
+            <div class="analytics-panel">
+              <div class="analytics-panel-head">
+                <div>
+                  <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-speed"></use></svg></span> Order Status Mix</div>
+                  <div class="chart-sub">Fulfilment pipeline snapshot</div>
+                </div>
+              </div>
+              <div class="status-ring-card">
+                <div class="status-ring" id="analytics-status-ring"><span>0%</span></div>
+                <div class="status-ring-meta" id="analytics-status-meta">No orders yet</div>
+              </div>
+              <div class="met-list compact-met-list" id="analytics-status-list"></div>
+            </div>
+          </div>
+
+          <div class="analytics-charts analytics-module-grid reveal-up delay-3">
+            <div class="chart-card analytics-card-polish">
               <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-globe"></use></svg></span> Traffic Sources</div>
+              <div class="chart-sub">Admin-derived sources until website tracking is connected</div>
               <div class="met-list" id="traffic-list"></div>
             </div>
-            <div class="chart-card reveal-up delay-1">
-              <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-speed"></use></svg></span> Top Products</div>
+            <div class="chart-card analytics-card-polish">
+              <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-products"></use></svg></span> Top Products</div>
+              <div class="chart-sub">Best-selling merchandise by quantity sold</div>
               <div class="met-list" id="top-products-list"></div>
             </div>
-            <div class="chart-card reveal-up delay-2">
+            <div class="chart-card analytics-card-polish">
               <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-map"></use></svg></span> User Geography</div>
+              <div class="chart-sub">Shipping city and fan location signals</div>
               <div class="met-list" id="geo-list"></div>
             </div>
-            <div class="chart-card reveal-up delay-3">
+            <div class="chart-card analytics-card-polish">
               <div class="chart-title"><span class="title-ico"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-game"></use></svg></span> Fan Engagement</div>
+              <div class="chart-sub">Users, fan points, wallpapers and catalogue health</div>
               <div class="met-list" id="engagement-list"></div>
+            </div>
+          </div>
+
+          <div class="analytics-bottom-grid reveal-up delay-3">
+            <div class="analytics-panel">
+              <div class="analytics-panel-head">
+                <div>
+                  <div class="chart-title">Inventory Signals</div>
+                  <div class="chart-sub">Stock risks and catalogue strength</div>
+                </div>
+              </div>
+              <div class="met-list" id="analytics-inventory-list"></div>
+            </div>
+            <div class="analytics-panel">
+              <div class="analytics-panel-head">
+                <div>
+                  <div class="chart-title">Coupon & Digital Signals</div>
+                  <div class="chart-sub">Discount and wallpaper sales visibility</div>
+                </div>
+              </div>
+              <div class="met-list" id="analytics-commerce-list"></div>
             </div>
           </div>
         </div>
@@ -1113,7 +1217,7 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script src="admin.js?v=A4_8D"></script>
+  <script src="admin.js?v=A4_9A"></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/api.js"></script>
