@@ -3565,14 +3565,18 @@ loadLastResult();
 console.log('%cPADDOX — Fan Hub Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
 
 
+
 /* ══════════════════════════════════════
-   PHASE A4.11B — PADDOX AI FAN STUDIO UI
-   Frontend preview only. Real generation arrives in A4.11C.
+   PHASE A4.11C — PADDOX AI FAN STUDIO ENGINE
+   Backend foundation: credit deduction + Cloudinary save + Gemini-ready structure.
 ══════════════════════════════════════ */
+const AI_STUDIO_API_BASE = 'https://paddox-backend.onrender.com/api/ai-studio';
 const AI_STUDIO_STATE = {
   style: 'VIP Paddock',
   tone: 'Luxury paddock access, glass card, carbon shadows',
-  photoUrl: ''
+  photoUrl: '',
+  generatedUrl: '',
+  generatedPosterId: ''
 };
 
 function aiStudioToken() {
@@ -3613,34 +3617,42 @@ async function loadAiCreditBalance() {
   }
 }
 
-function updateAiStudioPreview() {
-  const fanName = document.getElementById('ai-fan-name')?.value?.trim() || 'PADDOX FAN';
-  const driver = document.getElementById('ai-driver-inspo')?.value?.trim() || 'Driver-inspired';
-  const team = document.getElementById('ai-team-mood')?.value || 'PADDOX Red';
-  const format = document.getElementById('ai-output-format')?.value || 'Portrait 4:5';
-  const prompt = document.getElementById('ai-creative-prompt')?.value?.trim();
+function getAiStudioPayload() {
+  return {
+    style: AI_STUDIO_STATE.style,
+    tone: AI_STUDIO_STATE.tone,
+    fanName: document.getElementById('ai-fan-name')?.value?.trim() || 'PADDOX FAN',
+    driverInspiration: document.getElementById('ai-driver-inspo')?.value?.trim() || 'Driver-inspired',
+    teamMood: document.getElementById('ai-team-mood')?.value || 'PADDOX Red',
+    outputFormat: document.getElementById('ai-output-format')?.value || 'Portrait 4:5',
+    creativePrompt: document.getElementById('ai-creative-prompt')?.value?.trim() || '',
+    photoDataUrl: AI_STUDIO_STATE.photoUrl || ''
+  };
+}
 
+function updateAiStudioPreview() {
+  const payload = getAiStudioPayload();
   const styleEl = document.getElementById('ai-preview-style');
   const nameEl = document.getElementById('ai-preview-name');
   const lineEl = document.getElementById('ai-preview-line');
   const teamEl = document.getElementById('ai-preview-team');
   const formatEl = document.getElementById('ai-preview-format');
 
-  if (styleEl) styleEl.textContent = AI_STUDIO_STATE.style;
-  if (nameEl) nameEl.textContent = fanName.toUpperCase();
+  if (styleEl) styleEl.textContent = payload.style;
+  if (nameEl) nameEl.textContent = payload.fanName.toUpperCase();
   if (lineEl) {
-    lineEl.textContent = prompt
-      ? prompt
-      : `${driver} motorsport poster with ${team} energy.`;
+    lineEl.textContent = payload.creativePrompt
+      ? payload.creativePrompt
+      : `${payload.driverInspiration} motorsport poster with ${payload.teamMood} energy.`;
   }
-  if (teamEl) teamEl.textContent = team;
-  if (formatEl) formatEl.textContent = format;
+  if (teamEl) teamEl.textContent = payload.teamMood;
+  if (formatEl) formatEl.textContent = payload.outputFormat;
 
   const poster = document.getElementById('ai-poster-preview');
   if (poster) {
     poster.classList.remove('ai-format-square','ai-format-wide');
-    if (format.includes('Square')) poster.classList.add('ai-format-square');
-    if (format.includes('Wallpaper')) poster.classList.add('ai-format-wide');
+    if (payload.outputFormat.includes('Square')) poster.classList.add('ai-format-square');
+    if (payload.outputFormat.includes('Wallpaper')) poster.classList.add('ai-format-wide');
   }
 }
 
@@ -3656,6 +3668,28 @@ function initAiStudioStyles() {
   });
 }
 
+function shrinkAiPhoto(file, maxSize = 980, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read image'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not load image'));
+      img.onload = () => {
+        const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.width * ratio));
+        canvas.height = Math.max(1, Math.round(img.height * ratio));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = String(reader.result || '');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function initAiStudioPhotoUpload() {
   const input = document.getElementById('ai-photo-input');
   const img = document.getElementById('ai-photo-preview');
@@ -3663,7 +3697,7 @@ function initAiStudioPhotoUpload() {
   const uploadBox = document.getElementById('ai-upload-box');
   if (!input || !img || !frame) return;
 
-  input.addEventListener('change', () => {
+  input.addEventListener('change', async () => {
     const file = input.files?.[0];
     if (!file) return;
 
@@ -3673,15 +3707,151 @@ function initAiStudioPhotoUpload() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      AI_STUDIO_STATE.photoUrl = String(reader.result || '');
+    try {
+      AI_STUDIO_STATE.photoUrl = await shrinkAiPhoto(file);
       img.src = AI_STUDIO_STATE.photoUrl;
       frame.classList.add('has-photo');
       uploadBox?.classList.add('has-photo');
-      showToast('Fan photo added to preview');
-    };
-    reader.readAsDataURL(file);
+      clearGeneratedPosterState(false);
+      showToast('Fan photo added');
+    } catch (err) {
+      showToast(err.message || 'Photo upload failed');
+    }
+  });
+}
+
+function clearGeneratedPosterState(clearPhoto = false) {
+  AI_STUDIO_STATE.generatedUrl = '';
+  AI_STUDIO_STATE.generatedPosterId = '';
+  const generatedImg = document.getElementById('ai-generated-poster-img');
+  const poster = document.getElementById('ai-poster-preview');
+  const status = document.getElementById('ai-poster-status');
+  const downloadBtn = document.getElementById('ai-download-poster');
+  const shareBtn = document.getElementById('ai-share-poster');
+  generatedImg?.removeAttribute('src');
+  poster?.classList.remove('has-generated','is-generating');
+  if (status) status.textContent = 'Fictional fan artwork · Preview';
+  [downloadBtn, shareBtn].forEach(btn => {
+    if (!btn) return;
+    btn.disabled = true;
+    btn.classList.add('disabled','ai-locked-btn');
+    btn.classList.remove('ai-ready');
+  });
+  if (downloadBtn) downloadBtn.innerHTML = 'Download Poster <small>Generate first</small>';
+  if (shareBtn) shareBtn.innerHTML = 'Share Poster <small>Generate first</small>';
+  if (clearPhoto) {
+    AI_STUDIO_STATE.photoUrl = '';
+  }
+}
+
+function setAiGenerating(isGenerating) {
+  const btn = document.getElementById('ai-generate-preview');
+  const poster = document.getElementById('ai-poster-preview');
+  if (btn) {
+    btn.disabled = isGenerating;
+    btn.classList.toggle('is-loading', isGenerating);
+    btn.textContent = isGenerating ? 'Generating...' : 'Generate AI Poster';
+  }
+  poster?.classList.toggle('is-generating', isGenerating);
+}
+
+async function generateAiPoster() {
+  const token = aiStudioToken();
+  if (!token) {
+    showToast('Please login to generate AI posters');
+    setTimeout(() => { window.location.href = 'account.html'; }, 900);
+    return;
+  }
+
+  updateAiStudioPreview();
+  setAiGenerating(true);
+  clearGeneratedPosterState(false);
+
+  try {
+    const res = await fetch(`${AI_STUDIO_API_BASE}/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(getAiStudioPayload())
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'AI generation failed');
+    }
+
+    const payload = data.data || data;
+    const poster = payload.poster || {};
+    const imageUrl = poster.image?.url || poster.url || payload.imageUrl || '';
+    if (!imageUrl) throw new Error('Generated image URL missing');
+
+    AI_STUDIO_STATE.generatedUrl = imageUrl;
+    AI_STUDIO_STATE.generatedPosterId = poster._id || poster.id || '';
+
+    const generatedImg = document.getElementById('ai-generated-poster-img');
+    const preview = document.getElementById('ai-poster-preview');
+    const status = document.getElementById('ai-poster-status');
+    const downloadBtn = document.getElementById('ai-download-poster');
+    const shareBtn = document.getElementById('ai-share-poster');
+
+    if (generatedImg) generatedImg.src = imageUrl;
+    preview?.classList.add('has-generated');
+    if (status) status.textContent = `Generated · ${payload.cost || 15} credits used`;
+
+    const newCredits = payload.aiCredits ?? payload.remainingCredits;
+    const balanceEl = document.getElementById('ai-credit-balance');
+    if (balanceEl && newCredits !== undefined) {
+      balanceEl.textContent = Number(newCredits || 0).toLocaleString('en-IN');
+    }
+
+    [downloadBtn, shareBtn].forEach(btn => {
+      if (!btn) return;
+      btn.disabled = false;
+      btn.classList.remove('disabled');
+      btn.classList.add('ai-ready');
+    });
+    if (downloadBtn) downloadBtn.innerHTML = 'Download Poster <small>Ready</small>';
+    if (shareBtn) shareBtn.innerHTML = 'Share Poster <small>Copy Link</small>';
+
+    showToast(data.message || 'AI poster generated and saved');
+  } catch (err) {
+    showToast(err.message || 'AI generation failed');
+  } finally {
+    setAiGenerating(false);
+  }
+}
+
+function initAiGeneratedPosterActions() {
+  document.getElementById('ai-download-poster')?.addEventListener('click', () => {
+    if (!AI_STUDIO_STATE.generatedUrl) return showToast('Generate a poster first');
+    const a = document.createElement('a');
+    a.href = AI_STUDIO_STATE.generatedUrl;
+    a.download = `paddox-ai-poster-${Date.now()}.png`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  document.getElementById('ai-share-poster')?.addEventListener('click', async () => {
+    if (!AI_STUDIO_STATE.generatedUrl) return showToast('Generate a poster first');
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'PADDOX AI Fan Poster',
+          text: 'My fictional PADDOX motorsport fan poster',
+          url: AI_STUDIO_STATE.generatedUrl
+        });
+        showToast('Poster shared');
+        return;
+      }
+      await navigator.clipboard.writeText(AI_STUDIO_STATE.generatedUrl);
+      showToast('Poster link copied');
+    } catch (err) {
+      showToast('Share cancelled');
+    }
   });
 }
 
@@ -3689,18 +3859,11 @@ function initAiStudioInputs() {
   ['ai-fan-name','ai-driver-inspo','ai-team-mood','ai-output-format','ai-creative-prompt'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('input', updateAiStudioPreview);
-    el.addEventListener('change', updateAiStudioPreview);
+    el.addEventListener('input', () => { updateAiStudioPreview(); clearGeneratedPosterState(false); });
+    el.addEventListener('change', () => { updateAiStudioPreview(); clearGeneratedPosterState(false); });
   });
 
-  document.getElementById('ai-generate-preview')?.addEventListener('click', () => {
-    updateAiStudioPreview();
-    const poster = document.getElementById('ai-poster-preview');
-    poster?.classList.remove('preview-pulse');
-    void poster?.offsetWidth;
-    poster?.classList.add('preview-pulse');
-    showToast('Premium preview ready. Real AI generation connects in A4.11C');
-  });
+  document.getElementById('ai-generate-preview')?.addEventListener('click', generateAiPoster);
 
   document.getElementById('ai-reset-studio')?.addEventListener('click', () => {
     const name = document.getElementById('ai-fan-name');
@@ -3726,8 +3889,8 @@ function initAiStudioInputs() {
     document.querySelectorAll('.ai-style-card').forEach((card, index) => card.classList.toggle('on', index === 0));
     AI_STUDIO_STATE.style = 'VIP Paddock';
     AI_STUDIO_STATE.tone = 'Luxury paddock access, glass card, carbon shadows';
-    AI_STUDIO_STATE.photoUrl = '';
 
+    clearGeneratedPosterState(true);
     updateAiStudioPreview();
     showToast('AI Studio reset');
   });
@@ -3738,8 +3901,10 @@ function initPaddoxAiStudio() {
   initAiStudioStyles();
   initAiStudioPhotoUpload();
   initAiStudioInputs();
+  initAiGeneratedPosterActions();
   updateAiStudioPreview();
   loadAiCreditBalance();
 }
 
 window.addEventListener('load', initPaddoxAiStudio);
+

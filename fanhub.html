@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Digital Fan Hub</title>
-  <link rel="stylesheet" href="fanhub.css?v=A4_11B"/>
+  <link rel="stylesheet" href="fanhub.css?v=A4_11C"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -282,12 +282,12 @@
             <input id="ai-photo-input" type="file" accept="image/*"/>
             <span class="ai-upload-icon" aria-hidden="true"></span>
             <strong>Upload fan photo</strong>
-            <small>Optional preview image now. A4.11C will generate the final AI poster and store it in your gallery.</small>
+            <small>Optional. Your image helps shape the preview and will be sent only when you generate.</small>
           </label>
 
           <div class="ai-actions-row">
             <button class="ai-generate-btn" id="ai-generate-preview" type="button">
-              Generate Live Preview
+              Generate AI Poster
             </button>
             <button class="ai-secondary-btn" id="ai-reset-studio" type="button">Reset</button>
           </div>
@@ -308,6 +308,7 @@
 
           <div class="ai-poster-preview" id="ai-poster-preview">
             <div class="ai-poster-bg"></div>
+            <img id="ai-generated-poster-img" class="ai-generated-poster-img" alt="Generated PADDOX AI poster"/>
             <div class="ai-poster-brand">
               <img src="assets/paddox-logo-icon-web.png?v=A4_10C_3" alt="PADDOX" loading="lazy"/>
               <span>PADDOX AI STUDIO · FAN POSTER</span>
@@ -322,21 +323,21 @@
               <p id="ai-preview-line">Driver-inspired motorsport poster with PADDOX red energy.</p>
             </div>
             <div class="ai-poster-footer">
-              <span>Fictional fan artwork · Preview</span>
+              <span id="ai-poster-status">Fictional fan artwork · Preview</span>
               <strong id="ai-preview-team">PADDOX Red</strong>
             </div>
           </div>
 
           <div class="ai-preview-actions">
-            <button class="ai-secondary-btn disabled ai-locked-btn" type="button" disabled>Save to Gallery <small>Coming A4.11C</small></button>
-            <button class="ai-secondary-btn disabled ai-locked-btn" type="button" disabled>Share Poster <small>Coming A4.11C</small></button>
+            <button class="ai-secondary-btn disabled ai-locked-btn" id="ai-download-poster" type="button" disabled>Download Poster <small>Generate first</small></button>
+            <button class="ai-secondary-btn disabled ai-locked-btn" id="ai-share-poster" type="button" disabled>Share Poster <small>Generate first</small></button>
           </div>
 
           <div class="ai-next-phase-card">
             <span class="ai-next-icon" aria-hidden="true"></span>
             <div>
-              <strong>A4.11C Backend Ready Next</strong>
-              <p>A4.11C will connect real AI image generation, deduct credits and save generated posters to Cloudinary.</p>
+              <strong>A4.11C Generation Engine</strong>
+              <p>Generates a PADDOX-safe poster, deducts 15 credits and saves the poster record. Real Gemini image mode can be switched on from Render env later.</p>
             </div>
           </div>
         </div>
