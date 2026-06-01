@@ -7016,3 +7016,76 @@ body.modal-open { overflow: hidden; }
   padding:5px 8px;
   border-radius:999px;
 }
+
+
+/* ══════════════════════════════════════
+   PHASE A4.11C.1 — AI STUDIO GENERATION LAYOUT FIX
+   Keeps generated result clean and prevents visual duplication.
+══════════════════════════════════════ */
+#sec-ai-studio{
+  padding-top:46px;
+}
+#sec-ai-studio .sec-header{
+  margin-bottom:28px;
+}
+.ai-studio-grid{
+  align-items:start;
+}
+.ai-preview-panel{
+  overflow:hidden;
+}
+.ai-poster-preview{
+  isolation:isolate;
+  max-width:420px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.ai-poster-preview.has-generated{
+  border-color:rgba(201,168,76,.46);
+  box-shadow:0 0 0 1px rgba(201,168,76,.18),0 28px 80px rgba(0,0,0,.62),0 0 48px rgba(232,0,45,.13);
+}
+.ai-poster-preview.has-generated .ai-generated-poster-img{
+  opacity:1;
+  z-index:3;
+  filter:brightness(.9) saturate(1.08) contrast(1.05);
+}
+.ai-poster-preview.has-generated .ai-poster-bg,
+.ai-poster-preview.has-generated .ai-photo-frame,
+.ai-poster-preview.has-generated .ai-poster-copy{
+  opacity:0;
+  pointer-events:none;
+}
+.ai-poster-preview.has-generated .ai-poster-brand,
+.ai-poster-preview.has-generated .ai-poster-footer{
+  z-index:5;
+}
+.ai-poster-preview.has-generated .ai-poster-brand{
+  background:linear-gradient(90deg,rgba(7,7,7,.72),rgba(7,7,7,.18));
+  border-radius:999px;
+  padding:7px 10px;
+  width:max-content;
+  max-width:calc(100% - 26px);
+}
+.ai-poster-preview.has-generated .ai-poster-footer{
+  background:linear-gradient(90deg,rgba(7,7,7,.74),rgba(7,7,7,.28));
+  border-top-color:rgba(201,168,76,.22);
+  padding-top:10px;
+}
+.ai-preview-actions .ai-secondary-btn.ai-ready{
+  border-color:rgba(201,168,76,.45);
+  color:#ffe28a;
+  background:rgba(201,168,76,.09);
+}
+.ai-preview-actions .ai-secondary-btn.ai-ready:hover{
+  transform:translateY(-2px);
+  border-color:rgba(232,0,45,.48);
+  color:#fff;
+  background:rgba(232,0,45,.11);
+}
+.ai-next-phase-card{
+  margin-top:18px;
+}
+@media(max-width:900px){
+  #sec-ai-studio{padding-top:34px;}
+  .ai-poster-preview{max-width:360px;}
+}

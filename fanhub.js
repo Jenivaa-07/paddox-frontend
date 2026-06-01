@@ -3896,8 +3896,17 @@ function initAiStudioInputs() {
   });
 }
 
+
+function cleanupDuplicateAiStudioSections() {
+  const sections = Array.from(document.querySelectorAll('[id="sec-ai-studio"]'));
+  sections.slice(1).forEach(section => section.remove());
+}
+
 function initPaddoxAiStudio() {
+  if (window.__PADDOX_AI_STUDIO_INIT_DONE__) return;
+  cleanupDuplicateAiStudioSections();
   if (!document.getElementById('sec-ai-studio')) return;
+  window.__PADDOX_AI_STUDIO_INIT_DONE__ = true;
   initAiStudioStyles();
   initAiStudioPhotoUpload();
   initAiStudioInputs();
