@@ -9362,3 +9362,299 @@ async function deleteCoupon(id) {
     bindDigitalAssetPolish();
   });
 })();
+
+/* ══════════════════════════════════════
+   ADMIN PHASE A4.9A.1 — ANALYTICS REALTIME LOCK FIX
+   Fixes older duplicate renderAnalyticsRealtime override below Phase A4.9A.
+   Keeps Analytics synced from live backend arrays and refresh button.
+══════════════════════════════════════ */
+(function(){
+  function a49Escape(value = '') {
+    if (typeof escapeProductHTML === 'function') return escapeProductHTML(value);
+    return String(value ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+
+  function a49Money(value = 0) {
+    return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+  }
+
+  function a49OrderTotal(order = {}) {
+    return Number(order?.pricing?.total ?? order?.pricing?.grandTotal ?? order?.total ?? order?.amount ?? 0);
+  }
+
+  function a49OrderStatus(order = {}) {
+    return String(order.status || order.orderStatus || 'placed').toLowerCase().replace(/\s+/g, '_');
+  }
+
+  function a49Delivered(status = '') {
+    return ['delivered', 'fulfilled', 'completed'].includes(String(status).toLowerCase());
+  }
+
+  function a49Cancelled(status = '') {
+    return ['cancelled', 'canceled', 'failed', 'refunded'].includes(String(status).toLowerCase());
+  }
+
+  function a49PaidOrder(order = {}) {
+    const status = a49OrderStatus(order);
+    const pay = String(order.paymentStatus || order.payment?.status || '').toLowerCase();
+    return !a49Cancelled(status) && (pay === 'paid' || a49OrderTotal(order) > 0 || a49Delivered(status));
+  }
+
+  function a49ProductStock(product = {}) {
+    return Number(product.stock ?? product.inventory ?? product.quantity ?? product.availableStock ?? 0);
+  }
+
+  function a49RangeOrders() {
+    const range = document.getElementById('analytics-range')?.value || 'all';
+    const statusFilter = document.getElementById('analytics-status')?.value || 'all';
+    const now = Date.now();
+
+    return (window.REAL_ORDERS || REAL_ORDERS || []).filter(order => {
+      const created = order.createdAt || order.created_at || order.date;
+      if (range !== 'all') {
+        if (!created) return false;
+        const t = new Date(created).getTime();
+        if (Number.isNaN(t)) return false;
+        if (range === 'today') {
+          if (new Date(t).toDateString() !== new Date().toDateString()) return false;
+        } else {
+          const days = Number(range || 0);
+          if (days && now - t > days * 24 * 60 * 60 * 1000) return false;
+        }
+      }
+
+      const status = a49OrderStatus(order);
+      if (statusFilter === 'paid') return a49PaidOrder(order);
+      if (statusFilter === 'delivered') return a49Delivered(status);
+      if (statusFilter === 'cancelled') return a49Cancelled(status);
+      if (statusFilter === 'pending') return !a49Delivered(status) && !a49Cancelled(status);
+      return true;
+    });
+  }
+
+  function a49RenderMetList(id, data) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (!Array.isArray(data) || !data.length) {
+      el.innerHTML = '<div class="analytics-empty-state">No live data yet</div>';
+      return;
+    }
+
+    el.innerHTML = data.map(d => `
+      <div class="met-row">
+        <span class="met-name">${a49Escape(d.name)}</span>
+        <div class="met-bar-wrap">
+          <div class="met-bar" style="width:0%;background:${d.color || 'var(--red)'}" data-w="${Math.max(0, Math.min(100, Number(d.pct || 0)))}%"></div>
+        </div>
+        <span class="met-val">${a49Escape(d.val || `${d.pct || 0}%`)}</span>
+      </div>
+    `).join('');
+
+    setTimeout(() => {
+      el.querySelectorAll('.met-bar').forEach(b => {
+        b.style.transition = 'width 1s cubic-bezier(.34,1.56,.64,1)';
+        b.style.width = b.dataset.w;
+      });
+    }, 80);
+  }
+
+  function a49RevenueChart(orders) {
+    const el = document.getElementById('analytics-revenue-chart');
+    if (!el) return;
+
+    const monthMap = new Map();
+    const now = new Date();
+    for (let i = 5; i >= 0; i -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthMap.set(d.toLocaleString('en-US', { month:'short' }), 0);
+    }
+
+    orders.forEach(order => {
+      const date = new Date(order.createdAt || order.created_at || order.date || Date.now());
+      const key = date.toLocaleString('en-US', { month:'short' });
+      monthMap.set(key, (monthMap.get(key) || 0) + a49OrderTotal(order));
+    });
+
+    const rows = Array.from(monthMap.entries()).map(([month, value]) => ({ month, value }));
+    const max = Math.max(...rows.map(r => r.value), 1);
+
+    el.innerHTML = rows.map(item => `
+      <div class="analytics-revenue-col">
+        <div class="analytics-revenue-bar-wrap">
+          <div class="analytics-revenue-bar" data-h="${Math.max(4, Math.round((item.value / max) * 100))}%" data-v="${a49Money(item.value)}"></div>
+        </div>
+        <span>${a49Escape(item.month)}</span>
+      </div>
+    `).join('');
+
+    setTimeout(() => el.querySelectorAll('.analytics-revenue-bar').forEach(bar => { bar.style.height = bar.dataset.h; }), 80);
+  }
+
+  function a49StatusRing(orders) {
+    const total = orders.length || 0;
+    const delivered = orders.filter(order => a49Delivered(a49OrderStatus(order))).length;
+    const cancelled = orders.filter(order => a49Cancelled(a49OrderStatus(order))).length;
+    const open = Math.max(0, total - delivered - cancelled);
+    const pct = total ? Math.round((delivered / total) * 100) : 0;
+
+    const ring = document.getElementById('analytics-status-ring');
+    const meta = document.getElementById('analytics-status-meta');
+    if (ring) {
+      ring.style.setProperty('--ring-pct', `${pct}%`);
+      ring.innerHTML = `<span>${pct}%</span>`;
+    }
+    if (meta) meta.textContent = total ? `${delivered} delivered from ${total} selected orders` : 'No orders yet';
+
+    a49RenderMetList('analytics-status-list', [
+      { name:'Delivered', val:String(delivered), pct: total ? Math.round((delivered / total) * 100) : 0, color:'var(--green)' },
+      { name:'Open / Processing', val:String(open), pct: total ? Math.round((open / total) * 100) : 0, color:'var(--gold)' },
+      { name:'Cancelled', val:String(cancelled), pct: total ? Math.round((cancelled / total) * 100) : 0, color:'var(--red)' }
+    ]);
+  }
+
+  window.renderAnalyticsRealtime = function renderAnalyticsRealtimeA49Final() {
+    const orders = a49RangeOrders();
+    const totalOrders = orders.length || 0;
+    const totalRevenue = orders.reduce((sum, order) => sum + a49OrderTotal(order), 0);
+    const aov = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
+    const deliveredOrders = orders.filter(order => a49Delivered(a49OrderStatus(order))).length;
+    const paidOrders = orders.filter(a49PaidOrder).length;
+    const health = totalOrders ? Math.round((deliveredOrders / totalOrders) * 100) : 0;
+
+    const products = Array.isArray(window.REAL_PRODUCTS || REAL_PRODUCTS) ? (window.REAL_PRODUCTS || REAL_PRODUCTS) : [];
+    const assets = Array.isArray(window.REAL_ASSETS || REAL_ASSETS) ? (window.REAL_ASSETS || REAL_ASSETS) : [];
+    const users = Array.isArray(window.REAL_USERS || REAL_USERS) ? (window.REAL_USERS || REAL_USERS) : [];
+
+    const lowStock = products.filter(p => a49ProductStock(p) > 0 && a49ProductStock(p) <= 5).length;
+    const outStock = products.filter(p => a49ProductStock(p) <= 0).length;
+    const activeProducts = products.filter(p => p.isActive !== false && p.status !== 'inactive').length;
+    const premiumAssets = assets.filter(a => String(a.type || a.access || '').toLowerCase().includes('premium') || Number(a.price || 0) > 0).length;
+    const totalFanPoints = users.reduce((sum, user) => sum + Number(user.fanPoints || 0), 0);
+    const avgFanPoints = users.length ? Math.round(totalFanPoints / users.length) : 0;
+
+    const productSales = {};
+    orders.forEach(order => (order.items || []).forEach(item => {
+      const name = item.name || item.title || 'Product';
+      productSales[name] = (productSales[name] || 0) + Number(item.quantity || item.qty || 1);
+    }));
+    const topProducts = Object.entries(productSales).sort((a,b) => b[1] - a[1]).slice(0,5);
+    const maxProductQty = Math.max(...topProducts.map(([, qty]) => qty), 1);
+
+    const cityCount = {};
+    orders.forEach(order => {
+      const city = order.shippingAddress?.city || order.address?.city || order.city || 'Online';
+      cityCount[city] = (cityCount[city] || 0) + 1;
+    });
+    const geoRows = Object.entries(cityCount).sort((a,b) => b[1] - a[1]).slice(0,5);
+    const maxGeo = Math.max(...geoRows.map(([, count]) => count), 1);
+
+    const couponOrders = orders.filter(order => order.coupon || order.couponCode || order.pricing?.coupon || Number(order.pricing?.discount || order.discount || 0) > 0).length;
+    const discountTotal = orders.reduce((sum, order) => sum + Number(order.pricing?.discount || order.discount || 0), 0);
+
+    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    setText('analytics-total-revenue', a49Money(totalRevenue));
+    setText('analytics-total-orders', String(totalOrders));
+    setText('analytics-aov', a49Money(aov));
+    setText('analytics-health', `${health}%`);
+    setText('analytics-revenue-sub', `${paidOrders} paid / ${totalOrders} selected`);
+    setText('analytics-orders-sub', `${orders.length} live records`);
+    setText('analytics-aov-sub', totalOrders ? 'Calculated from selected orders' : 'Waiting for first order');
+    setText('analytics-health-sub', `${deliveredOrders} delivered orders`);
+
+    a49RevenueChart(orders);
+    a49StatusRing(orders);
+
+    a49RenderMetList('top-products-list', topProducts.map(([name, qty]) => ({ name, val:`${qty} sold`, pct:Math.max(8, Math.round((qty / maxProductQty) * 100)), color:'var(--gold)' })));
+    a49RenderMetList('traffic-list', [
+      { name:'Checkout Orders', val:String(totalOrders), pct:totalOrders ? 100 : 0, color:'var(--red)' },
+      { name:'Paid Signals', val:String(paidOrders), pct:totalOrders ? Math.round((paidOrders / totalOrders) * 100) : 0, color:'var(--green)' },
+      { name:'Catalogue Ready', val:String(activeProducts), pct:products.length ? Math.round((activeProducts / products.length) * 100) : 0, color:'var(--blue)' },
+      { name:'Digital Assets Ready', val:String(assets.length), pct:assets.length ? 100 : 0, color:'var(--gold)' }
+    ]);
+    a49RenderMetList('geo-list', geoRows.map(([name, count]) => ({ name, val:`${count} orders`, pct:Math.max(8, Math.round((count / maxGeo) * 100)), color:'var(--blue)' })));
+    a49RenderMetList('engagement-list', [
+      { name:'Registered Fans', val:String(users.length), pct:users.length ? 100 : 0, color:'var(--red)' },
+      { name:'Avg Fan Points', val:String(avgFanPoints), pct:Math.min(100, Math.round(avgFanPoints / 10)), color:'var(--gold)' },
+      { name:'Digital Assets', val:String(assets.length), pct:assets.length ? 100 : 0, color:'var(--green)' },
+      { name:'Products Listed', val:String(products.length), pct:products.length ? 100 : 0, color:'var(--blue)' }
+    ]);
+    a49RenderMetList('analytics-inventory-list', [
+      { name:'Active Products', val:String(activeProducts), pct:products.length ? Math.round((activeProducts / products.length) * 100) : 0, color:'var(--green)' },
+      { name:'Low Stock Alerts', val:String(lowStock), pct:products.length ? Math.round((lowStock / products.length) * 100) : 0, color:'var(--orange)' },
+      { name:'Out of Stock', val:String(outStock), pct:products.length ? Math.round((outStock / products.length) * 100) : 0, color:'var(--red)' }
+    ]);
+    a49RenderMetList('analytics-commerce-list', [
+      { name:'Coupon Orders', val:String(couponOrders), pct:totalOrders ? Math.round((couponOrders / totalOrders) * 100) : 0, color:'var(--red)' },
+      { name:'Discount Given', val:a49Money(discountTotal), pct:totalRevenue ? Math.min(100, Math.round((discountTotal / totalRevenue) * 100)) : 0, color:'var(--gold)' },
+      { name:'Premium Digital Assets', val:String(premiumAssets), pct:assets.length ? Math.round((premiumAssets / assets.length) * 100) : 0, color:'var(--blue)' }
+    ]);
+
+    window.analyticsLastSnapshot = {
+      totalRevenue, totalOrders, aov, conversionHealth:health, paidOrders, deliveredOrders,
+      products:products.length, activeProducts, users:users.length, assets:assets.length,
+      lowStock, outStock, couponOrders, discountTotal
+    };
+  };
+
+  window.loadAnalyticsDashboard = async function loadAnalyticsDashboardA49Final(force = false, silent = false) {
+    try {
+      if (!silent) showToast(force ? 'Refreshing live analytics...' : 'Syncing analytics...');
+      const jobs = [loadOrders?.(), loadProducts?.(), loadAssets?.(), loadUsers?.()].filter(Boolean);
+      await Promise.allSettled(jobs);
+      window.renderAnalyticsRealtime();
+      if (!silent) showToast('Analytics live data synced');
+    } catch (err) {
+      console.error('Analytics realtime sync failed:', err);
+      window.renderAnalyticsRealtime();
+      if (!silent) showToast('Analytics sync paused — showing cached live data');
+    }
+  };
+
+  window.downloadAnalyticsReport = function downloadAnalyticsReportA49Final() {
+    window.renderAnalyticsRealtime();
+    const snap = window.analyticsLastSnapshot || {};
+    const rows = [
+      ['Metric', 'Value'],
+      ['Total Revenue', snap.totalRevenue || 0],
+      ['Total Orders', snap.totalOrders || 0],
+      ['Average Order Value', snap.aov || 0],
+      ['Conversion Health %', snap.conversionHealth || 0],
+      ['Paid Orders', snap.paidOrders || 0],
+      ['Delivered Orders', snap.deliveredOrders || 0],
+      ['Products Listed', snap.products || 0],
+      ['Active Products', snap.activeProducts || 0],
+      ['Registered Users', snap.users || 0],
+      ['Digital Assets', snap.assets || 0],
+      ['Low Stock Alerts', snap.lowStock || 0],
+      ['Out of Stock', snap.outStock || 0],
+      ['Coupon Orders', snap.couponOrders || 0],
+      ['Discount Given', snap.discountTotal || 0]
+    ];
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `paddox-analytics-report-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Analytics report downloaded');
+  };
+
+  setInterval(() => {
+    if (document.getElementById('adm-analytics')?.classList.contains('on')) {
+      window.loadAnalyticsDashboard(true, true);
+    }
+  }, 30000);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    ['analytics-range','analytics-status'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.dataset.a49FinalBound) {
+        el.dataset.a49FinalBound = '1';
+        el.addEventListener('change', () => window.renderAnalyticsRealtime());
+      }
+    });
+  });
+})();
