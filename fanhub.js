@@ -1908,20 +1908,61 @@ async function buildQuoteShareCanvas(q = {}) {
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  const teamColor = teamColorFromName(q.team || q.era || '') || '#e8002d';
+  const brandRed = '#e8002d';
+  const chrome = '#d9d9dc';
+  const teamColor = teamColorFromName(q.team || q.era || '') || brandRed;
+  const accent = brandRed;
 
+  function drawCoverImage(img, x, y, w, h) {
+    if (!img) return;
+    const ratio = Math.max(w / img.width, h / img.height);
+    const sw = w / ratio;
+    const sh = h / ratio;
+    const sx = (img.width - sw) / 2;
+    const sy = (img.height - sh) / 2;
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  }
+
+  function drawCircleImage(img, cx, cy, r, fallbackText = 'F1') {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = '#111216';
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    if (img) {
+      drawCoverImage(img, cx - r, cy - r, r * 2, r * 2);
+    } else {
+      const g = ctx.createRadialGradient(cx, cy, 10, cx, cy, r);
+      g.addColorStop(0, 'rgba(232,0,45,.35)');
+      g.addColorStop(1, 'rgba(15,15,18,1)');
+      ctx.fillStyle = g;
+      ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      ctx.font = '86px Bebas Neue, Impact, Arial Narrow, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(fallbackText, cx, cy + 5);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+    }
+    ctx.restore();
+  }
+
+  // Deep premium PADDOX background.
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#050505');
-  bg.addColorStop(.52, '#101010');
-  bg.addColorStop(1, '#050505');
+  bg.addColorStop(0, '#030305');
+  bg.addColorStop(.42, '#09090d');
+  bg.addColorStop(1, '#150006');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
+  // Motorsport diagonal texture.
   ctx.save();
-  ctx.globalAlpha = 0.20;
-  ctx.strokeStyle = teamColor;
-  ctx.lineWidth = 2;
-  for (let x = -H; x < W; x += 74) {
+  ctx.globalAlpha = 0.10;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 1.5;
+  for (let x = -H; x < W + H; x += 54) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x + H, H);
@@ -1929,112 +1970,164 @@ async function buildQuoteShareCanvas(q = {}) {
   }
   ctx.restore();
 
+  // Soft red/chrome light blooms.
   ctx.save();
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = teamColor;
-  ctx.filter = 'blur(80px)';
+  ctx.filter = 'blur(90px)';
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = 'rgba(232,0,45,.58)';
   ctx.beginPath();
-  ctx.arc(870, 210, 230, 0, Math.PI * 2);
+  ctx.arc(895, 210, 205, 0, Math.PI * 2);
   ctx.fill();
+  ctx.globalAlpha = 0.24;
+  ctx.fillStyle = 'rgba(255,255,255,.52)';
   ctx.beginPath();
-  ctx.arc(190, 1130, 250, 0, Math.PI * 2);
+  ctx.arc(205, 1225, 235, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
   ctx.filter = 'none';
 
-  roundedRect(ctx, 70, 70, W - 140, H - 140, 44);
-  const cardGradient = ctx.createLinearGradient(70, 70, W - 70, H - 70);
-  cardGradient.addColorStop(0, 'rgba(9,10,13,.96)');
-  cardGradient.addColorStop(.52, 'rgba(12,13,16,.93)');
-  cardGradient.addColorStop(1, 'rgba(17,12,14,.94)');
+  // Main card shell.
+  roundedRect(ctx, 70, 72, W - 140, H - 144, 46);
+  const cardGradient = ctx.createLinearGradient(70, 72, W - 70, H - 72);
+  cardGradient.addColorStop(0, 'rgba(13,14,18,.985)');
+  cardGradient.addColorStop(.58, 'rgba(8,9,13,.975)');
+  cardGradient.addColorStop(1, 'rgba(15,12,15,.975)');
   ctx.fillStyle = cardGradient;
   ctx.fill();
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 2.5;
   ctx.strokeStyle = 'rgba(255,255,255,.16)';
   ctx.stroke();
 
-  ctx.fillStyle = teamColor;
-  ctx.fillRect(70, 70, W - 140, 12);
+  // Premium top edge and corner accents.
+  const topLine = ctx.createLinearGradient(70, 72, W - 70, 72);
+  topLine.addColorStop(0, accent);
+  topLine.addColorStop(.5, '#ff335c');
+  topLine.addColorStop(1, 'rgba(255,255,255,.62)');
+  ctx.fillStyle = topLine;
+  ctx.fillRect(70, 72, W - 140, 12);
+  ctx.fillStyle = 'rgba(232,0,45,.85)';
+  ctx.fillRect(70, 72, 12, 210);
 
-  const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  drawPaddoxAlignedBrand(ctx, 110, 108, brandLogo, { size: 52, fontSize: 49, gap: 14, letterGap: 5 });
-
-  ctx.font = '24px Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.62)';
-  ctx.fillText('DIGITAL FAN HUB QUOTE CARD', 110, 200);
-
   const imgSrc = quoteImageValue(q);
-  const img = await loadQuoteImageForCanvas(imgSrc);
+  const driverImg = await loadQuoteImageForCanvas(imgSrc);
 
+  // Header brand: visible but not oversized.
+  drawPaddoxAlignedBrand(ctx, 112, 114, brandLogo, {
+    size: 58,
+    fontSize: 56,
+    gap: 16,
+    letterGap: 5,
+    tone: '#ffffff',
+    accent
+  });
+
+  ctx.font = '700 22px Barlow Condensed, Arial Narrow, sans-serif';
+  ctx.letterSpacing = '0px';
+  ctx.fillStyle = 'rgba(255,255,255,.58)';
+  ctx.fillText('FAN HUB • DRIVER QUOTE', 112, 214);
+
+  // Driver portrait: integrated into the top-right with glow ring.
+  const portraitCx = 808;
+  const portraitCy = 258;
+  const portraitR = 130;
   ctx.save();
+  ctx.shadowColor = 'rgba(232,0,45,.58)';
+  ctx.shadowBlur = 35;
   ctx.beginPath();
-  ctx.arc(810, 255, 122, 0, Math.PI * 2);
-  ctx.fillStyle = '#141417';
-  ctx.fill();
-  ctx.lineWidth = 6;
-  ctx.strokeStyle = teamColor;
+  ctx.arc(portraitCx, portraitCy, portraitR + 11, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(232,0,45,.95)';
+  ctx.lineWidth = 8;
   ctx.stroke();
-  ctx.clip();
+  ctx.restore();
+  ctx.beginPath();
+  ctx.arc(portraitCx, portraitCy, portraitR + 21, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,.10)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  drawCircleImage(driverImg || brandLogo, portraitCx, portraitCy, portraitR, driverInitials(q.driver || 'F1'));
 
-  if (img) {
-    const size = Math.min(img.width, img.height);
-    const sx = (img.width - size) / 2;
-    const sy = (img.height - size) / 2;
-    ctx.drawImage(img, sx, sy, size, size, 688, 133, 244, 244);
-  } else if (brandLogo) {
-    const logoSize = Math.min(brandLogo.width, brandLogo.height);
-    const sx = (brandLogo.width - logoSize) / 2;
-    const sy = (brandLogo.height - logoSize) / 2;
-    ctx.drawImage(brandLogo, sx, sy, logoSize, logoSize, 688, 133, 244, 244);
-  } else {
-    ctx.font = '72px Bebas Neue, Arial Black, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('F1', 810, 255);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
+  // Quote glyph.
+  ctx.font = '190px Georgia, serif';
+  ctx.fillStyle = 'rgba(232,0,45,.42)';
+  ctx.fillText('“', 112, 462);
+
+  // Main quote text with better width and controlled maximum height.
+  const quoteText = String(q.text || '').trim() || 'Racing starts where comfort ends.';
+  const len = quoteText.length;
+  const quoteFont = len > 150 ? 48 : len > 105 ? 54 : 62;
+  const quoteLine = len > 150 ? 60 : len > 105 ? 66 : 76;
+  ctx.font = `${quoteFont}px Barlow Condensed, Arial Narrow, sans-serif`;
+  ctx.fillStyle = '#ffffff';
+  const quoteBottom = wrapCanvasText(ctx, quoteText, 145, 520, 790, quoteLine, 7);
+
+  // Driver info block.
+  const dividerY = Math.min(quoteBottom + 70, 875);
+  ctx.fillStyle = accent;
+  roundedRect(ctx, 145, dividerY, 150, 7, 4);
+  ctx.fill();
+
+  const driverY = Math.min(dividerY + 96, 1018);
+  ctx.font = '700 56px Bebas Neue, Impact, Arial Narrow, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(String(q.driver || 'F1 Driver').toUpperCase(), 145, driverY);
+
+  ctx.font = '32px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.72)';
+  ctx.fillText(String(q.team || q.era || 'PADDOX Quote Library'), 145, driverY + 50);
+
+  const chipText = `${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'MOTIVATION').toUpperCase()}`;
+  ctx.font = '700 25px Barlow Condensed, Arial Narrow, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.46)';
+  ctx.fillText(chipText, 145, driverY + 94);
+
+  // Signature diagonal stripe area on right bottom.
+  ctx.save();
+  ctx.globalAlpha = .26;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 4;
+  for (let x = 690; x < 1050; x += 44) {
+    ctx.beginPath();
+    ctx.moveTo(x, 980);
+    ctx.lineTo(x + 200, 1225);
+    ctx.stroke();
   }
   ctx.restore();
 
-  ctx.font = '140px Georgia, serif';
-  ctx.fillStyle = 'rgba(232,0,45,.55)';
-  ctx.fillText('“', 105, 430);
-
-  ctx.font = '58px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = '#ffffff';
-  const quoteBottom = wrapCanvasText(ctx, q.text || '', 145, 500, 790, 72, 8);
-
-  ctx.fillStyle = teamColor;
-  roundedRect(ctx, 145, Math.min(quoteBottom + 52, 930), 150, 6, 4);
-  ctx.fill();
-
-  ctx.font = '54px Bebas Neue, Arial Black, sans-serif';
-  ctx.fillStyle = '#ffffff';
-  const driverY = Math.min(quoteBottom + 142, 1040);
-  ctx.fillText(String(q.driver || 'F1 Driver').toUpperCase(), 145, driverY);
-
-  ctx.font = '30px Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.70)';
-  ctx.fillText(String(q.team || q.era || 'PADDOX Quote Library'), 145, driverY + 48);
-
-  ctx.font = '24px Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.50)';
-  ctx.fillText(`${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'MOTIVATION').toUpperCase()}`, 145, driverY + 92);
-
-  const footerGrad = ctx.createLinearGradient(110, 1160, W - 110, 1242);
-  footerGrad.addColorStop(0, 'rgba(255,255,255,.08)');
-  footerGrad.addColorStop(1, 'rgba(255,255,255,.05)');
+  // Footer glass bar.
+  const footerX = 110;
+  const footerY = 1162;
+  const footerW = W - 220;
+  const footerH = 86;
+  const footerGrad = ctx.createLinearGradient(footerX, footerY, footerX + footerW, footerY + footerH);
+  footerGrad.addColorStop(0, 'rgba(255,255,255,.085)');
+  footerGrad.addColorStop(.5, 'rgba(232,0,45,.055)');
+  footerGrad.addColorStop(1, 'rgba(255,255,255,.055)');
   ctx.fillStyle = footerGrad;
-  roundedRect(ctx, 110, 1160, W - 220, 82, 26);
+  roundedRect(ctx, footerX, footerY, footerW, footerH, 24);
   ctx.fill();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(255,255,255,.06)';
+  ctx.stroke();
 
-  ctx.font = '27px Barlow Condensed, Arial, sans-serif';
+  ctx.font = '700 27px Barlow Condensed, Arial Narrow, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.78)';
-  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1213);
+  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1216);
 
-  drawPaddoxAlignedBrand(ctx, 780, 1180, brandLogo, { size: 30, fontSize: 29, gap: 9, letterGap: 2 });
+  // Footer brand lockup bigger and clearer.
+  drawPaddoxAlignedBrand(ctx, 742, 1182, brandLogo, {
+    size: 46,
+    fontSize: 38,
+    gap: 11,
+    letterGap: 3,
+    tone: '#ffffff',
+    accent
+  });
+
+  // Tiny quality mark.
+  ctx.font = '700 18px Barlow Condensed, Arial Narrow, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.32)';
+  ctx.fillText('PADDOX DIGITAL FAN HUB', 145, 1268);
 
   return canvas;
 }
