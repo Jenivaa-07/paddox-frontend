@@ -2497,12 +2497,12 @@ body.modal-open { overflow: hidden; }
 .quote-preview-modal{display:none;position:fixed;inset:0;z-index:99999}
 .quote-preview-modal.show{display:block}
 .quote-preview-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:22px}
-.quote-preview-card{position:relative;width:min(520px,96vw);max-height:92vh;overflow:auto;background:linear-gradient(145deg,#111,#070707);border:1px solid rgba(255,255,255,.13);box-shadow:0 30px 90px rgba(0,0,0,.65);padding:24px;color:#fff}
+.quote-preview-card{position:relative;width:min(560px,96vw);max-height:92vh;overflow:auto;background:linear-gradient(145deg,#111,#070707);border:1px solid rgba(255,255,255,.13);box-shadow:0 30px 90px rgba(0,0,0,.65);padding:24px;color:#fff;border-radius:20px}
 .quote-preview-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border:1px solid rgba(255,255,255,.15);color:#fff;background:rgba(255,255,255,.05)}
 .quote-preview-kicker{font-family:var(--font-c);letter-spacing:3px;color:var(--red);font-size:.72rem;text-transform:uppercase;margin-bottom:8px}
 .quote-preview-card h3{font-family:var(--font-d);font-size:2rem;letter-spacing:2px;margin-bottom:4px}
 .quote-preview-card p{color:var(--muted2);font-size:.9rem;margin-bottom:18px}
-.quote-preview-frame{background:#050505;border:1px solid rgba(255,255,255,.08);padding:10px;max-height:58vh;overflow:auto}
+.quote-preview-frame{background:#050505;border:1px solid rgba(255,255,255,.08);padding:10px;max-height:62vh;overflow:auto;border-radius:18px}
 .quote-preview-frame img{width:100%;height:auto;display:block}
 .quote-preview-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 .quote-preview-actions button{padding:11px 18px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;font-family:var(--font-c);letter-spacing:2px;text-transform:uppercase;font-weight:800}
@@ -6184,70 +6184,4 @@ body.modal-open { overflow: hidden; }
   }
   .qf-brand-final .qf-brand-icon-wrap,
   .qf-brand-final .qf-brand-icon{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;flex-basis:30px!important;}
-}
-
-
-/* ============================================================
-   PADDOX Phase A4.10D.1 — Quote Share Preview Visibility Fix
-   Bumps the preview styling so the redesigned generated image is seen clearly.
-   ============================================================ */
-.quote-preview-modal{z-index:100000!important;}
-.quote-preview-card{
-  width:min(980px,94vw)!important;
-  max-height:94vh!important;
-  padding:26px!important;
-  border-radius:28px!important;
-  background:linear-gradient(145deg,rgba(13,14,18,.98),rgba(5,5,7,.98))!important;
-  border:1px solid rgba(255,255,255,.14)!important;
-  box-shadow:0 35px 120px rgba(0,0,0,.72),0 0 70px rgba(232,0,45,.18)!important;
-}
-.quote-preview-frame{
-  max-height:72vh!important;
-  border-radius:22px!important;
-  background:#050506!important;
-  border:1px solid rgba(232,0,45,.24)!important;
-  padding:12px!important;
-}
-.quote-preview-frame img,
-#quote-preview-img{
-  width:auto!important;
-  max-width:100%!important;
-  max-height:70vh!important;
-  object-fit:contain!important;
-  border-radius:16px!important;
-  display:block!important;
-  margin:0 auto!important;
-}
-.quote-preview-kicker{
-  color:var(--red)!important;
-  letter-spacing:4px!important;
-  font-family:var(--font-c)!important;
-  text-transform:uppercase!important;
-  font-weight:900!important;
-}
-
-
-/* ============================================================
-   PADDOX Phase A4.10D.3 — Quote Share Final Premium Layout
-   Preview modal polish only. The generated image layout is in fanhub.js canvas.
-   ============================================================ */
-.quote-preview-card{
-  width:min(720px,94vw)!important;
-  border-radius:26px!important;
-  background:linear-gradient(145deg,rgba(12,12,14,.96),rgba(4,4,6,.98))!important;
-  border:1px solid rgba(255,255,255,.12)!important;
-  box-shadow:0 34px 110px rgba(0,0,0,.72),0 0 45px rgba(232,0,45,.18)!important;
-}
-.quote-preview-frame{
-  background:#040406!important;
-  border-radius:18px!important;
-  border:1px solid rgba(255,255,255,.10)!important;
-  overflow:hidden!important;
-}
-.quote-preview-frame img{
-  display:block!important;
-  width:100%!important;
-  height:auto!important;
-  max-height:74vh!important;
-  object-fit:contain!important;
 }
