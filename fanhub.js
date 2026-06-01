@@ -1921,10 +1921,10 @@ async function buildQuoteShareCanvas(q = {}) {
   // Premium red atmosphere
   ctx.save();
   ctx.filter = 'blur(120px)';
-  ctx.globalAlpha = .40;
+  ctx.globalAlpha = .34;
   ctx.fillStyle = '#e8002d';
   ctx.beginPath(); ctx.arc(112, 135, 230, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = .30;
+  ctx.globalAlpha = .24;
   ctx.beginPath(); ctx.arc(960, 1135, 285, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   ctx.filter = 'none';
@@ -1958,7 +1958,7 @@ async function buildQuoteShareCanvas(q = {}) {
   const img = await loadQuoteImageForCanvas(quoteImageValue(q));
 
   // Bigger VIP glass header
-  const headerX = 110, headerY = 112, headerW = 860, headerH = 132;
+  const headerX = 110, headerY = 108, headerW = 860, headerH = 128;
   roundedRect(ctx, headerX, headerY, headerW, headerH, 28);
   const header = ctx.createLinearGradient(headerX, headerY, headerX + headerW, headerY + headerH);
   header.addColorStop(0, 'rgba(255,255,255,.075)');
@@ -1970,15 +1970,15 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.strokeStyle = glassLine;
   ctx.stroke();
 
-  drawPaddoxAlignedBrand(ctx, 128, 135, brandLogo, { size: 88, fontSize: 78, gap: 18, letterGap: 5 });
+  drawPaddoxAlignedBrand(ctx, 128, 130, brandLogo, { size: 90, fontSize: 80, gap: 18, letterGap: 5 });
   ctx.font = '800 24px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.68)';
-  ctx.fillText('FAN HUB • VIP QUOTE CARD', 234, 230);
+  ctx.fillText('FAN HUB • VIP QUOTE CARD', 236, 224);
 
   // Premium chip
   const chipText = String(q.era || 'QUOTE').toUpperCase();
-  roundedRect(ctx, 746, 130, 192, 60, 20);
-  const chip = ctx.createLinearGradient(746, 130, 938, 190);
+  roundedRect(ctx, 746, 126, 192, 58, 20);
+  const chip = ctx.createLinearGradient(746, 126, 938, 184);
   chip.addColorStop(0, 'rgba(232,0,45,.22)');
   chip.addColorStop(1, 'rgba(255,255,255,.045)');
   ctx.fillStyle = chip;
@@ -1986,20 +1986,20 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.strokeStyle = 'rgba(232,0,45,.42)'; ctx.lineWidth = 1.4; ctx.stroke();
   ctx.font = '800 25px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(chipText, 842, 162);
+  ctx.fillText(chipText, 842, 155);
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
 
   ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(110, 285); ctx.lineTo(970, 285); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(110, 274); ctx.lineTo(970, 274); ctx.stroke();
 
   // Quote, less huge + more balanced
   ctx.font = '128px Georgia, serif';
   ctx.fillStyle = 'rgba(232,0,45,.92)';
-  ctx.fillText('“', 122, 420);
+  ctx.fillText('“', 122, 398);
 
   ctx.font = '60px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.96)';
-  wrapCanvasText(ctx, q.text || '', 132, 432, 815, 82, 5);
+  wrapCanvasText(ctx, q.text || '', 132, 408, 815, 80, 5);
 
   // Fine bottom separator before VIP panel
   ctx.save();
@@ -2009,16 +2009,16 @@ async function buildQuoteShareCanvas(q = {}) {
   shine.addColorStop(.5, 'rgba(255,255,255,.14)');
   shine.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.strokeStyle = shine;
-  ctx.beginPath(); ctx.moveTo(112, 720); ctx.lineTo(968, 720); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(112, 696); ctx.lineTo(968, 696); ctx.stroke();
   ctx.restore();
 
   // Larger VIP driver card, moved up and cleaner
-  const infoX = 110, infoY = 744, infoW = 860, infoH = 292;
+  const infoX = 110, infoY = 718, infoW = 860, infoH = 286;
   roundedRect(ctx, infoX, infoY, infoW, infoH, 32);
   const info = ctx.createLinearGradient(infoX, infoY, infoX + infoW, infoY + infoH);
   info.addColorStop(0, 'rgba(255,255,255,.11)');
   info.addColorStop(.42, 'rgba(13,15,22,.72)');
-  info.addColorStop(1, 'rgba(232,0,45,.24)');
+  info.addColorStop(1, 'rgba(232,0,45,.18)');
   ctx.fillStyle = info;
   ctx.fill();
   ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(255,255,255,.13)'; ctx.stroke();
@@ -2043,7 +2043,7 @@ async function buildQuoteShareCanvas(q = {}) {
   // Driver image medal, bigger and vertically centered
   const portraitCx = infoX + infoW - 166;
   const portraitCy = infoY + infoH / 2;
-  ctx.save(); ctx.filter = 'blur(22px)'; ctx.globalAlpha = .38; ctx.fillStyle = accent;
+  ctx.save(); ctx.filter = 'blur(22px)'; ctx.globalAlpha = .30; ctx.fillStyle = accent;
   ctx.beginPath(); ctx.arc(portraitCx, portraitCy, 122, 0, Math.PI * 2); ctx.fill(); ctx.restore(); ctx.filter = 'none';
   ctx.beginPath(); ctx.arc(portraitCx, portraitCy, 108, 0, Math.PI * 2);
   const ring = ctx.createLinearGradient(portraitCx - 110, portraitCy - 110, portraitCx + 110, portraitCy + 110);
@@ -2061,14 +2061,14 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.restore();
 
   // Footer glass signature — bigger brand lockup
-  const footerX = 110, footerY = 1122, footerW = 860, footerH = 104;
+  const footerX = 110, footerY = 1114, footerW = 860, footerH = 100;
   roundedRect(ctx, footerX, footerY, footerW, footerH, 30);
   const footer = ctx.createLinearGradient(footerX, footerY, footerX + footerW, footerY + footerH);
-  footer.addColorStop(0, 'rgba(255,255,255,.09)'); footer.addColorStop(.7, 'rgba(255,255,255,.045)'); footer.addColorStop(1, 'rgba(232,0,45,.20)');
+  footer.addColorStop(0, 'rgba(255,255,255,.09)'); footer.addColorStop(.7, 'rgba(255,255,255,.045)'); footer.addColorStop(1, 'rgba(232,0,45,.16)');
   ctx.fillStyle = footer; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1.1; ctx.stroke();
-  ctx.font = '800 25px Barlow Condensed, Arial, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.84)';
-  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1186);
-  drawPaddoxAlignedBrand(ctx, 720, 1144, brandLogo, { size: 58, fontSize: 54, gap: 14, letterGap: 3 });
+  ctx.font = '800 23px Barlow Condensed, Arial, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.82)';
+  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1176);
+  drawPaddoxAlignedBrand(ctx, 724, 1138, brandLogo, { size: 56, fontSize: 52, gap: 14, letterGap: 3 });
 
   // final light vignette
   const vignette = ctx.createRadialGradient(W/2, H/2, 160, W/2, H/2, 730);
