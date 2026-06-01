@@ -2419,6 +2419,20 @@ async function uploadProfileAvatar(file) {
   }
 }
 
+
+function getUserAiCredits(user = currentUser) {
+  const raw = Number(user?.aiCredits);
+  return Number.isFinite(raw) ? Math.max(0, Math.round(raw)) : 50;
+}
+
+function updateAiCreditsUI(user = currentUser) {
+  const credits = getUserAiCredits(user).toLocaleString('en-IN');
+  const side = document.getElementById('side-ai-credits');
+  const dash = document.getElementById('dash-ai-credits');
+  if (side) side.textContent = credits;
+  if (dash) dash.textContent = credits;
+}
+
 function hydrateProfile(user = {}) {
   currentUser = user;
 
@@ -2442,6 +2456,8 @@ function hydrateProfile(user = {}) {
 
   const dashFanPoints = document.getElementById('dash-fan-points');
   if (dashFanPoints) dashFanPoints.textContent = realFanPoints;
+
+  updateAiCreditsUI(user);
 
   setFieldValue('pf-fn', user.firstName || '');
   setFieldValue('pf-ln', user.lastName || '');
@@ -3031,6 +3047,7 @@ function clearStarterDashboard() {
   if (dashFanPoints && currentUser) {
     dashFanPoints.textContent = Number(currentUser.fanPoints || 0).toLocaleString('en-IN');
   }
+  updateAiCreditsUI(currentUser);
 }
 
 
@@ -3895,10 +3912,25 @@ function openOrderReceipt(orderId) {
   }
 
   const oldHydrateProfile = window.hydrateProfile || hydrateProfile;
-  function hydrateProfile(user = {}) {
+  
+function getUserAiCredits(user = currentUser) {
+  const raw = Number(user?.aiCredits);
+  return Number.isFinite(raw) ? Math.max(0, Math.round(raw)) : 50;
+}
+
+function updateAiCreditsUI(user = currentUser) {
+  const credits = getUserAiCredits(user).toLocaleString('en-IN');
+  const side = document.getElementById('side-ai-credits');
+  const dash = document.getElementById('dash-ai-credits');
+  if (side) side.textContent = credits;
+  if (dash) dash.textContent = credits;
+}
+
+function hydrateProfile(user = {}) {
     oldHydrateProfile(user);
     setProfileAvatar(user);
-  hydrateSecurityState(user);
+    updateAiCreditsUI(user);
+    hydrateSecurityState(user);
     bindAvatarUpload();
   }
 

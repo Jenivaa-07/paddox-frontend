@@ -2296,6 +2296,11 @@ function getUserStatus(user) {
   return { cls: 's-act', text: 'Active' };
 }
 
+function getUserAiCredits(user) {
+  const raw = Number(user?.aiCredits);
+  return Number.isFinite(raw) ? Math.max(0, Math.round(raw)) : 50;
+}
+
 function bindUsersControls() {
   if (usersControlsBound) return;
   usersControlsBound = true;
@@ -2331,14 +2336,17 @@ function updateUserStats() {
   const total = REAL_USERS.length;
   const active = REAL_USERS.filter(user => !user.isBanned).length;
   const points = REAL_USERS.reduce((sum, user) => sum + Number(user.fanPoints || 0), 0);
+  const credits = REAL_USERS.reduce((sum, user) => sum + getUserAiCredits(user), 0);
 
   const totalEl = document.getElementById('users-stat-total');
   const activeEl = document.getElementById('users-stat-active');
   const pointsEl = document.getElementById('users-stat-points');
+  const creditsEl = document.getElementById('users-stat-credits');
 
   if (totalEl) totalEl.textContent = total.toLocaleString();
   if (activeEl) activeEl.textContent = active.toLocaleString();
   if (pointsEl) pointsEl.textContent = points.toLocaleString('en-IN');
+  if (creditsEl) creditsEl.textContent = credits.toLocaleString('en-IN');
 }
 
 async function loadUsers() {
@@ -2662,6 +2670,124 @@ async function submitUserPointAdjustment(userId) {
   }
 }
 
+
+function openUserCreditsModal(userId) {
+  const user = REAL_USERS.find(u => String(u._id) === String(userId));
+
+  if (!user) {
+    showToast('❌ User not found');
+    return;
+  }
+
+  const name = getUserName(user);
+  const modal = document.createElement('div');
+
+  modal.innerHTML = `
+    <div class="preview-overlay users-points-overlay" id="user-credits-overlay">
+      <div class="users-points-modal">
+        <button class="preview-close users-points-close" id="user-credits-close">✕</button>
+
+        <div class="users-modal-kicker">AI CREDITS CONTROL</div>
+        <h2>${escapeUserText(name)}</h2>
+        <p>${escapeUserText(user.email || 'No email')}</p>
+
+        <div class="users-modal-current">
+          <span>Current AI Credits</span>
+          <strong>${getUserAiCredits(user).toLocaleString('en-IN')}</strong>
+          <em>50 free / 15 per standard image</em>
+        </div>
+
+        <div class="users-points-form">
+          <label>
+            <span>Action</span>
+            <select id="user-credits-mode">
+              <option value="add">Add credits</option>
+              <option value="deduct">Deduct credits</option>
+              <option value="reset">Reset to 50 free credits</option>
+            </select>
+          </label>
+          <label>
+            <span>Credits</span>
+            <input id="user-credits-amount" type="number" min="0" step="1" placeholder="Example: 50" value="50"/>
+          </label>
+          <label class="wide">
+            <span>Reason / action note</span>
+            <input id="user-credits-reason" type="text" placeholder="Example: AI Studio bonus, correction, creator reward"/>
+          </label>
+        </div>
+
+        <div class="users-modal-chart-head">
+          <span>AI Fan Studio credit guide</span>
+          <strong>Standard image = 15 credits · Free users can create 3 images</strong>
+        </div>
+        <div class="users-modal-point-chart">
+          <div class="users-modal-point-row"><span>Free Signup Credits</span><div><i style="width:100%"></i></div><strong>50</strong><em>start</em></div>
+          <div class="users-modal-point-row"><span>Standard AI Poster</span><div><i style="width:30%"></i></div><strong>-15</strong><em>cost</em></div>
+          <div class="users-modal-point-row"><span>Premium AI Poster</span><div><i style="width:50%"></i></div><strong>-25</strong><em>later</em></div>
+          <div class="users-modal-point-row"><span>HD Download</span><div><i style="width:20%"></i></div><strong>-10</strong><em>later</em></div>
+        </div>
+
+        <div class="users-modal-actions">
+          <button class="adm-btn-red" type="button" onclick="submitUserCreditAdjustment('${user._id}')">Apply Credits Update</button>
+          <button class="adm-btn-ghost" type="button" onclick="document.getElementById('user-credits-overlay')?.remove()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#user-credits-close').onclick = () => modal.remove();
+  modal.querySelector('#user-credits-overlay').onclick = e => {
+    if (e.target.id === 'user-credits-overlay') modal.remove();
+  };
+
+  modal.querySelector('#user-credits-mode')?.addEventListener('change', e => {
+    const amount = modal.querySelector('#user-credits-amount');
+    if (amount) amount.disabled = e.target.value === 'reset';
+  });
+}
+
+async function submitUserCreditAdjustment(userId) {
+  try {
+    const mode = document.getElementById('user-credits-mode')?.value || 'add';
+    const amount = Number(document.getElementById('user-credits-amount')?.value || 0);
+    const reason = document.getElementById('user-credits-reason')?.value || '';
+
+    if (mode !== 'reset' && (!Number.isFinite(amount) || amount <= 0)) {
+      showToast('❌ Enter a valid credit amount');
+      return;
+    }
+
+    if (mode === 'reset' && !confirm('Reset this user AI credits to 50?')) return;
+
+    showToast('⏳ Updating AI credits...');
+
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/ai-credits/adjust`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAdminToken()}`
+      },
+      body: JSON.stringify({ mode, amount, reason })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'AI credits update failed');
+    }
+
+    document.getElementById('user-credits-overlay')?.remove();
+    showToast('🔥 AI credits updated');
+    await loadUsers();
+
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ ${err.message}`);
+  }
+}
+
 function openUserView(userId) {
   const user = REAL_USERS.find(u => String(u._id) === String(userId));
 
@@ -2686,6 +2812,7 @@ function openUserView(userId) {
           <div><span>Role</span><strong>${escapeUserText(user.role || (user.isAdmin ? 'admin' : 'user'))}</strong></div>
           <div><span>Tier</span><strong>${escapeUserText(getUserTier(user))}</strong></div>
           <div><span>Fan Points</span><strong class="red">${Number(user.fanPoints || 0).toLocaleString('en-IN')}</strong></div>
+          <div><span>AI Credits</span><strong class="red">${getUserAiCredits(user).toLocaleString('en-IN')}</strong></div>
           <div><span>Joined</span><strong>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</strong></div>
           <div><span>Status</span><strong><span class="sb ${status.cls}">${status.text}</span></strong></div>
           <div><span>Orders</span><strong>${Number(user.ordersCount || user.totalOrders || 0).toLocaleString()}</strong></div>
@@ -2693,6 +2820,7 @@ function openUserView(userId) {
 
         <div class="users-modal-actions">
           <button class="adm-btn-red" onclick="openUserPointsModal('${user._id}'); document.getElementById('user-view-overlay')?.remove();">Manage Points</button>
+          <button class="adm-btn-ghost" onclick="openUserCreditsModal('${user._id}'); document.getElementById('user-view-overlay')?.remove();">Manage Credits</button>
           <button class="adm-btn-ghost" onclick="toggleUserBan('${user._id}'); document.getElementById('user-view-overlay')?.remove();">${user.isBanned ? 'Unban User' : 'Ban User'}</button>
           <button class="adm-btn-ghost" onclick="makeUserAdmin('${user._id}'); document.getElementById('user-view-overlay')?.remove();">Make Admin</button>
           <button class="adm-btn-ghost danger" onclick="deleteUserAdmin('${user._id}')">Delete User</button>
@@ -2718,7 +2846,7 @@ function renderUsers() {
   if (!users.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" class="users-empty-state">
+        <td colspan="10" class="users-empty-state">
           <strong>No users found</strong>
           <span>Try clearing the search or filters.</span>
         </td>
@@ -2760,6 +2888,8 @@ function renderUsers() {
 
         <td class="users-points-cell">${Number(user.fanPoints || 0).toLocaleString('en-IN')}</td>
 
+        <td class="users-credits-cell">${getUserAiCredits(user).toLocaleString('en-IN')}</td>
+
         <td class="users-date-cell">${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</td>
 
         <td><span class="sb ${status.cls}">${status.text}</span></td>
@@ -2768,6 +2898,7 @@ function renderUsers() {
           <div class="users-action-stack">
             <button class="act-btn" onclick="openUserView('${user._id}')">View</button>
             <button class="act-btn points" onclick="openUserPointsModal('${user._id}')">Points</button>
+            <button class="act-btn points" onclick="openUserCreditsModal('${user._id}')">Credits</button>
             <button class="act-btn danger" onclick="toggleUserBan('${user._id}')">${user.isBanned ? 'Unban' : 'Ban'}</button>
             <button class="act-btn delete" onclick="deleteUserAdmin('${user._id}')">Delete</button>
           </div>
@@ -2784,13 +2915,14 @@ function exportUsersCsv() {
   }
 
   const rows = [
-    ['Name', 'Email', 'Role', 'Tier', 'Fan Points', 'Status', 'Joined'],
+    ['Name', 'Email', 'Role', 'Tier', 'Fan Points', 'AI Credits', 'Status', 'Joined'],
     ...REAL_USERS.map(user => [
       getUserName(user),
       user.email || '',
       user.role || (user.isAdmin ? 'admin' : 'user'),
       getUserTier(user),
       user.fanPoints || 0,
+      getUserAiCredits(user),
       user.isBanned ? 'Banned' : 'Active',
       user.createdAt ? new Date(user.createdAt).toLocaleDateString() : ''
     ])

@@ -124,6 +124,8 @@ select.form-input option{background:var(--dark2)}
 .fan-pts-box{margin-top:16px;background:var(--gray);padding:10px;text-align:center}
 .fan-pts-num{font-family:var(--font-d);font-size:1.6rem;color:var(--red)}
 .fan-pts-lbl{font-family:var(--font-c);font-size:.58rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.ai-credits-box{margin-top:10px;padding:10px;text-align:center;background:linear-gradient(135deg,rgba(201,168,76,.14),rgba(232,0,45,.08));border:1px solid rgba(201,168,76,.28);box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.ai-credits-num{font-family:var(--font-d);font-size:1.65rem;color:var(--gold);letter-spacing:1px}.ai-credits-lbl{font-family:var(--font-c);font-size:.58rem;letter-spacing:2px;color:var(--muted2);text-transform:uppercase}.ai-credit-dash-card{border-color:rgba(201,168,76,.18)!important}.ds-ai-icon::before{content:'AI';font-family:var(--font-c);letter-spacing:1px;color:var(--gold);font-weight:800}
 .acc-nav{padding:14px 0;flex:1}
 .acc-nav-item{display:flex;align-items:center;gap:10px;padding:12px 20px;cursor:pointer;font-size:.82rem;font-weight:500;color:var(--muted2);border-left:3px solid transparent;transition:all var(--tr)}
 .acc-nav-item:hover{color:var(--white);background:rgba(255,255,255,.02)}
