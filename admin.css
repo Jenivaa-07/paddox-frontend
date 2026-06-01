@@ -6496,28 +6496,62 @@ html,body{max-width:100%;overflow-x:hidden}
 
 
 /* ============================================================
-   PADDOX PHASE A4.10C.2 — Exact PNG Logo Replacement Polish
-   Scope: Admin sidebar + product/inventory fallbacks only.
-   Receipt page intentionally untouched.
+   PADDOX Phase A4.10C.3 — Admin Circular Logo Fit Fix
+   Locks the new round logo into square slots so it never becomes oval.
+   Receipt branding untouched.
    ============================================================ */
+.adm-logo-wrap{
+  gap:14px!important;
+  min-height:88px!important;
+}
 .adm-helmet{
-  width:48px!important;
-  height:48px!important;
-  min-width:48px!important;
-  border-radius:50%!important;
+  width:62px!important;
+  height:62px!important;
+  min-width:62px!important;
+  min-height:62px!important;
+  max-width:62px!important;
+  max-height:62px!important;
+  aspect-ratio:1/1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
   padding:0!important;
-  overflow:hidden!important;
-  background:radial-gradient(circle at 50% 50%,rgba(232,0,45,.18),rgba(7,7,7,.82) 66%)!important;
-  border:1px solid rgba(232,0,45,.32)!important;
-  box-shadow:0 0 22px rgba(232,0,45,.12)!important;
+  margin:0!important;
+  overflow:visible!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:0!important;
 }
 .adm-logo-icon-official{
-  width:48px!important;
-  height:48px!important;
-  max-width:48px!important;
-  max-height:48px!important;
-  object-fit:cover!important;
+  width:62px!important;
+  height:62px!important;
+  min-width:62px!important;
+  min-height:62px!important;
+  max-width:62px!important;
+  max-height:62px!important;
+  aspect-ratio:1/1!important;
+  object-fit:contain!important;
   object-position:center!important;
   border-radius:50%!important;
   display:block!important;
+  transform:none!important;
+  filter:none!important;
+}
+.product-admin-thumb,
+.inventory-thumb{
+  aspect-ratio:1/1!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:rgba(7,7,7,.96)!important;
+}
+.product-admin-thumb[src*="paddox-logo-icon-web"],
+.inventory-thumb[src*="paddox-logo-icon-web"]{
+  border-radius:50%!important;
+  padding:3px!important;
+  object-fit:contain!important;
+}
+@media(max-width:900px){
+  .adm-helmet,.adm-logo-icon-official{width:54px!important;height:54px!important;min-width:54px!important;min-height:54px!important;max-width:54px!important;max-height:54px!important;}
 }
