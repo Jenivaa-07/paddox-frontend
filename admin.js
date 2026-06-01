@@ -303,7 +303,7 @@ const PAGE_META = {
   fandrivers: { title:'FAN DRIVERS',     action:'+ Add Image',   fn:()=>openDriverProfileModal() },
   users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
   analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>downloadAnalyticsReport() },
-  moderation: { title:'MODERATION',      action:'Clear All',      fn:()=>showToast('✓ All items reviewed!') },
+  moderation: { title:'MODERATION',      action:'Clear Reviewed', fn:()=>moderationClearReviewed() },
 };
 
 function switchPage(id) {
@@ -1198,7 +1198,7 @@ function updateAdminSidebarBadges() {
     if (label.includes('orders')) {
       count = REAL_ORDERS.length;
     } else if (label.includes('moderation')) {
-      count = 0;
+      count = (window.ADM_MODERATION_QUEUE || []).filter(item => item.status !== 'reviewed').length;
     } else {
       count = 0;
     }
@@ -3156,33 +3156,342 @@ function downloadAnalyticsReport() {
 }
 window.downloadAnalyticsReport = downloadAnalyticsReport;
 
-/* ══ MODERATION — CLEAN EMPTY STATE ══ */
+/* ══════════════════════════════════════
+   MODERATION — Phase A4.9B Premium Community Safety
+   Reads admin moderation endpoint when available, then Fan Hub feed fallback.
+══════════════════════════════════════ */
+const MODERATION_ADMIN_API = 'https://paddox-backend.onrender.com/api/admin/moderation';
+const MODERATION_FAN_FEED_API = 'https://paddox-backend.onrender.com/api/fan/feed';
+let ADM_MODERATION_QUEUE = window.ADM_MODERATION_QUEUE || [];
+let MODERATION_LAST_SYNC = null;
+let MODERATION_AUTO_TIMER = null;
+window.ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE;
+
+function moderationHeaders(json = false) {
+  return {
+    ...(json ? { 'Content-Type': 'application/json' } : {}),
+    ...(getAdminToken() ? { Authorization: `Bearer ${getAdminToken()}` } : {})
+  };
+}
+
+function moderationEscape(value = '') {
+  return String(value ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function moderationKey(item = {}) {
+  return String(item.key || `${item.type || 'item'}:${item.id || item._id || item.postId || item.commentId || item.createdAt || ''}`);
+}
+
+function moderationLocalState() {
+  try { return JSON.parse(localStorage.getItem('paddox_moderation_state') || '{}'); }
+  catch { return {}; }
+}
+
+function saveModerationLocalState(state = {}) {
+  localStorage.setItem('paddox_moderation_state', JSON.stringify(state));
+}
+
+function moderationRiskScan(text = '') {
+  const value = String(text || '').toLowerCase();
+  const highWords = ['hate','kill','abuse','idiot','stupid','trash','scam','fraud','fake','spam'];
+  const mediumWords = ['http://','https://','www.','.com','buy now','free money','follow me'];
+  const repeated = /(.)\1{5,}/.test(value);
+  const highHits = highWords.filter(word => value.includes(word));
+  const mediumHits = mediumWords.filter(word => value.includes(word));
+  if (highHits.length || repeated) return { risk:'high', reason: highHits.length ? `Matched: ${highHits.slice(0,3).join(', ')}` : 'Repeated character spam' };
+  if (mediumHits.length || value.length > 240) return { risk:'medium', reason: mediumHits.length ? 'Link / promo pattern' : 'Very long message' };
+  return { risk:'low', reason:'Clean scan' };
+}
+
+function moderationUserName(user = {}, fallback = 'Paddox Fan') {
+  if (typeof user === 'string') return user || fallback;
+  return `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.name || user?.email || fallback;
+}
+
+function normalizeModerationItem(raw = {}, fallbackType = 'system') {
+  const text = raw.text || raw.content || raw.message || raw.body || raw.comment || raw.reason || '';
+  const scan = moderationRiskScan(text);
+  const type = String(raw.type || raw.kind || fallbackType || 'system').toLowerCase();
+  const id = String(raw._id || raw.id || raw.itemId || raw.postId || raw.commentId || `${type}-${Date.now()}-${Math.random()}`);
+  const user = moderationUserName(raw.user || raw.author || raw.createdBy || raw.reportedUser, raw.userName || 'Paddox Fan');
+  const item = {
+    key: raw.key || `${type}:${id}`,
+    id,
+    postId: raw.postId || raw.post?._id || raw.parentPostId || (type === 'post' ? id : ''),
+    commentId: raw.commentId || raw.comment?._id || (type === 'comment' ? id : ''),
+    type,
+    user,
+    userEmail: raw.user?.email || raw.author?.email || raw.email || '',
+    text,
+    createdAt: raw.createdAt || raw.updatedAt || new Date().toISOString(),
+    risk: raw.risk || raw.severity || scan.risk,
+    reason: raw.reason || raw.flagReason || scan.reason,
+    source: raw.source || 'Live community',
+    raw
+  };
+  const local = moderationLocalState()[moderationKey(item)] || {};
+  item.status = local.status || raw.status || raw.reviewStatus || 'pending';
+  item.watched = !!local.watched;
+  item.note = local.note || '';
+  return item;
+}
+
+function moderationItemsFromFeed(posts = []) {
+  const items = [];
+  posts.forEach(post => {
+    const postId = String(post._id || post.id || '');
+    const postText = post.text || post.content || '';
+    const postScan = moderationRiskScan(postText);
+    items.push(normalizeModerationItem({
+      ...post,
+      key:`post:${postId}`,
+      type:'post',
+      postId,
+      text: postText,
+      user: post.user,
+      userName: post.userName,
+      reason: post.isFlagged ? 'Flagged post' : postScan.reason,
+      risk: post.isFlagged ? 'high' : postScan.risk,
+      source:'Fan Hub post'
+    }, 'post'));
+
+    (post.comments || []).forEach(comment => {
+      const commentId = String(comment._id || comment.id || '');
+      const commentText = comment.text || comment.content || '';
+      const cScan = moderationRiskScan(commentText);
+      items.push(normalizeModerationItem({
+        ...comment,
+        key:`comment:${postId}:${commentId}`,
+        type:'comment',
+        postId,
+        commentId,
+        text: commentText,
+        user: comment.user,
+        reason: comment.isFlagged ? 'Flagged comment' : cScan.reason,
+        risk: comment.isFlagged ? 'high' : cScan.risk,
+        source:'Fan Hub comment'
+      }, 'comment'));
+    });
+  });
+  return items;
+}
+
+async function loadAdminModerationQueue() {
+  const res = await fetch(MODERATION_ADMIN_API, { headers: moderationHeaders() });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === false) throw new Error(data.message || 'Admin moderation endpoint unavailable');
+  const queue = data.data?.items || data.data?.queue || data.queue || data.items || [];
+  return Array.isArray(queue) ? queue.map(item => normalizeModerationItem(item, item.type || 'system')) : [];
+}
+
+async function loadFanFeedModerationFallback() {
+  const res = await fetch(MODERATION_FAN_FEED_API, { headers: moderationHeaders() });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === false) throw new Error(data.message || 'Fan feed unavailable');
+  const posts = data.data?.posts || data.posts || [];
+  return moderationItemsFromFeed(Array.isArray(posts) ? posts : []);
+}
+
+function setModerationStatus(message = '') {
+  const el = document.getElementById('mod-sync-status');
+  if (el) el.textContent = message;
+}
+
+async function refreshModerationQueue(silent = false) {
+  try {
+    if (!silent) setModerationStatus('Syncing moderation queue…');
+    let items = [];
+    try {
+      items = await loadAdminModerationQueue();
+    } catch (adminErr) {
+      console.warn('Admin moderation endpoint fallback:', adminErr.message);
+      items = await loadFanFeedModerationFallback();
+    }
+    ADM_MODERATION_QUEUE = items.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    window.ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE;
+    MODERATION_LAST_SYNC = new Date();
+    renderModeration();
+    updateAdminSidebarBadges?.();
+    if (!silent) setModerationStatus('Live moderation queue synced');
+  } catch (err) {
+    console.error(err);
+    ADM_MODERATION_QUEUE = [];
+    window.ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE;
+    renderModeration();
+    setModerationStatus('No live moderation endpoint yet — queue is ready for connection');
+  }
+}
+
+function getFilteredModerationItems() {
+  const type = String(document.getElementById('mod-type-filter')?.value || 'all').toLowerCase();
+  const status = String(document.getElementById('mod-status-filter')?.value || 'all').toLowerCase();
+  const risk = String(document.getElementById('mod-risk-filter')?.value || 'all').toLowerCase();
+  const search = String(document.getElementById('mod-search-input')?.value || '').toLowerCase().trim();
+  return ADM_MODERATION_QUEUE.filter(item => {
+    const itemStatus = String(item.status || 'pending').toLowerCase();
+    const hay = [item.user,item.userEmail,item.text,item.reason,item.source,item.type,item.risk].join(' ').toLowerCase();
+    return (type === 'all' || item.type === type)
+      && (status === 'all' || itemStatus === status)
+      && (risk === 'all' || item.risk === risk)
+      && (!search || hay.includes(search));
+  });
+}
+
+function updateModerationStats() {
+  const total = ADM_MODERATION_QUEUE.length;
+  const pending = ADM_MODERATION_QUEUE.filter(i => i.status !== 'reviewed').length;
+  const high = ADM_MODERATION_QUEUE.filter(i => i.risk === 'high' && i.status !== 'reviewed').length;
+  const reviewed = ADM_MODERATION_QUEUE.filter(i => i.status === 'reviewed').length;
+  const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = String(value); };
+  set('mod-stat-total', total);
+  set('mod-stat-pending', pending);
+  set('mod-stat-risk', high);
+  set('mod-stat-reviewed', reviewed);
+  const subtitle = document.getElementById('mod-queue-subtitle');
+  if (subtitle) subtitle.textContent = `${pending} pending · ${high} high risk · ${reviewed} reviewed`;
+  const last = document.getElementById('mod-last-sync');
+  if (last) last.textContent = MODERATION_LAST_SYNC ? `Last sync ${MODERATION_LAST_SYNC.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}` : 'Waiting for sync';
+}
+
 function renderModeration() {
   const list = document.getElementById('mod-list');
   if (!list) return;
-
-  list.innerHTML = `
-    <div style="
-      padding:40px;
-      color:#777;
-      text-align:center;
-      border:1px solid rgba(255,255,255,.08);
-      background:#0d0d0d;
-    ">
-      No moderation queue yet.
-      <br>
-      <span style="font-size:.85rem;color:#555">
-        Reviews/comments moderation can be connected later.
-      </span>
-    </div>
-  `;
+  updateModerationStats();
+  const items = getFilteredModerationItems();
+  if (!items.length) {
+    list.innerHTML = `
+      <div class="moderation-empty">
+        <div>
+          <div class="moderation-empty-mark">OK</div>
+          <strong>No moderation items in this view</strong>
+          <span>${ADM_MODERATION_QUEUE.length ? 'Try changing the filters above.' : 'When fan posts, comments, reports or reviews appear, they will show here for admin review.'}</span>
+        </div>
+      </div>
+    `;
+    updateAdminSidebarBadges?.();
+    return;
+  }
+  list.innerHTML = items.map((item, index) => {
+    const key = moderationEscape(moderationKey(item));
+    const reviewed = item.status === 'reviewed';
+    const canDelete = item.type === 'post' || item.type === 'comment';
+    return `
+      <div class="mod-item mod-premium risk-${moderationEscape(item.risk || 'low')}" data-mod-key="${key}">
+        <div class="mod-main">
+          <div class="mod-topline">
+            <span class="mod-chip type">${moderationEscape(item.type || 'item')}</span>
+            <span class="mod-chip risk-${moderationEscape(item.risk || 'low')}">${moderationEscape(item.risk || 'low')} risk</span>
+            <span class="mod-chip ${reviewed ? 'reviewed' : ''}">${reviewed ? 'Reviewed' : 'Pending'}</span>
+            ${item.watched ? '<span class="mod-chip risk-medium">User watched</span>' : ''}
+          </div>
+          <div class="mod-title">${moderationEscape(item.user || 'Paddox Fan')}</div>
+          <div class="mod-content-text">${moderationEscape(item.text || 'No content text available')}</div>
+          <div class="mod-meta">
+            <span><b>Reason:</b> ${moderationEscape(item.reason || 'Manual review')}</span>
+            <span><b>Source:</b> ${moderationEscape(item.source || 'Community')}</span>
+            <span><b>Time:</b> ${adminPhase9DateTime ? adminPhase9DateTime(item.createdAt) : moderationEscape(item.createdAt || '-')}</span>
+          </div>
+          ${reviewed ? '<div class="mod-reviewed-banner">Cleared by admin review</div>' : ''}
+        </div>
+        <div class="mod-actions">
+          <button class="act-btn ok" type="button" onclick="moderationMarkReviewed('${key}')">${reviewed ? 'Reopen' : 'Review'}</button>
+          <button class="act-btn watch" type="button" onclick="moderationWatchUser('${key}')">${item.watched ? 'Unwatch' : 'Watch User'}</button>
+          ${canDelete ? `<button class="act-btn danger" type="button" onclick="moderationDeleteItem('${key}')">Delete</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+  updateAdminSidebarBadges?.();
 }
 
-function modAction(i, action) {
-  showToast('No moderation items right now');
+function findModerationItem(key = '') {
+  return ADM_MODERATION_QUEUE.find(item => moderationKey(item) === String(key));
 }
+
+function moderationPatchLocal(key, patch = {}) {
+  const state = moderationLocalState();
+  state[key] = { ...(state[key] || {}), ...patch };
+  saveModerationLocalState(state);
+  ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE.map(item => moderationKey(item) === key ? { ...item, ...patch } : item);
+  window.ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE;
+  renderModeration();
+}
+
+function moderationMarkReviewed(key) {
+  const item = findModerationItem(key);
+  if (!item) return showToast('Moderation item not found');
+  const next = item.status === 'reviewed' ? 'pending' : 'reviewed';
+  moderationPatchLocal(key, { status: next });
+  showToast(next === 'reviewed' ? 'Item marked reviewed' : 'Item reopened');
+}
+
+function moderationWatchUser(key) {
+  const item = findModerationItem(key);
+  if (!item) return showToast('Moderation item not found');
+  moderationPatchLocal(key, { watched: !item.watched });
+  showToast(!item.watched ? 'User added to watch list' : 'User removed from watch list');
+}
+
+async function moderationDeleteItem(key) {
+  const item = findModerationItem(key);
+  if (!item) return showToast('Moderation item not found');
+  if (!confirm(`Delete this ${item.type} from Fan Hub?`)) return;
+  try {
+    let url = '';
+    if (item.type === 'post') {
+      url = `${MODERATION_FAN_FEED_API}/${encodeURIComponent(item.postId || item.id)}`;
+    } else if (item.type === 'comment') {
+      url = `${MODERATION_FAN_FEED_API}/${encodeURIComponent(item.postId)}/comments/${encodeURIComponent(item.commentId || item.id)}`;
+    }
+    if (!url) throw new Error('Delete endpoint not available for this item');
+    const res = await fetch(url, { method:'DELETE', headers: moderationHeaders(true) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
+    ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE.filter(x => moderationKey(x) !== key);
+    window.ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE;
+    renderModeration();
+    showToast(`${item.type} deleted from Fan Hub`);
+  } catch (err) {
+    showToast(`Delete failed: ${err.message}`);
+  }
+}
+
+function moderationClearReviewed() {
+  const reviewedKeys = ADM_MODERATION_QUEUE.filter(item => item.status === 'reviewed').map(moderationKey);
+  if (!reviewedKeys.length) return showToast('No reviewed items to clear');
+  ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE.filter(item => item.status !== 'reviewed');
+  window.ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE;
+  const state = moderationLocalState();
+  reviewedKeys.forEach(key => { state[key] = { ...(state[key] || {}), status:'reviewed', cleared:true }; });
+  saveModerationLocalState(state);
+  renderModeration();
+  showToast('Reviewed moderation items cleared');
+}
+
+function startModerationAutoRefresh() {
+  if (MODERATION_AUTO_TIMER) return;
+  MODERATION_AUTO_TIMER = setInterval(() => {
+    if (document.getElementById('adm-moderation')?.classList.contains('on')) {
+      refreshModerationQueue(true);
+    }
+  }, 30000);
+}
+
+document.addEventListener('input', e => {
+  if (['mod-search-input','mod-type-filter','mod-status-filter','mod-risk-filter'].includes(e.target?.id)) renderModeration();
+});
+document.addEventListener('change', e => {
+  if (['mod-type-filter','mod-status-filter','mod-risk-filter'].includes(e.target?.id)) renderModeration();
+});
+
+window.refreshModerationQueue = refreshModerationQueue;
+window.moderationMarkReviewed = moderationMarkReviewed;
+window.moderationWatchUser = moderationWatchUser;
+window.moderationDeleteItem = moderationDeleteItem;
+window.moderationClearReviewed = moderationClearReviewed;
 
 renderModeration();
+startModerationAutoRefresh();
 updateAdminSidebarBadges();
 
 
