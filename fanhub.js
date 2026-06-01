@@ -3768,14 +3768,19 @@ async function generateAiPoster() {
   clearGeneratedPosterState(false);
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     const res = await fetch(`${AI_STUDIO_API_BASE}/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify(getAiStudioPayload())
+      body: JSON.stringify(getAiStudioPayload()),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) {
@@ -3817,7 +3822,10 @@ async function generateAiPoster() {
 
     showToast(data.message || 'AI poster generated and saved');
   } catch (err) {
-    showToast(err.message || 'AI generation failed');
+    const message = err?.name === 'AbortError'
+      ? 'Generation timed out. Backend may still be deploying — try again after Render is live.'
+      : (err.message || 'AI generation failed');
+    showToast(message);
   } finally {
     setAiGenerating(false);
   }
