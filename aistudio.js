@@ -1138,6 +1138,39 @@ function formValue(id, fallback='') {
   return $(id)?.value?.trim() || fallback;
 }
 
+function compactPrompt(text) {
+  return String(text || '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([,.])/g, '$1')
+    .trim();
+}
+
+function aspectLabel(ratio) {
+  const map = {
+    '1:1': 'square social post, 1:1 aspect ratio',
+    '4:5': 'portrait poster, 4:5 aspect ratio',
+    '9:16': 'vertical story or mobile wallpaper, 9:16 aspect ratio',
+    '16:9': 'cinematic widescreen or desktop wallpaper, 16:9 aspect ratio',
+    '21:9': 'ultra-wide banner, 21:9 aspect ratio'
+  };
+  return map[ratio] || `${ratio} aspect ratio`;
+}
+
+function buildFanIdentityBlock(fanName, fanTagline, fanCountry, customNumber) {
+  if(!selectedTemplate?.requiresUserPhoto) {
+    return compactPrompt(`Fan text layer only: include fan name ${fanName || 'the fan'} only if the template composition has readable poster text. Optional tagline: ${fanTagline || 'Born for the paddock'}. Optional country: ${fanCountry || 'India'}. Optional number: ${customNumber || selectedDriver.number}.`);
+  }
+  return compactPrompt(`Fan identity reference instruction: use the uploaded fan photo as the primary identity reference. Preserve the exact fan face, bone structure, jawline, nose shape, eye shape, eyebrow thickness, lip shape, skin tone, skin texture, forehead, cheekbones, chin, hairstyle, facial hair if any, and all visible accessories such as earrings, piercings, glasses, chains, tattoos, moles, scars, freckles, caps, or headbands. Do not replace the fan with another person. Fan display name: ${fanName || 'the fan'}. Fan tagline: ${fanTagline || 'Born for the paddock'}. Fan country: ${fanCountry || 'India'}. Fan number: ${customNumber || selectedDriver.number}.`);
+}
+
+function buildDriverIdentityBlock() {
+  return compactPrompt(`Current grid driver identity: selected driver is ${selectedDriver.name}, racing number ${selectedDriver.number}, driving for ${selectedDriver.team}. Driver visual description: ${selectedDriver.faceDescription}. Driver must look recognizable and realistic, with natural expression and accurate proportions. Team theme: ${selectedDriver.teamTheme}. Team garage atmosphere: ${selectedDriver.garageDescription}. Racing suit: ${selectedDriver.racingSuitDescription}.`);
+}
+
+function buildRealismBlock() {
+  return compactPrompt('Realism quality lock: photorealistic, hyper-realistic motorsport photography, natural human skin texture, realistic fabric stitching, realistic helmet and visor materials, correct depth of field, authentic lens behavior, cinematic but believable lighting, sharp subject focus, high dynamic range, premium sports editorial finish. Avoid cartoon, anime, illustration, toy-like proportions, plastic skin, over-smoothed face, distorted fingers, extra limbs, duplicate faces, wrong team colors, unreadable random text, fake low-quality logos, messy sponsor text, watermark artifacts, and blurry identity.');
+}
+
 function buildPrompt() {
   if(!selectedDriver || !selectedTemplate) return '';
   const fanName = formValue('#fan-name','the fan');
@@ -1159,32 +1192,76 @@ function buildPrompt() {
     '{custom_number}': customNumber,
     '{aspect_ratio}': selectedRatio
   };
-  let prompt = selectedTemplate.prompt;
-  Object.entries(map).forEach(([k,v]) => prompt = prompt.split(k).join(v));
-  return prompt;
+  let corePrompt = selectedTemplate.prompt;
+  Object.entries(map).forEach(([k,v]) => corePrompt = corePrompt.split(k).join(v));
+
+  const promptParts = [
+    `PADDOX AI Studio realistic image generation request. Template: ${selectedTemplate.title}. Category: ${selectedTemplate.category}.`,
+    corePrompt,
+    buildFanIdentityBlock(fanName, fanTagline, fanCountry, customNumber),
+    buildDriverIdentityBlock(),
+    `Output composition: ${aspectLabel(selectedRatio)}. Keep the image premium, sharp, social-media-ready, and realistic with no cartoon styling.`,
+    buildRealismBlock()
+  ];
+  return compactPrompt(promptParts.join(' '));
 }
 
 function buildPayload() {
+  const prompt = buildPrompt();
   return {
-    phase: 'A4.11F',
-    mode: 'frontend-generation-ready',
-    driverId: selectedDriver.id,
-    driverName: selectedDriver.name,
-    teamName: selectedDriver.team,
-    driverImage: selectedDriver.image || '',
-    driverImageSource: selectedDriver.imageSource || 'local-fallback',
-    templateId: selectedTemplate.id,
-    templateTitle: selectedTemplate.title,
-    category: selectedTemplate.category,
-    aspectRatio: selectedRatio,
-    creditCost: selectedTemplate.creditCost,
-    requiresUserPhoto: selectedTemplate.requiresUserPhoto,
-    uploadedPhotoName,
-    fanName: formValue('#fan-name',''),
-    fanTagline: formValue('#fan-tagline',''),
-    fanCountry: formValue('#fan-country',''),
-    customNumber: formValue('#custom-number', selectedDriver.number),
-    prompt: buildPrompt(),
+    phase: 'A4.11G',
+    mode: 'gemini-ready-realistic-prompt-payload',
+    providerTarget: 'gemini-image-generation',
+    promptVersion: 'paddox-realistic-v1',
+    driver: {
+      id: selectedDriver.id,
+      name: selectedDriver.name,
+      team: selectedDriver.team,
+      number: selectedDriver.number,
+      image: selectedDriver.image || '',
+      imageSource: selectedDriver.imageSource || 'cloudinary-or-fallback',
+      faceDescription: selectedDriver.faceDescription,
+      racingSuitDescription: selectedDriver.racingSuitDescription,
+      garageDescription: selectedDriver.garageDescription,
+      teamTheme: selectedDriver.teamTheme,
+      accentColor: selectedDriver.accentColor,
+      secondaryColor: selectedDriver.secondaryColor
+    },
+    template: {
+      id: selectedTemplate.id,
+      title: selectedTemplate.title,
+      category: selectedTemplate.category,
+      creditCost: selectedTemplate.creditCost,
+      requiresUserPhoto: selectedTemplate.requiresUserPhoto,
+      recommendedAspect: selectedTemplate.recommendedAspect,
+      realism: selectedTemplate.realism || 'Hyper-realistic'
+    },
+    fan: {
+      name: formValue('#fan-name',''),
+      tagline: formValue('#fan-tagline',''),
+      country: formValue('#fan-country',''),
+      customNumber: formValue('#custom-number', selectedDriver.number),
+      uploadedPhotoName,
+      photoRequired: selectedTemplate.requiresUserPhoto
+    },
+    output: {
+      aspectRatio: selectedRatio,
+      aspectLabel: aspectLabel(selectedRatio),
+      quality: 'photorealistic-hyperrealistic',
+      style: 'premium motorsport editorial photography'
+    },
+    references: {
+      fanPhoto: uploadedPhotoName ? { type: 'user-upload', fileName: uploadedPhotoName, role: 'primary identity reference' } : null,
+      driverImage: selectedDriver.image ? { type: selectedDriver.imageSource || 'driver-profile', url: selectedDriver.image, role: 'driver visual reference' } : null
+    },
+    instructions: {
+      preserveFanFace: !!selectedTemplate.requiresUserPhoto,
+      preserveDriverRecognition: true,
+      useCurrentGridDriverData: true,
+      useTeamSuitDescription: true,
+      avoidStyle: ['cartoon', 'anime', 'illustration', 'plastic skin', 'wrong team colors', 'distorted face', 'extra limbs']
+    },
+    prompt,
     createdAt: new Date().toISOString()
   };
 }
@@ -1240,13 +1317,13 @@ function generatePrompt() {
   if(credits < selectedTemplate.creditCost) return showToast('You need more PADDOX Credits.');
   finalPayload = buildPayload();
   $('#final-prompt').value = finalPayload.prompt;
-  $('#result-status').textContent = 'Hyper-realistic prompt and backend-ready payload prepared.';
+  $('#result-status').textContent = 'Gemini-ready realistic prompt payload prepared with driver identity, team suit, fan-face instructions, and aspect ratio.';
   $('#copy-prompt-btn').disabled = false;
   $('#download-payload').disabled = false;
   $('#save-creation').disabled = false;
   setCredits(credits - selectedTemplate.creditCost);
   renderPreview();
-  showToast('Your PADDOX realistic generation prompt is ready.');
+  showToast('Gemini-ready realistic payload prepared.');
 }
 
 function copyPrompt() {
