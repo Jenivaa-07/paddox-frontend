@@ -718,6 +718,12 @@ const AI_F1_DRIVERS_API = 'https://paddox-backend.onrender.com/api/f1/drivers';
 
 const PADDOX_API_BASE = window.PADDOX_API_BASE || 'https://paddox-backend.onrender.com/api';
 const AI_STUDIO_GENERATE_API = `${PADDOX_API_BASE}/ai-studio/generate`;
+const AI_STUDIO_CREDITS_API = `${PADDOX_API_BASE}/ai-studio/credits`;
+
+/* Phase A4.11H.1 — Real credits sync:
+   Admin-added credits live in MongoDB. Do not trust browser/localStorage alone. */
+let backendAiCredits = null;
+let backendCreditsLoaded = false;
 
 function getAccessToken() {
   return window.TokenManager?.getAccess?.()
@@ -746,7 +752,11 @@ async function aiStudioAuthFetch(pathOrUrl, options = {}) {
   if (responseSessionId) localStorage.setItem('paddox_session_id', responseSessionId);
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) {
-    throw new Error(data.message || 'Request failed');
+    const credits = data?.data?.aiCredits ?? data?.aiCredits;
+    if (Number.isFinite(Number(credits))) setCredits(Number(credits));
+    const err = new Error(data.message || 'Request failed');
+    err.responseData = data;
+    throw err;
   }
   return data;
 }
@@ -1404,8 +1414,9 @@ function renderPreview() {
   if(pd) pd.textContent = selectedDriver?.name || 'Select Driver';
   if(pt) pt.textContent = `${selectedDriver?.team || 'Team'} · ${selectedTemplate?.title || 'Template'}`;
   if(pr) pr.textContent = selectedRatio;
-  $('#credit-balance') && ($('#credit-balance').textContent = getCredits());
-  $('#hero-credit-count') && ($('#hero-credit-count').textContent = getCredits());
+  const creditsLabel = backendCreditsLoaded ? getCredits() : (getAccessToken() ? '...' : getCredits());
+  $('#credit-balance') && ($('#credit-balance').textContent = creditsLabel);
+  $('#hero-credit-count') && ($('#hero-credit-count').textContent = creditsLabel);
   $('#upload-box')?.classList.toggle('need-photo', !!selectedTemplate?.requiresUserPhoto);
 }
 
@@ -1417,11 +1428,51 @@ function hexToRgba(hex, alpha) {
 }
 
 function getCredits() {
-  return Number(localStorage.getItem('paddox_ai_credits') || 240);
+  if (Number.isFinite(Number(backendAiCredits))) return Math.max(0, Math.round(Number(backendAiCredits)));
+  return Number(localStorage.getItem('paddox_ai_credits') || 0);
 }
 
 function setCredits(v) {
-  localStorage.setItem('paddox_ai_credits', String(Math.max(0, v)));
+  const safe = Math.max(0, Math.round(Number(v) || 0));
+  backendAiCredits = safe;
+  backendCreditsLoaded = true;
+  localStorage.setItem('paddox_ai_credits', String(safe));
+}
+
+function setCreditsLoading() {
+  const hero = $('#hero-credit-count');
+  const wallet = $('#credit-balance');
+  if (hero && !backendCreditsLoaded) hero.textContent = '...';
+  if (wallet && !backendCreditsLoaded) wallet.textContent = '...';
+}
+
+async function syncRealAiCredits(silent = false) {
+  const token = getAccessToken();
+  if (!token) {
+    backendCreditsLoaded = false;
+    if (!silent) showToast('Login to sync PADDOX AI Credits.');
+    renderPreview();
+    return null;
+  }
+
+  try {
+    setCreditsLoading();
+    const response = await aiStudioAuthFetch(AI_STUDIO_CREDITS_API, { method: 'GET' });
+    const data = response.data || response || {};
+    const credits = Number(data.aiCredits ?? data.user?.aiCredits ?? data.credits);
+    if (Number.isFinite(credits)) {
+      setCredits(credits);
+      renderPreview();
+      return credits;
+    }
+    throw new Error('AI credits not found in profile response');
+  } catch (err) {
+    console.warn('PADDOX AI credits sync failed:', err);
+    backendCreditsLoaded = false;
+    renderPreview();
+    if (!silent) showToast('Could not sync backend AI Credits. Try refreshing after login.');
+    return null;
+  }
 }
 
 async function generatePrompt() {
@@ -1437,8 +1488,14 @@ async function generatePrompt() {
     finalPayload = buildPayload();
     $('#final-prompt').value = finalPayload.prompt;
 
-    const localCredits = getCredits();
-    if(localCredits < selectedTemplate.creditCost) return showToast('You need more PADDOX Credits.');
+    const liveCredits = await syncRealAiCredits(true);
+    const creditsToCheck = Number.isFinite(Number(liveCredits)) ? Number(liveCredits) : getCredits();
+
+    /* H.1 fix: only block using synced backend credits. The backend is still the final authority. */
+    if(Number.isFinite(creditsToCheck) && creditsToCheck < selectedTemplate.creditCost) {
+      $('#result-status').textContent = `Backend AI Credits: ${creditsToCheck}. Required: ${selectedTemplate.creditCost}.`;
+      return showToast('You need more PADDOX Credits. Refresh Account/Admin if you just changed credits.');
+    }
 
     if(btn) {
       btn.disabled = true;
@@ -1634,4 +1691,5 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCreations();
   renderAll();
   syncCloudinaryDriverImages();
+  syncRealAiCredits(true);
 });
