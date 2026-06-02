@@ -761,6 +761,40 @@ async function aiStudioAuthFetch(pathOrUrl, options = {}) {
   return data;
 }
 
+function isQuotaErrorMessage(message = '', responseData = {}) {
+  const text = `${message || ''} ${JSON.stringify(responseData || {})}`.toLowerCase();
+  return text.includes('quota') ||
+    text.includes('resource_exhausted') ||
+    text.includes('free tier') ||
+    text.includes('generate_content_free_tier') ||
+    text.includes('gemini_quota_exceeded');
+}
+
+function handleGeminiGenerationError(err) {
+  const responseData = err?.responseData || {};
+  const data = responseData.data || {};
+  const credits = Number(data.aiCredits ?? responseData.aiCredits);
+  if (Number.isFinite(credits)) setCredits(credits);
+
+  const quota = isQuotaErrorMessage(err?.message, responseData);
+  const message = quota
+    ? 'Gemini free image quota is exhausted. No PADDOX Credits were used. Try again after quota reset or switch API key/model.'
+    : (err?.message || 'Gemini generation failed. Check Render logs and API key.');
+
+  $('#result-status').textContent = message;
+  showToast(quota ? 'Gemini free quota exhausted — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+
+  const frame = $('#preview-frame');
+  frame?.classList.remove('has-generated-image');
+  const img = $('#generated-image');
+  if (img) img.remove();
+
+  const wm = frame?.querySelector('.preview-watermark');
+  if (wm) wm.textContent = quota ? 'GEMINI QUOTA' : 'PADDOX AI';
+
+  return message;
+}
+
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1537,8 +1571,8 @@ async function generatePrompt() {
     showToast('Gemini image ready.');
   } catch (err) {
     console.error('PADDOX Gemini generation failed:', err);
-    $('#result-status').textContent = err.message || 'Gemini generation failed. Check Render logs and API key.';
-    showToast(`Generation failed: ${err.message || 'Try again'}`);
+    handleGeminiGenerationError(err);
+    await syncRealAiCredits(true);
   } finally {
     if(btn) {
       btn.disabled = false;
