@@ -1145,6 +1145,17 @@ function compactPrompt(text) {
     .trim();
 }
 
+function cleanPromptLine(text) {
+  return compactPrompt(text).replace(/\s+([:.])/g, '$1');
+}
+
+function promptSection(title, body) {
+  const cleanBody = Array.isArray(body)
+    ? body.filter(Boolean).map(cleanPromptLine).join('\n')
+    : cleanPromptLine(body);
+  return `${title}:\n${cleanBody}`;
+}
+
 function aspectLabel(ratio) {
   const map = {
     '1:1': 'square social post, 1:1 aspect ratio',
@@ -1156,19 +1167,45 @@ function aspectLabel(ratio) {
   return map[ratio] || `${ratio} aspect ratio`;
 }
 
-function buildFanIdentityBlock(fanName, fanTagline, fanCountry, customNumber) {
+function buildFanIdentityLines(fanName, fanTagline, fanCountry, customNumber) {
   if(!selectedTemplate?.requiresUserPhoto) {
-    return compactPrompt(`Fan text layer only: include fan name ${fanName || 'the fan'} only if the template composition has readable poster text. Optional tagline: ${fanTagline || 'Born for the paddock'}. Optional country: ${fanCountry || 'India'}. Optional number: ${customNumber || selectedDriver.number}.`);
+    return [
+      `Fan text layer only: include fan name ${fanName || 'the fan'} only if the composition has clean readable poster text.`,
+      `Optional fan details: tagline ${fanTagline || 'Born for the paddock'}, country ${fanCountry || 'India'}, fan number ${customNumber || selectedDriver.number}.`,
+      'Do not create random extra people unless the selected scene/template clearly requires a fan subject.'
+    ];
   }
-  return compactPrompt(`Fan identity reference instruction: use the uploaded fan photo as the primary identity reference. Preserve the exact fan face, bone structure, jawline, nose shape, eye shape, eyebrow thickness, lip shape, skin tone, skin texture, forehead, cheekbones, chin, hairstyle, facial hair if any, and all visible accessories such as earrings, piercings, glasses, chains, tattoos, moles, scars, freckles, caps, or headbands. Do not replace the fan with another person. Fan display name: ${fanName || 'the fan'}. Fan tagline: ${fanTagline || 'Born for the paddock'}. Fan country: ${fanCountry || 'India'}. Fan number: ${customNumber || selectedDriver.number}.`);
+  return [
+    'Use the uploaded fan photo as the primary identity reference.',
+    'Preserve the exact fan face, bone structure, jawline, nose shape, eye shape, eyebrow thickness, lip shape, skin tone, skin texture, forehead, cheekbones, chin, hairstyle, facial hair if any, and every visible accessory.',
+    'Replicate earrings, piercings, glasses, chains, tattoos, moles, scars, freckles, caps, headbands, and other visible details from the uploaded fan photo with high accuracy.',
+    'Do not replace the fan with another person and do not beautify into a different identity.',
+    `Fan display name: ${fanName || 'the fan'}.`,
+    `Fan tagline: ${fanTagline || 'Born for the paddock'}.`,
+    `Fan country: ${fanCountry || 'India'}.`,
+    `Fan number: ${customNumber || selectedDriver.number}.`
+  ];
 }
 
-function buildDriverIdentityBlock() {
-  return compactPrompt(`Current grid driver identity: selected driver is ${selectedDriver.name}, racing number ${selectedDriver.number}, driving for ${selectedDriver.team}. Driver visual description: ${selectedDriver.faceDescription}. Driver must look recognizable and realistic, with natural expression and accurate proportions. Team theme: ${selectedDriver.teamTheme}. Team garage atmosphere: ${selectedDriver.garageDescription}. Racing suit: ${selectedDriver.racingSuitDescription}.`);
+function buildDriverIdentityLines() {
+  return [
+    `Selected current-grid driver: ${selectedDriver.name}.`,
+    `Racing number: ${selectedDriver.number}.`,
+    `Team: ${selectedDriver.team}.`,
+    `Driver visual description: ${selectedDriver.faceDescription}.`,
+    'Driver must look recognizable, realistic, naturally expressive, and proportionally accurate.',
+    `Team theme: ${selectedDriver.teamTheme}.`,
+    `Team garage atmosphere: ${selectedDriver.garageDescription}.`,
+    `Racing suit: ${selectedDriver.racingSuitDescription}.`
+  ];
 }
 
-function buildRealismBlock() {
-  return compactPrompt('Realism quality lock: photorealistic, hyper-realistic motorsport photography, natural human skin texture, realistic fabric stitching, realistic helmet and visor materials, correct depth of field, authentic lens behavior, cinematic but believable lighting, sharp subject focus, high dynamic range, premium sports editorial finish. Avoid cartoon, anime, illustration, toy-like proportions, plastic skin, over-smoothed face, distorted fingers, extra limbs, duplicate faces, wrong team colors, unreadable random text, fake low-quality logos, messy sponsor text, watermark artifacts, and blurry identity.');
+function buildRealismLines() {
+  return [
+    'Photorealistic and hyper-realistic motorsport photography.',
+    'Natural human skin texture, realistic fabric stitching, realistic helmet and visor materials, correct depth of field, authentic lens behavior, cinematic but believable lighting, sharp subject focus, high dynamic range, and premium sports editorial finish.',
+    'Avoid cartoon, anime, illustration, toy-like proportions, plastic skin, over-smoothed face, distorted fingers, extra limbs, duplicate faces, wrong team colors, unreadable random text, fake low-quality logos, messy sponsor text, watermark artifacts, and blurry identity.'
+  ];
 }
 
 function buildPrompt() {
@@ -1195,24 +1232,34 @@ function buildPrompt() {
   let corePrompt = selectedTemplate.prompt;
   Object.entries(map).forEach(([k,v]) => corePrompt = corePrompt.split(k).join(v));
 
-  const promptParts = [
-    `PADDOX AI Studio realistic image generation request. Template: ${selectedTemplate.title}. Category: ${selectedTemplate.category}.`,
-    corePrompt,
-    buildFanIdentityBlock(fanName, fanTagline, fanCountry, customNumber),
-    buildDriverIdentityBlock(),
-    `Output composition: ${aspectLabel(selectedRatio)}. Keep the image premium, sharp, social-media-ready, and realistic with no cartoon styling.`,
-    buildRealismBlock()
+  const sections = [
+    promptSection('PADDOX AI STUDIO REQUEST', [
+      `Template: ${selectedTemplate.title}.`,
+      `Category: ${categoryLabel(selectedTemplate.category)}.`,
+      `Output format: ${aspectLabel(selectedRatio)}.`,
+      `Realism mode: ${selectedTemplate.realism || 'Hyper-realistic'}.`
+    ]),
+    promptSection('SCENE', corePrompt),
+    promptSection('FAN IDENTITY LOCK', buildFanIdentityLines(fanName, fanTagline, fanCountry, customNumber)),
+    promptSection('CURRENT GRID DRIVER IDENTITY', buildDriverIdentityLines()),
+    promptSection('COMPOSITION AND OUTPUT', [
+      `Use ${aspectLabel(selectedRatio)}.`,
+      'Keep the image premium, sharp, realistic, cinematic, and social-media-ready.',
+      'Use clean professional sports photography composition with believable human proportions.'
+    ]),
+    promptSection('QUALITY AND REALISM LOCK', buildRealismLines())
   ];
-  return compactPrompt(promptParts.join(' '));
+
+  return sections.join('\n\n');
 }
 
 function buildPayload() {
   const prompt = buildPrompt();
   return {
-    phase: 'A4.11G',
+    phase: 'A4.11G.1',
     mode: 'gemini-ready-realistic-prompt-payload',
     providerTarget: 'gemini-image-generation',
-    promptVersion: 'paddox-realistic-v1',
+    promptVersion: 'paddox-realistic-v1.1-sectioned',
     driver: {
       id: selectedDriver.id,
       name: selectedDriver.name,
@@ -1262,6 +1309,8 @@ function buildPayload() {
       avoidStyle: ['cartoon', 'anime', 'illustration', 'plastic skin', 'wrong team colors', 'distorted face', 'extra limbs']
     },
     prompt,
+    promptFormat: 'sectioned-readable-text',
+    promptSections: ['request','scene','fan_identity_lock','current_grid_driver_identity','composition_and_output','quality_and_realism_lock'],
     createdAt: new Date().toISOString()
   };
 }
@@ -1317,19 +1366,36 @@ function generatePrompt() {
   if(credits < selectedTemplate.creditCost) return showToast('You need more PADDOX Credits.');
   finalPayload = buildPayload();
   $('#final-prompt').value = finalPayload.prompt;
-  $('#result-status').textContent = 'Gemini-ready realistic prompt payload prepared with driver identity, team suit, fan-face instructions, and aspect ratio.';
+  $('#result-status').textContent = 'Sectioned Gemini-ready prompt prepared with scene, fan identity lock, driver identity, composition, realism, and avoid rules.';
   $('#copy-prompt-btn').disabled = false;
   $('#download-payload').disabled = false;
+  $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
+  $('#copy-json-btn') && ($('#copy-json-btn').disabled = false);
   $('#save-creation').disabled = false;
   setCredits(credits - selectedTemplate.creditCost);
   renderPreview();
-  showToast('Gemini-ready realistic payload prepared.');
+  showToast('Sectioned Gemini-ready payload prepared.');
 }
 
 function copyPrompt() {
   const txt = $('#final-prompt')?.value;
   if(!txt) return;
-  navigator.clipboard?.writeText(txt).then(() => showToast('Final prompt copied.'));
+  navigator.clipboard?.writeText(txt).then(() => showToast('Sectioned final prompt copied.'));
+}
+
+function copyPayloadJson() {
+  if(!finalPayload) finalPayload = buildPayload();
+  navigator.clipboard?.writeText(JSON.stringify(finalPayload, null, 2)).then(() => showToast('Payload JSON copied.'));
+}
+
+function downloadTextPrompt() {
+  const prompt = $('#final-prompt')?.value || buildPrompt();
+  const blob = new Blob([prompt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `paddox-ai-${selectedDriver.id}-${selectedTemplate.id}-prompt.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function downloadPayload() {
@@ -1337,7 +1403,7 @@ function downloadPayload() {
   const blob = new Blob([JSON.stringify(finalPayload, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `paddox-ai-${selectedDriver.id}-${selectedTemplate.id}.json`;
+  a.download = `paddox-ai-${selectedDriver.id}-${selectedTemplate.id}-payload.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -1360,8 +1426,8 @@ function renderCreations() {
   }
   grid.innerHTML = list.map(x => `
     <div class="creation-card">
-      <h3>${x.templateTitle}</h3>
-      <p>${x.driverName} · ${x.teamName} · ${x.aspectRatio}</p>
+      <h3>${x.template?.title || 'PADDOX AI Creation'}</h3>
+      <p>${x.driver?.name || 'Driver'} · ${x.driver?.team || 'Team'} · ${x.output?.aspectRatio || '4:5'}</p>
       <p>${new Date(x.createdAt).toLocaleString()}</p>
     </div>
   `).join('');
@@ -1396,6 +1462,8 @@ function initFormListeners() {
   $('#generate-btn')?.addEventListener('click', generatePrompt);
   $('#copy-prompt-btn')?.addEventListener('click', copyPrompt);
   $('#download-payload')?.addEventListener('click', downloadPayload);
+  $('#download-text-prompt')?.addEventListener('click', downloadTextPrompt);
+  $('#copy-json-btn')?.addEventListener('click', copyPayloadJson);
   $('#save-creation')?.addEventListener('click', saveCreation);
 }
 
