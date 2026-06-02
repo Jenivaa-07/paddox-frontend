@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11F
+   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11H.4 Gemini Only
    ============================================================ */
 'use strict';
 
@@ -768,9 +768,7 @@ function isQuotaErrorMessage(message = '', responseData = {}) {
     text.includes('free tier') ||
     text.includes('generate_content_free_tier') ||
     text.includes('gemini_quota_exceeded') ||
-    text.includes('cloudflare_quota_exceeded') ||
-    text.includes('all_image_providers_failed') ||
-    text.includes('workers ai');
+    text.includes('all_image_providers_failed');
 }
 
 function handleProviderGenerationError(err) {
@@ -780,17 +778,12 @@ function handleProviderGenerationError(err) {
   if (Number.isFinite(credits)) setCredits(credits);
 
   const quota = isQuotaErrorMessage(err?.message, responseData);
-  const providerErrors = Array.isArray(data.providerErrors) ? data.providerErrors : [];
-  const cloudflareMissing = providerErrors.some(e => String(e.code || '').includes('CLOUDFLARE_CONFIG_MISSING'));
-
   const message = quota
-    ? (cloudflareMissing
-        ? 'Gemini quota failed and Cloudflare fallback is not configured on backend. No PADDOX Credits were used.'
-        : 'Free image providers are unavailable or quota-limited right now. No PADDOX Credits were used.')
-    : (err?.message || 'Image generation failed. Check Render logs and provider env keys.');
+    ? 'Gemini image generation is temporarily unavailable. Your credits were not deducted.'
+    : (err?.message || 'Gemini image generation failed. Your credits were not deducted.');
 
   $('#result-status').textContent = message;
-  showToast(quota ? 'Free provider unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+  showToast(quota ? 'Gemini unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
 
   const frame = $('#preview-frame');
   frame?.classList.remove('has-generated-image');
@@ -798,7 +791,7 @@ function handleProviderGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = quota ? 'PROVIDER QUOTA' : 'PADDOX AI';
+  if (wm) wm.textContent = quota ? 'GEMINI UNAVAILABLE' : 'PADDOX AI';
 
   return message;
 }
@@ -1545,8 +1538,8 @@ async function generatePrompt() {
       btn.classList.add('is-loading');
     }
 
-    $('#result-status').textContent = 'Trying Gemini first. If quota fails, Cloudflare Workers AI fallback will run automatically...';
-    showToast('Generating with free provider fallback...');
+    $('#result-status').textContent = 'Generating with Gemini. If Gemini fails, no credits will be deducted...';
+    showToast('Generating with Gemini...');
 
     const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
       method: 'POST',
@@ -1568,7 +1561,7 @@ async function generatePrompt() {
     setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
     renderPreview();
 
-    $('#result-status').textContent = `${(data.provider || 'AI').toUpperCase()} image generated successfully using ${data.model || 'image model'}.`;
+    $('#result-status').textContent = `GEMINI image generated successfully using ${data.model || 'image model'}.`;
     $('#copy-prompt-btn').disabled = false;
     $('#download-payload').disabled = false;
     $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1576,7 +1569,7 @@ async function generatePrompt() {
     $('#save-creation').disabled = false;
     $('#download-generated-image') && ($('#download-generated-image').disabled = false);
 
-    showToast(`${(data.provider || 'AI').toUpperCase()} image ready.`);
+    showToast('Gemini image ready.');
   } catch (err) {
     console.error('PADDOX image generation failed:', err);
     handleProviderGenerationError(err);
@@ -1606,13 +1599,13 @@ function renderGeneratedImage(imageUrl, meta = {}) {
   frame.classList.add('has-generated-image');
 
   const wm = frame.querySelector('.preview-watermark');
-  if(wm) wm.textContent = `${String(meta.provider || 'AI').toUpperCase()} OUTPUT`;
+  if(wm) wm.textContent = 'GEMINI OUTPUT';
 
   const pd = $('#preview-driver');
   const pt = $('#preview-template');
   const pr = $('#preview-ratio');
   if(pd) pd.textContent = selectedDriver?.name || 'Generated';
-  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · ${meta.providerMode || 'live-simple'}`;
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · gemini-only`;
   if(pr) pr.textContent = selectedRatio;
 }
 
