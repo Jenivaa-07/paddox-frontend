@@ -767,22 +767,31 @@ function isQuotaErrorMessage(message = '', responseData = {}) {
     text.includes('resource_exhausted') ||
     text.includes('free tier') ||
     text.includes('generate_content_free_tier') ||
-    text.includes('gemini_quota_exceeded');
+    text.includes('gemini_quota_exceeded') ||
+    text.includes('cloudflare_quota_exceeded') ||
+    text.includes('all_image_providers_failed') ||
+    text.includes('workers ai');
 }
 
-function handleGeminiGenerationError(err) {
+function handleProviderGenerationError(err) {
   const responseData = err?.responseData || {};
   const data = responseData.data || {};
   const credits = Number(data.aiCredits ?? responseData.aiCredits);
   if (Number.isFinite(credits)) setCredits(credits);
 
   const quota = isQuotaErrorMessage(err?.message, responseData);
+  const code = String(data.code || '').toUpperCase();
+  const providerErrors = Array.isArray(data.providerErrors) ? data.providerErrors : [];
+  const cloudflareMissing = providerErrors.some(e => String(e.code || '').includes('CLOUDFLARE_CONFIG_MISSING'));
+
   const message = quota
-    ? 'Gemini free image quota is exhausted. No PADDOX Credits were used. Try again after quota reset or switch API key/model.'
-    : (err?.message || 'Gemini generation failed. Check Render logs and API key.');
+    ? (cloudflareMissing
+        ? 'Gemini quota failed and Cloudflare fallback is not configured on backend. No PADDOX Credits were used.'
+        : 'Free image providers are unavailable or quota-limited right now. No PADDOX Credits were used.')
+    : (err?.message || 'Image generation failed. Check Render logs and provider env keys.');
 
   $('#result-status').textContent = message;
-  showToast(quota ? 'Gemini free quota exhausted — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+  showToast(quota ? 'Free provider unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
 
   const frame = $('#preview-frame');
   frame?.classList.remove('has-generated-image');
@@ -790,7 +799,7 @@ function handleGeminiGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = quota ? 'GEMINI QUOTA' : 'PADDOX AI';
+  if (wm) wm.textContent = code.includes('CLOUDFLARE') ? 'CLOUDFLARE' : quota ? 'PROVIDER QUOTA' : 'PADDOX AI';
 
   return message;
 }
@@ -1517,7 +1526,7 @@ async function generatePrompt() {
   }
 
   const btn = $('#generate-btn');
-  const originalText = btn?.textContent || 'Generate with Gemini';
+  const originalText = btn?.textContent || 'Generate Image';
   try {
     finalPayload = buildPayload();
     $('#final-prompt').value = finalPayload.prompt;
@@ -1533,12 +1542,12 @@ async function generatePrompt() {
 
     if(btn) {
       btn.disabled = true;
-      btn.textContent = 'Generating with Gemini...';
+      btn.textContent = 'Generating Image...';
       btn.classList.add('is-loading');
     }
 
-    $('#result-status').textContent = 'Sending sectioned prompt and fan photo to Gemini. This can take a little time...';
-    showToast('Generating realistic PADDOX image...');
+    $('#result-status').textContent = 'Trying Gemini first. If quota fails, Cloudflare Workers AI fallback will run automatically...';
+    showToast('Generating with free provider fallback...');
 
     const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
       method: 'POST',
@@ -1557,10 +1566,10 @@ async function generatePrompt() {
 
     generatedImageUrl = imageUrl;
     renderGeneratedImage(imageUrl, data);
-    setCredits(Number(data.aiCredits ?? Math.max(0, localCredits - selectedTemplate.creditCost)));
+    setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
     renderPreview();
 
-    $('#result-status').textContent = `Gemini image generated successfully using ${data.model || 'Gemini image model'}.`;
+    $('#result-status').textContent = `${(data.provider || 'AI').toUpperCase()} image generated successfully using ${data.model || 'image model'}.`;
     $('#copy-prompt-btn').disabled = false;
     $('#download-payload').disabled = false;
     $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1568,10 +1577,10 @@ async function generatePrompt() {
     $('#save-creation').disabled = false;
     $('#download-generated-image') && ($('#download-generated-image').disabled = false);
 
-    showToast('Gemini image ready.');
+    showToast(`${(data.provider || 'AI').toUpperCase()} image ready.`);
   } catch (err) {
-    console.error('PADDOX Gemini generation failed:', err);
-    handleGeminiGenerationError(err);
+    console.error('PADDOX image generation failed:', err);
+    handleProviderGenerationError(err);
     await syncRealAiCredits(true);
   } finally {
     if(btn) {
@@ -1598,7 +1607,7 @@ function renderGeneratedImage(imageUrl, meta = {}) {
   frame.classList.add('has-generated-image');
 
   const wm = frame.querySelector('.preview-watermark');
-  if(wm) wm.textContent = 'GEMINI OUTPUT';
+  if(wm) wm.textContent = `${String(meta.provider || 'AI').toUpperCase()} OUTPUT`;
 
   const pd = $('#preview-driver');
   const pt = $('#preview-template');
