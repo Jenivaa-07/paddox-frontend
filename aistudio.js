@@ -780,7 +780,6 @@ function handleProviderGenerationError(err) {
   if (Number.isFinite(credits)) setCredits(credits);
 
   const quota = isQuotaErrorMessage(err?.message, responseData);
-  const code = String(data.code || '').toUpperCase();
   const providerErrors = Array.isArray(data.providerErrors) ? data.providerErrors : [];
   const cloudflareMissing = providerErrors.some(e => String(e.code || '').includes('CLOUDFLARE_CONFIG_MISSING'));
 
@@ -799,7 +798,7 @@ function handleProviderGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = code.includes('CLOUDFLARE') ? 'CLOUDFLARE' : quota ? 'PROVIDER QUOTA' : 'PADDOX AI';
+  if (wm) wm.textContent = quota ? 'PROVIDER QUOTA' : 'PADDOX AI';
 
   return message;
 }
