@@ -713,7 +713,10 @@ const RATIOS = [
   { id:'21:9', title:'Wide Banner', note:'Header visual' }
 ];
 
-let selectedDriver = AI_DRIVERS[0];
+const AI_DRIVER_PROFILE_API = 'https://paddox-backend.onrender.com/api/fan/driver-profiles';
+
+let ACTIVE_AI_DRIVERS = AI_DRIVERS.map(d => ({ ...d, imageSource: 'local-fallback' }));
+let selectedDriver = ACTIVE_AI_DRIVERS[0];
 let selectedTemplate = PROMPT_TEMPLATES.find(t => t.id === 'night_selfie_driver') || PROMPT_TEMPLATES[0];
 let selectedRatio = selectedTemplate.recommendedAspect || '4:5';
 let uploadedPhotoName = '';
@@ -777,20 +780,153 @@ function initials(name) {
   return String(name).split(' ').map(x => x[0]).join('').slice(0,2).toUpperCase();
 }
 
+function escapeHtml(value = '') {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function normalizeDriverKey(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-');
+}
+
+function normalizeLooseKey(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+function bestProfileString(obj = {}, keys = []) {
+  for (const key of keys) {
+    const value = obj?.[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (value && typeof value === 'object') {
+      const nested = bestProfileString(value, ['url','secure_url','src','image','imageUrl','profileImage','headshot','photo']);
+      if (nested) return nested;
+    }
+  }
+  return '';
+}
+
+function profileImageUrl(profile = {}) {
+  return bestProfileString(profile, [
+    'image','imageUrl','imageURL','driverImage','driverImageUrl','profileImage','profileImageUrl',
+    'headshot','headshotUrl','photo','photoUrl','avatar','avatarUrl','cloudinaryUrl','url','secure_url'
+  ]);
+}
+
+function profileName(profile = {}) {
+  return bestProfileString(profile, ['name','driverName','fullName']) ||
+    `${bestProfileString(profile, ['firstName','givenName'])} ${bestProfileString(profile, ['lastName','familyName'])}`.trim();
+}
+
+function profileCode(profile = {}) {
+  return bestProfileString(profile, ['code','abbreviation','shortCode']).toLowerCase();
+}
+
+function buildProfileMap(profiles = []) {
+  const map = new Map();
+  profiles.forEach(profile => {
+    const name = profileName(profile);
+    const code = profileCode(profile);
+    const keys = [
+      profile.driverKey,
+      profile.slug,
+      profile.id,
+      profile._id,
+      code,
+      name,
+      normalizeDriverKey(name),
+      normalizeLooseKey(name)
+    ].filter(Boolean);
+    keys.forEach(key => map.set(String(key).toLowerCase(), profile));
+  });
+  return map;
+}
+
+function findProfileForDriver(driver = {}, profileMap = new Map()) {
+  const keys = [
+    driver.id,
+    normalizeDriverKey(driver.name),
+    normalizeLooseKey(driver.name),
+    driver.name,
+    String(driver.number || '')
+  ].filter(Boolean).map(k => String(k).toLowerCase());
+
+  for (const key of keys) {
+    if (profileMap.has(key)) return profileMap.get(key);
+  }
+
+  // Last-safe fallback: compare normalized names, but never change the driver grid count/order.
+  for (const profile of profileMap.values()) {
+    if (normalizeLooseKey(profileName(profile)) === normalizeLooseKey(driver.name)) return profile;
+  }
+  return null;
+}
+
+async function syncCloudinaryDriverImages() {
+  try {
+    const res = await fetch(AI_DRIVER_PROFILE_API, { cache: 'no-store' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Driver profile request failed');
+
+    const rawProfiles = data.data?.profiles || data.profiles || data.data || [];
+    const profiles = Array.isArray(rawProfiles) ? rawProfiles : [];
+    const profileMap = buildProfileMap(profiles);
+
+    ACTIVE_AI_DRIVERS = AI_DRIVERS.map(driver => {
+      const profile = findProfileForDriver(driver, profileMap);
+      const image = profileImageUrl(profile || {});
+      const team = bestProfileString(profile || {}, ['team','teamName']) || driver.team;
+      return {
+        ...driver,
+        image: image || driver.image,
+        team,
+        imageSource: image ? 'cloudinary-admin' : 'local-fallback'
+      };
+    });
+
+    selectedDriver = ACTIVE_AI_DRIVERS.find(d => d.id === selectedDriver?.id) || ACTIVE_AI_DRIVERS[0];
+    renderAll();
+
+    const loadedCount = ACTIVE_AI_DRIVERS.filter(d => d.imageSource === 'cloudinary-admin').length;
+    if (loadedCount) showToast(`Cloudinary driver images synced: ${loadedCount}/22`);
+  } catch (err) {
+    console.warn('AI Studio driver image sync unavailable:', err);
+    ACTIVE_AI_DRIVERS = AI_DRIVERS.map(d => ({ ...d, imageSource: 'local-fallback' }));
+  }
+}
+
+function driverImageHTML(driver = {}) {
+  const image = driver.image || '';
+  const fallback = initials(driver.name);
+  if (image && (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:image/'))) {
+    return `<img src="${escapeHtml(image)}" alt="${escapeHtml(driver.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span>${fallback}</span>'">`;
+  }
+  return `<span>${fallback}</span>`;
+}
+
 function renderDrivers(filter='') {
   const grid = $('#driver-grid');
   if(!grid) return;
   const q = filter.toLowerCase();
-  grid.innerHTML = AI_DRIVERS.filter(d => !q || d.name.toLowerCase().includes(q) || d.team.toLowerCase().includes(q)).map(d => `
+  grid.innerHTML = ACTIVE_AI_DRIVERS.filter(d => !q || d.name.toLowerCase().includes(q) || d.team.toLowerCase().includes(q)).map(d => `
     <button class="driver-card ${selectedDriver?.id===d.id?'on':''}" data-driver="${d.id}" style="--driver-accent:${d.accentColor}">
-      <div class="driver-img">${initials(d.name)}</div>
-      <strong>${d.name}</strong>
-      <small>${d.team} · #${d.number}</small>
-      <span class="driver-num">${d.number}</span>
+      <div class="driver-img ${d.imageSource === 'cloudinary-admin' ? 'has-cloudinary' : ''}">${driverImageHTML(d)}</div>
+      <strong>${escapeHtml(d.name)}</strong>
+      <small>${escapeHtml(d.team)} · #${escapeHtml(d.number)}</small>
+      <span class="driver-num">${escapeHtml(d.number)}</span>
     </button>
   `).join('');
   $$('[data-driver]').forEach(btn => btn.addEventListener('click', () => {
-    selectedDriver = AI_DRIVERS.find(d => d.id === btn.dataset.driver);
+    selectedDriver = ACTIVE_AI_DRIVERS.find(d => d.id === btn.dataset.driver);
     selectedRatio = selectedTemplate?.recommendedAspect || selectedRatio;
     renderAll();
   }));
@@ -902,6 +1038,8 @@ function buildPayload() {
     driverId: selectedDriver.id,
     driverName: selectedDriver.name,
     teamName: selectedDriver.team,
+    driverImage: selectedDriver.image || '',
+    driverImageSource: selectedDriver.imageSource || 'local-fallback',
     templateId: selectedTemplate.id,
     templateTitle: selectedTemplate.title,
     category: selectedTemplate.category,
@@ -963,7 +1101,7 @@ function generatePrompt() {
   if(!selectedDriver) return showToast('Please select a driver first.');
   if(!selectedTemplate) return showToast('Please choose a realistic template.');
   if(selectedTemplate.requiresUserPhoto && !uploadedPhotoName) {
-    showToast('This realistic fan-face template needs a fan photo.');
+    return showToast('This realistic fan-face template needs a fan photo.');
   }
   const credits = getCredits();
   if(credits < selectedTemplate.creditCost) return showToast('You need more PADDOX Credits.');
@@ -1058,4 +1196,5 @@ document.addEventListener('DOMContentLoaded', () => {
   renderFeatured();
   renderCreations();
   renderAll();
+  syncCloudinaryDriverImages();
 });
