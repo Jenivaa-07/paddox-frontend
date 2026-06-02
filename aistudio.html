@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>PADDOX — AI Fan Studio</title>
-  <link rel="stylesheet" href="aistudio.css?v=A4_11F"/>
+  <link rel="stylesheet" href="aistudio.css?v=A4_11H"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -118,7 +118,7 @@
           <div class="summary-card">
             <div class="summary-title">Generation Summary</div>
             <div id="summary-lines"></div>
-            <button class="generate-btn" id="generate-btn">Prepare Gemini Payload</button>
+            <button class="generate-btn" id="generate-btn">Generate with Gemini</button>
             <button class="copy-btn" id="copy-prompt-btn" disabled>Copy Sectioned Prompt</button>
           </div>
         </aside>
@@ -131,10 +131,11 @@
             <div class="preview-ratio" id="preview-ratio">4:5</div>
           </div>
           <div class="result-card">
-            <h3>Gemini-Ready Sectioned Prompt</h3>
-            <p id="result-status">Ready when your driver and template are selected.</p>
+            <h3>Gemini Output + Sectioned Prompt</h3>
+            <p id="result-status">Ready when your driver, template, and fan photo are selected.</p>
             <textarea id="final-prompt" readonly placeholder="Your sectioned Gemini-ready realistic prompt will appear here…"></textarea>
             <div class="result-actions">
+              <button id="download-generated-image" disabled>Download Image</button>
               <button id="download-text-prompt" disabled>Download TXT Prompt</button>
               <button id="download-payload" disabled>Download JSON Payload</button>
               <button id="copy-json-btn" disabled>Copy JSON</button>
@@ -181,6 +182,6 @@
   </footer>
 
   <div id="toast" class="toast"></div>
-  <script src="aistudio.js?v=A4_11F"></script>
+  <script src="aistudio.js?v=A4_11H"></script>
 </body>
 </html>

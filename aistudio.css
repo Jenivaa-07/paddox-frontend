@@ -46,3 +46,59 @@ a{text-decoration:none;color:inherit}button{cursor:pointer;font-family:inherit;b
 @media(max-width:1180px){.ai-hero-inner,.studio-grid{grid-template-columns:1fr}.ai-hero-showcase{height:360px}.preview-panel{position:relative;top:auto}.preview-frame{min-height:470px}.nav-inner{padding:0 24px}.nav-link{padding:8px 8px;font-size:.68rem;letter-spacing:1px}}
 @media(max-width:860px){.nav-links,.nav-cta-btn,.nav-search-btn,.nav-cart-btn{display:none}.hamburger{display:flex}.ai-hero-inner,.ai-main{padding-left:20px;padding-right:20px}.ai-title{font-size:4.2rem}.studio-shell,.template-showcase,.recent-creations,.credits-banner{padding:18px}.studio-top,.credits-banner{flex-direction:column}.form-grid,.result-actions{grid-template-columns:1fr}.upload-box{grid-template-columns:1fr}.poster-one{right:40px}.poster-two{left:0}.poster-three{display:none}.preview-frame{min-height:390px}.preview-driver{font-size:3.2rem}}
 @media(max-width:520px){.driver-grid,.template-grid{grid-template-columns:1fr}.ai-hero-showcase{display:none}.ai-hero{min-height:78vh}.ai-title{font-size:3.4rem}.ai-main{padding-bottom:40px}.nav-inner{padding:0 16px}.logo-text{font-size:1.55rem}.preview-frame{min-height:340px}.credits-banner .ai-primary-btn{width:100%;justify-content:center}}
+
+
+/* Phase A4.11H — Gemini live output preview */
+.preview-frame.has-generated-image{
+  min-height:520px;
+  overflow:hidden;
+  border-color:rgba(201,168,76,.35);
+  box-shadow:0 30px 90px rgba(0,0,0,.55),0 0 55px rgba(201,168,76,.12);
+}
+.generated-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:1;
+  filter:saturate(1.04) contrast(1.02);
+}
+.preview-frame.has-generated-image::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:linear-gradient(to top,rgba(0,0,0,.55),transparent 42%),linear-gradient(135deg,rgba(232,0,45,.12),transparent 35%);
+}
+.preview-frame.has-generated-image .preview-watermark,
+.preview-frame.has-generated-image .preview-driver,
+.preview-frame.has-generated-image .preview-template,
+.preview-frame.has-generated-image .preview-ratio{
+  z-index:3;
+  text-shadow:0 8px 24px rgba(0,0,0,.75);
+}
+.generate-btn.is-loading{
+  opacity:.82;
+  pointer-events:none;
+  position:relative;
+}
+.generate-btn.is-loading::after{
+  content:'';
+  width:14px;
+  height:14px;
+  border:2px solid rgba(255,255,255,.45);
+  border-top-color:#fff;
+  border-radius:50%;
+  margin-left:10px;
+  display:inline-block;
+  vertical-align:-2px;
+  animation:aiSpin .8s linear infinite;
+}
+@keyframes aiSpin{to{transform:rotate(360deg)}}
+.result-actions #download-generated-image:not(:disabled){
+  border-color:rgba(201,168,76,.55);
+  color:#f3d77c;
+  background:rgba(201,168,76,.08);
+}

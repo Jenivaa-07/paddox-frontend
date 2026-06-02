@@ -716,11 +716,58 @@ const RATIOS = [
 const AI_DRIVER_PROFILE_API = 'https://paddox-backend.onrender.com/api/fan/driver-profiles';
 const AI_F1_DRIVERS_API = 'https://paddox-backend.onrender.com/api/f1/drivers';
 
+const PADDOX_API_BASE = window.PADDOX_API_BASE || 'https://paddox-backend.onrender.com/api';
+const AI_STUDIO_GENERATE_API = `${PADDOX_API_BASE}/ai-studio/generate`;
+
+function getAccessToken() {
+  return window.TokenManager?.getAccess?.()
+    || localStorage.getItem('token')
+    || localStorage.getItem('paddox_access_token')
+    || localStorage.getItem('accessToken')
+    || '';
+}
+
+async function aiStudioAuthFetch(pathOrUrl, options = {}) {
+  const url = /^https?:\/\//i.test(pathOrUrl) ? pathOrUrl : `${PADDOX_API_BASE}${pathOrUrl}`;
+  const token = getAccessToken();
+  const sessionId = localStorage.getItem('paddox_session_id') || '';
+  const headers = options.headers || {};
+  const res = await fetch(url, {
+    credentials: 'include',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(sessionId ? { 'X-Paddox-Session-Id': sessionId } : {}),
+      ...headers
+    }
+  });
+  const responseSessionId = res.headers.get('X-Paddox-Session-Id');
+  if (responseSessionId) localStorage.setItem('paddox_session_id', responseSessionId);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === false) {
+    throw new Error(data.message || 'Request failed');
+  }
+  return data;
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Could not read uploaded image'));
+    reader.readAsDataURL(file);
+  });
+}
+
+
 let ACTIVE_AI_DRIVERS = AI_DRIVERS.map(d => ({ ...d, imageSource: 'initials-fallback' }));
 let selectedDriver = ACTIVE_AI_DRIVERS[0];
 let selectedTemplate = PROMPT_TEMPLATES.find(t => t.id === 'night_selfie_driver') || PROMPT_TEMPLATES[0];
 let selectedRatio = selectedTemplate.recommendedAspect || '4:5';
 let uploadedPhotoName = '';
+let uploadedPhotoDataUrl = '';
+let generatedImageUrl = '';
 let finalPayload = null;
 
 function $(s, root=document) { return root.querySelector(s); }
@@ -1377,26 +1424,107 @@ function setCredits(v) {
   localStorage.setItem('paddox_ai_credits', String(Math.max(0, v)));
 }
 
-function generatePrompt() {
+async function generatePrompt() {
   if(!selectedDriver) return showToast('Please select a driver first.');
   if(!selectedTemplate) return showToast('Please choose a realistic template.');
-  if(selectedTemplate.requiresUserPhoto && !uploadedPhotoName) {
+  if(selectedTemplate.requiresUserPhoto && !uploadedPhotoDataUrl) {
     return showToast('This realistic fan-face template needs a fan photo.');
   }
-  const credits = getCredits();
-  if(credits < selectedTemplate.creditCost) return showToast('You need more PADDOX Credits.');
-  finalPayload = buildPayload();
-  $('#final-prompt').value = finalPayload.prompt;
-  $('#result-status').textContent = 'Sectioned Gemini-ready prompt prepared. Selfie templates now include strict phone-selfie composition lock.';
-  $('#copy-prompt-btn').disabled = false;
-  $('#download-payload').disabled = false;
-  $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
-  $('#copy-json-btn') && ($('#copy-json-btn').disabled = false);
-  $('#save-creation').disabled = false;
-  setCredits(credits - selectedTemplate.creditCost);
-  renderPreview();
-  showToast('Gemini-ready payload prepared with selfie composition lock.');
+
+  const btn = $('#generate-btn');
+  const originalText = btn?.textContent || 'Generate with Gemini';
+  try {
+    finalPayload = buildPayload();
+    $('#final-prompt').value = finalPayload.prompt;
+
+    const localCredits = getCredits();
+    if(localCredits < selectedTemplate.creditCost) return showToast('You need more PADDOX Credits.');
+
+    if(btn) {
+      btn.disabled = true;
+      btn.textContent = 'Generating with Gemini...';
+      btn.classList.add('is-loading');
+    }
+
+    $('#result-status').textContent = 'Sending sectioned prompt and fan photo to Gemini. This can take a little time...';
+    showToast('Generating realistic PADDOX image...');
+
+    const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
+      method: 'POST',
+      body: JSON.stringify({
+        payload: finalPayload,
+        prompt: finalPayload.prompt,
+        photoDataUrl: uploadedPhotoDataUrl || '',
+        cost: selectedTemplate.creditCost,
+        aspectRatio: selectedRatio
+      })
+    });
+
+    const data = response.data || response;
+    const imageUrl = data.image?.url || data.image?.dataUri || data.poster?.image?.url || '';
+    if(!imageUrl) throw new Error('Gemini response did not include an image.');
+
+    generatedImageUrl = imageUrl;
+    renderGeneratedImage(imageUrl, data);
+    setCredits(Number(data.aiCredits ?? Math.max(0, localCredits - selectedTemplate.creditCost)));
+    renderPreview();
+
+    $('#result-status').textContent = `Gemini image generated successfully using ${data.model || 'Gemini image model'}.`;
+    $('#copy-prompt-btn').disabled = false;
+    $('#download-payload').disabled = false;
+    $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
+    $('#copy-json-btn') && ($('#copy-json-btn').disabled = false);
+    $('#save-creation').disabled = false;
+    $('#download-generated-image') && ($('#download-generated-image').disabled = false);
+
+    showToast('Gemini image ready.');
+  } catch (err) {
+    console.error('PADDOX Gemini generation failed:', err);
+    $('#result-status').textContent = err.message || 'Gemini generation failed. Check Render logs and API key.';
+    showToast(`Generation failed: ${err.message || 'Try again'}`);
+  } finally {
+    if(btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+      btn.classList.remove('is-loading');
+    }
+  }
 }
+
+function renderGeneratedImage(imageUrl, meta = {}) {
+  const frame = $('#preview-frame');
+  if(!frame) return;
+
+  let img = $('#generated-image');
+  if(!img) {
+    img = document.createElement('img');
+    img.id = 'generated-image';
+    img.className = 'generated-image';
+    img.alt = 'Generated PADDOX AI artwork';
+    frame.appendChild(img);
+  }
+  img.src = imageUrl;
+  frame.classList.add('has-generated-image');
+
+  const wm = frame.querySelector('.preview-watermark');
+  if(wm) wm.textContent = 'GEMINI OUTPUT';
+
+  const pd = $('#preview-driver');
+  const pt = $('#preview-template');
+  const pr = $('#preview-ratio');
+  if(pd) pd.textContent = selectedDriver?.name || 'Generated';
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · ${meta.providerMode || 'live-simple'}`;
+  if(pr) pr.textContent = selectedRatio;
+}
+
+function downloadGeneratedImage() {
+  if(!generatedImageUrl) return showToast('Generate an image first.');
+  const a = document.createElement('a');
+  a.href = generatedImageUrl;
+  a.download = `paddox-ai-${selectedDriver.id}-${selectedTemplate.id}.png`;
+  a.click();
+}
+
 
 function copyPrompt() {
   const txt = $('#final-prompt')?.value;
@@ -1465,14 +1593,23 @@ function renderAll() {
 
 function initUploads() {
   $('#upload-trigger')?.addEventListener('click', () => $('#fan-photo')?.click());
-  $('#fan-photo')?.addEventListener('change', e => {
+  $('#fan-photo')?.addEventListener('change', async e => {
     const file = e.target.files?.[0];
     if(!file) return;
     uploadedPhotoName = file.name;
+    uploadedPhotoDataUrl = '';
     const img = $('#photo-preview');
     img.src = URL.createObjectURL(file);
     img.style.display = 'block';
-    $('#upload-note').textContent = file.name;
+    $('#upload-note').textContent = `${file.name} — preparing reference...`;
+    try {
+      uploadedPhotoDataUrl = await fileToDataUrl(file);
+      $('#upload-note').textContent = `${file.name} — ready for Gemini`;
+      showToast('Fan photo ready for Gemini reference.');
+    } catch (err) {
+      $('#upload-note').textContent = 'Could not read the uploaded photo.';
+      showToast(err.message || 'Photo upload failed');
+    }
     renderSummary();
   });
 }
@@ -1486,6 +1623,7 @@ function initFormListeners() {
   $('#download-text-prompt')?.addEventListener('click', downloadTextPrompt);
   $('#copy-json-btn')?.addEventListener('click', copyPayloadJson);
   $('#save-creation')?.addEventListener('click', saveCreation);
+  $('#download-generated-image')?.addEventListener('click', downloadGeneratedImage);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
