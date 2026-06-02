@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11J.1 Puter Photo Reference Strict Mode
+   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11L Colab Hugging Face Free API Bridge
    ============================================================ */
 'use strict';
 
@@ -719,9 +719,6 @@ const AI_F1_DRIVERS_API = 'https://paddox-backend.onrender.com/api/f1/drivers';
 const PADDOX_API_BASE = window.PADDOX_API_BASE || 'https://paddox-backend.onrender.com/api';
 const AI_STUDIO_GENERATE_API = `${PADDOX_API_BASE}/ai-studio/generate`;
 const AI_STUDIO_CREDITS_API = `${PADDOX_API_BASE}/ai-studio/credits`;
-const PUTER_DEFAULT_PROVIDER = 'openai-image-generation';
-const PUTER_DEFAULT_MODEL = 'gpt-image-1-mini';
-const PUTER_DEFAULT_QUALITY = 'low';
 
 /* Phase A4.11H.1 — Real credits sync:
    Admin-added credits live in MongoDB. Do not trust browser/localStorage alone. */
@@ -769,11 +766,11 @@ function isQuotaErrorMessage(message = '', responseData = {}) {
   return text.includes('quota') ||
     text.includes('resource_exhausted') ||
     text.includes('free tier') ||
-    text.includes('generate_content_free_tier') ||
-    text.includes('gemini_quota_exceeded') ||
     text.includes('billing') ||
     text.includes('payment') ||
-    text.includes('credits');
+    text.includes('colab') ||
+    text.includes('ngrok') ||
+    text.includes('hugging face');
 }
 
 function handleProviderGenerationError(err) {
@@ -783,12 +780,12 @@ function handleProviderGenerationError(err) {
   if (Number.isFinite(credits)) setCredits(credits);
 
   const quota = isQuotaErrorMessage(err?.message, responseData);
-  const message = quota
-    ? 'AI image generation is currently unavailable. Your PADDOX Credits were not deducted.'
-    : (err?.message || 'AI image generation failed. Your PADDOX Credits were not deducted.');
+  const message = err?.message || (quota
+    ? 'Colab AI generation is temporarily unavailable. Your credits were not deducted.'
+    : 'Colab AI generation failed. Your credits were not deducted.');
 
   $('#result-status').textContent = message;
-  showToast(quota ? 'Provider unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+  showToast(quota ? 'Colab AI unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
 
   const frame = $('#preview-frame');
   frame?.classList.remove('has-generated-image');
@@ -796,7 +793,7 @@ function handleProviderGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = quota ? 'PROVIDER UNAVAILABLE' : 'PADDOX AI';
+  if (wm) wm.textContent = quota ? 'COLAB AI UNAVAILABLE' : 'PADDOX AI';
 
   return message;
 }
@@ -1374,9 +1371,9 @@ function buildPrompt() {
 function buildPayload() {
   const prompt = buildPrompt();
   return {
-    phase: 'A4.11J',
-    mode: 'puter-ready-realistic-prompt-payload',
-    providerTarget: 'puter-js-frontend',
+    phase: 'A4.11L',
+    mode: 'colab-hf-ready-realistic-prompt-payload',
+    providerTarget: 'colab-huggingface-free-api',
     promptVersion: 'paddox-realistic-v1.2-selfie-composition-lock',
     driver: {
       id: selectedDriver.id,
@@ -1515,92 +1512,6 @@ async function syncRealAiCredits(silent = false) {
   }
 }
 
-function getPuterRatioObject(ratio = '4:5') {
-  const [w, h] = String(ratio || '4:5').split(':').map(n => Number(n) || 1);
-  return { w, h };
-}
-
-async function ensurePuterSession() {
-  if (!window.puter || !window.puter.ai || typeof window.puter.ai.txt2img !== 'function') {
-    throw new Error('Puter.js did not load. Refresh the page and try again.');
-  }
-  try {
-    if (window.puter.auth && typeof window.puter.auth.isSignedIn === 'function') {
-      const signedIn = await window.puter.auth.isSignedIn();
-      if (!signedIn && typeof window.puter.auth.signIn === 'function') {
-        await window.puter.auth.signIn();
-      }
-    }
-  } catch (err) {
-    console.warn('Puter sign-in check warning:', err);
-  }
-}
-
-async function generateWithPuterFrontend(prompt) {
-  await ensurePuterSession();
-
-  const ratio = getPuterRatioObject(selectedRatio);
-  const attempts = [];
-  const requiresPhotoIdentity = Boolean(selectedTemplate?.requiresUserPhoto);
-
-  if (uploadedPhotoDataUrl) {
-    attempts.push({
-      label: 'puter-gemini-photo-reference',
-      identitySafe: true,
-      options: {
-        provider: 'gemini',
-        ratio,
-        quality: '1K',
-        input_images: [uploadedPhotoDataUrl]
-      }
-    });
-  }
-
-  /* Strict identity rule:
-     If the selected template requires a fan photo, do NOT fall back to text-only models.
-     Text-only image models may generate a nice image, but they cannot preserve the uploaded face reliably. */
-  if (!requiresPhotoIdentity) {
-    attempts.push({
-      label: 'puter-openai-default',
-      identitySafe: false,
-      options: {
-        provider: PUTER_DEFAULT_PROVIDER,
-        model: PUTER_DEFAULT_MODEL,
-        quality: PUTER_DEFAULT_QUALITY,
-        ratio
-      }
-    });
-  }
-
-  let lastError = null;
-  for (const attempt of attempts) {
-    try {
-      const imageElement = await window.puter.ai.txt2img(prompt, attempt.options);
-      const imageUrl = imageElement?.src || imageElement?.currentSrc || '';
-      if (!imageUrl) throw new Error('Puter did not return an image source.');
-      return {
-        imageUrl,
-        provider: attempt.options.provider || 'openai-image-generation',
-        model: attempt.options.model || 'default',
-        requestLabel: attempt.label,
-        usedPhotoReference: Boolean(attempt.options.input_images?.length),
-        identitySafe: Boolean(attempt.identitySafe)
-      };
-    } catch (err) {
-      lastError = err;
-      console.warn(`Puter attempt failed: ${attempt.label}`, err);
-    }
-  }
-
-  const finalError = new Error(
-    requiresPhotoIdentity
-      ? 'Puter photo-reference generation failed, so PADDOX stopped before using a text-only fallback. Your credits were not deducted.'
-      : (lastError?.message || 'Puter image generation failed.')
-  );
-  finalError.responseData = { data: { provider: 'puter', providerMode: 'puter-photo-strict' } };
-  throw finalError;
-}
-
 async function generatePrompt() {
   if(!selectedDriver) return showToast('Please select a driver first.');
   if(!selectedTemplate) return showToast('Please choose a realistic template.');
@@ -1616,6 +1527,8 @@ async function generatePrompt() {
 
     const liveCredits = await syncRealAiCredits(true);
     const creditsToCheck = Number.isFinite(Number(liveCredits)) ? Number(liveCredits) : getCredits();
+
+    /* H.1 fix: only block using synced backend credits. The backend is still the final authority. */
     if(Number.isFinite(creditsToCheck) && creditsToCheck < selectedTemplate.creditCost) {
       $('#result-status').textContent = `Backend AI Credits: ${creditsToCheck}. Required: ${selectedTemplate.creditCost}.`;
       return showToast('You need more PADDOX Credits. Refresh Account/Admin if you just changed credits.');
@@ -1627,11 +1540,8 @@ async function generatePrompt() {
       btn.classList.add('is-loading');
     }
 
-    $('#result-status').textContent = 'Generating with Puter.js frontend provider. PADDOX Credits will only deduct after success...';
-    showToast('Generating with Puter...');
-
-    const puterResult = await generateWithPuterFrontend(finalPayload.prompt);
-    if(!puterResult?.imageUrl) throw new Error('Puter did not return an image.');
+    $('#result-status').textContent = 'Generating with Colab Hugging Face bridge. If generation fails, no credits will be deducted...';
+    showToast('Generating with Colab AI...');
 
     const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
       method: 'POST',
@@ -1640,27 +1550,20 @@ async function generatePrompt() {
         prompt: finalPayload.prompt,
         photoDataUrl: uploadedPhotoDataUrl || '',
         cost: selectedTemplate.creditCost,
-        aspectRatio: selectedRatio,
-        generatedImageDataUrl: puterResult.imageUrl,
-        externalProvider: 'puter',
-        externalProviderMode: puterResult.identitySafe ? 'puter-photo-reference' : 'puter-frontend',
-        puterProvider: puterResult.provider,
-        puterModel: puterResult.model,
-        puterRequestLabel: puterResult.requestLabel,
-        puterIdentitySafe: Boolean(puterResult.identitySafe)
+        aspectRatio: selectedRatio
       })
     });
 
     const data = response.data || response;
-    const imageUrl = data.image?.url || data.image?.dataUri || puterResult.imageUrl || '';
-    if(!imageUrl) throw new Error('Puter response did not include an image.');
+    const imageUrl = data.image?.url || data.image?.dataUri || data.poster?.image?.url || '';
+    if(!imageUrl) throw new Error('Colab AI response did not include an image.');
 
     generatedImageUrl = imageUrl;
-    renderGeneratedImage(imageUrl, { ...data, puterProvider: puterResult.provider, puterModel: puterResult.model });
+    renderGeneratedImage(imageUrl, data);
     setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
     renderPreview();
 
-    $('#result-status').textContent = `PUTER image generated successfully using ${puterResult.provider}${puterResult.model ? ` / ${puterResult.model}` : ''}${puterResult.identitySafe ? ' with photo reference' : ''}.`;
+    $('#result-status').textContent = `COLAB AI image generated successfully using ${data.model || 'image model'}.`;
     $('#copy-prompt-btn').disabled = false;
     $('#download-payload').disabled = false;
     $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1668,7 +1571,7 @@ async function generatePrompt() {
     $('#save-creation').disabled = false;
     $('#download-generated-image') && ($('#download-generated-image').disabled = false);
 
-    showToast('Puter image ready.');
+    showToast('Colab AI image ready.');
   } catch (err) {
     console.error('PADDOX image generation failed:', err);
     handleProviderGenerationError(err);
@@ -1698,13 +1601,13 @@ function renderGeneratedImage(imageUrl, meta = {}) {
   frame.classList.add('has-generated-image');
 
   const wm = frame.querySelector('.preview-watermark');
-  if(wm) wm.textContent = 'PUTER OUTPUT';
+  if(wm) wm.textContent = 'COLAB AI OUTPUT';
 
   const pd = $('#preview-driver');
   const pt = $('#preview-template');
   const pr = $('#preview-ratio');
   if(pd) pd.textContent = selectedDriver?.name || 'Generated';
-  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · puter-photo-strict`;
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · colab-hf-bridge`;
   if(pr) pr.textContent = selectedRatio;
 }
 
@@ -1795,8 +1698,8 @@ function initUploads() {
     $('#upload-note').textContent = `${file.name} — preparing reference...`;
     try {
       uploadedPhotoDataUrl = await fileToDataUrl(file);
-      $('#upload-note').textContent = `${file.name} — ready for Puter test`;
-      showToast('Fan photo ready for Puter reference test.');
+      $('#upload-note').textContent = `${file.name} — ready for Colab AI bridge`;
+      showToast('Fan photo ready for Colab AI reference bridge.');
     } catch (err) {
       $('#upload-note').textContent = 'Could not read the uploaded photo.';
       showToast(err.message || 'Photo upload failed');
