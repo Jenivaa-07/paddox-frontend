@@ -2863,3 +2863,10 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
     min-height:42px!important;
   }
 }
+
+
+
+/* Phase A4.11F — AI Studio navbar icon/link */
+.nav-ai-icon{position:relative}
+.nav-ai-icon::before{content:'AI';font-family:var(--font-c, 'Barlow Condensed', sans-serif);font-size:.72rem;letter-spacing:.5px;font-weight:900;color:currentColor}
+.mob-icon.nav-ai-icon::before{content:'AI';font-family:var(--font-c, 'Barlow Condensed', sans-serif);font-size:.72rem;letter-spacing:.5px;font-weight:900;color:currentColor}

@@ -7089,3 +7089,10 @@ body.modal-open { overflow: hidden; }
   #sec-ai-studio{padding-top:34px;}
   .ai-poster-preview{max-width:360px;}
 }
+
+
+
+/* Phase A4.11F — AI Studio navbar icon/link */
+.nav-ai-icon{position:relative}
+.nav-ai-icon::before{content:'AI';font-family:var(--font-c, 'Barlow Condensed', sans-serif);font-size:.72rem;letter-spacing:.5px;font-weight:900;color:currentColor}
+.mob-icon.nav-ai-icon::before{content:'AI';font-family:var(--font-c, 'Barlow Condensed', sans-serif);font-size:.72rem;letter-spacing:.5px;font-weight:900;color:currentColor}
