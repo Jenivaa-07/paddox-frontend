@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11H.4 Gemini Only
+   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11I Pollinations Free Provider
    ============================================================ */
 'use strict';
 
@@ -768,7 +768,9 @@ function isQuotaErrorMessage(message = '', responseData = {}) {
     text.includes('free tier') ||
     text.includes('generate_content_free_tier') ||
     text.includes('gemini_quota_exceeded') ||
-    text.includes('all_image_providers_failed');
+    text.includes('all_image_providers_failed') ||
+    text.includes('pollinations') ||
+    text.includes('temporarily unavailable');
 }
 
 function handleProviderGenerationError(err) {
@@ -779,11 +781,11 @@ function handleProviderGenerationError(err) {
 
   const quota = isQuotaErrorMessage(err?.message, responseData);
   const message = quota
-    ? 'Gemini image generation is temporarily unavailable. Your credits were not deducted.'
-    : (err?.message || 'Gemini image generation failed. Your credits were not deducted.');
+    ? 'Pollinations free image generation is temporarily unavailable. Your credits were not deducted.'
+    : (err?.message || 'Pollinations image generation failed. Your credits were not deducted.');
 
   $('#result-status').textContent = message;
-  showToast(quota ? 'Gemini unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+  showToast(quota ? 'Pollinations unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
 
   const frame = $('#preview-frame');
   frame?.classList.remove('has-generated-image');
@@ -791,7 +793,7 @@ function handleProviderGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = quota ? 'GEMINI UNAVAILABLE' : 'PADDOX AI';
+  if (wm) wm.textContent = quota ? 'POLLINATIONS UNAVAILABLE' : 'PADDOX AI';
 
   return message;
 }
@@ -1370,8 +1372,8 @@ function buildPayload() {
   const prompt = buildPrompt();
   return {
     phase: 'A4.11G.2',
-    mode: 'gemini-ready-realistic-prompt-payload',
-    providerTarget: 'gemini-image-generation',
+    mode: 'pollinations-ready-realistic-prompt-payload',
+    providerTarget: 'pollinations-free-image-generation',
     promptVersion: 'paddox-realistic-v1.2-selfie-composition-lock',
     driver: {
       id: selectedDriver.id,
@@ -1538,8 +1540,8 @@ async function generatePrompt() {
       btn.classList.add('is-loading');
     }
 
-    $('#result-status').textContent = 'Generating with Gemini. If Gemini fails, no credits will be deducted...';
-    showToast('Generating with Gemini...');
+    $('#result-status').textContent = 'Generating with Pollinations free provider. If it fails, no credits will be deducted...';
+    showToast('Generating with Pollinations...');
 
     const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
       method: 'POST',
@@ -1554,14 +1556,14 @@ async function generatePrompt() {
 
     const data = response.data || response;
     const imageUrl = data.image?.url || data.image?.dataUri || data.poster?.image?.url || '';
-    if(!imageUrl) throw new Error('Gemini response did not include an image.');
+    if(!imageUrl) throw new Error('Pollinations response did not include an image.');
 
     generatedImageUrl = imageUrl;
     renderGeneratedImage(imageUrl, data);
     setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
     renderPreview();
 
-    $('#result-status').textContent = `GEMINI image generated successfully using ${data.model || 'image model'}.`;
+    $('#result-status').textContent = `POLLINATIONS image generated successfully using ${data.model || 'free image model'}.`;
     $('#copy-prompt-btn').disabled = false;
     $('#download-payload').disabled = false;
     $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1569,7 +1571,7 @@ async function generatePrompt() {
     $('#save-creation').disabled = false;
     $('#download-generated-image') && ($('#download-generated-image').disabled = false);
 
-    showToast('Gemini image ready.');
+    showToast('Pollinations image ready.');
   } catch (err) {
     console.error('PADDOX image generation failed:', err);
     handleProviderGenerationError(err);
@@ -1599,7 +1601,7 @@ function renderGeneratedImage(imageUrl, meta = {}) {
   frame.classList.add('has-generated-image');
 
   const wm = frame.querySelector('.preview-watermark');
-  if(wm) wm.textContent = 'GEMINI OUTPUT';
+  if(wm) wm.textContent = 'POLLINATIONS OUTPUT';
 
   const pd = $('#preview-driver');
   const pt = $('#preview-template');
