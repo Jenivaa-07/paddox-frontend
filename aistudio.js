@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11J Puter Frontend Provider Test
+   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11J.1 Puter Photo Reference Strict Mode
    ============================================================ */
 'use strict';
 
@@ -1541,10 +1541,12 @@ async function generateWithPuterFrontend(prompt) {
 
   const ratio = getPuterRatioObject(selectedRatio);
   const attempts = [];
+  const requiresPhotoIdentity = Boolean(selectedTemplate?.requiresUserPhoto);
 
   if (uploadedPhotoDataUrl) {
     attempts.push({
       label: 'puter-gemini-photo-reference',
+      identitySafe: true,
       options: {
         provider: 'gemini',
         ratio,
@@ -1554,15 +1556,21 @@ async function generateWithPuterFrontend(prompt) {
     });
   }
 
-  attempts.push({
-    label: 'puter-openai-default',
-    options: {
-      provider: PUTER_DEFAULT_PROVIDER,
-      model: PUTER_DEFAULT_MODEL,
-      quality: PUTER_DEFAULT_QUALITY,
-      ratio
-    }
-  });
+  /* Strict identity rule:
+     If the selected template requires a fan photo, do NOT fall back to text-only models.
+     Text-only image models may generate a nice image, but they cannot preserve the uploaded face reliably. */
+  if (!requiresPhotoIdentity) {
+    attempts.push({
+      label: 'puter-openai-default',
+      identitySafe: false,
+      options: {
+        provider: PUTER_DEFAULT_PROVIDER,
+        model: PUTER_DEFAULT_MODEL,
+        quality: PUTER_DEFAULT_QUALITY,
+        ratio
+      }
+    });
+  }
 
   let lastError = null;
   for (const attempt of attempts) {
@@ -1575,7 +1583,8 @@ async function generateWithPuterFrontend(prompt) {
         provider: attempt.options.provider || 'openai-image-generation',
         model: attempt.options.model || 'default',
         requestLabel: attempt.label,
-        usedPhotoReference: Boolean(attempt.options.input_images?.length)
+        usedPhotoReference: Boolean(attempt.options.input_images?.length),
+        identitySafe: Boolean(attempt.identitySafe)
       };
     } catch (err) {
       lastError = err;
@@ -1583,8 +1592,12 @@ async function generateWithPuterFrontend(prompt) {
     }
   }
 
-  const finalError = new Error(lastError?.message || 'Puter image generation failed.');
-  finalError.responseData = { data: { provider: 'puter', providerMode: 'puter-frontend' } };
+  const finalError = new Error(
+    requiresPhotoIdentity
+      ? 'Puter photo-reference generation failed, so PADDOX stopped before using a text-only fallback. Your credits were not deducted.'
+      : (lastError?.message || 'Puter image generation failed.')
+  );
+  finalError.responseData = { data: { provider: 'puter', providerMode: 'puter-photo-strict' } };
   throw finalError;
 }
 
@@ -1630,10 +1643,11 @@ async function generatePrompt() {
         aspectRatio: selectedRatio,
         generatedImageDataUrl: puterResult.imageUrl,
         externalProvider: 'puter',
-        externalProviderMode: 'puter-frontend',
+        externalProviderMode: puterResult.identitySafe ? 'puter-photo-reference' : 'puter-frontend',
         puterProvider: puterResult.provider,
         puterModel: puterResult.model,
-        puterRequestLabel: puterResult.requestLabel
+        puterRequestLabel: puterResult.requestLabel,
+        puterIdentitySafe: Boolean(puterResult.identitySafe)
       })
     });
 
@@ -1646,7 +1660,7 @@ async function generatePrompt() {
     setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
     renderPreview();
 
-    $('#result-status').textContent = `PUTER image generated successfully using ${puterResult.provider}${puterResult.model ? ` / ${puterResult.model}` : ''}.`;
+    $('#result-status').textContent = `PUTER image generated successfully using ${puterResult.provider}${puterResult.model ? ` / ${puterResult.model}` : ''}${puterResult.identitySafe ? ' with photo reference' : ''}.`;
     $('#copy-prompt-btn').disabled = false;
     $('#download-payload').disabled = false;
     $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1690,7 +1704,7 @@ function renderGeneratedImage(imageUrl, meta = {}) {
   const pt = $('#preview-template');
   const pr = $('#preview-ratio');
   if(pd) pd.textContent = selectedDriver?.name || 'Generated';
-  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · puter-frontend`;
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · puter-photo-strict`;
   if(pr) pr.textContent = selectedRatio;
 }
 
