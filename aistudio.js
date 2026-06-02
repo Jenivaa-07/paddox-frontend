@@ -617,7 +617,7 @@ const PROMPT_TEMPLATES = [
     "previewImage": "./assets/ai-templates/night-selfie-driver.jpg",
     "realism": "Hyper-realistic",
     "active": true,
-    "prompt": "Photorealistic nighttime selfie-style photo taken on a Formula 1 pit lane at night. Two people posing together for a close-up selfie photo, shot from slightly above as if one of them is holding the phone up. PERSON ON THE LEFT, taller fan: preserve the exact face, bone structure, jawline, nose shape, eye shape, eyebrow thickness, lip shape, skin tone, skin texture, forehead, cheekbones, chin, hairstyle, facial hair, and every visible accessory from the uploaded reference photo. The fan is slightly taller, smiling naturally showing teeth, one arm around the driver's shoulder, the other hand making a casual excited gesture. PERSON ON THE RIGHT, shorter: {driver_name}, recognizable as himself, slightly shorter than the fan, with {driver_face_description}. He has a natural relaxed smile and one arm around the fan's back. Both people are wearing the {team_name} 2026 Formula 1 racing suit: {racing_suit_description}. Background: nighttime Formula 1 pit lane, heavy gaussian blur, warm amber and orange bokeh lights from pit garage lamps and floodlights, blurred team equipment, monitors, mechanics, tyre blankets, pit wall screens, dark night sky above, {garage_description} faintly visible. Lighting: harsh overhead artificial pit lane lights, strong highlights on both faces, slight lens flare, smartphone selfie camera characteristics, slight wide-angle distortion, subtle built-in flash, natural skin texture, candid authentic iPhone-style photo, slight motion energy, genuine fan-and-driver moment."
+    "prompt": "TRUE SMARTPHONE SELFIE COMPOSITION LOCK: This must look like a real fan-held smartphone selfie, not a third-person professional portrait, not an editorial garage photo, and not a photographer-taken image. Create a photorealistic nighttime selfie-style photo on a Formula 1 pit lane at night. The taller fan on the left is holding the phone at arm's length, slightly above face level, using the front camera. Use tight close-up selfie framing from shoulders/chest upward, with both faces large and close to the lens, filling most of the frame. Add slight smartphone wide-angle distortion, imperfect candid crop, natural flash-lit skin, and casual selfie energy. Both people must look directly into the phone camera. PERSON ON THE LEFT, taller fan: preserve the exact face, bone structure, jawline, nose shape, eye shape, eyebrow thickness, lip shape, skin tone, skin texture, forehead, cheekbones, chin, hairstyle, facial hair, and every visible accessory from the uploaded reference photo. The fan is smiling naturally showing teeth, one arm around the driver's shoulder, and the selfie angle should imply the fan's other arm is extended holding the phone. PERSON ON THE RIGHT, slightly shorter driver: {driver_name}, recognizable as himself, with {driver_face_description}. He has a natural relaxed smile and one arm around the fan's back. Both people are wearing the {team_name} 2026 Formula 1 racing suit: {racing_suit_description}. Background: nighttime Formula 1 pit lane, heavily out of focus gaussian blur, warm amber and orange bokeh lights from pit garage lamps and floodlights, blurred team equipment, monitors, mechanics, tyre blankets, pit wall screens, dark night sky above, {garage_description} faintly visible. Lighting: harsh overhead artificial pit lane lights, strong highlights on both faces, slight lens flare, smartphone selfie camera characteristics, built-in flash subtly illuminating faces, natural skin texture, candid authentic iPhone-style photo, slight motion energy, genuine fan-and-driver moment. SELFIE NEGATIVE COMPOSITION RULES: do not show full-body posing, do not use a distant camera, do not create a formal portrait, do not make it look like a media-day photoshoot, do not center them like a magazine cover, do not place the camera several meters away, and do not make the driver/fan look unaware of the camera."
   },
   {
     "id": "vip_paddock_guest",
@@ -1208,6 +1208,22 @@ function buildRealismLines() {
   ];
 }
 
+function isSelfieTemplate() {
+  return selectedTemplate?.id === 'night_selfie_driver';
+}
+
+function buildSelfieCompositionLines() {
+  return [
+    'TRUE SELFIE LOCK: This must look like a real smartphone selfie captured by the taller fan, not a third-person editorial portrait.',
+    'Camera position: arm-length distance, slightly above face level, front-camera/iPhone-style perspective.',
+    'Framing: tight close-up from shoulders or chest upward; both faces must be large, near the lens, and fill most of the frame.',
+    'Eye contact: both the fan and selected driver must look directly into the phone camera.',
+    'Lens behavior: slight wide-angle selfie distortion, subtle built-in flash, candid imperfect crop, and natural handheld motion energy.',
+    'Body language: fan on the left is slightly taller, smiling, arm around the driver, with the other arm implied extended toward camera holding the phone; driver on the right is slightly shorter, relaxed smile, arm around fan.',
+    'Do NOT create a full-body garage portrait, distant photographer shot, media-day pose, magazine cover, or third-person documentary image.'
+  ];
+}
+
 function buildPrompt() {
   if(!selectedDriver || !selectedTemplate) return '';
   const fanName = formValue('#fan-name','the fan');
@@ -1242,10 +1258,15 @@ function buildPrompt() {
     promptSection('SCENE', corePrompt),
     promptSection('FAN IDENTITY LOCK', buildFanIdentityLines(fanName, fanTagline, fanCountry, customNumber)),
     promptSection('CURRENT GRID DRIVER IDENTITY', buildDriverIdentityLines()),
+    ...(isSelfieTemplate() ? [promptSection('SELFIE COMPOSITION LOCK', buildSelfieCompositionLines())] : []),
     promptSection('COMPOSITION AND OUTPUT', [
       `Use ${aspectLabel(selectedRatio)}.`,
-      'Keep the image premium, sharp, realistic, cinematic, and social-media-ready.',
-      'Use clean professional sports photography composition with believable human proportions.'
+      isSelfieTemplate()
+        ? 'Keep the image premium, sharp, realistic, candid, and phone-selfie believable.'
+        : 'Keep the image premium, sharp, realistic, cinematic, and social-media-ready.',
+      isSelfieTemplate()
+        ? 'Use authentic smartphone front-camera composition with believable human proportions.'
+        : 'Use clean professional sports photography composition with believable human proportions.'
     ]),
     promptSection('QUALITY AND REALISM LOCK', buildRealismLines())
   ];
@@ -1256,10 +1277,10 @@ function buildPrompt() {
 function buildPayload() {
   const prompt = buildPrompt();
   return {
-    phase: 'A4.11G.1',
+    phase: 'A4.11G.2',
     mode: 'gemini-ready-realistic-prompt-payload',
     providerTarget: 'gemini-image-generation',
-    promptVersion: 'paddox-realistic-v1.1-sectioned',
+    promptVersion: 'paddox-realistic-v1.2-selfie-composition-lock',
     driver: {
       id: selectedDriver.id,
       name: selectedDriver.name,
@@ -1310,7 +1331,7 @@ function buildPayload() {
     },
     prompt,
     promptFormat: 'sectioned-readable-text',
-    promptSections: ['request','scene','fan_identity_lock','current_grid_driver_identity','composition_and_output','quality_and_realism_lock'],
+    promptSections: isSelfieTemplate() ? ['request','scene','fan_identity_lock','current_grid_driver_identity','selfie_composition_lock','composition_and_output','quality_and_realism_lock'] : ['request','scene','fan_identity_lock','current_grid_driver_identity','composition_and_output','quality_and_realism_lock'],
     createdAt: new Date().toISOString()
   };
 }
@@ -1366,7 +1387,7 @@ function generatePrompt() {
   if(credits < selectedTemplate.creditCost) return showToast('You need more PADDOX Credits.');
   finalPayload = buildPayload();
   $('#final-prompt').value = finalPayload.prompt;
-  $('#result-status').textContent = 'Sectioned Gemini-ready prompt prepared with scene, fan identity lock, driver identity, composition, realism, and avoid rules.';
+  $('#result-status').textContent = 'Sectioned Gemini-ready prompt prepared. Selfie templates now include strict phone-selfie composition lock.';
   $('#copy-prompt-btn').disabled = false;
   $('#download-payload').disabled = false;
   $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1374,7 +1395,7 @@ function generatePrompt() {
   $('#save-creation').disabled = false;
   setCredits(credits - selectedTemplate.creditCost);
   renderPreview();
-  showToast('Sectioned Gemini-ready payload prepared.');
+  showToast('Gemini-ready payload prepared with selfie composition lock.');
 }
 
 function copyPrompt() {
