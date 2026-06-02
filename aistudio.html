@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>PADDOX — AI Fan Studio</title>
-  <link rel="stylesheet" href="aistudio.css?v=A4_11I_1_2_4"/>
+  <link rel="stylesheet" href="aistudio.css?v=A4_11J"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -75,7 +75,7 @@
         <div>
           <div class="section-label">GENERATOR</div>
           <h2>Build a realistic fan-driver image</h2>
-          <p>Choose driver, template, fan details and output ratio. PADDOX builds a clean generation prompt and payload ready for the image backend.</p>
+          <p>Choose driver, template, fan details and output ratio. PADDOX builds a clean generation prompt and payload ready for Puter.js frontend image testing.</p>
         </div>
         <div class="wallet-card"><span>PADDOX Credits</span><strong id="credit-balance">240</strong></div>
       </div>
@@ -131,9 +131,9 @@
             <div class="preview-ratio" id="preview-ratio">4:5</div>
           </div>
           <div class="result-card">
-            <h3>Gemini Output + Sectioned Prompt</h3>
+            <h3>Puter Output + Sectioned Prompt</h3>
             <p id="result-status">Ready when your driver, template, and fan photo are selected.</p>
-            <textarea id="final-prompt" readonly placeholder="Your sectioned Gemini-only realistic prompt will appear here…"></textarea>
+            <textarea id="final-prompt" readonly placeholder="Your sectioned Puter-ready realistic prompt will appear here…"></textarea>
             <div class="result-actions">
               <button id="download-generated-image" disabled>Download Image</button>
               <button id="download-text-prompt" disabled>Download TXT Prompt</button>
@@ -182,6 +182,7 @@
   </footer>
 
   <div id="toast" class="toast"></div>
-  <script src="aistudio.js?v=A4_11I_1_4"></script>
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="aistudio.js?v=A4_11J"></script>
 </body>
 </html>
