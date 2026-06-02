@@ -714,8 +714,9 @@ const RATIOS = [
 ];
 
 const AI_DRIVER_PROFILE_API = 'https://paddox-backend.onrender.com/api/fan/driver-profiles';
+const AI_F1_DRIVERS_API = 'https://paddox-backend.onrender.com/api/f1/drivers';
 
-let ACTIVE_AI_DRIVERS = AI_DRIVERS.map(d => ({ ...d, imageSource: 'local-fallback' }));
+let ACTIVE_AI_DRIVERS = AI_DRIVERS.map(d => ({ ...d, imageSource: 'initials-fallback' }));
 let selectedDriver = ACTIVE_AI_DRIVERS[0];
 let selectedTemplate = PROMPT_TEMPLATES.find(t => t.id === 'night_selfie_driver') || PROMPT_TEMPLATES[0];
 let selectedRatio = selectedTemplate.recommendedAspect || '4:5';
@@ -791,16 +792,110 @@ function escapeHtml(value = '') {
 
 function normalizeDriverKey(value = '') {
   return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-');
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }
 
 function normalizeLooseKey(value = '') {
   return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '');
+}
+
+function normalizeWords(value = '') {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const AI_DRIVER_ALIASES = {
+  george_russell: ['george russell', 'russell', '63', 'rus'],
+  kimi_antonelli: ['kimi antonelli', 'andrea kimi antonelli', 'antonelli', '12', 'ant'],
+  charles_leclerc: ['charles leclerc', 'leclerc', '16', 'lec'],
+  lewis_hamilton: ['lewis hamilton', 'hamilton', '44', 'ham'],
+  lando_norris: ['lando norris', 'norris', '4', 'nor'],
+  oscar_piastri: ['oscar piastri', 'piastri', '81', 'pia'],
+  max_verstappen: ['max verstappen', 'verstappen', '1', 'ver'],
+  isack_hadjar: ['isack hadjar', 'hadjar', '6', 'had'],
+  pierre_gasly: ['pierre gasly', 'gasly', '10', 'gas'],
+  franco_colapinto: ['franco colapinto', 'colapinto', '43', 'col'],
+  liam_lawson: ['liam lawson', 'lawson', '30', 'law'],
+  arvid_lindblad: ['arvid lindblad', 'lindblad', '41', 'lin'],
+  esteban_ocon: ['esteban ocon', 'ocon', '31', 'oco'],
+  oliver_bearman: ['oliver bearman', 'ollie bearman', 'bearman', '87', 'bea'],
+  carlos_sainz: ['carlos sainz', 'carlos sainz jr', 'sainz', '55', 'sai'],
+  alexander_albon: ['alexander albon', 'alex albon', 'albon', '23', 'alb'],
+  nico_hulkenberg: ['nico hulkenberg', 'nico hülkenberg', 'hulkenberg', 'hülkenberg', '27', 'hul'],
+  gabriel_bortoleto: ['gabriel bortoleto', 'bortoleto', '5', 'bor'],
+  sergio_perez: ['sergio perez', 'sergio pérez', 'checo perez', 'checo pérez', 'perez', 'pérez', '11', 'per'],
+  valtteri_bottas: ['valtteri bottas', 'bottas', '77', 'bot'],
+  fernando_alonso: ['fernando alonso', 'alonso', '14', 'alo'],
+  lance_stroll: ['lance stroll', 'stroll', '18', 'str']
+};
+
+function driverAliasKeys(driver = {}) {
+  const raw = [
+    driver.id,
+    driver.name,
+    driver.number,
+    ...(AI_DRIVER_ALIASES[driver.id] || [])
+  ];
+  const keys = new Set();
+  raw.filter(Boolean).forEach(value => {
+    keys.add(String(value).toLowerCase());
+    keys.add(normalizeDriverKey(value));
+    keys.add(normalizeLooseKey(value));
+    keys.add(normalizeWords(value));
+  });
+  return Array.from(keys).filter(Boolean);
+}
+
+function looksLikeImageUrl(value = '') {
+  const v = String(value || '').trim();
+  if (!v) return false;
+  if (v.startsWith('data:image/')) return true;
+  if (!/^https?:\/\//i.test(v)) return false;
+  return /cloudinary|res\.cloudinary|media\.formula1|formula1|\.png|\.jpe?g|\.webp|\.avif|image\/upload/i.test(v);
+}
+
+function firstImageUrlDeep(value, depth = 0) {
+  if (!value || depth > 6) return '';
+  if (typeof value === 'string') return looksLikeImageUrl(value) ? value.trim() : '';
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = firstImageUrlDeep(item, depth + 1);
+      if (found) return found;
+    }
+    return '';
+  }
+  if (typeof value === 'object') {
+    const priority = [
+      'secure_url','url','src','href','image','imageUrl','imageURL','driverImage','driverImageUrl',
+      'profileImage','profileImageUrl','headshot','headshotUrl','photo','photoUrl','avatar','avatarUrl',
+      'cloudinaryUrl','publicUrl','thumbnail','thumbnailUrl','picture','pictureUrl'
+    ];
+    for (const key of priority) {
+      const found = firstImageUrlDeep(value[key], depth + 1);
+      if (found) return found;
+    }
+    for (const child of Object.values(value)) {
+      const found = firstImageUrlDeep(child, depth + 1);
+      if (found) return found;
+    }
+  }
+  return '';
 }
 
 function bestProfileString(obj = {}, keys = []) {
@@ -808,7 +903,7 @@ function bestProfileString(obj = {}, keys = []) {
     const value = obj?.[key];
     if (typeof value === 'string' && value.trim()) return value.trim();
     if (value && typeof value === 'object') {
-      const nested = bestProfileString(value, ['url','secure_url','src','image','imageUrl','profileImage','headshot','photo']);
+      const nested = bestProfileString(value, ['name','fullName','driverName','teamName','constructorName','value','label']);
       if (nested) return nested;
     }
   }
@@ -816,19 +911,33 @@ function bestProfileString(obj = {}, keys = []) {
 }
 
 function profileImageUrl(profile = {}) {
-  return bestProfileString(profile, [
-    'image','imageUrl','imageURL','driverImage','driverImageUrl','profileImage','profileImageUrl',
-    'headshot','headshotUrl','photo','photoUrl','avatar','avatarUrl','cloudinaryUrl','url','secure_url'
-  ]);
+  return firstImageUrlDeep(profile);
 }
 
 function profileName(profile = {}) {
-  return bestProfileString(profile, ['name','driverName','fullName']) ||
+  return bestProfileString(profile, ['name','driverName','fullName','displayName']) ||
     `${bestProfileString(profile, ['firstName','givenName'])} ${bestProfileString(profile, ['lastName','familyName'])}`.trim();
 }
 
 function profileCode(profile = {}) {
-  return bestProfileString(profile, ['code','abbreviation','shortCode']).toLowerCase();
+  return bestProfileString(profile, ['code','abbreviation','shortCode','driverCode']).toLowerCase();
+}
+
+function collectProfilesFromResponse(data = {}) {
+  const buckets = [
+    data?.data?.profiles,
+    data?.profiles,
+    data?.data?.drivers,
+    data?.drivers,
+    data?.data?.standings,
+    data?.standings,
+    data?.data,
+    data
+  ];
+  for (const bucket of buckets) {
+    if (Array.isArray(bucket)) return bucket;
+  }
+  return [];
 }
 
 function buildProfileMap(profiles = []) {
@@ -836,15 +945,23 @@ function buildProfileMap(profiles = []) {
   profiles.forEach(profile => {
     const name = profileName(profile);
     const code = profileCode(profile);
+    const number = bestProfileString(profile, ['number','driverNumber','permanentNumber','carNumber']);
+    const familyName = bestProfileString(profile, ['lastName','familyName']);
+    const givenName = bestProfileString(profile, ['firstName','givenName']);
     const keys = [
       profile.driverKey,
       profile.slug,
       profile.id,
       profile._id,
       code,
+      number,
       name,
+      familyName,
+      `${givenName} ${familyName}`.trim(),
       normalizeDriverKey(name),
-      normalizeLooseKey(name)
+      normalizeLooseKey(name),
+      normalizeWords(name),
+      normalizeLooseKey(familyName)
     ].filter(Boolean);
     keys.forEach(key => map.set(String(key).toLowerCase(), profile));
   });
@@ -852,55 +969,71 @@ function buildProfileMap(profiles = []) {
 }
 
 function findProfileForDriver(driver = {}, profileMap = new Map()) {
-  const keys = [
-    driver.id,
-    normalizeDriverKey(driver.name),
-    normalizeLooseKey(driver.name),
-    driver.name,
-    String(driver.number || '')
-  ].filter(Boolean).map(k => String(k).toLowerCase());
-
+  const keys = driverAliasKeys(driver).map(k => String(k).toLowerCase());
   for (const key of keys) {
     if (profileMap.has(key)) return profileMap.get(key);
   }
 
-  // Last-safe fallback: compare normalized names, but never change the driver grid count/order.
+  const aliases = new Set(driverAliasKeys(driver).map(normalizeLooseKey));
   for (const profile of profileMap.values()) {
-    if (normalizeLooseKey(profileName(profile)) === normalizeLooseKey(driver.name)) return profile;
+    const name = profileName(profile);
+    const code = profileCode(profile);
+    const number = bestProfileString(profile, ['number','driverNumber','permanentNumber','carNumber']);
+    const profileKeys = [name, code, number, normalizeWords(name), normalizeLooseKey(name)];
+    if (profileKeys.some(k => aliases.has(normalizeLooseKey(k)))) return profile;
   }
   return null;
 }
 
-async function syncCloudinaryDriverImages() {
+async function fetchJsonSafe(url) {
   try {
-    const res = await fetch(AI_DRIVER_PROFILE_API, { cache: 'no-store' });
+    const res = await fetch(url, { cache: 'no-store' });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) throw new Error(data.message || 'Driver profile request failed');
-
-    const rawProfiles = data.data?.profiles || data.profiles || data.data || [];
-    const profiles = Array.isArray(rawProfiles) ? rawProfiles : [];
-    const profileMap = buildProfileMap(profiles);
-
-    ACTIVE_AI_DRIVERS = AI_DRIVERS.map(driver => {
-      const profile = findProfileForDriver(driver, profileMap);
-      const image = profileImageUrl(profile || {});
-      const team = bestProfileString(profile || {}, ['team','teamName']) || driver.team;
-      return {
-        ...driver,
-        image: image || driver.image,
-        team,
-        imageSource: image ? 'cloudinary-admin' : 'local-fallback'
-      };
-    });
-
-    selectedDriver = ACTIVE_AI_DRIVERS.find(d => d.id === selectedDriver?.id) || ACTIVE_AI_DRIVERS[0];
-    renderAll();
-
-    const loadedCount = ACTIVE_AI_DRIVERS.filter(d => d.imageSource === 'cloudinary-admin').length;
-    if (loadedCount) showToast(`Cloudinary driver images synced: ${loadedCount}/22`);
+    if (!res.ok || data.success === false) throw new Error(data.message || 'Request failed');
+    return data;
   } catch (err) {
-    console.warn('AI Studio driver image sync unavailable:', err);
-    ACTIVE_AI_DRIVERS = AI_DRIVERS.map(d => ({ ...d, imageSource: 'local-fallback' }));
+    console.warn('AI Studio image source unavailable:', url, err);
+    return null;
+  }
+}
+
+async function syncCloudinaryDriverImages() {
+  const profileData = await fetchJsonSafe(AI_DRIVER_PROFILE_API);
+  const f1Data = await fetchJsonSafe(AI_F1_DRIVERS_API);
+
+  const adminProfiles = collectProfilesFromResponse(profileData || {});
+  const f1Profiles = collectProfilesFromResponse(f1Data || {});
+
+  const adminMap = buildProfileMap(adminProfiles);
+  const f1Map = buildProfileMap(f1Profiles);
+
+  ACTIVE_AI_DRIVERS = AI_DRIVERS.map(driver => {
+    const adminProfile = findProfileForDriver(driver, adminMap);
+    const f1Profile = findProfileForDriver(driver, f1Map);
+
+    const adminImage = profileImageUrl(adminProfile || {});
+    const f1Image = profileImageUrl(f1Profile || {});
+    const image = adminImage || f1Image || '';
+
+    const team = bestProfileString(adminProfile || f1Profile || {}, ['team','teamName','constructor','constructorName']) || driver.team;
+
+    return {
+      ...driver,
+      image,
+      team,
+      imageSource: adminImage ? 'cloudinary-admin' : f1Image ? 'f1-api' : 'initials-fallback'
+    };
+  });
+
+  selectedDriver = ACTIVE_AI_DRIVERS.find(d => d.id === selectedDriver?.id) || ACTIVE_AI_DRIVERS[0];
+  renderAll();
+
+  const cloudinaryCount = ACTIVE_AI_DRIVERS.filter(d => d.imageSource === 'cloudinary-admin').length;
+  const apiCount = ACTIVE_AI_DRIVERS.filter(d => d.imageSource === 'f1-api').length;
+  if (cloudinaryCount || apiCount) {
+    showToast(`Driver images synced: ${cloudinaryCount} Cloudinary + ${apiCount} fallback`);
+  } else {
+    showToast('Driver profile images missing. Add them in Admin Fan Drivers.');
   }
 }
 
@@ -919,7 +1052,7 @@ function renderDrivers(filter='') {
   const q = filter.toLowerCase();
   grid.innerHTML = ACTIVE_AI_DRIVERS.filter(d => !q || d.name.toLowerCase().includes(q) || d.team.toLowerCase().includes(q)).map(d => `
     <button class="driver-card ${selectedDriver?.id===d.id?'on':''}" data-driver="${d.id}" style="--driver-accent:${d.accentColor}">
-      <div class="driver-img ${d.imageSource === 'cloudinary-admin' ? 'has-cloudinary' : ''}">${driverImageHTML(d)}</div>
+      <div class="driver-img ${d.imageSource === 'cloudinary-admin' ? 'has-cloudinary' : d.imageSource === 'f1-api' ? 'has-api-image' : ''}">${driverImageHTML(d)}</div>
       <strong>${escapeHtml(d.name)}</strong>
       <small>${escapeHtml(d.team)} · #${escapeHtml(d.number)}</small>
       <span class="driver-num">${escapeHtml(d.number)}</span>
