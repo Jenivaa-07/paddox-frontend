@@ -3855,45 +3855,8 @@ body {
 
 
 /* ============================================================
-   H1.6 — Home Content Cleanup + Fan Section Premium Polish
+   H1.7 — True Realtime Fan Section, No Hardcoded Fan Cards
    ============================================================ */
-
-/* Nav readability final balance */
-.nav-link {
-  font-size: .8rem !important;
-  letter-spacing: 2.05px !important;
-}
-
-.nav-links {
-  gap: 8px !important;
-}
-
-/* Avoid weak dummy product names feeling cheap */
-.pcard-name {
-  text-transform: none;
-  letter-spacing: .01em;
-}
-
-/* Product card premium details */
-.pcard-info {
-  min-height: 142px;
-}
-
-.pcard-name {
-  line-height: 1.25;
-}
-
-.pcard-foot {
-  align-items: flex-end;
-}
-
-/* Stronger fan section */
-.testimonials-section,
-#testimonials,
-#fan-stories {
-  position: relative;
-}
-
 .testi-grid,
 #testi-grid {
   display: grid !important;
@@ -3946,6 +3909,17 @@ body {
   font-weight: 800;
 }
 
+.fan-card-type::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: #21f59b;
+  box-shadow: 0 0 14px rgba(33,245,155,.55);
+}
+
 .fan-card-rank {
   font-family: var(--font-tech);
   color: rgba(255,255,255,.26);
@@ -3953,34 +3927,11 @@ body {
   font-weight: 800;
 }
 
-.testi-stars {
-  color: var(--gold);
-  letter-spacing: 3px;
-  margin-bottom: 14px;
-}
-
 .testi-text {
   min-height: 78px;
   font-size: .88rem !important;
   line-height: 1.65 !important;
   color: rgba(255,255,255,.78);
-}
-
-.testi-author {
-  margin-top: 20px;
-}
-
-.testi-avatar {
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255,255,255,.20), transparent 35%),
-    rgba(232,0,45,.16) !important;
-  border: 1px solid rgba(232,0,45,.45);
-  color: #fff;
-}
-
-.testi-loc {
-  color: rgba(255,255,255,.50) !important;
-  font-size: .68rem !important;
 }
 
 .testi-badge {
@@ -3995,52 +3946,21 @@ body {
   font-size: .62rem;
   letter-spacing: 1.8px;
   text-transform: uppercase;
+  text-decoration: none;
 }
 
-/* Footer stronger but still clean */
-.footer {
-  background:
-    radial-gradient(circle at 20% 0%, rgba(232,0,45,.08), transparent 28%),
-    #030303;
+.real-empty-card {
+  grid-column: 1 / -1;
+  min-height: 190px;
 }
 
-.footer-logo {
-  margin-bottom: 18px;
+.testi-card::before {
+  content: none !important;
 }
 
-.footer-desc {
-  max-width: 280px;
-  line-height: 1.75 !important;
-}
-
-.footer-socials a {
-  transition: transform .25s ease, border-color .25s ease, background .25s ease;
-}
-
-.footer-socials a:hover {
-  transform: translateY(-3px);
-  border-color: rgba(232,0,45,.55);
-  background: rgba(232,0,45,.08);
-}
-
-/* Final newsletter balance */
-.newsletter-inner {
-  max-width: 760px;
-}
-
-/* Mobile fan section */
 @media (max-width: 960px) {
   .testi-grid,
   #testi-grid {
     grid-template-columns: 1fr;
-  }
-
-  .fan-voice-card,
-  .testi-card {
-    min-height: 210px;
-  }
-
-  .nav-link {
-    font-size: .72rem !important;
   }
 }

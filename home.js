@@ -167,28 +167,6 @@ function homeMoney(value) {
   return `₹${Number(value || 0).toLocaleString('en-IN')}`;
 }
 
-function cleanPremiumProductName(name = '', p = {}) {
-  const raw = safeText(name, '').trim();
-  const weakNames = new Set(['hello', 'test', 'demo', 'sample', 'product', 'new product', 'untitled']);
-  if (raw && !weakNames.has(raw.toLowerCase())) return raw;
-
-  const team = safeText(p.team, 'PADDOX');
-  const category = safeText(p.category || p.cat, 'Merch').toLowerCase();
-
-  if (category.includes('poster')) return `${team} Race Poster`;
-  if (category.includes('collect')) return `${team} Collectible Drop`;
-  if (category.includes('access')) return `${team} Performance Accessory`;
-  if (category.includes('shirt') || category.includes('apparel') || category.includes('tee') || category.includes('hoodie')) return `${team} Teamwear Drop`;
-  return `${team} Premium Drop`;
-}
-
-function cleanPremiumProductDesc(desc = '', p = {}) {
-  const raw = safeText(desc, '').trim();
-  if (raw && !['test', 'demo', 'sample', 'hello'].includes(raw.toLowerCase())) return raw;
-  const team = safeText(p.team, 'PADDOX');
-  return `Premium ${team} inspired PADDOX merchandise built for race-week fans.`;
-}
-
 function productEmoji(category = '') {
   const c = String(category || '').toLowerCase();
   if (c.includes('apparel') || c.includes('shirt') || c.includes('hoodie')) return '👕';
@@ -219,10 +197,9 @@ function normalizeHomeProduct(p = {}) {
     ? (p.images[0]?.url || p.images[0] || '')
     : (p.image || '');
   const price = Number(p.effectivePrice || p.salePrice || p.price || 0);
-  const cleanName = cleanPremiumProductName(p.name, p);
   return {
     id: p._id || p.id,
-    name: cleanName,
+    name: safeText(p.name, 'Paddox Product'),
     team: safeText(p.team, 'PADDOX'),
     cat: safeText(p.category, 'merch'),
     price,
@@ -231,7 +208,7 @@ function normalizeHomeProduct(p = {}) {
     emoji: safeText(p.emoji, productEmoji(p.category)),
     image,
     gradient: 'linear-gradient(135deg,#111,#1a1a1a)',
-    desc: cleanPremiumProductDesc(p.shortDesc || p.description, p),
+    desc: safeText(p.shortDesc || p.description, 'Premium PADDOX merchandise.'),
   };
 }
 
@@ -522,79 +499,73 @@ function fanDateLabel(value = '') {
   }
 }
 
-function buildPremiumFanCards(posts = [], leaders = []) {
+function buildRealtimeFanCards(posts = [], leaders = []) {
   const cards = [];
+  const used = new Set();
 
-  posts.slice(0, 3).forEach(post => {
-    const name = fanDisplayName(post);
-    const text = safeText(post.text || post.content || post.message, 'Shared a new PADDOX fan moment from the community.');
-    cards.push({
-      type: 'Live Post',
-      name,
-      initials: fanInitials(name),
-      text,
-      meta: fanDateLabel(post.createdAt),
-      badge: 'Live Fan Hub',
-      points: fanPointsFrom(post),
+  posts
+    .filter(post => safeText(post.text || post.content || post.message, ''))
+    .slice(0, 3)
+    .forEach(post => {
+      const name = fanDisplayName(post);
+      const text = safeText(post.text || post.content || post.message, '');
+      const key = `post:${post._id || post.id || text}:${name}`.toLowerCase();
+      if (used.has(key)) return;
+      used.add(key);
+
+      cards.push({
+        type: 'Live Post',
+        name,
+        initials: fanInitials(name),
+        text,
+        meta: fanDateLabel(post.createdAt),
+        badge: 'Live Fan Hub'
+      });
     });
-  });
 
-  leaders.slice(0, 3).forEach((leader, index) => {
-    if (cards.length >= 3) return;
-    const name = fanDisplayName(leader);
-    const points = fanPointsFrom(leader);
-    cards.push({
-      type: index === 0 ? 'Top Fan' : 'Fan Points',
-      name,
-      initials: fanInitials(name),
-      text: points
-        ? `${name} is climbing the PADDOX leaderboard with ${points.toLocaleString('en-IN')} Fan Points.`
-        : `${name} is active in the PADDOX Fan Hub.`,
-      meta: points ? `${points.toLocaleString('en-IN')} Fan Points` : 'Leaderboard synced',
-      badge: index === 0 ? 'Top Fan' : 'Leaderboard',
-      points,
+  leaders
+    .filter(Boolean)
+    .slice(0, 3)
+    .forEach((leader, index) => {
+      if (cards.length >= 3) return;
+      const name = fanDisplayName(leader);
+      const points = fanPointsFrom(leader);
+      const key = `leader:${name}:${points}`.toLowerCase();
+      if (used.has(key)) return;
+      used.add(key);
+
+      cards.push({
+        type: index === 0 ? 'Top Fan' : 'Leaderboard',
+        name,
+        initials: fanInitials(name),
+        text: points
+          ? `${name} is climbing the PADDOX leaderboard with ${points.toLocaleString('en-IN')} Fan Points.`
+          : `${name} is active in the PADDOX Fan Hub.`,
+        meta: points ? `${points.toLocaleString('en-IN')} Fan Points` : 'Leaderboard synced',
+        badge: index === 0 ? 'Top Fan' : 'Fan Points'
+      });
     });
-  });
-
-  const fallback = [
-    {
-      type: 'Polls',
-      name: 'Race Predictor',
-      initials: 'RP',
-      text: 'Vote in fan polls, predict race outcomes and climb the PADDOX leaderboard.',
-      meta: 'Earn Fan Points',
-      badge: 'Fan Hub',
-      points: 0,
-    },
-    {
-      type: 'Trivia',
-      name: 'Pit Wall Quiz',
-      initials: 'PQ',
-      text: 'Play motorsport trivia and prove your racing knowledge every week.',
-      meta: 'Live Challenges',
-      badge: 'Trivia',
-      points: 0,
-    },
-    {
-      type: 'Community',
-      name: 'Fan Feed',
-      initials: 'FF',
-      text: 'Share posts, react to race moments and connect with the PADDOX crew.',
-      meta: 'Community Live',
-      badge: 'Fan Feed',
-      points: 0,
-    }
-  ];
-
-  fallback.forEach(item => {
-    if (cards.length < 3) cards.push(item);
-  });
 
   return cards.slice(0, 3);
 }
 
-function renderPremiumFanCards(grid, cards = []) {
+function renderRealtimeFanCards(grid, cards = []) {
   if (!grid) return;
+
+  if (!cards.length) {
+    grid.innerHTML = `
+      <div class="home-empty-card fan-empty-card real-empty-card reveal-up">
+        <div class="empty-icon" aria-hidden="true"></div>
+        <div>
+          <h3>No live fan activity yet</h3>
+          <p>Real Fan Hub posts, leaderboard users and fan-point activity will appear here automatically once fans start using PADDOX.</p>
+          <a href="fanhub.html" class="empty-cta">Open Fan Hub →</a>
+        </div>
+      </div>`;
+    initRevealObserver(grid.querySelectorAll('.reveal-up'));
+    return;
+  }
+
   grid.innerHTML = cards.map((card, i) => `
     <div class="testi-card fan-voice-card reveal-up delay-${i + 1}">
       <div class="fan-card-topline">
@@ -622,27 +593,28 @@ async function loadHomeFanStories() {
   if (!grid) return;
   try {
     const [feedData, leaderboardData] = await Promise.allSettled([
-      PaddoxAPI.fan.getFeed(),
-      PaddoxAPI.fan.leaderboard(),
+      PaddoxAPI.fan.getFeed({ t: Date.now() }),
+      PaddoxAPI.fan.leaderboard({ t: Date.now() }),
     ]);
+
     const posts = feedData.value?.data?.posts || feedData.value?.data?.feed || feedData.value?.posts || [];
     const leaders = leaderboardData.value?.data?.leaderboard || leaderboardData.value?.data || [];
-    HOME_REALTIME_STATE.fanCount = Math.max(uniqueFanCount(posts, leaders), Array.isArray(leaders) ? leaders.length : 0);
-    HOME_REALTIME_STATE.topFan = Array.isArray(leaders) && leaders.length ? leaders[0] : null;
-    HOME_REALTIME_STATE.latestPost = Array.isArray(posts) && posts.length ? posts[0] : null;
+    const safePosts = Array.isArray(posts) ? posts : [];
+    const safeLeaders = Array.isArray(leaders) ? leaders : [];
+
+    HOME_REALTIME_STATE.fanCount = Math.max(uniqueFanCount(safePosts, safeLeaders), safeLeaders.length);
+    HOME_REALTIME_STATE.topFan = safeLeaders.length ? safeLeaders[0] : null;
+    HOME_REALTIME_STATE.latestPost = safePosts.length ? safePosts[0] : null;
+
     const fanEl = document.getElementById('home-fan-count');
     if (fanEl) fanEl.classList.remove('is-loading');
     updateHomeFanStat(HOME_REALTIME_STATE.fanCount);
     renderHeroLiveCards();
 
-    const cards = buildPremiumFanCards(
-      Array.isArray(posts) ? posts : [],
-      Array.isArray(leaders) ? leaders : []
-    );
-    renderPremiumFanCards(grid, cards);
+    renderRealtimeFanCards(grid, buildRealtimeFanCards(safePosts, safeLeaders));
   } catch (err) {
     console.warn('Fan stories unavailable', err);
-    renderPremiumFanCards(grid, buildPremiumFanCards([], []));
+    renderRealtimeFanCards(grid, []);
   }
 }
 
@@ -1116,7 +1088,7 @@ function isApparelProduct(product = {}) {
 }
 
 function renderFanEmptyState(grid, title, message) {
-  renderPremiumFanCards(grid, buildPremiumFanCards([], []));
+  renderRealtimeFanCards(grid, []);
 }
 
 /* ══════════════════════════════════════
@@ -1791,4 +1763,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (content) content.style.transform = '';
   if (liveCards) liveCards.style.transform = '';
   if (stats) stats.style.transform = '';
+});
+
+
+/* H1.7 — true realtime refresh: no hardcoded fan cards */
+document.addEventListener('DOMContentLoaded', () => {
+  setInterval(() => {
+    if (typeof loadHomeFanStories === 'function') loadHomeFanStories();
+  }, 45000);
 });
