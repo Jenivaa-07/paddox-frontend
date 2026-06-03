@@ -3153,3 +3153,323 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
     animation: none !important;
   }
 }
+
+
+/* ============================================================
+   H1.4 — Formula 1 Font System + UI Density Polish
+   IMPORTANT:
+   Add your legally available font files here:
+   frontend/assets/fonts/Formula1-Regular.woff2
+   frontend/assets/fonts/Formula1-Bold.woff2
+   frontend/assets/fonts/Formula1-Wide.woff2
+   frontend/assets/fonts/Formula1-Black.woff2
+   ============================================================ */
+
+@font-face {
+  font-family: 'PaddoxF1Regular';
+  src: url('assets/fonts/Formula1-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Bold';
+  src: url('assets/fonts/Formula1-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Wide';
+  src: url('assets/fonts/Formula1-Wide.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Black';
+  src: url('assets/fonts/Formula1-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-display: 'PaddoxF1Black', 'PaddoxF1Wide', 'Bebas Neue', sans-serif;
+  --font-condensed: 'PaddoxF1Bold', 'Barlow Condensed', sans-serif;
+  --font-body: 'PaddoxF1Regular', 'Inter', sans-serif;
+}
+
+/* Formula-style typography reset */
+body {
+  font-family: var(--font-body);
+  letter-spacing: .01em;
+}
+
+.logo-text,
+.hero-h1,
+.section-title,
+.cs-name,
+.cd-num,
+.stat-num,
+.quote-text,
+.exp-title,
+.pcard-title,
+.newsletter-title {
+  font-family: var(--font-display);
+  letter-spacing: clamp(1px, .18vw, 3px);
+}
+
+.nav-link,
+.mob-link,
+.nav-cta-btn,
+.btn-primary,
+.btn-outline,
+.section-label,
+.cs-label,
+.cs-chip,
+.stat-sep,
+.stat-label,
+.ticker-label,
+.ticker-text,
+.cd-lbl,
+.see-all,
+.exp-link,
+.pcard-cat,
+.pcard-team,
+.footer-title {
+  font-family: var(--font-condensed);
+}
+
+/* Make F1-style font breathe better */
+.hero-h1 {
+  line-height: .84;
+  letter-spacing: clamp(1px, .2vw, 4px);
+}
+
+.logo-text {
+  letter-spacing: 7px;
+}
+
+.nav-link {
+  letter-spacing: 2.4px;
+  font-size: .72rem;
+}
+
+.hero-sub {
+  max-width: 560px;
+  font-size: 1rem;
+  line-height: 1.9;
+  color: rgba(255,255,255,.66);
+}
+
+.section-title {
+  line-height: .9;
+}
+
+.section-label {
+  letter-spacing: 4.5px;
+}
+
+/* UI density polish */
+.section {
+  padding: 96px 0;
+}
+
+.section-head {
+  margin-bottom: 44px;
+}
+
+.products-grid {
+  gap: 18px;
+}
+
+.pcard {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+    var(--dark2);
+}
+
+.pcard-info {
+  padding-top: 20px;
+}
+
+.pcard-title {
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.pcard-price {
+  margin-top: 10px;
+}
+
+.home-grid-strip-section {
+  padding-top: 82px;
+  padding-bottom: 86px;
+}
+
+.quote-inner {
+  max-width: 760px;
+  border: 1px solid rgba(232,0,45,.24);
+  box-shadow:
+    0 28px 90px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.quote-text {
+  font-size: clamp(1.5rem, 2.45vw, 2.45rem);
+  line-height: 1.34;
+}
+
+/* What Fans Say stronger */
+.testi-grid,
+#testi-grid {
+  min-height: 180px;
+}
+
+.testi-card {
+  border: 1px solid rgba(232,0,45,.18);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(232,0,45,.12), transparent 38%),
+    linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+    rgba(12,12,12,.92);
+  box-shadow: 0 22px 60px rgba(0,0,0,.38);
+}
+
+.testi-card::before {
+  content: 'FAN VOICE';
+  display: inline-block;
+  margin-bottom: 12px;
+  font-family: var(--font-condensed);
+  font-size: .58rem;
+  letter-spacing: 3px;
+  color: var(--red);
+}
+
+/* Newsletter premium final block */
+.newsletter-inner {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(232,0,45,.16), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.015)),
+    rgba(10,10,10,.94);
+  border: 1px solid rgba(232,0,45,.25);
+  box-shadow: 0 30px 100px rgba(0,0,0,.5);
+}
+
+.newsletter-form input,
+.newsletter-form button {
+  font-family: var(--font-condensed);
+  letter-spacing: 1.8px;
+}
+
+/* Footer density */
+.footer {
+  border-top: 1px solid rgba(232,0,45,.12);
+}
+
+.footer-logo,
+.footer-title {
+  letter-spacing: 3px;
+}
+
+.footer-link {
+  transition: color .25s ease, transform .25s ease;
+}
+
+.footer-link:hover {
+  transform: translateX(3px);
+}
+
+/* Better fallback if font files are missing */
+@supports not (font-variation-settings: normal) {
+  body { text-rendering: geometricPrecision; }
+}
+
+@media (max-width: 768px) {
+  .logo-text { letter-spacing: 5px; }
+  .hero-h1 { letter-spacing: 1px; }
+  .section { padding: 78px 0; }
+  .quote-text { font-size: 1.35rem; }
+}
+
+
+/* ============================================================
+   H1.4.1 — Uploaded Formula1 TTF Font Path Fix
+   Place the uploaded font files in:
+   frontend/assets/fonts/
+   ============================================================ */
+@font-face {
+  font-family: 'PaddoxF1Regular';
+  src: url('assets/fonts/Formula1-Regular-1.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Bold';
+  src: url('assets/fonts/Formula1-Bold_web.ttf') format('truetype'),
+       url('assets/fonts/Formula1-Bold-4.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Wide';
+  src: url('assets/fonts/Formula1-Wide.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Black';
+  src: url('assets/fonts/Formula1-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Italic';
+  src: url('assets/fonts/Formula1-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Force uploaded Formula1 fonts to override previous woff2 declarations */
+:root {
+  --font-display: 'PaddoxF1Black', 'PaddoxF1Wide', 'Bebas Neue', sans-serif;
+  --font-condensed: 'PaddoxF1Bold', 'Barlow Condensed', sans-serif;
+  --font-body: 'PaddoxF1Regular', 'Inter', sans-serif;
+}
+
+.hero-eyebrow,
+.section-label,
+.cs-label,
+.pcard-cat,
+.exp-link,
+.see-all,
+.footer-title {
+  font-family: 'PaddoxF1Bold', var(--font-condensed);
+}
+
+.hero-sub,
+.pcard-desc,
+.exp-desc,
+.quote-team,
+.footer-desc,
+.newsletter-sub {
+  font-family: 'PaddoxF1Regular', var(--font-body);
+}
+
+.h1-accent,
+.accent,
+.logo-x {
+  font-family: 'PaddoxF1Black', var(--font-display);
+}
