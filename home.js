@@ -2150,3 +2150,215 @@ function initH3AnimeCounters() {
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initH3LiquidGlassAnime, 80);
 });
+
+
+/* ============================================================
+   H3.1 — Signature Interactive Home Upgrade
+   Nav indicator + SVG track motion + quote carousel polish
+   ============================================================ */
+function initH31SignatureUpgrade() {
+  initH31NavIndicator();
+  initH31RaceControl();
+  initH31QuoteProgress();
+  initH31WordMotion();
+}
+
+function initH31NavIndicator() {
+  const nav = document.getElementById('nav-links') || document.querySelector('.nav-links');
+  const indicator = document.getElementById('nav-active-indicator');
+  if (!nav || !indicator) return;
+
+  const links = [...nav.querySelectorAll('.nav-link')];
+  const active = links.find(a => a.classList.contains('active')) || links[0];
+
+  function moveTo(el, instant = false) {
+    if (!el) return;
+    const navRect = nav.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
+    const x = rect.left - navRect.left + rect.width / 2;
+    indicator.classList.add('is-ready');
+
+    if (typeof window.anime === 'function' && !instant) {
+      window.anime({
+        targets: indicator,
+        translateX: x - 22,
+        width: Math.max(36, rect.width * 0.72),
+        duration: 420,
+        easing: 'easeOutExpo'
+      });
+    } else {
+      indicator.style.transform = `translateX(${x - 22}px)`;
+      indicator.style.width = `${Math.max(36, rect.width * 0.72)}px`;
+    }
+  }
+
+  moveTo(active, true);
+
+  links.forEach(link => {
+    link.addEventListener('mouseenter', () => moveTo(link));
+    link.addEventListener('focus', () => moveTo(link));
+  });
+
+  nav.addEventListener('mouseleave', () => moveTo(active));
+  window.addEventListener('resize', () => moveTo(active, true), { passive: true });
+}
+
+function h31SafeText(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text && text !== '[object Object]' ? text : fallback;
+}
+
+function h31RaceName(race = {}) {
+  return h31SafeText(race.name || race.raceName || race.grandPrix || race.eventName, 'Next Grand Prix');
+}
+
+function h31RaceMeta(race = {}) {
+  const circuit = h31SafeText(race.circuit || race.Circuit?.circuitName || race.circuitName, '');
+  const location = h31SafeText(race.location || race.locality || race.country || race.Circuit?.Location?.country, '');
+  return [circuit, location].filter(Boolean).join(' · ') || 'Live calendar sync';
+}
+
+function h31LeaderName(standings = []) {
+  const first = Array.isArray(standings) ? standings[0] : null;
+  if (!first) return 'Live Standings';
+  const driver = first.driver || first.Driver || first;
+  const given = h31SafeText(driver.givenName || driver.firstName, '');
+  const family = h31SafeText(driver.familyName || driver.lastName, '');
+  return h31SafeText(driver.name || driver.fullName || `${given} ${family}`.trim() || first.name, 'Championship Leader');
+}
+
+function updateH31RaceControlData() {
+  const race = HOME_F1?.nextRace || (Array.isArray(HOME_F1?.schedule) ? HOME_F1.schedule[0] : null) || {};
+  const name = h31RaceName(race);
+  const meta = h31RaceMeta(race);
+  const leader = h31LeaderName(HOME_F1?.standings || []);
+
+  const nameEl = document.getElementById('rc-race-name');
+  const metaEl = document.getElementById('rc-race-meta');
+  const cdEl = document.getElementById('rc-countdown');
+  const leaderEl = document.getElementById('rc-leader');
+  const statusEl = document.getElementById('rc-status');
+
+  if (nameEl) nameEl.textContent = name;
+  if (metaEl) metaEl.textContent = meta;
+  if (leaderEl) leaderEl.textContent = leader;
+  if (statusEl) statusEl.textContent = 'Realtime Sync';
+
+  const d = document.getElementById('cd-d')?.textContent || '--';
+  const h = document.getElementById('cd-h')?.textContent || '--';
+  const m = document.getElementById('cd-m')?.textContent || '--';
+  if (cdEl) cdEl.textContent = `${d}D : ${h}H : ${m}M`;
+}
+
+function initH31RaceControl() {
+  const path = document.getElementById('race-track-path');
+  const dot = document.getElementById('race-track-dot');
+  const glow = document.getElementById('race-track-dot-glow');
+
+  updateH31RaceControlData();
+  setInterval(updateH31RaceControlData, 15000);
+
+  if (!path) return;
+
+  const length = path.getTotalLength();
+  path.style.strokeDasharray = length;
+  path.style.strokeDashoffset = length;
+
+  if (typeof window.anime === 'function') {
+    window.anime({
+      targets: path,
+      strokeDashoffset: [length, 0],
+      duration: 1900,
+      easing: 'easeInOutSine',
+      delay: 250
+    });
+
+    const motion = { progress: 0 };
+    window.anime({
+      targets: motion,
+      progress: [0, 1],
+      duration: 6200,
+      easing: 'linear',
+      loop: true,
+      update: () => {
+        const point = path.getPointAtLength(motion.progress * length);
+        if (dot) {
+          dot.setAttribute('cx', point.x);
+          dot.setAttribute('cy', point.y);
+        }
+        if (glow) {
+          glow.setAttribute('cx', point.x);
+          glow.setAttribute('cy', point.y);
+        }
+      }
+    });
+
+    window.anime({
+      targets: '#race-track-dot-glow',
+      r: [14, 24],
+      opacity: [0.4, 0.9],
+      duration: 950,
+      direction: 'alternate',
+      loop: true,
+      easing: 'easeInOutSine'
+    });
+  } else {
+    path.style.strokeDashoffset = 0;
+  }
+}
+
+function initH31QuoteProgress() {
+  const bar = document.getElementById('quote-progress-bar');
+  const card = document.querySelector('.quote-inner');
+  if (!bar || !card) return;
+
+  function animateBar() {
+    if (typeof window.anime === 'function') {
+      window.anime.remove(bar);
+      window.anime({
+        targets: bar,
+        width: ['0%', '100%'],
+        duration: 5200,
+        easing: 'linear'
+      });
+    } else {
+      bar.style.width = '100%';
+    }
+  }
+
+  animateBar();
+  setInterval(() => {
+    card.classList.add('h3-quote-changing');
+    setTimeout(() => card.classList.remove('h3-quote-changing'), 520);
+    animateBar();
+  }, 5400);
+}
+
+function initH31WordMotion() {
+  if (typeof window.anime !== 'function') return;
+  const titles = document.querySelectorAll('.section-title, .grid-strip-title');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      if (el.dataset.h31Animated === '1') return;
+      el.dataset.h31Animated = '1';
+
+      window.anime({
+        targets: el,
+        translateX: [-18, 0],
+        opacity: [0.55, 1],
+        letterSpacing: ['0.02em', '-0.025em'],
+        duration: 820,
+        easing: 'easeOutExpo'
+      });
+      observer.unobserve(el);
+    });
+  }, { threshold: .4 });
+
+  titles.forEach(el => observer.observe(el));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initH31SignatureUpgrade, 180);
+});

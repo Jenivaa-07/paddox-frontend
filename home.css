@@ -4496,3 +4496,355 @@ body::before {
     animation: none !important;
   }
 }
+
+
+/* ============================================================
+   H3.1 — Signature Interactive Home Upgrade
+   Liquid glass quote carousel + animated nav indicator + SVG track
+   ============================================================ */
+
+/* Motorsport liquid nav indicator */
+.nav-links {
+  position: relative;
+}
+
+.nav-active-indicator {
+  position: absolute;
+  left: 0;
+  bottom: -11px;
+  width: 44px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--red), #fff, var(--red), transparent);
+  box-shadow: 0 0 22px rgba(232,0,45,.85);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(0);
+  transition: opacity .25s ease;
+}
+
+.nav-active-indicator::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--red);
+  transform: translateX(-50%);
+  box-shadow: 0 0 18px rgba(232,0,45,.9);
+}
+
+.nav-links:hover .nav-active-indicator,
+.nav-active-indicator.is-ready {
+  opacity: 1;
+}
+
+/* Signature Race Control Section */
+.race-control-section {
+  padding: 104px 0 118px !important;
+  background:
+    radial-gradient(circle at 78% 25%, rgba(232,0,45,.12), transparent 28%),
+    linear-gradient(180deg, rgba(3,3,3,.96), rgba(5,12,12,.94));
+  overflow: hidden;
+}
+
+.race-control-head {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(260px, .55fr);
+  align-items: end;
+  gap: 34px;
+}
+
+.race-control-sub {
+  color: rgba(255,255,255,.58);
+  line-height: 1.8;
+  max-width: 520px;
+  margin: 0;
+}
+
+.race-control-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, .75fr);
+  gap: 34px;
+  align-items: center;
+  margin-top: 42px;
+  padding: clamp(28px, 4vw, 52px);
+  border-radius: 32px;
+  border: 1px solid rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255,255,255,.08), transparent 30%),
+    radial-gradient(circle at 90% 20%, rgba(232,0,45,.18), transparent 32%),
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.018)),
+    rgba(7,7,7,.78);
+  backdrop-filter: blur(28px) saturate(1.32);
+  -webkit-backdrop-filter: blur(28px) saturate(1.32);
+  box-shadow:
+    0 38px 120px rgba(0,0,0,.62),
+    inset 0 1px 0 rgba(255,255,255,.10);
+  overflow: hidden;
+}
+
+.race-control-panel::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.13), transparent 24% 72%, rgba(232,0,45,.14));
+  pointer-events: none;
+  opacity: .7;
+}
+
+.race-track-stage {
+  position: relative;
+  min-height: 360px;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(232,0,45,.10), transparent 52%),
+    rgba(2,2,2,.55);
+  background-size: 34px 34px, 34px 34px, auto, auto;
+  overflow: hidden;
+}
+
+.race-track-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 34%, rgba(0,0,0,.42));
+  pointer-events: none;
+}
+
+.race-track-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.race-track-path {
+  fill: none;
+  stroke: url(#trackGrad);
+  stroke-width: 11;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#trackGlow);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.race-track-path.ghost {
+  stroke: rgba(255,255,255,.12);
+  stroke-width: 22;
+  filter: none;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+}
+
+.race-track-dot {
+  fill: #fff;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.9));
+}
+
+.race-track-dot-glow {
+  fill: rgba(232,0,45,.24);
+  stroke: rgba(232,0,45,.75);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 18px rgba(232,0,45,.95));
+}
+
+.track-label {
+  position: absolute;
+  z-index: 2;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(232,0,45,.30);
+  background: rgba(232,0,45,.10);
+  color: #fff;
+  font-family: var(--font-condensed);
+  font-size: .62rem;
+  letter-spacing: 2px;
+  font-weight: 800;
+}
+
+.track-label-start {
+  left: 11%;
+  bottom: 18%;
+}
+
+.track-label-sector {
+  right: 13%;
+  top: 22%;
+}
+
+.race-control-info {
+  position: relative;
+  z-index: 2;
+}
+
+.race-control-kicker {
+  color: var(--red);
+  font-family: var(--font-condensed);
+  font-size: .68rem;
+  letter-spacing: 4px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.race-control-info h3 {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4vw, 3.8rem);
+  line-height: .98;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.race-control-info p {
+  color: rgba(255,255,255,.62);
+  line-height: 1.8;
+  margin: 0 0 28px;
+}
+
+.race-control-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.race-control-grid div {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.018)),
+    rgba(0,0,0,.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.race-control-grid span {
+  display: block;
+  color: var(--red);
+  font-family: var(--font-condensed);
+  font-size: .62rem;
+  letter-spacing: 2.4px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.race-control-grid strong {
+  display: block;
+  color: #fff;
+  font-family: var(--font-tech);
+  font-size: 1.05rem;
+  letter-spacing: .4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.race-control-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font-condensed);
+  font-size: .74rem;
+  letter-spacing: 2.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 18px 42px rgba(232,0,45,.25);
+}
+
+/* Quote card upgrade: actual rounded liquid glass */
+.quote-inner {
+  border-radius: 34px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,.09), transparent 32%),
+    radial-gradient(circle at 86% 18%, rgba(232,0,45,.18), transparent 32%),
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.018)),
+    rgba(7,7,7,.74) !important;
+  backdrop-filter: blur(28px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.35) !important;
+  box-shadow:
+    0 38px 115px rgba(0,0,0,.58),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+
+.quote-progress {
+  width: min(190px, 46vw);
+  height: 3px;
+  margin: 26px auto 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.09);
+  overflow: hidden;
+}
+
+.quote-progress span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--red), #fff, var(--red));
+  box-shadow: 0 0 16px rgba(232,0,45,.75);
+}
+
+.quote-inner.h3-quote-changing .quote-text,
+.quote-inner.h3-quote-changing .quote-author {
+  animation: quotePulse .42s var(--liquid-ease);
+}
+
+@keyframes quotePulse {
+  0% { opacity: .3; transform: translateY(8px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Stronger liquid visibility */
+.hero-live-card,
+.pcard,
+.exp-card,
+.testi-card,
+.cd-block {
+  border-radius: 22px;
+}
+
+@media (max-width: 980px) {
+  .race-control-head,
+  .race-control-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .race-track-stage {
+    min-height: 310px;
+  }
+}
+
+@media (max-width: 640px) {
+  .race-control-section {
+    padding: 76px 0 88px !important;
+  }
+
+  .race-control-panel {
+    border-radius: 24px;
+    padding: 22px;
+  }
+
+  .race-track-stage {
+    min-height: 260px;
+  }
+}
