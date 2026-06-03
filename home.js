@@ -1987,3 +1987,166 @@ function initH2MarqueeControl() {
 }
 
 document.addEventListener('DOMContentLoaded', initH2MotionSystem);
+
+
+/* ============================================================
+   H3 — Anime.js Liquid Glass Motorsport Motion
+   Progressive enhancement: if Anime.js fails, normal site still works.
+   ============================================================ */
+function initH3LiquidGlassAnime() {
+  initH3LiquidPointer();
+  initH3LiquidSurfaces();
+  initH3AnimeHeroText();
+  initH3AnimeViewport();
+  initH3AnimeHoverSweeps();
+  initH3AnimeCounters();
+}
+
+function h3AnimeAvailable() {
+  return typeof window.anime === 'function';
+}
+
+function initH3LiquidPointer() {
+  const layer = document.getElementById('liquid-glass-layer');
+  if (!layer || window.innerWidth < 900) return;
+
+  let raf = null;
+  window.addEventListener('mousemove', e => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      layer.style.setProperty('--lgx', `${x}%`);
+      layer.style.setProperty('--lgy', `${y}%`);
+    });
+  }, { passive: true });
+}
+
+function initH3LiquidSurfaces() {
+  document
+    .querySelectorAll('.pcard,.exp-card,.testi-card,.quote-inner,.newsletter-inner,.hero-live-card,.cd-block')
+    .forEach(el => el.classList.add('liquid-sweep'));
+}
+
+function splitH3Text(el) {
+  if (!el || el.dataset.h3Split === '1') return;
+  const text = el.textContent;
+  el.dataset.h3Original = text;
+  el.dataset.h3Split = '1';
+  el.innerHTML = text.split('').map(ch => {
+    if (ch === ' ') return '<span class="h3-char">&nbsp;</span>';
+    return `<span class="h3-char">${ch}</span>`;
+  }).join('');
+}
+
+function initH3AnimeHeroText() {
+  const heroLines = document.querySelectorAll('.hero-h1 .h1-line');
+  heroLines.forEach(splitH3Text);
+
+  if (!h3AnimeAvailable()) return;
+
+  window.anime({
+    targets: '.hero-h1 .h3-char',
+    translateY: [44, 0],
+    translateX: [-18, 0],
+    rotateZ: [-6, 0],
+    opacity: [0, 1],
+    filter: ['blur(10px)', 'blur(0px)'],
+    delay: window.anime.stagger(18, { start: 180 }),
+    duration: 980,
+    easing: 'easeOutExpo'
+  });
+
+  window.anime({
+    targets: '.hero-eyebrow, .hero-sub, .hero-btns, .hero-ticker',
+    translateY: [22, 0],
+    opacity: [0, 1],
+    delay: window.anime.stagger(90, { start: 550 }),
+    duration: 850,
+    easing: 'easeOutExpo'
+  });
+}
+
+function initH3AnimeViewport() {
+  if (!('IntersectionObserver' in window)) return;
+
+  const targets = document.querySelectorAll(
+    '.section-head, .pcard, .exp-card, .testi-card, .quote-inner, .newsletter-inner, .cd-block'
+  );
+
+  targets.forEach(el => el.classList.add('h3-anime-init'));
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      el.classList.add('h3-anime-ready', 'motion-in');
+
+      if (h3AnimeAvailable()) {
+        window.anime({
+          targets: el,
+          translateY: [28, 0],
+          scale: [0.985, 1],
+          opacity: [0, 1],
+          filter: ['blur(8px)', 'blur(0px)'],
+          duration: 760,
+          easing: 'easeOutExpo'
+        });
+      }
+
+      if (el.classList.contains('liquid-sweep')) {
+        el.classList.add('is-sweeping');
+        setTimeout(() => el.classList.remove('is-sweeping'), 1100);
+      }
+
+      observer.unobserve(el);
+    });
+  }, {
+    threshold: 0.16,
+    rootMargin: '0px 0px -7% 0px'
+  });
+
+  targets.forEach(el => observer.observe(el));
+}
+
+function initH3AnimeHoverSweeps() {
+  document.querySelectorAll('.liquid-sweep').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      el.classList.remove('is-sweeping');
+      void el.offsetWidth;
+      el.classList.add('is-sweeping');
+
+      if (h3AnimeAvailable() && window.innerWidth >= 900) {
+        window.anime({
+          targets: el,
+          scale: [1, 1.015],
+          duration: 420,
+          direction: 'alternate',
+          easing: 'easeOutQuad'
+        });
+      }
+    });
+  });
+}
+
+function initH3AnimeCounters() {
+  if (!h3AnimeAvailable()) return;
+
+  const nums = document.querySelectorAll('.stat-num, .cd-num');
+  nums.forEach(num => {
+    num.addEventListener('DOMSubtreeModified', () => {
+      window.anime({
+        targets: num,
+        translateY: [-6, 0],
+        opacity: [0.55, 1],
+        duration: 320,
+        easing: 'easeOutQuad'
+      });
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initH3LiquidGlassAnime, 80);
+});

@@ -4254,3 +4254,245 @@ body::before {
     display: none !important;
   }
 }
+
+
+/* ============================================================
+   H3 — Liquid Glass Motorsport UI + Anime.js Motion System
+   Matte black base + selective liquid glass panels
+   ============================================================ */
+
+:root {
+  --glass-bg: rgba(255,255,255,.055);
+  --glass-bg-strong: rgba(255,255,255,.082);
+  --glass-border: rgba(255,255,255,.13);
+  --glass-red: rgba(232,0,45,.14);
+  --glass-red-strong: rgba(232,0,45,.28);
+  --glass-blur: 22px;
+  --glass-shadow: 0 28px 90px rgba(0,0,0,.50);
+  --liquid-ease: cubic-bezier(.16,1,.3,1);
+}
+
+/* Ambient liquid layer: subtle, not full glass takeover */
+.liquid-glass-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .38;
+  background:
+    radial-gradient(circle at var(--lgx, 70%) var(--lgy, 25%), rgba(232,0,45,.18), transparent 20%),
+    radial-gradient(circle at calc(var(--lgx, 70%) - 24%) calc(var(--lgy, 25%) + 22%), rgba(255,255,255,.045), transparent 18%),
+    linear-gradient(115deg, transparent 0%, rgba(255,255,255,.025) 45%, transparent 70%);
+  filter: blur(.2px);
+}
+
+/* Selective liquid glass surfaces */
+#navbar,
+.hero-live-card,
+.cd-block,
+.quote-inner,
+.newsletter-inner,
+.testi-card,
+.pcard,
+.exp-card,
+.home-empty-card,
+.nav-search-drawer,
+.mobile-menu {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+    radial-gradient(circle at 0% 0%, var(--glass-red), transparent 42%),
+    rgba(7,7,7,.74) !important;
+  border-color: var(--glass-border) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+#navbar {
+  background:
+    linear-gradient(135deg, rgba(7,7,7,.86), rgba(7,7,7,.68)),
+    rgba(7,7,7,.82) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+
+#navbar.scrolled {
+  background:
+    linear-gradient(135deg, rgba(7,7,7,.94), rgba(7,7,7,.78)),
+    rgba(7,7,7,.92) !important;
+  box-shadow:
+    0 18px 70px rgba(0,0,0,.48),
+    0 0 0 1px rgba(232,0,45,.14);
+}
+
+/* Liquid edge highlights */
+.hero-live-card::before,
+.cd-block::after,
+.quote-inner::before,
+.newsletter-inner::before,
+.testi-card::before,
+.pcard::before,
+.exp-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.16), transparent 28% 70%, rgba(232,0,45,.12));
+  opacity: .46;
+  mix-blend-mode: screen;
+}
+
+.pcard,
+.exp-card,
+.testi-card,
+.hero-live-card,
+.quote-inner,
+.newsletter-inner,
+.cd-block {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Liquid reflection sweep, Anime triggers class */
+.liquid-sweep::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    linear-gradient(115deg, transparent 15%, rgba(255,255,255,.18) 45%, transparent 70%);
+  transform: translateX(-120%) rotate(6deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.liquid-sweep.is-sweeping::after {
+  animation: h3LiquidSweep .95s var(--liquid-ease) both;
+}
+
+@keyframes h3LiquidSweep {
+  0% { transform: translateX(-125%) rotate(6deg); opacity: .8; }
+  100% { transform: translateX(125%) rotate(6deg); opacity: 0; }
+}
+
+/* Hero anime-ready text */
+.hero-h1 .h1-line {
+  transform-origin: left center;
+}
+
+.h3-char {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+/* Racing underline reveal */
+.section-title,
+.grid-strip-title,
+.newsletter-title {
+  position: relative;
+}
+
+.section-title::after,
+.grid-strip-title::after,
+.newsletter-title::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  margin-top: 14px;
+  background: linear-gradient(90deg, var(--red), transparent);
+  transition: width .9s var(--liquid-ease);
+}
+
+.motion-in .section-title::after,
+.section-head.motion-in .section-title::after,
+.section-head.motion-in .grid-strip-title::after,
+.newsletter-inner.motion-in .newsletter-title::after {
+  width: min(180px, 42vw);
+}
+
+/* More premium cards with liquid feel */
+.pcard:hover,
+.exp-card:hover,
+.testi-card:hover,
+.hero-live-card:hover {
+  border-color: rgba(232,0,45,.42) !important;
+  box-shadow:
+    0 34px 95px rgba(0,0,0,.62),
+    0 0 36px rgba(232,0,45,.15),
+    inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+/* Countdown glass panel feel */
+.countdown-strip .cs-inner {
+  position: relative;
+  padding-top: 34px;
+  padding-bottom: 34px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+    radial-gradient(circle at 10% 0%, rgba(232,0,45,.12), transparent 32%);
+  backdrop-filter: blur(18px) saturate(1.18);
+  -webkit-backdrop-filter: blur(18px) saturate(1.18);
+  box-shadow: 0 24px 70px rgba(0,0,0,.36);
+}
+
+/* Marquee liquid tunnel */
+.marquee-strip {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.025), rgba(232,0,45,.055), rgba(255,255,255,.025)),
+    rgba(10,10,10,.82);
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Anime states */
+.h3-anime-init {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+.h3-anime-ready {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Lottie placeholder compatible area if added later */
+.lottie-slot {
+  min-height: 84px;
+}
+
+/* Keep liquid glass controlled on mobile */
+@media (max-width: 768px) {
+  :root {
+    --glass-blur: 14px;
+  }
+
+  .liquid-glass-layer {
+    opacity: .22;
+  }
+
+  .countdown-strip .cs-inner {
+    margin-left: 18px;
+    margin-right: 18px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .h3-char,
+  .h3-anime-init {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .liquid-sweep.is-sweeping::after {
+    animation: none !important;
+  }
+}
