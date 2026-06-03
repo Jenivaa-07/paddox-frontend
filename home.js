@@ -1520,106 +1520,144 @@ document.querySelectorAll('.size-btn').forEach(btn => {
 console.log('%cPADDOX — Home Page Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
 
 /* ============================================================
-   H1.1 — Floating Live Cards + Parallax Polish
+   H1.2 — Viewport Detection / Awwwards-style Motion System
    ============================================================ */
-function h11Text(value, fallback = '') {
-  const text = String(value ?? '').trim();
-  return text && text !== '[object Object]' ? text : fallback;
-}
-
-function h11RaceName(race = {}) {
-  return h11Text(race.name || race.raceName || race.grandPrix || race.eventName, 'Next Grand Prix');
-}
-
-function h11RaceMeta(race = {}) {
-  const circuit = h11Text(race.circuit || race.Circuit?.circuitName || race.circuitName, '');
-  const location = h11Text(race.location || race.locality || race.country || race.Circuit?.Location?.country, '');
-  return [circuit, location].filter(Boolean).join(' · ') || 'Live calendar sync';
-}
-
-function h11ProductName(product = {}) {
-  return h11Text(product.name || product.title, 'Latest Drop');
-}
-
-function h11ProductMeta(product = {}) {
-  const team = h11Text(product.team || product.category, 'PADDOX');
-  const priceValue = product.price || product.effectivePrice || product.salePrice;
-  const price = Number(priceValue || 0);
-  return price ? `${team} · ₹${price.toLocaleString('en-IN')}` : `${team} · Shop live`;
-}
-
-function h11DriverLeader(standings = []) {
-  const first = Array.isArray(standings) ? standings[0] : null;
-  if (!first) return { title: 'Standings', meta: 'Awaiting live data' };
-  const driver = first.driver || first.Driver || first;
-  const given = h11Text(driver.givenName || driver.firstName, '');
-  const family = h11Text(driver.familyName || driver.lastName, '');
-  const title = h11Text(driver.name || driver.fullName || `${given} ${family}`.trim() || first.name, 'Championship Leader');
-  const team = h11Text(first.team || first.constructor?.name || first.Constructor?.name || first.constructorName, 'Formula 1');
-  const pts = h11Text(first.points || first.pts, '');
-  return { title, meta: pts ? `${team} · ${pts} pts` : team };
-}
-
-function h11TopFan(leaders = []) {
-  const first = Array.isArray(leaders) ? leaders[0] : null;
-  if (!first) return { title: 'Community', meta: 'Fan points loading' };
-  const user = first.user || first;
-  const name = h11Text(user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || first.name, 'Top Fan');
-  const points = Number(first.points || first.fanPoints || user.fanPoints || 0);
-  return { title: name, meta: points ? `${points.toLocaleString('en-IN')} Fan Points` : 'Leaderboard synced' };
-}
-
-function h11SetCard(idTitle, idMeta, title, meta) {
-  const titleEl = document.getElementById(idTitle);
-  const metaEl = document.getElementById(idMeta);
-  const card = titleEl?.closest('.float-card');
-  if (titleEl) titleEl.textContent = title;
-  if (metaEl) metaEl.textContent = meta;
-  if (card) {
-    card.classList.add('is-updated');
-    clearTimeout(card._h11Pulse);
-    card._h11Pulse = setTimeout(() => card.classList.remove('is-updated'), 1200);
+function initH12ViewportMotion() {
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.vp-reveal,.vp-reveal-left,.vp-reveal-right,.vp-scale,.vp-clip,.vp-blur,.vp-line,.vp-stagger')
+      .forEach(el => el.classList.add('vp-in'));
+    return;
   }
-}
 
-function updateHomeFloatingCards(data = {}) {
-  const race = data.nextRace || HOME_F1?.nextRace || (Array.isArray(HOME_F1?.schedule) ? HOME_F1.schedule.find(r => new Date(r.date || r.raceDate || r.startDate || 0) > new Date()) : null) || {};
-  h11SetCard('float-race-title', 'float-race-meta', h11RaceName(race), h11RaceMeta(race));
+  const revealMap = [
+    ['.section-head', 'vp-reveal'],
+    ['.section-title', 'vp-clip'],
+    ['.section-label', 'vp-reveal'],
+    ['.cs-left', 'vp-reveal-left'],
+    ['.cs-right', 'vp-reveal-right'],
+    ['.quote-inner', 'vp-scale'],
+    ['.newsletter-inner', 'vp-scale'],
+    ['.footer .footer-col', 'vp-reveal'],
+    ['.hero-live-card', 'vp-scale']
+  ];
 
-  const leader = h11DriverLeader(data.standings || HOME_F1?.standings || []);
-  h11SetCard('float-leader-title', 'float-leader-meta', leader.title, leader.meta);
+  revealMap.forEach(([selector, className]) => {
+    document.querySelectorAll(selector).forEach(el => el.classList.add(className));
+  });
 
-  const drop = (data.products || PRODUCTS || [])[0] || {};
-  h11SetCard('float-drop-title', 'float-drop-meta', h11ProductName(drop), h11ProductMeta(drop));
+  const staggerSelectors = [
+    '#products-grid',
+    '.exp-grid',
+    '#testi-grid',
+    '.cd-blocks',
+    '#marquee-track'
+  ];
 
-  const fan = h11TopFan(data.leaders || window.HOME_LEADERS || []);
-  h11SetCard('float-fan-title', 'float-fan-meta', fan.title, fan.meta);
-}
+  staggerSelectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach(el => el.classList.add('vp-stagger'));
+  });
 
-function initFloatingCardParallax() {
-  const wrap = document.getElementById('hero-floating-cards');
-  const hero = document.getElementById('hero');
-  if (!wrap || !hero) return;
+  document.querySelectorAll('.pcard,.exp-card,.testi-card,.cd-block').forEach(el => {
+    el.classList.add('vp-scale');
+  });
 
-  hero.addEventListener('mousemove', (e) => {
-    if (window.innerWidth < 861) return;
-    const rect = hero.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - .5) * 2;
-    const y = ((e.clientY - rect.top) / rect.height - .5) * 2;
-    wrap.querySelectorAll('.float-card').forEach(card => {
-      const depth = Number(card.dataset.floatDepth || .08);
-      card.style.transform = `translate3d(${x * 38 * depth}px, ${y * 34 * depth}px, 0)`;
+  document.querySelectorAll('.section,.countdown-strip,.home-grid-strip-section,.quote-section,.newsletter-section').forEach(el => {
+    el.classList.add('vp-section-watch');
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('vp-in');
+      if (entry.target.classList.contains('vp-section-watch')) {
+        entry.target.classList.add('section-in-view');
+      }
+      observer.unobserve(entry.target);
     });
-  }, { passive: true });
+  }, {
+    threshold: 0.16,
+    rootMargin: '0px 0px -8% 0px'
+  });
 
-  hero.addEventListener('mouseleave', () => {
-    wrap.querySelectorAll('.float-card').forEach(card => {
-      card.style.transform = '';
+  document.querySelectorAll('.vp-reveal,.vp-reveal-left,.vp-reveal-right,.vp-scale,.vp-clip,.vp-blur,.vp-line,.vp-stagger,.vp-section-watch')
+    .forEach(el => observer.observe(el));
+}
+
+function initH12CardTilt() {
+  const cards = document.querySelectorAll('.pcard,.exp-card,.testi-card');
+  cards.forEach(card => {
+    card.addEventListener('mousemove', e => {
+      if (window.innerWidth < 900) return;
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - .5) * 8;
+      card.style.setProperty('--tilt-x', `${x}deg`);
+    }, { passive: true });
+    card.addEventListener('mouseleave', () => {
+      card.style.removeProperty('--tilt-x');
     });
   });
 }
 
-function initCountdownFlipPolish() {
+function initH12HeroDepth() {
+  const hero = document.getElementById('hero');
+  const content = document.getElementById('hero-content');
+  const liveCards = document.querySelector('.hero-live-cards');
+  const stats = document.querySelector('.hero-stats');
+  if (!hero) return;
+
+  hero.classList.add('hero-awake');
+
+  hero.addEventListener('mousemove', e => {
+    if (window.innerWidth < 900) return;
+    const rect = hero.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - .5) * 2;
+    const y = ((e.clientY - rect.top) / rect.height - .5) * 2;
+    if (content) content.style.transform = `translate3d(${x * -10}px, ${y * -6}px, 0)`;
+    if (liveCards) liveCards.style.transform = `translate3d(${x * 14}px, ${y * 10}px, 0)`;
+    if (stats) stats.style.transform = `translate3d(${x * 8}px, ${y * 5}px, 0)`;
+  }, { passive: true });
+
+  hero.addEventListener('mouseleave', () => {
+    if (content) content.style.transform = '';
+    if (liveCards) liveCards.style.transform = '';
+    if (stats) stats.style.transform = '';
+  });
+}
+
+function initH12MagneticButtons() {
+  const buttons = document.querySelectorAll('.btn-primary,.btn-outline,.nav-cta-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      if (window.innerWidth < 900) return;
+      const rect = btn.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width / 2) * .16;
+      const y = (e.clientY - rect.top - rect.height / 2) * .20;
+      btn.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    }, { passive: true });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+    });
+  });
+}
+
+function initH12ScrollDirection() {
+  let lastY = window.scrollY || 0;
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY || 0;
+      document.body.classList.toggle('is-scrolling-down', y > lastY && y > 90);
+      document.body.classList.toggle('is-scrolling-up', y < lastY && y > 90);
+      lastY = y;
+      ticking = false;
+    });
+  }, { passive: true });
+}
+
+function initH12CountdownFlip() {
   ['cd-d','cd-h','cd-m','cd-s'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1632,40 +1670,23 @@ function initCountdownFlipPolish() {
         void block?.offsetWidth;
         block?.classList.add('is-flip');
       }
-    }, 700);
+    }, 650);
   });
 }
 
-/* Hook existing render/load functions without risky rewrites */
-(function h11PatchHomeLoaders(){
-  const oldRenderHomeProducts = window.renderHomeProducts || (typeof renderHomeProducts === 'function' ? renderHomeProducts : null);
-  if (oldRenderHomeProducts && !window.__h11ProductsPatched) {
-    window.__h11ProductsPatched = true;
-    const patched = function(...args) {
-      const result = oldRenderHomeProducts.apply(this, args);
-      try { updateHomeFloatingCards({ products: PRODUCTS }); } catch (e) {}
-      return result;
-    };
-    window.renderHomeProducts = patched;
-    try { renderHomeProducts = patched; } catch(e) {}
-  }
-
-  const oldUpdateTicker = window.updateTickerFromAPI || (typeof updateTickerFromAPI === 'function' ? updateTickerFromAPI : null);
-  if (oldUpdateTicker && !window.__h11TickerPatched) {
-    window.__h11TickerPatched = true;
-    const patchedTicker = function(...args) {
-      const result = oldUpdateTicker.apply(this, args);
-      try { updateHomeFloatingCards({ standings: HOME_F1?.standings || [], nextRace: HOME_F1?.nextRace }); } catch (e) {}
-      return result;
-    };
-    window.updateTickerFromAPI = patchedTicker;
-    try { updateTickerFromAPI = patchedTicker; } catch(e) {}
-  }
-})();
+/* Re-run observer gently after async cards/products are injected */
+function refreshH12ViewportMotion() {
+  document.querySelectorAll('.pcard:not(.vp-scale),.exp-card:not(.vp-scale),.testi-card:not(.vp-scale)')
+    .forEach(el => el.classList.add('vp-scale','vp-in'));
+}
 
 document.addEventListener('DOMContentLoaded', () => {
-  initFloatingCardParallax();
-  initCountdownFlipPolish();
-  setTimeout(() => updateHomeFloatingCards(), 800);
-  setInterval(() => updateHomeFloatingCards(), 30000);
+  initH12ViewportMotion();
+  initH12CardTilt();
+  initH12HeroDepth();
+  initH12MagneticButtons();
+  initH12ScrollDirection();
+  initH12CountdownFlip();
+  setTimeout(refreshH12ViewportMotion, 1200);
+  setTimeout(refreshH12ViewportMotion, 2600);
 });
