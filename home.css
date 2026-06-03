@@ -3159,15 +3159,15 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
    H1.4 — Formula 1 Font System + UI Density Polish
    IMPORTANT:
    Add your legally available font files here:
-   frontend/assets/fonts/Formula1-Regular.woff2
-   frontend/assets/fonts/Formula1-Bold.woff2
-   frontend/assets/fonts/Formula1-Wide.woff2
-   frontend/assets/fonts/Formula1-Black.woff2
+   frontend/assets/Fonts/Formula1-Regular.woff2
+   frontend/assets/Fonts/Formula1-Bold.woff2
+   frontend/assets/Fonts/Formula1-Wide.woff2
+   frontend/assets/Fonts/Formula1-Black.woff2
    ============================================================ */
 
 @font-face {
   font-family: 'PaddoxF1Regular';
-  src: url('assets/fonts/Formula1-Regular.woff2') format('woff2');
+  src: url('assets/Fonts/Formula1-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -3175,7 +3175,7 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 
 @font-face {
   font-family: 'PaddoxF1Bold';
-  src: url('assets/fonts/Formula1-Bold.woff2') format('woff2');
+  src: url('assets/Fonts/Formula1-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -3183,7 +3183,7 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 
 @font-face {
   font-family: 'PaddoxF1Wide';
-  src: url('assets/fonts/Formula1-Wide.woff2') format('woff2');
+  src: url('assets/Fonts/Formula1-Wide.woff2') format('woff2');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
@@ -3191,7 +3191,7 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 
 @font-face {
   font-family: 'PaddoxF1Black';
-  src: url('assets/fonts/Formula1-Black.woff2') format('woff2');
+  src: url('assets/Fonts/Formula1-Black.woff2') format('woff2');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -3399,11 +3399,11 @@ body {
 /* ============================================================
    H1.4.1 — Uploaded Formula1 TTF Font Path Fix
    Place the uploaded font files in:
-   frontend/assets/fonts/
+   frontend/assets/Fonts/
    ============================================================ */
 @font-face {
   font-family: 'PaddoxF1Regular';
-  src: url('assets/fonts/Formula1-Regular-1.ttf') format('truetype');
+  src: url('assets/Fonts/Formula1-Regular-1.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -3411,8 +3411,8 @@ body {
 
 @font-face {
   font-family: 'PaddoxF1Bold';
-  src: url('assets/fonts/Formula1-Bold_web.ttf') format('truetype'),
-       url('assets/fonts/Formula1-Bold-4.ttf') format('truetype');
+  src: url('assets/Fonts/Formula1-Bold_web.ttf') format('truetype'),
+       url('assets/Fonts/Formula1-Bold-4.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -3420,7 +3420,7 @@ body {
 
 @font-face {
   font-family: 'PaddoxF1Wide';
-  src: url('assets/fonts/Formula1-Wide.ttf') format('truetype');
+  src: url('assets/Fonts/Formula1-Wide.ttf') format('truetype');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
@@ -3428,7 +3428,7 @@ body {
 
 @font-face {
   font-family: 'PaddoxF1Black';
-  src: url('assets/fonts/Formula1-Black.ttf') format('truetype');
+  src: url('assets/Fonts/Formula1-Black.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -3436,7 +3436,7 @@ body {
 
 @font-face {
   font-family: 'PaddoxF1Italic';
-  src: url('assets/fonts/Formula1-Italic.ttf') format('truetype');
+  src: url('assets/Fonts/Formula1-Italic.ttf') format('truetype');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -3472,4 +3472,58 @@ body {
 .accent,
 .logo-x {
   font-family: 'PaddoxF1Black', var(--font-display);
+}
+
+
+/* ============================================================
+   H1.4.2 — Actual PADDOX folder path fix
+   Your project path is:
+   paddox-frontend/assets/Fonts/
+   ============================================================ */
+
+@font-face {
+  font-family: 'PaddoxF1Regular';
+  src: url('assets/Fonts/Formula1-Regular-1.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Bold';
+  src: url('assets/Fonts/Formula1-Bold_web.ttf') format('truetype'),
+       url('assets/Fonts/Formula1-Bold-4.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Wide';
+  src: url('assets/Fonts/Formula1-Wide.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Black';
+  src: url('assets/Fonts/Formula1-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PaddoxF1Italic';
+  src: url('assets/Fonts/Formula1-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --font-display: 'PaddoxF1Black', 'PaddoxF1Wide', 'Bebas Neue', sans-serif;
+  --font-condensed: 'PaddoxF1Bold', 'Barlow Condensed', sans-serif;
+  --font-body: 'PaddoxF1Regular', 'Inter', sans-serif;
 }
