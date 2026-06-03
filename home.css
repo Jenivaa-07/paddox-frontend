@@ -3527,3 +3527,66 @@ body {
   --font-condensed: 'PaddoxF1Bold', 'Barlow Condensed', sans-serif;
   --font-body: 'PaddoxF1Regular', 'Inter', sans-serif;
 }
+
+
+/* ============================================================
+   H1.4.3 — Restore PADDOX Wordmark + Remove Hero Mouse Effect
+   ============================================================ */
+
+/* Keep PADDOX wordmark exactly like the earlier brand look */
+.logo-text,
+.logo-text .logo-x,
+.nav-logo .logo-text,
+.nav-logo .logo-x,
+.footer-logo,
+.footer-logo .logo-x {
+  font-family: 'Bebas Neue', sans-serif !important;
+  letter-spacing: 5px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+}
+
+/* Keep the X red, but do not let Formula1 font affect the wordmark */
+.logo-x,
+.footer-logo .logo-x {
+  color: var(--red) !important;
+}
+
+/* Disable hero mouse depth movement visually */
+.hero-content,
+.hero-live-cards,
+.hero-stats {
+  transform: none !important;
+}
+
+/* Keep hero background stable; no mouse/depth feeling */
+.hero.hero-interactive .hero-bg-image,
+.hero-bg-image {
+  animation: none !important;
+}
+
+/* Slightly improve Formula1 font readability outside logo */
+.hero-sub,
+.pcard-desc,
+.exp-desc,
+.quote-team,
+.footer-desc,
+.newsletter-sub {
+  letter-spacing: .02em;
+}
+
+/* Better header spacing after logo font restore */
+.nav-logo {
+  gap: 10px;
+}
+
+.logo-text {
+  font-size: 1.85rem !important;
+}
+
+@media (max-width: 768px) {
+  .logo-text {
+    letter-spacing: 4.5px !important;
+    font-size: 1.65rem !important;
+  }
+}

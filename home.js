@@ -1572,28 +1572,14 @@ function refreshSafeMotionAfterAsyncRender() {
 
 function initSafeHeroDepth() {
   const hero = document.getElementById('hero');
+  if (!hero) return;
+  hero.classList.remove('hero-interactive');
   const content = document.getElementById('hero-content');
   const liveCards = document.querySelector('.hero-live-cards');
   const stats = document.querySelector('.hero-stats');
-
-  if (!hero) return;
-  hero.classList.add('hero-interactive');
-
-  hero.addEventListener('mousemove', e => {
-    if (window.innerWidth < 900) return;
-    const rect = hero.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - .5) * 2;
-    const y = ((e.clientY - rect.top) / rect.height - .5) * 2;
-    if (content) content.style.transform = `translate3d(${x * -7}px, ${y * -4}px, 0)`;
-    if (liveCards) liveCards.style.transform = `translate3d(${x * 8}px, ${y * 5}px, 0)`;
-    if (stats) stats.style.transform = `translate3d(${x * 5}px, ${y * 3}px, 0)`;
-  }, { passive: true });
-
-  hero.addEventListener('mouseleave', () => {
-    if (content) content.style.transform = '';
-    if (liveCards) liveCards.style.transform = '';
-    if (stats) stats.style.transform = '';
-  });
+  if (content) content.style.transform = '';
+  if (liveCards) liveCards.style.transform = '';
+  if (stats) stats.style.transform = '';
 }
 
 function initSafeCardTilt() {
@@ -1679,4 +1665,18 @@ document.addEventListener('DOMContentLoaded', () => {
     initSafeCardTilt();
     ensureHomeMarqueeVisible();
   }, 2200);
+});
+
+
+/* H1.4.3 safety: remove hero mouse/depth transforms */
+document.addEventListener('DOMContentLoaded', () => {
+  const hero = document.getElementById('hero');
+  const content = document.getElementById('hero-content');
+  const liveCards = document.querySelector('.hero-live-cards');
+  const stats = document.querySelector('.hero-stats');
+
+  hero?.classList.remove('hero-interactive');
+  if (content) content.style.transform = '';
+  if (liveCards) liveCards.style.transform = '';
+  if (stats) stats.style.transform = '';
 });
