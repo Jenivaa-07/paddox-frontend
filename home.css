@@ -2923,3 +2923,258 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
 @media(max-width:900px){.hero-live-grid{grid-template-columns:1fr 1fr;max-width:520px}.hero-live-card:last-child{grid-column:1/-1}}
 @media(max-width:620px){.hero-live-grid{grid-template-columns:1fr;margin-top:16px}.hero-live-card{padding:13px 14px}.hero-spotlight{opacity:.42}.scroll-progress{height:2px}}
 @media(prefers-reduced-motion:reduce){.hero-spotlight,.hero-live-card,.pcard,.cd-block,.reveal-section.in-view::after{animation:none!important;transition:none!important}.scroll-progress{display:none}}
+
+
+/* ============================================================
+   H1.1 — Home Floating Live Cards + Parallax Polish
+   ============================================================ */
+.hero-floating-cards {
+  position: absolute;
+  top: 18%;
+  right: clamp(36px, 7vw, 112px);
+  z-index: 3;
+  width: min(360px, 32vw);
+  min-height: 430px;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.float-card {
+  position: absolute;
+  width: 235px;
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.025)),
+    radial-gradient(circle at 0 0, rgba(232,0,45,.20), transparent 46%);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  box-shadow:
+    0 22px 70px rgba(0,0,0,.46),
+    inset 0 1px 0 rgba(255,255,255,.09);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(26px) scale(.96);
+  animation: floatCardIn .8s cubic-bezier(.2,.85,.2,1) forwards, floatCardDrift 6s ease-in-out infinite;
+}
+
+.float-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.13) 38%, transparent 68%);
+  transform: translateX(-140%) skewX(-14deg);
+  animation: floatSweep 5.2s ease-in-out infinite;
+}
+
+.float-card::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--red), transparent);
+  opacity: .85;
+}
+
+.float-card-race { top: 0; right: 38px; animation-delay: .9s, 1.8s; }
+.float-card-leader { top: 104px; right: 0; animation-delay: 1.05s, 2.1s; }
+.float-card-drop { top: 218px; right: 70px; animation-delay: 1.2s, 2.4s; }
+.float-card-fan { top: 332px; right: 18px; animation-delay: 1.35s, 2.7s; }
+
+.float-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-condensed);
+  font-size: .62rem;
+  letter-spacing: 3px;
+  color: var(--red);
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.float-kicker::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 16px rgba(232,0,45,.65);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.float-card strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: 1.6px;
+  line-height: 1;
+  color: #fff;
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.float-card small {
+  display: block;
+  margin-top: 7px;
+  font-family: var(--font-body);
+  font-size: .72rem;
+  color: rgba(255,255,255,.62);
+  line-height: 1.35;
+}
+
+.float-card.is-updated {
+  border-color: rgba(232,0,45,.45);
+  box-shadow:
+    0 26px 80px rgba(0,0,0,.52),
+    0 0 30px rgba(232,0,45,.15),
+    inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+@keyframes floatCardIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes floatCardDrift {
+  0%,100% { margin-top: 0; }
+  50% { margin-top: -10px; }
+}
+
+@keyframes floatSweep {
+  0%, 48% { transform: translateX(-145%) skewX(-14deg); }
+  65% { transform: translateX(145%) skewX(-14deg); }
+  100% { transform: translateX(145%) skewX(-14deg); }
+}
+
+/* Premium section motion depth */
+.reveal-up.in-view,
+.reveal-left.in-view,
+.reveal-right.in-view,
+.reveal-section.in-view {
+  will-change: transform, opacity;
+}
+
+.pcard,
+.exp-card,
+.testi-card,
+.float-card {
+  backface-visibility: hidden;
+}
+
+.pcard {
+  transform-style: preserve-3d;
+}
+
+.pcard:hover {
+  transform: translateY(-12px) perspective(900px) rotateX(2deg);
+}
+
+/* Marquee hover polish */
+.marquee-strip {
+  position: relative;
+}
+
+.marquee-strip::after,
+.marquee-strip::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 110px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marquee-strip::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--black), transparent);
+}
+
+.marquee-strip::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--black), transparent);
+}
+
+.marquee-strip:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Countdown premium glow */
+.countdown-strip {
+  position: relative;
+  overflow: hidden;
+}
+
+.countdown-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 30%, rgba(232,0,45,.16), transparent 32%),
+    linear-gradient(90deg, transparent, rgba(232,0,45,.07), transparent);
+  pointer-events: none;
+}
+
+.cd-block {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.cd-block.is-flip .cd-num {
+  animation: cdFlip .38s cubic-bezier(.2,.85,.2,1);
+}
+
+@keyframes cdFlip {
+  0% { transform: rotateX(0deg); opacity: 1; }
+  45% { transform: rotateX(72deg); opacity: .45; }
+  100% { transform: rotateX(0deg); opacity: 1; }
+}
+
+@media (max-width: 1080px) {
+  .hero-floating-cards {
+    right: 24px;
+    width: 300px;
+    opacity: .88;
+  }
+  .float-card {
+    width: 210px;
+  }
+}
+
+@media (max-width: 860px) {
+  .hero-floating-cards {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: auto;
+    min-height: unset;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: -18px 20px 28px;
+    padding: 0;
+    pointer-events: auto;
+  }
+  .float-card,
+  .float-card-race,
+  .float-card-leader,
+  .float-card-drop,
+  .float-card-fan {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    animation: floatCardIn .65s cubic-bezier(.2,.85,.2,1) forwards;
+  }
+  .float-card strong {
+    max-width: 100%;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-floating-cards {
+    grid-template-columns: 1fr;
+    margin: -6px 18px 26px;
+  }
+}

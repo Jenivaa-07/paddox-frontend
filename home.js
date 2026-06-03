@@ -1518,3 +1518,154 @@ document.querySelectorAll('.size-btn').forEach(btn => {
    GLOBAL INIT LOG
 ══════════════════════════════════════ */
 console.log('%cPADDOX — Home Page Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
+
+/* ============================================================
+   H1.1 — Floating Live Cards + Parallax Polish
+   ============================================================ */
+function h11Text(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text && text !== '[object Object]' ? text : fallback;
+}
+
+function h11RaceName(race = {}) {
+  return h11Text(race.name || race.raceName || race.grandPrix || race.eventName, 'Next Grand Prix');
+}
+
+function h11RaceMeta(race = {}) {
+  const circuit = h11Text(race.circuit || race.Circuit?.circuitName || race.circuitName, '');
+  const location = h11Text(race.location || race.locality || race.country || race.Circuit?.Location?.country, '');
+  return [circuit, location].filter(Boolean).join(' · ') || 'Live calendar sync';
+}
+
+function h11ProductName(product = {}) {
+  return h11Text(product.name || product.title, 'Latest Drop');
+}
+
+function h11ProductMeta(product = {}) {
+  const team = h11Text(product.team || product.category, 'PADDOX');
+  const priceValue = product.price || product.effectivePrice || product.salePrice;
+  const price = Number(priceValue || 0);
+  return price ? `${team} · ₹${price.toLocaleString('en-IN')}` : `${team} · Shop live`;
+}
+
+function h11DriverLeader(standings = []) {
+  const first = Array.isArray(standings) ? standings[0] : null;
+  if (!first) return { title: 'Standings', meta: 'Awaiting live data' };
+  const driver = first.driver || first.Driver || first;
+  const given = h11Text(driver.givenName || driver.firstName, '');
+  const family = h11Text(driver.familyName || driver.lastName, '');
+  const title = h11Text(driver.name || driver.fullName || `${given} ${family}`.trim() || first.name, 'Championship Leader');
+  const team = h11Text(first.team || first.constructor?.name || first.Constructor?.name || first.constructorName, 'Formula 1');
+  const pts = h11Text(first.points || first.pts, '');
+  return { title, meta: pts ? `${team} · ${pts} pts` : team };
+}
+
+function h11TopFan(leaders = []) {
+  const first = Array.isArray(leaders) ? leaders[0] : null;
+  if (!first) return { title: 'Community', meta: 'Fan points loading' };
+  const user = first.user || first;
+  const name = h11Text(user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || first.name, 'Top Fan');
+  const points = Number(first.points || first.fanPoints || user.fanPoints || 0);
+  return { title: name, meta: points ? `${points.toLocaleString('en-IN')} Fan Points` : 'Leaderboard synced' };
+}
+
+function h11SetCard(idTitle, idMeta, title, meta) {
+  const titleEl = document.getElementById(idTitle);
+  const metaEl = document.getElementById(idMeta);
+  const card = titleEl?.closest('.float-card');
+  if (titleEl) titleEl.textContent = title;
+  if (metaEl) metaEl.textContent = meta;
+  if (card) {
+    card.classList.add('is-updated');
+    clearTimeout(card._h11Pulse);
+    card._h11Pulse = setTimeout(() => card.classList.remove('is-updated'), 1200);
+  }
+}
+
+function updateHomeFloatingCards(data = {}) {
+  const race = data.nextRace || HOME_F1?.nextRace || (Array.isArray(HOME_F1?.schedule) ? HOME_F1.schedule.find(r => new Date(r.date || r.raceDate || r.startDate || 0) > new Date()) : null) || {};
+  h11SetCard('float-race-title', 'float-race-meta', h11RaceName(race), h11RaceMeta(race));
+
+  const leader = h11DriverLeader(data.standings || HOME_F1?.standings || []);
+  h11SetCard('float-leader-title', 'float-leader-meta', leader.title, leader.meta);
+
+  const drop = (data.products || PRODUCTS || [])[0] || {};
+  h11SetCard('float-drop-title', 'float-drop-meta', h11ProductName(drop), h11ProductMeta(drop));
+
+  const fan = h11TopFan(data.leaders || window.HOME_LEADERS || []);
+  h11SetCard('float-fan-title', 'float-fan-meta', fan.title, fan.meta);
+}
+
+function initFloatingCardParallax() {
+  const wrap = document.getElementById('hero-floating-cards');
+  const hero = document.getElementById('hero');
+  if (!wrap || !hero) return;
+
+  hero.addEventListener('mousemove', (e) => {
+    if (window.innerWidth < 861) return;
+    const rect = hero.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - .5) * 2;
+    const y = ((e.clientY - rect.top) / rect.height - .5) * 2;
+    wrap.querySelectorAll('.float-card').forEach(card => {
+      const depth = Number(card.dataset.floatDepth || .08);
+      card.style.transform = `translate3d(${x * 38 * depth}px, ${y * 34 * depth}px, 0)`;
+    });
+  }, { passive: true });
+
+  hero.addEventListener('mouseleave', () => {
+    wrap.querySelectorAll('.float-card').forEach(card => {
+      card.style.transform = '';
+    });
+  });
+}
+
+function initCountdownFlipPolish() {
+  ['cd-d','cd-h','cd-m','cd-s'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let last = el.textContent;
+    setInterval(() => {
+      if (el.textContent !== last) {
+        last = el.textContent;
+        const block = el.closest('.cd-block');
+        block?.classList.remove('is-flip');
+        void block?.offsetWidth;
+        block?.classList.add('is-flip');
+      }
+    }, 700);
+  });
+}
+
+/* Hook existing render/load functions without risky rewrites */
+(function h11PatchHomeLoaders(){
+  const oldRenderHomeProducts = window.renderHomeProducts || (typeof renderHomeProducts === 'function' ? renderHomeProducts : null);
+  if (oldRenderHomeProducts && !window.__h11ProductsPatched) {
+    window.__h11ProductsPatched = true;
+    const patched = function(...args) {
+      const result = oldRenderHomeProducts.apply(this, args);
+      try { updateHomeFloatingCards({ products: PRODUCTS }); } catch (e) {}
+      return result;
+    };
+    window.renderHomeProducts = patched;
+    try { renderHomeProducts = patched; } catch(e) {}
+  }
+
+  const oldUpdateTicker = window.updateTickerFromAPI || (typeof updateTickerFromAPI === 'function' ? updateTickerFromAPI : null);
+  if (oldUpdateTicker && !window.__h11TickerPatched) {
+    window.__h11TickerPatched = true;
+    const patchedTicker = function(...args) {
+      const result = oldUpdateTicker.apply(this, args);
+      try { updateHomeFloatingCards({ standings: HOME_F1?.standings || [], nextRace: HOME_F1?.nextRace }); } catch (e) {}
+      return result;
+    };
+    window.updateTickerFromAPI = patchedTicker;
+    try { updateTickerFromAPI = patchedTicker; } catch(e) {}
+  }
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  initFloatingCardParallax();
+  initCountdownFlipPolish();
+  setTimeout(() => updateHomeFloatingCards(), 800);
+  setInterval(() => updateHomeFloatingCards(), 30000);
+});
