@@ -3590,3 +3590,247 @@ body {
     font-size: 1.65rem !important;
   }
 }
+
+
+/* ============================================================
+   H1.4.4 — Formula1 Font Size Balance Fix
+   Keeps PADDOX logo unchanged.
+   Reduces over-heavy Formula1 typography for premium readability.
+   ============================================================ */
+
+/* HERO: still bold, less oversized */
+.hero-h1 {
+  font-size: clamp(4.7rem, 10.2vw, 9.25rem) !important;
+  line-height: .88 !important;
+  letter-spacing: clamp(.5px, .12vw, 2.2px) !important;
+  margin-bottom: 24px !important;
+}
+
+.hero-eyebrow {
+  font-size: .68rem !important;
+  letter-spacing: 4.2px !important;
+  margin-bottom: 20px !important;
+}
+
+.hero-sub {
+  font-size: .94rem !important;
+  line-height: 1.82 !important;
+  max-width: 520px !important;
+}
+
+/* NAV: less tiny/cramped with Formula font */
+.nav-link {
+  font-size: .68rem !important;
+  letter-spacing: 2px !important;
+  padding: 8px 12px !important;
+}
+
+.nav-cta-btn {
+  font-size: .74rem !important;
+  letter-spacing: 1.7px !important;
+}
+
+/* HERO LIVE CARDS / STATS */
+.hero-live-card strong,
+.live-card-title,
+.live-card-value {
+  font-size: .98rem !important;
+  letter-spacing: 1.2px !important;
+}
+
+.stat-num {
+  font-size: 2.55rem !important;
+  letter-spacing: 1px !important;
+}
+
+.stat-sep {
+  font-size: .78rem !important;
+}
+
+/* COUNTDOWN */
+.cs-name {
+  font-size: clamp(1.65rem, 3vw, 2.25rem) !important;
+  letter-spacing: 1.2px !important;
+}
+
+.cd-num {
+  font-size: 2.25rem !important;
+  letter-spacing: .8px !important;
+}
+
+.cd-lbl {
+  font-size: .52rem !important;
+  letter-spacing: 2.3px !important;
+}
+
+/* SECTION TITLES: reduce heavy block feel */
+.section-title,
+.grid-strip-title {
+  font-size: clamp(2.05rem, 4.25vw, 3.45rem) !important;
+  line-height: .94 !important;
+  letter-spacing: clamp(.5px, .12vw, 2px) !important;
+}
+
+.section-label {
+  font-size: .62rem !important;
+  letter-spacing: 3.8px !important;
+  margin-bottom: 9px !important;
+}
+
+.section {
+  padding: 88px 0 !important;
+}
+
+.section-head {
+  margin-bottom: 38px !important;
+}
+
+/* PRODUCT CARDS */
+.pcard-title {
+  font-size: .95rem !important;
+  line-height: 1.2 !important;
+  letter-spacing: .6px !important;
+}
+
+.pcard-team,
+.pcard-cat,
+.pcard-badge {
+  font-size: .54rem !important;
+  letter-spacing: 1.8px !important;
+}
+
+.pcard-price {
+  font-size: .92rem !important;
+}
+
+.pcard-rating {
+  transform: scale(.92);
+  transform-origin: right center;
+}
+
+/* TEAM STRIP */
+.marquee-card,
+.team-card,
+.marquee-item {
+  letter-spacing: .5px;
+}
+
+/* QUOTE: make it premium, not too poster-heavy */
+.quote-inner {
+  max-width: 720px !important;
+  padding: clamp(42px, 6vw, 72px) clamp(30px, 6vw, 78px) !important;
+}
+
+.quote-text {
+  font-family: 'PaddoxF1Bold', var(--font-condensed) !important;
+  font-size: clamp(1.18rem, 2.05vw, 1.85rem) !important;
+  line-height: 1.48 !important;
+  letter-spacing: .6px !important;
+  font-weight: 700 !important;
+}
+
+.quote-name {
+  font-size: .8rem !important;
+  letter-spacing: 1.2px !important;
+}
+
+.quote-team {
+  font-size: .62rem !important;
+}
+
+/* EXPERIENCE / FAN HUB CARDS */
+.exp-title {
+  font-size: 1.2rem !important;
+  letter-spacing: .8px !important;
+}
+
+.exp-desc {
+  font-size: .78rem !important;
+  line-height: 1.65 !important;
+}
+
+.exp-link {
+  font-size: .62rem !important;
+  letter-spacing: 2px !important;
+}
+
+/* WHAT FANS SAY */
+.testi-card {
+  min-height: 170px;
+}
+
+.testi-card p,
+.testi-text {
+  font-size: .78rem !important;
+  line-height: 1.65 !important;
+}
+
+.testi-name {
+  font-size: .82rem !important;
+}
+
+/* NEWSLETTER */
+.newsletter-title {
+  font-size: clamp(1.85rem, 4.1vw, 3.2rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: 1.2px !important;
+}
+
+.newsletter-sub {
+  font-size: .82rem !important;
+  line-height: 1.75 !important;
+}
+
+/* FOOTER */
+.footer-logo,
+.footer-logo .logo-x {
+  font-size: 1.5rem !important;
+}
+
+.footer-title {
+  font-size: .64rem !important;
+  letter-spacing: 2.6px !important;
+}
+
+.footer-link {
+  font-size: .74rem !important;
+}
+
+/* Mobile balance */
+@media (max-width: 900px) {
+  .hero-h1 {
+    font-size: clamp(4rem, 17vw, 7rem) !important;
+  }
+
+  .section-title,
+  .grid-strip-title {
+    font-size: clamp(1.95rem, 9vw, 3rem) !important;
+  }
+
+  .stat-num {
+    font-size: 2.15rem !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-h1 {
+    font-size: clamp(3.45rem, 18vw, 5.5rem) !important;
+    line-height: .9 !important;
+  }
+
+  .hero-sub {
+    font-size: .86rem !important;
+  }
+
+  .section {
+    padding: 72px 0 !important;
+  }
+
+  .quote-text {
+    font-size: 1.08rem !important;
+  }
+
+  .cd-num {
+    font-size: 2rem !important;
+  }
+}
