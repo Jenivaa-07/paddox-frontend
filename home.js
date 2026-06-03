@@ -11,7 +11,8 @@ let QUOTES = [];
 let HOME_F1 = { schedule: [], drivers: [], standings: [], constructors: [], nextRace: null };
 let HOME_MARQUEE_LOGOS = [];
 
-const HOME_MARKETING_STATS = { races: null, products: 50, fans: 250 };
+const HOME_MARKETING_STATS = { races: null, products: null, fans: null };
+const HOME_REALTIME_STATE = { productCount: 0, fanCount: 0, topFan: null, latestPost: null };
 
 const USE_OFFICIAL_F1_LOGO_LIBRARY = true;
 
@@ -75,8 +76,10 @@ const PADDOX_HOME_TEAMS = [
 
 function setHomeMarketingStats() {
   setRaceStatLoading();
-  setCounter(document.getElementById('home-product-count'), HOME_MARKETING_STATS.products);
-  setCounter(document.getElementById('home-fan-count'), HOME_MARKETING_STATS.fans);
+  const productEl = document.getElementById('home-product-count');
+  const fanEl = document.getElementById('home-fan-count');
+  if (productEl) { productEl.dataset.count = '0'; productEl.textContent = '—'; productEl.classList.add('is-loading'); }
+  if (fanEl) { fanEl.dataset.count = '0'; fanEl.textContent = '—'; fanEl.classList.add('is-loading'); }
 }
 
 function setRaceStatLoading() {
@@ -335,6 +338,31 @@ function setCountdownFlag(flagEl, race = {}) {
     />`;
 }
 
+
+function renderHomeProductSkeletons(count = 4) {
+  const grid = document.getElementById('products-grid');
+  if (!grid) return;
+  grid.innerHTML = Array.from({ length: count }, (_, i) => `
+    <div class="pcard-skeleton reveal-up delay-${i + 1}" aria-hidden="true">
+      <div class="sk-img"></div>
+      <div class="sk-line short"></div>
+      <div class="sk-line mid"></div>
+      <div class="sk-line"></div>
+    </div>
+  `).join('');
+  initRevealObserver(grid.querySelectorAll('.reveal-up'));
+}
+
+function uniqueFanCount(posts = [], leaders = []) {
+  const ids = new Set();
+  [...posts, ...leaders].forEach(item => {
+    const user = item?.user || item?.author || item;
+    const key = user?._id || user?.id || user?.email || user?.name || item?.username || item?.name;
+    if (key) ids.add(String(key).toLowerCase());
+  });
+  return ids.size;
+}
+
 function renderQuoteAvatar(el, avatar, driver = 'PADDOX') {
   if (!el) return;
   const av = safeText(avatar, '🏁');
@@ -350,7 +378,7 @@ function renderQuoteAvatar(el, avatar, driver = 'PADDOX') {
 
 async function loadHomeProducts() {
   const grid = document.getElementById('products-grid');
-  if (grid) grid.innerHTML = '<div class="home-empty-card">Loading shop products...</div>';
+  renderHomeProductSkeletons(4);
   try {
     const data = await PaddoxAPI.product.getAll({ limit: 12 });
     const list = data?.data?.products || data?.data || data?.products || [];
@@ -362,12 +390,20 @@ async function loadHomeProducts() {
       return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
     });
     PRODUCTS = ordered.slice(0, 4).map(normalizeHomeProduct).filter(p => p.id);
+    HOME_REALTIME_STATE.productCount = active.length || PRODUCTS.length;
+    const productEl = document.getElementById('home-product-count');
+    if (productEl) productEl.classList.remove('is-loading');
+    updateHomeProductStat(HOME_REALTIME_STATE.productCount);
     renderHomeProducts();
-    /* Home hero stats stay as brand milestones, not raw API counts. */
+    renderHeroLiveCards();
   } catch (err) {
     console.warn('Home products unavailable', err);
     PRODUCTS = [];
+    const productEl = document.getElementById('home-product-count');
+    if (productEl) productEl.classList.remove('is-loading');
+    updateHomeProductStat(0);
     renderHomeProducts();
+    renderHeroLiveCards();
   }
 }
 
@@ -449,7 +485,13 @@ async function loadHomeFanStories() {
     ]);
     const posts = feedData.value?.data?.posts || feedData.value?.data?.feed || feedData.value?.posts || [];
     const leaders = leaderboardData.value?.data?.leaderboard || leaderboardData.value?.data || [];
-    /* Fan count is shown as a brand/community milestone on the landing hero. */
+    HOME_REALTIME_STATE.fanCount = Math.max(uniqueFanCount(posts, leaders), Array.isArray(leaders) ? leaders.length : 0);
+    HOME_REALTIME_STATE.topFan = Array.isArray(leaders) && leaders.length ? leaders[0] : null;
+    HOME_REALTIME_STATE.latestPost = Array.isArray(posts) && posts.length ? posts[0] : null;
+    const fanEl = document.getElementById('home-fan-count');
+    if (fanEl) fanEl.classList.remove('is-loading');
+    updateHomeFanStat(HOME_REALTIME_STATE.fanCount);
+    renderHeroLiveCards();
     const stories = posts.slice(0, 3);
     if (!stories.length) {
       renderFanEmptyState(grid, 'No fan stories yet', 'Community posts from Fan Hub will appear here once fans start sharing.');
@@ -1322,6 +1364,36 @@ function renderHomeMarquee() {
   track.innerHTML = [...teams, ...teams].map(renderItem).join('');
 }
 
+
+function bestLeaderName() {
+  if (HOME_F1.standings.length) return normalizeDriverFromAny(HOME_F1.standings[0]).name;
+  const fan = HOME_REALTIME_STATE.topFan;
+  if (fan) {
+    const user = fan.user || fan;
+    return safeText(`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name || fan.name || fan.username, 'Top Fan');
+  }
+  return 'Loading';
+}
+
+function latestDropName() {
+  return PRODUCTS[0]?.name || (HOME_REALTIME_STATE.productCount ? `${HOME_REALTIME_STATE.productCount} Products` : 'Loading');
+}
+
+function renderHeroLiveCards() {
+  const grid = document.getElementById('hero-live-grid');
+  if (!grid) return;
+  const nextRace = HOME_F1.nextRace || {};
+  const raceTitle = safeText(nextRace.name || nextRace.raceName, 'Next Race');
+  const raceMeta = [nextRace.circuit, nextRace.country].filter(Boolean).join(' · ') || 'Formula 1 schedule';
+  const leader = bestLeaderName();
+  const drop = latestDropName();
+  grid.innerHTML = `
+    <div class="hero-live-card"><span>Next Race</span><strong>${escapeHTML(raceTitle)}</strong><small>${escapeHTML(raceMeta)}</small></div>
+    <div class="hero-live-card"><span>Live Leader</span><strong>${escapeHTML(leader)}</strong><small>${HOME_F1.standings.length ? 'Driver standings' : 'Community leaderboard'}</small></div>
+    <div class="hero-live-card"><span>Latest Drop</span><strong>${escapeHTML(drop)}</strong><small>${HOME_REALTIME_STATE.productCount || PRODUCTS.length || 'Live'} shop items</small></div>
+  `;
+}
+
 function updateTickerFromAPI() {
   const tickerEl = document.getElementById('ticker-text');
   if (!tickerEl) return;
@@ -1339,8 +1411,12 @@ function updateTickerFromAPI() {
     messages.push(`Current standings leader: ${leader.name}`);
   }
   if (PRODUCTS.length) {
-    messages.push(`Latest shop drops are live now`);
+    messages.push(`Latest drop: ${PRODUCTS[0].name}`);
   }
+  if (HOME_REALTIME_STATE.fanCount) {
+    messages.push(`${HOME_REALTIME_STATE.fanCount} active PADDOX fans tracked from community data`);
+  }
+  renderHeroLiveCards();
 
   if (!messages.length) {
     tickerEl.textContent = 'PADDOX data loading...';
@@ -1375,11 +1451,53 @@ document.querySelectorAll('.size-btn').forEach(btn => {
 });
 
 
+
+/* ══════════════════════════════════════
+   H1 PREMIUM SCROLL + MOTION POLISH
+══════════════════════════════════════ */
+(function initHomeMotionPolish() {
+  const progress = document.getElementById('scroll-progress');
+  function updateProgress() {
+    if (!progress) return;
+    const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    progress.style.width = `${Math.min(100, Math.max(0, (window.scrollY / max) * 100))}%`;
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('resize', updateProgress);
+  updateProgress();
+
+  const hero = document.getElementById('hero');
+  const spotlight = document.getElementById('hero-spotlight');
+  if (hero && spotlight && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    hero.addEventListener('pointermove', e => {
+      const rect = hero.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      spotlight.style.setProperty('--mx', `${x}%`);
+      spotlight.style.setProperty('--my', `${y}%`);
+    });
+  }
+
+  const magnetic = document.querySelectorAll('.btn-primary,.btn-outline,.nav-cta-btn,.see-all');
+  magnetic.forEach(el => {
+    el.classList.add('magnetic-ready');
+    el.addEventListener('pointermove', e => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) * 0.12;
+      const y = (e.clientY - r.top - r.height / 2) * 0.18;
+      el.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+  });
+})();
+
 /* ══════════════════════════════════════
    HOME DATA INIT
 ══════════════════════════════════════ */
 (function initHomeData() {
   setHomeMarketingStats();
+  renderHeroLiveCards();
   if (!window.PaddoxAPI) {
     console.warn('Paddox API not available on home page');
     renderHomeProducts();

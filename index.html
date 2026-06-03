@@ -17,6 +17,7 @@
 
   <!-- ░░ PAGE TRANSITION OVERLAY ░░ -->
   <div id="page-overlay"></div>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
   <!-- ░░ NAVBAR ░░ -->
   <nav id="navbar">
@@ -113,6 +114,7 @@
   <!-- ░░ HERO SECTION ░░ -->
   <section class="hero" id="hero">
     <div class="hero-bg-image"></div>
+    <div class="hero-spotlight" id="hero-spotlight" aria-hidden="true"></div>
     <div class="hero-overlay"></div>
     <div class="hero-grid-lines"></div>
 
@@ -155,6 +157,12 @@
         <span class="ticker-dot"></span>
         <span class="ticker-label">LIVE</span>
         <span class="ticker-text" id="ticker-text">Loading PADDOX live data...</span>
+      </div>
+
+      <div class="hero-live-grid animate-fade-up delay-6" id="hero-live-grid" aria-label="PADDOX live status">
+        <div class="hero-live-card skeleton-live"><span>Next Race</span><strong>Loading</strong><small>Formula 1 schedule</small></div>
+        <div class="hero-live-card skeleton-live"><span>Leader</span><strong>Loading</strong><small>Driver standings</small></div>
+        <div class="hero-live-card skeleton-live"><span>Drop</span><strong>Loading</strong><small>Featured merch</small></div>
       </div>
     </div>
 
@@ -498,6 +506,6 @@
 <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="js/api.js"></script>
-<script src="home.js"></script>
+<script src="home.js?v=H1_realtime_motion"></script>
 </body>
 </html>
