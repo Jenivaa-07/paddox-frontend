@@ -2362,3 +2362,266 @@ function initH31WordMotion() {
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initH31SignatureUpgrade, 180);
 });
+
+
+/* ============================================================
+   H3.1.1 — Signature Features Visibility Fix
+   Creates missing DOM elements if HTML insertion did not land.
+   ============================================================ */
+function initH311SignatureVisibilityFix() {
+  ensureH311NavIndicator();
+  ensureH311QuoteProgress();
+  ensureH311RaceControlSection();
+  setTimeout(() => {
+    moveH311NavIndicator();
+    initH311TrackAnimation();
+    updateH311RaceControlData();
+    initH311QuoteProgressAnimation();
+  }, 120);
+}
+
+function ensureH311NavIndicator() {
+  const nav = document.querySelector('.nav-links');
+  if (!nav) return;
+  if (!nav.id) nav.id = 'nav-links';
+
+  let indicator = document.getElementById('nav-active-indicator');
+  if (!indicator) {
+    indicator = document.createElement('span');
+    indicator.className = 'nav-active-indicator';
+    indicator.id = 'nav-active-indicator';
+    indicator.setAttribute('aria-hidden', 'true');
+    nav.prepend(indicator);
+  }
+
+  nav.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('mouseenter', () => moveH311NavIndicator(link));
+    link.addEventListener('focus', () => moveH311NavIndicator(link));
+  });
+
+  nav.addEventListener('mouseleave', () => moveH311NavIndicator());
+  window.addEventListener('resize', () => moveH311NavIndicator(), { passive: true });
+}
+
+function moveH311NavIndicator(target) {
+  const nav = document.getElementById('nav-links') || document.querySelector('.nav-links');
+  const indicator = document.getElementById('nav-active-indicator');
+  if (!nav || !indicator) return;
+
+  const active = target || nav.querySelector('.nav-link.active') || nav.querySelector('.nav-link');
+  if (!active) return;
+
+  const navRect = nav.getBoundingClientRect();
+  const rect = active.getBoundingClientRect();
+  const x = rect.left - navRect.left + rect.width / 2 - 23;
+  const width = Math.max(38, rect.width * 0.74);
+
+  indicator.style.width = `${width}px`;
+  indicator.style.transform = `translateX(${x}px)`;
+  indicator.classList.add('is-ready');
+}
+
+function ensureH311QuoteProgress() {
+  const quote = document.querySelector('.quote-inner');
+  if (!quote) return;
+  if (document.getElementById('quote-progress-bar')) return;
+
+  const progress = document.createElement('div');
+  progress.className = 'quote-progress';
+  progress.innerHTML = '<span id="quote-progress-bar"></span>';
+
+  const dots = document.getElementById('quote-dots') || quote.querySelector('.quote-dots');
+  if (dots) quote.insertBefore(progress, dots);
+  else quote.appendChild(progress);
+}
+
+function ensureH311RaceControlSection() {
+  if (document.getElementById('race-control-section')) return;
+
+  const section = document.createElement('section');
+  section.className = 'race-control-section section';
+  section.id = 'race-control-section';
+  section.innerHTML = `
+    <div class="container">
+      <div class="section-head race-control-head">
+        <div>
+          <span class="section-label">LIVE RACE CONTROL</span>
+          <h2 class="section-title">TRACK <span>MODE</span></h2>
+        </div>
+        <p class="race-control-sub">Realtime next-race pulse, animated circuit path and PADDOX race-week status.</p>
+      </div>
+
+      <div class="race-control-panel liquid-sweep">
+        <div class="race-track-stage">
+          <svg class="race-track-svg" viewBox="0 0 620 360" role="img" aria-label="Animated race circuit">
+            <defs>
+              <linearGradient id="trackGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.88"/>
+                <stop offset="45%" stop-color="#e8002d" stop-opacity="0.95"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.62"/>
+              </linearGradient>
+            </defs>
+            <path id="race-track-path" class="race-track-path" d="M86 214 C88 104 170 62 252 92 C333 121 341 202 419 178 C507 152 558 201 532 263 C506 326 401 313 333 286 C263 258 227 321 151 294 C96 274 78 244 86 214 Z"/>
+            <path class="race-track-path ghost" d="M86 214 C88 104 170 62 252 92 C333 121 341 202 419 178 C507 152 558 201 532 263 C506 326 401 313 333 286 C263 258 227 321 151 294 C96 274 78 244 86 214 Z"/>
+            <circle id="race-track-dot-glow" class="race-track-dot-glow" r="18" cx="86" cy="214"></circle>
+            <circle id="race-track-dot" class="race-track-dot" r="8" cx="86" cy="214"></circle>
+          </svg>
+          <div class="track-label track-label-start">START</div>
+          <div class="track-label track-label-sector">SECTOR</div>
+        </div>
+
+        <div class="race-control-info">
+          <div class="race-control-kicker">NEXT EVENT</div>
+          <h3 id="rc-race-name">Loading Grand Prix</h3>
+          <p id="rc-race-meta">Syncing live race calendar...</p>
+
+          <div class="race-control-grid">
+            <div>
+              <span>Countdown</span>
+              <strong id="rc-countdown">-- : -- : --</strong>
+            </div>
+            <div>
+              <span>Leader</span>
+              <strong id="rc-leader">Live Standings</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong id="rc-status">Race Week Sync</strong>
+            </div>
+          </div>
+
+          <a href="pitwall.html" class="race-control-cta">Open Pit Wall →</a>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const countdown = document.querySelector('.countdown-strip');
+  const featured = document.querySelector('#featured, .featured-section, [data-section="featured"]');
+  if (countdown && countdown.parentNode) countdown.insertAdjacentElement('afterend', section);
+  else if (featured && featured.parentNode) featured.insertAdjacentElement('beforebegin', section);
+  else document.body.appendChild(section);
+}
+
+function h311SafeText(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text && text !== '[object Object]' ? text : fallback;
+}
+
+function h311RaceName(race = {}) {
+  return h311SafeText(race.name || race.raceName || race.grandPrix || race.eventName, 'Next Grand Prix');
+}
+
+function h311RaceMeta(race = {}) {
+  const circuit = h311SafeText(race.circuit || race.Circuit?.circuitName || race.circuitName, '');
+  const location = h311SafeText(race.location || race.locality || race.country || race.Circuit?.Location?.country, '');
+  return [circuit, location].filter(Boolean).join(' · ') || 'Live calendar sync';
+}
+
+function h311LeaderName(standings = []) {
+  const first = Array.isArray(standings) ? standings[0] : null;
+  if (!first) return 'Live Standings';
+  const driver = first.driver || first.Driver || first;
+  const given = h311SafeText(driver.givenName || driver.firstName, '');
+  const family = h311SafeText(driver.familyName || driver.lastName, '');
+  return h311SafeText(driver.name || driver.fullName || `${given} ${family}`.trim() || first.name, 'Championship Leader');
+}
+
+function updateH311RaceControlData() {
+  const race = window.HOME_F1?.nextRace || (Array.isArray(window.HOME_F1?.schedule) ? window.HOME_F1.schedule[0] : null) || {};
+  const nameEl = document.getElementById('rc-race-name');
+  const metaEl = document.getElementById('rc-race-meta');
+  const cdEl = document.getElementById('rc-countdown');
+  const leaderEl = document.getElementById('rc-leader');
+  const statusEl = document.getElementById('rc-status');
+
+  if (nameEl) nameEl.textContent = h311RaceName(race);
+  if (metaEl) metaEl.textContent = h311RaceMeta(race);
+  if (leaderEl) leaderEl.textContent = h311LeaderName(window.HOME_F1?.standings || []);
+  if (statusEl) statusEl.textContent = 'Realtime Sync';
+
+  const d = document.getElementById('cd-d')?.textContent || '--';
+  const h = document.getElementById('cd-h')?.textContent || '--';
+  const m = document.getElementById('cd-m')?.textContent || '--';
+  if (cdEl) cdEl.textContent = `${d}D : ${h}H : ${m}M`;
+}
+
+function initH311TrackAnimation() {
+  const path = document.getElementById('race-track-path');
+  const dot = document.getElementById('race-track-dot');
+  const glow = document.getElementById('race-track-dot-glow');
+  if (!path) return;
+
+  const length = path.getTotalLength();
+  path.style.strokeDasharray = length;
+  path.style.strokeDashoffset = length;
+
+  if (typeof window.anime === 'function') {
+    window.anime({
+      targets: path,
+      strokeDashoffset: [length, 0],
+      duration: 1600,
+      easing: 'easeInOutSine'
+    });
+
+    const motion = { progress: 0 };
+    window.anime({
+      targets: motion,
+      progress: [0, 1],
+      duration: 6200,
+      easing: 'linear',
+      loop: true,
+      update: () => {
+        const point = path.getPointAtLength(motion.progress * length);
+        if (dot) {
+          dot.setAttribute('cx', point.x);
+          dot.setAttribute('cy', point.y);
+        }
+        if (glow) {
+          glow.setAttribute('cx', point.x);
+          glow.setAttribute('cy', point.y);
+        }
+      }
+    });
+
+    window.anime({
+      targets: '#race-track-dot-glow',
+      r: [14, 25],
+      opacity: [0.35, 0.9],
+      duration: 950,
+      direction: 'alternate',
+      loop: true,
+      easing: 'easeInOutSine'
+    });
+  } else {
+    path.style.strokeDashoffset = 0;
+  }
+}
+
+function initH311QuoteProgressAnimation() {
+  const bar = document.getElementById('quote-progress-bar');
+  if (!bar) return;
+
+  function run() {
+    if (typeof window.anime === 'function') {
+      window.anime.remove(bar);
+      window.anime({
+        targets: bar,
+        width: ['0%', '100%'],
+        duration: 5200,
+        easing: 'linear'
+      });
+    } else {
+      bar.style.transition = 'width 5.2s linear';
+      bar.style.width = '100%';
+    }
+  }
+
+  run();
+  setInterval(run, 5400);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initH311SignatureVisibilityFix();
+  setInterval(updateH311RaceControlData, 15000);
+});
