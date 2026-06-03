@@ -116,9 +116,10 @@
           </div>
 
           <div class="summary-card">
-            <div class="summary-title">Prompt Builder Summary</div>
+            <div class="summary-title">NVIDIA FLUX + Prompt Builder Summary</div>
             <div id="summary-lines"></div>
             <button class="generate-btn" id="generate-btn">Build Prompt</button>
+            <button class="generate-btn live-btn" id="generate-live-btn">Generate with NVIDIA Beta</button>
             <button class="copy-btn" id="copy-prompt-btn" disabled>Copy Prompt</button>
           </div>
         </aside>
@@ -131,8 +132,8 @@
             <div class="preview-ratio" id="preview-ratio">4:5</div>
           </div>
           <div class="result-card">
-            <h3>Prompt Builder + Fan Result Upload</h3>
-            <p id="result-status">Build your PADDOX prompt, generate the image in any external AI tool, then upload the final result here to earn +50 Fan Points.</p>
+            <h3>NVIDIA Live Output + Prompt Tools</h3>
+            <p id="result-status">Use Build Prompt for copy/export mode, or use Generate with NVIDIA Beta for live image creation. If NVIDIA fails or free trial requests finish, your PADDOX credits stay safe and you can still upload an external AI result for +50 Fan Points.</p>
             <textarea id="final-prompt" readonly placeholder="Your premium PADDOX prompt will appear here…"></textarea>
             <input type="file" id="ai-result-file" accept="image/*" hidden/>
             <div class="result-actions">
@@ -185,6 +186,6 @@
   </footer>
 
   <div id="toast" class="toast"></div>
-  <script src="aistudio.js?v=A4_11M"></script>
+  <script src="aistudio.js?v=A4_11N"></script>
 </body>
 </html>
