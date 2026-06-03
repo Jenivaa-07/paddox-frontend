@@ -719,6 +719,7 @@ const AI_F1_DRIVERS_API = 'https://paddox-backend.onrender.com/api/f1/drivers';
 const PADDOX_API_BASE = window.PADDOX_API_BASE || 'https://paddox-backend.onrender.com/api';
 const AI_STUDIO_GENERATE_API = `${PADDOX_API_BASE}/ai-studio/generate`;
 const AI_STUDIO_CREDITS_API = `${PADDOX_API_BASE}/ai-studio/credits`;
+const AI_STUDIO_UPLOAD_RESULT_API = `${PADDOX_API_BASE}/ai-studio/upload-result`;
 
 /* Phase A4.11H.1 — Real credits sync:
    Admin-added credits live in MongoDB. Do not trust browser/localStorage alone. */
@@ -1733,28 +1734,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 /* ============================================================
-   PADDOX A4.11N — NVIDIA FLUX Live Provider + Prompt Builder
-   This override layer keeps prompt-builder/upload mode and adds
-   NVIDIA FLUX live generation.
+   PADDOX A4.11N.2 — Revert to GPT/Gemini Prompt Builder Only
+   Removes NVIDIA/FLUX live generation from active frontend flow.
    ============================================================ */
-const AI_STUDIO_UPLOAD_RESULT_API = `${PADDOX_API_BASE}/ai-studio/upload-result`;
+let uploadedResultName = '';
 let uploadedResultDataUrl = '';
 let uploadRewardClaimed = false;
-
-function safeText(value = '') {
-  return String(value ?? '').trim();
-}
 
 function buildPromptBuilderPrompt(payload = {}) {
   const template = payload.template?.title || 'PADDOX AI fan visual';
   const driver = payload.driver?.name || 'selected current-grid driver';
   const team = payload.driver?.team || 'selected team';
   const fanName = payload.fan?.name || 'the fan';
-  const tagline = payload.fan?.tagline || 'Create a premium motorsport visual';
+  const tagline = payload.fan?.tagline || 'Create a premium motorsport fan visual';
   const aspect = payload.output?.aspectRatio || payload.output?.aspectLabel || selectedRatio || '4:5';
-  const photoLine = payload.photo?.included
-    ? 'Fan reference photo is uploaded and should guide the fan appearance.'
-    : 'No fan reference photo is uploaded.';
+  const photoUploaded = Boolean(uploadedPhotoDataUrl || payload.references?.fanPhoto?.dataUrl || payload.photo?.included || payload.photo?.name);
+  const photoLine = photoUploaded
+    ? `Use the uploaded fan reference photo as the primary identity reference for ${fanName}. Preserve face shape, skin tone, hairstyle, facial hair, and visible accessories as closely as possible.`
+    : `No fan reference photo is uploaded. Create ${fanName} as a realistic premium fan character.`;
 
   return [
     'PADDOX AI STUDIO REQUEST:',
@@ -1762,20 +1759,23 @@ function buildPromptBuilderPrompt(payload = {}) {
     `Driver: ${driver}.`,
     `Team: ${team}.`,
     `Output format: ${aspect}.`,
+    'Target tool: GPT Image / Gemini Image / any premium AI image generator.',
     '',
-    `Create a premium realistic motorsport visual featuring ${fanName}.`,
+    'SCENE:',
+    `Create a premium realistic motorsport visual featuring ${fanName} and ${driver}.`,
     `Creative direction: ${tagline}.`,
+    `Use authentic ${team} colors, believable Formula 1 paddock/garage/pit-lane atmosphere, premium race-week lighting, and clean editorial composition.`,
+    '',
+    'IDENTITY / REFERENCE:',
     photoLine,
-    'Keep the visual premium, hyper-realistic, sharp, and social-share ready.',
-    'Avoid cartoonish rendering, extra fingers, duplicate faces, broken anatomy, wrong team colors, and low-detail skin.'
+    `${driver} should look realistic and wear a believable ${team} race suit or motorsport outfit.`,
+    '',
+    'STYLE:',
+    'Hyper-realistic, premium sports photography, natural skin texture, crisp facial detail, sharp eyes, realistic anatomy, cinematic depth of field, high-end motorsport brand feeling.',
+    '',
+    'NEGATIVE:',
+    'Avoid cartoon, anime, painting, plastic skin, blurry face, duplicate face, wrong team colors, extra fingers, distorted hands, deformed anatomy, low detail, messy sponsor text, unreadable branding, and overexposed neon glow.'
   ].join('\n');
-}
-
-function renderUploadReadyState() {
-  const trigger = $('#upload-result-trigger');
-  const submit = $('#submit-result-upload');
-  if (trigger) trigger.disabled = false;
-  if (submit) submit.disabled = !uploadedResultDataUrl || uploadRewardClaimed;
 }
 
 async function generatePrompt() {
@@ -1786,42 +1786,16 @@ async function generatePrompt() {
   }
 
   finalPayload = buildPayload();
-  const prompt = buildPromptBuilderPrompt(finalPayload);
-  finalPayload.prompt = prompt;
-  $('#final-prompt').value = prompt;
-  $('#result-status').textContent = 'Prompt ready. Copy it, export it, or generate live with NVIDIA Beta. You can also upload an external AI result later for +50 Fan Points.';
+  finalPayload.prompt = buildPromptBuilderPrompt(finalPayload);
+  $('#final-prompt').value = finalPayload.prompt;
+  $('#result-status').textContent = 'GPT/Gemini prompt ready. Copy it, generate in any image tool, then upload the result here for +50 Fan Points. No live API generation is active.';
   $('#copy-prompt-btn').disabled = false;
   $('#download-payload').disabled = false;
-  $('#download-text-prompt').disabled = false;
-  $('#copy-json-btn').disabled = false;
+  $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
+  $('#copy-json-btn') && ($('#copy-json-btn').disabled = false);
   $('#save-creation').disabled = false;
-  renderUploadReadyState();
-  showToast('PADDOX prompt built.');
-}
-
-function isQuotaErrorMessage(message = '', responseData = {}) {
-  const text = `${message || ''} ${JSON.stringify(responseData || {})}`.toLowerCase();
-  return text.includes('quota') ||
-    text.includes('request limit') ||
-    text.includes('too many requests') ||
-    text.includes('trial') ||
-    text.includes('resource_exhausted') ||
-    text.includes('nvidia');
-}
-
-function handleProviderGenerationError(err) {
-  const responseData = err?.responseData || {};
-  const data = responseData.data || {};
-  const credits = Number(data.aiCredits ?? responseData.aiCredits);
-  if (Number.isFinite(credits)) setCredits(credits);
-
-  const quota = isQuotaErrorMessage(err?.message, responseData);
-  const message = err?.message || (quota
-    ? 'NVIDIA FLUX beta generation is temporarily unavailable. Your PADDOX credits were not deducted.'
-    : 'NVIDIA FLUX generation failed. Your PADDOX credits were not deducted.');
-
-  $('#result-status').textContent = message;
-  showToast(quota ? 'NVIDIA unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+  $('#upload-result-trigger') && ($('#upload-result-trigger').disabled = false);
+  $('#submit-result-upload') && ($('#submit-result-upload').disabled = !uploadedResultDataUrl || uploadRewardClaimed);
 
   const frame = $('#preview-frame');
   frame?.classList.remove('has-generated-image');
@@ -1829,85 +1803,22 @@ function handleProviderGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = quota ? 'NVIDIA BETA UNAVAILABLE' : 'PADDOX AI';
+  if (wm) wm.textContent = 'PROMPT READY';
 
-  return message;
+  const pd = $('#preview-driver');
+  const pt = $('#preview-template');
+  const pr = $('#preview-ratio');
+  if(pd) pd.textContent = selectedDriver?.name || 'Select Driver';
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · GPT/Gemini Prompt`;
+  if(pr) pr.textContent = selectedRatio;
+
+  showToast('GPT/Gemini-ready PADDOX prompt built.');
 }
 
-async function generateLiveNvidia() {
-  if(!selectedDriver) return showToast('Please select a driver first.');
-  if(!selectedTemplate) return showToast('Please choose a realistic template.');
-  if(selectedTemplate.requiresUserPhoto && !uploadedPhotoDataUrl) {
-    return showToast('This realistic fan-face template needs a fan photo.');
-  }
-
-  const btn = $('#generate-live-btn');
-  const originalText = btn?.textContent || 'Generate with NVIDIA Beta';
-  try {
-    finalPayload = buildPayload();
-    finalPayload.prompt = buildPromptBuilderPrompt(finalPayload);
-    $('#final-prompt').value = finalPayload.prompt;
-
-    const liveCredits = await syncRealAiCredits(true);
-    const creditsToCheck = Number.isFinite(Number(liveCredits)) ? Number(liveCredits) : getCredits();
-    if(Number.isFinite(creditsToCheck) && creditsToCheck < selectedTemplate.creditCost) {
-      $('#result-status').textContent = `Backend AI Credits: ${creditsToCheck}. Required: ${selectedTemplate.creditCost}.`;
-      return showToast('You need more PADDOX Credits.');
-    }
-
-    if(btn) {
-      btn.disabled = true;
-      btn.textContent = 'Generating with NVIDIA...';
-      btn.classList.add('is-loading');
-    }
-
-    $('#result-status').textContent = 'Generating live with NVIDIA FLUX beta. If generation fails, your PADDOX credits stay safe.';
-    showToast('Generating with NVIDIA FLUX beta...');
-
-    const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
-      method: 'POST',
-      body: JSON.stringify({
-        payload: finalPayload,
-        prompt: finalPayload.prompt,
-        photoDataUrl: uploadedPhotoDataUrl || '',
-        cost: selectedTemplate.creditCost,
-        aspectRatio: selectedRatio,
-        generationMode: 'nvidia_live'
-      })
-    });
-
-    const data = response.data || response;
-    const imageUrl = data.image?.dataUri || data.image?.url || data.poster?.image?.url || '';
-    if(!imageUrl) throw new Error('NVIDIA response did not include an image.');
-
-    generatedImageUrl = imageUrl;
-    renderGeneratedImage(imageUrl, data);
-    setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
-    renderPreview();
-
-    const promptToShow = data.nvidiaPrompt || data.prompt || finalPayload.prompt;
-    $('#final-prompt').value = promptToShow;
-    $('#result-status').textContent = `NVIDIA FLUX beta generated your PADDOX image successfully using ${data.model || 'flux.2-klein-4b'}. Credits deducted only after success.`;
-    $('#copy-prompt-btn').disabled = false;
-    $('#download-payload').disabled = false;
-    $('#download-text-prompt').disabled = false;
-    $('#copy-json-btn').disabled = false;
-    $('#save-creation').disabled = false;
-    $('#download-generated-image').disabled = false;
-    renderUploadReadyState();
-
-    showToast('NVIDIA FLUX image ready.');
-  } catch (err) {
-    console.error('PADDOX NVIDIA image generation failed:', err);
-    handleProviderGenerationError(err);
-    await syncRealAiCredits(true);
-  } finally {
-    if(btn) {
-      btn.disabled = false;
-      btn.textContent = originalText;
-      btn.classList.remove('is-loading');
-    }
-  }
+function copyPrompt() {
+  const txt = $('#final-prompt')?.value;
+  if(!txt) return showToast('Build your prompt first.');
+  navigator.clipboard?.writeText(txt).then(() => showToast('GPT/Gemini prompt copied.'));
 }
 
 function renderGeneratedImage(imageUrl, meta = {}) {
@@ -1919,28 +1830,28 @@ function renderGeneratedImage(imageUrl, meta = {}) {
     img = document.createElement('img');
     img.id = 'generated-image';
     img.className = 'generated-image';
-    img.alt = 'Generated PADDOX AI artwork';
+    img.alt = 'PADDOX uploaded AI result';
     frame.appendChild(img);
   }
   img.src = imageUrl;
   frame.classList.add('has-generated-image');
 
   const wm = frame.querySelector('.preview-watermark');
-  if(wm) wm.textContent = (meta.provider || '').toLowerCase() === 'nvidia' ? 'NVIDIA FLUX BETA' : 'PADDOX AI OUTPUT';
+  if(wm) wm.textContent = 'FAN RESULT';
 
   const pd = $('#preview-driver');
   const pt = $('#preview-template');
   const pr = $('#preview-ratio');
-  if(pd) pd.textContent = selectedDriver?.name || 'Generated';
-  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · ${(meta.providerMode || meta.provider || 'prompt-builder').replace(/_/g,' ')}`;
+  if(pd) pd.textContent = selectedDriver?.name || 'PADDOX';
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · Uploaded Result`;
   if(pr) pr.textContent = selectedRatio;
 }
 
 function downloadGeneratedImage() {
-  if(!generatedImageUrl && !uploadedResultDataUrl) return showToast('Generate or upload an image first.');
+  if(!generatedImageUrl && !uploadedResultDataUrl) return showToast('Upload an AI result first.');
   const a = document.createElement('a');
   a.href = generatedImageUrl || uploadedResultDataUrl;
-  a.download = `paddox-ai-${selectedDriver?.id || 'driver'}-${selectedTemplate?.id || 'template'}.png`;
+  a.download = `paddox-ai-result-${selectedDriver?.id || 'driver'}-${selectedTemplate?.id || 'template'}.png`;
   a.click();
 }
 
@@ -1950,26 +1861,28 @@ function saveCreation() {
   list.unshift({
     ...finalPayload,
     createdAt: new Date().toISOString(),
-    imageDataUrl: generatedImageUrl || uploadedResultDataUrl || ''
+    imageDataUrl: generatedImageUrl || uploadedResultDataUrl || '',
+    mode: 'gpt-gemini-prompt-builder'
   });
   localStorage.setItem('paddox_ai_creations', JSON.stringify(list.slice(0,12)));
   renderCreations();
-  showToast('Saved to local AI Creations.');
+  showToast('Prompt setup saved locally.');
 }
 
 function renderCreations() {
   const grid = $('#recent-grid'); if(!grid) return;
   const list = JSON.parse(localStorage.getItem('paddox_ai_creations') || '[]');
   if(!list.length) {
-    grid.innerHTML = '<div class="empty-creation">No creations yet. Build a prompt, generate with NVIDIA, or upload an external result to get started.</div>';
+    grid.innerHTML = '<div class="empty-creation">No prompt setups or uploads yet. Build your first PADDOX prompt.</div>';
     return;
   }
   grid.innerHTML = list.map(x => `
     <div class="creation-card">
-      <h3>${x.template?.title || x.creationTitle || 'PADDOX AI Creation'}</h3>
-      <p>${x.driver?.name || x.driverName || 'Driver'} · ${x.driver?.team || x.teamName || 'Team'} · ${x.output?.aspectRatio || '4:5'}</p>
+      ${x.imageDataUrl ? `<img class="creation-thumb" src="${x.imageDataUrl}" alt="AI upload preview"/>` : ''}
+      ${x.pointsAwarded ? `<div class="creation-points">+${x.pointsAwarded} Fan Points</div>` : '<div class="creation-points creation-points--muted">Prompt Setup</div>'}
+      <h3>${x.template?.title || x.creationTitle || 'PADDOX Prompt Setup'}</h3>
+      <p>${x.driver?.name || x.driverName || 'Driver'} · ${x.driver?.team || x.teamName || 'Team'} · ${x.output?.aspectRatio || selectedRatio}</p>
       <p>${new Date(x.createdAt).toLocaleString()}</p>
-      ${x.pointsAwarded ? `<small>Fan Points Awarded: +${x.pointsAwarded}</small>` : ''}
     </div>
   `).join('');
 }
@@ -1977,36 +1890,38 @@ function renderCreations() {
 function handleAiResultFileSelect(e) {
   const file = e.target.files?.[0];
   if(!file) return;
-  uploadRewardClaimed = false;
+  uploadedResultName = file.name;
   uploadedResultDataUrl = '';
-  const trigger = $('#upload-result-trigger');
-  if(trigger) trigger.textContent = file.name;
-  $('#result-status').textContent = `${file.name} selected. Click “Submit Result +50 FP” to reward the fan upload.`;
+  uploadRewardClaimed = false;
+  $('#result-status').textContent = 'Reading your AI result image...';
   fileToDataUrl(file)
     .then(dataUrl => {
       uploadedResultDataUrl = dataUrl;
       generatedImageUrl = dataUrl;
-      renderGeneratedImage(dataUrl, { provider: 'external-upload', providerMode: 'upload_result' });
-      $('#download-generated-image').disabled = false;
-      renderUploadReadyState();
-      showToast('AI result ready for upload reward.');
+      renderGeneratedImage(dataUrl, {});
+      $('#result-status').textContent = `${file.name} ready. Submit it to PADDOX and claim +50 Fan Points.`;
+      $('#submit-result-upload') && ($('#submit-result-upload').disabled = false);
+      $('#download-generated-image') && ($('#download-generated-image').disabled = false);
+      showToast('AI result preview ready.');
     })
     .catch(err => {
-      $('#result-status').textContent = err.message || 'Could not read the selected AI result image.';
-      showToast(err.message || 'Upload preparation failed');
+      $('#result-status').textContent = 'Could not read your AI result image.';
+      showToast(err.message || 'Result image upload failed');
     });
 }
 
 async function submitAiResultUpload() {
-  if(uploadRewardClaimed) return showToast('Reward already claimed for this upload.');
-  if(!uploadedResultDataUrl) return showToast('Please choose an AI result image first.');
+  if(!finalPayload) finalPayload = buildPayload();
+  if(!uploadedResultDataUrl) return showToast('Upload your AI result image first.');
+  if(uploadRewardClaimed) return showToast('Fan Points already claimed for this upload.');
+  if(!getAccessToken()) return showToast('Please log in to earn Fan Points.');
 
   const btn = $('#submit-result-upload');
   const originalText = btn?.textContent || 'Submit Result +50 FP';
   try {
     if(btn) {
       btn.disabled = true;
-      btn.textContent = 'Submitting Upload...';
+      btn.textContent = 'Submitting...';
       btn.classList.add('is-loading');
     }
 
@@ -2015,7 +1930,7 @@ async function submitAiResultUpload() {
       body: JSON.stringify({
         imageDataUrl: uploadedResultDataUrl,
         creationTitle: `${selectedTemplate?.title || 'PADDOX AI'} Result`,
-        templateTitle: selectedTemplate?.title || 'PADDOX AI Result',
+        templateTitle: selectedTemplate?.title || 'PADDOX Prompt',
         driverName: selectedDriver?.name || '',
         teamName: selectedDriver?.team || '',
         pointsAwarded: 50,
@@ -2071,8 +1986,8 @@ function initUploads() {
     $('#upload-note').textContent = `${file.name} — preparing fan reference...`;
     try {
       uploadedPhotoDataUrl = await fileToDataUrl(file);
-      $('#upload-note').textContent = `${file.name} — ready for PADDOX prompt building / NVIDIA beta`;
-      showToast('Fan photo ready.');
+      $('#upload-note').textContent = `${file.name} — ready for GPT/Gemini prompt building`;
+      showToast('Fan photo ready for prompt building.');
     } catch (err) {
       $('#upload-note').textContent = 'Could not read the uploaded photo.';
       showToast(err.message || 'Photo upload failed');
@@ -2088,7 +2003,6 @@ function initFormListeners() {
   ['#fan-name','#fan-tagline','#fan-country','#custom-number'].forEach(id => $(id)?.addEventListener('input', renderSummary));
   $('#driver-search')?.addEventListener('input', e => renderDrivers(e.target.value));
   $('#generate-btn')?.addEventListener('click', generatePrompt);
-  $('#generate-live-btn')?.addEventListener('click', generateLiveNvidia);
   $('#copy-prompt-btn')?.addEventListener('click', copyPrompt);
   $('#download-payload')?.addEventListener('click', downloadPayload);
   $('#download-text-prompt')?.addEventListener('click', downloadTextPrompt);

@@ -54,7 +54,7 @@
       <div class="ai-hero-copy">
         <div class="ai-kicker animate-fade-up">PADDOX AI FAN STUDIO</div>
         <h1 class="ai-title animate-fade-up delay-1">CREATE YOUR <span>RACING LEGACY</span></h1>
-        <p class="ai-sub animate-fade-up delay-2">Build premium PADDOX prompts using the current 22-driver grid, team suits, driver face descriptions, and cinematic racing templates. Generate your image in any AI tool, then upload the result back here to earn Fan Points.</p>
+        <p class="ai-sub animate-fade-up delay-2">Build premium GPT/Gemini-ready PADDOX prompts using the current 22-driver grid, team suits, driver face descriptions, pit-lane selfie scenes, podium posters, cockpit drama, and premium motorsport styling. Copy the prompt, generate anywhere, then upload your result for Fan Points.</p>
         <div class="ai-hero-actions animate-fade-up delay-3">
           <a href="#studio" class="ai-primary-btn">Start Creating <span class="cta-arrow"></span></a>
           <a href="#templates" class="ai-secondary-btn">Explore Templates</a>
@@ -75,7 +75,7 @@
         <div>
           <div class="section-label">GENERATOR</div>
           <h2>Build a realistic fan-driver image</h2>
-          <p>Choose driver, template, fan details and output ratio. PADDOX builds a premium prompt you can copy into any AI image tool, then upload your finished result back here.</p>
+          <p>Choose driver, template, fan details and output ratio. PADDOX builds a polished GPT/Gemini-ready prompt and JSON payload you can copy into any AI image tool.</p>
         </div>
         <div class="wallet-card"><span>PADDOX Credits</span><strong id="credit-balance">240</strong></div>
       </div>
@@ -116,11 +116,10 @@
           </div>
 
           <div class="summary-card">
-            <div class="summary-title">NVIDIA FLUX + Prompt Builder Summary</div>
+            <div class="summary-title">Prompt Builder Summary</div>
             <div id="summary-lines"></div>
             <button class="generate-btn" id="generate-btn">Build Prompt</button>
-            <button class="generate-btn live-btn" id="generate-live-btn">Generate with NVIDIA Beta</button>
-            <button class="copy-btn" id="copy-prompt-btn" disabled>Copy Prompt</button>
+            <button class="copy-btn" id="copy-prompt-btn" disabled>Copy GPT/Gemini Prompt</button>
           </div>
         </aside>
 
@@ -132,9 +131,9 @@
             <div class="preview-ratio" id="preview-ratio">4:5</div>
           </div>
           <div class="result-card">
-            <h3>NVIDIA Live Output + Prompt Tools</h3>
-            <p id="result-status">Use Build Prompt for copy/export mode, or use Generate with NVIDIA Beta for live image creation. If NVIDIA fails or free trial requests finish, your PADDOX credits stay safe and you can still upload an external AI result for +50 Fan Points.</p>
-            <textarea id="final-prompt" readonly placeholder="Your premium PADDOX prompt will appear here…"></textarea>
+            <h3>GPT/Gemini Prompt Builder + Fan Upload</h3>
+            <p id="result-status">Build your premium PADDOX prompt, generate the image in GPT/Gemini or any AI image tool, then upload your final result here to earn +50 Fan Points.</p>
+            <textarea id="final-prompt" readonly placeholder="Your premium GPT/Gemini-ready PADDOX prompt will appear here…"></textarea>
             <input type="file" id="ai-result-file" accept="image/*" hidden/>
             <div class="result-actions">
               <button id="download-text-prompt" disabled>Download TXT Prompt</button>
@@ -162,11 +161,11 @@
     <section class="recent-creations reveal-up">
       <div class="sec-header">
         <div class="section-label">MY CREATIONS</div>
-        <h2>My Prompt Uploads</h2>
-        <p>Save prompt setups locally, then upload your final AI image here and earn PADDOX Fan Points.</p>
+        <h2>My Prompt Setups & Uploads</h2>
+        <p>Save prompt setups locally. Upload your externally generated AI result to earn Fan Points.</p>
       </div>
       <div class="recent-grid" id="recent-grid">
-        <div class="empty-creation">No prompt setups or uploaded AI results yet. Build your first PADDOX prompt.</div>
+        <div class="empty-creation">No prompt setups or uploads yet. Build your first PADDOX prompt.</div>
       </div>
     </section>
 
@@ -174,7 +173,7 @@
       <div>
         <span>AI CREDITS</span>
         <h2>Build prompts. Upload results. Earn Fan Points.</h2>
-        <p>Use PADDOX to craft premium F1-style prompts, then bring back your best AI result and grow your Fan Points inside the community.</p>
+        <p>Use PADDOX to craft premium GPT/Gemini-ready prompts, then bring back your best generated result and grow your Fan Points.</p>
       </div>
       <a href="account.html" class="ai-primary-btn">View Credits</a>
     </section>
@@ -186,6 +185,6 @@
   </footer>
 
   <div id="toast" class="toast"></div>
-  <script src="aistudio.js?v=A4_11N_1"></script>
+  <script src="aistudio.js?v=A4_11N_2"></script>
 </body>
 </html>
