@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>PADDOX — AI Fan Studio</title>
-  <link rel="stylesheet" href="aistudio.css?v=A4_11L_1"/>
+  <link rel="stylesheet" href="aistudio.css?v=A4_11L"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -54,7 +54,7 @@
       <div class="ai-hero-copy">
         <div class="ai-kicker animate-fade-up">PADDOX AI FAN STUDIO</div>
         <h1 class="ai-title animate-fade-up delay-1">CREATE YOUR <span>RACING LEGACY</span></h1>
-        <p class="ai-sub animate-fade-up delay-2">Generate realistic and hyper-realistic F1 fan visuals using the current 22-driver grid, team suits, driver face descriptions, pit-lane selfie scenes, podium posters, cockpit drama, and premium PADDOX styling.</p>
+        <p class="ai-sub animate-fade-up delay-2">Build premium PADDOX prompts using the current 22-driver grid, team suits, driver face descriptions, and cinematic racing templates. Generate your image in any AI tool, then upload the result back here to earn Fan Points.</p>
         <div class="ai-hero-actions animate-fade-up delay-3">
           <a href="#studio" class="ai-primary-btn">Start Creating <span class="cta-arrow"></span></a>
           <a href="#templates" class="ai-secondary-btn">Explore Templates</a>
@@ -75,7 +75,7 @@
         <div>
           <div class="section-label">GENERATOR</div>
           <h2>Build a realistic fan-driver image</h2>
-          <p>Choose driver, template, fan details and output ratio. PADDOX builds a clean generation prompt and payload ready for Gemini image generation through the PADDOX backend.</p>
+          <p>Choose driver, template, fan details and output ratio. PADDOX builds a premium prompt you can copy into any AI image tool, then upload your finished result back here.</p>
         </div>
         <div class="wallet-card"><span>PADDOX Credits</span><strong id="credit-balance">240</strong></div>
       </div>
@@ -116,10 +116,10 @@
           </div>
 
           <div class="summary-card">
-            <div class="summary-title">Generation Summary</div>
+            <div class="summary-title">Prompt Builder Summary</div>
             <div id="summary-lines"></div>
-            <button class="generate-btn" id="generate-btn">Generate Image</button>
-            <button class="copy-btn" id="copy-prompt-btn" disabled>Copy Sectioned Prompt</button>
+            <button class="generate-btn" id="generate-btn">Build Prompt</button>
+            <button class="copy-btn" id="copy-prompt-btn" disabled>Copy Prompt</button>
           </div>
         </aside>
 
@@ -131,15 +131,18 @@
             <div class="preview-ratio" id="preview-ratio">4:5</div>
           </div>
           <div class="result-card">
-            <h3>Gemini AI Output + Sectioned Prompt</h3>
-            <p id="result-status">Ready when your driver, template, and fan photo are selected.</p>
-            <textarea id="final-prompt" readonly placeholder="Your sectioned Gemini-ready realistic prompt will appear here…"></textarea>
+            <h3>Prompt Builder + Fan Result Upload</h3>
+            <p id="result-status">Build your PADDOX prompt, generate the image in any external AI tool, then upload the final result here to earn +50 Fan Points.</p>
+            <textarea id="final-prompt" readonly placeholder="Your premium PADDOX prompt will appear here…"></textarea>
+            <input type="file" id="ai-result-file" accept="image/*" hidden/>
             <div class="result-actions">
-              <button id="download-generated-image" disabled>Download Image</button>
               <button id="download-text-prompt" disabled>Download TXT Prompt</button>
               <button id="download-payload" disabled>Download JSON Payload</button>
               <button id="copy-json-btn" disabled>Copy JSON</button>
-              <button id="save-creation" disabled>Save AI Creation</button>
+              <button id="save-creation" disabled>Save Prompt Setup</button>
+              <button id="upload-result-trigger" disabled>Upload AI Result</button>
+              <button id="submit-result-upload" disabled>Submit Result +50 FP</button>
+              <button id="download-generated-image" disabled>Download Result Image</button>
             </div>
           </div>
         </section>
@@ -158,19 +161,19 @@
     <section class="recent-creations reveal-up">
       <div class="sec-header">
         <div class="section-label">MY CREATIONS</div>
-        <h2>Recent AI Creations</h2>
-        <p>Frontend save mock for now. Backend sync can connect this later to Account → Downloads or AI Creations.</p>
+        <h2>My Prompt Uploads</h2>
+        <p>Save prompt setups locally, then upload your final AI image here and earn PADDOX Fan Points.</p>
       </div>
       <div class="recent-grid" id="recent-grid">
-        <div class="empty-creation">No creations yet. Prepare your first PADDOX AI generation.</div>
+        <div class="empty-creation">No prompt setups or uploaded AI results yet. Build your first PADDOX prompt.</div>
       </div>
     </section>
 
     <section class="credits-banner reveal-up">
       <div>
         <span>AI CREDITS</span>
-        <h2>Need more PADDOX Credits?</h2>
-        <p>Unlock more realistic fan-driver selfies, podium posters, race-week portraits and wallpapers.</p>
+        <h2>Build prompts. Upload results. Earn Fan Points.</h2>
+        <p>Use PADDOX to craft premium F1-style prompts, then bring back your best AI result and grow your Fan Points inside the community.</p>
       </div>
       <a href="account.html" class="ai-primary-btn">View Credits</a>
     </section>
@@ -182,6 +185,6 @@
   </footer>
 
   <div id="toast" class="toast"></div>
-  <script src="aistudio.js?v=A4_11L_1"></script>
+  <script src="aistudio.js?v=A4_11M"></script>
 </body>
 </html>

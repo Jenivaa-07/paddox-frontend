@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11L.1 Gemini Only Restore Fix
+   PADDOX — aistudio.js | AI Prompt Studio | Phase A4.11M Prompt Builder + Fan Upload Rewards
    ============================================================ */
 'use strict';
 
@@ -719,6 +719,7 @@ const AI_F1_DRIVERS_API = 'https://paddox-backend.onrender.com/api/f1/drivers';
 const PADDOX_API_BASE = window.PADDOX_API_BASE || 'https://paddox-backend.onrender.com/api';
 const AI_STUDIO_GENERATE_API = `${PADDOX_API_BASE}/ai-studio/generate`;
 const AI_STUDIO_CREDITS_API = `${PADDOX_API_BASE}/ai-studio/credits`;
+const AI_STUDIO_UPLOAD_RESULT_API = `${PADDOX_API_BASE}/ai-studio/upload-result`;
 
 /* Phase A4.11H.1 — Real credits sync:
    Admin-added credits live in MongoDB. Do not trust browser/localStorage alone. */
@@ -768,9 +769,9 @@ function isQuotaErrorMessage(message = '', responseData = {}) {
     text.includes('free tier') ||
     text.includes('billing') ||
     text.includes('payment') ||
-    text.includes('gemini') ||
+    text.includes('colab') ||
     text.includes('ngrok') ||
-    text.includes('gemini');
+    text.includes('hugging face');
 }
 
 function handleProviderGenerationError(err) {
@@ -781,11 +782,11 @@ function handleProviderGenerationError(err) {
 
   const quota = isQuotaErrorMessage(err?.message, responseData);
   const message = err?.message || (quota
-    ? 'Gemini AI generation is temporarily unavailable. Your credits were not deducted.'
-    : 'Gemini AI generation failed. Your credits were not deducted.');
+    ? 'Colab AI generation is temporarily unavailable. Your credits were not deducted.'
+    : 'Colab AI generation failed. Your credits were not deducted.');
 
   $('#result-status').textContent = message;
-  showToast(quota ? 'Gemini AI unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+  showToast(quota ? 'Colab AI unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
 
   const frame = $('#preview-frame');
   frame?.classList.remove('has-generated-image');
@@ -793,7 +794,7 @@ function handleProviderGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = quota ? 'GEMINI AI UNAVAILABLE' : 'PADDOX AI';
+  if (wm) wm.textContent = quota ? 'COLAB AI UNAVAILABLE' : 'PADDOX AI';
 
   return message;
 }
@@ -816,6 +817,9 @@ let uploadedPhotoName = '';
 let uploadedPhotoDataUrl = '';
 let generatedImageUrl = '';
 let finalPayload = null;
+let uploadedResultName = '';
+let uploadedResultDataUrl = '';
+let uploadRewardClaimed = false;
 
 function $(s, root=document) { return root.querySelector(s); }
 function $$(s, root=document) { return Array.from(root.querySelectorAll(s)); }
@@ -1372,8 +1376,8 @@ function buildPayload() {
   const prompt = buildPrompt();
   return {
     phase: 'A4.11L',
-    mode: 'gemini-hf-ready-realistic-prompt-payload',
-    providerTarget: 'gemini-api',
+    mode: 'colab-hf-ready-realistic-prompt-payload',
+    providerTarget: 'colab-huggingface-free-api',
     promptVersion: 'paddox-realistic-v1.2-selfie-composition-lock',
     driver: {
       id: selectedDriver.id,
@@ -1540,8 +1544,8 @@ async function generatePrompt() {
       btn.classList.add('is-loading');
     }
 
-    $('#result-status').textContent = 'Generating with Gemini provider. If generation fails, no credits will be deducted...';
-    showToast('Generating with Gemini AI...');
+    $('#result-status').textContent = 'Generating with Colab Hugging Face bridge. If generation fails, no credits will be deducted...';
+    showToast('Generating with Colab AI...');
 
     const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
       method: 'POST',
@@ -1556,14 +1560,14 @@ async function generatePrompt() {
 
     const data = response.data || response;
     const imageUrl = data.image?.url || data.image?.dataUri || data.poster?.image?.url || '';
-    if(!imageUrl) throw new Error('Gemini AI response did not include an image.');
+    if(!imageUrl) throw new Error('Colab AI response did not include an image.');
 
     generatedImageUrl = imageUrl;
     renderGeneratedImage(imageUrl, data);
     setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
     renderPreview();
 
-    $('#result-status').textContent = `GEMINI AI image generated successfully using ${data.model || 'image model'}.`;
+    $('#result-status').textContent = `COLAB AI image generated successfully using ${data.model || 'image model'}.`;
     $('#copy-prompt-btn').disabled = false;
     $('#download-payload').disabled = false;
     $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1571,7 +1575,7 @@ async function generatePrompt() {
     $('#save-creation').disabled = false;
     $('#download-generated-image') && ($('#download-generated-image').disabled = false);
 
-    showToast('Gemini AI image ready.');
+    showToast('Colab AI image ready.');
   } catch (err) {
     console.error('PADDOX image generation failed:', err);
     handleProviderGenerationError(err);
@@ -1601,13 +1605,13 @@ function renderGeneratedImage(imageUrl, meta = {}) {
   frame.classList.add('has-generated-image');
 
   const wm = frame.querySelector('.preview-watermark');
-  if(wm) wm.textContent = 'GEMINI AI OUTPUT';
+  if(wm) wm.textContent = 'COLAB AI OUTPUT';
 
   const pd = $('#preview-driver');
   const pt = $('#preview-template');
   const pr = $('#preview-ratio');
   if(pd) pd.textContent = selectedDriver?.name || 'Generated';
-  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · gemini-gemini`;
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · colab-hf-bridge`;
   if(pr) pr.textContent = selectedRatio;
 }
 
@@ -1698,8 +1702,8 @@ function initUploads() {
     $('#upload-note').textContent = `${file.name} — preparing reference...`;
     try {
       uploadedPhotoDataUrl = await fileToDataUrl(file);
-      $('#upload-note').textContent = `${file.name} — ready for Gemini AI provider`;
-      showToast('Fan photo ready for Gemini AI reference provider.');
+      $('#upload-note').textContent = `${file.name} — ready for Colab AI bridge`;
+      showToast('Fan photo ready for Colab AI reference bridge.');
     } catch (err) {
       $('#upload-note').textContent = 'Could not read the uploaded photo.';
       showToast(err.message || 'Photo upload failed');
@@ -1730,3 +1734,247 @@ document.addEventListener('DOMContentLoaded', () => {
   syncCloudinaryDriverImages();
   syncRealAiCredits(true);
 });
+
+
+/* ============================================================
+   Phase A4.11M — Prompt Builder + Fan Upload Rewards overrides
+   ============================================================ */
+function generatePrompt() {
+  if(!selectedDriver) return showToast('Please select a driver first.');
+  if(!selectedTemplate) return showToast('Please choose a prompt template.');
+  if(selectedTemplate.requiresUserPhoto && !uploadedPhotoDataUrl) {
+    return showToast('This fan-face template needs a fan photo.');
+  }
+
+  finalPayload = buildPayload();
+  $('#final-prompt').value = finalPayload.prompt;
+  $('#result-status').textContent = 'Prompt ready. Copy it, generate in any AI image tool, then upload your result back here to earn +50 Fan Points.';
+  $('#copy-prompt-btn').disabled = false;
+  $('#download-payload').disabled = false;
+  $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
+  $('#copy-json-btn') && ($('#copy-json-btn').disabled = false);
+  $('#save-creation').disabled = false;
+  $('#upload-result-trigger') && ($('#upload-result-trigger').disabled = false);
+  $('#submit-result-upload') && ($('#submit-result-upload').disabled = !uploadedResultDataUrl);
+  $('#download-generated-image') && ($('#download-generated-image').disabled = !generatedImageUrl);
+
+  const frame = $('#preview-frame');
+  frame?.classList.remove('has-generated-image');
+  const existing = $('#generated-image');
+  if (existing) existing.remove();
+  const wm = frame?.querySelector('.preview-watermark');
+  if (wm) wm.textContent = 'PROMPT READY';
+  const pd = $('#preview-driver');
+  const pt = $('#preview-template');
+  const pr = $('#preview-ratio');
+  if(pd) pd.textContent = selectedDriver?.name || 'Select Driver';
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · Prompt Builder`; 
+  if(pr) pr.textContent = selectedRatio;
+
+  showToast('PADDOX prompt built. Copy it and create your image anywhere.');
+}
+
+function renderGeneratedImage(imageUrl, meta = {}) {
+  const frame = $('#preview-frame');
+  if(!frame) return;
+
+  let img = $('#generated-image');
+  if(!img) {
+    img = document.createElement('img');
+    img.id = 'generated-image';
+    img.className = 'generated-image';
+    img.alt = 'PADDOX uploaded AI result';
+    frame.appendChild(img);
+  }
+  img.src = imageUrl;
+  frame.classList.add('has-generated-image');
+
+  const wm = frame.querySelector('.preview-watermark');
+  if(wm) wm.textContent = 'FAN RESULT';
+
+  const pd = $('#preview-driver');
+  const pt = $('#preview-template');
+  const pr = $('#preview-ratio');
+  if(pd) pd.textContent = selectedDriver?.name || 'PADDOX';
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · Uploaded Result`;
+  if(pr) pr.textContent = selectedRatio;
+}
+
+function copyPrompt() {
+  const txt = $('#final-prompt')?.value;
+  if(!txt) return showToast('Build your prompt first.');
+  navigator.clipboard?.writeText(txt).then(() => showToast('PADDOX prompt copied. Paste it into any AI image tool.'));
+}
+
+function saveCreation() {
+  if(!finalPayload) finalPayload = buildPayload();
+  const list = JSON.parse(localStorage.getItem('paddox_ai_creations') || '[]');
+  list.unshift({
+    kind: 'prompt',
+    template: finalPayload.template,
+    driver: finalPayload.driver,
+    output: finalPayload.output,
+    createdAt: new Date().toISOString(),
+    prompt: finalPayload.prompt
+  });
+  localStorage.setItem('paddox_ai_creations', JSON.stringify(list.slice(0,12)));
+  renderCreations();
+  showToast('Prompt setup saved locally.');
+}
+
+function renderCreations() {
+  const grid = $('#recent-grid'); if(!grid) return;
+  const list = JSON.parse(localStorage.getItem('paddox_ai_creations') || '[]');
+  if(!list.length) {
+    grid.innerHTML = '<div class="empty-creation">No prompt setups or uploaded AI results yet. Build your first PADDOX prompt.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(x => {
+    const when = x.createdAt ? new Date(x.createdAt).toLocaleString() : 'Recently';
+    const title = x.template?.title || x.creationTitle || 'PADDOX AI Entry';
+    const meta = `${x.driver?.name || x.driverName || 'Driver'} · ${x.driver?.team || x.teamName || 'Team'} · ${x.output?.aspectRatio || selectedRatio}`;
+    const badge = x.kind === 'upload' ? `<div class="creation-points">+${x.pointsAwarded || 50} Fan Points</div>` : '<div class="creation-points creation-points--muted">Prompt Setup</div>';
+    const thumb = x.imageDataUrl ? `<img class="creation-thumb" src="${x.imageDataUrl}" alt="AI upload preview"/>` : '';
+    return `
+      <div class="creation-card">
+        ${thumb}
+        ${badge}
+        <h3>${title}</h3>
+        <p>${meta}</p>
+        <p>${when}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+function downloadGeneratedImage() {
+  if(!generatedImageUrl) return showToast('Upload an AI result first.');
+  const a = document.createElement('a');
+  a.href = generatedImageUrl;
+  a.download = `paddox-fan-result-${selectedDriver.id}-${selectedTemplate.id}.png`;
+  a.click();
+}
+
+async function handleAiResultFileSelect(e) {
+  const file = e.target.files?.[0];
+  if(!file) return;
+  uploadedResultName = file.name;
+  uploadedResultDataUrl = '';
+  uploadRewardClaimed = false;
+  $('#result-status').textContent = 'Reading your AI result image...';
+  try {
+    uploadedResultDataUrl = await fileToDataUrl(file);
+    generatedImageUrl = uploadedResultDataUrl;
+    renderGeneratedImage(uploadedResultDataUrl, {});
+    $('#result-status').textContent = `${file.name} ready. Submit it to PADDOX and claim +50 Fan Points.`;
+    $('#submit-result-upload') && ($('#submit-result-upload').disabled = false);
+    $('#download-generated-image') && ($('#download-generated-image').disabled = false);
+    showToast('AI result preview ready.');
+  } catch (err) {
+    $('#result-status').textContent = 'Could not read your AI result image.';
+    showToast(err.message || 'Result image upload failed');
+  }
+}
+
+async function submitAiResultUpload() {
+  if(!finalPayload) return showToast('Build your prompt first.');
+  if(!uploadedResultDataUrl) return showToast('Upload your AI result image first.');
+  if(uploadRewardClaimed) return showToast('Fan Points already claimed for this upload.');
+  if(!getAccessToken()) return showToast('Please log in to upload your result and earn Fan Points.');
+
+  const btn = $('#submit-result-upload');
+  const originalText = btn?.textContent || 'Submit Result +50 FP';
+  try {
+    if(btn) {
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      btn.classList.add('is-loading');
+    }
+
+    const response = await aiStudioAuthFetch(AI_STUDIO_UPLOAD_RESULT_API, {
+      method: 'POST',
+      body: JSON.stringify({
+        imageDataUrl: uploadedResultDataUrl,
+        creationTitle: `${selectedTemplate?.title || 'PADDOX AI'} Result`,
+        promptTitle: selectedTemplate?.title || 'PADDOX Prompt',
+        templateTitle: selectedTemplate?.title || 'PADDOX Prompt',
+        driverName: selectedDriver?.name || '',
+        teamName: selectedDriver?.team || '',
+        pointsAwarded: 50,
+        prompt: finalPayload?.prompt || ''
+      })
+    });
+
+    const data = response.data || response;
+    uploadRewardClaimed = true;
+    const awarded = Number(data.pointsAwarded || data.upload?.pointsAwarded || 50);
+    const totalPoints = Number(data.fanPoints || data.fanPointsAfter || 0);
+    $('#result-status').textContent = `Upload successful. You earned +${awarded} Fan Points. Current Fan Points: ${totalPoints}.`;
+
+    const list = JSON.parse(localStorage.getItem('paddox_ai_creations') || '[]');
+    list.unshift({
+      kind: 'upload',
+      template: { title: selectedTemplate?.title || 'PADDOX Upload' },
+      driver: { name: selectedDriver?.name || '', team: selectedDriver?.team || '' },
+      output: { aspectRatio: selectedRatio },
+      createdAt: new Date().toISOString(),
+      pointsAwarded: awarded,
+      imageDataUrl: uploadedResultDataUrl,
+      creationTitle: `${selectedTemplate?.title || 'PADDOX AI'} Result`
+    });
+    localStorage.setItem('paddox_ai_creations', JSON.stringify(list.slice(0,12)));
+    renderCreations();
+
+    showToast(`Uploaded to PADDOX. +${awarded} Fan Points earned.`);
+    await syncRealAiCredits(true);
+  } catch (err) {
+    console.error('AI result upload failed:', err);
+    $('#result-status').textContent = err.message || 'Could not upload your AI result right now.';
+    showToast(err.message || 'Upload failed');
+  } finally {
+    if(btn) {
+      btn.disabled = uploadRewardClaimed;
+      btn.textContent = uploadRewardClaimed ? 'Points Claimed' : originalText;
+      btn.classList.remove('is-loading');
+    }
+  }
+}
+
+function initUploads() {
+  $('#upload-trigger')?.addEventListener('click', () => $('#fan-photo')?.click());
+  $('#fan-photo')?.addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if(!file) return;
+    uploadedPhotoName = file.name;
+    uploadedPhotoDataUrl = '';
+    const img = $('#photo-preview');
+    img.src = URL.createObjectURL(file);
+    img.style.display = 'block';
+    $('#upload-note').textContent = `${file.name} — preparing fan reference...`;
+    try {
+      uploadedPhotoDataUrl = await fileToDataUrl(file);
+      $('#upload-note').textContent = `${file.name} — ready for prompt building`;
+      showToast('Fan photo ready for prompt building.');
+    } catch (err) {
+      $('#upload-note').textContent = 'Could not read the uploaded photo.';
+      showToast(err.message || 'Photo upload failed');
+    }
+    renderSummary();
+  });
+
+  $('#upload-result-trigger')?.addEventListener('click', () => $('#ai-result-file')?.click());
+  $('#ai-result-file')?.addEventListener('change', handleAiResultFileSelect);
+}
+
+function initFormListeners() {
+  ['#fan-name','#fan-tagline','#fan-country','#custom-number'].forEach(id => $(id)?.addEventListener('input', renderSummary));
+  $('#driver-search')?.addEventListener('input', e => renderDrivers(e.target.value));
+  $('#generate-btn')?.addEventListener('click', generatePrompt);
+  $('#copy-prompt-btn')?.addEventListener('click', copyPrompt);
+  $('#download-payload')?.addEventListener('click', downloadPayload);
+  $('#download-text-prompt')?.addEventListener('click', downloadTextPrompt);
+  $('#copy-json-btn')?.addEventListener('click', copyPayloadJson);
+  $('#save-creation')?.addEventListener('click', saveCreation);
+  $('#download-generated-image')?.addEventListener('click', downloadGeneratedImage);
+  $('#submit-result-upload')?.addEventListener('click', submitAiResultUpload);
+}
