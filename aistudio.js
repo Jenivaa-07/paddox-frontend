@@ -1,5 +1,5 @@
 /* ============================================================
-   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11L Colab Hugging Face Free API Bridge
+   PADDOX — aistudio.js | AI Fan Studio | Phase A4.11L.1 Gemini Only Restore Fix
    ============================================================ */
 'use strict';
 
@@ -768,9 +768,9 @@ function isQuotaErrorMessage(message = '', responseData = {}) {
     text.includes('free tier') ||
     text.includes('billing') ||
     text.includes('payment') ||
-    text.includes('colab') ||
+    text.includes('gemini') ||
     text.includes('ngrok') ||
-    text.includes('hugging face');
+    text.includes('gemini');
 }
 
 function handleProviderGenerationError(err) {
@@ -781,11 +781,11 @@ function handleProviderGenerationError(err) {
 
   const quota = isQuotaErrorMessage(err?.message, responseData);
   const message = err?.message || (quota
-    ? 'Colab AI generation is temporarily unavailable. Your credits were not deducted.'
-    : 'Colab AI generation failed. Your credits were not deducted.');
+    ? 'Gemini AI generation is temporarily unavailable. Your credits were not deducted.'
+    : 'Gemini AI generation failed. Your credits were not deducted.');
 
   $('#result-status').textContent = message;
-  showToast(quota ? 'Colab AI unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
+  showToast(quota ? 'Gemini AI unavailable — credits safe.' : `Generation failed: ${err.message || 'Try again'}`);
 
   const frame = $('#preview-frame');
   frame?.classList.remove('has-generated-image');
@@ -793,7 +793,7 @@ function handleProviderGenerationError(err) {
   if (img) img.remove();
 
   const wm = frame?.querySelector('.preview-watermark');
-  if (wm) wm.textContent = quota ? 'COLAB AI UNAVAILABLE' : 'PADDOX AI';
+  if (wm) wm.textContent = quota ? 'GEMINI AI UNAVAILABLE' : 'PADDOX AI';
 
   return message;
 }
@@ -1372,8 +1372,8 @@ function buildPayload() {
   const prompt = buildPrompt();
   return {
     phase: 'A4.11L',
-    mode: 'colab-hf-ready-realistic-prompt-payload',
-    providerTarget: 'colab-huggingface-free-api',
+    mode: 'gemini-hf-ready-realistic-prompt-payload',
+    providerTarget: 'gemini-api',
     promptVersion: 'paddox-realistic-v1.2-selfie-composition-lock',
     driver: {
       id: selectedDriver.id,
@@ -1540,8 +1540,8 @@ async function generatePrompt() {
       btn.classList.add('is-loading');
     }
 
-    $('#result-status').textContent = 'Generating with Colab Hugging Face bridge. If generation fails, no credits will be deducted...';
-    showToast('Generating with Colab AI...');
+    $('#result-status').textContent = 'Generating with Gemini provider. If generation fails, no credits will be deducted...';
+    showToast('Generating with Gemini AI...');
 
     const response = await aiStudioAuthFetch(AI_STUDIO_GENERATE_API, {
       method: 'POST',
@@ -1556,14 +1556,14 @@ async function generatePrompt() {
 
     const data = response.data || response;
     const imageUrl = data.image?.url || data.image?.dataUri || data.poster?.image?.url || '';
-    if(!imageUrl) throw new Error('Colab AI response did not include an image.');
+    if(!imageUrl) throw new Error('Gemini AI response did not include an image.');
 
     generatedImageUrl = imageUrl;
     renderGeneratedImage(imageUrl, data);
     setCredits(Number(data.aiCredits ?? Math.max(0, getCredits() - selectedTemplate.creditCost)));
     renderPreview();
 
-    $('#result-status').textContent = `COLAB AI image generated successfully using ${data.model || 'image model'}.`;
+    $('#result-status').textContent = `GEMINI AI image generated successfully using ${data.model || 'image model'}.`;
     $('#copy-prompt-btn').disabled = false;
     $('#download-payload').disabled = false;
     $('#download-text-prompt') && ($('#download-text-prompt').disabled = false);
@@ -1571,7 +1571,7 @@ async function generatePrompt() {
     $('#save-creation').disabled = false;
     $('#download-generated-image') && ($('#download-generated-image').disabled = false);
 
-    showToast('Colab AI image ready.');
+    showToast('Gemini AI image ready.');
   } catch (err) {
     console.error('PADDOX image generation failed:', err);
     handleProviderGenerationError(err);
@@ -1601,13 +1601,13 @@ function renderGeneratedImage(imageUrl, meta = {}) {
   frame.classList.add('has-generated-image');
 
   const wm = frame.querySelector('.preview-watermark');
-  if(wm) wm.textContent = 'COLAB AI OUTPUT';
+  if(wm) wm.textContent = 'GEMINI AI OUTPUT';
 
   const pd = $('#preview-driver');
   const pt = $('#preview-template');
   const pr = $('#preview-ratio');
   if(pd) pd.textContent = selectedDriver?.name || 'Generated';
-  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · colab-hf-bridge`;
+  if(pt) pt.textContent = `${selectedTemplate?.title || 'Template'} · gemini-gemini`;
   if(pr) pr.textContent = selectedRatio;
 }
 
@@ -1698,8 +1698,8 @@ function initUploads() {
     $('#upload-note').textContent = `${file.name} — preparing reference...`;
     try {
       uploadedPhotoDataUrl = await fileToDataUrl(file);
-      $('#upload-note').textContent = `${file.name} — ready for Colab AI bridge`;
-      showToast('Fan photo ready for Colab AI reference bridge.');
+      $('#upload-note').textContent = `${file.name} — ready for Gemini AI provider`;
+      showToast('Fan photo ready for Gemini AI reference provider.');
     } catch (err) {
       $('#upload-note').textContent = 'Could not read the uploaded photo.';
       showToast(err.message || 'Photo upload failed');
