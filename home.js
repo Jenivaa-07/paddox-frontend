@@ -3304,3 +3304,221 @@ setInterval(() => {
   window.addEventListener('load', boot);
   [350, 1200, 2600].forEach(ms => setTimeout(boot, ms));
 })();
+
+
+/* ============================================================
+   Phase H3.3B — Home Track Mode Countdown Circuit Sync
+   Replaces fake/random SVG Track Mode with the next race's
+   Formula Timer circuit image, synced from backend countdown.
+   ============================================================ */
+(function initH33BHomeTrackMode(){
+  const SLUGS = [
+    { keys:['australia','melbourne','albert park'], slugs:['melbourne','albert-park','albert_park'], label:'Albert Park Circuit' },
+    { keys:['china','shanghai'], slugs:['shanghai'], label:'Shanghai International Circuit' },
+    { keys:['japan','suzuka'], slugs:['suzuka'], label:'Suzuka Circuit' },
+    { keys:['miami'], slugs:['miami'], label:'Miami International Autodrome' },
+    { keys:['canada','montreal','montréal','villeneuve','gilles'], slugs:['villeneuve','montreal','gilles-villeneuve','gilles_villeneuve'], label:'Circuit Gilles Villeneuve' },
+    { keys:['monaco','monte carlo'], slugs:['monaco'], label:'Circuit de Monaco' },
+    { keys:['barcelona','catalunya'], slugs:['catalunya','barcelona','barcelona-catalunya','barcelona_catalunya'], label:'Circuit de Barcelona-Catalunya' },
+    { keys:['austria','spielberg','red bull ring'], slugs:['red_bull_ring','red-bull-ring','spielberg','austria'], label:'Red Bull Ring' },
+    { keys:['britain','british','silverstone','united kingdom'], slugs:['silverstone'], label:'Silverstone Circuit' },
+    { keys:['belgium','belgian','spa','francorchamps'], slugs:['spa','spa-francorchamps','spa_francorchamps'], label:'Circuit de Spa-Francorchamps' },
+    { keys:['hungary','hungarian','hungaroring'], slugs:['hungaroring','hungary'], label:'Hungaroring' },
+    { keys:['netherlands','dutch','zandvoort'], slugs:['zandvoort'], label:'Circuit Zandvoort' },
+    { keys:['italy','italian','monza'], slugs:['monza'], label:'Autodromo Nazionale Monza' },
+    { keys:['spain','spanish','madrid','madring'], slugs:['madrid','madring'], label:'Madring' },
+    { keys:['azerbaijan','baku'], slugs:['baku'], label:'Baku City Circuit' },
+    { keys:['singapore','marina bay'], slugs:['marina_bay','marina-bay','singapore'], label:'Marina Bay Street Circuit' },
+    { keys:['united states','usa','austin','americas','cota'], slugs:['americas','austin','cota','circuit-of-the-americas'], label:'Circuit of the Americas' },
+    { keys:['mexico','mexican','rodriguez','hermanos'], slugs:['rodriguez','mexico-city','hermanos-rodriguez','hermanos_rodriguez'], label:'Autódromo Hermanos Rodríguez' },
+    { keys:['brazil','brazilian','sao paulo','são paulo','interlagos'], slugs:['interlagos','sao-paulo','sao_paulo','brazil'], label:'Autódromo José Carlos Pace' },
+    { keys:['las vegas','vegas'], slugs:['vegas','las-vegas','las_vegas'], label:'Las Vegas Strip Circuit' },
+    { keys:['qatar','lusail','losail'], slugs:['losail','lusail','qatar'], label:'Lusail International Circuit' },
+    { keys:['abu dhabi','yas marina','uae','united arab emirates'], slugs:['yas_marina','yas-marina','abu-dhabi','abu_dhabi'], label:'Yas Marina Circuit' }
+  ];
+
+  function clean(value){
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/grand prix|gp|circuit|autodromo|autodrome|street circuit|international|de |of the/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+  function text(value, fallback){
+    const t = String(value ?? '').trim();
+    return t && t !== '[object Object]' ? t : (fallback || '');
+  }
+  function esc(value){
+    return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+  function getRace(){
+    try {
+      const race = window.HOME_F1?.nextRace || HOME_F1?.nextRace || null;
+      if (race) return race;
+      const schedule = window.HOME_F1?.schedule || HOME_F1?.schedule || [];
+      if (Array.isArray(schedule) && schedule.length) {
+        const now = Date.now();
+        return schedule.find(r => new Date(`${r.date || r.raceDate || ''}T${r.time || '13:00:00Z'}`).getTime() >= now) || schedule[0];
+      }
+    } catch (err) {}
+    const name = document.querySelector('.cs-name')?.textContent || '';
+    const circuit = document.querySelector('.cs-circuit')?.textContent || '';
+    return { name, circuit, location: circuit };
+  }
+  function getCircuit(race){
+    const hay = clean([race?.name, race?.raceName, race?.circuit, race?.location, race?.country, race?.locality].filter(Boolean).join(' '));
+    const found = SLUGS.find(item => item.keys.some(k => hay.includes(clean(k)) || clean(k).includes(hay)));
+    return found || { slugs:['monaco'], label:text(race?.circuit, 'Circuit image') };
+  }
+  function imageUrl(slug, width){
+    return `https://formula-timer.com/_next/image?url=%2Fcircuits%2F${encodeURIComponent(slug)}.png&w=${width || 3840}&q=75`;
+  }
+  function imageSources(circuit){
+    const out = [];
+    (circuit.slugs || []).forEach(slug => {
+      [3840,1920,1200,828].forEach(width => out.push(imageUrl(slug, width)));
+    });
+    return out;
+  }
+  function raceDate(race){
+    const raw = race?.date || race?.raceDate || race?.startDate || '';
+    if (!raw) return null;
+    const d = new Date(`${raw}${String(raw).includes('T') ? '' : `T${race?.time || '13:00:00Z'}`}`);
+    return Number.isFinite(d.getTime()) ? d : null;
+  }
+  function countdownText(race){
+    const d = raceDate(race);
+    if (!d) {
+      const dd = document.getElementById('cd-d')?.textContent || '--';
+      const hh = document.getElementById('cd-h')?.textContent || '--';
+      const mm = document.getElementById('cd-m')?.textContent || '--';
+      return `${dd}D · ${hh}H · ${mm}M`;
+    }
+    const diff = Math.max(0, d.getTime() - Date.now());
+    const days = Math.floor(diff / 864e5);
+    const hours = Math.floor((diff % 864e5) / 36e5);
+    const mins = Math.floor((diff % 36e5) / 6e4);
+    return `${String(days).padStart(2,'0')}D · ${String(hours).padStart(2,'0')}H · ${String(mins).padStart(2,'0')}M`;
+  }
+  function formatDate(race){
+    const d = raceDate(race);
+    if (!d) return 'Race date syncing';
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+  function splitRaceName(name){
+    const value = text(name, 'Next Grand Prix');
+    const parts = value.replace(/Grand Prix/i, '').trim();
+    return parts ? `${esc(parts)} <span class="accent">GRAND PRIX</span>` : esc(value);
+  }
+  function ensureSection(){
+    let section = document.getElementById('race-control-section');
+    if (!section) {
+      section = document.createElement('section');
+      section.id = 'race-control-section';
+      section.className = 'race-control-section section';
+      const countdown = document.querySelector('.countdown-strip');
+      const featured = document.querySelector('#featured, .featured-section');
+      if (countdown) countdown.insertAdjacentElement('afterend', section);
+      else if (featured) featured.insertAdjacentElement('beforebegin', section);
+      else document.body.appendChild(section);
+    }
+    return section;
+  }
+  function loadImage(frame, sources, alt){
+    let idx = 0;
+    function tryNext(){
+      if (!sources[idx]) {
+        frame.innerHTML = `<div class="h33b-image-pending"><strong>IMAGE PENDING</strong><small>Circuit source unavailable</small></div>`;
+        return;
+      }
+      const img = new Image();
+      img.className = 'h33b-circuit-img';
+      img.alt = alt;
+      img.decoding = 'async';
+      img.loading = 'lazy';
+      img.onload = () => {
+        frame.innerHTML = '';
+        frame.appendChild(img);
+      };
+      img.onerror = () => { idx += 1; tryNext(); };
+      img.src = sources[idx];
+    }
+    tryNext();
+  }
+  function render(){
+    if (window.__PADDOX_H32C_RAF) {
+      cancelAnimationFrame(window.__PADDOX_H32C_RAF);
+      window.__PADDOX_H32C_RAF = null;
+    }
+    const race = getRace() || {};
+    const circuit = getCircuit(race);
+    const section = ensureSection();
+    const raceName = text(race.name || race.raceName || race.grandPrix || race.eventName, 'Next Grand Prix');
+    const circuitLabel = text(race.circuit || circuit.label, circuit.label);
+    const location = [race.location || race.locality, race.country].filter(Boolean).join(' · ') || circuitLabel;
+    const round = text(race.round, '—');
+    const season = text(race.season, new Date().getFullYear());
+    const sources = imageSources(circuit);
+
+    section.classList.remove('h32c-track-foundation','h32a-track-mode');
+    section.classList.add('h33b-track-sync');
+    section.innerHTML = `
+      <div class="container">
+        <div class="section-head race-control-head">
+          <div class="reveal-up in-view">
+            <div class="section-label">LIVE RACE CONTROL</div>
+            <h2 class="section-title">TRACK <span class="accent">MODE</span></h2>
+          </div>
+          <p class="race-control-sub reveal-up in-view">Synced from the live countdown. Home Track Mode now shows only the next Grand Prix circuit, not random track buttons.</p>
+        </div>
+        <div class="h33b-track-panel liquid-sweep">
+          <div class="h33b-circuit-stage">
+            <div class="h33b-circuit-frame" id="h33b-circuit-frame">
+              <div class="h33b-image-pending"><strong>LOADING CIRCUIT</strong><small>Formula Timer direct image</small></div>
+            </div>
+            <div class="h33b-circuit-meta">
+              <span class="h33b-circuit-pill"><strong>Next</strong> ${esc(text(raceName, 'Grand Prix'))}</span>
+              <span class="h33b-circuit-pill"><strong>Map</strong> Formula Timer</span>
+            </div>
+          </div>
+          <div class="h33b-info">
+            <div class="h33b-kicker">COUNTDOWN SYNC READY</div>
+            <h3 id="rc-race-name">${splitRaceName(raceName)}</h3>
+            <p id="rc-race-meta">${esc(circuitLabel)} · ${esc(location)}</p>
+            <div class="h33b-chip-row">
+              <span class="h33b-chip">Round ${esc(round)}</span>
+              <span class="h33b-chip">Season ${esc(season)}</span>
+              <span class="h33b-chip">Live Countdown</span>
+            </div>
+            <div class="h33b-sync-card">
+              <div class="h33b-sync-top"><span>Next race pulse</span><strong id="h33b-track-countdown">${esc(countdownText(race))}</strong></div>
+              <div class="h33b-sync-rail"><span></span></div>
+            </div>
+            <div class="h33b-data-grid">
+              <div class="h33b-data-row"><span>Circuit</span><strong>${esc(circuitLabel)}</strong></div>
+              <div class="h33b-data-row"><span>Date</span><strong>${esc(formatDate(race))}</strong></div>
+              <div class="h33b-data-row"><span>Status</span><strong id="rc-status">Backend Synced</strong></div>
+            </div>
+            <a href="fanhub.html" class="h33b-track-cta">View Race Calendar →</a>
+          </div>
+        </div>
+      </div>`;
+
+    const frame = document.getElementById('h33b-circuit-frame');
+    if (frame) loadImage(frame, sources, `${circuitLabel} circuit map`);
+  }
+  function refreshCountdownOnly(){
+    const race = getRace() || {};
+    const el = document.getElementById('h33b-track-countdown');
+    if (el) el.textContent = countdownText(race);
+  }
+  function boot(){
+    try { render(); } catch (err) { console.warn('H3.3B Track Mode sync failed', err); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+  [650, 1600, 3300, 5200].forEach(ms => setTimeout(boot, ms));
+  setInterval(refreshCountdownOnly, 1000);
+})();

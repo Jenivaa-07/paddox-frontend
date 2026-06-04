@@ -6466,3 +6466,350 @@ body .nl-trust {
   .h32c-track-btn { flex: 1 1 44%; }
   .h32c-track-foundation #rc-race-name { font-size: 3rem; }
 }
+
+
+/* ============================================================
+   Phase H3.3B — Home Track Mode Countdown Circuit Sync
+   Uses next-race data + Formula Timer direct circuit image.
+   Removes random SVG selector UI from Home Track Mode.
+   ============================================================ */
+#race-control-section.h33b-track-sync,
+.race-control-section.h33b-track-sync {
+  position: relative !important;
+  padding: 112px 0 118px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(232,0,45,.12), transparent 32%),
+    radial-gradient(circle at 86% 68%, rgba(0,255,210,.045), transparent 30%),
+    linear-gradient(180deg, #030404 0%, #07100f 48%, #050505 100%) !important;
+}
+#race-control-section.h33b-track-sync::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px) !important;
+  background-size: 72px 72px !important;
+  mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 72%) !important;
+  opacity: .78 !important;
+}
+.h33b-track-sync .container { position: relative !important; z-index: 1 !important; }
+.h33b-track-sync .race-control-head {
+  align-items: flex-end !important;
+  margin-bottom: 46px !important;
+}
+.h33b-track-sync .race-control-head .section-title span,
+.h33b-track-sync .race-control-head .section-title .accent { color: var(--red) !important; }
+.h33b-track-sync .race-control-sub {
+  max-width: 440px !important;
+  color: rgba(255,255,255,.64) !important;
+  line-height: 1.75 !important;
+}
+.h33b-track-panel {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.18fr) minmax(330px, .82fr) !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  border-radius: 34px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.018)),
+    rgba(4,6,7,.88) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: 0 36px 100px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.h33b-track-panel::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(120deg, transparent 0 18%, rgba(255,255,255,.08) 31%, transparent 44% 100%) !important;
+  transform: translateX(-130%) !important;
+  animation: h33bPanelSweep 7.5s ease-in-out infinite !important;
+  pointer-events: none !important;
+}
+@keyframes h33bPanelSweep {
+  0%, 58% { transform: translateX(-130%); opacity: 0; }
+  68% { opacity: .62; }
+  100% { transform: translateX(130%); opacity: 0; }
+}
+.h33b-circuit-stage {
+  min-height: 430px !important;
+  position: relative !important;
+  padding: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background:
+    radial-gradient(circle at 44% 52%, rgba(232,0,45,.20), transparent 38%),
+    radial-gradient(circle at 20% 25%, rgba(255,255,255,.075), transparent 24%),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.026) 1px, transparent 1px),
+    rgba(0,0,0,.66) !important;
+  background-size: auto, auto, 34px 34px, 34px 34px, auto !important;
+}
+.h33b-circuit-stage::before {
+  content: 'COUNTDOWN CIRCUIT SYNC' !important;
+  position: absolute !important;
+  left: 34px !important;
+  top: 26px !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .62rem !important;
+  letter-spacing: 3px !important;
+  color: rgba(255,255,255,.42) !important;
+  text-transform: uppercase !important;
+}
+.h33b-circuit-frame {
+  position: relative !important;
+  width: min(92%, 720px) !important;
+  aspect-ratio: 16 / 9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(232,0,45,.22), transparent 48%),
+    linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.012)),
+    rgba(0,0,0,.44) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 24px 52px rgba(0,0,0,.38) !important;
+}
+.h33b-circuit-frame::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), transparent 38%),
+    radial-gradient(circle at 50% 50%, transparent 0 48%, rgba(0,0,0,.42) 100%) !important;
+}
+.h33b-circuit-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  padding: 18px !important;
+  filter:
+    drop-shadow(0 0 16px rgba(232,0,45,.40))
+    drop-shadow(0 0 28px rgba(255,255,255,.08)) !important;
+  transform: scale(1.02) !important;
+  transition: transform .55s ease, filter .55s ease, opacity .35s ease !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+.h33b-track-panel:hover .h33b-circuit-img {
+  transform: scale(1.055) !important;
+  filter:
+    drop-shadow(0 0 18px rgba(232,0,45,.55))
+    drop-shadow(0 0 34px rgba(255,255,255,.12)) !important;
+}
+.h33b-image-pending {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-height: 260px !important;
+  color: rgba(255,255,255,.65) !important;
+  font-family: var(--font-condensed) !important;
+  letter-spacing: 4px !important;
+  text-transform: uppercase !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+.h33b-image-pending strong { color: var(--red) !important; font-size: 1.1rem !important; }
+.h33b-image-pending small { color: rgba(255,255,255,.42) !important; letter-spacing: 2px !important; }
+.h33b-circuit-meta {
+  position: absolute !important;
+  left: 28px !important;
+  right: 28px !important;
+  bottom: 24px !important;
+  z-index: 3 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px !important;
+  pointer-events: none !important;
+}
+.h33b-circuit-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  background: rgba(0,0,0,.48) !important;
+  backdrop-filter: blur(12px) !important;
+  color: rgba(255,255,255,.72) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .62rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.7px !important;
+  text-transform: uppercase !important;
+}
+.h33b-circuit-pill strong { color: var(--red) !important; }
+.h33b-info {
+  position: relative !important;
+  padding: 46px 38px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(232,0,45,.26), transparent 36%),
+    linear-gradient(155deg, rgba(232,0,45,.16), rgba(255,255,255,.026)) !important;
+}
+.h33b-kicker {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(232,0,45,.16) !important;
+  border: 1px solid rgba(232,0,45,.28) !important;
+  color: rgba(255,255,255,.75) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .68rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+.h33b-info h3 {
+  margin-top: 18px !important;
+  margin-bottom: 14px !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(2.5rem, 4.2vw, 4.8rem) !important;
+  letter-spacing: 2px !important;
+  line-height: .86 !important;
+  color: #fff !important;
+}
+.h33b-info h3 .accent { color: var(--red) !important; }
+.h33b-info p {
+  color: rgba(255,255,255,.64) !important;
+  line-height: 1.7 !important;
+  margin-bottom: 22px !important;
+}
+.h33b-chip-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 22px 0 18px !important;
+}
+.h33b-chip {
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  background: rgba(0,0,0,.42) !important;
+  color: rgba(255,255,255,.74) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .62rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.7px !important;
+  text-transform: uppercase !important;
+}
+.h33b-sync-card {
+  margin: 20px 0 !important;
+  padding: 15px !important;
+  border-radius: 18px !important;
+  background: rgba(0,0,0,.32) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+}
+.h33b-sync-top {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 10px !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .66rem !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  color: rgba(255,255,255,.70) !important;
+}
+.h33b-sync-top strong { color: var(--red) !important; }
+.h33b-sync-rail {
+  height: 6px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,.10) !important;
+}
+.h33b-sync-rail span {
+  display: block !important;
+  height: 100% !important;
+  width: 0% !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, #fff, var(--red), #ff7c7c) !important;
+  box-shadow: 0 0 18px rgba(232,0,45,.38) !important;
+  animation: h33bSyncRail 7s ease-in-out infinite !important;
+}
+@keyframes h33bSyncRail { 0%{width:8%} 50%{width:74%} 100%{width:100%} }
+.h33b-data-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+  margin: 20px 0 22px !important;
+}
+.h33b-data-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 13px 14px !important;
+  border-radius: 12px !important;
+  background: rgba(0,0,0,.30) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+}
+.h33b-data-row span {
+  font-family: var(--font-condensed) !important;
+  font-size: .62rem !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  color: var(--red) !important;
+}
+.h33b-data-row strong {
+  color: #fff !important;
+  font-size: .88rem !important;
+  text-align: right !important;
+}
+.h33b-track-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px 18px !important;
+  background: var(--red) !important;
+  color: #fff !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  border-radius: 0 !important;
+  clip-path: polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%) !important;
+  transition: transform .25s ease, background .25s ease, box-shadow .25s ease !important;
+}
+.h33b-track-cta:hover {
+  transform: translateY(-2px) !important;
+  background: var(--red2) !important;
+  box-shadow: 0 16px 34px rgba(232,0,45,.25) !important;
+}
+/* Kill old H3.2C SVG/selectors if cached JS tries to re-add them. */
+.h33b-track-sync .race-track-stage,
+.h33b-track-sync .race-track-svg,
+.h33b-track-sync .h32c-track-selectors,
+.h33b-track-sync .h32c-sector-stack,
+.h33b-track-sync .track-label,
+.h33b-track-sync .h32c-motion-readout,
+.h33b-track-sync .h32a-track-chip-row,
+.h33b-track-sync .h32c-track-chip-row { display: none !important; }
+@media (max-width: 920px) {
+  .h33b-track-panel { grid-template-columns: 1fr !important; }
+  .h33b-circuit-stage { min-height: 330px !important; padding: 26px !important; }
+  .h33b-info { padding: 34px 26px !important; }
+}
+@media (max-width: 560px) {
+  #race-control-section.h33b-track-sync { padding: 78px 0 !important; }
+  .h33b-circuit-stage { min-height: 280px !important; padding: 18px !important; }
+  .h33b-circuit-stage::before { left: 18px !important; top: 16px !important; font-size: .54rem !important; }
+  .h33b-circuit-frame { width: 100% !important; border-radius: 20px !important; }
+  .h33b-circuit-img { padding: 12px !important; }
+  .h33b-circuit-meta { left: 14px !important; right: 14px !important; bottom: 12px !important; }
+  .h33b-circuit-pill { font-size: .52rem !important; padding: 7px 9px !important; }
+}
