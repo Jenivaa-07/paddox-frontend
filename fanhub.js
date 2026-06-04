@@ -305,7 +305,7 @@ function paddoxCircuitPreviewHTML(race = {}, index = 0) {
     <div class="rc-track-art ${circuit.verified ? 'is-verified-svg is-loading-svg' : 'is-missing-svg'}"
       data-circuit="${safeId}"
       data-svg-file="${safeText(circuit.file || '')}"
-      data-svg-alt="${safeLabel} verified SVG circuit map"
+      data-svg-alt="${safeLabel} SVG circuit map"
       data-sources="${candidates.join('|')}"
       style="--rc-delay:${index * 70}ms">
       <div class="rc-track-bg"></div>
@@ -314,7 +314,7 @@ function paddoxCircuitPreviewHTML(race = {}, index = 0) {
         <small>${circuit.verified ? 'Official local SVG asset' : 'No verified SVG mapping yet'}</small>
       </div>
       <div class="rc-track-glow"></div>
-      <div class="rc-track-label">VERIFIED CIRCUIT MAP</div>
+      <div class="rc-track-label" aria-hidden="true"></div>
     </div>`;
 }
 
@@ -351,7 +351,7 @@ async function hydratePaddoxCircuitSVGs(root = document) {
       /* Older same-circuit fallback is allowed silently; no visible fallback badge. */
     }
     img.src = src;
-    img.alt = card.dataset.svgAlt || 'Verified circuit SVG map';
+    img.alt = card.dataset.svgAlt || 'Circuit SVG map';
     img.loading = 'lazy';
     img.decoding = 'async';
     img.addEventListener('load', () => {

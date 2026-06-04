@@ -7477,3 +7477,49 @@ body.modal-open { overflow: hidden; }
   content:none!important;
   display:none!important;
 }
+
+
+/* ============================================================
+   Phase H3.3A.7 — Race Calendar Clean Visual Lock
+   Removes technical/debug labels from visible cards while keeping
+   latest-first + same-circuit SVG fallback logic untouched.
+   ============================================================ */
+#sec-calendar .rc-track-label,
+#sec-calendar .rc-track-label::after,
+#sec-calendar .rc-track-art.is-verified-svg::after,
+#sec-calendar .rc-svg-source{
+  display:none!important;
+  content:none!important;
+}
+#sec-calendar .rc-track-art{
+  padding-top:28px!important;
+  min-height:250px;
+}
+#sec-calendar .rc-track-svg{
+  margin-top:6px;
+}
+#sec-calendar .rc-svg-card{
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 72% 12%, rgba(232,0,45,.20), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+    rgba(13,13,13,.92);
+}
+#sec-calendar .rc-svg-card:hover{
+  transform:translateY(-5px);
+}
+#sec-calendar .rc-info-panel{
+  padding-top:18px;
+}
+#sec-calendar .rc-circuit{
+  margin-bottom:14px;
+}
+#sec-calendar .rc-bottom-row{
+  justify-content:flex-start;
+}
+#sec-calendar .rc-track-fallback small{
+  display:none!important;
+}
+#sec-calendar .rc-track-fallback span{
+  letter-spacing:3px;
+}
