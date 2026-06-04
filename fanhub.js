@@ -311,7 +311,7 @@ function paddoxCircuitPreviewHTML(race = {}, index = 0) {
       <div class="rc-track-bg"></div>
       <div class="rc-track-fallback">
         <span>${circuit.verified ? safeId.toUpperCase() : 'SVG PENDING'}</span>
-        <small>${circuit.verified ? 'Latest first, fallback allowed' : 'No verified SVG mapping yet'}</small>
+        <small>${circuit.verified ? 'Official local SVG asset' : 'No verified SVG mapping yet'}</small>
       </div>
       <div class="rc-track-glow"></div>
       <div class="rc-track-label">VERIFIED CIRCUIT MAP</div>
@@ -348,9 +348,7 @@ async function hydratePaddoxCircuitSVGs(root = document) {
     const img = document.createElement('img');
     img.className = src.includes(card.dataset.svgFile || '') ? 'rc-track-svg rc-track-svg-latest' : 'rc-track-svg rc-track-svg-fallback';
     if (!src.includes(card.dataset.svgFile || '')) {
-      card.classList.add('uses-fallback-svg');
-      const small = card.querySelector('.rc-track-fallback small');
-      if (small) small.textContent = 'Using older same-circuit layout';
+      /* Older same-circuit fallback is allowed silently; no visible fallback badge. */
     }
     img.src = src;
     img.alt = card.dataset.svgAlt || 'Verified circuit SVG map';

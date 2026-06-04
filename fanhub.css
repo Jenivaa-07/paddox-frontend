@@ -7462,3 +7462,18 @@ body.modal-open { overflow: hidden; }
   border:1px solid rgba(201,168,76,.24);
   padding:4px 8px;
 }
+
+
+/* Phase H3.3A.6 — hide fallback badge, keep same-circuit fallback silently */
+#sec-calendar .rc-track-art.uses-fallback-svg .rc-track-label{
+  color:rgba(255,255,255,.46)!important;
+  border-color:rgba(255,255,255,.10)!important;
+  background:rgba(255,255,255,.04)!important;
+}
+#sec-calendar .rc-track-art.uses-fallback-svg .rc-track-svg{
+  opacity:1!important;
+}
+#sec-calendar .rc-track-art.uses-fallback-svg::after{
+  content:none!important;
+  display:none!important;
+}
