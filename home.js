@@ -3307,9 +3307,9 @@ setInterval(() => {
 
 
 /* ============================================================
-   Phase H3.3B.2 — Home Track Formula Timer CORS Fix
+   Phase H3.3B.3 — Home Track Mode Visual Polish Lock
    Replaces fake/random SVG Track Mode with the next race's
-   Formula Timer circuit image, synced from backend countdown.
+   polished next-race circuit image, synced from backend countdown.
    ============================================================ */
 (function initH33BHomeTrackMode(){
   const SLUGS = [
@@ -3431,21 +3431,21 @@ setInterval(() => {
     const cleanSources = [...new Set((sources || []).filter(Boolean))];
 
     function showPending(message = 'Circuit source unavailable'){
-      frame.innerHTML = `<div class="h33b-image-pending"><strong>IMAGE PENDING</strong><small>${esc(message)}</small></div>`;
+      frame.innerHTML = `<div class="h33b-image-pending"><strong>IMAGE SYNCING</strong><small>${esc(message)}</small></div>`;
       frame.dataset.loadedSrc = '';
     }
 
     function tryNext(){
       const src = cleanSources[idx];
       if (!src) {
-        showPending('Formula Timer image unavailable');
+        showPending('Circuit image unavailable');
         return;
       }
 
       /* Avoid endless reload loops when boot() runs again after the same image already loaded. */
       if (frame.dataset.loadedSrc === src && frame.querySelector('.h33b-circuit-img')) return;
 
-      frame.innerHTML = `<div class="h33b-image-pending h33b-image-loading"><strong>LOADING CIRCUIT</strong><small>Formula Timer direct image</small></div>`;
+      frame.innerHTML = `<div class="h33b-image-pending h33b-image-loading"><strong>LOADING RACE MAP</strong><small>Countdown circuit image</small></div>`;
 
       const img = document.createElement('img');
       img.className = 'h33b-circuit-img';
@@ -3496,20 +3496,20 @@ setInterval(() => {
             <div class="section-label">LIVE RACE CONTROL</div>
             <h2 class="section-title">TRACK <span class="accent">MODE</span></h2>
           </div>
-          <p class="race-control-sub reveal-up in-view">Synced from the live countdown. Home Track Mode now shows only the next Grand Prix circuit, not random track buttons.</p>
+          <p class="race-control-sub reveal-up in-view">Synced from the live countdown. Home Track Mode shows the next Grand Prix circuit with a clean race-map card and live pulse details.</p>
         </div>
         <div class="h33b-track-panel liquid-sweep">
           <div class="h33b-circuit-stage">
             <div class="h33b-circuit-frame" id="h33b-circuit-frame">
-              <div class="h33b-image-pending"><strong>LOADING CIRCUIT</strong><small>Formula Timer direct image</small></div>
+              <div class="h33b-image-pending"><strong>LOADING RACE MAP</strong><small>Countdown circuit image</small></div>
             </div>
             <div class="h33b-circuit-meta">
               <span class="h33b-circuit-pill"><strong>Next</strong> ${esc(text(raceName, 'Grand Prix'))}</span>
-              <span class="h33b-circuit-pill"><strong>Map</strong> Formula Timer</span>
+              <span class="h33b-circuit-pill"><strong>Map</strong> Live Circuit</span>
             </div>
           </div>
           <div class="h33b-info">
-            <div class="h33b-kicker">COUNTDOWN SYNC READY</div>
+            <div class="h33b-kicker">COUNTDOWN CIRCUIT LIVE</div>
             <h3 id="rc-race-name">${splitRaceName(raceName)}</h3>
             <p id="rc-race-meta">${esc(circuitLabel)} · ${esc(location)}</p>
             <div class="h33b-chip-row">
@@ -3548,7 +3548,7 @@ setInterval(() => {
       if (key && key === lastRenderKey && document.querySelector('#h33b-circuit-frame .h33b-circuit-img')) return;
       lastRenderKey = key;
       render();
-    } catch (err) { console.warn('H3.3B.2 Track Mode sync failed', err); }
+    } catch (err) { console.warn('H3.3B.3 Track Mode sync failed', err); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
