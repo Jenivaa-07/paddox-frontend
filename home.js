@@ -2625,3 +2625,325 @@ document.addEventListener('DOMContentLoaded', () => {
   initH311SignatureVisibilityFix();
   setInterval(updateH311RaceControlData, 15000);
 });
+
+/* ============================================================
+   H3.2A — AI Studio Removal + Premium Interactive Home Shell
+   Brand direction: PADDOX = interactive motorsport experience, not AI Studio.
+   ============================================================ */
+(function initH32AInteractiveHomeShell() {
+  const ready = (fn) => {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+    else fn();
+  };
+
+  ready(() => {
+    document.body.classList.add('h32a-home', 'h32a-section-ready');
+    removeH32AAIStudioLinks();
+    initH32ANavShell();
+    initH32AHeroShell();
+    initH32AQuoteShell();
+    setTimeout(initH32ATrackShell, 420);
+    setTimeout(syncH32AHomeState, 760);
+    window.addEventListener('resize', h32ADebounce(() => {
+      if (typeof moveH311NavIndicator === 'function') moveH311NavIndicator();
+    }, 120), { passive: true });
+  });
+
+  function removeH32AAIStudioLinks() {
+    const selectors = [
+      'a[href*="aistudio"]',
+      '.nav-ai-icon',
+      '.mob-icon.nav-ai-icon'
+    ];
+    document.querySelectorAll(selectors.join(',')).forEach((el) => {
+      const holder = el.closest('li') || el.closest('a') || el;
+      holder.remove();
+    });
+
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.placeholder = 'Search products, drivers, circuits, fan posts…';
+  }
+
+  function initH32ANavShell() {
+    const navbar = document.getElementById('navbar');
+    const nav = document.getElementById('nav-links') || document.querySelector('.nav-links');
+    if (navbar) navbar.classList.add('h32a-nav');
+    if (!nav) return;
+
+    if (!document.getElementById('nav-active-indicator') && typeof ensureH311NavIndicator === 'function') {
+      ensureH311NavIndicator();
+    }
+
+    nav.querySelectorAll('.nav-link').forEach((link, index) => {
+      link.style.setProperty('--nav-index', String(index));
+      link.addEventListener('mouseenter', () => h32AAnimateNavPulse(link), { passive: true });
+      link.addEventListener('click', () => h32AAnimateNavPulse(link));
+    });
+
+    setTimeout(() => {
+      if (typeof moveH311NavIndicator === 'function') moveH311NavIndicator();
+    }, 80);
+  }
+
+  function h32AAnimateNavPulse(link) {
+    if (!link || typeof window.anime !== 'function') return;
+    window.anime.remove(link);
+    window.anime({
+      targets: link,
+      scale: [1, 1.045, 1],
+      duration: 460,
+      easing: 'easeOutElastic(1, .55)'
+    });
+  }
+
+  function initH32AHeroShell() {
+    const hero = document.getElementById('hero');
+    if (!hero) return;
+    hero.classList.add('h32a-hero');
+    ensureH32ARaceRail(hero);
+    splitH32ATextWords('.hero-h1 .h1-line, .section-title, .nl-title');
+    animateH32AHeroWords();
+    initH32APointerSpotlight(hero);
+  }
+
+  function ensureH32ARaceRail(hero) {
+    if (document.getElementById('h32a-race-rail')) return;
+    const rail = document.createElement('aside');
+    rail.className = 'h32a-race-rail';
+    rail.id = 'h32a-race-rail';
+    rail.setAttribute('aria-hidden', 'true');
+    rail.innerHTML = `
+      <div class="h32a-rail-line">
+        <span class="h32a-rail-dot"></span>
+      </div>
+      <p class="h32a-rail-caption">Interactive circuit pulse, live countdown and fan energy synced across the PADDOX experience.</p>
+    `;
+    hero.appendChild(rail);
+  }
+
+  function splitH32ATextWords(selector) {
+    document.querySelectorAll(selector).forEach((el) => {
+      if (!el || el.dataset.h32Split === '1') return;
+      const children = Array.from(el.childNodes);
+      const rebuilt = [];
+
+      children.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const parts = node.textContent.split(/(\s+)/);
+          parts.forEach((part) => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) rebuilt.push(document.createTextNode(part));
+            else {
+              const span = document.createElement('span');
+              span.className = 'h32-word';
+              span.textContent = part;
+              rebuilt.push(span);
+            }
+          });
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          node.classList.add('h32-word');
+          rebuilt.push(node);
+        }
+      });
+
+      el.replaceChildren(...rebuilt);
+      el.dataset.h32Split = '1';
+    });
+  }
+
+  function animateH32AHeroWords() {
+    const words = document.querySelectorAll('.hero-h1 .h32-word');
+    if (!words.length) return;
+
+    if (typeof window.anime === 'function') {
+      window.anime.set(words, { opacity: 0, translateY: 55, rotateX: -24, filter: 'blur(10px)' });
+      window.anime({
+        targets: words,
+        opacity: [0, 1],
+        translateY: [55, 0],
+        rotateX: [-24, 0],
+        filter: ['blur(10px)', 'blur(0px)'],
+        delay: window.anime.stagger(105, { start: 220 }),
+        duration: 820,
+        easing: 'easeOutExpo'
+      });
+    } else {
+      words.forEach((word, i) => {
+        word.style.animation = `fadeUp .75s ${i * 0.08}s forwards`;
+      });
+    }
+  }
+
+  function initH32APointerSpotlight(hero) {
+    const railLine = document.querySelector('.h32a-rail-line');
+    hero.addEventListener('pointermove', (event) => {
+      const rect = hero.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      hero.style.setProperty('--hero-x', `${x}%`);
+      hero.style.setProperty('--hero-y', `${y}%`);
+      if (railLine) {
+        railLine.style.setProperty('--mx', `${Math.max(8, Math.min(92, x))}%`);
+        railLine.style.setProperty('--my', `${Math.max(8, Math.min(92, y))}%`);
+      }
+    }, { passive: true });
+  }
+
+  function initH32AQuoteShell() {
+    const quoteSection = document.getElementById('quote-section') || document.querySelector('.quote-section');
+    const quoteCard = document.querySelector('.quote-inner');
+    if (quoteSection) quoteSection.classList.add('h32a-quotes');
+    if (!quoteCard || quoteCard.querySelector('.h32a-quote-lottie')) return;
+
+    const deco = document.createElement('div');
+    deco.className = 'h32a-quote-lottie';
+    deco.setAttribute('aria-hidden', 'true');
+    deco.dataset.lottieSource = 'https://lottiefiles.com/free-animation/slideshow-FOHpasQNWU';
+    deco.innerHTML = `
+      <span class="h32a-slide-pill"></span>
+      <span class="h32a-slide-pill"></span>
+      <span class="h32a-slide-pill"></span>
+      <span class="h32a-slide-pill"></span>
+    `;
+    quoteCard.prepend(deco);
+
+    const bar = document.getElementById('quote-progress-bar');
+    if (bar) bar.style.width = '0%';
+  }
+
+  function initH32ATrackShell() {
+    const section = document.getElementById('race-control-section');
+    if (!section) {
+      if (typeof ensureH311RaceControlSection === 'function') ensureH311RaceControlSection();
+    }
+
+    const trackSection = document.getElementById('race-control-section');
+    if (!trackSection) return;
+    trackSection.classList.add('h32a-track-mode');
+
+    const title = trackSection.querySelector('.section-title');
+    if (title && !title.dataset.h32TrackTitle) {
+      title.innerHTML = 'TRACK <span class="accent">MODE</span>';
+      title.dataset.h32TrackTitle = '1';
+    }
+
+    const sub = trackSection.querySelector('.race-control-sub');
+    if (sub) sub.textContent = 'Real circuit-style motion foundation for PADDOX: SVG route, animated race pulse, countdown sync and live Pit Wall bridge.';
+
+    ensureH32ATrackChips(trackSection);
+    ensureH32ACarMarker();
+    initH32ATrackAnimation();
+    syncH32AHomeState();
+  }
+
+  function ensureH32ATrackChips(trackSection) {
+    const info = trackSection.querySelector('.race-control-info');
+    if (!info || info.querySelector('.h32a-track-chip-row')) return;
+    const row = document.createElement('div');
+    row.className = 'h32a-track-chip-row';
+    row.innerHTML = `
+      <span class="h32a-track-chip">SVG Circuit</span>
+      <span class="h32a-track-chip">Anime Motion</span>
+      <span class="h32a-track-chip">Live Sync Ready</span>
+    `;
+    const grid = info.querySelector('.race-control-grid');
+    if (grid) info.insertBefore(row, grid);
+    else info.appendChild(row);
+  }
+
+  function ensureH32ACarMarker() {
+    const svg = document.querySelector('.race-track-svg');
+    const path = document.getElementById('race-track-path');
+    if (!svg || !path || document.getElementById('h32a-car-marker')) return;
+
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    marker.setAttribute('id', 'h32a-car-marker');
+    marker.setAttribute('class', 'h32a-car-marker');
+    marker.innerHTML = `
+      <path d="M-17 -7 L12 -5 L22 0 L12 5 L-17 7 L-10 0 Z" fill="#e8002d" stroke="rgba(255,255,255,.78)" stroke-width="1.4"></path>
+      <circle cx="-8" cy="7" r="2.5" fill="#050505"></circle>
+      <circle cx="8" cy="5" r="2.5" fill="#050505"></circle>
+    `;
+    svg.appendChild(marker);
+  }
+
+  function initH32ATrackAnimation() {
+    const path = document.getElementById('race-track-path');
+    const dot = document.getElementById('race-track-dot');
+    const glow = document.getElementById('race-track-dot-glow');
+    const car = document.getElementById('h32a-car-marker');
+    if (!path) return;
+
+    const len = path.getTotalLength();
+    if (!Number.isFinite(len) || len <= 0) return;
+
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+
+    const setAt = (progress) => {
+      const point = path.getPointAtLength(progress * len);
+      const ahead = path.getPointAtLength(Math.min(len, progress * len + 3));
+      const angle = Math.atan2(ahead.y - point.y, ahead.x - point.x) * 180 / Math.PI;
+      if (dot) {
+        dot.setAttribute('cx', point.x);
+        dot.setAttribute('cy', point.y);
+      }
+      if (glow) {
+        glow.setAttribute('cx', point.x);
+        glow.setAttribute('cy', point.y);
+      }
+      if (car) car.setAttribute('transform', `translate(${point.x} ${point.y}) rotate(${angle})`);
+    };
+
+    setAt(0);
+
+    if (typeof window.anime === 'function') {
+      window.anime.remove(path);
+      window.anime({ targets: path, strokeDashoffset: [len, 0], duration: 1900, easing: 'easeInOutSine' });
+      const motion = { progress: 0 };
+      window.anime({
+        targets: motion,
+        progress: [0, 1],
+        duration: 7200,
+        easing: 'linear',
+        loop: true,
+        update: () => setAt(motion.progress)
+      });
+      window.anime({
+        targets: '#h32a-car-marker',
+        scale: [0.92, 1.06],
+        duration: 780,
+        direction: 'alternate',
+        loop: true,
+        easing: 'easeInOutSine'
+      });
+    } else {
+      path.style.strokeDashoffset = 0;
+    }
+  }
+
+  function syncH32AHomeState() {
+    try {
+      if (typeof HOME_F1 !== 'undefined') window.HOME_F1 = HOME_F1;
+      if (typeof updateH311RaceControlData === 'function') updateH311RaceControlData();
+    } catch (err) {
+      console.warn('H3.2A home state sync skipped', err);
+    }
+  }
+
+  function h32ADebounce(fn, wait) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), wait);
+    };
+  }
+})();
+
+/* H3.2A — keep legacy Track Mode bridge synced with loaded HOME_F1 state */
+setInterval(() => {
+  try {
+    if (typeof HOME_F1 !== 'undefined') window.HOME_F1 = HOME_F1;
+    if (typeof updateH311RaceControlData === 'function') updateH311RaceControlData();
+  } catch (_) {}
+}, 10000);
