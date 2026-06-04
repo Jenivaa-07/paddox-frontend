@@ -1,6 +1,6 @@
 /* ============================================================
    PADDOX — Verified Circuit SVG Map
-   Phase H3.3A.3: Strict verified mapping using detailed circuit SVGs
+   Phase H3.3A.4: Strict verified mapping using latest minimal circuit SVGs
 
    Purpose:
    - Do NOT fuzzy-match to random/wrong tracks.
@@ -8,36 +8,31 @@
    - If SVG is missing, show a premium placeholder instead of a wrong circuit.
 
    Expected SVG source:
-   julesr0y/f1-circuits-svg detailed folder copied into one of these structures:
-   1) frontend/assets/circuits/circuits/detailed/white-outline/<file>.svg
-   2) frontend/assets/circuits/detailed/white-outline/<file>.svg
-   3) frontend/assets/circuits/detailed/white/<file>.svg
-   4) frontend/assets/circuits/<file>.svg
+   julesr0y/f1-circuits-svg minimal latest layout files copied into one of these structures:
+   1) frontend/assets/circuits/circuits/minimal/white-outline/<latest-file>.svg
+   2) frontend/assets/circuits/minimal/white-outline/<latest-file>.svg
+   3) frontend/assets/circuits/<latest-file>.svg
+
+   Rule: use the latest layout file only. Do not fall back to older layout numbers
+   such as zandvoort-1/2/3 when zandvoort-5 is the current layout.
    ============================================================ */
 (function () {
   'use strict';
 
   const STYLE_PATHS = [
-    /* Preferred: detailed tracks from julesr0y/f1-circuits-svg/tree/main/circuits/detailed */
-    'circuits/detailed/white-outline',
-    'detailed/white-outline',
-    'circuits/detailed/white',
-    'detailed/white',
-    'circuits/detailed/black-outline',
-    'detailed/black-outline',
-    'circuits/detailed/black',
-    'detailed/black',
+    /* Preferred: latest minimal white-outline layouts from julesr0y/f1-circuits-svg. */
+    'circuits/minimal/white-outline',
+    'minimal/white-outline',
 
     /* Compatibility if you copied only SVGs directly. */
-    'detailed',
-    'circuits/detailed',
-    '',
-
-    /* Last-resort compatibility with old minimal folder. */
-    'circuits/minimal/white-outline',
-    'minimal/white-outline'
+    ''
   ];
   const VERIFIED = [
+    /*
+      These files intentionally point to the newest layout number for the circuit.
+      If the selected latest SVG is not present in your assets folder, PADDOX shows
+      SVG PENDING instead of silently using an old/fake layout.
+    */
     {
       id: 'melbourne', file: 'melbourne-2.svg', label: 'Albert Park Circuit', location: 'Melbourne', country: 'Australia', official: 'Australian Grand Prix',
       match: ['australian grand prix','australia','albert park','melbourne grand prix circuit','melbourne']
@@ -47,7 +42,7 @@
       match: ['chinese grand prix','china','shanghai international circuit','shanghai']
     },
     {
-      id: 'suzuka', file: 'suzuka-1.svg', label: 'Suzuka Circuit', location: 'Suzuka', country: 'Japan', official: 'Japanese Grand Prix',
+      id: 'suzuka', file: 'suzuka-3.svg', label: 'Suzuka Circuit', location: 'Suzuka', country: 'Japan', official: 'Japanese Grand Prix',
       match: ['japanese grand prix','japan','suzuka circuit','suzuka']
     },
     {
@@ -67,7 +62,7 @@
       match: ['barcelona-catalunya','barcelona catalunya','circuit de barcelona-catalunya','catalunya','catalonia','barcelona grand prix']
     },
     {
-      id: 'spielberg', file: 'spielberg-1.svg', label: 'Red Bull Ring', location: 'Spielberg', country: 'Austria', official: 'Austrian Grand Prix',
+      id: 'spielberg', file: 'spielberg-4.svg', label: 'Red Bull Ring', location: 'Spielberg', country: 'Austria', official: 'Austrian Grand Prix',
       match: ['austrian grand prix','austria','red bull ring','spielberg']
     },
     {
@@ -75,7 +70,7 @@
       match: ['british grand prix','great britain','united kingdom','silverstone circuit','silverstone']
     },
     {
-      id: 'spa-francorchamps', file: 'spa-francorchamps-1.svg', label: 'Circuit de Spa-Francorchamps', location: 'Spa-Francorchamps', country: 'Belgium', official: 'Belgian Grand Prix',
+      id: 'spa-francorchamps', file: 'spa-francorchamps-2.svg', label: 'Circuit de Spa-Francorchamps', location: 'Spa-Francorchamps', country: 'Belgium', official: 'Belgian Grand Prix',
       match: ['belgian grand prix','belgium','spa-francorchamps','spa francorchamps','spa']
     },
     {
@@ -83,7 +78,7 @@
       match: ['hungarian grand prix','hungary','hungaroring','budapest']
     },
     {
-      id: 'zandvoort', file: 'zandvoort-1.svg', label: 'Circuit Zandvoort', location: 'Zandvoort', country: 'Netherlands', official: 'Dutch Grand Prix',
+      id: 'zandvoort', file: 'zandvoort-5.svg', label: 'Circuit Zandvoort', location: 'Zandvoort', country: 'Netherlands', official: 'Dutch Grand Prix',
       match: ['dutch grand prix','netherlands','zandvoort','circuit zandvoort']
     },
     {
@@ -123,7 +118,7 @@
       match: ['qatar grand prix','qatar','lusail international circuit','losail international circuit','lusail','losail']
     },
     {
-      id: 'yas-marina', file: 'yas-marina-1.svg', label: 'Yas Marina Circuit', location: 'Abu Dhabi', country: 'United Arab Emirates', official: 'Abu Dhabi Grand Prix',
+      id: 'yas-marina', file: 'yas-marina-3.svg', label: 'Yas Marina Circuit', location: 'Abu Dhabi', country: 'United Arab Emirates', official: 'Abu Dhabi Grand Prix',
       match: ['abu dhabi grand prix','abu dhabi','yas marina circuit','yas marina','united arab emirates','uae']
     },
 
