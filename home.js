@@ -829,68 +829,136 @@ function animateSingleCounter(el) {
 })();
 
 /* Real F1 countdown — auto-detects next race */
-async function initRealCountdown() {
+function normalizeHomeRaceDate(race = {}) {
+  const raw = race.raceDate || race.date || race.startDate || race.sessionDate || '';
+  if (!raw) return null;
+  const time = race.time || race.raceTime || '13:00:00Z';
+  const value = String(raw).includes('T') ? String(raw) : `${raw}T${time}`;
+  const d = new Date(value);
+  return Number.isFinite(d.getTime()) ? d : null;
+}
+
+function findHomeNextRaceFromSchedule(list = []) {
+  const races = extractRaceList(list);
+  if (!races.length) return null;
+  const now = Date.now();
+  const enriched = races
+    .map(race => ({ race, date: normalizeHomeRaceDate(race) }))
+    .filter(item => item.race && item.date);
+  const future = enriched
+    .filter(item => item.date.getTime() >= now)
+    .sort((a, b) => a.date - b.date)[0];
+  return (future || enriched.sort((a, b) => b.date - a.date)[0] || { race: races[0], date: null });
+}
+
+async function getHomeNextRaceSource() {
+  /* 1) Prefer backend next-race endpoint. */
+  try {
+    const data = await PaddoxAPI.f1.nextRace();
+    const race = data?.data?.race || data?.race || null;
+    if (data?.success !== false && race) {
+      return {
+        race,
+        raceDate: normalizeHomeRaceDate({ ...race, raceDate: data?.data?.raceDate || race.raceDate || race.date }),
+        schedule: extractRaceList(data || {}),
+        source: 'nextRace'
+      };
+    }
+  } catch (err) {
+    console.warn('Next race endpoint unavailable, trying schedule fallback', err);
+  }
+
+  /* 2) Fallback to live schedule endpoint, same source used by Track Mode. */
+  try {
+    const scheduleData = await PaddoxAPI.f1.schedule();
+    const schedule = extractRaceList(scheduleData || {});
+    const selected = findHomeNextRaceFromSchedule(schedule);
+    if (selected?.race) {
+      return { race: selected.race, raceDate: selected.date, schedule, source: 'schedule' };
+    }
+  } catch (err) {
+    console.warn('Schedule fallback unavailable', err);
+  }
+
+  /* 3) Last resort: use whatever Home F1 already loaded. */
+  const existing = HOME_F1.nextRace ? { race: HOME_F1.nextRace, date: normalizeHomeRaceDate(HOME_F1.nextRace) } : findHomeNextRaceFromSchedule(HOME_F1.schedule || []);
+  if (existing?.race) {
+    return { race: existing.race, raceDate: existing.date, schedule: HOME_F1.schedule || [], source: 'memory' };
+  }
+  return null;
+}
+
+function updateCountdownDisplayFromRace(race = {}, raceDate = null, schedule = []) {
   const nameEl = document.querySelector('.cs-name');
   const circEl = document.querySelector('.cs-circuit');
   const chipEl = document.querySelector('.cs-chip');
   const flagEl = document.querySelector('.cs-flag');
 
+  HOME_F1.nextRace = race;
+  if (Array.isArray(schedule) && schedule.length) {
+    HOME_F1.schedule = schedule;
+    updateHomeSeasonRaceCount(schedule);
+  } else if (race.totalRaces || race.seasonRaceCount) {
+    updateHomeSeasonRaceCount(Array.from({ length: Number(race.totalRaces || race.seasonRaceCount) }, (_, i) => ({ round: i + 1 })));
+  }
+  window.HOME_F1 = HOME_F1;
+
+  if (flagEl) {
+    flagEl.title = race.country || race.location || race.name || 'Next Grand Prix';
+    flagEl.setAttribute('aria-label', race.country || race.location || 'Grand Prix');
+    setCountdownFlag(flagEl, race);
+  }
+  if (nameEl) nameEl.textContent = race.name || race.raceName || race.grandPrix || 'Next Grand Prix';
+  if (circEl) circEl.textContent = [race.circuit, race.location || race.locality, race.country].filter(Boolean).join(' · ') || 'Circuit details syncing';
+  if (chipEl) chipEl.textContent = `Round ${race.round || '—'} · Season ${race.season || new Date().getFullYear()}`;
+
+  clearInterval(window.__PADDOX_COUNTDOWN_TIMER);
+  function tick() {
+    const date = raceDate || normalizeHomeRaceDate(race);
+    const diff = date ? date.getTime() - Date.now() : 0;
+    const values = diff > 0
+      ? [
+          Math.floor(diff / 864e5),
+          Math.floor((diff % 864e5) / 36e5),
+          Math.floor((diff % 36e5) / 6e4),
+          Math.floor((diff % 6e4) / 1e3),
+        ]
+      : [0, 0, 0, 0];
+    ['d','h','m','s'].forEach((key, i) => {
+      const el = document.getElementById(`cd-${key}`);
+      if (el) el.textContent = String(values[i]).padStart(2, '0');
+    });
+  }
+  tick();
+  window.__PADDOX_COUNTDOWN_TIMER = setInterval(tick, 1000);
+  updateTickerFromAPI();
+}
+
+async function initRealCountdown() {
   try {
-    const data = await PaddoxAPI.f1.nextRace();
-    if (!data.success || !data.data?.race) throw new Error('No next race data');
-
-    const raceDate = new Date(data.data.raceDate);
-    const race = data.data.race;
-    HOME_F1.nextRace = race;
-    const nextRaceSchedule = extractRaceList(data || {});
-    if (nextRaceSchedule.length) {
-      HOME_F1.schedule = nextRaceSchedule;
-      updateHomeSeasonRaceCount(nextRaceSchedule);
-    } else if (data.data?.seasonRaceCount || data.data?.totalRaces || race.totalRaces || race.seasonRaceCount) {
-      updateHomeSeasonRaceCount(Array.from({ length: Number(data.data?.seasonRaceCount || data.data?.totalRaces || race.totalRaces || race.seasonRaceCount) }, (_, i) => ({ round: i + 1 })));
-    }
-
-    if (flagEl) {
-      flagEl.title = race.country || race.name || 'Next Grand Prix';
-      flagEl.setAttribute('aria-label', race.country || 'Grand Prix');
-      setCountdownFlag(flagEl, race);
-    }
-    updateTickerFromAPI();
-    if (nameEl) nameEl.textContent = race.name || 'Next Grand Prix';
-    if (circEl) circEl.textContent = [race.circuit, race.location, race.country].filter(Boolean).join(' · ');
-    if (chipEl) chipEl.textContent = `Round ${race.round || '—'} · Season ${race.season || new Date().getFullYear()}`;
-
-    function tick() {
-      const diff = raceDate - new Date();
-      const values = diff > 0
-        ? [
-            Math.floor(diff / 864e5),
-            Math.floor((diff % 864e5) / 36e5),
-            Math.floor((diff % 36e5) / 6e4),
-            Math.floor((diff % 6e4) / 1e3),
-          ]
-        : [0, 0, 0, 0];
-      ['d','h','m','s'].forEach((key, i) => {
-        const el = document.getElementById(`cd-${key}`);
-        if (el) el.textContent = String(values[i]).padStart(2, '0');
-      });
-    }
-    tick();
-    setInterval(tick, 1000);
+    const source = await getHomeNextRaceSource();
+    if (!source?.race) throw new Error('No next race data');
+    updateCountdownDisplayFromRace(source.race, source.raceDate, source.schedule);
   } catch (err) {
     console.warn('Countdown unavailable', err);
+    const nameEl = document.querySelector('.cs-name');
+    const circEl = document.querySelector('.cs-circuit');
+    const chipEl = document.querySelector('.cs-chip');
+    const flagEl = document.querySelector('.cs-flag');
     if (flagEl) {
       flagEl.title = 'Grand Prix';
       flagEl.setAttribute('aria-label', 'Grand Prix');
       setCountdownFlag(flagEl, {});
     }
-    if (nameEl) nameEl.textContent = 'Race schedule unavailable';
-    if (circEl) circEl.textContent = 'Please check again shortly.';
-    if (chipEl) chipEl.textContent = 'F1 schedule data unavailable';
+    if (nameEl) nameEl.textContent = 'Next race syncing';
+    if (circEl) circEl.textContent = 'Live calendar reconnecting...';
+    if (chipEl) chipEl.textContent = 'Schedule sync retrying';
   }
 }
 
 initRealCountdown();
+/* Re-check the countdown source so the strip and Track Mode stay matched while the page is open. */
+setInterval(initRealCountdown, 10 * 60 * 1000);
 
 /* ══════════════════════════════════════
    HERO SPEED LINES
@@ -3548,7 +3616,7 @@ setInterval(() => {
       if (key && key === lastRenderKey && document.querySelector('#h33b-circuit-frame .h33b-circuit-img')) return;
       lastRenderKey = key;
       render();
-    } catch (err) { console.warn('H3.3B.3 Track Mode sync failed', err); }
+    } catch (err) { console.warn('H3.3B Track Mode sync failed', err); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
