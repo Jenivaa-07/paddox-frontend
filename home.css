@@ -5990,3 +5990,205 @@ body.h32a-home {
   .nl-title { font-size: clamp(2.45rem, 13vw, 3.7rem) !important; }
   .nl-form { border-radius: 18px !important; }
 }
+
+
+/* ============================================================
+   PADDOX H3.2A.3 — HARD VISIBLE POLISH PATCH
+   Purpose: no soft/runtime dependency. These overrides must visibly apply.
+   ============================================================ */
+html body #navbar,
+body #navbar.h32a-nav {
+  height: 76px !important;
+  background: rgba(3,3,3,.96) !important;
+  border-bottom: 1px solid rgba(232,0,45,.22) !important;
+  box-shadow: 0 18px 70px rgba(0,0,0,.50) !important;
+}
+body #navbar .nav-inner {
+  padding: 0 clamp(28px, 5vw, 82px) !important;
+  gap: 24px !important;
+}
+body #navbar .nav-links {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  max-width: 760px !important;
+  padding: 8px !important;
+  margin: 0 auto !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.015)), rgba(6,6,6,.72) !important;
+  overflow: hidden !important;
+}
+body #navbar .nav-active-indicator,
+body #navbar #nav-active-indicator,
+body .nav-active-indicator,
+body #nav-active-indicator {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body #navbar .nav-link {
+  min-height: 44px !important;
+  padding: 0 22px !important;
+  border-radius: 999px !important;
+  color: rgba(255,255,255,.62) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  transform: none !important;
+  box-shadow: none !important;
+  letter-spacing: 3px !important;
+}
+body #navbar .nav-link:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(255,255,255,.09) !important;
+}
+body #navbar .nav-link.active {
+  color: #fff !important;
+  background: linear-gradient(135deg, rgba(232,0,45,.96), rgba(130,0,30,.82)) !important;
+  border-color: rgba(255,255,255,.16) !important;
+  box-shadow: 0 14px 34px rgba(232,0,45,.26), inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+body #navbar .nav-link .nl-underline,
+body #navbar .nav-link::before,
+body #navbar .nav-link::after {
+  display: none !important;
+}
+body #navbar .nl-icon {
+  opacity: .75 !important;
+  transform: none !important;
+}
+body #navbar .nav-link:hover .nl-icon,
+body #navbar .nav-link.active .nl-icon {
+  transform: none !important;
+  opacity: 1 !important;
+}
+body #navbar a[href*="aistudio"],
+body a[href*="aistudio.html"] {
+  display: none !important;
+}
+
+/* Hero: remove red side line completely and make RACE red as a real word line */
+body .hero .hero-content {
+  padding-top: clamp(90px, 12vh, 150px) !important;
+}
+body .hero-h1,
+body .h32a-hero .hero-h1 {
+  position: relative !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(5.6rem, 12vw, 12rem) !important;
+  line-height: .82 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+}
+body .hero-h1::before,
+body .hero-h1::after,
+body .h32a-hero .hero-h1::before,
+body .h32a-hero .hero-h1::after {
+  content: none !important;
+  display: none !important;
+}
+body .hero-h1 .h1-line {
+  display: block !important;
+  color: #fff !important;
+  background: none !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: 0 18px 50px rgba(0,0,0,.62) !important;
+}
+body .hero-h1 .h1-race-line {
+  margin-top: .015em !important;
+}
+body .hero-h1 .h1-accent,
+body .h32a-hero .h1-accent {
+  color: var(--red) !important;
+  -webkit-text-fill-color: var(--red) !important;
+  background: none !important;
+  background-image: none !important;
+  text-shadow: 0 0 38px rgba(232,0,45,.36) !important;
+}
+body .hero-eyebrow {
+  margin-left: 0 !important;
+}
+
+/* Newsletter: centered card and title no broken alignment */
+body .newsletter-section,
+body #newsletter-section {
+  padding: 120px 0 128px !important;
+  background: radial-gradient(circle at 50% 0%, rgba(232,0,45,.10), transparent 32%), #070707 !important;
+}
+body .newsletter-section .container {
+  display: flex !important;
+  justify-content: center !important;
+}
+body .nl-inner,
+body .newsletter-inner {
+  width: min(820px, calc(100vw - 48px)) !important;
+  margin: 0 auto !important;
+  padding: clamp(44px, 6vw, 72px) clamp(28px, 5vw, 84px) !important;
+  text-align: center !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.012)), rgba(5,5,5,.82) !important;
+  box-shadow: 0 42px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+body .nl-title,
+body .newsletter-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto 20px !important;
+  text-align: center !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(3rem, 5.2vw, 5.4rem) !important;
+  line-height: .86 !important;
+  letter-spacing: 2.2px !important;
+  white-space: normal !important;
+}
+body .nl-title-main,
+body .nl-title-sub {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+body .nl-title-main { color: #fff !important; }
+body .nl-title-sub,
+body .newsletter-title .accent {
+  color: var(--red) !important;
+  -webkit-text-fill-color: var(--red) !important;
+  text-shadow: 0 0 30px rgba(232,0,45,.32) !important;
+}
+body .nl-sub,
+body .newsletter-sub {
+  max-width: 610px !important;
+  margin: 0 auto 30px !important;
+  text-align: center !important;
+  color: rgba(255,255,255,.68) !important;
+}
+body .nl-form,
+body .newsletter-form {
+  max-width: 580px !important;
+  margin: 0 auto !important;
+}
+body .nl-trust {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+@media (max-width: 1080px) {
+  body #navbar .nav-links { display: none !important; }
+}
+@media (max-width: 700px) {
+  body .hero-h1,
+  body .h32a-hero .hero-h1 { font-size: clamp(4.4rem, 21vw, 7rem) !important; }
+  body .nl-title,
+  body .newsletter-title { font-size: clamp(2.55rem, 13vw, 3.8rem) !important; }
+}

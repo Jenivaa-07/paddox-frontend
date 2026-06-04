@@ -3029,3 +3029,34 @@ setInterval(() => {
   setTimeout(run, 900);
   setTimeout(run, 1800);
 })();
+
+
+/* ============================================================
+   PADDOX H3.2A.3 — HARD VISIBLE RUNTIME GUARD
+   Removes legacy nav indicator and forces hero/newsletter structure after all old scripts.
+   ============================================================ */
+(function initH32A3HardVisibleGuard(){
+  'use strict';
+  function run(){
+    document.querySelectorAll('#nav-active-indicator, .nav-active-indicator').forEach(el => el.remove());
+    document.querySelectorAll('a[href*="aistudio"]').forEach(el => {
+      const li = el.closest('li');
+      if (li) li.remove();
+      else el.remove();
+    });
+    const h1 = document.querySelector('.hero-h1');
+    if (h1 && h1.dataset.h32a3 !== '1') {
+      h1.innerHTML = '<span class="h1-line animate-fade-up delay-2">LIVE</span><span class="h1-line animate-fade-up delay-3">THE</span><span class="h1-line h1-race-line animate-fade-up delay-4"><span class="h1-accent">RACE</span></span>';
+      h1.dataset.h32a3 = '1';
+    }
+    const title = document.querySelector('.nl-title');
+    if (title && title.dataset.h32a3 !== '1') {
+      title.innerHTML = '<span class="nl-title-main">JOIN THE PADDO<span class="logo-x">X</span></span><span class="nl-title-sub">CREW</span>';
+      title.dataset.h32a3 = '1';
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+  window.addEventListener('load', run);
+  [50, 250, 700, 1500, 3000].forEach(ms => setTimeout(run, ms));
+})();
