@@ -3654,3 +3654,38 @@ setInterval(() => {
 
 
 /* Phase H3.3C: Featured Merch + Teams Strip visual polish uses CSS-only overrides; backend data flow preserved. */
+
+
+/* Phase H3.3D: Quote Section Premium Polish Lock */
+(function initH33DQuotePolish(){
+  function boot(){
+    const section = document.getElementById('quote-section');
+    const card = document.querySelector('.quote-inner');
+    if (!section || !card) return;
+    section.classList.add('h33d-quotes');
+    card.classList.add('h33d-quote-card');
+
+    const label = card.querySelector('.quote-kicker-label') || card.querySelector('.section-label');
+    if (label && label.textContent.trim().toLowerCase().includes('driver')) {
+      label.textContent = 'Fan Voice Radio';
+    }
+
+    if (!card.querySelector('.quote-card-topline')) {
+      const top = document.createElement('div');
+      top.className = 'quote-card-topline';
+      top.setAttribute('aria-hidden', 'true');
+      top.innerHTML = '<span>Live Fan Quote</span><span>PADDOX Signal</span>';
+      card.prepend(top);
+    }
+
+    const progress = document.querySelector('.quote-progress');
+    const dots = document.getElementById('quote-dots');
+    if (progress && dots && progress.nextElementSibling !== dots) {
+      dots.parentNode.insertBefore(progress, dots);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+  setTimeout(boot, 1000);
+})();

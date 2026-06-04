@@ -7314,3 +7314,243 @@ body .nl-trust {
   .marquee-team{min-width:226px !important;height:104px !important;padding:12px 14px !important;}
   .marquee-team-car-wrap{height:56px !important;}
 }
+
+
+/* ============================================================
+   Phase H3.3D — Quote Section Premium Polish Lock
+   Goal: sharper VIP quote card, stronger readability, controlled motion.
+   ============================================================ */
+.quote-section.h33d-quotes,
+.quote-section.h32a-quotes.h33d-quotes {
+  padding: 132px 0 !important;
+  min-height: auto !important;
+  background:
+    radial-gradient(circle at 70% 40%, rgba(0,120,96,.13), transparent 34%),
+    radial-gradient(circle at 34% 45%, rgba(232,0,45,.15), transparent 38%),
+    linear-gradient(180deg, #050606 0%, #080808 56%, #050505 100%) !important;
+  overflow: hidden;
+}
+.quote-section.h33d-quotes::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.026) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: .45;
+  pointer-events: none;
+}
+.quote-section.h33d-quotes::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,0,45,.55), transparent);
+  opacity: .75;
+}
+.quote-section.h33d-quotes .container {
+  max-width: 980px !important;
+}
+.quote-section.h33d-quotes .quote-inner {
+  position: relative;
+  width: min(760px, 100%) !important;
+  margin: 0 auto !important;
+  min-height: 360px !important;
+  padding: 54px 64px 44px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+  background:
+    linear-gradient(135deg, rgba(24,24,24,.94), rgba(9,9,10,.92) 54%, rgba(72,0,18,.54)) !important;
+  box-shadow:
+    0 32px 90px rgba(0,0,0,.62),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 0 0 1px rgba(232,0,45,.08) !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  transform: translateZ(0);
+  filter: none !important;
+  opacity: 1 !important;
+}
+.quote-section.h33d-quotes .quote-inner::before {
+  content: '' !important;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.13), transparent 22%),
+    radial-gradient(circle at 82% 22%, rgba(232,0,45,.18), transparent 26%),
+    linear-gradient(115deg, transparent 0 38%, rgba(255,255,255,.06) 48%, transparent 58%);
+  opacity: .55 !important;
+  pointer-events: none;
+  z-index: 0;
+}
+.quote-section.h33d-quotes .quote-inner::after {
+  content: '' !important;
+  position: absolute;
+  left: 18%; right: 18%; bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), rgba(255,255,255,.45), var(--red), transparent);
+  opacity: .85;
+  box-shadow: 0 0 24px rgba(232,0,45,.36);
+  z-index: 2;
+}
+.quote-section.h33d-quotes .h32a-quote-lottie {
+  display: none !important;
+}
+.quote-section.h33d-quotes .quote-card-topline {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 24px;
+  font-family: var(--font-condensed);
+  font-size: .64rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.55);
+}
+.quote-section.h33d-quotes .quote-card-topline span:first-child {
+  color: var(--red);
+}
+.quote-section.h33d-quotes .quote-kicker-label,
+.quote-section.h33d-quotes .section-label {
+  position: relative;
+  z-index: 2;
+  justify-content: center !important;
+  color: var(--red) !important;
+  letter-spacing: 4px !important;
+  opacity: 1 !important;
+}
+.quote-section.h33d-quotes .quote-mark {
+  position: absolute !important;
+  z-index: 1 !important;
+  top: 52px !important;
+  left: 48px !important;
+  font-size: 8.8rem !important;
+  line-height: .6 !important;
+  color: rgba(232,0,45,.16) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.quote-section.h33d-quotes .quote-text {
+  position: relative;
+  z-index: 3;
+  max-width: 610px;
+  margin: 10px auto 34px !important;
+  font-family: var(--font-body) !important;
+  font-size: clamp(1.24rem, 2.05vw, 1.72rem) !important;
+  line-height: 1.48 !important;
+  font-weight: 800 !important;
+  letter-spacing: -.015em !important;
+  color: #ffffff !important;
+  text-align: center !important;
+  text-shadow: 0 8px 24px rgba(0,0,0,.52) !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none;
+}
+.quote-section.h33d-quotes .quote-driver {
+  position: relative;
+  z-index: 3;
+  justify-content: center !important;
+  gap: 14px !important;
+  margin-top: 6px !important;
+}
+.quote-section.h33d-quotes .quote-avatar {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(232,0,45,.78) !important;
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.18), transparent 32%), #191919 !important;
+  box-shadow: 0 0 0 7px rgba(232,0,45,.10), 0 12px 26px rgba(0,0,0,.42) !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  font-weight: 900;
+}
+.quote-section.h33d-quotes .quote-avatar.has-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: saturate(1.06) contrast(1.02) !important;
+}
+.quote-section.h33d-quotes .quote-name {
+  color: #fff !important;
+  font-family: var(--font-condensed) !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+}
+.quote-section.h33d-quotes .quote-team {
+  color: rgba(255,255,255,.52) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .66rem !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+.quote-section.h33d-quotes .quote-progress {
+  position: relative;
+  z-index: 3;
+  width: min(280px, 54%) !important;
+  height: 3px !important;
+  margin: 32px auto 18px !important;
+  background: rgba(255,255,255,.08) !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+.quote-section.h33d-quotes .quote-progress span,
+.quote-section.h33d-quotes #quote-progress-bar {
+  display: block !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, var(--red), #fff, var(--red)) !important;
+  box-shadow: 0 0 20px rgba(232,0,45,.36) !important;
+  border-radius: inherit !important;
+}
+.quote-section.h33d-quotes .quote-dots {
+  position: relative;
+  z-index: 3;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+.quote-section.h33d-quotes .q-dot {
+  width: 22px !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.18) !important;
+  border: 0 !important;
+  cursor: pointer !important;
+  transition: width .28s ease, background .28s ease, box-shadow .28s ease !important;
+}
+.quote-section.h33d-quotes .q-dot.on {
+  width: 42px !important;
+  background: var(--red) !important;
+  box-shadow: 0 0 18px rgba(232,0,45,.45) !important;
+}
+.quote-section.h33d-quotes .quote-inner.h33d-quote-changing .quote-text,
+.quote-section.h33d-quotes .quote-inner.h3-quote-changing .quote-text {
+  animation: h33dQuoteSwitch .44s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes h33dQuoteSwitch {
+  0% { opacity: .2; transform: translateY(10px) scale(.992); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@media (max-width: 720px) {
+  .quote-section.h33d-quotes { padding: 84px 0 !important; }
+  .quote-section.h33d-quotes .quote-inner {
+    padding: 38px 22px 34px !important;
+    min-height: 330px !important;
+    border-radius: 20px !important;
+  }
+  .quote-section.h33d-quotes .quote-card-topline {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+  }
+  .quote-section.h33d-quotes .quote-text {
+    font-size: 1.18rem !important;
+  }
+  .quote-section.h33d-quotes .quote-progress { width: 72% !important; }
+}
