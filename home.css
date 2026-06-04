@@ -5822,3 +5822,171 @@ body.h32a-home {
   .h32a-quotes .quote-inner { min-height: 310px; padding-inline: 24px !important; }
   .h32a-quotes .quote-text { font-size: 1.15rem !important; }
 }
+
+
+/* ============================================================
+   PADDOX H3.2A.2 — Section Polish 01
+   Fixes: navbar hover animation, hero title accent, newsletter alignment.
+   ============================================================ */
+
+/* NAVBAR: remove the floating red tracker/dot and use a stable premium tab state */
+.h32a-nav #nav-active-indicator,
+.h32a-nav .nav-active-indicator,
+#nav-active-indicator,
+.nav-active-indicator {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#navbar.h32a-nav {
+  height: 76px;
+  background: rgba(4,4,5,.96) !important;
+  border-bottom: 1px solid rgba(232,0,45,.16);
+  box-shadow: 0 18px 55px rgba(0,0,0,.42), inset 0 -1px 0 rgba(255,255,255,.035);
+}
+#navbar.h32a-nav.scrolled { height: 66px; }
+
+.h32a-nav .nav-links {
+  gap: 6px !important;
+  padding: 7px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.052), rgba(255,255,255,.018)) !important;
+  border: 1px solid rgba(255,255,255,.095) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 18px 50px rgba(0,0,0,.32) !important;
+}
+
+.h32a-nav .nav-link {
+  min-height: 42px !important;
+  padding: 10px 20px !important;
+  border: 1px solid transparent;
+  background: transparent !important;
+  transform: none !important;
+  box-shadow: none !important;
+  transition: color .22s ease, background .22s ease, border-color .22s ease, transform .22s ease !important;
+}
+.h32a-nav .nav-link::before,
+.h32a-nav .nav-link::after {
+  display: none !important;
+  content: none !important;
+}
+.h32a-nav .nav-link:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.052) !important;
+  border-color: rgba(255,255,255,.11) !important;
+  transform: translateY(-1px) !important;
+}
+.h32a-nav .nav-link.active {
+  color: #fff !important;
+  background:
+    radial-gradient(circle at 38% 12%, rgba(255,255,255,.20), transparent 38%),
+    linear-gradient(135deg, rgba(232,0,45,.96), rgba(125,0,31,.70)) !important;
+  border-color: rgba(255,255,255,.14) !important;
+  box-shadow: 0 12px 30px rgba(232,0,45,.24), inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.h32a-nav .nav-link.active:hover {
+  transform: none !important;
+  background:
+    radial-gradient(circle at 38% 12%, rgba(255,255,255,.22), transparent 38%),
+    linear-gradient(135deg, rgba(232,0,45,.98), rgba(125,0,31,.72)) !important;
+}
+.h32a-nav .nl-icon { opacity: .82; }
+.h32a-nav .nav-link.active .nl-icon { opacity: 1; }
+
+/* HERO: remove the red vertical line, make RACE clean red */
+.h32a-hero .hero-h1::before,
+.hero-h1::before {
+  display: none !important;
+  content: none !important;
+}
+.h32a-hero .hero-h1 {
+  padding-left: 0 !important;
+  max-width: 790px;
+}
+.h32a-hero .h1-accent,
+.hero-h1 .h1-accent {
+  color: var(--red) !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: var(--red) !important;
+  text-shadow: 0 0 34px rgba(232,0,45,.38) !important;
+}
+.h32a-hero .hero-eyebrow {
+  margin-left: 0 !important;
+}
+
+/* NEWSLETTER: fix JOIN THE PADDOX CREW alignment and prevent ugly wrapping */
+.newsletter-section,
+.h32a-section-ready .newsletter-section {
+  padding: 118px 0 126px !important;
+  background:
+    radial-gradient(circle at 50% 6%, rgba(232,0,45,.09), transparent 30%),
+    radial-gradient(circle at 0% 72%, rgba(255,255,255,.025), transparent 28%),
+    #060606 !important;
+}
+.nl-inner {
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  padding: clamp(42px, 6vw, 66px) clamp(28px, 5vw, 76px) !important;
+  text-align: center !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255,255,255,.115) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(232,0,45,.13), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.014)) !important;
+  box-shadow: 0 34px 95px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+.nl-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin: 0 auto 18px !important;
+  text-align: center !important;
+  font-size: clamp(2.7rem, 5vw, 5.1rem) !important;
+  line-height: .88 !important;
+  letter-spacing: 2px !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+.nl-title-main,
+.nl-title-sub {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+.nl-title-main { color: #fff; }
+.nl-title-sub {
+  color: var(--red) !important;
+  text-shadow: 0 0 28px rgba(232,0,45,.26);
+}
+.nl-sub {
+  max-width: 590px !important;
+  margin: 0 auto 28px !important;
+  color: rgba(255,255,255,.68) !important;
+  line-height: 1.75 !important;
+}
+.nl-form {
+  max-width: 560px !important;
+  margin: 0 auto !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  background: rgba(0,0,0,.36) !important;
+}
+.nl-trust {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+@media (max-width: 1120px) {
+  .h32a-nav .nav-link { padding-inline: 15px !important; }
+}
+@media (max-width: 640px) {
+  #navbar.h32a-nav { height: 68px; }
+  .h32a-hero .hero-h1 { font-size: clamp(4.65rem, 21vw, 7rem) !important; }
+  .nl-title { font-size: clamp(2.45rem, 13vw, 3.7rem) !important; }
+  .nl-form { border-radius: 18px !important; }
+}

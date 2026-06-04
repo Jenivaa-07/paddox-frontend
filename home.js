@@ -2985,3 +2985,47 @@ setInterval(() => {
   setTimeout(tuneAfterRender, 450);
   setTimeout(tuneAfterRender, 1400);
 })();
+
+
+/* ============================================================
+   PADDOX H3.2A.2 — Runtime Polish 01
+   Locks navbar to clean active-tab behavior and keeps hero/newsletter text balanced.
+   ============================================================ */
+(function initH32A2SectionPolish(){
+  'use strict';
+
+  function removeFloatingNavIndicator(){
+    document.querySelectorAll('#nav-active-indicator, .nav-active-indicator').forEach((el) => el.remove());
+  }
+
+  function lockHeroRaceAccent(){
+    document.querySelectorAll('.hero-h1 .h1-accent').forEach((el) => {
+      el.textContent = el.textContent.trim();
+      el.style.color = 'var(--red)';
+      el.style.background = 'none';
+    });
+  }
+
+  function alignNewsletterTitle(){
+    const title = document.querySelector('.nl-title');
+    if (!title || title.dataset.h32a2Aligned === '1') return;
+    if (!title.querySelector('.nl-title-main')) {
+      title.innerHTML = '<span class="nl-title-main">JOIN THE PADDO<span class="logo-x">X</span></span><span class="nl-title-sub">CREW</span>';
+    }
+    title.dataset.h32a2Aligned = '1';
+  }
+
+  function run(){
+    removeFloatingNavIndicator();
+    lockHeroRaceAccent();
+    alignNewsletterTitle();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+
+  window.addEventListener('load', run);
+  setTimeout(run, 250);
+  setTimeout(run, 900);
+  setTimeout(run, 1800);
+})();
