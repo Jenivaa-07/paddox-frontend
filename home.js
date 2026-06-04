@@ -1309,6 +1309,7 @@ document.addEventListener('keydown', e => {
 ══════════════════════════════════════ */
 function renderHomeQuotes() {
   const QUOTE_DURATION = 6500;
+  const QUOTE_SWITCH_DELAY = 260;
   let current = 0;
   let autoplay = null;
   let quotePaused = false;
@@ -1323,17 +1324,32 @@ function renderHomeQuotes() {
   function restartProgress() {
     const bar = document.getElementById('quote-progress-bar');
     if (!bar) return;
+
+    /* H3.3D.3: one owner only. Reset first, then animate after browser paint.
+       The next quote is scheduled only AFTER this function runs, so the card
+       cannot change before the line reaches 100%. */
     bar.style.transition = 'none';
     bar.style.width = '0%';
     bar.style.transformOrigin = 'left center';
-    bar.offsetHeight; // force repaint so the line restarts cleanly
+    bar.offsetHeight; // force repaint
+
     requestAnimationFrame(() => {
-      bar.style.transition = `width ${QUOTE_DURATION}ms linear`;
-      bar.style.width = '100%';
+      requestAnimationFrame(() => {
+        bar.style.transition = `width ${QUOTE_DURATION}ms linear`;
+        bar.style.width = '100%';
+      });
     });
   }
 
   window.PADDOX_RESTART_QUOTE_PROGRESS = restartProgress;
+
+  function scheduleNextQuote() {
+    clearTimeout(autoplay);
+    autoplay = setTimeout(() => {
+      if (quotePaused) return;
+      setQuote(current + 1, true, scheduleNextQuote);
+    }, QUOTE_DURATION + 180);
+  }
 
   if (!QUOTES.length) {
     textEl.textContent = 'Fan quotes are unavailable right now.';
@@ -1353,16 +1369,16 @@ function renderHomeQuotes() {
     dotsEl.querySelectorAll('.q-dot').forEach(dot => {
       dot.addEventListener('click', () => {
         clearTimeout(autoplay);
-        setQuote(parseInt(dot.dataset.i, 10));
-        startAutoplay();
+        setQuote(parseInt(dot.dataset.i, 10), true, scheduleNextQuote);
       });
     });
   }
 
-  function setQuote(i, animate = true) {
+  function setQuote(i, animate = true, afterReady = null) {
     if (!QUOTES.length) return;
     current = ((i % QUOTES.length) + QUOTES.length) % QUOTES.length;
     const q = QUOTES[current];
+
     const apply = () => {
       textEl.textContent = q.text;
       renderQuoteAvatar(avEl, q.av || '🏁', q.driver);
@@ -1370,36 +1386,26 @@ function renderHomeQuotes() {
       if (teamEl) teamEl.textContent = q.team;
       renderDots();
       restartProgress();
+      if (typeof afterReady === 'function') afterReady();
     };
 
     if (animate) {
       card?.classList.add('h33d-quote-changing');
       textEl.style.opacity = '0';
       textEl.style.transform = 'translateY(10px)';
-      setTimeout(() => {
+      window.setTimeout(() => {
         apply();
+        textEl.style.transition = 'opacity .4s, transform .4s';
         textEl.style.opacity = '1';
         textEl.style.transform = 'translateY(0)';
-        textEl.style.transition = 'opacity .4s, transform .4s';
-        setTimeout(() => card?.classList.remove('h33d-quote-changing'), 520);
-      }, 250);
+        window.setTimeout(() => card?.classList.remove('h33d-quote-changing'), 520);
+      }, QUOTE_SWITCH_DELAY);
     } else {
       apply();
     }
   }
 
-  function startAutoplay() {
-    clearTimeout(autoplay);
-    autoplay = setTimeout(() => {
-      if (!quotePaused) {
-        setQuote(current + 1);
-        startAutoplay();
-      }
-    }, QUOTE_DURATION + 80);
-  }
-
-  setQuote(0, false);
-  startAutoplay();
+  setQuote(0, false, scheduleNextQuote);
 
   const section = document.getElementById('quote-section');
   if (section) {
@@ -1410,7 +1416,7 @@ function renderHomeQuotes() {
     section.addEventListener('mouseleave', () => {
       quotePaused = false;
       restartProgress();
-      startAutoplay();
+      scheduleNextQuote();
     });
   }
 }
@@ -3722,3 +3728,6 @@ setInterval(() => {
 (function initH33D2QuoteTimerGuard(){
   window.PADDOX_QUOTE_TIMER_OWNER = 'renderHomeQuotes';
 })();
+
+/* Phase H3.3D.3 — Quote Timer Completion Fix
+   The quote card now advances only after the visible progress line has been started and completed. */
