@@ -364,38 +364,81 @@
     </div>
   </section>
 
-  <!-- ░░ NEWSLETTER ░░ -->
-  <section class="newsletter-section reveal-section h33e-polish" id="newsletter-section">
-    <div class="nl-bg-img"></div>
-    <div class="nl-overlay"></div>
+  <!-- ░░ PADDOX RACE LAB ░░ -->
+  <section class="paddox-lab-section reveal-section" id="paddox-race-lab">
+    <div class="paddox-lab-bg" aria-hidden="true"></div>
+    <div class="paddox-lab-grid" aria-hidden="true"></div>
     <div class="container">
-      <div class="nl-inner reveal-up">
-        <div class="section-label h33e-centered-label">Stay in the Race</div>
-        <h2 class="nl-title">
-          <span class="nl-title-main">JOIN THE PADDO<span class="logo-x">X</span></span>
-          <span class="nl-title-sub">CREW</span>
-        </h2>
-        <p class="nl-sub">
-          Race-day alerts, exclusive drops, premium wallpapers and fan-only access — built for the digital paddock.
-        </p>
-        <div class="nl-form" id="nl-form">
-          <input
-            class="nl-input"
-            type="email"
-            id="nl-email"
-            placeholder="Enter your email address"
-          />
-          <button class="nl-btn" id="nl-btn">
-            <span>Subscribe</span>
-            <span class="nl-btn-icon btn-arrow-icon" aria-hidden="true"></span>
-          </button>
+      <div class="paddox-lab-shell reveal-up">
+        <div class="paddox-lab-head">
+          <div>
+            <div class="section-label h33e-centered-label">New PADDOX Feature Layer</div>
+            <h2 class="paddox-lab-title">RACE <span class="accent">LAB</span></h2>
+            <p class="paddox-lab-sub">
+              Predictions, badge vault, driver mood match and race passport — built to make every race week feel collectible.
+            </p>
+          </div>
+          <div class="paddox-lab-live">
+            <span class="lab-live-dot"></span>
+            <div>
+              <small>Next Race</small>
+              <strong id="lab-next-race">Syncing race source...</strong>
+            </div>
+          </div>
         </div>
-        <div class="nl-trust">
-          <span>No spam</span>
-          <span>·</span>
-          <span>Exclusive drops first</span>
-          <span>·</span>
-          <span>Race day alerts</span>
+
+        <div class="paddox-lab-grid-cards">
+          <article class="lab-card lab-prediction-card" data-lab-card="prediction">
+            <div class="lab-card-kicker">Feature 01</div>
+            <h3>Fantasy Race Prediction</h3>
+            <p>Pick your race-week call before lights out. Later this can score points after results.</p>
+            <div class="prediction-picks" id="prediction-picks">
+              <button type="button" data-pick="Pole Sitter">Pole</button>
+              <button type="button" data-pick="Race Winner">Winner</button>
+              <button type="button" data-pick="Fastest Lap">Fastest Lap</button>
+            </div>
+            <div class="lab-card-status" id="prediction-status">No prediction saved yet.</div>
+          </article>
+
+          <article class="lab-card lab-badge-card" data-lab-card="badge">
+            <div class="lab-card-kicker">Feature 02</div>
+            <h3>PADDOX Badge Vault</h3>
+            <p>Collect visual badges for race-week activity, predictions, mood matches and passport stamps.</p>
+            <div class="badge-vault-mini" id="badge-vault-mini">
+              <span class="vault-badge" data-badge="prediction">P</span>
+              <span class="vault-badge" data-badge="mood">M</span>
+              <span class="vault-badge" data-badge="passport">S</span>
+            </div>
+            <div class="lab-card-status" id="badge-status">0 / 3 badges active</div>
+          </article>
+
+          <article class="lab-card lab-mood-card" data-lab-card="mood">
+            <div class="lab-card-kicker">Feature 03</div>
+            <h3>Driver Mood Match</h3>
+            <p>Choose your race-day energy and unlock a PADDOX driver-style identity.</p>
+            <div class="mood-picks" id="mood-picks">
+              <button type="button" data-mood="strategist">Strategist</button>
+              <button type="button" data-mood="charger">Charger</button>
+              <button type="button" data-mood="ice">Ice Mode</button>
+              <button type="button" data-mood="comeback">Comeback</button>
+            </div>
+            <div class="mood-result" id="mood-result">Pick a mood to reveal your race identity.</div>
+          </article>
+
+          <article class="lab-card lab-passport-card" data-lab-card="passport">
+            <div class="lab-card-kicker">Feature 04</div>
+            <h3>My Race Passport</h3>
+            <p>Collect a stamp for each Grand Prix you follow and build a season-long fan journey.</p>
+            <div class="passport-stamp">
+              <span id="passport-stamp-code">GP</span>
+              <small id="passport-stamp-name">Next race stamp</small>
+            </div>
+            <div class="passport-progress"><span id="passport-progress-fill"></span></div>
+            <div class="passport-actions">
+              <button type="button" class="passport-claim-btn" id="passport-claim-btn">Claim Stamp</button>
+              <a href="fanhub.html" class="passport-link">Open Calendar →</a>
+            </div>
+          </article>
         </div>
       </div>
     </div>

@@ -3743,3 +3743,123 @@ setInterval(() => {
 
 /* Phase H3.3D.3 — Quote Timer Completion Fix
    The quote card now advances only after the visible progress line has been started and completed. */
+
+
+/* ============================================================
+   Phase H3.3E.1 — PADDOX Race Lab interactions
+   Replaces the old newsletter with prediction, badge vault,
+   mood match and race passport micro-features.
+   ============================================================ */
+(function initPaddoxRaceLab(){
+  const STORE_KEY = 'paddox_race_lab_v1';
+  const moodCopy = {
+    strategist: 'You are The Strategist — calm, patient and ready to win with timing.',
+    charger: 'You are The Charger — aggressive starts, late braking and full-send energy.',
+    ice: 'You are Ice Mode — composed under pressure with clean race control.',
+    comeback: 'You are The Comeback King — built for recovery drives and last-lap drama.'
+  };
+
+  function readState(){
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}; }
+    catch (err) { return {}; }
+  }
+  function writeState(state){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (err) {}
+  }
+  function nextRaceName(){
+    const cs = document.querySelector('.cs-name');
+    const txt = cs?.textContent?.trim();
+    if (txt && !/loading|unavailable|fetching/i.test(txt)) return txt;
+    const race = window.HOME_F1?.nextRace || window.HOME_F1?.schedule?.find?.(r => new Date(`${r.date || r.raceDate || ''}T${r.time || '13:00:00Z'}`) >= new Date());
+    return race?.name || race?.raceName || 'Next Grand Prix';
+  }
+  function raceCode(name){
+    const words = String(name || 'GP').replace(/grand prix|gp/ig,'').trim().split(/\s+/).filter(Boolean);
+    return (words[0] || 'GP').slice(0,3).toUpperCase();
+  }
+  function setActiveButtons(container, value, attr){
+    container?.querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset[attr] === value));
+  }
+  function updateBadges(state){
+    const flags = {
+      prediction: !!state.prediction,
+      mood: !!state.mood,
+      passport: Array.isArray(state.stamps) && state.stamps.length > 0
+    };
+    let count = 0;
+    document.querySelectorAll('.vault-badge').forEach(badge => {
+      const on = !!flags[badge.dataset.badge];
+      badge.classList.toggle('unlocked', on);
+      if (on) count += 1;
+    });
+    const status = document.getElementById('badge-status');
+    if (status) status.textContent = `${count} / 3 badges active`;
+  }
+  function updatePassport(state){
+    const race = nextRaceName();
+    const code = raceCode(race);
+    const codeEl = document.getElementById('passport-stamp-code');
+    const nameEl = document.getElementById('passport-stamp-name');
+    const nextEl = document.getElementById('lab-next-race');
+    const fill = document.getElementById('passport-progress-fill');
+    if (codeEl) codeEl.textContent = code;
+    if (nameEl) nameEl.textContent = `${race} stamp`;
+    if (nextEl) nextEl.textContent = race;
+    const stamps = Array.isArray(state.stamps) ? state.stamps : [];
+    if (fill) fill.style.width = `${Math.min(100, Math.round((stamps.length / 24) * 100))}%`;
+    const claim = document.getElementById('passport-claim-btn');
+    if (claim) claim.textContent = stamps.includes(race) ? 'Stamp Claimed' : 'Claim Stamp';
+  }
+  function render(){
+    const state = readState();
+    const predictionStatus = document.getElementById('prediction-status');
+    if (predictionStatus) predictionStatus.textContent = state.prediction ? `${state.prediction} saved for ${state.predictionRace || nextRaceName()}.` : 'No prediction saved yet.';
+    setActiveButtons(document.getElementById('prediction-picks'), state.prediction || '', 'pick');
+    setActiveButtons(document.getElementById('mood-picks'), state.mood || '', 'mood');
+    const moodResult = document.getElementById('mood-result');
+    if (moodResult) moodResult.textContent = state.mood ? moodCopy[state.mood] : 'Pick a mood to reveal your race identity.';
+    updatePassport(state);
+    updateBadges(state);
+  }
+  function boot(){
+    const root = document.getElementById('paddox-race-lab');
+    if (!root || root.dataset.ready === '1') { render(); return; }
+    root.dataset.ready = '1';
+
+    document.getElementById('prediction-picks')?.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-pick]');
+      if (!btn) return;
+      const state = readState();
+      state.prediction = btn.dataset.pick;
+      state.predictionRace = nextRaceName();
+      writeState(state);
+      render();
+      if (typeof showToast === 'function') showToast('Race prediction saved');
+    });
+
+    document.getElementById('mood-picks')?.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-mood]');
+      if (!btn) return;
+      const state = readState();
+      state.mood = btn.dataset.mood;
+      writeState(state);
+      render();
+      if (typeof showToast === 'function') showToast('Driver mood matched');
+    });
+
+    document.getElementById('passport-claim-btn')?.addEventListener('click', () => {
+      const state = readState();
+      const race = nextRaceName();
+      state.stamps = Array.isArray(state.stamps) ? state.stamps : [];
+      if (!state.stamps.includes(race)) state.stamps.push(race);
+      writeState(state);
+      render();
+      if (typeof showToast === 'function') showToast('Race passport stamp claimed');
+    });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+  [900, 2400, 5000].forEach(ms => setTimeout(render, ms));
+})();
