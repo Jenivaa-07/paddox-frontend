@@ -3805,6 +3805,8 @@ setInterval(() => {
     if (nextEl) nextEl.textContent = race;
     const stamps = Array.isArray(state.stamps) ? state.stamps : [];
     if (fill) fill.style.width = `${Math.min(100, Math.round((stamps.length / 24) * 100))}%`;
+    const label = document.getElementById('passport-progress-label');
+    if (label) label.textContent = `${Math.min(24, stamps.length)} / 24`;
     const claim = document.getElementById('passport-claim-btn');
     if (claim) claim.textContent = stamps.includes(race) ? 'Stamp Claimed' : 'Claim Stamp';
   }

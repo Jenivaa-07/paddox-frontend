@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Paddox — F1 Fan Universe</title>
-  <link rel="stylesheet" href="home.css?v=H3_3E_3" />
+  <link rel="stylesheet" href="home.css?v=H3_3E_4" />
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=Titillium+Web:wght@400;600;700;900&display=swap"
     rel="stylesheet"
@@ -365,22 +365,21 @@
   </section>
 
   <!-- ░░ PADDOX RACE LAB ░░ -->
-  <section class="paddox-lab-section reveal-section h33e2-race-lab h33e3-race-lab" id="paddox-race-lab">
-    <div class="paddox-lab-bg" aria-hidden="true"></div>
-    <div class="paddox-lab-grid" aria-hidden="true"></div>
-    <div class="race-lab-orbit" aria-hidden="true"></div>
+  <section class="paddox-lab-section reveal-section h33e4-race-lab" id="paddox-race-lab">
+    <div class="h33e4-lab-bg" aria-hidden="true"></div>
+    <div class="h33e4-lab-grid" aria-hidden="true"></div>
     <div class="container">
-      <div class="paddox-lab-shell reveal-up">
-        <div class="paddox-lab-head">
-          <div class="lab-title-stack">
-            <div class="section-label h33e-centered-label">New PADDOX Collectible System</div>
-            <h2 class="paddox-lab-title">RACE <span class="accent">LAB</span></h2>
-            <p class="paddox-lab-sub">
-              Predict race outcomes, unlock collectible badges, and build your PADDOX Race Passport through every Grand Prix weekend.
+      <div class="h33e4-lab-shell reveal-up">
+        <div class="h33e4-lab-head">
+          <div class="h33e4-title-block">
+            <div class="section-label h33e4-kicker">PADDOX Collectible System</div>
+            <h2 class="h33e4-title">RACE <span>LAB</span></h2>
+            <p>
+              Predict the next race, collect digital trophies, and stamp your PADDOX Race Passport through every Grand Prix weekend.
             </p>
           </div>
-          <div class="paddox-lab-live">
-            <span class="lab-live-dot"></span>
+          <div class="h33e4-live-chip">
+            <span></span>
             <div>
               <small>Next Stamp Window</small>
               <strong id="lab-next-race">Syncing race source...</strong>
@@ -388,58 +387,67 @@
           </div>
         </div>
 
-        <div class="paddox-lab-grid-cards h33e3-lab-grid">
-          <article class="lab-card lab-prediction-card h33e3-feature-card" data-lab-card="prediction">
-            <div class="lab-card-art prediction-art" aria-hidden="true">
-              <span class="art-ring"></span>
-              <span class="art-grid-dot p1"></span>
-              <span class="art-grid-dot p2"></span>
-              <span class="art-grid-dot p3"></span>
+        <div class="h33e4-command-grid">
+          <article class="h33e4-passport-panel lab-card lab-passport-card" data-lab-card="passport">
+            <div class="h33e4-panel-tag">Feature 03 · Season Passport</div>
+            <div class="h33e4-passport-visual" aria-hidden="true">
+              <div class="h33e4-passport-book">
+                <div class="h33e4-passport-spine"></div>
+                <div class="h33e4-passport-logo">PADDO<span>X</span></div>
+                <div class="h33e4-passport-title">Race Passport</div>
+                <div class="h33e4-passport-lines"></div>
+              </div>
+              <div class="passport-stamp h33e4-stamp">
+                <span id="passport-stamp-code">GP</span>
+                <small id="passport-stamp-name">Next race stamp</small>
+              </div>
             </div>
-            <div class="lab-card-kicker">Feature 01 · Race Strategy</div>
-            <h3>Fantasy Race Prediction</h3>
-            <p>Lock a race-week call before lights out. Later this becomes a scored prediction system with fan points and rewards.</p>
-            <div class="prediction-picks" id="prediction-picks">
-              <button type="button" data-pick="Pole Sitter"><span>P1</span> Pole</button>
-              <button type="button" data-pick="Race Winner"><span>WIN</span> Winner</button>
-              <button type="button" data-pick="Fastest Lap"><span>FL</span> Fastest Lap</button>
+            <div class="h33e4-passport-copy">
+              <h3>My Race Passport</h3>
+              <p>Claim one stamp per Grand Prix weekend and build a season-long PADDOX journey.</p>
+              <div class="h33e4-progress-row">
+                <small>Season progress</small>
+                <b id="passport-progress-label">0 / 24</b>
+              </div>
+              <div class="passport-progress h33e4-passport-progress"><span id="passport-progress-fill"></span></div>
+              <div class="passport-actions h33e4-actions">
+                <button type="button" class="passport-claim-btn" id="passport-claim-btn">Claim Stamp</button>
+                <a href="fanhub.html" class="passport-link">Open Calendar →</a>
+              </div>
             </div>
-            <div class="lab-card-status" id="prediction-status">No prediction saved yet.</div>
           </article>
 
-          <article class="lab-card lab-badge-card h33e3-feature-card h33e3-vault-card" data-lab-card="badge">
-            <div class="lab-card-art badge-art" aria-hidden="true">
-              <span class="vault-scan"></span>
-            </div>
-            <div class="lab-card-kicker">Feature 02 · Trophy System</div>
-            <h3>PADDOX Badge Vault</h3>
-            <p>Your digital trophy cabinet. Collect premium badges from prediction wins, race passport stamps, and season milestones.</p>
-            <div class="badge-vault-mini h33e3-vault-mini" id="badge-vault-mini">
-              <span class="vault-badge" data-badge="prediction"><b>P</b><small>Predictor</small></span>
-              <span class="vault-badge" data-badge="passport"><b>S</b><small>Stamp</small></span>
-              <span class="vault-badge" data-badge="season"><b>24</b><small>Season</small></span>
-            </div>
-            <div class="lab-card-status" id="badge-status">0 / 3 badges active</div>
-          </article>
+          <div class="h33e4-side-stack">
+            <article class="h33e4-feature-panel h33e4-prediction-panel lab-card lab-prediction-card" data-lab-card="prediction">
+              <div class="h33e4-feature-icon" aria-hidden="true"><span></span><i></i></div>
+              <div class="h33e4-panel-tag">Feature 01 · Race Strategy</div>
+              <h3>Fantasy Race Prediction</h3>
+              <p>Lock your race-week call before lights out. Later this becomes a scored fan-points system.</p>
+              <div class="prediction-picks h33e4-picks" id="prediction-picks">
+                <button type="button" data-pick="Pole Sitter"><span>P1</span> Pole</button>
+                <button type="button" data-pick="Race Winner"><span>WIN</span> Winner</button>
+                <button type="button" data-pick="Fastest Lap"><span>FL</span> Fastest Lap</button>
+              </div>
+              <div class="lab-card-status h33e4-status" id="prediction-status">No prediction saved yet.</div>
+            </article>
 
-          <article class="lab-card lab-passport-card h33e3-feature-card" data-lab-card="passport">
-            <div class="lab-card-art passport-art" aria-hidden="true">
-              <span class="passport-page-line"></span>
-              <span class="passport-page-line small"></span>
-            </div>
-            <div class="lab-card-kicker">Feature 03 · Season Passport</div>
-            <h3>My Race Passport</h3>
-            <p>Collect a digital stamp for each Grand Prix and build a season-long PADDOX fan journey.</p>
-            <div class="passport-stamp h33e3-passport-stamp">
-              <span id="passport-stamp-code">GP</span>
-              <small id="passport-stamp-name">Next race stamp</small>
-            </div>
-            <div class="passport-progress"><span id="passport-progress-fill"></span></div>
-            <div class="passport-actions">
-              <button type="button" class="passport-claim-btn" id="passport-claim-btn">Claim Stamp</button>
-              <a href="fanhub.html" class="passport-link">Open Calendar →</a>
-            </div>
-          </article>
+            <article class="h33e4-feature-panel h33e4-vault-panel lab-card lab-badge-card" data-lab-card="badge">
+              <div class="h33e4-vault-head">
+                <div>
+                  <div class="h33e4-panel-tag">Feature 02 · Trophy Cabinet</div>
+                  <h3>PADDOX Badge Vault</h3>
+                </div>
+                <div class="h33e4-vault-count">3 Slots</div>
+              </div>
+              <p>Your digital trophy cabinet for predictions, race passport stamps, and season milestones.</p>
+              <div class="badge-vault-mini h33e4-vault-mini" id="badge-vault-mini">
+                <span class="vault-badge" data-badge="prediction"><b>P</b><small>Predictor</small></span>
+                <span class="vault-badge" data-badge="passport"><b>S</b><small>Stamp</small></span>
+                <span class="vault-badge" data-badge="season"><b>24</b><small>Season</small></span>
+              </div>
+              <div class="lab-card-status h33e4-status" id="badge-status">0 / 3 badges active</div>
+            </article>
+          </div>
         </div>
       </div>
     </div>
