@@ -557,9 +557,9 @@ function renderRealtimeFanCards(grid, cards = []) {
       <div class="home-empty-card fan-empty-card real-empty-card reveal-up">
         <div class="empty-icon" aria-hidden="true"></div>
         <div>
-          <h3>No live fan activity yet</h3>
-          <p>Real Fan Hub posts, leaderboard users and fan-point activity will appear here automatically once fans start using PADDOX.</p>
-          <a href="fanhub.html" class="empty-cta">Open Fan Hub →</a>
+          <h3>Fan activity is warming up</h3>
+          <p>Real Fan Hub posts, leaderboard heat and fan-point activity will appear here automatically.</p>
+          <a href="fanhub.html" class="empty-cta">Enter Fan Hub →</a>
         </div>
       </div>`;
     initRevealObserver(grid.querySelectorAll('.reveal-up'));
