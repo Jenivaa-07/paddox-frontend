@@ -3426,24 +3426,51 @@ setInterval(() => {
     return section;
   }
   function loadImage(frame, sources, alt){
+    if (!frame) return;
     let idx = 0;
+    const cleanSources = [...new Set((sources || []).filter(Boolean))];
+
+    function showPending(message = 'Circuit source unavailable'){
+      frame.innerHTML = `<div class="h33b-image-pending"><strong>IMAGE PENDING</strong><small>${esc(message)}</small></div>`;
+      frame.dataset.loadedSrc = '';
+    }
+
     function tryNext(){
-      if (!sources[idx]) {
-        frame.innerHTML = `<div class="h33b-image-pending"><strong>IMAGE PENDING</strong><small>Circuit source unavailable</small></div>`;
+      const src = cleanSources[idx];
+      if (!src) {
+        showPending('Formula Timer image unavailable');
         return;
       }
-      const img = new Image();
+
+      /* Avoid endless reload loops when boot() runs again after the same image already loaded. */
+      if (frame.dataset.loadedSrc === src && frame.querySelector('.h33b-circuit-img')) return;
+
+      frame.innerHTML = `<div class="h33b-image-pending h33b-image-loading"><strong>LOADING CIRCUIT</strong><small>Formula Timer direct image</small></div>`;
+
+      const img = document.createElement('img');
       img.className = 'h33b-circuit-img';
-      img.alt = alt;
+      img.alt = alt || 'Circuit map';
       img.decoding = 'async';
-      img.loading = 'lazy';
-      img.onload = () => {
-        frame.innerHTML = '';
-        frame.appendChild(img);
-      };
-      img.onerror = () => { idx += 1; tryNext(); };
-      img.src = sources[idx];
+      img.loading = 'eager';
+      img.referrerPolicy = 'no-referrer';
+      img.crossOrigin = 'anonymous';
+
+      img.addEventListener('load', () => {
+        frame.dataset.loadedSrc = src;
+        frame.querySelectorAll('.h33b-image-pending').forEach(el => el.remove());
+        img.classList.add('is-loaded');
+      }, { once: true });
+
+      img.addEventListener('error', () => {
+        idx += 1;
+        tryNext();
+      }, { once: true });
+
+      /* Append first, then set src. This matches the working Fan Hub loader and lets the browser paint immediately. */
+      frame.appendChild(img);
+      img.src = src;
     }
+
     tryNext();
   }
   function render(){
@@ -3513,12 +3540,20 @@ setInterval(() => {
     const el = document.getElementById('h33b-track-countdown');
     if (el) el.textContent = countdownText(race);
   }
+  let lastRenderKey = '';
   function boot(){
-    try { render(); } catch (err) { console.warn('H3.3B Track Mode sync failed', err); }
+    try {
+      const race = getRace() || {};
+      const circuit = getCircuit(race);
+      const key = [race.name || race.raceName, race.date || race.raceDate, circuit.slugs?.[0]].join('|');
+      if (key && key === lastRenderKey && document.querySelector('#h33b-circuit-frame .h33b-circuit-img')) return;
+      lastRenderKey = key;
+      render();
+    } catch (err) { console.warn('H3.3B.1 Track Mode sync failed', err); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
   window.addEventListener('load', boot);
-  [650, 1600, 3300, 5200].forEach(ms => setTimeout(boot, ms));
+  [900, 2200, 4200].forEach(ms => setTimeout(boot, ms));
   setInterval(refreshCountdownOnly, 1000);
 })();

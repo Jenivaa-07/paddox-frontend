@@ -6813,3 +6813,22 @@ body .nl-trust {
   .h33b-circuit-meta { left: 14px !important; right: 14px !important; bottom: 12px !important; }
   .h33b-circuit-pill { font-size: .52rem !important; padding: 7px 9px !important; }
 }
+
+
+/* H3.3B.1 — Home Track Mode image load hard fix */
+.h33b-circuit-frame .h33b-image-loading{
+  position:absolute !important;
+  inset:0 !important;
+  z-index:0 !important;
+}
+.h33b-circuit-frame .h33b-circuit-img{
+  opacity:1 !important;
+  display:block !important;
+}
+.h33b-circuit-frame .h33b-circuit-img.is-loaded{
+  animation:h33bMapReveal .55s ease both !important;
+}
+@keyframes h33bMapReveal{
+  from{opacity:.25;transform:scale(.985)}
+  to{opacity:1;transform:scale(1.02)}
+}
