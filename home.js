@@ -3060,3 +3060,145 @@ setInterval(() => {
   window.addEventListener('load', run);
   [50, 250, 700, 1500, 3000].forEach(ms => setTimeout(run, ms));
 })();
+
+
+/* ============================================================
+   PADDOX H3.2B — Hero + Countdown Premium Realtime Polish
+   Uses existing backend-fed state: products, fan data, F1 schedule/standings.
+   ============================================================ */
+(function initH32BHeroCountdownPolish() {
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  }
+
+  ready(() => {
+    document.body.classList.add('h32b-home');
+    stampH32BRealtimePills();
+    initH32BHeroPointer();
+    initH32BCountdownTickPulse();
+    initH32BRealtimeRefreshBridge();
+    setTimeout(syncH32BRealtimeHero, 700);
+    setTimeout(syncH32BRealtimeHero, 1800);
+    setTimeout(syncH32BRealtimeHero, 3600);
+  });
+
+  function stampH32BRealtimePills() {
+    const ticker = document.querySelector('.hero-ticker');
+    if (ticker && !ticker.querySelector('.h32b-sync-pill')) {
+      const pill = document.createElement('span');
+      pill.className = 'h32b-sync-pill';
+      pill.textContent = 'Backend Live';
+      ticker.appendChild(pill);
+    }
+
+    const csLabel = document.querySelector('.cs-label');
+    if (csLabel && !csLabel.querySelector('.h32b-sync-pill')) {
+      const pill = document.createElement('span');
+      pill.className = 'h32b-sync-pill';
+      pill.textContent = 'Realtime';
+      csLabel.appendChild(pill);
+    }
+  }
+
+  function initH32BHeroPointer() {
+    const hero = document.getElementById('hero');
+    if (!hero || hero.dataset.h32bPointer === '1') return;
+    hero.dataset.h32bPointer = '1';
+    hero.addEventListener('pointermove', (event) => {
+      const rect = hero.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100;
+      const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 100;
+      hero.style.setProperty('--hero-x', `${Math.max(0, Math.min(100, x))}%`);
+      hero.style.setProperty('--hero-y', `${Math.max(0, Math.min(100, y))}%`);
+    }, { passive: true });
+  }
+
+  function textValue(value, fallback = 'Loading') {
+    if (typeof safeText === 'function') return safeText(value, fallback);
+    const text = String(value ?? '').trim();
+    return text || fallback;
+  }
+
+  function htmlEscape(value = '') {
+    if (typeof escapeHTML === 'function') return escapeHTML(value);
+    return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+  }
+
+  function raceName(race = {}) {
+    return textValue(race.name || race.raceName || race.grandPrix || race.roundName, 'Next Grand Prix');
+  }
+
+  function raceMeta(race = {}) {
+    return [race.circuit || race.Circuit?.circuitName, race.country || race.location || race.Circuit?.Location?.country]
+      .map(x => textValue(x, ''))
+      .filter(Boolean)
+      .join(' · ') || 'Live Formula 1 schedule';
+  }
+
+  function syncH32BRealtimeHero() {
+    try {
+      const grid = document.getElementById('hero-live-grid');
+      if (!grid) return;
+      const state = (typeof HOME_REALTIME_STATE !== 'undefined') ? HOME_REALTIME_STATE : {};
+      const f1 = (typeof HOME_F1 !== 'undefined') ? HOME_F1 : {};
+      const products = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)) ? PRODUCTS : [];
+      const nextRace = f1.nextRace || {};
+      const standings = Array.isArray(f1.standings) ? f1.standings : [];
+      const schedule = Array.isArray(f1.schedule) ? f1.schedule : [];
+      const raceCount = typeof validRaceCount === 'function' ? validRaceCount(schedule) : schedule.length;
+      const leader = (typeof bestLeaderName === 'function') ? bestLeaderName() : 'Live Standings';
+      const drop = products[0]?.name || (state.productCount ? `${state.productCount} Products` : 'Shop Live');
+      const fanLine = state.fanCount ? `${state.fanCount} fans` : 'Community sync';
+
+      grid.innerHTML = `
+        <div class="hero-live-card"><span>Next Race</span><strong>${htmlEscape(raceName(nextRace))}</strong><small>${htmlEscape(raceMeta(nextRace))}</small></div>
+        <div class="hero-live-card"><span>Season Sync</span><strong>${htmlEscape(raceCount ? `${raceCount} Rounds` : 'Schedule Live')}</strong><small>${htmlEscape(leader && leader !== 'Loading' ? `Leader: ${leader}` : 'Driver standings')}</small></div>
+        <div class="hero-live-card"><span>PADDOX Live</span><strong>${htmlEscape(drop)}</strong><small>${htmlEscape(fanLine)}</small></div>
+      `;
+
+      const ticker = document.getElementById('ticker-text');
+      if (ticker && (!ticker.textContent || ticker.textContent.includes('loading') || ticker.textContent.includes('Loading'))) {
+        ticker.textContent = nextRace && (nextRace.name || nextRace.raceName)
+          ? `Next race: ${raceName(nextRace)} · ${raceMeta(nextRace)}`
+          : 'PADDOX backend live sync active';
+      }
+    } catch (err) {
+      console.warn('H3.2B realtime hero sync skipped', err);
+    }
+  }
+
+  function initH32BCountdownTickPulse() {
+    const ids = ['cd-d','cd-h','cd-m','cd-s'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el || el.dataset.h32bObserved === '1') return;
+      el.dataset.h32bObserved = '1';
+      let last = el.textContent;
+      const observer = new MutationObserver(() => {
+        const current = el.textContent;
+        if (current === last) return;
+        last = current;
+        const block = el.closest('.cd-block');
+        if (!block) return;
+        block.classList.remove('is-ticking');
+        void block.offsetWidth;
+        block.classList.add('is-ticking');
+        setTimeout(() => block.classList.remove('is-ticking'), 480);
+      });
+      observer.observe(el, { childList: true, characterData: true, subtree: true });
+    });
+  }
+
+  function initH32BRealtimeRefreshBridge() {
+    if (window.__h32bRefreshBridge) return;
+    window.__h32bRefreshBridge = true;
+    const originalRenderHero = window.renderHeroLiveCards;
+    // Function declarations in this file are not always window properties in strict mode,
+    // so use safe interval sync instead of replacing existing logic.
+    setInterval(syncH32BRealtimeHero, 8000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) setTimeout(syncH32BRealtimeHero, 400);
+    });
+  }
+})();

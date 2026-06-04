@@ -6192,3 +6192,343 @@ body .nl-trust {
   body .nl-title,
   body .newsletter-title { font-size: clamp(2.55rem, 13vw, 3.8rem) !important; }
 }
+
+
+/* ============================================================
+   PADDOX H3.2B — Hero + Countdown Premium Realtime Polish
+   Section-by-section polish: keeps existing backend data flow.
+   ============================================================ */
+
+body.h32b-home {
+  background:
+    radial-gradient(circle at 78% 12%, rgba(232,0,45,.055), transparent 26%),
+    radial-gradient(circle at 14% 54%, rgba(255,255,255,.025), transparent 24%),
+    #050505 !important;
+}
+
+/* HERO: cleaner motorsport editorial composition */
+body.h32b-home .hero {
+  min-height: 96vh;
+  align-items: center;
+  isolation: isolate;
+}
+body.h32b-home .hero::before {
+  content: '';
+  position: absolute;
+  left: clamp(38px, 6.5vw, 108px);
+  top: 22%;
+  bottom: 18%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(232,0,45,.75), transparent);
+  opacity: .34;
+  pointer-events: none;
+  z-index: 2;
+}
+body.h32b-home .hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 34%;
+  background: linear-gradient(to bottom, transparent, rgba(5,5,5,.96));
+  pointer-events: none;
+  z-index: 1;
+}
+body.h32b-home .hero-bg-image {
+  filter: brightness(.34) saturate(.76) contrast(1.04);
+  transform: scale(1.045);
+}
+body.h32b-home .hero-overlay {
+  background:
+    radial-gradient(circle at var(--hero-x, 68%) var(--hero-y, 32%), rgba(232,0,45,.13), transparent 30%),
+    linear-gradient(102deg, rgba(5,5,5,.96) 0%, rgba(5,5,5,.78) 48%, rgba(5,5,5,.52) 100%),
+    linear-gradient(to top, rgba(5,5,5,1) 0%, transparent 42%) !important;
+}
+body.h32b-home .hero-content {
+  padding-left: clamp(52px, 7vw, 106px) !important;
+  padding-top: clamp(72px, 10vh, 120px);
+  max-width: min(920px, 70vw);
+}
+body.h32b-home .hero-eyebrow {
+  display: inline-flex;
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(232,0,45,.24);
+  background: rgba(232,0,45,.055);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  letter-spacing: 5.4px;
+}
+body.h32b-home .hero-eyebrow .eyebrow-line {
+  width: 34px;
+  opacity: .8;
+}
+body.h32b-home .hero-h1 {
+  margin-top: 18px;
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  font-size: clamp(5.8rem, 10.9vw, 12.6rem);
+  line-height: .78;
+  letter-spacing: .035em;
+  text-shadow: 0 28px 80px rgba(0,0,0,.55);
+}
+body.h32b-home .hero-h1::before { display: none !important; }
+body.h32b-home .hero-h1 .h1-line {
+  transform-origin: left center;
+}
+body.h32b-home .h1-race-line {
+  display: inline-flex;
+  width: fit-content;
+  position: relative;
+}
+body.h32b-home .h1-race-line::after {
+  content: '';
+  position: absolute;
+  left: .035em;
+  right: .08em;
+  bottom: -.08em;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(232,0,45,0), rgba(232,0,45,.92), rgba(255,255,255,.55), rgba(232,0,45,0));
+  filter: drop-shadow(0 0 14px rgba(232,0,45,.45));
+  opacity: .75;
+}
+body.h32b-home .h1-accent {
+  color: #ff0034 !important;
+  text-shadow: 0 0 34px rgba(232,0,45,.36), 0 24px 70px rgba(0,0,0,.65);
+}
+body.h32b-home .hero-sub {
+  max-width: 630px;
+  color: rgba(255,255,255,.72) !important;
+  font-size: clamp(1rem, 1.25vw, 1.13rem);
+  line-height: 1.75;
+  margin-bottom: 30px;
+}
+body.h32b-home .hero-btns { margin-bottom: 20px; }
+body.h32b-home .btn-primary,
+body.h32b-home .btn-outline,
+body.h32b-home .nav-cta-btn {
+  will-change: transform;
+}
+
+/* Hero realtime rail: visible, clean, not fake */
+body.h32b-home .hero-ticker {
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: rgba(5,5,5,.58);
+  border: 1px solid rgba(255,255,255,.105);
+  box-shadow: 0 16px 42px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter: blur(16px) saturate(1.24);
+  -webkit-backdrop-filter: blur(16px) saturate(1.24);
+}
+body.h32b-home .ticker-label {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(232,0,45,.16);
+}
+body.h32b-home .ticker-text {
+  transition: opacity .35s ease, transform .35s ease;
+  color: rgba(255,255,255,.72) !important;
+}
+body.h32b-home .hero-live-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 690px;
+  margin-top: 14px !important;
+}
+body.h32b-home .hero-live-card {
+  min-height: 74px;
+  border-radius: 16px !important;
+  padding: 13px 14px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.018)),
+    rgba(7,7,8,.72) !important;
+  border: 1px solid rgba(255,255,255,.11) !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.055);
+  overflow: hidden;
+}
+body.h32b-home .hero-live-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(232,0,45,.05), rgba(232,0,45,.85), rgba(255,255,255,.4));
+  opacity: .68;
+}
+body.h32b-home .hero-live-card span {
+  color: var(--red);
+  font-family: var(--font-condensed);
+  letter-spacing: 2.2px;
+  font-size: .62rem;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+body.h32b-home .hero-live-card strong {
+  display: block;
+  margin: 5px 0 3px;
+  color: #fff;
+  font-size: clamp(.88rem, 1vw, 1.02rem);
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.h32b-home .hero-live-card small {
+  display: block;
+  color: rgba(255,255,255,.50);
+  font-size: .68rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.h32b-home .hero-stats {
+  right: clamp(36px, 6vw, 96px);
+  bottom: clamp(52px, 8vh, 84px);
+  padding: 12px 16px;
+  border-radius: 22px;
+  background: rgba(5,5,5,.28);
+  border: 1px solid rgba(255,255,255,.06);
+  backdrop-filter: blur(12px);
+}
+body.h32b-home .stat-num {
+  font-family: var(--font-number, var(--font-display));
+  font-size: clamp(2.1rem, 2.4vw, 3.1rem);
+}
+
+/* COUNTDOWN: full premium card instead of plain strip */
+body.h32b-home .countdown-strip {
+  padding: 34px 0 38px !important;
+  background:
+    linear-gradient(180deg, rgba(5,5,5,1), rgba(7,2,4,1)) !important;
+  border: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+body.h32b-home .countdown-strip::before {
+  content: '';
+  position: absolute;
+  inset: 14px max(18px, calc((100vw - 1240px) / 2)) 14px max(18px, calc((100vw - 1240px) / 2));
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255,255,255,.09), transparent 18%),
+    radial-gradient(circle at 78% 58%, rgba(232,0,45,.18), transparent 34%),
+    linear-gradient(110deg, rgba(232,0,45,.20), rgba(255,255,255,.035) 45%, rgba(232,0,45,.09));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 24px 90px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.08);
+  pointer-events: none;
+}
+body.h32b-home .countdown-strip::after {
+  content: '';
+  position: absolute;
+  inset: 14px max(18px, calc((100vw - 1240px) / 2)) auto max(18px, calc((100vw - 1240px) / 2));
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,0,45,.85), rgba(255,255,255,.35), transparent);
+  pointer-events: none;
+}
+body.h32b-home .cs-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  min-height: 124px;
+  padding: 24px clamp(30px, 5vw, 58px) !important;
+}
+body.h32b-home .cs-label {
+  color: rgba(255,255,255,.54);
+  letter-spacing: 4.6px;
+}
+body.h32b-home .cs-name {
+  font-size: clamp(1.9rem, 3vw, 3.1rem);
+  line-height: .94;
+  letter-spacing: 1.5px;
+}
+body.h32b-home .cs-circuit {
+  margin-top: 6px;
+  color: rgba(255,255,255,.64);
+}
+body.h32b-home .cs-chip {
+  border-radius: 999px;
+  background: rgba(232,0,45,.86);
+  padding: 5px 12px;
+}
+body.h32b-home .cs-flag {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: rgba(0,0,0,.30);
+}
+body.h32b-home .cs-flag::before,
+body.h32b-home .cs-flag::after { display: none; }
+body.h32b-home .cs-flag-img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 16px;
+}
+body.h32b-home .cd-blocks {
+  gap: 10px;
+}
+body.h32b-home .cd-colon {
+  opacity: .55;
+  color: rgba(255,255,255,.55);
+}
+body.h32b-home .cd-block {
+  min-width: 84px;
+  border-radius: 16px;
+  padding: 17px 16px 15px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.09), transparent 48%),
+    rgba(5,5,5,.54) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-bottom: 1px solid rgba(232,0,45,.55) !important;
+  box-shadow: 0 16px 34px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.06);
+}
+body.h32b-home .cd-num {
+  font-family: var(--font-number, var(--font-display));
+  font-size: clamp(2rem, 2.6vw, 3rem);
+}
+body.h32b-home .cd-lbl {
+  color: rgba(255,255,255,.48);
+}
+body.h32b-home .cd-block.is-ticking .cd-num {
+  animation: h32bTick .42s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes h32bTick {
+  0% { transform: translateY(-7px); opacity: .35; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Track Mode handoff note: backend-safe realtime status badges */
+body.h32b-home .h32b-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: 10px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: rgba(255,255,255,.70);
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.045);
+  font-family: var(--font-condensed);
+  font-size: .62rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+body.h32b-home .h32b-sync-pill::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 16px rgba(34,197,94,.6);
+}
+
+@media (max-width: 1120px) {
+  body.h32b-home .hero-content { max-width: 82vw; }
+  body.h32b-home .hero-stats { position: relative; right: auto; bottom: auto; margin: 26px 0 0 clamp(52px, 7vw, 106px); width: fit-content; }
+}
+@media (max-width: 780px) {
+  body.h32b-home .hero { min-height: auto; padding-bottom: 50px; }
+  body.h32b-home .hero::before { display: none; }
+  body.h32b-home .hero-content { max-width: none; padding-left: 26px !important; padding-right: 22px !important; }
+  body.h32b-home .hero-h1 { font-size: clamp(4.6rem, 23vw, 7rem); }
+  body.h32b-home .hero-live-grid { grid-template-columns: 1fr; max-width: 420px; }
+  body.h32b-home .hero-stats { margin-left: 26px; flex-wrap: wrap; }
+  body.h32b-home .cs-inner { text-align: left; align-items: flex-start; }
+  body.h32b-home .cd-blocks { display: grid; grid-template-columns: repeat(2, minmax(104px, 1fr)); width: 100%; max-width: 290px; }
+  body.h32b-home .cd-colon { display: none; }
+}
