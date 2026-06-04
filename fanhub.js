@@ -66,63 +66,70 @@ async function loadRealCalendar() {
   if (!grid) return;
 
   try {
-    /* Show loading state */
     grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">
+      <div class="calendar-loading-card">
         <div class="fh-empty-mark fh-mark-loading"></div>
-        <p>Loading 2026 Race Calendar...</p>
+        <p>Loading live Race Calendar + SVG circuit maps...</p>
       </div>`;
 
     const data = await PaddoxAPI.f1.schedule();
     if (!data.success) throw new Error('API failed');
 
-    const races = data.data.races;
-
-    /* Find the "next" race */
-    const now     = new Date();
+    const races = data.data.races || data.data.schedule || [];
+    const now = new Date();
     let nextFound = false;
-    const tagged  = races.map(r => {
+    const tagged = races.map(r => {
       const rDate = new Date(`${r.date}T${r.time || '13:00:00Z'}`);
-      const past  = rDate < now;
-      let status  = past ? 'completed' : 'upcoming';
+      const past = rDate < now;
+      let status = past ? 'completed' : 'upcoming';
       if (!past && !nextFound) { status = 'next'; nextFound = true; }
       return { ...r, status };
     });
 
     grid.innerHTML = tagged.map((r, i) => {
       const isNext = r.status === 'next';
-      const rDate  = new Date(`${r.date}T${r.time || '13:00:00Z'}`);
-      const diff   = rDate - now;
-      const d      = Math.max(0, Math.floor(diff / 864e5));
-      const h      = Math.max(0, Math.floor((diff % 864e5) / 36e5));
-      const m      = Math.max(0, Math.floor((diff % 36e5) / 6e4));
+      const rDate = new Date(`${r.date}T${r.time || '13:00:00Z'}`);
+      const diff = rDate - now;
+      const d = Math.max(0, Math.floor(diff / 864e5));
+      const h = Math.max(0, Math.floor((diff % 864e5) / 36e5));
+      const m = Math.max(0, Math.floor((diff % 36e5) / 6e4));
+      const circuit = paddoxRaceCircuit(r);
 
       return `
-        <div class="rcard" style="animation-delay:${i * 0.05}s">
-          <div class="rc-flag">${raceFlagHTML(r)}</div>
-          <div class="rc-round">Round ${r.round}</div>
-          <div class="rc-name">${r.name}</div>
-          <div class="rc-circuit">${r.circuit} · ${r.location}</div>
-          <div class="rc-date">${new Date(r.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</div>
-          <span class="rc-status rs-${r.status === 'next' ? 'next' : r.status === 'completed' ? 'done' : 'up'}">
-            ${r.status === 'next' ? '▶ Next Race' : r.status === 'completed' ? '✓ Completed' : 'Upcoming'}
-          </span>
-          ${isNext ? `
-            <div class="rc-mini-cd">
-              <div class="rcb"><div class="rcb-n">${String(d).padStart(2,'0')}</div><div class="rcb-l">Days</div></div>
-              <div class="rcb"><div class="rcb-n">${String(h).padStart(2,'0')}</div><div class="rcb-l">Hrs</div></div>
-              <div class="rcb"><div class="rcb-n">${String(m).padStart(2,'0')}</div><div class="rcb-l">Min</div></div>
-            </div>` : ''}
-        </div>`;
+        <article class="rcard rc-svg-card ${isNext ? 'is-next-race' : ''}" data-circuit="${safeText(circuit.id)}" style="animation-delay:${i * 0.05}s">
+          <div class="rc-card-topline">
+            <div class="rc-round">Round ${safeText(r.round, i + 1)}</div>
+            <div class="rc-flag">${raceFlagHTML(r)}</div>
+          </div>
+
+          ${paddoxCircuitPreviewHTML(r, i)}
+
+          <div class="rc-info-panel">
+            <div class="rc-name">${safeText(r.name || r.raceName, 'Grand Prix')}</div>
+            <div class="rc-circuit">${safeText(r.circuit || circuit.label, circuit.label)} · ${safeText(r.location || r.country, circuit.country || 'F1')}</div>
+            <div class="rc-date">${rDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</div>
+            <div class="rc-bottom-row">
+              <span class="rc-status rs-${r.status === 'next' ? 'next' : r.status === 'completed' ? 'done' : 'up'}">
+                ${r.status === 'next' ? 'Next Race' : r.status === 'completed' ? 'Completed' : 'Upcoming'}
+              </span>
+              <span class="rc-svg-source">${safeText(circuit.id).toUpperCase()}</span>
+            </div>
+            ${isNext ? `
+              <div class="rc-mini-cd">
+                <div class="rcb"><div class="rcb-n">${String(d).padStart(2,'0')}</div><div class="rcb-l">Days</div></div>
+                <div class="rcb"><div class="rcb-n">${String(h).padStart(2,'0')}</div><div class="rcb-l">Hrs</div></div>
+                <div class="rcb"><div class="rcb-n">${String(m).padStart(2,'0')}</div><div class="rcb-l">Min</div></div>
+              </div>` : ''}
+          </div>
+        </article>`;
     }).join('');
 
   } catch (err) {
     grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">
-        <p>⚠️ Could not load calendar. Using cached data.</p>
+      <div class="calendar-loading-card">
+        <p>Could not load live calendar. Showing cached calendar with SVG circuit maps.</p>
       </div>`;
     console.warn('Calendar load failed:', err);
-    /* Fallback to existing renderCalendar() function */
     if (typeof renderCalendar === 'function') renderCalendar();
   }
 }
@@ -246,6 +253,54 @@ function driverFlagHTML(driver = {}, className = 'driver-flag-img') {
 function raceFlagHTML(race = {}, className = 'race-flag-img') {
   const code = race.flagCode || flagCodeFromRace(race);
   return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
+}
+
+/* ── Phase H3.3A: Real Circuit SVG Calendar helpers ── */
+function paddoxRaceCircuit(race = {}) {
+  if (window.PADDOX_CIRCUIT_MAP?.getCircuit) return window.PADDOX_CIRCUIT_MAP.getCircuit(race);
+  const text = [race.name, race.raceName, race.circuit, race.location, race.country]
+    .filter(Boolean).join(' ').toLowerCase();
+  const slug = text.replace(/grand prix|circuit|gp/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'unknown-circuit';
+  return { id: slug, label: race.circuit || race.name || 'Circuit TBA', country: race.country || '' };
+}
+
+function paddoxCircuitCandidates(circuit = {}) {
+  if (window.PADDOX_CIRCUIT_MAP?.candidatePaths) return window.PADDOX_CIRCUIT_MAP.candidatePaths(circuit);
+  const id = circuit.id || 'unknown-circuit';
+  return [`assets/circuits/${id}.svg`, `assets/circuits/minimal/white-outline/${id}.svg`, `assets/circuits/detailed/white-outline/${id}.svg`];
+}
+
+window.paddoxCircuitImgFallback = function paddoxCircuitImgFallback(img) {
+  if (!img) return;
+  const list = String(img.dataset.sources || '').split('|').filter(Boolean);
+  const next = Number(img.dataset.idx || 0) + 1;
+  if (list[next]) {
+    img.dataset.idx = String(next);
+    img.src = list[next];
+    return;
+  }
+  const shell = img.closest('.rc-track-art');
+  if (shell) shell.classList.add('is-missing-svg');
+  img.remove();
+};
+
+function paddoxCircuitPreviewHTML(race = {}, index = 0) {
+  const circuit = paddoxRaceCircuit(race);
+  const candidates = paddoxCircuitCandidates(circuit);
+  const first = candidates[0] || `assets/circuits/${circuit.id}.svg`;
+  const safeLabel = safeText(circuit.label || race.circuit || race.name || 'Circuit').replace(/"/g, '&quot;');
+  const safeId = safeText(circuit.id || 'circuit');
+  return `
+    <div class="rc-track-art" data-circuit="${safeId}" style="--rc-delay:${index * 70}ms">
+      <div class="rc-track-bg"></div>
+      <img class="rc-track-svg" src="${first}" data-sources="${candidates.join('|')}" data-idx="0" alt="${safeLabel} SVG circuit map" loading="lazy" onerror="paddoxCircuitImgFallback(this)">
+      <div class="rc-track-fallback">
+        <span>${safeId.toUpperCase()}</span>
+        <small>Add SVG in assets/circuits</small>
+      </div>
+      <div class="rc-track-glow"></div>
+      <div class="rc-track-label">SVG CIRCUIT MAP</div>
+    </div>`;
 }
 
 function bestString(value, keys = []) {
@@ -1356,24 +1411,34 @@ function renderCalendar(){
   const grid=document.getElementById('race-grid'); if(!grid) return;
   const next=new Date('2025-05-25T13:00:00Z'),now=new Date(),diff=next-now;
   const d=Math.max(0,Math.floor(diff/864e5)),h=Math.max(0,Math.floor((diff%864e5)/36e5)),m=Math.max(0,Math.floor((diff%36e5)/6e4));
-  grid.innerHTML=RACES.map((r,i)=>`
-    <div class="rcard" style="animation-delay:${i*.05}s">
-      <div class="rc-flag">${raceFlagHTML(r)}</div>
-      <div class="rc-round">Round ${r.round}</div>
-      <div class="rc-name">${r.name}</div>
-      <div class="rc-circuit">${r.circuit}</div>
-      <div class="rc-date">${r.date}, 2025</div>
-      <span class="rc-status rs-${r.status==='next'?'next':r.status==='completed'?'done':'up'}">
-        ${r.status==='next'?'▶ Next Race':r.status==='completed'?'✓ Completed':'Upcoming'}
-      </span>
-      ${r.winner?`<div class="rc-winner">Winner: ${r.winner}</div>`:''}
-      ${r.status==='next'?`<div class="rc-mini-cd">
-        <div class="rcb"><div class="rcb-n">${String(d).padStart(2,'0')}</div><div class="rcb-l">Days</div></div>
-        <div class="rcb"><div class="rcb-n">${String(h).padStart(2,'0')}</div><div class="rcb-l">Hrs</div></div>
-        <div class="rcb"><div class="rcb-n">${String(m).padStart(2,'0')}</div><div class="rcb-l">Min</div></div>
-      </div>`:''}
-    </div>
-  `).join('');
+  grid.innerHTML=RACES.map((r,i)=>{
+    const circuit = paddoxRaceCircuit(r);
+    return `
+    <article class="rcard rc-svg-card ${r.status==='next'?'is-next-race':''}" data-circuit="${safeText(circuit.id)}" style="animation-delay:${i*.05}s">
+      <div class="rc-card-topline">
+        <div class="rc-round">Round ${r.round}</div>
+        <div class="rc-flag">${raceFlagHTML(r)}</div>
+      </div>
+      ${paddoxCircuitPreviewHTML(r, i)}
+      <div class="rc-info-panel">
+        <div class="rc-name">${r.name}</div>
+        <div class="rc-circuit">${r.circuit || circuit.label}</div>
+        <div class="rc-date">${r.date}, 2025</div>
+        <div class="rc-bottom-row">
+          <span class="rc-status rs-${r.status==='next'?'next':r.status==='completed'?'done':'up'}">
+            ${r.status==='next'?'Next Race':r.status==='completed'?'Completed':'Upcoming'}
+          </span>
+          <span class="rc-svg-source">${safeText(circuit.id).toUpperCase()}</span>
+        </div>
+        ${r.winner?`<div class="rc-winner">Winner: ${r.winner}</div>`:''}
+        ${r.status==='next'?`<div class="rc-mini-cd">
+          <div class="rcb"><div class="rcb-n">${String(d).padStart(2,'0')}</div><div class="rcb-l">Days</div></div>
+          <div class="rcb"><div class="rcb-n">${String(h).padStart(2,'0')}</div><div class="rcb-l">Hrs</div></div>
+          <div class="rcb"><div class="rcb-n">${String(m).padStart(2,'0')}</div><div class="rcb-l">Min</div></div>
+        </div>`:''}
+      </div>
+    </article>`;
+  }).join('');
 }
 loadRealCalendar();
 

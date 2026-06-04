@@ -7096,3 +7096,267 @@ body.modal-open { overflow: hidden; }
 .nav-ai-icon{position:relative}
 .nav-ai-icon::before{content:'AI';font-family:var(--font-c, 'Barlow Condensed', sans-serif);font-size:.72rem;letter-spacing:.5px;font-weight:900;color:currentColor}
 .mob-icon.nav-ai-icon::before{content:'AI';font-family:var(--font-c, 'Barlow Condensed', sans-serif);font-size:.72rem;letter-spacing:.5px;font-weight:900;color:currentColor}
+
+
+/* ══════════════════════════════════════
+   PHASE H3.3A — FAN HUB REAL CIRCUIT SVG CALENDAR
+   Scope: Race Calendar section only
+══════════════════════════════════════ */
+#sec-calendar .sec-header{
+  position:relative;
+  max-width:1120px;
+}
+#sec-calendar .sec-header::after{
+  content:'Real SVG circuit maps from local assets/circuits';
+  display:inline-flex;
+  margin-top:12px;
+  padding:6px 12px;
+  border:1px solid rgba(232,0,45,.22);
+  background:rgba(232,0,45,.055);
+  color:rgba(255,255,255,.68);
+  border-radius:999px;
+  font-family:var(--font-c);
+  font-size:.62rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+#sec-calendar .race-grid{
+  grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
+  gap:22px;
+  align-items:stretch;
+}
+.calendar-loading-card{
+  grid-column:1/-1;
+  text-align:center;
+  padding:70px 28px;
+  color:var(--muted2);
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(232,0,45,.035));
+}
+.rcard.rc-svg-card{
+  min-height:430px;
+  padding:0;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 72% 0%,rgba(232,0,45,.17),transparent 36%),
+    linear-gradient(145deg,rgba(18,18,18,.98),rgba(7,7,7,.96));
+  border:1px solid rgba(255,255,255,.075);
+  box-shadow:0 20px 58px rgba(0,0,0,.34);
+  isolation:isolate;
+  overflow:hidden;
+}
+.rcard.rc-svg-card::before{display:none;}
+.rcard.rc-svg-card::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.06),transparent);
+  transform:translateX(-120%);
+  transition:transform .85s cubic-bezier(.2,.7,.2,1);
+  z-index:4;
+}
+.rcard.rc-svg-card:hover::after{transform:translateX(120%);}
+.rcard.rc-svg-card:hover{
+  transform:translateY(-8px);
+  border-color:rgba(232,0,45,.42);
+  box-shadow:0 30px 76px rgba(0,0,0,.55),0 0 32px rgba(232,0,45,.10);
+}
+.rcard.rc-svg-card.is-next-race{
+  border-color:rgba(232,0,45,.42);
+  box-shadow:0 24px 74px rgba(0,0,0,.55),0 0 44px rgba(232,0,45,.14);
+}
+.rc-card-topline{
+  position:absolute;
+  top:16px;
+  left:16px;
+  right:16px;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:none;
+}
+.rc-svg-card .rc-round{
+  margin:0;
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;
+  background:rgba(0,0,0,.32);
+  backdrop-filter:blur(10px);
+  color:rgba(255,255,255,.72);
+}
+.rc-svg-card .rc-flag{
+  position:static;
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.38);
+  backdrop-filter:blur(10px);
+  overflow:hidden;
+}
+.rc-svg-card .rc-flag img,
+.rc-svg-card .race-flag-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.rc-track-art{
+  position:relative;
+  height:238px;
+  margin:0;
+  padding:44px 28px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 48% 45%,rgba(232,0,45,.15),transparent 38%),
+    linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+}
+.rc-track-bg{
+  position:absolute;
+  inset:0;
+  opacity:.58;
+  background-image:
+    linear-gradient(rgba(232,0,45,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,0,45,.045) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:linear-gradient(to bottom,transparent,black 22%,black 78%,transparent);
+}
+.rc-track-svg{
+  position:relative;
+  z-index:2;
+  width:86%;
+  height:168px;
+  object-fit:contain;
+  opacity:.92;
+  filter:drop-shadow(0 0 10px rgba(232,0,45,.52)) drop-shadow(0 0 24px rgba(255,255,255,.08));
+  transform:scale(.96);
+  transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .55s ease,opacity .55s ease;
+  animation:rcTrackReveal .75s ease both;
+  animation-delay:var(--rc-delay,0ms);
+}
+.rcard:hover .rc-track-svg{
+  transform:scale(1.03) rotate(-.4deg);
+  filter:drop-shadow(0 0 14px rgba(232,0,45,.72)) drop-shadow(0 0 34px rgba(255,255,255,.12));
+}
+@keyframes rcTrackReveal{
+  from{opacity:0;transform:translateY(12px) scale(.9)}
+  to{opacity:.92;transform:translateY(0) scale(.96)}
+}
+.rc-track-glow{
+  position:absolute;
+  width:170px;
+  height:170px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(232,0,45,.18),transparent 62%);
+  filter:blur(10px);
+  animation:rcGlowDrift 4.8s ease-in-out infinite;
+  z-index:1;
+}
+@keyframes rcGlowDrift{
+  0%,100%{transform:translate(-28px,18px) scale(.92);opacity:.55}
+  50%{transform:translate(34px,-12px) scale(1.08);opacity:.9}
+}
+.rc-track-label{
+  position:absolute;
+  left:18px;
+  bottom:16px;
+  z-index:3;
+  font-family:var(--font-c);
+  font-size:.56rem;
+  letter-spacing:2.3px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.42);
+}
+.rc-track-fallback{
+  display:none;
+  position:absolute;
+  z-index:3;
+  inset:58px 24px 24px;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:8px;
+  border:1px dashed rgba(232,0,45,.28);
+  color:rgba(255,255,255,.72);
+  text-align:center;
+  border-radius:14px;
+  background:rgba(0,0,0,.22);
+}
+.rc-track-fallback span{
+  font-family:var(--font-d);
+  letter-spacing:2px;
+  font-size:1.45rem;
+}
+.rc-track-fallback small{
+  font-family:var(--font-c);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--red);
+  font-size:.62rem;
+}
+.rc-track-art.is-missing-svg .rc-track-fallback{display:flex;}
+.rc-info-panel{
+  position:relative;
+  z-index:3;
+  padding:20px 22px 22px;
+}
+.rc-svg-card .rc-name{
+  font-size:1.82rem;
+  line-height:.95;
+  letter-spacing:1.7px;
+  margin-bottom:8px;
+}
+.rc-svg-card .rc-circuit{
+  min-height:38px;
+  margin-bottom:12px;
+  line-height:1.45;
+  color:rgba(255,255,255,.56);
+}
+.rc-svg-card .rc-date{
+  color:var(--gold);
+  margin-bottom:14px;
+}
+.rc-bottom-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.rc-svg-card .rc-status{
+  border-radius:999px;
+  padding:5px 10px;
+}
+.rc-svg-source{
+  font-family:var(--font-c);
+  font-size:.58rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.46);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:999px;
+  padding:5px 9px;
+}
+.rc-svg-card .rc-mini-cd{
+  margin-top:16px;
+}
+.rc-svg-card .rcb{
+  border-radius:10px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.075);
+}
+@media(max-width:520px){
+  #sec-calendar .race-grid{grid-template-columns:1fr;gap:16px;}
+  .rcard.rc-svg-card{min-height:410px;border-radius:14px;}
+  .rc-track-art{height:220px;padding:48px 18px 18px;}
+  .rc-track-svg{width:92%;height:150px;}
+  .rc-info-panel{padding:18px;}
+}
