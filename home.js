@@ -3063,142 +3063,244 @@ setInterval(() => {
 
 
 /* ============================================================
-   PADDOX H3.2B — Hero + Countdown Premium Realtime Polish
-   Uses existing backend-fed state: products, fan data, F1 schedule/standings.
+   PADDOX H3.2C — Track Mode Real SVG Motion Foundation
+   Keeps backend data intact; upgrades the visual circuit module only.
    ============================================================ */
-(function initH32BHeroCountdownPolish() {
-  function ready(fn) {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
-    else fn();
-  }
+(function initH32CTrackModeFoundation(){
+  'use strict';
 
-  ready(() => {
-    document.body.classList.add('h32b-home');
-    stampH32BRealtimePills();
-    initH32BHeroPointer();
-    initH32BCountdownTickPulse();
-    initH32BRealtimeRefreshBridge();
-    setTimeout(syncH32BRealtimeHero, 700);
-    setTimeout(syncH32BRealtimeHero, 1800);
-    setTimeout(syncH32BRealtimeHero, 3600);
-  });
-
-  function stampH32BRealtimePills() {
-    const ticker = document.querySelector('.hero-ticker');
-    if (ticker && !ticker.querySelector('.h32b-sync-pill')) {
-      const pill = document.createElement('span');
-      pill.className = 'h32b-sync-pill';
-      pill.textContent = 'Backend Live';
-      ticker.appendChild(pill);
+  const CIRCUITS = [
+    {
+      key: 'monaco',
+      short: 'MON',
+      name: 'Monaco Grand Prix',
+      circuit: 'Circuit de Monaco',
+      country: 'Monte Carlo',
+      length: '3.337 KM',
+      path: 'M86 214 C88 104 170 62 252 92 C333 121 341 202 419 178 C507 152 558 201 532 263 C506 326 401 313 333 286 C263 258 227 321 151 294 C96 274 78 244 86 214 Z',
+      sectors: ['S1 Casino', 'S2 Tunnel', 'S3 Portier']
+    },
+    {
+      key: 'silverstone',
+      short: 'SIL',
+      name: 'British Grand Prix',
+      circuit: 'Silverstone Circuit',
+      country: 'United Kingdom',
+      length: '5.891 KM',
+      path: 'M92 224 C126 112 237 86 329 121 C389 144 438 94 512 118 C573 138 564 207 502 219 C426 234 422 314 338 300 C269 288 253 226 187 259 C134 285 74 273 92 224 Z',
+      sectors: ['S1 Abbey', 'S2 Maggots', 'S3 Hangar']
+    },
+    {
+      key: 'suzuka',
+      short: 'SUZ',
+      name: 'Japanese Grand Prix',
+      circuit: 'Suzuka Circuit',
+      country: 'Japan',
+      length: '5.807 KM',
+      path: 'M74 227 C117 124 198 95 282 126 C362 156 388 237 468 209 C540 184 589 225 553 280 C518 333 419 306 350 274 C279 240 237 317 155 301 C94 289 51 269 74 227 Z M256 127 C224 178 245 222 307 230 C363 237 389 201 420 178',
+      sectors: ['S1 Esses', 'S2 Degner', 'S3 130R']
+    },
+    {
+      key: 'spa',
+      short: 'SPA',
+      name: 'Belgian Grand Prix',
+      circuit: 'Spa-Francorchamps',
+      country: 'Belgium',
+      length: '7.004 KM',
+      path: 'M78 249 C115 111 257 64 348 110 C425 149 418 229 509 210 C578 196 584 282 516 309 C445 338 390 284 328 311 C264 339 241 270 181 284 C121 297 62 306 78 249 Z',
+      sectors: ['S1 Eau Rouge', 'S2 Pouhon', 'S3 Blanchimont']
     }
+  ];
 
-    const csLabel = document.querySelector('.cs-label');
-    if (csLabel && !csLabel.querySelector('.h32b-sync-pill')) {
-      const pill = document.createElement('span');
-      pill.className = 'h32b-sync-pill';
-      pill.textContent = 'Realtime';
-      csLabel.appendChild(pill);
-    }
+  let activeIndex = 0;
+  let animationFrame = null;
+  let startTime = 0;
+
+  function safeText(value, fallback){
+    const txt = String(value || '').trim();
+    return txt || fallback || '';
   }
 
-  function initH32BHeroPointer() {
-    const hero = document.getElementById('hero');
-    if (!hero || hero.dataset.h32bPointer === '1') return;
-    hero.dataset.h32bPointer = '1';
-    hero.addEventListener('pointermove', (event) => {
-      const rect = hero.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100;
-      const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 100;
-      hero.style.setProperty('--hero-x', `${Math.max(0, Math.min(100, x))}%`);
-      hero.style.setProperty('--hero-y', `${Math.max(0, Math.min(100, y))}%`);
-    }, { passive: true });
-  }
-
-  function textValue(value, fallback = 'Loading') {
-    if (typeof safeText === 'function') return safeText(value, fallback);
-    const text = String(value ?? '').trim();
-    return text || fallback;
-  }
-
-  function htmlEscape(value = '') {
-    if (typeof escapeHTML === 'function') return escapeHTML(value);
-    return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
-  }
-
-  function raceName(race = {}) {
-    return textValue(race.name || race.raceName || race.grandPrix || race.roundName, 'Next Grand Prix');
-  }
-
-  function raceMeta(race = {}) {
-    return [race.circuit || race.Circuit?.circuitName, race.country || race.location || race.Circuit?.Location?.country]
-      .map(x => textValue(x, ''))
-      .filter(Boolean)
-      .join(' · ') || 'Live Formula 1 schedule';
-  }
-
-  function syncH32BRealtimeHero() {
+  function raceFromBackend(){
     try {
-      const grid = document.getElementById('hero-live-grid');
-      if (!grid) return;
-      const state = (typeof HOME_REALTIME_STATE !== 'undefined') ? HOME_REALTIME_STATE : {};
-      const f1 = (typeof HOME_F1 !== 'undefined') ? HOME_F1 : {};
-      const products = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)) ? PRODUCTS : [];
-      const nextRace = f1.nextRace || {};
-      const standings = Array.isArray(f1.standings) ? f1.standings : [];
-      const schedule = Array.isArray(f1.schedule) ? f1.schedule : [];
-      const raceCount = typeof validRaceCount === 'function' ? validRaceCount(schedule) : schedule.length;
-      const leader = (typeof bestLeaderName === 'function') ? bestLeaderName() : 'Live Standings';
-      const drop = products[0]?.name || (state.productCount ? `${state.productCount} Products` : 'Shop Live');
-      const fanLine = state.fanCount ? `${state.fanCount} fans` : 'Community sync';
+      const race = window.HOME_F1?.nextRace || HOME_F1?.nextRace || null;
+      if (race) return race;
+      const schedule = window.HOME_F1?.schedule || HOME_F1?.schedule || [];
+      return Array.isArray(schedule) ? schedule[0] : null;
+    } catch (err) { return null; }
+  }
 
-      grid.innerHTML = `
-        <div class="hero-live-card"><span>Next Race</span><strong>${htmlEscape(raceName(nextRace))}</strong><small>${htmlEscape(raceMeta(nextRace))}</small></div>
-        <div class="hero-live-card"><span>Season Sync</span><strong>${htmlEscape(raceCount ? `${raceCount} Rounds` : 'Schedule Live')}</strong><small>${htmlEscape(leader && leader !== 'Loading' ? `Leader: ${leader}` : 'Driver standings')}</small></div>
-        <div class="hero-live-card"><span>PADDOX Live</span><strong>${htmlEscape(drop)}</strong><small>${htmlEscape(fanLine)}</small></div>
-      `;
+  function ensureSection(){
+    if (!document.getElementById('race-control-section') && typeof window.ensureH311RaceControlSection === 'function') {
+      window.ensureH311RaceControlSection();
+    } else if (!document.getElementById('race-control-section') && typeof ensureH311RaceControlSection === 'function') {
+      ensureH311RaceControlSection();
+    }
+    const section = document.getElementById('race-control-section');
+    if (!section) return null;
+    section.classList.add('h32c-track-foundation');
+    section.classList.remove('h32a-track-mode');
+    return section;
+  }
 
-      const ticker = document.getElementById('ticker-text');
-      if (ticker && (!ticker.textContent || ticker.textContent.includes('loading') || ticker.textContent.includes('Loading'))) {
-        ticker.textContent = nextRace && (nextRace.name || nextRace.raceName)
-          ? `Next race: ${raceName(nextRace)} · ${raceMeta(nextRace)}`
-          : 'PADDOX backend live sync active';
-      }
-    } catch (err) {
-      console.warn('H3.2B realtime hero sync skipped', err);
+  function ensureSvgDefs(svg){
+    if (!svg) return;
+    let defs = svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      svg.prepend(defs);
+    }
+    if (!svg.querySelector('#h32cTrackGlow')) {
+      const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+      filter.setAttribute('id', 'h32cTrackGlow');
+      filter.setAttribute('x', '-60%');
+      filter.setAttribute('y', '-60%');
+      filter.setAttribute('width', '220%');
+      filter.setAttribute('height', '220%');
+      filter.innerHTML = '<feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur><feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>';
+      defs.appendChild(filter);
     }
   }
 
-  function initH32BCountdownTickPulse() {
-    const ids = ['cd-d','cd-h','cd-m','cd-s'];
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el || el.dataset.h32bObserved === '1') return;
-      el.dataset.h32bObserved = '1';
-      let last = el.textContent;
-      const observer = new MutationObserver(() => {
-        const current = el.textContent;
-        if (current === last) return;
-        last = current;
-        const block = el.closest('.cd-block');
-        if (!block) return;
-        block.classList.remove('is-ticking');
-        void block.offsetWidth;
-        block.classList.add('is-ticking');
-        setTimeout(() => block.classList.remove('is-ticking'), 480);
-      });
-      observer.observe(el, { childList: true, characterData: true, subtree: true });
-    });
+  function ensureCarMarker(svg){
+    let car = document.getElementById('h32a-car-marker') || document.getElementById('h32c-car-marker');
+    if (!svg || car) {
+      if (car) {
+        car.id = 'h32c-car-marker';
+        car.classList.add('h32c-car-marker');
+      }
+      return car;
+    }
+    car = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    car.setAttribute('id', 'h32c-car-marker');
+    car.setAttribute('class', 'h32c-car-marker');
+    car.innerHTML = '<path d="M-18 -7 L12 -5 L24 0 L12 5 L-18 7 L-10 0 Z" fill="#e8002d" stroke="rgba(255,255,255,.82)" stroke-width="1.45"></path><circle cx="-8" cy="7" r="2.5" fill="#050505"></circle><circle cx="8" cy="5" r="2.5" fill="#050505"></circle>';
+    svg.appendChild(car);
+    return car;
   }
 
-  function initH32BRealtimeRefreshBridge() {
-    if (window.__h32bRefreshBridge) return;
-    window.__h32bRefreshBridge = true;
-    const originalRenderHero = window.renderHeroLiveCards;
-    // Function declarations in this file are not always window properties in strict mode,
-    // so use safe interval sync instead of replacing existing logic.
-    setInterval(syncH32BRealtimeHero, 8000);
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) setTimeout(syncH32BRealtimeHero, 400);
+  function ensureSelectors(stage){
+    if (!stage || stage.querySelector('.h32c-track-selectors')) return;
+    const selectors = document.createElement('div');
+    selectors.className = 'h32c-track-selectors';
+    selectors.innerHTML = CIRCUITS.map((c, index) => `<button type="button" class="h32c-track-btn${index === activeIndex ? ' is-active' : ''}" data-track-index="${index}">${c.short} · ${c.circuit.split(' ')[0]}</button>`).join('');
+    selectors.addEventListener('click', (event) => {
+      const btn = event.target.closest('.h32c-track-btn');
+      if (!btn) return;
+      activeIndex = Number(btn.dataset.trackIndex || 0);
+      selectors.querySelectorAll('.h32c-track-btn').forEach(el => el.classList.toggle('is-active', el === btn));
+      applyCircuit(true);
     });
+    stage.appendChild(selectors);
   }
+
+  function ensureSectorStack(stage){
+    if (!stage || stage.querySelector('.h32c-sector-stack')) return;
+    const stack = document.createElement('div');
+    stack.className = 'h32c-sector-stack';
+    stage.appendChild(stack);
+  }
+
+  function ensureReadout(info){
+    if (!info || info.querySelector('.h32c-motion-readout')) return;
+    const readout = document.createElement('div');
+    readout.className = 'h32c-motion-readout';
+    readout.innerHTML = '<div class="h32c-readout-top"><span>Motion Path</span><strong id="h32c-motion-percent">00%</strong></div><div class="h32c-progress-rail"><span class="h32c-progress-fill" id="h32c-progress-fill"></span></div>';
+    const grid = info.querySelector('.race-control-grid');
+    if (grid) info.insertBefore(readout, grid);
+    else info.appendChild(readout);
+  }
+
+  function syncInfo(circuit){
+    const backendRace = raceFromBackend();
+    const backendName = backendRace ? safeText(backendRace.name || backendRace.raceName || backendRace.grandPrix || backendRace.eventName, '') : '';
+    const nameEl = document.getElementById('rc-race-name');
+    const metaEl = document.getElementById('rc-race-meta');
+    const statusEl = document.getElementById('rc-status');
+    if (nameEl) nameEl.textContent = backendName && activeIndex === 0 ? backendName : circuit.name;
+    if (metaEl) metaEl.textContent = `${circuit.circuit} · ${circuit.country} · ${circuit.length}`;
+    if (statusEl) statusEl.textContent = backendRace ? 'Backend Synced' : 'Visual Foundation';
+    const kicker = document.querySelector('.race-control-kicker');
+    if (kicker) kicker.textContent = 'REAL SVG TRACK MODE';
+  }
+
+  function applyCircuit(restart){
+    const circuit = CIRCUITS[activeIndex] || CIRCUITS[0];
+    const path = document.getElementById('race-track-path');
+    const ghost = document.querySelector('.race-track-path.ghost');
+    const stage = document.querySelector('.race-track-stage');
+    if (path) path.setAttribute('d', circuit.path);
+    if (ghost) ghost.setAttribute('d', circuit.path);
+    const sectorStack = stage?.querySelector('.h32c-sector-stack');
+    if (sectorStack) {
+      sectorStack.innerHTML = circuit.sectors.map((item, index) => `<span class="h32c-sector-pill"><strong>S${index + 1}</strong>${item.replace(/^S\d+\s*/, '')}</span>`).join('');
+    }
+    document.querySelectorAll('.track-label-start').forEach(el => { el.textContent = 'START / FINISH'; });
+    document.querySelectorAll('.track-label-sector').forEach(el => { el.textContent = circuit.short; });
+    syncInfo(circuit);
+    if (restart) startTrackLoop(true);
+  }
+
+  function startTrackLoop(force){
+    const path = document.getElementById('race-track-path');
+    const dot = document.getElementById('race-track-dot');
+    const glow = document.getElementById('race-track-dot-glow');
+    const car = document.getElementById('h32c-car-marker') || document.getElementById('h32a-car-marker');
+    if (!path) return;
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    if (window.__PADDOX_H32C_RAF) cancelAnimationFrame(window.__PADDOX_H32C_RAF);
+    if (typeof window.anime === 'function') {
+      try { window.anime.remove(path); window.anime.remove(dot); window.anime.remove(glow); window.anime.remove(car); } catch (err) {}
+    }
+    let len = 0;
+    try { len = path.getTotalLength(); } catch (err) { len = 0; }
+    if (!len) return;
+    path.style.strokeDasharray = String(len);
+    startTime = performance.now();
+    const fill = document.getElementById('h32c-progress-fill');
+    const percent = document.getElementById('h32c-motion-percent');
+    const speed = force ? 9800 : 11200;
+
+    function tick(now){
+      const raw = ((now - startTime) % speed) / speed;
+      const eased = raw < .5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
+      let point, ahead;
+      try {
+        point = path.getPointAtLength(eased * len);
+        ahead = path.getPointAtLength(Math.min(len, eased * len + 5));
+      } catch (err) { return; }
+      const angle = Math.atan2(ahead.y - point.y, ahead.x - point.x) * 180 / Math.PI;
+      path.style.strokeDashoffset = String(len - eased * len);
+      if (dot) { dot.setAttribute('cx', point.x); dot.setAttribute('cy', point.y); }
+      if (glow) { glow.setAttribute('cx', point.x); glow.setAttribute('cy', point.y); }
+      if (car) car.setAttribute('transform', `translate(${point.x} ${point.y}) rotate(${angle})`);
+      const pct = Math.round(raw * 100);
+      if (fill) fill.style.width = `${pct}%`;
+      if (percent) percent.textContent = `${String(pct).padStart(2, '0')}%`;
+      animationFrame = requestAnimationFrame(tick);
+      window.__PADDOX_H32C_RAF = animationFrame;
+    }
+    animationFrame = requestAnimationFrame(tick);
+    window.__PADDOX_H32C_RAF = animationFrame;
+  }
+
+  function boot(){
+    const section = ensureSection();
+    if (!section) return;
+    const svg = section.querySelector('.race-track-svg');
+    const stage = section.querySelector('.race-track-stage');
+    const info = section.querySelector('.race-control-info');
+    ensureSvgDefs(svg);
+    ensureCarMarker(svg);
+    ensureSelectors(stage);
+    ensureSectorStack(stage);
+    ensureReadout(info);
+    applyCircuit(false);
+    startTrackLoop(false);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+  [350, 1200, 2600].forEach(ms => setTimeout(boot, ms));
 })();
