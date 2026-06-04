@@ -7035,3 +7035,282 @@ body .nl-trust {
   .h33b-info h3 { font-size: clamp(2.45rem, 14vw, 3.55rem) !important; }
   .h33b-track-cta { width: 100% !important; }
 }
+
+
+/* ============================================================
+   Phase H3.3C — Featured Merch + Teams Strip Premium Polish
+   Scope: Home Featured Merch + Teams On The Grid only
+   ============================================================ */
+.featured-section{
+  background:
+    radial-gradient(circle at 15% 0%, rgba(232,0,45,.12), transparent 32%),
+    radial-gradient(circle at 78% 12%, rgba(0,160,140,.055), transparent 34%),
+    linear-gradient(180deg,#090909 0%,#050505 100%);
+  border-top:1px solid rgba(232,0,45,.08);
+  border-bottom:1px solid rgba(255,255,255,.035);
+}
+.featured-section .section-head{
+  margin-bottom:44px;
+  align-items:flex-end;
+}
+.featured-section .section-label,
+.home-grid-strip-section .section-label{
+  position:relative;
+  width:max-content;
+  padding-left:18px;
+}
+.featured-section .section-label::before,
+.home-grid-strip-section .section-label::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:50%;
+  width:7px;
+  height:7px;
+  transform:translateY(-50%);
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 18px rgba(232,0,45,.65);
+}
+.featured-section .see-all{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.025);
+  padding:10px 16px;
+  border-radius:999px;
+  letter-spacing:2.2px;
+}
+.featured-section .see-all:hover{
+  border-color:rgba(232,0,45,.45);
+  background:rgba(232,0,45,.075);
+  box-shadow:0 0 24px rgba(232,0,45,.14);
+}
+.products-grid{
+  gap:22px !important;
+  align-items:stretch;
+}
+.pcard{
+  border-radius:16px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),
+    rgba(12,12,12,.92);
+  border:1px solid rgba(255,255,255,.075);
+  box-shadow:0 22px 60px rgba(0,0,0,.38);
+  min-height:438px;
+  isolation:isolate;
+}
+.pcard::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(120deg,transparent 0%,rgba(255,255,255,.06) 42%,transparent 58%),
+    radial-gradient(circle at 16% 12%,rgba(232,0,45,.18),transparent 26%);
+  opacity:0;
+  transform:translateX(-32%);
+  transition:opacity .45s ease, transform .65s ease;
+  z-index:1;
+}
+.pcard:hover::after{
+  opacity:1;
+  transform:translateX(0);
+}
+.pcard:hover{
+  transform:translateY(-10px) scale(1.012);
+  border-color:rgba(232,0,45,.42);
+  box-shadow:0 30px 76px rgba(0,0,0,.58),0 0 0 1px rgba(232,0,45,.12),0 0 34px rgba(232,0,45,.12);
+}
+.pcard-img-wrap{
+  height:294px;
+  border-radius:16px 16px 0 0;
+  background:
+    radial-gradient(circle at 50% 40%,rgba(232,0,45,.08),transparent 36%),
+    #101010;
+}
+.pcard-img{
+  object-fit:cover;
+  transform:scale(1.002);
+  filter:brightness(.9) contrast(1.05) saturate(.96);
+}
+.pcard:hover .pcard-img{
+  transform:scale(1.06);
+  filter:brightness(1) contrast(1.09) saturate(1.02);
+}
+.pcard-img-overlay{
+  background:
+    linear-gradient(to top,rgba(8,8,8,.98) 0%,rgba(8,8,8,.56) 28%,transparent 65%),
+    linear-gradient(120deg,rgba(232,0,45,.10),transparent 42%);
+}
+.pcard-overlay{
+  background:linear-gradient(180deg,rgba(7,7,7,.20),rgba(7,7,7,.82));
+  backdrop-filter:blur(6px);
+}
+.ov-btn{
+  border-radius:999px;
+  width:auto;
+  min-width:150px;
+  padding:11px 20px;
+  box-shadow:0 10px 26px rgba(232,0,45,.18);
+}
+.ov-btn.outline{
+  border-color:rgba(255,255,255,.22);
+  box-shadow:none;
+}
+.pbadge{
+  top:14px;
+  left:14px;
+  border-radius:999px;
+  padding:5px 10px;
+  background:var(--red);
+  color:#fff;
+  box-shadow:0 0 20px rgba(232,0,45,.28);
+}
+.pwish{
+  top:14px;
+  right:14px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:rgba(0,0,0,.46);
+  border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(10px);
+}
+.pwish:hover,.pwish.on{
+  background:rgba(232,0,45,.16);
+  border-color:rgba(232,0,45,.45);
+  color:#fff;
+}
+.pcard-info{
+  position:relative;
+  z-index:2;
+  padding:20px 20px 18px;
+  min-height:144px;
+  display:flex;
+  flex-direction:column;
+}
+.pcard-team{
+  color:var(--red);
+  letter-spacing:2.8px;
+  margin-bottom:8px;
+}
+.pcard-name{
+  font-family:var(--font-condensed);
+  font-size:1.14rem;
+  line-height:1.18;
+  letter-spacing:.8px;
+  color:#fff;
+  min-height:42px;
+}
+.pcard-foot{
+  margin-top:auto;
+  align-items:flex-end;
+  border-top:1px solid rgba(255,255,255,.07);
+  padding-top:14px;
+}
+.pcard-price{
+  font-size:1.05rem;
+  letter-spacing:.5px;
+}
+.pcard-rating{
+  color:var(--gold);
+  opacity:.95;
+  letter-spacing:2px;
+  text-shadow:0 0 14px rgba(201,168,76,.16);
+}
+.home-grid-strip-section{
+  background:
+    linear-gradient(180deg,#060606 0%,#070909 55%,#050505 100%);
+  border-top:1px solid rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(232,0,45,.08);
+  padding:92px 0 78px;
+}
+.home-grid-strip-section .section-head{
+  margin-bottom:34px;
+}
+.grid-strip-title{
+  text-shadow:0 0 28px rgba(232,0,45,.10);
+}
+.marquee-strip{
+  min-height:156px !important;
+  padding:16px 0 20px !important;
+  background:
+    linear-gradient(90deg,rgba(232,0,45,.04),transparent 20%,transparent 80%,rgba(232,0,45,.04)),
+    rgba(8,10,12,.62) !important;
+  border-top:1px solid rgba(255,255,255,.055) !important;
+  border-bottom:1px solid rgba(255,255,255,.055) !important;
+  box-shadow:inset 0 18px 48px rgba(0,0,0,.35);
+}
+.marquee-track{
+  gap:18px !important;
+  padding:0 34px !important;
+  animation-duration:138s !important;
+}
+.marquee-team{
+  min-width:292px !important;
+  height:122px !important;
+  border-radius:18px !important;
+  padding:14px 18px !important;
+  background:
+    linear-gradient(135deg,color-mix(in srgb,var(--team-color) 20%, transparent),rgba(255,255,255,.035) 42%,rgba(255,255,255,.018)),
+    rgba(12,14,18,.82) !important;
+  border:1px solid rgba(255,255,255,.09) !important;
+  box-shadow:0 16px 42px rgba(0,0,0,.42);
+  overflow:hidden;
+}
+.marquee-team:hover{
+  transform:translateY(-5px) scale(1.012) !important;
+  border-color:color-mix(in srgb,var(--team-color) 62%, rgba(255,255,255,.18)) !important;
+  box-shadow:0 22px 56px rgba(0,0,0,.58),0 0 28px color-mix(in srgb,var(--team-color) 22%, transparent) !important;
+}
+.marquee-team::before{
+  opacity:.65 !important;
+  background:radial-gradient(circle at 12% 18%,color-mix(in srgb,var(--team-color) 28%, transparent),transparent 34%) !important;
+}
+.marquee-team-head{
+  position:relative;
+  z-index:2;
+}
+.team-logo-orb{
+  width:30px !important;
+  height:30px !important;
+  border-color:color-mix(in srgb,var(--team-color) 44%, rgba(255,255,255,.20)) !important;
+  background:rgba(255,255,255,.065) !important;
+}
+.marquee-team-name{
+  font-family:var(--font-condensed);
+  font-size:1.02rem !important;
+  letter-spacing:1.5px !important;
+  color:#fff !important;
+}
+.marquee-team-car-wrap{
+  position:relative;
+  z-index:2;
+  height:72px !important;
+  margin-top:6px !important;
+}
+.team-car-img{
+  object-fit:contain !important;
+  filter:drop-shadow(0 12px 18px rgba(0,0,0,.58)) saturate(1.03) contrast(1.04);
+}
+.marquee-team:hover .team-car-img{
+  transform:translateX(8px) scale(1.035) !important;
+}
+@media (max-width: 980px){
+  .products-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+  .pcard{min-height:410px;}
+  .pcard-img-wrap{height:252px;}
+  .marquee-team{min-width:250px !important;height:112px !important;}
+  .marquee-team-car-wrap{height:62px !important;}
+}
+@media (max-width: 560px){
+  .featured-section .section-head,
+  .home-grid-strip-section .section-head{align-items:flex-start;gap:16px;}
+  .products-grid{grid-template-columns:1fr !important;}
+  .pcard{min-height:auto;border-radius:18px;}
+  .pcard-img-wrap{height:260px;}
+  .pcard-info{min-height:132px;}
+  .marquee-strip{min-height:136px !important;}
+  .marquee-track{gap:12px !important;padding:0 18px !important;}
+  .marquee-team{min-width:226px !important;height:104px !important;padding:12px 14px !important;}
+  .marquee-team-car-wrap{height:56px !important;}
+}

@@ -3583,3 +3583,6 @@ setInterval(() => {
   }
   setInterval(refreshTrackRaceSource, 10 * 60 * 1000);
 })();
+
+
+/* Phase H3.3C: Featured Merch + Teams Strip visual polish uses CSS-only overrides; backend data flow preserved. */
