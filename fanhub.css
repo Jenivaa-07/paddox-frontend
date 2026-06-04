@@ -7437,3 +7437,28 @@ body.modal-open { overflow: hidden; }
   #sec-calendar .rc-track-art{min-height:226px;}
   #sec-calendar .rc-track-svg.rc-track-svg-detailed{height:164px;}
 }
+
+
+/* Phase H3.3A.5 — latest-first fallback badge */
+.rc-track-art.uses-fallback-svg .rc-track-label{
+  color:var(--gold);
+  border-color:rgba(201,168,76,.36);
+  background:rgba(201,168,76,.08);
+}
+.rc-track-art.uses-fallback-svg .rc-track-svg{
+  opacity:.88;
+}
+.rc-track-art.uses-fallback-svg::after{
+  content:'FALLBACK LAYOUT';
+  position:absolute;
+  left:14px;
+  bottom:12px;
+  z-index:4;
+  font-family:var(--font-c);
+  font-size:.54rem;
+  letter-spacing:2px;
+  color:var(--gold);
+  background:rgba(201,168,76,.09);
+  border:1px solid rgba(201,168,76,.24);
+  padding:4px 8px;
+}

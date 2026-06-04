@@ -257,7 +257,7 @@ function raceFlagHTML(race = {}, className = 'race-flag-img') {
   return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
 }
 
-/* ── Phase H3.3A.4: Latest minimal Circuit SVG Calendar helpers ── */
+/* ── Phase H3.3A.5: Latest-first Circuit SVG Calendar helpers ── */
 function paddoxRaceCircuit(race = {}) {
   const verified = window.PADDOX_CIRCUIT_MAP?.getCircuit?.(race);
   if (verified) return { ...verified, verified: true };
@@ -305,16 +305,16 @@ function paddoxCircuitPreviewHTML(race = {}, index = 0) {
     <div class="rc-track-art ${circuit.verified ? 'is-verified-svg is-loading-svg' : 'is-missing-svg'}"
       data-circuit="${safeId}"
       data-svg-file="${safeText(circuit.file || '')}"
-      data-svg-alt="${safeLabel} latest SVG circuit map"
+      data-svg-alt="${safeLabel} verified SVG circuit map"
       data-sources="${candidates.join('|')}"
       style="--rc-delay:${index * 70}ms">
       <div class="rc-track-bg"></div>
       <div class="rc-track-fallback">
         <span>${circuit.verified ? safeId.toUpperCase() : 'SVG PENDING'}</span>
-        <small>${circuit.verified ? 'Looking for latest SVG' : 'No verified SVG mapping yet'}</small>
+        <small>${circuit.verified ? 'Latest first, fallback allowed' : 'No verified SVG mapping yet'}</small>
       </div>
       <div class="rc-track-glow"></div>
-      <div class="rc-track-label">LATEST CIRCUIT MAP</div>
+      <div class="rc-track-label">VERIFIED CIRCUIT MAP</div>
     </div>`;
 }
 
@@ -341,14 +341,19 @@ async function hydratePaddoxCircuitSVGs(root = document) {
     if (!src) {
       card.classList.add('is-missing-svg');
       const small = card.querySelector('.rc-track-fallback small');
-      if (small) small.textContent = 'Add latest SVG in assets/circuits';
+      if (small) small.textContent = 'Add latest/fallback SVG in assets/circuits';
       return;
     }
 
     const img = document.createElement('img');
-    img.className = 'rc-track-svg rc-track-svg-latest';
+    img.className = src.includes(card.dataset.svgFile || '') ? 'rc-track-svg rc-track-svg-latest' : 'rc-track-svg rc-track-svg-fallback';
+    if (!src.includes(card.dataset.svgFile || '')) {
+      card.classList.add('uses-fallback-svg');
+      const small = card.querySelector('.rc-track-fallback small');
+      if (small) small.textContent = 'Using older same-circuit layout';
+    }
     img.src = src;
-    img.alt = card.dataset.svgAlt || 'Latest circuit SVG map';
+    img.alt = card.dataset.svgAlt || 'Verified circuit SVG map';
     img.loading = 'lazy';
     img.decoding = 'async';
     img.addEventListener('load', () => {
