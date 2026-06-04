@@ -3307,7 +3307,7 @@ setInterval(() => {
 
 
 /* ============================================================
-   Phase H3.3B.3 — Home Track Mode Visual Polish Lock
+   Phase H3.3B.4 — Home Track Auto Refresh + Text Cleanup
    Replaces fake/random SVG Track Mode with the next race's
    polished next-race circuit image, synced from backend countdown.
    ============================================================ */
@@ -3496,7 +3496,7 @@ setInterval(() => {
             <div class="section-label">LIVE RACE CONTROL</div>
             <h2 class="section-title">TRACK <span class="accent">MODE</span></h2>
           </div>
-          <p class="race-control-sub reveal-up in-view">Synced from the live countdown. Home Track Mode shows the next Grand Prix circuit with a clean race-map card and live pulse details.</p>
+          <p class="race-control-sub reveal-up in-view">Next race circuit updates from the live race calendar.</p>
         </div>
         <div class="h33b-track-panel liquid-sweep">
           <div class="h33b-circuit-stage">
@@ -3555,4 +3555,31 @@ setInterval(() => {
   window.addEventListener('load', boot);
   [900, 2200, 4200].forEach(ms => setTimeout(boot, ms));
   setInterval(refreshCountdownOnly, 1000);
+
+  /* Refresh the race source periodically so Track Mode changes when backend next-race data changes. */
+  async function refreshTrackRaceSource(){
+    try {
+      if (window.PaddoxAPI?.f1?.schedule) {
+        const scheduleData = await window.PaddoxAPI.f1.schedule();
+        const list = extractRaceList(scheduleData || {});
+        if (Array.isArray(list) && list.length) {
+          HOME_F1.schedule = list;
+          window.HOME_F1 = HOME_F1;
+        }
+      }
+      if (window.PaddoxAPI?.f1?.nextRace) {
+        const nextData = await window.PaddoxAPI.f1.nextRace();
+        const next = nextData?.data?.race || nextData?.data || nextData?.race || null;
+        if (next && typeof next === 'object') {
+          HOME_F1.nextRace = next;
+          window.HOME_F1 = HOME_F1;
+        }
+      }
+      lastRenderKey = '';
+      boot();
+    } catch (err) {
+      console.warn('Track Mode auto refresh skipped', err);
+    }
+  }
+  setInterval(refreshTrackRaceSource, 10 * 60 * 1000);
 })();
