@@ -123,7 +123,6 @@ async function loadRealCalendar() {
           </div>
         </article>`;
     }).join('');
-    if (typeof paddoxHydrateCircuitSVGs === 'function') paddoxHydrateCircuitSVGs(grid);
 
   } catch (err) {
     grid.innerHTML = `
@@ -256,113 +255,64 @@ function raceFlagHTML(race = {}, className = 'race-flag-img') {
   return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
 }
 
-/* ── Phase H3.3A: Real Circuit SVG Calendar helpers ── */
+/* ── Phase H3.3A.2: Verified Circuit SVG Calendar helpers ── */
 function paddoxRaceCircuit(race = {}) {
-  if (window.PADDOX_CIRCUIT_MAP?.getCircuit) return window.PADDOX_CIRCUIT_MAP.getCircuit(race);
-  const text = [race.name, race.raceName, race.circuit, race.location, race.country]
-    .filter(Boolean).join(' ').toLowerCase();
-  const slug = text.replace(/grand prix|circuit|gp/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'unknown-circuit';
-  return { id: slug, label: race.circuit || race.name || 'Circuit TBA', country: race.country || '' };
+  const verified = window.PADDOX_CIRCUIT_MAP?.getCircuit?.(race);
+  if (verified) return { ...verified, verified: true };
+
+  const label = safeText(race.circuit || race.name || race.raceName, 'Circuit SVG pending');
+  return {
+    id: 'pending',
+    file: '',
+    label,
+    country: safeText(race.country || race.location, ''),
+    location: safeText(race.location || race.locality, ''),
+    verified: false
+  };
 }
 
 function paddoxCircuitCandidates(circuit = {}) {
-  if (window.PADDOX_CIRCUIT_MAP?.candidatePaths) return window.PADDOX_CIRCUIT_MAP.candidatePaths(circuit);
-  const id = circuit.id || 'unknown-circuit';
-  return [`assets/circuits/${id}.svg`, `assets/circuits/minimal/white-outline/${id}.svg`, `assets/circuits/detailed/white-outline/${id}.svg`];
+  if (!circuit?.verified || !circuit?.file) return [];
+  return window.PADDOX_CIRCUIT_MAP?.candidatePaths?.(circuit) || [];
 }
 
-/*
-  Phase H3.3A.1 — SVG loader fix
-  Previous version used <img onerror> to try many circuit filenames. It worked visually,
-  but every failed candidate produced a red 404 console error. This loader probes paths
-  with handled fetch() first, then only assigns a proven URL to <img>. Result: same SVG
-  preview, clean console.
-*/
-const PADDOX_CIRCUIT_SVG_CACHE = new Map();
-
-function paddoxCircuitEscapeAttr(value = '') {
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-async function paddoxProbeCircuitSVG(url = '') {
-  if (!url) return false;
-  if (PADDOX_CIRCUIT_SVG_CACHE.has(url)) return PADDOX_CIRCUIT_SVG_CACHE.get(url);
-  try {
-    const res = await fetch(url, { method: 'GET', cache: 'force-cache' });
-    const ok = !!(res && res.ok);
-    PADDOX_CIRCUIT_SVG_CACHE.set(url, ok);
-    return ok;
-  } catch (err) {
-    PADDOX_CIRCUIT_SVG_CACHE.set(url, false);
-    return false;
-  }
-}
-
-async function paddoxFindWorkingCircuitSVG(candidates = []) {
-  const list = Array.from(new Set((candidates || []).filter(Boolean)));
-  for (const url of list) {
-    // eslint-disable-next-line no-await-in-loop
-    if (await paddoxProbeCircuitSVG(url)) return url;
-  }
-  return '';
-}
-
-async function paddoxHydrateCircuitSVGs(root = document) {
-  const cards = Array.from((root || document).querySelectorAll('.rc-track-art:not(.svg-hydrated):not(.svg-loading)'));
-  for (const card of cards) {
-    card.classList.add('svg-loading');
-    const sources = String(card.dataset.sources || '').split('|').filter(Boolean);
-    const label = card.dataset.label || card.dataset.circuit || 'Circuit map';
-    const url = await paddoxFindWorkingCircuitSVG(sources);
-    card.classList.remove('svg-loading');
-    card.classList.add('svg-hydrated');
-    if (!url) {
-      card.classList.add('is-missing-svg');
-      continue;
-    }
-    const img = document.createElement('img');
-    img.className = 'rc-track-svg';
-    img.src = url;
-    img.alt = `${label} SVG circuit map`;
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.onerror = () => {
-      card.classList.add('is-missing-svg');
-      img.remove();
-    };
-    const bg = card.querySelector('.rc-track-bg');
-    if (bg && bg.nextSibling) card.insertBefore(img, bg.nextSibling);
-    else card.prepend(img);
-  }
-}
-
-window.paddoxHydrateCircuitSVGs = paddoxHydrateCircuitSVGs;
 window.paddoxCircuitImgFallback = function paddoxCircuitImgFallback(img) {
-  const shell = img && img.closest ? img.closest('.rc-track-art') : null;
+  if (!img) return;
+  const list = String(img.dataset.sources || '').split('|').filter(Boolean);
+  const next = Number(img.dataset.idx || 0) + 1;
+
+  /* Strict fallback only through verified paths. No fuzzy/random track retries. */
+  if (list[next]) {
+    img.dataset.idx = String(next);
+    img.src = list[next];
+    return;
+  }
+
+  const shell = img.closest('.rc-track-art');
   if (shell) shell.classList.add('is-missing-svg');
-  if (img) img.remove();
+  img.remove();
 };
 
 function paddoxCircuitPreviewHTML(race = {}, index = 0) {
   const circuit = paddoxRaceCircuit(race);
   const candidates = paddoxCircuitCandidates(circuit);
-  const safeLabel = paddoxCircuitEscapeAttr(circuit.label || race.circuit || race.name || 'Circuit');
-  const safeId = paddoxCircuitEscapeAttr(safeText(circuit.id || 'circuit'));
+  const first = candidates[0] || '';
+  const safeLabel = safeText(circuit.label || race.circuit || race.name || 'Circuit').replace(/"/g, '&quot;');
+  const safeId = safeText(circuit.id || 'pending');
+  const svgHTML = first
+    ? `<img class="rc-track-svg" src="${first}" data-sources="${candidates.join('|')}" data-idx="0" alt="${safeLabel} verified SVG circuit map" loading="lazy" onerror="paddoxCircuitImgFallback(this)">`
+    : '';
+
   return `
-    <div class="rc-track-art" data-circuit="${safeId}" data-label="${safeLabel}" data-sources="${paddoxCircuitEscapeAttr(candidates.join('|'))}" style="--rc-delay:${index * 70}ms">
+    <div class="rc-track-art ${circuit.verified ? 'is-verified-svg' : 'is-missing-svg'}" data-circuit="${safeId}" data-svg-file="${safeText(circuit.file || '')}" style="--rc-delay:${index * 70}ms">
       <div class="rc-track-bg"></div>
-      <div class="rc-track-loader" aria-hidden="true"><span></span></div>
+      ${svgHTML}
       <div class="rc-track-fallback">
-        <span>${safeId.toUpperCase()}</span>
-        <small>SVG not found in assets/circuits</small>
+        <span>${circuit.verified ? safeId.toUpperCase() : 'SVG PENDING'}</span>
+        <small>${circuit.verified ? 'Check assets/circuits path' : 'No verified SVG mapping yet'}</small>
       </div>
       <div class="rc-track-glow"></div>
-      <div class="rc-track-label">SVG CIRCUIT MAP</div>
+      <div class="rc-track-label">VERIFIED CIRCUIT MAP</div>
     </div>`;
 }
 
@@ -1502,7 +1452,6 @@ function renderCalendar(){
       </div>
     </article>`;
   }).join('');
-  if (typeof paddoxHydrateCircuitSVGs === 'function') paddoxHydrateCircuitSVGs(grid);
 }
 loadRealCalendar();
 
