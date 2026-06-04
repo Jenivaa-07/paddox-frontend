@@ -6832,3 +6832,21 @@ body .nl-trust {
   from{opacity:.25;transform:scale(.985)}
   to{opacity:1;transform:scale(1.02)}
 }
+
+
+/* H3.3B.2 — Home Track Formula Timer image paint fix */
+.h33b-circuit-frame .h33b-circuit-img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  opacity:1;
+  filter:drop-shadow(0 0 18px rgba(232,0,45,.22));
+}
+.h33b-circuit-frame .h33b-circuit-img.is-loaded{
+  animation:h33bCircuitImageIn .45s ease both;
+}
+@keyframes h33bCircuitImageIn{
+  from{opacity:0;transform:scale(.96)}
+  to{opacity:1;transform:scale(1)}
+}

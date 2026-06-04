@@ -3307,7 +3307,7 @@ setInterval(() => {
 
 
 /* ============================================================
-   Phase H3.3B — Home Track Mode Countdown Circuit Sync
+   Phase H3.3B.2 — Home Track Formula Timer CORS Fix
    Replaces fake/random SVG Track Mode with the next race's
    Formula Timer circuit image, synced from backend countdown.
    ============================================================ */
@@ -3453,7 +3453,6 @@ setInterval(() => {
       img.decoding = 'async';
       img.loading = 'eager';
       img.referrerPolicy = 'no-referrer';
-      img.crossOrigin = 'anonymous';
 
       img.addEventListener('load', () => {
         frame.dataset.loadedSrc = src;
@@ -3549,7 +3548,7 @@ setInterval(() => {
       if (key && key === lastRenderKey && document.querySelector('#h33b-circuit-frame .h33b-circuit-img')) return;
       lastRenderKey = key;
       render();
-    } catch (err) { console.warn('H3.3B.1 Track Mode sync failed', err); }
+    } catch (err) { console.warn('H3.3B.2 Track Mode sync failed', err); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
