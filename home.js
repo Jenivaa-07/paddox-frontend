@@ -1311,6 +1311,7 @@ function renderHomeQuotes() {
   const QUOTE_DURATION = 6500;
   let current = 0;
   let autoplay = null;
+  let quotePaused = false;
   const textEl = document.getElementById('quote-text');
   const avEl   = document.getElementById('quote-avatar');
   const nameEl = document.getElementById('quote-name');
@@ -1324,9 +1325,12 @@ function renderHomeQuotes() {
     if (!bar) return;
     bar.style.transition = 'none';
     bar.style.width = '0%';
+    bar.style.transformOrigin = 'left center';
     bar.offsetHeight; // force repaint so the line restarts cleanly
-    bar.style.transition = `width ${QUOTE_DURATION}ms linear`;
-    bar.style.width = '100%';
+    requestAnimationFrame(() => {
+      bar.style.transition = `width ${QUOTE_DURATION}ms linear`;
+      bar.style.width = '100%';
+    });
   }
 
   window.PADDOX_RESTART_QUOTE_PROGRESS = restartProgress;
@@ -1348,6 +1352,7 @@ function renderHomeQuotes() {
     ).join('');
     dotsEl.querySelectorAll('.q-dot').forEach(dot => {
       dot.addEventListener('click', () => {
+        clearTimeout(autoplay);
         setQuote(parseInt(dot.dataset.i, 10));
         startAutoplay();
       });
@@ -1384,8 +1389,13 @@ function renderHomeQuotes() {
   }
 
   function startAutoplay() {
-    clearInterval(autoplay);
-    autoplay = setInterval(() => setQuote(current + 1), QUOTE_DURATION);
+    clearTimeout(autoplay);
+    autoplay = setTimeout(() => {
+      if (!quotePaused) {
+        setQuote(current + 1);
+        startAutoplay();
+      }
+    }, QUOTE_DURATION + 80);
   }
 
   setQuote(0, false);
@@ -1393,8 +1403,12 @@ function renderHomeQuotes() {
 
   const section = document.getElementById('quote-section');
   if (section) {
-    section.addEventListener('mouseenter', () => clearInterval(autoplay));
+    section.addEventListener('mouseenter', () => {
+      quotePaused = true;
+      clearTimeout(autoplay);
+    });
     section.addEventListener('mouseleave', () => {
+      quotePaused = false;
       restartProgress();
       startAutoplay();
     });
@@ -2465,7 +2479,8 @@ function initH311SignatureVisibilityFix() {
     moveH311NavIndicator();
     initH311TrackAnimation();
     updateH311RaceControlData();
-    initH311QuoteProgressAnimation();
+    /* H3.3D.2: old standalone quote progress animation disabled.
+       renderHomeQuotes() owns the timer so the bar never reverses or restarts halfway. */
   }, 120);
 }
 
@@ -2688,27 +2703,14 @@ function initH311TrackAnimation() {
 }
 
 function initH311QuoteProgressAnimation() {
-  const bar = document.getElementById('quote-progress-bar');
-  if (!bar) return;
-
-  function run() {
-    if (typeof window.anime === 'function') {
-      window.anime.remove(bar);
-      window.anime({
-        targets: bar,
-        width: ['0%', '100%'],
-        duration: 5200,
-        easing: 'linear'
-      });
-    } else {
-      bar.style.transition = 'width 5.2s linear';
-      bar.style.width = '100%';
-    }
+  /* H3.3D.2: disabled.
+     Older H3.1.1 animation used its own 5.4s loop and fought the real quote carousel timer.
+     The single source of truth is now renderHomeQuotes() -> restartProgress(). */
+  if (typeof window.PADDOX_RESTART_QUOTE_PROGRESS === 'function') {
+    window.PADDOX_RESTART_QUOTE_PROGRESS();
   }
-
-  run();
-  setInterval(run, 5400);
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   initH311SignatureVisibilityFix();
@@ -3713,3 +3715,10 @@ setInterval(() => {
 
 
 /* Phase H3.3D.1: Quote carousel line timer is now synchronized with card auto-advance. */
+
+
+/* Phase H3.3D.2 — Quote Timer Direction Fix
+   Keeps quote progress one-way left-to-right and prevents older timer loops from fighting it. */
+(function initH33D2QuoteTimerGuard(){
+  window.PADDOX_QUOTE_TIMER_OWNER = 'renderHomeQuotes';
+})();

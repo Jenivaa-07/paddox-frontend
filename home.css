@@ -7612,3 +7612,19 @@ body .nl-trust {
     font-size: 1rem !important;
   }
 }
+
+
+/* ============================================================
+   Phase H3.3D.2 — Quote Timer Direction Fix
+   ============================================================ */
+.quote-section.h33d-quotes .quote-progress {
+  direction: ltr !important;
+}
+.quote-section.h33d-quotes #quote-progress-bar {
+  width: 0%;
+  transform-origin: left center !important;
+  will-change: width !important;
+}
+.quote-section.h33d-quotes .quote-progress span {
+  transform-origin: left center !important;
+}
