@@ -69,7 +69,7 @@ async function loadRealCalendar() {
     grid.innerHTML = `
       <div class="calendar-loading-card">
         <div class="fh-empty-mark fh-mark-loading"></div>
-        <p>Loading live Race Calendar + SVG circuit maps...</p>
+        <p>Loading live Race Calendar + Formula Timer circuit maps...</p>
       </div>`;
 
     const data = await PaddoxAPI.f1.schedule();
@@ -129,7 +129,7 @@ async function loadRealCalendar() {
   } catch (err) {
     grid.innerHTML = `
       <div class="calendar-loading-card">
-        <p>Could not load live calendar. Showing cached calendar with SVG circuit maps.</p>
+        <p>Could not load live calendar. Showing cached calendar with circuit maps.</p>
       </div>`;
     console.warn('Calendar load failed:', err);
     if (typeof renderCalendar === 'function') renderCalendar();
@@ -257,7 +257,7 @@ function raceFlagHTML(race = {}, className = 'race-flag-img') {
   return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
 }
 
-/* ── Phase H3.3A.10: Direct Formula Timer Circuit Image Calendar helpers ── */
+/* ── Phase H3.3A.11: Formula Timer Direct Circuit Image Loader ── */
 function paddoxRaceCircuit(race = {}) {
   const verified = window.PADDOX_CIRCUIT_MAP?.getCircuit?.(race);
   if (verified) return { ...verified, verified: true };
@@ -265,59 +265,86 @@ function paddoxRaceCircuit(race = {}) {
   const label = safeText(race.circuit || race.name || race.raceName, 'Circuit image pending');
   return {
     id: 'pending',
-    formulaTimerSlug: '',
+    file: '',
     label,
     country: safeText(race.country || race.location, ''),
     location: safeText(race.location || race.locality, ''),
-    verified: false
+    verified: false,
+    source: 'pending',
+    timerSlugs: []
   };
 }
 
-function paddoxFormulaTimerImageURL(circuit = {}) {
-  const slug = safeText(circuit.formulaTimerSlug || circuit.id, '');
-  if (!slug || slug === 'pending') return '';
-  const encoded = encodeURIComponent(`/circuits/${slug}.png`);
-  return `https://formula-timer.com/_next/image?q=75&url=${encoded}&w=3840`;
+function paddoxCircuitCandidates(circuit = {}) {
+  if (!circuit?.verified) return [];
+  return window.PADDOX_CIRCUIT_MAP?.candidatePaths?.(circuit) || [];
 }
 
 function paddoxCircuitPreviewHTML(race = {}, index = 0) {
   const circuit = paddoxRaceCircuit(race);
+  const candidates = paddoxCircuitCandidates(circuit);
   const safeLabel = safeText(circuit.label || race.circuit || race.name || 'Circuit').replace(/"/g, '&quot;');
   const safeId = safeText(circuit.id || 'pending');
-  const imageURL = paddoxFormulaTimerImageURL(circuit);
 
   return `
-    <div class="rc-track-art rc-ft-card ${circuit.verified && imageURL ? 'has-formula-timer-image' : 'is-missing-svg'}"
+    <div class="rc-track-art rc-ft-image-art ${circuit.verified ? 'is-verified-svg is-loading-svg is-formula-timer-image' : 'is-missing-svg'}"
       data-circuit="${safeId}"
-      data-ft-slug="${safeText(circuit.formulaTimerSlug || '')}"
+      data-ft-alt="${safeLabel} circuit map"
+      data-sources="${candidates.join('|')}"
       style="--rc-delay:${index * 70}ms">
       <div class="rc-track-bg"></div>
-      ${imageURL ? `<img class="rc-track-svg rc-track-ft-img" src="${imageURL}" alt="${safeLabel} circuit layout" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.rc-track-art')?.classList.add('is-missing-svg');this.remove();">` : ''}
       <div class="rc-track-fallback">
-        <span>IMAGE PENDING</span>
-        <small>Formula Timer image URL missing</small>
+        <span>${circuit.verified ? 'IMAGE PENDING' : 'IMAGE PENDING'}</span>
+        <small>${circuit.verified ? 'Trying Formula Timer image source' : 'No verified Formula Timer mapping yet'}</small>
       </div>
       <div class="rc-track-glow"></div>
       <div class="rc-track-label" aria-hidden="true"></div>
     </div>`;
 }
 
-function hydratePaddoxCircuitSVGs(root = document) {
-  /* Direct Formula Timer image mode: images load directly from src, no local asset probing. */
-  const cards = [...root.querySelectorAll('.rc-track-art.rc-ft-card')];
+function paddoxLoadFormulaTimerImage(card, sources = [], idx = 0) {
+  if (!card) return;
+  const src = sources[idx];
+
+  if (!src) {
+    card.classList.remove('is-loading-svg');
+    card.classList.add('is-missing-svg');
+    const small = card.querySelector('.rc-track-fallback small');
+    if (small) small.textContent = 'Formula Timer image unavailable';
+    return;
+  }
+
+  const img = document.createElement('img');
+  img.className = 'rc-track-svg rc-track-img rc-formula-timer-img';
+  img.src = src;
+  img.alt = card.dataset.ftAlt || 'Circuit map';
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.referrerPolicy = 'no-referrer';
+
+  img.addEventListener('load', () => {
+    card.querySelectorAll('.rc-track-img').forEach(old => {
+      if (old !== img) old.remove();
+    });
+    card.classList.add('has-svg', 'has-formula-timer-image');
+    card.classList.remove('is-missing-svg', 'is-loading-svg');
+  }, { once: true });
+
+  img.addEventListener('error', () => {
+    img.remove();
+    paddoxLoadFormulaTimerImage(card, sources, idx + 1);
+  }, { once: true });
+
+  const bg = card.querySelector('.rc-track-bg');
+  bg?.insertAdjacentElement('afterend', img);
+}
+
+async function hydratePaddoxCircuitSVGs(root = document) {
+  const cards = [...root.querySelectorAll('.rc-track-art.is-formula-timer-image[data-sources]')];
+
   cards.forEach(card => {
-    const img = card.querySelector('.rc-track-ft-img');
-    if (!img) {
-      card.classList.add('is-missing-svg');
-      return;
-    }
-    img.addEventListener('load', () => {
-      card.classList.add('has-svg');
-      card.classList.remove('is-missing-svg');
-    }, { once: true });
-    img.addEventListener('error', () => {
-      card.classList.add('is-missing-svg');
-    }, { once: true });
+    const sources = String(card.dataset.sources || '').split('|').filter(Boolean);
+    paddoxLoadFormulaTimerImage(card, sources, 0);
   });
 }
 

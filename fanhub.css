@@ -7526,66 +7526,57 @@ body.modal-open { overflow: hidden; }
 
 
 /* ============================================================
-   Phase H3.3A.10 — Direct Formula Timer Circuit Image Mode
-   Uses remote Formula Timer circuit PNGs directly, no local assets.
+   Phase H3.3A.11 — Formula Timer Direct Image Slug Fix
    ============================================================ */
-#sec-calendar .rc-track-art.rc-ft-card{
+#sec-calendar .rc-ft-image-art{
   min-height:250px;
-  padding:22px 18px 18px!important;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(232,0,45,.18), transparent 42%),
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
-    rgba(8,8,8,.72);
+  padding:26px 18px 16px!important;
 }
-#sec-calendar .rc-track-ft-img{
-  position:relative;
-  z-index:3;
-  width:min(96%, 430px);
-  height:190px;
+#sec-calendar .rc-formula-timer-img{
+  width:96%;
+  height:196px;
+  max-height:196px;
   object-fit:contain;
-  object-position:center;
-  opacity:.96;
-  filter:
-    drop-shadow(0 0 10px rgba(255,255,255,.12))
-    drop-shadow(0 0 20px rgba(232,0,45,.42));
+  opacity:.98;
   mix-blend-mode:screen;
-  transform:translateZ(0);
+  filter:
+    saturate(1.08)
+    contrast(1.04)
+    drop-shadow(0 0 12px rgba(232,0,45,.45))
+    drop-shadow(0 0 22px rgba(255,255,255,.08));
 }
-#sec-calendar .rc-track-art.has-formula-timer-image .rc-track-fallback,
-#sec-calendar .rc-track-art.has-svg .rc-track-fallback{
-  display:none!important;
-}
-#sec-calendar .rc-track-art.is-missing-svg .rc-track-fallback{
-  display:flex!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-#sec-calendar .rc-track-art.is-missing-svg .rc-track-fallback span{
-  color:var(--red);
-}
-#sec-calendar .rc-track-art.rc-ft-card .rc-track-label,
-#sec-calendar .rc-track-art.rc-ft-card .rc-track-label::after,
-#sec-calendar .rc-svg-source{
-  display:none!important;
-  content:none!important;
-}
-#sec-calendar .rc-track-art.rc-ft-card::after{
-  content:none!important;
-  display:none!important;
-}
-#sec-calendar .rc-svg-card{
-  border-radius:16px;
-}
-#sec-calendar .rcard.rc-svg-card:hover .rc-track-ft-img{
+#sec-calendar .rcard:hover .rc-formula-timer-img{
   transform:scale(1.035);
   filter:
-    drop-shadow(0 0 12px rgba(255,255,255,.18))
-    drop-shadow(0 0 28px rgba(232,0,45,.55));
+    saturate(1.12)
+    contrast(1.08)
+    drop-shadow(0 0 16px rgba(232,0,45,.65))
+    drop-shadow(0 0 32px rgba(255,255,255,.10));
+}
+#sec-calendar .rc-track-art.has-formula-timer-image .rc-track-fallback{
+  display:none!important;
+}
+#sec-calendar .rc-track-art.is-formula-timer-image.is-missing-svg .rc-track-fallback{
+  display:flex;
+}
+#sec-calendar .rc-track-fallback span{
+  font-size:1.15rem!important;
+}
+#sec-calendar .rc-track-fallback small{
+  display:block!important;
+  max-width:220px;
+  line-height:1.5;
+  opacity:.65;
+}
+#sec-calendar .rc-svg-source,
+#sec-calendar .rc-track-label,
+#sec-calendar .rc-track-label::after,
+#sec-calendar .rc-track-art::after{
+  display:none!important;
+  content:none!important;
 }
 @media(max-width:620px){
-  #sec-calendar .rc-track-art.rc-ft-card{min-height:220px;}
-  #sec-calendar .rc-track-ft-img{height:160px;width:98%;}
+  #sec-calendar .rc-formula-timer-img{
+    height:164px;
+  }
 }
