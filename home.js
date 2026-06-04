@@ -2947,3 +2947,41 @@ setInterval(() => {
     if (typeof updateH311RaceControlData === 'function') updateH311RaceControlData();
   } catch (_) {}
 }, 10000);
+
+/* ============================================================
+   PADDOX H3.2A.1 — Visual Balance Runtime Fix
+   Removes the floating hero rail and protects quote readability.
+   ============================================================ */
+(function initH32A1VisualBalanceFix(){
+  'use strict';
+
+  function removeUnwantedRail(){
+    document.querySelectorAll('.h32a-race-rail').forEach((rail) => rail.remove());
+  }
+
+  function lockQuoteReadability(){
+    const quote = document.getElementById('quote-text');
+    const name = document.getElementById('quote-name');
+    const team = document.getElementById('quote-team');
+    if (quote && (!quote.textContent || !quote.textContent.trim())) {
+      quote.textContent = 'The paddock is not just a place. It is a feeling built by fans.';
+    }
+    if (name && (!name.textContent || !name.textContent.trim())) name.textContent = 'PADDOX';
+    if (team && (!team.textContent || !team.textContent.trim())) team.textContent = 'Fan Quote Library';
+  }
+
+  function tuneAfterRender(){
+    removeUnwantedRail();
+    lockQuoteReadability();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tuneAfterRender);
+  } else {
+    tuneAfterRender();
+  }
+
+  window.addEventListener('load', tuneAfterRender);
+  setTimeout(tuneAfterRender, 450);
+  setTimeout(tuneAfterRender, 1400);
+})();

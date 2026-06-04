@@ -5562,3 +5562,263 @@ a[href*="aistudio"],
   .h32a-slide-pill { transform: scale(.72); opacity: .45; }
   .h32a-track-mode .race-track-stage { min-height: 265px; }
 }
+
+/* ============================================================
+   PADDOX H3.2A.1 — Home Visual Balance Fix
+   Dark mode kept, unnecessary decorative noise reduced.
+   Focus: cleaner hero, readable quote card, stronger premium spacing.
+   ============================================================ */
+
+:root {
+  --pdx-panel: rgba(13, 13, 14, .82);
+  --pdx-panel-soft: rgba(18, 18, 20, .62);
+  --pdx-line: rgba(255,255,255,.105);
+}
+
+/* Keep the dark mode, but reduce the washed red haze */
+body.h32a-home {
+  background:
+    radial-gradient(circle at 82% 7%, rgba(232,0,45,.07), transparent 26%),
+    radial-gradient(circle at 12% 38%, rgba(255,255,255,.035), transparent 24%),
+    #050505;
+}
+
+/* NAV: the previous glass pill became too small/soft on desktop */
+#navbar.h32a-nav {
+  height: 74px;
+  background: rgba(5,5,5,.94) !important;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  box-shadow: 0 16px 45px rgba(0,0,0,.36), inset 0 -1px 0 rgba(232,0,45,.18);
+}
+#navbar.h32a-nav.scrolled { height: 64px; }
+.h32a-nav .nav-inner { padding-inline: clamp(28px, 4vw, 64px); }
+.h32a-nav .brand-logo-icon { width: 44px; height: 44px; object-fit: contain; }
+.h32a-nav .helmet-wrap {
+  width: 46px; height: 46px;
+  background: radial-gradient(circle at 42% 30%, rgba(255,255,255,.12), rgba(232,0,45,.12) 46%, rgba(0,0,0,.55));
+  border-color: rgba(232,0,45,.34);
+}
+.h32a-nav .logo-text { font-size: 2.05rem; letter-spacing: 5.4px; }
+.h32a-nav .nav-links {
+  gap: 8px;
+  padding: 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.h32a-nav .nav-link {
+  min-height: 40px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: .82rem;
+  letter-spacing: 2.2px;
+}
+.h32a-nav .nav-link.active {
+  background: linear-gradient(135deg, rgba(232,0,45,.92), rgba(105,0,24,.62));
+  box-shadow: 0 10px 26px rgba(232,0,45,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.h32a-nav .nl-underline { display: none; }
+.h32a-nav .nav-search-btn,
+.h32a-nav .nav-cart-btn { width: 44px; height: 44px; }
+.h32a-nav .nav-cta-btn { padding: 13px 28px; }
+
+/* HERO: remove the random mini track card; make the hero feel cleaner */
+.h32a-race-rail { display: none !important; }
+.hero.h32a-hero {
+  min-height: 100svh;
+  background: #050505;
+}
+.h32a-hero .hero-bg-image {
+  filter: brightness(.38) contrast(1.08) saturate(.82) !important;
+  opacity: .92;
+}
+.h32a-hero .hero-overlay {
+  background:
+    linear-gradient(100deg, rgba(5,5,5,.98) 0%, rgba(5,5,5,.86) 44%, rgba(5,5,5,.48) 100%),
+    radial-gradient(circle at 82% 31%, rgba(232,0,45,.18), transparent 32%),
+    linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,.32) 42%, transparent 100%) !important;
+}
+.h32a-hero .hero-content {
+  max-width: 900px;
+  padding-left: clamp(48px, 6vw, 92px);
+  padding-top: 72px;
+}
+.h32a-hero .hero-h1 {
+  font-size: clamp(5.7rem, 10.6vw, 10.6rem);
+  line-height: .84;
+  max-width: 760px;
+  text-shadow: 0 24px 60px rgba(0,0,0,.55);
+}
+.h32a-hero .hero-h1::before {
+  opacity: .9;
+  box-shadow: 0 0 30px rgba(232,0,45,.52);
+}
+.h32a-hero .hero-sub {
+  max-width: 585px;
+  color: rgba(255,255,255,.72);
+  font-size: 1.05rem;
+}
+.h32a-hero .hero-live-grid {
+  max-width: 575px;
+  gap: 12px;
+}
+.h32a-hero .hero-live-card {
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(0,0,0,.42);
+}
+.h32a-hero .hero-stats { right: clamp(42px, 7vw, 96px); bottom: 74px; }
+.h32a-hero .stat-num { font-size: clamp(2.5rem, 3.7vw, 3.55rem); }
+
+/* COUNTDOWN: stronger card, less flat strip */
+.countdown-strip {
+  background:
+    linear-gradient(90deg, rgba(5,5,5,1), rgba(92,0,24,.58), rgba(5,5,5,1)) !important;
+  border-top: 1px solid rgba(232,0,45,.22);
+  border-bottom: 1px solid rgba(232,0,45,.20);
+}
+.cs-inner {
+  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 24px;
+  padding-block: 24px;
+  box-shadow: 0 25px 75px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.cd-block { border-radius: 14px; background: rgba(6,6,7,.72); }
+
+/* TRACK MODE: keep it dark/premium, but remove over-red panel heaviness */
+#race-control-section.h32a-track-mode,
+.race-control-section.h32a-track-mode {
+  background:
+    radial-gradient(circle at 82% 22%, rgba(232,0,45,.11), transparent 31%),
+    radial-gradient(circle at 12% 86%, rgba(0,255,210,.045), transparent 30%),
+    linear-gradient(180deg, #050505 0%, #061010 58%, #050505 100%) !important;
+}
+.h32a-track-mode .race-control-panel {
+  border-radius: 30px;
+  background: linear-gradient(140deg, rgba(255,255,255,.055), rgba(255,255,255,.018)) !important;
+  border: 1px solid rgba(255,255,255,.115);
+}
+.h32a-track-mode .race-track-stage {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    radial-gradient(circle at 50% 47%, rgba(232,0,45,.11), transparent 42%),
+    rgba(0,0,0,.64) !important;
+}
+.h32a-track-mode .race-control-info {
+  background: linear-gradient(135deg, rgba(232,0,45,.12), rgba(255,255,255,.02)) !important;
+}
+.h32a-track-chip { background: rgba(0,0,0,.34); }
+
+/* PRODUCTS + CONTENT: subtle premium lift */
+.pcard,
+.exp-card,
+.testi-card {
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.014));
+  border-color: rgba(255,255,255,.075);
+}
+.pcard:hover,
+.exp-card:hover,
+.testi-card:hover {
+  border-color: rgba(232,0,45,.34);
+  box-shadow: 0 26px 70px rgba(0,0,0,.58), 0 0 0 1px rgba(232,0,45,.10);
+}
+.section-title { text-shadow: 0 12px 38px rgba(0,0,0,.45); }
+
+/* QUOTE SECTION: the H3.2A card looked empty/broken. Make the quote readable and VIP. */
+.quote-section.h32a-quotes {
+  padding: 125px 0 130px;
+  background:
+    radial-gradient(circle at 50% 23%, rgba(232,0,45,.105), transparent 34%),
+    radial-gradient(circle at 83% 78%, rgba(255,255,255,.035), transparent 26%),
+    #050505 !important;
+}
+.h32a-quotes .quote-inner {
+  max-width: 760px;
+  min-height: 330px;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(255,255,255,.09), transparent 24%),
+    radial-gradient(circle at 88% 20%, rgba(232,0,45,.20), transparent 27%),
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.026)) !important;
+  border: 1px solid rgba(255,255,255,.135) !important;
+  box-shadow: 0 34px 95px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.13);
+}
+.h32a-quotes .quote-inner::before { opacity: .18 !important; }
+.h32a-quote-lottie { opacity: .18; filter: blur(.2px); }
+.h32a-slide-pill { opacity: .34 !important; transform: scale(.78); }
+.h32a-quotes .section-label {
+  color: var(--red) !important;
+  text-align: center !important;
+  margin-bottom: 2px !important;
+}
+.h32a-quotes .quote-mark {
+  position: absolute !important;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(232,0,45,.52) !important;
+  font-size: 3.4rem !important;
+  line-height: 1;
+}
+.h32a-quotes .quote-text {
+  color: rgba(255,255,255,.92) !important;
+  font-size: clamp(1.18rem, 2vw, 1.65rem) !important;
+  font-weight: 800;
+  text-align: center;
+  max-width: 570px;
+  line-height: 1.42 !important;
+  margin: 18px auto 6px !important;
+  min-height: auto;
+}
+.h32a-quotes .quote-driver {
+  margin-top: 4px;
+  justify-content: center;
+}
+.h32a-quotes .quote-name { color: #fff !important; font-weight: 800; }
+.h32a-quotes .quote-team { color: rgba(255,255,255,.58) !important; }
+.h32a-quotes .quote-progress {
+  width: min(230px, 58%);
+  background: rgba(255,255,255,.09);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.h32a-quotes .quote-dots { margin-top: 2px; }
+
+/* Newsletter/footer: cleaner block */
+.newsletter-section .newsletter-box,
+.newsletter-box {
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.014)) !important;
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+@media (max-width: 1120px) {
+  .h32a-nav .logo-text { font-size: 1.74rem; letter-spacing: 4.2px; }
+  .h32a-nav .nav-link { padding-inline: 13px; font-size: .76rem; }
+  .h32a-hero .hero-stats { position: relative; right: auto; bottom: auto; margin: 20px 0 0 clamp(48px, 6vw, 92px); justify-content: flex-start; }
+}
+@media (max-width: 900px) {
+  #navbar.h32a-nav { height: 68px; }
+  .h32a-nav .nav-links { display: none; }
+  .h32a-hero .hero-content { padding-top: 54px; }
+  .h32a-hero .hero-live-grid { grid-template-columns: 1fr; max-width: 420px; }
+}
+@media (max-width: 640px) {
+  .h32a-nav .logo-text { font-size: 1.52rem; letter-spacing: 3.4px; }
+  .h32a-nav .helmet-wrap { width: 40px; height: 40px; }
+  .h32a-hero .hero-content { padding-left: 26px; padding-right: 24px; }
+  .h32a-hero .hero-h1 { font-size: clamp(4.6rem, 21vw, 6.8rem); }
+  .h32a-hero .hero-stats { margin-left: 26px; flex-wrap: wrap; gap: 18px; }
+  .cs-inner { margin-inline: 18px; }
+  .h32a-quotes .quote-inner { min-height: 310px; padding-inline: 24px !important; }
+  .h32a-quotes .quote-text { font-size: 1.15rem !important; }
+}
