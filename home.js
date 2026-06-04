@@ -3753,10 +3753,10 @@ setInterval(() => {
 (function initPaddoxRaceLab(){
   const STORE_KEY = 'paddox_race_lab_v1';
   const moodCopy = {
-    strategist: 'You are The Strategist — calm, patient and ready to win with timing.',
-    charger: 'You are The Charger — aggressive starts, late braking and full-send energy.',
-    ice: 'You are Ice Mode — composed under pressure with clean race control.',
-    comeback: 'You are The Comeback King — built for recovery drives and last-lap drama.'
+    strategist: 'Strategist Mode unlocked — calm, patient, and ready to win with timing.',
+    charger: 'Charger Mode unlocked — aggressive starts, late braking, full-send energy.',
+    ice: 'Ice Mode unlocked — composed under pressure with clean race control.',
+    comeback: 'Comeback Mode unlocked — built for recovery drives and last-lap drama.'
   };
 
   function readState(){
@@ -3793,7 +3793,7 @@ setInterval(() => {
       if (on) count += 1;
     });
     const status = document.getElementById('badge-status');
-    if (status) status.textContent = `${count} / 3 badges active`;
+    if (status) status.textContent = `${count} / 3 collectibles unlocked`;
   }
   function updatePassport(state){
     const race = nextRaceName();
@@ -3813,11 +3813,11 @@ setInterval(() => {
   function render(){
     const state = readState();
     const predictionStatus = document.getElementById('prediction-status');
-    if (predictionStatus) predictionStatus.textContent = state.prediction ? `${state.prediction} saved for ${state.predictionRace || nextRaceName()}.` : 'No prediction saved yet.';
+    if (predictionStatus) predictionStatus.textContent = state.prediction ? `${state.prediction} saved for ${state.predictionRace || nextRaceName()}.` : 'No prediction locked yet.';
     setActiveButtons(document.getElementById('prediction-picks'), state.prediction || '', 'pick');
     setActiveButtons(document.getElementById('mood-picks'), state.mood || '', 'mood');
     const moodResult = document.getElementById('mood-result');
-    if (moodResult) moodResult.textContent = state.mood ? moodCopy[state.mood] : 'Pick a mood to reveal your race identity.';
+    if (moodResult) moodResult.textContent = state.mood ? moodCopy[state.mood] : 'Choose a mood chip to unlock your race identity.';
     updatePassport(state);
     updateBadges(state);
   }
