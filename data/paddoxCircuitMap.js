@@ -1,6 +1,6 @@
 /* ============================================================
    PADDOX — Verified Circuit SVG Map
-   Phase H3.3A.2: Strict official-calendar circuit mapping
+   Phase H3.3A.3: Strict verified mapping using detailed circuit SVGs
 
    Purpose:
    - Do NOT fuzzy-match to random/wrong tracks.
@@ -8,24 +8,35 @@
    - If SVG is missing, show a premium placeholder instead of a wrong circuit.
 
    Expected SVG source:
-   julesr0y/f1-circuits-svg copied into one of these structures:
-   1) frontend/assets/circuits/circuits/minimal/white-outline/<file>.svg
-   2) frontend/assets/circuits/minimal/white-outline/<file>.svg
-   3) frontend/assets/circuits/<file>.svg
+   julesr0y/f1-circuits-svg detailed folder copied into one of these structures:
+   1) frontend/assets/circuits/circuits/detailed/white-outline/<file>.svg
+   2) frontend/assets/circuits/detailed/white-outline/<file>.svg
+   3) frontend/assets/circuits/detailed/white/<file>.svg
+   4) frontend/assets/circuits/<file>.svg
    ============================================================ */
 (function () {
   'use strict';
 
   const STYLE_PATHS = [
-    'circuits/minimal/white-outline',
-    'minimal/white-outline',
-    'circuits/minimal/white',
-    'minimal/white',
+    /* Preferred: detailed tracks from julesr0y/f1-circuits-svg/tree/main/circuits/detailed */
     'circuits/detailed/white-outline',
     'detailed/white-outline',
-    ''
-  ];
+    'circuits/detailed/white',
+    'detailed/white',
+    'circuits/detailed/black-outline',
+    'detailed/black-outline',
+    'circuits/detailed/black',
+    'detailed/black',
 
+    /* Compatibility if you copied only SVGs directly. */
+    'detailed',
+    'circuits/detailed',
+    '',
+
+    /* Last-resort compatibility with old minimal folder. */
+    'circuits/minimal/white-outline',
+    'minimal/white-outline'
+  ];
   const VERIFIED = [
     {
       id: 'melbourne', file: 'melbourne-2.svg', label: 'Albert Park Circuit', location: 'Melbourne', country: 'Australia', official: 'Australian Grand Prix',

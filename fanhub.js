@@ -124,6 +124,8 @@ async function loadRealCalendar() {
         </article>`;
     }).join('');
 
+    hydratePaddoxCircuitSVGs(grid);
+
   } catch (err) {
     grid.innerHTML = `
       <div class="calendar-loading-card">
@@ -255,7 +257,7 @@ function raceFlagHTML(race = {}, className = 'race-flag-img') {
   return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
 }
 
-/* ── Phase H3.3A.2: Verified Circuit SVG Calendar helpers ── */
+/* ── Phase H3.3A.3: Detailed Circuit SVG Calendar helpers ── */
 function paddoxRaceCircuit(race = {}) {
   const verified = window.PADDOX_CIRCUIT_MAP?.getCircuit?.(race);
   if (verified) return { ...verified, verified: true };
@@ -296,24 +298,71 @@ window.paddoxCircuitImgFallback = function paddoxCircuitImgFallback(img) {
 function paddoxCircuitPreviewHTML(race = {}, index = 0) {
   const circuit = paddoxRaceCircuit(race);
   const candidates = paddoxCircuitCandidates(circuit);
-  const first = candidates[0] || '';
   const safeLabel = safeText(circuit.label || race.circuit || race.name || 'Circuit').replace(/"/g, '&quot;');
   const safeId = safeText(circuit.id || 'pending');
-  const svgHTML = first
-    ? `<img class="rc-track-svg" src="${first}" data-sources="${candidates.join('|')}" data-idx="0" alt="${safeLabel} verified SVG circuit map" loading="lazy" onerror="paddoxCircuitImgFallback(this)">`
-    : '';
 
   return `
-    <div class="rc-track-art ${circuit.verified ? 'is-verified-svg' : 'is-missing-svg'}" data-circuit="${safeId}" data-svg-file="${safeText(circuit.file || '')}" style="--rc-delay:${index * 70}ms">
+    <div class="rc-track-art ${circuit.verified ? 'is-verified-svg is-loading-svg' : 'is-missing-svg'}"
+      data-circuit="${safeId}"
+      data-svg-file="${safeText(circuit.file || '')}"
+      data-svg-alt="${safeLabel} detailed SVG circuit map"
+      data-sources="${candidates.join('|')}"
+      style="--rc-delay:${index * 70}ms">
       <div class="rc-track-bg"></div>
-      ${svgHTML}
       <div class="rc-track-fallback">
         <span>${circuit.verified ? safeId.toUpperCase() : 'SVG PENDING'}</span>
-        <small>${circuit.verified ? 'Check assets/circuits path' : 'No verified SVG mapping yet'}</small>
+        <small>${circuit.verified ? 'Looking for detailed SVG' : 'No verified SVG mapping yet'}</small>
       </div>
       <div class="rc-track-glow"></div>
-      <div class="rc-track-label">VERIFIED CIRCUIT MAP</div>
+      <div class="rc-track-label">DETAILED CIRCUIT MAP</div>
     </div>`;
+}
+
+async function paddoxFirstExistingAsset(paths = []) {
+  for (const path of paths) {
+    try {
+      const res = await fetch(path, { method: 'HEAD', cache: 'force-cache' });
+      if (res.ok) return path;
+    } catch (err) {
+      /* Ignore and try the next verified candidate path. */
+    }
+  }
+  return '';
+}
+
+async function hydratePaddoxCircuitSVGs(root = document) {
+  const cards = [...root.querySelectorAll('.rc-track-art.is-verified-svg[data-sources]')];
+  await Promise.all(cards.map(async card => {
+    const paths = String(card.dataset.sources || '').split('|').filter(Boolean);
+    const src = await paddoxFirstExistingAsset(paths);
+
+    card.classList.remove('is-loading-svg');
+
+    if (!src) {
+      card.classList.add('is-missing-svg');
+      const small = card.querySelector('.rc-track-fallback small');
+      if (small) small.textContent = 'Add detailed SVG in assets/circuits';
+      return;
+    }
+
+    const img = document.createElement('img');
+    img.className = 'rc-track-svg rc-track-svg-detailed';
+    img.src = src;
+    img.alt = card.dataset.svgAlt || 'Detailed circuit SVG map';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.addEventListener('load', () => {
+      card.classList.add('has-svg');
+      card.classList.remove('is-missing-svg');
+    }, { once: true });
+    img.addEventListener('error', () => {
+      card.classList.add('is-missing-svg');
+      img.remove();
+    }, { once: true });
+
+    const bg = card.querySelector('.rc-track-bg');
+    bg?.insertAdjacentElement('afterend', img);
+  }));
 }
 
 function bestString(value, keys = []) {
@@ -1452,6 +1501,7 @@ function renderCalendar(){
       </div>
     </article>`;
   }).join('');
+  hydratePaddoxCircuitSVGs(grid);
 }
 loadRealCalendar();
 

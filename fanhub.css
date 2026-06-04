@@ -7394,3 +7394,46 @@ body.modal-open { overflow: hidden; }
   text-overflow:ellipsis;
   white-space:nowrap;
 }
+
+/* ============================================================
+   Phase H3.3A.3 — Detailed Circuit SVG Priority
+   Uses julesr0y/f1-circuits-svg / circuits/detailed first.
+   ============================================================ */
+#sec-calendar .rc-track-art{
+  min-height:252px;
+  padding:40px 22px 20px;
+}
+#sec-calendar .rc-track-svg.rc-track-svg-detailed{
+  width:96%;
+  height:190px;
+  max-height:190px;
+  opacity:.96;
+  filter:
+    drop-shadow(0 0 9px rgba(255,255,255,.16))
+    drop-shadow(0 0 18px rgba(232,0,45,.48));
+}
+#sec-calendar .rc-track-art.is-loading-svg::before{
+  content:'';
+  position:absolute;
+  width:56%;
+  height:2px;
+  left:22%;
+  top:50%;
+  z-index:3;
+  background:linear-gradient(90deg,transparent,rgba(232,0,45,.75),transparent);
+  animation:rcDetailedLoading 1.15s ease-in-out infinite;
+}
+#sec-calendar .rc-track-art.has-svg::before{display:none;}
+#sec-calendar .rc-track-art.has-svg .rc-track-fallback{display:none!important;}
+#sec-calendar .rc-track-label::after{
+  content:' · DETAILED';
+  color:rgba(232,0,45,.82);
+}
+@keyframes rcDetailedLoading{
+  0%,100%{transform:scaleX(.35);opacity:.35;}
+  50%{transform:scaleX(1);opacity:.9;}
+}
+@media(max-width:620px){
+  #sec-calendar .rc-track-art{min-height:226px;}
+  #sec-calendar .rc-track-svg.rc-track-svg-detailed{height:164px;}
+}
