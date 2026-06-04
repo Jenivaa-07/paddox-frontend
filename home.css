@@ -7843,3 +7843,14 @@ body .nl-trust {
   .marquee-team{width:280px !important;min-width:280px !important;height:126px !important;min-height:126px !important;}
   .marquee-team-car-wrap{height:66px !important;}
 }
+
+
+/* ============================================================
+   Phase H3.3D.5 — Quote Auto Advance Completion Fix
+   The visible progress bar is now the single trigger for changing quotes.
+   ============================================================ */
+.quote-section.h33d-quotes #quote-progress-bar{
+  width:0%;
+  transform-origin:left center !important;
+  will-change:width;
+}

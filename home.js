@@ -1311,8 +1311,9 @@ function renderHomeQuotes() {
   const QUOTE_DURATION = 6500;
   const QUOTE_SWITCH_DELAY = 260;
   let current = 0;
-  let autoplay = null;
-  let quotePaused = false;
+  let quoteTimerToken = 0;
+  let quoteFallbackTimer = null;
+
   const textEl = document.getElementById('quote-text');
   const avEl   = document.getElementById('quote-avatar');
   const nameEl = document.getElementById('quote-name');
@@ -1321,35 +1322,56 @@ function renderHomeQuotes() {
   const card   = document.querySelector('.quote-inner');
   if (!textEl) return;
 
-  function restartProgress() {
-    const bar = document.getElementById('quote-progress-bar');
-    if (!bar) return;
+  function quoteBar() {
+    return document.getElementById('quote-progress-bar');
+  }
 
-    /* H3.3D.3: one owner only. Reset first, then animate after browser paint.
-       The next quote is scheduled only AFTER this function runs, so the card
-       cannot change before the line reaches 100%. */
+  function cancelQuoteTimer() {
+    quoteTimerToken += 1;
+    clearTimeout(quoteFallbackTimer);
+    const bar = quoteBar();
+    if (bar) bar.ontransitionend = null;
+  }
+
+  function startQuoteProgressTimer() {
+    const bar = quoteBar();
+    if (!bar || !QUOTES.length) return;
+
+    cancelQuoteTimer();
+    const token = quoteTimerToken;
+
+    bar.ontransitionend = null;
     bar.style.transition = 'none';
     bar.style.width = '0%';
     bar.style.transformOrigin = 'left center';
-    bar.offsetHeight; // force repaint
+    void bar.offsetWidth;
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        if (token !== quoteTimerToken) return;
+
+        bar.ontransitionend = (event) => {
+          if (event.propertyName !== 'width') return;
+          if (token !== quoteTimerToken) return;
+          clearTimeout(quoteFallbackTimer);
+          bar.ontransitionend = null;
+          setQuote(current + 1, true);
+        };
+
         bar.style.transition = `width ${QUOTE_DURATION}ms linear`;
         bar.style.width = '100%';
+
+        /* Safety fallback only if transitionend is missed by the browser. */
+        quoteFallbackTimer = window.setTimeout(() => {
+          if (token !== quoteTimerToken) return;
+          bar.ontransitionend = null;
+          setQuote(current + 1, true);
+        }, QUOTE_DURATION + 450);
       });
     });
   }
 
-  window.PADDOX_RESTART_QUOTE_PROGRESS = restartProgress;
-
-  function scheduleNextQuote() {
-    clearTimeout(autoplay);
-    autoplay = setTimeout(() => {
-      if (quotePaused) return;
-      setQuote(current + 1, true, scheduleNextQuote);
-    }, QUOTE_DURATION + 180);
-  }
+  window.PADDOX_RESTART_QUOTE_PROGRESS = startQuoteProgressTimer;
 
   if (!QUOTES.length) {
     textEl.textContent = 'Fan quotes are unavailable right now.';
@@ -1357,7 +1379,11 @@ function renderHomeQuotes() {
     if (nameEl) nameEl.textContent = 'PADDOX';
     if (teamEl) teamEl.textContent = 'Quote Library';
     if (dotsEl) dotsEl.innerHTML = '';
-    restartProgress();
+    const bar = quoteBar();
+    if (bar) {
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+    }
     return;
   }
 
@@ -1368,14 +1394,14 @@ function renderHomeQuotes() {
     ).join('');
     dotsEl.querySelectorAll('.q-dot').forEach(dot => {
       dot.addEventListener('click', () => {
-        clearTimeout(autoplay);
-        setQuote(parseInt(dot.dataset.i, 10), true, scheduleNextQuote);
+        setQuote(parseInt(dot.dataset.i, 10), true);
       });
     });
   }
 
-  function setQuote(i, animate = true, afterReady = null) {
+  function setQuote(i, animate = true) {
     if (!QUOTES.length) return;
+    cancelQuoteTimer();
     current = ((i % QUOTES.length) + QUOTES.length) % QUOTES.length;
     const q = QUOTES[current];
 
@@ -1385,8 +1411,7 @@ function renderHomeQuotes() {
       if (nameEl) nameEl.textContent = q.driver;
       if (teamEl) teamEl.textContent = q.team;
       renderDots();
-      restartProgress();
-      if (typeof afterReady === 'function') afterReady();
+      startQuoteProgressTimer();
     };
 
     if (animate) {
@@ -1405,20 +1430,7 @@ function renderHomeQuotes() {
     }
   }
 
-  setQuote(0, false, scheduleNextQuote);
-
-  const section = document.getElementById('quote-section');
-  if (section) {
-    section.addEventListener('mouseenter', () => {
-      quotePaused = true;
-      clearTimeout(autoplay);
-    });
-    section.addEventListener('mouseleave', () => {
-      quotePaused = false;
-      restartProgress();
-      scheduleNextQuote();
-    });
-  }
+  setQuote(0, false);
 }
 
 /* ══════════════════════════════════════
