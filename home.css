@@ -8472,3 +8472,118 @@ body .nl-trust {
   .h33e2-race-lab .lab-card{min-height:300px !important;}
   .h33e2-race-lab .paddox-lab-live{min-width:0 !important;width:100% !important;}
 }
+
+
+/* ============================================================
+   Phase H3.3E.3 — Race Lab Three-Feature Premium Lock
+   ============================================================ */
+.h33e3-race-lab{
+  padding:88px 0 96px !important;
+  background:
+    radial-gradient(circle at 14% 14%, rgba(232,0,45,.18), transparent 34%),
+    radial-gradient(circle at 86% 68%, rgba(255,255,255,.05), transparent 32%),
+    linear-gradient(180deg,#070707 0%,#0b0b0b 58%,#070707 100%) !important;
+}
+.h33e3-race-lab .paddox-lab-shell{
+  padding:34px !important;
+  border-radius:30px !important;
+  background:
+    linear-gradient(145deg,rgba(20,20,20,.82),rgba(7,7,7,.94)),
+    radial-gradient(circle at top left,rgba(232,0,45,.14),transparent 42%) !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  box-shadow:0 34px 90px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.h33e3-race-lab .paddox-lab-sub{max-width:610px !important;color:#aaa !important;}
+.h33e3-race-lab .h33e3-lab-grid{
+  display:grid !important;
+  grid-template-columns:1.05fr 1.15fr 1.05fr !important;
+  gap:18px !important;
+  align-items:stretch !important;
+}
+.h33e3-race-lab .h33e3-feature-card{
+  min-height:360px !important;
+  padding:24px !important;
+  border-radius:26px !important;
+  border:1px solid rgba(255,255,255,.11) !important;
+  background:
+    linear-gradient(155deg,rgba(22,22,22,.94),rgba(8,8,8,.96)),
+    radial-gradient(circle at 20% 0%,rgba(232,0,45,.12),transparent 40%) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 18px 50px rgba(0,0,0,.34) !important;
+}
+.h33e3-race-lab .h33e3-feature-card:hover{
+  transform:translateY(-8px) !important;
+  border-color:rgba(232,0,45,.36) !important;
+  box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(232,0,45,.16), inset 0 1px 0 rgba(255,255,255,.09) !important;
+}
+.h33e3-race-lab .h33e3-vault-card{
+  background:
+    linear-gradient(155deg,rgba(24,24,24,.98),rgba(9,9,9,.98)),
+    radial-gradient(circle at 50% 0%,rgba(232,0,45,.18),transparent 46%) !important;
+}
+.h33e3-race-lab .lab-card-kicker{color:#ff6b7d !important;}
+.h33e3-race-lab .lab-card h3{font-size:1.78rem !important;letter-spacing:1.4px !important;}
+.h33e3-race-lab .lab-card p{font-size:.84rem !important;color:#a9a9a9 !important;}
+.h33e3-race-lab .lab-card-art{
+  min-height:88px !important;
+  border-radius:20px !important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018)),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 16px) !important;
+}
+.h33e3-race-lab .prediction-picks button,
+.h33e3-race-lab .passport-claim-btn{
+  min-height:39px !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+}
+.h33e3-race-lab .prediction-picks button:hover,
+.h33e3-race-lab .prediction-picks button.on,
+.h33e3-race-lab .passport-claim-btn:hover{
+  background:linear-gradient(135deg,rgba(232,0,45,.28),rgba(255,255,255,.05)) !important;
+  border-color:rgba(232,0,45,.72) !important;
+  color:#fff !important;
+  box-shadow:0 12px 28px rgba(232,0,45,.14) !important;
+}
+.h33e3-race-lab .h33e3-vault-mini{
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:12px !important;
+  margin-top:auto !important;
+}
+.h33e3-race-lab .vault-badge{
+  min-height:96px !important;
+  border-radius:20px !important;
+  background:
+    radial-gradient(circle at 50% 26%,rgba(255,255,255,.10),transparent 36%),
+    linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.25)) !important;
+}
+.h33e3-race-lab .vault-badge::after{
+  content:'';
+  position:absolute;
+  inset:13px;
+  border-radius:50%;
+  border:1px dashed rgba(255,255,255,.13);
+  pointer-events:none;
+}
+.h33e3-race-lab .vault-badge.unlocked::after{border-color:rgba(255,255,255,.38);}
+.h33e3-race-lab .vault-badge b{font-size:1.9rem !important;}
+.h33e3-race-lab .vault-badge small{font-size:.58rem !important;}
+.h33e3-race-lab .h33e3-passport-stamp{
+  min-height:112px !important;
+  border-radius:24px !important;
+  transform:rotate(-2deg) !important;
+  box-shadow:0 18px 40px rgba(0,0,0,.32), inset 0 0 0 1px rgba(232,0,45,.20) !important;
+}
+.h33e3-race-lab .passport-actions{align-items:center !important;gap:12px !important;}
+.h33e3-race-lab .passport-link{color:#fff !important;opacity:.72;transition:opacity .25s ease,transform .25s ease;}
+.h33e3-race-lab .passport-link:hover{opacity:1;transform:translateX(3px);}
+@media(max-width:1050px){
+  .h33e3-race-lab .h33e3-lab-grid{grid-template-columns:1fr !important;}
+  .h33e3-race-lab .h33e3-feature-card{min-height:310px !important;}
+}
+@media(max-width:620px){
+  .h33e3-race-lab{padding:64px 0 70px !important;}
+  .h33e3-race-lab .paddox-lab-shell{padding:22px 16px !important;border-radius:22px !important;}
+  .h33e3-race-lab .h33e3-vault-mini{grid-template-columns:1fr 1fr 1fr !important;gap:8px !important;}
+  .h33e3-race-lab .vault-badge{min-height:82px !important;border-radius:16px !important;}
+}

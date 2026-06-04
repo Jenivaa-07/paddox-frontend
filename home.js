@@ -3746,18 +3746,12 @@ setInterval(() => {
 
 
 /* ============================================================
-   Phase H3.3E.1 — PADDOX Race Lab interactions
-   Replaces the old newsletter with prediction, badge vault,
-   mood match and race passport micro-features.
+   Phase H3.3E.3 — PADDOX Race Lab three-feature lock
+   Keeps Fantasy Race Prediction, Badge Vault and My Race Passport.
+   Driver Mood Match removed from the brand flow.
    ============================================================ */
 (function initPaddoxRaceLab(){
   const STORE_KEY = 'paddox_race_lab_v1';
-  const moodCopy = {
-    strategist: 'Strategist Mode unlocked — calm, patient, and ready to win with timing.',
-    charger: 'Charger Mode unlocked — aggressive starts, late braking, full-send energy.',
-    ice: 'Ice Mode unlocked — composed under pressure with clean race control.',
-    comeback: 'Comeback Mode unlocked — built for recovery drives and last-lap drama.'
-  };
 
   function readState(){
     try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}; }
@@ -3781,10 +3775,11 @@ setInterval(() => {
     container?.querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset[attr] === value));
   }
   function updateBadges(state){
+    const stamps = Array.isArray(state.stamps) ? state.stamps : [];
     const flags = {
       prediction: !!state.prediction,
-      mood: !!state.mood,
-      passport: Array.isArray(state.stamps) && state.stamps.length > 0
+      passport: stamps.length > 0,
+      season: stamps.length >= 24
     };
     let count = 0;
     document.querySelectorAll('.vault-badge').forEach(badge => {
@@ -3793,7 +3788,10 @@ setInterval(() => {
       if (on) count += 1;
     });
     const status = document.getElementById('badge-status');
-    if (status) status.textContent = `${count} / 3 collectibles unlocked`;
+    if (status) {
+      const suffix = stamps.length >= 24 ? 'Season complete' : stamps.length > 0 ? `${stamps.length} race stamp${stamps.length === 1 ? '' : 's'} saved` : 'Start with a prediction or race stamp';
+      status.textContent = `${count} / 3 badges active · ${suffix}`;
+    }
   }
   function updatePassport(state){
     const race = nextRaceName();
@@ -3813,11 +3811,12 @@ setInterval(() => {
   function render(){
     const state = readState();
     const predictionStatus = document.getElementById('prediction-status');
-    if (predictionStatus) predictionStatus.textContent = state.prediction ? `${state.prediction} saved for ${state.predictionRace || nextRaceName()}.` : 'No prediction locked yet.';
+    if (predictionStatus) {
+      predictionStatus.textContent = state.prediction
+        ? `${state.prediction} saved for ${state.predictionRace || nextRaceName()}.`
+        : 'No prediction locked yet.';
+    }
     setActiveButtons(document.getElementById('prediction-picks'), state.prediction || '', 'pick');
-    setActiveButtons(document.getElementById('mood-picks'), state.mood || '', 'mood');
-    const moodResult = document.getElementById('mood-result');
-    if (moodResult) moodResult.textContent = state.mood ? moodCopy[state.mood] : 'Choose a mood chip to unlock your race identity.';
     updatePassport(state);
     updateBadges(state);
   }
@@ -3835,16 +3834,6 @@ setInterval(() => {
       writeState(state);
       render();
       if (typeof showToast === 'function') showToast('Race prediction saved');
-    });
-
-    document.getElementById('mood-picks')?.addEventListener('click', e => {
-      const btn = e.target.closest('button[data-mood]');
-      if (!btn) return;
-      const state = readState();
-      state.mood = btn.dataset.mood;
-      writeState(state);
-      render();
-      if (typeof showToast === 'function') showToast('Driver mood matched');
     });
 
     document.getElementById('passport-claim-btn')?.addEventListener('click', () => {
