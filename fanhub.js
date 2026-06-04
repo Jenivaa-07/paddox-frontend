@@ -257,15 +257,15 @@ function raceFlagHTML(race = {}, className = 'race-flag-img') {
   return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
 }
 
-/* ── Phase H3.3A.5: Latest-first Circuit SVG Calendar helpers ── */
+/* ── Phase H3.3A.10: Direct Formula Timer Circuit Image Calendar helpers ── */
 function paddoxRaceCircuit(race = {}) {
   const verified = window.PADDOX_CIRCUIT_MAP?.getCircuit?.(race);
   if (verified) return { ...verified, verified: true };
 
-  const label = safeText(race.circuit || race.name || race.raceName, 'Circuit SVG pending');
+  const label = safeText(race.circuit || race.name || race.raceName, 'Circuit image pending');
   return {
     id: 'pending',
-    file: '',
+    formulaTimerSlug: '',
     label,
     country: safeText(race.country || race.location, ''),
     location: safeText(race.location || race.locality, ''),
@@ -273,99 +273,52 @@ function paddoxRaceCircuit(race = {}) {
   };
 }
 
-function paddoxCircuitCandidates(circuit = {}) {
-  if (!circuit?.verified || !circuit?.file) return [];
-  return window.PADDOX_CIRCUIT_MAP?.candidatePaths?.(circuit) || [];
+function paddoxFormulaTimerImageURL(circuit = {}) {
+  const slug = safeText(circuit.formulaTimerSlug || circuit.id, '');
+  if (!slug || slug === 'pending') return '';
+  const encoded = encodeURIComponent(`/circuits/${slug}.png`);
+  return `https://formula-timer.com/_next/image?q=75&url=${encoded}&w=3840`;
 }
-
-window.paddoxCircuitImgFallback = function paddoxCircuitImgFallback(img) {
-  if (!img) return;
-  const list = String(img.dataset.sources || '').split('|').filter(Boolean);
-  const next = Number(img.dataset.idx || 0) + 1;
-
-  /* Strict fallback only through verified paths. No fuzzy/random track retries. */
-  if (list[next]) {
-    img.dataset.idx = String(next);
-    img.src = list[next];
-    return;
-  }
-
-  const shell = img.closest('.rc-track-art');
-  if (shell) shell.classList.add('is-missing-svg');
-  img.remove();
-};
 
 function paddoxCircuitPreviewHTML(race = {}, index = 0) {
   const circuit = paddoxRaceCircuit(race);
-  const candidates = paddoxCircuitCandidates(circuit);
   const safeLabel = safeText(circuit.label || race.circuit || race.name || 'Circuit').replace(/"/g, '&quot;');
   const safeId = safeText(circuit.id || 'pending');
+  const imageURL = paddoxFormulaTimerImageURL(circuit);
 
   return `
-    <div class="rc-track-art ${circuit.verified ? 'is-verified-svg is-loading-svg' : 'is-missing-svg'}"
+    <div class="rc-track-art rc-ft-card ${circuit.verified && imageURL ? 'has-formula-timer-image' : 'is-missing-svg'}"
       data-circuit="${safeId}"
-      data-svg-file="${safeText(circuit.file || '')}"
-      data-svg-alt="${safeLabel} SVG circuit map"
-      data-sources="${candidates.join('|')}"
+      data-ft-slug="${safeText(circuit.formulaTimerSlug || '')}"
       style="--rc-delay:${index * 70}ms">
       <div class="rc-track-bg"></div>
+      ${imageURL ? `<img class="rc-track-svg rc-track-ft-img" src="${imageURL}" alt="${safeLabel} circuit layout" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.rc-track-art')?.classList.add('is-missing-svg');this.remove();">` : ''}
       <div class="rc-track-fallback">
-        <span>${circuit.verified ? safeId.toUpperCase() : 'SVG PENDING'}</span>
-        <small>${circuit.verified ? 'Official local SVG asset' : 'No verified SVG mapping yet'}</small>
+        <span>IMAGE PENDING</span>
+        <small>Formula Timer image URL missing</small>
       </div>
       <div class="rc-track-glow"></div>
       <div class="rc-track-label" aria-hidden="true"></div>
     </div>`;
 }
 
-async function paddoxFirstExistingAsset(paths = []) {
-  for (const path of paths) {
-    try {
-      const res = await fetch(path, { method: 'HEAD', cache: 'force-cache' });
-      if (res.ok) return path;
-    } catch (err) {
-      /* Ignore and try the next verified candidate path. */
-    }
-  }
-  return '';
-}
-
-async function hydratePaddoxCircuitSVGs(root = document) {
-  const cards = [...root.querySelectorAll('.rc-track-art.is-verified-svg[data-sources]')];
-  await Promise.all(cards.map(async card => {
-    const paths = String(card.dataset.sources || '').split('|').filter(Boolean);
-    const src = await paddoxFirstExistingAsset(paths);
-
-    card.classList.remove('is-loading-svg');
-
-    if (!src) {
+function hydratePaddoxCircuitSVGs(root = document) {
+  /* Direct Formula Timer image mode: images load directly from src, no local asset probing. */
+  const cards = [...root.querySelectorAll('.rc-track-art.rc-ft-card')];
+  cards.forEach(card => {
+    const img = card.querySelector('.rc-track-ft-img');
+    if (!img) {
       card.classList.add('is-missing-svg');
-      const small = card.querySelector('.rc-track-fallback small');
-      if (small) small.textContent = 'Add latest/fallback SVG in assets/circuits';
       return;
     }
-
-    const img = document.createElement('img');
-    img.className = src.includes(card.dataset.svgFile || '') ? 'rc-track-svg rc-track-svg-latest' : 'rc-track-svg rc-track-svg-fallback';
-    if (!src.includes(card.dataset.svgFile || '')) {
-      /* Older same-circuit fallback is allowed silently; no visible fallback badge. */
-    }
-    img.src = src;
-    img.alt = card.dataset.svgAlt || 'Circuit SVG map';
-    img.loading = 'lazy';
-    img.decoding = 'async';
     img.addEventListener('load', () => {
       card.classList.add('has-svg');
       card.classList.remove('is-missing-svg');
     }, { once: true });
     img.addEventListener('error', () => {
       card.classList.add('is-missing-svg');
-      img.remove();
     }, { once: true });
-
-    const bg = card.querySelector('.rc-track-bg');
-    bg?.insertAdjacentElement('afterend', img);
-  }));
+  });
 }
 
 function bestString(value, keys = []) {

@@ -7523,3 +7523,69 @@ body.modal-open { overflow: hidden; }
 #sec-calendar .rc-track-fallback span{
   letter-spacing:3px;
 }
+
+
+/* ============================================================
+   Phase H3.3A.10 — Direct Formula Timer Circuit Image Mode
+   Uses remote Formula Timer circuit PNGs directly, no local assets.
+   ============================================================ */
+#sec-calendar .rc-track-art.rc-ft-card{
+  min-height:250px;
+  padding:22px 18px 18px!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(232,0,45,.18), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+    rgba(8,8,8,.72);
+}
+#sec-calendar .rc-track-ft-img{
+  position:relative;
+  z-index:3;
+  width:min(96%, 430px);
+  height:190px;
+  object-fit:contain;
+  object-position:center;
+  opacity:.96;
+  filter:
+    drop-shadow(0 0 10px rgba(255,255,255,.12))
+    drop-shadow(0 0 20px rgba(232,0,45,.42));
+  mix-blend-mode:screen;
+  transform:translateZ(0);
+}
+#sec-calendar .rc-track-art.has-formula-timer-image .rc-track-fallback,
+#sec-calendar .rc-track-art.has-svg .rc-track-fallback{
+  display:none!important;
+}
+#sec-calendar .rc-track-art.is-missing-svg .rc-track-fallback{
+  display:flex!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+#sec-calendar .rc-track-art.is-missing-svg .rc-track-fallback span{
+  color:var(--red);
+}
+#sec-calendar .rc-track-art.rc-ft-card .rc-track-label,
+#sec-calendar .rc-track-art.rc-ft-card .rc-track-label::after,
+#sec-calendar .rc-svg-source{
+  display:none!important;
+  content:none!important;
+}
+#sec-calendar .rc-track-art.rc-ft-card::after{
+  content:none!important;
+  display:none!important;
+}
+#sec-calendar .rc-svg-card{
+  border-radius:16px;
+}
+#sec-calendar .rcard.rc-svg-card:hover .rc-track-ft-img{
+  transform:scale(1.035);
+  filter:
+    drop-shadow(0 0 12px rgba(255,255,255,.18))
+    drop-shadow(0 0 28px rgba(232,0,45,.55));
+}
+@media(max-width:620px){
+  #sec-calendar .rc-track-art.rc-ft-card{min-height:220px;}
+  #sec-calendar .rc-track-ft-img{height:160px;width:98%;}
+}
