@@ -1308,13 +1308,28 @@ document.addEventListener('keydown', e => {
    DRIVER QUOTES — API backed
 ══════════════════════════════════════ */
 function renderHomeQuotes() {
+  const QUOTE_DURATION = 6500;
   let current = 0;
+  let autoplay = null;
   const textEl = document.getElementById('quote-text');
   const avEl   = document.getElementById('quote-avatar');
   const nameEl = document.getElementById('quote-name');
   const teamEl = document.getElementById('quote-team');
   const dotsEl = document.getElementById('quote-dots');
+  const card   = document.querySelector('.quote-inner');
   if (!textEl) return;
+
+  function restartProgress() {
+    const bar = document.getElementById('quote-progress-bar');
+    if (!bar) return;
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+    bar.offsetHeight; // force repaint so the line restarts cleanly
+    bar.style.transition = `width ${QUOTE_DURATION}ms linear`;
+    bar.style.width = '100%';
+  }
+
+  window.PADDOX_RESTART_QUOTE_PROGRESS = restartProgress;
 
   if (!QUOTES.length) {
     textEl.textContent = 'Fan quotes are unavailable right now.';
@@ -1322,31 +1337,38 @@ function renderHomeQuotes() {
     if (nameEl) nameEl.textContent = 'PADDOX';
     if (teamEl) teamEl.textContent = 'Quote Library';
     if (dotsEl) dotsEl.innerHTML = '';
+    restartProgress();
     return;
   }
 
   function renderDots() {
     if (!dotsEl) return;
     dotsEl.innerHTML = QUOTES.map((_, i) =>
-      `<div class="q-dot ${i === current ? 'on' : ''}" data-i="${i}"></div>`
+      `<div class="q-dot ${i === current ? 'on' : ''}" data-i="${i}" role="button" aria-label="Show quote ${i + 1}"></div>`
     ).join('');
     dotsEl.querySelectorAll('.q-dot').forEach(dot => {
-      dot.addEventListener('click', () => setQuote(parseInt(dot.dataset.i, 10)));
+      dot.addEventListener('click', () => {
+        setQuote(parseInt(dot.dataset.i, 10));
+        startAutoplay();
+      });
     });
   }
 
   function setQuote(i, animate = true) {
-    current = i;
-    const q = QUOTES[i];
+    if (!QUOTES.length) return;
+    current = ((i % QUOTES.length) + QUOTES.length) % QUOTES.length;
+    const q = QUOTES[current];
     const apply = () => {
       textEl.textContent = q.text;
       renderQuoteAvatar(avEl, q.av || '🏁', q.driver);
       if (nameEl) nameEl.textContent = q.driver;
       if (teamEl) teamEl.textContent = q.team;
       renderDots();
+      restartProgress();
     };
 
     if (animate) {
+      card?.classList.add('h33d-quote-changing');
       textEl.style.opacity = '0';
       textEl.style.transform = 'translateY(10px)';
       setTimeout(() => {
@@ -1354,19 +1376,27 @@ function renderHomeQuotes() {
         textEl.style.opacity = '1';
         textEl.style.transform = 'translateY(0)';
         textEl.style.transition = 'opacity .4s, transform .4s';
+        setTimeout(() => card?.classList.remove('h33d-quote-changing'), 520);
       }, 250);
     } else {
       apply();
     }
   }
 
+  function startAutoplay() {
+    clearInterval(autoplay);
+    autoplay = setInterval(() => setQuote(current + 1), QUOTE_DURATION);
+  }
+
   setQuote(0, false);
-  let autoplay = setInterval(() => setQuote((current + 1) % QUOTES.length), 6500);
+  startAutoplay();
+
   const section = document.getElementById('quote-section');
   if (section) {
     section.addEventListener('mouseenter', () => clearInterval(autoplay));
     section.addEventListener('mouseleave', () => {
-      autoplay = setInterval(() => setQuote((current + 1) % QUOTES.length), 6500);
+      restartProgress();
+      startAutoplay();
     });
   }
 }
@@ -2377,30 +2407,21 @@ function initH31RaceControl() {
 
 function initH31QuoteProgress() {
   const bar = document.getElementById('quote-progress-bar');
-  const card = document.querySelector('.quote-inner');
-  if (!bar || !card) return;
+  if (!bar) return;
 
-  function animateBar() {
-    if (typeof window.anime === 'function') {
-      window.anime.remove(bar);
-      window.anime({
-        targets: bar,
-        width: ['0%', '100%'],
-        duration: 5200,
-        easing: 'linear'
-      });
-    } else {
+  if (!window.PADDOX_RESTART_QUOTE_PROGRESS) {
+    window.PADDOX_RESTART_QUOTE_PROGRESS = function restartQuoteProgressFallback() {
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      bar.offsetHeight;
+      bar.style.transition = 'width 6500ms linear';
       bar.style.width = '100%';
-    }
+    };
   }
 
-  animateBar();
-  setInterval(() => {
-    card.classList.add('h3-quote-changing');
-    setTimeout(() => card.classList.remove('h3-quote-changing'), 520);
-    animateBar();
-  }, 5400);
+  window.PADDOX_RESTART_QUOTE_PROGRESS();
 }
+
 
 function initH31WordMotion() {
   if (typeof window.anime !== 'function') return;
@@ -3689,3 +3710,6 @@ setInterval(() => {
   window.addEventListener('load', boot);
   setTimeout(boot, 1000);
 })();
+
+
+/* Phase H3.3D.1: Quote carousel line timer is now synchronized with card auto-advance. */
