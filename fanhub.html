@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Digital Fan Hub</title>
-  <link rel="stylesheet" href="fanhub.css?v=H3_3A_11"/>
+  <link rel="stylesheet" href="fanhub.css?v=H3_3A_12"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -23,7 +23,6 @@
         <li><a href="index.html"   class="nav-link"><span class="nl-icon nav-home-icon" aria-hidden="true"></span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
         <li><a href="shop.html"    class="nav-link"><span class="nl-icon nav-shop-icon" aria-hidden="true"></span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
         <li><a href="fanhub.html"  class="nav-link active"><span class="nl-icon nav-fanhub-icon" aria-hidden="true"></span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
-        <li><a href="aistudio.html" class="nav-link"><span class="nl-icon nav-ai-icon" aria-hidden="true"></span><span class="nl-label">AI Studio</span><span class="nl-underline"></span></a></li>
         <li><a href="pitwall.html" class="nav-link"><span class="nl-icon nav-pitwall-icon" aria-hidden="true"></span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
         <li><a href="account.html" class="nav-link"><span class="nl-icon nav-account-icon" aria-hidden="true"></span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
       </ul>
@@ -42,7 +41,6 @@
       <a href="index.html"   class="mob-link">Home</a>
       <a href="shop.html"    class="mob-link">Shop</a>
       <a href="fanhub.html"  class="mob-link active">Fan Hub</a>
-      <a href="aistudio.html" class="mob-link"><span class="mob-icon nav-ai-icon" aria-hidden="true"></span>AI Studio</a>
       <a href="pitwall.html" class="mob-link">Pit Wall</a>
       <a href="account.html" class="mob-link">Account</a>
     </div>
@@ -69,7 +67,6 @@
         <span class="hero-chip"><span class="fh-chip-icon fh-ico-drivers" aria-hidden="true"></span> Driver Stats</span>
         <span class="hero-chip"><span class="fh-chip-icon fh-ico-calendar" aria-hidden="true"></span> Calendar</span>
         <span class="hero-chip"><span class="fh-chip-icon fh-ico-community" aria-hidden="true"></span> Community</span>
-        <button class="hero-chip ai-studio-hero-chip" type="button" onclick="activateHubTab('ai-studio', true)"><span class="fh-chip-icon fh-ico-ai-studio" aria-hidden="true"></span> AI Studio</button>
         <a class="hero-chip" href="pitwall.html"><span class="fh-chip-icon fh-ico-pitwall" aria-hidden="true"></span> Pit Wall Live</a>
       </div>
     </div>
@@ -82,7 +79,6 @@
       <button class="hub-tab" data-tab="drivers"><span class="fh-tab-icon fh-ico-drivers" aria-hidden="true"></span> Driver Stats</button>
       <button class="hub-tab" data-tab="calendar"><span class="fh-tab-icon fh-ico-calendar" aria-hidden="true"></span> Race Calendar</button>
       <button class="hub-tab" data-tab="quotes"><span class="fh-tab-icon fh-ico-quotes" aria-hidden="true"></span> Quotes</button>
-      <button class="hub-tab" data-tab="ai-studio"><span class="fh-tab-icon fh-ico-ai-studio" aria-hidden="true"></span> AI Studio</button>
       <button class="hub-tab" data-tab="community"><span class="fh-tab-icon fh-ico-community" aria-hidden="true"></span> Community</button>
     </div>
   </div>
@@ -188,163 +184,7 @@
     </section>
 
 
-    <!-- AI FAN STUDIO -->
-    <section class="hub-section" id="sec-ai-studio">
-      <div class="sec-header reveal-up ai-studio-header">
-        <div>
-          <div class="section-label"><span class="section-mark"></span> AI Creative Garage</div>
-          <h2 class="section-title">AI FAN <span class="accent">STUDIO</span></h2>
-          <p class="ai-studio-sub">
-            Build a fictional premium motorsport fan poster with your photo, driver inspiration, team color mood and PADDOX race-weekend energy.
-          </p>
-        </div>
-        <div class="ai-credit-wallet" id="ai-credit-wallet">
-          <span class="ai-credit-coin" aria-hidden="true"></span>
-          <div>
-            <span class="ai-wallet-label">PADDOX Credits</span>
-            <strong id="ai-credit-balance">--</strong>
-            <small class="ai-wallet-sub">Available balance · 15 credits/poster</small>
-          </div>
-        </div>
-      </div>
-
-      <div class="ai-studio-grid">
-        <div class="ai-studio-panel reveal-left">
-          <div class="ai-panel-head">
-            <div>
-              <div class="ai-kicker">Poster Builder</div>
-              <h3>Create your fan artwork</h3>
-            </div>
-            <span class="ai-cost-pill"><span class="ai-credit-coin mini" aria-hidden="true"></span> Standard · 15 credits</span>
-          </div>
-
-          <div class="ai-style-grid" id="ai-style-grid">
-            <button class="ai-style-card on" type="button" data-style="VIP Paddock" data-tone="Luxury paddock access, glass card, carbon shadows">
-              <span class="ai-style-icon ai-style-vip" aria-hidden="true"></span>
-              <strong>VIP Paddock</strong>
-              <small>Luxury access poster</small>
-            </button>
-            <button class="ai-style-card" type="button" data-style="Garage Hero" data-tone="Pit garage lights, race crew atmosphere, dramatic shadows">
-              <span class="ai-style-icon ai-style-garage" aria-hidden="true"></span>
-              <strong>Garage Hero</strong>
-              <small>Race garage mood</small>
-            </button>
-            <button class="ai-style-card" type="button" data-style="Podium Night" data-tone="Night podium, confetti lights, cinematic celebration">
-              <span class="ai-style-icon ai-style-podium" aria-hidden="true"></span>
-              <strong>Podium Night</strong>
-              <small>Victory scene</small>
-            </button>
-            <button class="ai-style-card" type="button" data-style="Helmet Vision" data-tone="Helmet reflection, speed lines, red graphite glow">
-              <span class="ai-style-icon ai-style-helmet" aria-hidden="true"></span>
-              <strong>Helmet Vision</strong>
-              <small>Helmet inspired artwork</small>
-            </button>
-          </div>
-
-          <div class="ai-form-grid">
-            <label class="ai-field">
-              <span>Fan Name</span>
-              <input id="ai-fan-name" type="text" maxlength="32" placeholder="Your display name"/>
-            </label>
-
-            <label class="ai-field">
-              <span>Driver Inspiration</span>
-              <input id="ai-driver-inspo" type="text" maxlength="40" placeholder="Favorite driver style"/>
-            </label>
-
-            <label class="ai-field">
-              <span>Team Color Mood</span>
-              <select id="ai-team-mood">
-                <option value="PADDOX Red">PADDOX Red</option>
-                <option value="Ferrari Red">Ferrari Red</option>
-                <option value="Red Bull Blue">Red Bull Blue</option>
-                <option value="Mercedes Silver">Mercedes Silver</option>
-                <option value="McLaren Papaya">McLaren Papaya</option>
-                <option value="Aston Green">Aston Green</option>
-                <option value="Cadillac Gold">Cadillac Gold</option>
-              </select>
-            </label>
-
-            <label class="ai-field">
-              <span>Output Format</span>
-              <select id="ai-output-format">
-                <option value="Portrait 4:5">Portrait 4:5</option>
-                <option value="Square 1:1">Square 1:1</option>
-                <option value="Wallpaper 16:9">Wallpaper 16:9</option>
-              </select>
-            </label>
-          </div>
-
-          <label class="ai-field full">
-            <span>Creative Direction</span>
-            <textarea id="ai-creative-prompt" maxlength="220" placeholder="Example: cinematic paddock poster, premium lights, race weekend atmosphere, clean PADDOX branding"></textarea>
-          </label>
-
-          <label class="ai-upload-box" for="ai-photo-input" id="ai-upload-box">
-            <input id="ai-photo-input" type="file" accept="image/*"/>
-            <span class="ai-upload-icon" aria-hidden="true"></span>
-            <strong>Upload fan photo</strong>
-            <small>Optional. Your image helps shape the preview and will be sent only when you generate.</small>
-          </label>
-
-          <div class="ai-actions-row">
-            <button class="ai-generate-btn" id="ai-generate-preview" type="button">
-              Generate AI Poster
-            </button>
-            <button class="ai-secondary-btn" id="ai-reset-studio" type="button">Reset</button>
-          </div>
-
-          <div class="ai-safe-note">
-            Fictional fan artwork only. PADDOX will generate motorsport-inspired posters, not real photos or official driver endorsements.
-          </div>
-        </div>
-
-        <div class="ai-preview-panel reveal-right">
-          <div class="ai-preview-toolbar">
-            <div>
-              <div class="ai-kicker">Live Composition</div>
-              <h3>Poster Preview</h3>
-            </div>
-            <span id="ai-preview-format">Portrait 4:5</span>
-          </div>
-
-          <div class="ai-poster-preview" id="ai-poster-preview">
-            <div class="ai-poster-bg"></div>
-            <img id="ai-generated-poster-img" class="ai-generated-poster-img" alt="Generated PADDOX AI poster"/>
-            <div class="ai-poster-brand">
-              <img src="assets/paddox-logo-icon-web.png?v=A4_10C_3" alt="PADDOX" loading="lazy"/>
-              <span>PADDOX AI STUDIO · FAN POSTER</span>
-            </div>
-            <div class="ai-photo-frame" id="ai-photo-frame">
-              <span class="ai-photo-placeholder">FAN PHOTO</span>
-              <img id="ai-photo-preview" alt="Fan upload preview"/>
-            </div>
-            <div class="ai-poster-copy">
-              <span id="ai-preview-style">VIP Paddock</span>
-              <h4 id="ai-preview-name">PADDOX FAN</h4>
-              <p id="ai-preview-line">Driver-inspired motorsport poster with PADDOX red energy.</p>
-            </div>
-            <div class="ai-poster-footer">
-              <span id="ai-poster-status">Fictional fan artwork · Preview</span>
-              <strong id="ai-preview-team">PADDOX Red</strong>
-            </div>
-          </div>
-
-          <div class="ai-preview-actions">
-            <button class="ai-secondary-btn disabled ai-locked-btn" id="ai-download-poster" type="button" disabled>Download Poster <small>Generate first</small></button>
-            <button class="ai-secondary-btn disabled ai-locked-btn" id="ai-share-poster" type="button" disabled>Share Poster <small>Generate first</small></button>
-          </div>
-
-          <div class="ai-next-phase-card">
-            <span class="ai-next-icon" aria-hidden="true"></span>
-            <div>
-              <strong>A4.11C Generation Engine</strong>
-              <p>Generates a PADDOX-safe poster, deducts 15 credits and saves the poster record. Real Gemini image mode can be switched on from Render env later.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- AI Studio removed from PADDOX brand roadmap in H3.3A.12 -->
 
     <!-- COMMUNITY -->
     <section class="hub-section" id="sec-community">
@@ -444,7 +284,7 @@
 <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="js/api.js"></script>
-<script src="data/paddoxCircuitMap.js?v=H3_3A_11"></script>
-<script src="fanhub.js?v=H3_3A_11"></script>
+<script src="data/paddoxCircuitMap.js?v=H3_3A_12"></script>
+<script src="fanhub.js?v=H3_3A_12"></script>
 </body>
 </html>

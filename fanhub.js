@@ -2,11 +2,23 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX A4.7B premium wallpaper checkout loaded');
+console.log('PADDOX H3.3A.12 Fan Hub calendar lock loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
 const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=A4_10C_3';
+
+/* Phase H3.3A.12 — PADDOX brand cleanup: AI Studio removed from Fan Hub UI. */
+function removePaddoxAiStudioUI() {
+  document.querySelectorAll('[href*="aistudio"], [data-tab="ai-studio"], .ai-studio-hero-chip, #sec-ai-studio').forEach(el => el.remove());
+  document.querySelectorAll('.hub-tab').forEach((tab, index) => {
+    if (!document.querySelector(`#sec-${tab.dataset.tab}`)) tab.remove();
+    else if (index === 0 && !document.querySelector('.hub-tab.on')) tab.classList.add('on');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', removePaddoxAiStudioUI);
+window.addEventListener('load', removePaddoxAiStudioUI);
 
 /* ============================================================
    REAL F1 2026 DATA FUNCTIONS
@@ -4041,5 +4053,6 @@ function initPaddoxAiStudio() {
   loadAiCreditBalance();
 }
 
-window.addEventListener('load', initPaddoxAiStudio);
+/* AI Studio removed from PADDOX brand — init disabled in H3.3A.12. */
+// window.addEventListener('load', initPaddoxAiStudio);
 

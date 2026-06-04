@@ -7580,3 +7580,23 @@ body.modal-open { overflow: hidden; }
     height:164px;
   }
 }
+
+
+/* ═════════ H3.3A.12 — Fan Hub AI Studio Removal + Calendar Lock ═════════ */
+a[href*="aistudio"],
+button[data-tab="ai-studio"],
+.ai-studio-hero-chip,
+#sec-ai-studio{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Keep Race Calendar as the locked visual hero of Fan Hub. */
+#sec-calendar .race-grid{
+  animation:calendarLockReveal .55s ease both;
+}
+@keyframes calendarLockReveal{
+  from{opacity:.92;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
