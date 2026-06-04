@@ -7600,3 +7600,45 @@ button[data-tab="ai-studio"],
   from{opacity:.92;transform:translateY(8px)}
   to{opacity:1;transform:none}
 }
+
+
+/* ═════════ H3.3A.13 — Race Calendar Technical Text Hide Lock ═════════
+   The Formula Timer direct image calendar is locked. Hide old SVG/source
+   fallback copy so users never see technical phrases like local assets,
+   verified circuit map, fallback layout, or image pending overlays. */
+#sec-calendar .rc-track-fallback,
+#sec-calendar .rc-track-fallback span,
+#sec-calendar .rc-track-fallback small,
+#sec-calendar .rc-track-label,
+#sec-calendar .rc-svg-source,
+#sec-calendar .rc-track-art::after{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  content:none!important;
+}
+#sec-calendar .rc-track-art.is-missing-svg .rc-track-fallback,
+#sec-calendar .rc-track-art.is-formula-timer-image.is-missing-svg .rc-track-fallback{
+  display:none!important;
+}
+#sec-calendar .rc-track-art{
+  color:transparent;
+}
+#sec-calendar .rc-track-art img,
+#sec-calendar .rc-track-bg,
+#sec-calendar .rc-track-glow{
+  color:initial;
+}
+#sec-calendar .rc-ft-image-art{
+  overflow:hidden;
+}
+#sec-calendar .rc-ft-image-art:not(.has-formula-timer-image)::before{
+  content:'';
+  position:absolute;
+  left:18%;
+  right:18%;
+  top:50%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(232,0,45,.45),transparent);
+  opacity:.28;
+}
