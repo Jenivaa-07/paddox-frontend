@@ -104,9 +104,13 @@
     const folders = [
       'assets/circuits',
       'assets/circuits/minimal/white-outline',
+      'assets/circuits/circuits/minimal/white-outline',
       'assets/circuits/minimal/white',
+      'assets/circuits/circuits/minimal/white',
       'assets/circuits/detailed/white-outline',
+      'assets/circuits/circuits/detailed/white-outline',
       'assets/circuits/detailed/white',
+      'assets/circuits/circuits/detailed/white',
       'assets/circuits/minimal/black-outline',
       'assets/circuits/detailed/black-outline'
     ];

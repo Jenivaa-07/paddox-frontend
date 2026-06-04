@@ -7360,3 +7360,15 @@ body.modal-open { overflow: hidden; }
   .rc-track-svg{width:92%;height:150px;}
   .rc-info-panel{padding:18px;}
 }
+
+
+/* Phase H3.3A.1 — clean SVG loader, prevents visible broken image state */
+.rc-track-art.svg-loading .rc-track-loader{opacity:1;visibility:visible}
+.rc-track-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:2;pointer-events:none}
+.rc-track-loader span{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.18);border-top-color:var(--red);box-shadow:0 0 20px rgba(232,0,45,.28);animation:rcSpin .8s linear infinite}
+@keyframes rcSpin{to{transform:rotate(360deg)}}
+.rc-track-art.svg-hydrated .rc-track-loader{display:none}
+.rc-track-art.is-missing-svg .rc-track-fallback{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.rc-track-art.is-missing-svg .rc-track-bg{opacity:.35}
+.rc-track-svg{opacity:0;animation:rcSvgReveal .45s ease forwards;position:relative;z-index:3}
+@keyframes rcSvgReveal{to{opacity:1}}
