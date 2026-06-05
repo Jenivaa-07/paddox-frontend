@@ -1,0 +1,1100 @@
+{
+  "albert_park": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Australian Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:15.096000",
+    "rawTelemetryPoints": 565,
+    "sectorTimes": {
+      "S1": 25.961,
+      "S2": 16.997,
+      "S3": 32.138
+    },
+    "circuitName": "Albert Park Circuit",
+    "raceName": "Australian Grand Prix",
+    "rawPointCount": 565,
+    "transformedPointCount": 565,
+    "svgPointsCount": 60,
+    "miniPointsCount": 29,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 33,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 35,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 44,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": false,
+      "flipY": false
+    }
+  },
+  "shanghai": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Chinese Grand Prix",
+    "sourceSession": "Q",
+    "driver": "PIA",
+    "lapTime": "0 days 00:01:30.641000",
+    "rawTelemetryPoints": 685,
+    "sectorTimes": {
+      "S1": 23.996,
+      "S2": 27.227,
+      "S3": 39.418
+    },
+    "circuitName": "Shanghai International Circuit",
+    "raceName": "Chinese Grand Prix",
+    "rawPointCount": 685,
+    "transformedPointCount": 685,
+    "svgPointsCount": 82,
+    "miniPointsCount": 42,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 43,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 54,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 41,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 45,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "suzuka": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Japanese Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:26.983000",
+    "rawTelemetryPoints": 654,
+    "sectorTimes": {
+      "S1": 30.387,
+      "S2": 39.355,
+      "S3": 17.241
+    },
+    "circuitName": "Suzuka Circuit",
+    "raceName": "Japanese Grand Prix",
+    "rawPointCount": 654,
+    "transformedPointCount": 654,
+    "svgPointsCount": 76,
+    "miniPointsCount": 37,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 50,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 55,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 29,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "bahrain": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Bahrain Grand Prix",
+    "sourceSession": "Q",
+    "driver": "PIA",
+    "lapTime": "0 days 00:01:29.841000",
+    "rawTelemetryPoints": 668,
+    "sectorTimes": {
+      "S1": 28.784,
+      "S2": 38.574,
+      "S3": 22.483
+    },
+    "circuitName": "Bahrain International Circuit",
+    "raceName": "Bahrain Grand Prix",
+    "rawPointCount": 668,
+    "transformedPointCount": 668,
+    "svgPointsCount": 74,
+    "miniPointsCount": 38,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 30,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 65,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 24,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "jeddah": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Saudi Arabian Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:27.294000",
+    "rawTelemetryPoints": 660,
+    "sectorTimes": {
+      "S1": 31.507,
+      "S2": 27.756,
+      "S3": 28.031
+    },
+    "circuitName": "Jeddah Corniche Circuit",
+    "raceName": "Saudi Arabian Grand Prix",
+    "rawPointCount": 660,
+    "transformedPointCount": 660,
+    "svgPointsCount": 66,
+    "miniPointsCount": 30,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 38,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 42,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 34,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 65,
+      "flipX": false,
+      "flipY": false
+    }
+  },
+  "miami": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Miami Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:26.204000",
+    "rawTelemetryPoints": 648,
+    "sectorTimes": {
+      "S1": 28.246,
+      "S2": 33.079,
+      "S3": 24.879
+    },
+    "circuitName": "Miami International Autodrome",
+    "raceName": "Miami Grand Prix",
+    "rawPointCount": 648,
+    "transformedPointCount": 648,
+    "svgPointsCount": 79,
+    "miniPointsCount": 39,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 52,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 40,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 24,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "imola": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Emilia Romagna Grand Prix",
+    "sourceSession": "Q",
+    "driver": "PIA",
+    "lapTime": "0 days 00:01:14.670000",
+    "rawTelemetryPoints": 549,
+    "sectorTimes": {
+      "S1": 23.677,
+      "S2": 25.747,
+      "S3": 25.246
+    },
+    "circuitName": "Autodromo Internazionale Enzo e Dino Ferrari",
+    "raceName": "Emilia Romagna Grand Prix",
+    "rawPointCount": 549,
+    "transformedPointCount": 549,
+    "svgPointsCount": 48,
+    "miniPointsCount": 27,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 26,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 30,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 36,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "monaco": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Monaco Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:09.954000",
+    "rawTelemetryPoints": 510,
+    "sectorTimes": {
+      "S1": 18.216,
+      "S2": 33.254,
+      "S3": 18.484
+    },
+    "circuitName": "Circuit de Monaco",
+    "raceName": "Monaco Grand Prix",
+    "rawPointCount": 510,
+    "transformedPointCount": 510,
+    "svgPointsCount": 77,
+    "miniPointsCount": 37,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 34,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 55,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 47,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 270,
+      "flipX": true,
+      "flipY": false
+    }
+  },
+  "gilles_villeneuve": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Canadian Grand Prix",
+    "sourceSession": "Q",
+    "driver": "RUS",
+    "lapTime": "0 days 00:01:10.899000",
+    "rawTelemetryPoints": 547,
+    "sectorTimes": {
+      "S1": 19.781,
+      "S2": 22.281,
+      "S3": 28.837
+    },
+    "circuitName": "Circuit Gilles Villeneuve",
+    "raceName": "Canadian Grand Prix",
+    "rawPointCount": 547,
+    "transformedPointCount": 547,
+    "svgPointsCount": 49,
+    "miniPointsCount": 23,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 42,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 30,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 19,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 270,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "barcelona_catalunya": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Spanish Grand Prix",
+    "sourceSession": "Q",
+    "driver": "PIA",
+    "lapTime": "0 days 00:01:11.546000",
+    "rawTelemetryPoints": 522,
+    "sectorTimes": {
+      "S1": 21.259,
+      "S2": 28.58,
+      "S3": 21.707
+    },
+    "circuitName": "Circuit de Barcelona-Catalunya",
+    "raceName": "Spanish Grand Prix",
+    "rawPointCount": 522,
+    "transformedPointCount": 522,
+    "svgPointsCount": 81,
+    "miniPointsCount": 40,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 28,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 49,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 53,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": true,
+      "flipY": false
+    }
+  },
+  "madrid_madring": {
+    "status": "skipped",
+    "reason": "No FastF1 telemetry exists yet for Madring.",
+    "circuitName": "Madring",
+    "raceName": "Spanish Grand Prix"
+  },
+  "red_bull_ring": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Austrian Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:03.971000",
+    "rawTelemetryPoints": 478,
+    "sectorTimes": {
+      "S1": 16.285,
+      "S2": 28.436,
+      "S3": 19.25
+    },
+    "circuitName": "Red Bull Ring",
+    "raceName": "Austrian Grand Prix",
+    "rawPointCount": 478,
+    "transformedPointCount": 478,
+    "svgPointsCount": 58,
+    "miniPointsCount": 30,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 14,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 44,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 32,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 315,
+      "flipX": true,
+      "flipY": false
+    }
+  },
+  "silverstone": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "British Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:24.892000",
+    "rawTelemetryPoints": 639,
+    "sectorTimes": {
+      "S1": 27.493,
+      "S2": 33.973,
+      "S3": 23.426
+    },
+    "circuitName": "Silverstone Circuit",
+    "raceName": "British Grand Prix",
+    "rawPointCount": 639,
+    "transformedPointCount": 639,
+    "svgPointsCount": 73,
+    "miniPointsCount": 38,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 40,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 53,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 33,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "spa": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Belgian Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:40.562000",
+    "rawTelemetryPoints": 758,
+    "sectorTimes": {
+      "S1": 30.005,
+      "S2": 42.579,
+      "S3": 27.978
+    },
+    "circuitName": "Circuit de Spa-Francorchamps",
+    "raceName": "Belgian Grand Prix",
+    "rawPointCount": 758,
+    "transformedPointCount": 758,
+    "svgPointsCount": 71,
+    "miniPointsCount": 41,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 23,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 68,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 35,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 315,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "hungaroring": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Hungarian Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:14.890000",
+    "rawTelemetryPoints": 558,
+    "sectorTimes": {
+      "S1": 27.443,
+      "S2": 26.396,
+      "S3": 21.051
+    },
+    "circuitName": "Hungaroring",
+    "raceName": "Hungarian Grand Prix",
+    "rawPointCount": 558,
+    "transformedPointCount": 558,
+    "svgPointsCount": 82,
+    "miniPointsCount": 39,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 37,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 52,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 47,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 315,
+      "flipX": true,
+      "flipY": false
+    }
+  },
+  "zandvoort": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Dutch Grand Prix",
+    "sourceSession": "Q",
+    "driver": "PIA",
+    "lapTime": "0 days 00:01:08.662000",
+    "rawTelemetryPoints": 528,
+    "sectorTimes": {
+      "S1": 23.367,
+      "S2": 24.476,
+      "S3": 20.819
+    },
+    "circuitName": "Circuit Zandvoort",
+    "raceName": "Dutch Grand Prix",
+    "rawPointCount": 528,
+    "transformedPointCount": 528,
+    "svgPointsCount": 87,
+    "miniPointsCount": 41,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 52,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 59,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 37,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": true,
+      "flipY": false
+    }
+  },
+  "monza": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Italian Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:18.792000",
+    "rawTelemetryPoints": 587,
+    "sectorTimes": {
+      "S1": 26.262,
+      "S2": 26.483,
+      "S3": 26.047
+    },
+    "circuitName": "Autodromo Nazionale Monza",
+    "raceName": "Italian Grand Prix",
+    "rawPointCount": 587,
+    "transformedPointCount": 587,
+    "svgPointsCount": 42,
+    "miniPointsCount": 21,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 23,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 29,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 28,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "baku": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Azerbaijan Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:41.117000",
+    "rawTelemetryPoints": 760,
+    "sectorTimes": {
+      "S1": 35.331,
+      "S2": 40.577,
+      "S3": 25.209
+    },
+    "circuitName": "Baku City Circuit",
+    "raceName": "Azerbaijan Grand Prix",
+    "rawPointCount": 760,
+    "transformedPointCount": 760,
+    "svgPointsCount": 47,
+    "miniPointsCount": 23,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 27,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 42,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 16,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": false
+    }
+  },
+  "marina_bay": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Singapore Grand Prix",
+    "sourceSession": "Q",
+    "driver": "RUS",
+    "lapTime": "0 days 00:01:29.158000",
+    "rawTelemetryPoints": 673,
+    "sectorTimes": {
+      "S1": 26.475,
+      "S2": 37.329,
+      "S3": 25.354
+    },
+    "circuitName": "Marina Bay Street Circuit",
+    "raceName": "Singapore Grand Prix",
+    "rawPointCount": 673,
+    "transformedPointCount": 673,
+    "svgPointsCount": 71,
+    "miniPointsCount": 30,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 37,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 52,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 35,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": false
+    }
+  },
+  "cota": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "United States Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:32.510000",
+    "rawTelemetryPoints": 702,
+    "sectorTimes": {
+      "S1": 24.914,
+      "S2": 37.41,
+      "S3": 30.186
+    },
+    "circuitName": "Circuit of The Americas",
+    "raceName": "United States Grand Prix",
+    "rawPointCount": 702,
+    "transformedPointCount": 702,
+    "svgPointsCount": 75,
+    "miniPointsCount": 36,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 37,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 38,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 61,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "mexico_city": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Mexico City Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:15.586000",
+    "rawTelemetryPoints": 554,
+    "sectorTimes": {
+      "S1": 26.916,
+      "S2": 29.114,
+      "S3": 19.556
+    },
+    "circuitName": "Autódromo Hermanos Rodríguez",
+    "raceName": "Mexico City Grand Prix",
+    "rawPointCount": 554,
+    "transformedPointCount": 554,
+    "svgPointsCount": 57,
+    "miniPointsCount": 27,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 21,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 41,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 41,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "interlagos": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "São Paulo Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:09.511000",
+    "rawTelemetryPoints": 546,
+    "sectorTimes": {
+      "S1": 18.036,
+      "S2": 35.534,
+      "S3": 15.941
+    },
+    "circuitName": "Autódromo José Carlos Pace",
+    "raceName": "São Paulo Grand Prix",
+    "rawPointCount": 546,
+    "transformedPointCount": 546,
+    "svgPointsCount": 84,
+    "miniPointsCount": 41,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 28,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 75,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 30,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 270,
+      "flipX": false,
+      "flipY": false
+    }
+  },
+  "las_vegas": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Las Vegas Grand Prix",
+    "sourceSession": "Q",
+    "driver": "NOR",
+    "lapTime": "0 days 00:01:47.934000",
+    "rawTelemetryPoints": 791,
+    "sectorTimes": {
+      "S1": 30.43,
+      "S2": 36.842,
+      "S3": 40.662
+    },
+    "circuitName": "Las Vegas Strip Circuit",
+    "raceName": "Las Vegas Grand Prix",
+    "rawPointCount": 791,
+    "transformedPointCount": 791,
+    "svgPointsCount": 59,
+    "miniPointsCount": 30,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 31,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 47,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 20,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "lusail": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Qatar Grand Prix",
+    "sourceSession": "Q",
+    "driver": "PIA",
+    "lapTime": "0 days 00:01:19.387000",
+    "rawTelemetryPoints": 609,
+    "sectorTimes": {
+      "S1": 29.209,
+      "S2": 26.919,
+      "S3": 23.259
+    },
+    "circuitName": "Lusail International Circuit",
+    "raceName": "Qatar Grand Prix",
+    "rawPointCount": 609,
+    "transformedPointCount": 609,
+    "svgPointsCount": 74,
+    "miniPointsCount": 37,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 38,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 56,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 36,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 270,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "yas_marina": {
+    "status": "ok",
+    "sourceYear": 2025,
+    "sourceEvent": "Abu Dhabi Grand Prix",
+    "sourceSession": "Q",
+    "driver": "VER",
+    "lapTime": "0 days 00:01:22.207000",
+    "rawTelemetryPoints": 616,
+    "sectorTimes": {
+      "S1": 16.858,
+      "S2": 35.71,
+      "S3": 29.639
+    },
+    "circuitName": "Yas Marina Circuit",
+    "raceName": "Abu Dhabi Grand Prix",
+    "rawPointCount": 616,
+    "transformedPointCount": 616,
+    "svgPointsCount": 64,
+    "miniPointsCount": 33,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 30,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 27,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 54,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "istanbul_park": {
+    "status": "ok",
+    "sourceYear": 2021,
+    "sourceEvent": "Turkish Grand Prix",
+    "sourceSession": "Q",
+    "driver": "HAM",
+    "lapTime": "0 days 00:01:22.868000",
+    "rawTelemetryPoints": 725,
+    "sectorTimes": {
+      "S1": 30.738,
+      "S2": 29.262,
+      "S3": 22.868
+    },
+    "circuitName": "Istanbul Park",
+    "raceName": "Turkish Grand Prix",
+    "rawPointCount": 725,
+    "transformedPointCount": 725,
+    "svgPointsCount": 66,
+    "miniPointsCount": 31,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 41,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 47,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 29,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 0,
+      "flipX": false,
+      "flipY": true
+    }
+  },
+  "portimao": {
+    "status": "ok",
+    "sourceYear": 2021,
+    "sourceEvent": "Portuguese Grand Prix",
+    "sourceSession": "Q",
+    "driver": "HAM",
+    "lapTime": "0 days 00:01:17.968000",
+    "rawTelemetryPoints": 680,
+    "sectorTimes": {
+      "S1": 22.613,
+      "S2": 29.798000000000002,
+      "S3": 25.557
+    },
+    "circuitName": "Algarve International Circuit",
+    "raceName": "Portuguese Grand Prix",
+    "rawPointCount": 680,
+    "transformedPointCount": 680,
+    "svgPointsCount": 77,
+    "miniPointsCount": 38,
+    "sectorPaths": [
+      {
+        "label": "S1",
+        "pointCount": 32,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S2",
+        "pointCount": 53,
+        "trueSectorBoundary": true
+      },
+      {
+        "label": "S3",
+        "pointCount": 53,
+        "trueSectorBoundary": true
+      }
+    ],
+    "transform": {
+      "rotate": 90,
+      "flipX": false,
+      "flipY": true
+    }
+  }
+}
