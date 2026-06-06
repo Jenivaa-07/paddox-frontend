@@ -8883,3 +8883,8 @@ body .nl-trust {
 .h34c-track-missing{height:100%;display:grid;place-items:center;text-align:center;color:rgba(255,255,255,.55);font-family:var(--font-condensed);letter-spacing:.14em;text-transform:uppercase;}
 @media(max-width:980px){.h34c-fastf1-panel{grid-template-columns:1fr}.h34c-fastf1-stage{min-height:360px}.h34c-fastf1-frame{height:300px}.h34c-sector-stack{grid-template-columns:1fr}}
 @media(max-width:620px){#race-control-section.h34c-fastf1-track{padding:72px 0!important}.h34c-fastf1-panel{border-radius:24px}.h34c-fastf1-stage{padding:18px;min-height:300px}.h34c-fastf1-frame{height:245px;padding:12px;border-radius:20px}.h34c-track-meta{left:18px;right:18px;bottom:16px}.h34c-fastf1-info{padding:30px 22px}.h34c-fastf1-info h3{font-size:3.1rem}.h34c-track-cta{width:100%;}.pdx-fastf1-label{font-size:8px}}
+
+
+/* H3.4C.4 — strict verified circuit mapping pending state */
+.h34c-track-missing small{display:block;margin-top:6px;font-size:.58rem;letter-spacing:.12em;color:rgba(255,255,255,.32);}
+.rc-track-art.is-missing-svg,.h34c-fastf1-art.is-missing-svg{background:radial-gradient(circle at 50% 45%,rgba(232,0,45,.08),transparent 54%),linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));}

@@ -8,7 +8,7 @@ console.log('PADDOX H3.4C.2 Fan Hub circuit identity matcher loaded');
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
 const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=A4_10C_3';
 
-/* Phase H3.3A.12 — PADDOX brand cleanup: AI Studio removed from Fan Hub UI. */
+/* Phase H3.4C.4 — PADDOX brand cleanup: AI Studio removed from Fan Hub UI. */
 function removePaddoxAiStudioUI() {
   document.querySelectorAll('[href*="aistudio"], [data-tab="ai-studio"], .ai-studio-hero-chip, #sec-ai-studio').forEach(el => el.remove());
   document.querySelectorAll('.hub-tab').forEach((tab, index) => {
@@ -105,7 +105,7 @@ async function loadRealCalendar() {
       const d = Math.max(0, Math.floor(diff / 864e5));
       const h = Math.max(0, Math.floor((diff % 864e5) / 36e5));
       const m = Math.max(0, Math.floor((diff % 36e5) / 6e4));
-      const circuit = paddoxRaceCircuit(r);
+      const circuit = paddoxRaceCircuit(r, i);
 
       return `
         <article class="rcard rc-svg-card ${isNext ? 'is-next-race' : ''}" data-circuit="${safeText(circuit.id)}" style="animation-delay:${i * 0.05}s">
@@ -271,8 +271,9 @@ function raceFlagHTML(race = {}, className = 'race-flag-img') {
 
 
 /* ============================================================
-   PADDOX H3.4C.1 — FastF1 Circuit Map Helpers
-   Uses frontend/data/paddoxTracks.generated.js from Python/FastF1.
+   PADDOX H3.4C.4 — Strict Verified FastF1 Circuit Map Helpers
+   Rule: never guess by country. Exact race/circuit identity first.
+   Madrid/Madring is marked pending because no historical FastF1 telemetry exists yet.
    ============================================================ */
 function pdxH34cText(value, fallback = '') {
   const text = String(value ?? '').trim();
@@ -286,97 +287,84 @@ function pdxH34cEsc(value = '') {
 function pdxH34cClean(value = '') {
   return String(value || '').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, ' and ')
     .replace(/grand prix|\bgp\b|circuit|autodromo|autodrome|international|street|de |of the|the/g, ' ')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
-const PDX_H34C_ROUND_TRACKS = {
-  // Fallback only. Name/circuit matching must run first because F1 calendars can change by season.
-  // Current PADDOX calendar order seen in Fan Hub: Australia, China, Japan, Miami, Canada, Monaco...
+function pdxH34cTracks() { return window.paddoxTracks || window.PADDOX_TRACKS || {}; }
+function pdxH34cTrackByKey(key = '') {
+  const tracks = pdxH34cTracks();
+  return tracks[key] || null;
+}
+const PDX_H34C_VERIFIED_2026_ROUND_TRACKS = {
   1:'albert_park', 2:'shanghai', 3:'suzuka', 4:'miami', 5:'gilles_villeneuve', 6:'monaco',
   7:'barcelona_catalunya', 8:'red_bull_ring', 9:'silverstone', 10:'spa', 11:'hungaroring',
   12:'zandvoort', 13:'monza', 14:'madrid_madring', 15:'baku', 16:'marina_bay',
   17:'cota', 18:'mexico_city', 19:'interlagos', 20:'las_vegas', 21:'lusail', 22:'yas_marina'
 };
-const PDX_H34C_NAME_TRACKS = [
-  ['las_vegas', ['las vegas','vegas']],
-  ['lusail', ['qatar','lusail','losail']],
-  ['yas_marina', ['abu dhabi','yas marina','uae','united arab emirates']],
-  ['mexico_city', ['mexico city','hermanos rodriguez','rodriguez']],
-  ['cota', ['united states grand prix','austin','circuit americas','cota']],
-  ['interlagos', ['brazil','brazilian','sao paulo','são paulo','interlagos','jose carlos pace']],
-  ['marina_bay', ['singapore','marina bay']],
-  ['baku', ['azerbaijan','baku']],
-  ['madrid_madring', ['madrid','madring']],
-  ['monza', ['italian grand prix','monza']],
-  ['zandvoort', ['dutch','netherlands','zandvoort']],
-  ['hungaroring', ['hungary','hungarian','hungaroring','budapest']],
-  ['spa', ['belgium','belgian','spa','francorchamps']],
-  ['silverstone', ['british','great britain','silverstone']],
-  ['red_bull_ring', ['austria','austrian','spielberg','red bull ring']],
-  ['barcelona_catalunya', ['barcelona','catalunya','catalonia','montmelo','spanish grand prix']],
-  ['gilles_villeneuve', ['canadian grand prix','canada','montreal','villeneuve','gilles']],
-  ['monaco', ['monaco','monte carlo']],
-  ['imola', ['emilia romagna','imola','enzo ferrari']],
-  ['miami', ['miami']],
-  ['jeddah', ['saudi','jeddah','corniche']],
-  ['bahrain', ['bahrain','sakhir']],
-  ['suzuka', ['japanese','japan','suzuka']],
-  ['shanghai', ['chinese','china','shanghai']],
-  ['albert_park', ['australian','australia','melbourne','albert park']]
+const PDX_H34C_STRICT_ALIAS_TRACKS = [
+  ['albert_park', ['australian albert park melbourne','australian melbourne','albert park','melbourne australia']],
+  ['shanghai', ['chinese shanghai','shanghai china','shanghai']],
+  ['suzuka', ['japanese suzuka','suzuka japan','suzuka']],
+  ['miami', ['miami international autodrome','miami united states','miami']],
+  ['gilles_villeneuve', ['canadian gilles villeneuve','circuit gilles villeneuve','montreal canada','canadian montreal','villeneuve']],
+  ['monaco', ['monaco monte carlo','circuit monaco','monaco']],
+  ['barcelona_catalunya', ['barcelona catalunya','barcelona catalunya spain','catalunya','montmelo','montmelo spain','barcelona grand prix']],
+  ['red_bull_ring', ['austrian red bull ring','red bull ring','spielberg austria','austrian spielberg']],
+  ['silverstone', ['british silverstone','silverstone great britain','silverstone united kingdom','silverstone']],
+  ['spa', ['belgian spa francorchamps','spa francorchamps','francorchamps belgium','spa belgium']],
+  ['hungaroring', ['hungarian hungaroring','hungaroring hungary','budapest hungary','hungaroring']],
+  ['zandvoort', ['dutch zandvoort','zandvoort netherlands','zandvoort']],
+  ['monza', ['italian monza','autodromo nazionale monza','monza italy','monza']],
+  ['baku', ['azerbaijan baku','baku city','baku azerbaijan','baku']],
+  ['marina_bay', ['singapore marina bay','marina bay singapore','marina bay']],
+  ['cota', ['united states circuit americas','united states austin','circuit americas austin','cota','austin united states']],
+  ['mexico_city', ['mexico city hermanos rodriguez','autodromo hermanos rodriguez','hermanos rodriguez','mexico city mexico']],
+  ['interlagos', ['brazilian interlagos','sao paulo interlagos','jose carlos pace','interlagos','sao paulo brazil']],
+  ['las_vegas', ['las vegas strip','las vegas united states','vegas strip','las vegas']],
+  ['lusail', ['qatar lusail','qatar losail','lusail qatar','losail qatar','lusail']],
+  ['yas_marina', ['abu dhabi yas marina','yas marina abu dhabi','yas marina united arab emirates','yas marina']]
 ];
-function pdxH34cTracks() { return window.paddoxTracks || window.PADDOX_TRACKS || {}; }
-function pdxH34cTrackByKey(key = '') {
-  const tracks = pdxH34cTracks();
-  if (tracks[key]) return tracks[key];
-  if (key === 'madrid_madring') return null;
-  return null;
+function pdxH34cContainsAllWords(haystack, alias) {
+  const hay = pdxH34cClean(haystack);
+  const words = pdxH34cClean(alias).split(' ').filter(Boolean);
+  if (!hay || !words.length) return false;
+  return words.every(word => hay.includes(word));
 }
-function pdxH34cMatchTrack(source = {}) {
-  const tracks = pdxH34cTracks();
-  const raceHay = pdxH34cClean([
-    source?.name, source?.raceName, source?.grandPrix, source?.eventName,
+function pdxH34cSourceText(source = {}) {
+  return [source?.name, source?.raceName, source?.grandPrix, source?.eventName,
     source?.circuit, source?.circuitName, source?.Circuit?.circuitName,
     source?.location, source?.locality, source?.Circuit?.Location?.locality,
-    source?.country, source?.Circuit?.Location?.country
-  ].filter(Boolean).join(' '));
-
-  // Exact race/circuit name wins first. Round numbers are unstable across seasons.
-  for (const [key, aliases] of PDX_H34C_NAME_TRACKS) {
+    source?.country, source?.Circuit?.Location?.country].filter(Boolean).join(' ');
+}
+function pdxH34cIsMadrid(source = {}) {
+  const hay = pdxH34cClean(pdxH34cSourceText(source));
+  return hay.includes('madrid') || hay.includes('madring');
+}
+function pdxH34cMatchTrack(source = {}, index = -1) {
+  const tracks = pdxH34cTracks();
+  const sourceText = pdxH34cSourceText(source);
+  if (pdxH34cIsMadrid(source)) return null;
+  for (const [key, aliases] of PDX_H34C_STRICT_ALIAS_TRACKS) {
     if (!tracks[key]) continue;
-    if (aliases.some(alias => raceHay.includes(pdxH34cClean(alias)))) return tracks[key];
+    if (aliases.some(alias => pdxH34cContainsAllWords(sourceText, alias))) return tracks[key];
   }
-
-  // Then compare against generated FastF1 metadata.
-  const values = Object.values(tracks);
-  const metadataMatch = values.find(track => {
-    const tokens = [track.id, track.circuitName, track.raceName, track.location, track.country]
-      .map(v => pdxH34cClean(v)).filter(Boolean);
+  const raceHay = pdxH34cClean(sourceText);
+  const metadataMatch = Object.values(tracks).find(track => {
+    const tokens = [track.id, track.circuitName, track.raceName, track.location]
+      .map(v => pdxH34cClean(v)).filter(v => v && v.length >= 5);
     return tokens.some(t => raceHay && (raceHay.includes(t) || t.includes(raceHay)));
   });
   if (metadataMatch) return metadataMatch;
-
-  // Round fallback only after name matching fails.
-  const roundValue = Number(source?.round || source?.raceRound || source?.Round || 0);
-  const roundKey = roundValue ? PDX_H34C_ROUND_TRACKS[roundValue] : '';
-  const roundTrack = pdxH34cTrackByKey(roundKey);
-  if (roundTrack) return roundTrack;
-
-  const countryHay = pdxH34cClean([source?.country, source?.Circuit?.Location?.country].filter(Boolean).join(' '));
-  const safeCountryMap = {
-    australia:'albert_park', china:'shanghai', japan:'suzuka', bahrain:'bahrain',
-    saudi:'jeddah', monaco:'monaco', canada:'gilles_villeneuve', austria:'red_bull_ring',
-    belgium:'spa', hungary:'hungaroring', netherlands:'zandvoort', azerbaijan:'baku',
-    singapore:'marina_bay', mexico:'mexico_city', brazil:'interlagos', qatar:'lusail'
-  };
-  for (const [country, key] of Object.entries(safeCountryMap)) {
-    if (countryHay.includes(country) && tracks[key]) return tracks[key];
-  }
-
-  return tracks.monaco || values[0] || null;
+  const roundValue = Number(source?.round || source?.raceRound || source?.Round || 0) || (index >= 0 ? index + 1 : 0);
+  const key = roundValue ? PDX_H34C_VERIFIED_2026_ROUND_TRACKS[roundValue] : '';
+  if (key === 'madrid_madring') return null;
+  if (key && tracks[key]) return tracks[key];
+  return null;
 }
 function pdxH34cSectorSVG(track, mode = 'mini') {
-  if (!track) return '<div class="h34c-track-missing">Track map pending</div>';
+  if (!track) return '<div class="h34c-track-missing">Madring map pending<br><small>No FastF1 telemetry yet</small></div>';
   const viewBox = pdxH34cEsc(track.viewBox || '0 0 300 180');
   const basePath = pdxH34cEsc(mode === 'mini' ? (track.miniPath || track.detailedPath) : (track.detailedPath || track.miniPath));
   const motionPath = pdxH34cEsc(track.detailedPath || track.miniPath || '');
@@ -396,6 +384,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
   const sx = Number(sf.x || 0), sy = Number(sf.y || 0);
   const dotR = mode === 'large' ? 3.9 : 3.1;
   return `<svg class="pdx-fastf1-track-svg pdx-fastf1-${mode}" viewBox="${viewBox}" role="img" aria-label="${pdxH34cEsc(track.circuitName || track.raceName || 'Circuit map')}">
+    <title>${pdxH34cEsc(track.circuitName || track.raceName || track.id)}</title>
     <path class="pdx-fastf1-shadow" d="${basePath}"></path>
     <path class="pdx-fastf1-glow" d="${basePath}"></path>
     <path class="pdx-fastf1-base" d="${basePath}"></path>
@@ -407,9 +396,9 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
 }
 
 
-/* ── Phase H3.4C.1: FastF1 True Sector Circuit Maps ── */
-function paddoxRaceCircuit(race = {}) {
-  const track = pdxH34cMatchTrack(race);
+/* ── Phase H3.4C.4: FastF1 True Sector Circuit Maps ── */
+function paddoxRaceCircuit(race = {}, index = -1) {
+  const track = pdxH34cMatchTrack(race, index);
   if (!track) {
     const label = safeText(race.circuit || race.name || race.raceName, 'Circuit map pending');
     return { id:'pending', label, country:safeText(race.country || race.location, ''), verified:false, track:null };
@@ -426,7 +415,7 @@ function paddoxRaceCircuit(race = {}) {
 }
 function paddoxCircuitCandidates() { return []; }
 function paddoxCircuitPreviewHTML(race = {}, index = 0) {
-  const circuit = paddoxRaceCircuit(race);
+  const circuit = paddoxRaceCircuit(race, index);
   const track = circuit.track;
   const safeId = safeText(circuit.id || 'pending');
   const source = track?.sourceType || 'fastf1-telemetry';
@@ -1559,7 +1548,7 @@ function renderCalendar(){
   const next=new Date('2025-05-25T13:00:00Z'),now=new Date(),diff=next-now;
   const d=Math.max(0,Math.floor(diff/864e5)),h=Math.max(0,Math.floor((diff%864e5)/36e5)),m=Math.max(0,Math.floor((diff%36e5)/6e4));
   grid.innerHTML=RACES.map((r,i)=>{
-    const circuit = paddoxRaceCircuit(r);
+    const circuit = paddoxRaceCircuit(r, i);
     return `
     <article class="rcard rc-svg-card ${r.status==='next'?'is-next-race':''}" data-circuit="${safeText(circuit.id)}" style="animation-delay:${i*.05}s">
       <div class="rc-card-topline">
@@ -4143,6 +4132,6 @@ function initPaddoxAiStudio() {
   loadAiCreditBalance();
 }
 
-/* AI Studio removed from PADDOX brand — init disabled in H3.3A.12. */
+/* AI Studio removed from PADDOX brand — init disabled in H3.4C.4. */
 // window.addEventListener('load', initPaddoxAiStudio);
 
