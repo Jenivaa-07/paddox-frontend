@@ -3608,14 +3608,14 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     }
     return section;
   }
-  function sectorCards(track){
+  function premiumCircuitAccent(track){
     const sectors = Array.isArray(track?.sectorPaths) ? track.sectorPaths : [];
-    return sectors.map((s, index) => {
-      const label = pdxH34cEsc(s.label || `S${index + 1}`);
-      const cls = String(label).toLowerCase();
-      const points = Number(s.pointCount || 0);
-      return `<div class="h34c-sector ${cls}"><span>${label}</span><strong>${points || '—'} pts</strong></div>`;
-    }).join('') || '<div class="h34c-sector s1"><span>S1</span><strong>Syncing</strong></div><div class="h34c-sector s2"><span>S2</span><strong>Syncing</strong></div><div class="h34c-sector s3"><span>S3</span><strong>Syncing</strong></div>';
+    if (!sectors.length) return '';
+    return `<div class="h34d2-sector-legend" aria-label="Circuit sector legend">
+      <span><i style="background:#e10600"></i>Sector 1</span>
+      <span><i style="background:#00d2ff"></i>Sector 2</span>
+      <span><i style="background:#ffd400"></i>Sector 3</span>
+    </div>`;
   }
   function render(){
     if (window.__PADDOX_H32C_RAF) { cancelAnimationFrame(window.__PADDOX_H32C_RAF); window.__PADDOX_H32C_RAF = null; }
@@ -3627,45 +3627,42 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     const location = [race.location || race.locality || track?.location, race.country || track?.country].filter(Boolean).join(' · ') || circuitLabel;
     const round = pdxH34cText(race.round, '—');
     const season = pdxH34cText(race.season, new Date().getFullYear());
-    section.className = 'race-control-section section h34c-fastf1-track';
+    section.className = 'race-control-section section h34c-fastf1-track h34d2-track-polish';
     section.innerHTML = `
       <div class="container">
-        <div class="section-head race-control-head">
+        <div class="section-head race-control-head h34d2-head">
           <div class="reveal-up in-view">
             <div class="section-label">LIVE RACE CONTROL</div>
             <h2 class="section-title">TRACK <span class="accent">MODE</span></h2>
           </div>
-          <p class="race-control-sub reveal-up in-view">Python/FastF1 true-sector circuit map synced with the live next-race countdown.</p>
+          <p class="race-control-sub reveal-up in-view">Premium circuit view synced with the next-race countdown.</p>
         </div>
-        <div class="h34c-fastf1-panel liquid-sweep">
-          <div class="h34c-fastf1-stage">
-            <div class="h34c-fastf1-frame" id="h34c-fastf1-frame">
+        <div class="h34c-fastf1-panel h34d2-panel liquid-sweep">
+          <div class="h34c-fastf1-stage h34d2-stage">
+            <div class="h34c-fastf1-frame h34d2-frame" id="h34c-fastf1-frame">
               ${pdxH34cSectorSVG(track, 'large')}
-            </div>
-            <div class="h34c-track-meta">
-              <span class="h34c-track-pill"><strong>Source</strong> FastF1 Telemetry</span>
-              <span class="h34c-track-pill"><strong>Map</strong> True Sector Path</span>
+              ${premiumCircuitAccent(track)}
             </div>
           </div>
-          <div class="h34c-fastf1-info">
-            <div class="h34c-kicker">FASTF1 TRUE SECTOR MODE</div>
+          <div class="h34c-fastf1-info h34d2-info">
+            <div class="h34c-kicker h34d2-kicker">NEXT CIRCUIT</div>
             <h3 id="rc-race-name">${splitRaceName(raceName)}</h3>
             <p id="rc-race-meta">${pdxH34cEsc(circuitLabel)} · ${pdxH34cEsc(location)}</p>
-            <div class="h34c-chip-row">
+            <div class="h34d2-countdown-card">
+              <span>Race starts in</span>
+              <strong id="h34c-track-countdown">${pdxH34cEsc(countdownText(race))}</strong>
+            </div>
+            <div class="h34c-chip-row h34d2-chip-row">
               <span class="h34c-chip">Round ${pdxH34cEsc(round)}</span>
               <span class="h34c-chip">Season ${pdxH34cEsc(season)}</span>
-              <span class="h34c-chip">Animated Path</span>
+              <span class="h34c-chip">Live Countdown</span>
             </div>
-            <div class="h34c-sector-stack">${sectorCards(track)}</div>
-            <div class="h34c-sync-card">
-              <div class="h34c-sync-top"><span>Next race pulse</span><strong id="h34c-track-countdown">${pdxH34cEsc(countdownText(race))}</strong></div>
-            </div>
-            <div class="h33b-data-grid">
+            <div class="h33b-data-grid h34d2-data-grid">
               <div class="h33b-data-row"><span>Circuit</span><strong>${pdxH34cEsc(circuitLabel)}</strong></div>
               <div class="h33b-data-row"><span>Date</span><strong>${pdxH34cEsc(formatDate(race))}</strong></div>
-              <div class="h33b-data-row"><span>Status</span><strong id="rc-status">FastF1 Map Synced</strong></div>
+              <div class="h33b-data-row"><span>Location</span><strong>${pdxH34cEsc(location)}</strong></div>
             </div>
-            <a href="fanhub.html" class="h34c-track-cta">View Race Calendar →</a>
+            <a href="fanhub.html" class="h34c-track-cta h34d2-track-cta">View Race Calendar →</a>
           </div>
         </div>
       </div>`;

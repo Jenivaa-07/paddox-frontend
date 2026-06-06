@@ -8888,3 +8888,160 @@ body .nl-trust {
 /* H3.4C.4 — strict verified circuit mapping pending state */
 .h34c-track-missing small{display:block;margin-top:6px;font-size:.58rem;letter-spacing:.12em;color:rgba(255,255,255,.32);}
 .rc-track-art.is-missing-svg,.h34c-fastf1-art.is-missing-svg{background:radial-gradient(circle at 50% 45%,rgba(232,0,45,.08),transparent 54%),linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));}
+
+/* ============================================================
+   PADDOX H3.4D.2 — Track Mode Premium Clean Polish
+   Clean visual upgrade only: no debug labels, no technical cards.
+   ============================================================ */
+#race-control-section.h34d2-track-polish{
+  padding:96px 0 92px!important;
+  background:
+    radial-gradient(circle at 14% 12%,rgba(232,0,45,.12),transparent 32%),
+    radial-gradient(circle at 82% 68%,rgba(0,210,255,.055),transparent 30%),
+    linear-gradient(180deg,#060606 0%,#020202 100%)!important;
+}
+.h34d2-head{align-items:flex-end!important;margin-bottom:34px!important;}
+.h34d2-head .race-control-sub{max-width:430px!important;color:rgba(255,255,255,.58)!important;line-height:1.6!important;}
+.h34d2-panel{
+  grid-template-columns:minmax(0,1.22fr) minmax(330px,.78fr)!important;
+  gap:0!important;
+  border-radius:30px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  background:
+    linear-gradient(110deg,rgba(255,255,255,.075),rgba(255,255,255,.024) 48%,rgba(225,6,0,.045)),
+    radial-gradient(circle at 22% 35%,rgba(225,6,0,.16),transparent 36%),
+    #070707!important;
+  box-shadow:0 36px 105px rgba(0,0,0,.66), inset 0 1px 0 rgba(255,255,255,.08)!important;
+  overflow:hidden!important;
+}
+.h34d2-panel::after{opacity:.28!important;}
+.h34d2-stage{
+  min-height:438px!important;
+  padding:34px!important;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(232,0,45,.13),transparent 54%),
+    linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.01))!important;
+}
+.h34d2-frame{
+  width:min(100%,760px)!important;
+  height:350px!important;
+  padding:28px 30px 44px!important;
+  border-radius:26px!important;
+  border:1px solid rgba(255,255,255,.105)!important;
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
+    radial-gradient(circle at 52% 52%,rgba(255,255,255,.07),transparent 36%),
+    rgba(0,0,0,.22)!important;
+  background-size:44px 44px,44px 44px,auto,auto!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 22px 58px rgba(0,0,0,.42)!important;
+  overflow:hidden!important;
+}
+.h34d2-frame::before{
+  content:'CIRCUIT PREVIEW'!important;
+  top:17px!important;
+  left:22px!important;
+  color:rgba(255,255,255,.42)!important;
+  letter-spacing:.22em!important;
+}
+.h34d2-frame::after{
+  content:'';
+  position:absolute;
+  inset:12px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.045);
+  pointer-events:none;
+}
+.h34d2-frame .pdx-fastf1-track-svg{transform:scale(1.08);transform-origin:center;}
+.h34d2-frame .pdx-fastf1-shadow{stroke-width:8.4;opacity:.68;}
+.h34d2-frame .pdx-fastf1-glow{stroke-width:10.5;opacity:.82;filter:blur(2.4px);}
+.h34d2-frame .pdx-fastf1-base{stroke:rgba(255,255,255,.13);stroke-width:4.1;}
+.h34d2-frame .pdx-fastf1-sector{stroke-width:3.35;}
+.h34d2-frame .pdx-fastf1-label{display:none!important;}
+.h34d2-sector-legend{
+  position:absolute;
+  left:24px;
+  right:24px;
+  bottom:17px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  z-index:4;
+}
+.h34d2-sector-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;
+  background:rgba(0,0,0,.36);
+  color:rgba(255,255,255,.62);
+  font-family:var(--font-condensed);
+  font-size:.6rem;
+  font-weight:800;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  backdrop-filter:blur(12px);
+}
+.h34d2-sector-legend i{width:7px;height:7px;border-radius:50%;box-shadow:0 0 10px currentColor;display:block;}
+.h34d2-info{
+  padding:44px 38px 42px!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.22));
+  border-left:1px solid rgba(255,255,255,.065);
+}
+.h34d2-kicker{color:#e10600!important;margin-bottom:14px!important;}
+.h34d2-info h3{font-size:clamp(3.15rem,4.6vw,4.8rem)!important;margin-bottom:14px!important;}
+.h34d2-info p{font-size:.92rem!important;color:rgba(255,255,255,.60)!important;margin-bottom:18px!important;}
+.h34d2-countdown-card{
+  margin:8px 0 16px;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid rgba(225,6,0,.18);
+  background:linear-gradient(135deg,rgba(225,6,0,.13),rgba(255,255,255,.035));
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.h34d2-countdown-card span{
+  color:rgba(255,255,255,.55);
+  font-family:var(--font-condensed);
+  font-size:.68rem;
+  font-weight:900;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.h34d2-countdown-card strong{
+  color:#fff;
+  font-family:var(--font-condensed);
+  font-size:1rem;
+  letter-spacing:.12em;
+  white-space:nowrap;
+}
+.h34d2-chip-row{margin:12px 0 16px!important;}
+.h34d2-chip-row .h34c-chip{background:rgba(255,255,255,.038)!important;color:rgba(255,255,255,.68)!important;}
+.h34d2-data-grid{margin-top:6px!important;}
+.h34d2-track-cta{margin-top:18px!important;}
+.h34d2-track-polish .h34c-track-meta,
+.h34d2-track-polish .h34c-sector-stack,
+.h34d2-track-polish .h34c-sync-card{display:none!important;}
+@media(max-width:980px){
+  .h34d2-panel{grid-template-columns:1fr!important;}
+  .h34d2-info{border-left:0;border-top:1px solid rgba(255,255,255,.065);}
+  .h34d2-stage{min-height:380px!important;}
+  .h34d2-frame{height:315px!important;}
+}
+@media(max-width:620px){
+  #race-control-section.h34d2-track-polish{padding:72px 0!important;}
+  .h34d2-head{align-items:flex-start!important;}
+  .h34d2-stage{padding:18px!important;min-height:300px!important;}
+  .h34d2-frame{height:245px!important;padding:20px 16px 48px!important;border-radius:20px!important;}
+  .h34d2-frame .pdx-fastf1-track-svg{transform:scale(1.03);}
+  .h34d2-sector-legend{left:14px;right:14px;bottom:13px;gap:6px;}
+  .h34d2-sector-legend span{font-size:.52rem;padding:6px 8px;}
+  .h34d2-info{padding:30px 22px!important;}
+  .h34d2-info h3{font-size:3rem!important;}
+  .h34d2-countdown-card{display:block;}
+  .h34d2-countdown-card strong{display:block;margin-top:8px;}
+}
