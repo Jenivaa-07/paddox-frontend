@@ -291,11 +291,12 @@ function pdxH34cClean(value = '') {
     .trim();
 }
 const PDX_H34C_ROUND_TRACKS = {
-  1:'albert_park', 2:'shanghai', 3:'suzuka', 4:'bahrain', 5:'jeddah', 6:'miami',
-  7:'gilles_villeneuve', 8:'monaco', 9:'barcelona_catalunya', 10:'red_bull_ring',
-  11:'silverstone', 12:'spa', 13:'hungaroring', 14:'zandvoort', 15:'monza',
-  16:'madrid_madring', 17:'baku', 18:'marina_bay', 19:'cota', 20:'mexico_city',
-  21:'interlagos', 22:'las_vegas', 23:'lusail', 24:'yas_marina'
+  // Fallback only. Name/circuit matching must run first because F1 calendars can change by season.
+  // Current PADDOX calendar order seen in Fan Hub: Australia, China, Japan, Miami, Canada, Monaco...
+  1:'albert_park', 2:'shanghai', 3:'suzuka', 4:'miami', 5:'gilles_villeneuve', 6:'monaco',
+  7:'barcelona_catalunya', 8:'red_bull_ring', 9:'silverstone', 10:'spa', 11:'hungaroring',
+  12:'zandvoort', 13:'monza', 14:'madrid_madring', 15:'baku', 16:'marina_bay',
+  17:'cota', 18:'mexico_city', 19:'interlagos', 20:'las_vegas', 21:'lusail', 22:'yas_marina'
 };
 const PDX_H34C_NAME_TRACKS = [
   ['las_vegas', ['las vegas','vegas']],
@@ -333,21 +334,33 @@ function pdxH34cTrackByKey(key = '') {
 }
 function pdxH34cMatchTrack(source = {}) {
   const tracks = pdxH34cTracks();
-  const roundValue = Number(source?.round || source?.raceRound || source?.Round || 0);
-  const roundKey = roundValue ? PDX_H34C_ROUND_TRACKS[roundValue] : '';
-  const roundTrack = pdxH34cTrackByKey(roundKey);
-  if (roundTrack) return roundTrack;
-
   const raceHay = pdxH34cClean([
     source?.name, source?.raceName, source?.grandPrix, source?.eventName,
     source?.circuit, source?.circuitName, source?.Circuit?.circuitName,
-    source?.location, source?.locality, source?.Circuit?.Location?.locality
+    source?.location, source?.locality, source?.Circuit?.Location?.locality,
+    source?.country, source?.Circuit?.Location?.country
   ].filter(Boolean).join(' '));
 
+  // Exact race/circuit name wins first. Round numbers are unstable across seasons.
   for (const [key, aliases] of PDX_H34C_NAME_TRACKS) {
     if (!tracks[key]) continue;
     if (aliases.some(alias => raceHay.includes(pdxH34cClean(alias)))) return tracks[key];
   }
+
+  // Then compare against generated FastF1 metadata.
+  const values = Object.values(tracks);
+  const metadataMatch = values.find(track => {
+    const tokens = [track.id, track.circuitName, track.raceName, track.location, track.country]
+      .map(v => pdxH34cClean(v)).filter(Boolean);
+    return tokens.some(t => raceHay && (raceHay.includes(t) || t.includes(raceHay)));
+  });
+  if (metadataMatch) return metadataMatch;
+
+  // Round fallback only after name matching fails.
+  const roundValue = Number(source?.round || source?.raceRound || source?.Round || 0);
+  const roundKey = roundValue ? PDX_H34C_ROUND_TRACKS[roundValue] : '';
+  const roundTrack = pdxH34cTrackByKey(roundKey);
+  if (roundTrack) return roundTrack;
 
   const countryHay = pdxH34cClean([source?.country, source?.Circuit?.Location?.country].filter(Boolean).join(' '));
   const safeCountryMap = {
@@ -360,11 +373,7 @@ function pdxH34cMatchTrack(source = {}) {
     if (countryHay.includes(country) && tracks[key]) return tracks[key];
   }
 
-  const values = Object.values(tracks);
-  return values.find(track => {
-    const t = pdxH34cClean([track.id, track.circuitName, track.raceName, track.location].join(' '));
-    return raceHay && (raceHay.includes(t) || t.includes(raceHay));
-  }) || tracks.monaco || values[0] || null;
+  return tracks.monaco || values[0] || null;
 }
 function pdxH34cSectorSVG(track, mode = 'mini') {
   if (!track) return '<div class="h34c-track-missing">Track map pending</div>';
