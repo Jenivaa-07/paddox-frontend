@@ -2,7 +2,7 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX H3.4C.1 Fan Hub FastF1 circuit maps loaded');
+console.log('PADDOX H3.4C.2 Fan Hub circuit identity matcher loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
@@ -81,7 +81,7 @@ async function loadRealCalendar() {
     grid.innerHTML = `
       <div class="calendar-loading-card">
         <div class="fh-empty-mark fh-mark-loading"></div>
-        <p>Loading live Race Calendar + Formula Timer circuit maps...</p>
+        <p>Loading live Race Calendar + FastF1 circuit maps...</p>
       </div>`;
 
     const data = await PaddoxAPI.f1.schedule();
@@ -290,53 +290,80 @@ function pdxH34cClean(value = '') {
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
-const PDX_H34C_ALIASES = [
-  ['albert_park', ['australia','australian','melbourne','albert park']],
-  ['shanghai', ['china','chinese','shanghai']],
-  ['suzuka', ['japan','japanese','suzuka']],
-  ['bahrain', ['bahrain','sakhir']],
-  ['jeddah', ['saudi','jeddah','corniche']],
-  ['miami', ['miami']],
-  ['imola', ['emilia romagna','imola','enzo ferrari']],
-  ['monaco', ['monaco','monte carlo']],
-  ['gilles_villeneuve', ['canada','canadian','montreal','villeneuve','gilles']],
-  ['barcelona_catalunya', ['barcelona','catalunya','catalonia','montmelo','spanish grand prix']],
-  ['red_bull_ring', ['austria','austrian','spielberg','red bull ring']],
-  ['silverstone', ['britain','british','great britain','united kingdom','silverstone']],
-  ['spa', ['belgium','belgian','spa','francorchamps']],
-  ['hungaroring', ['hungary','hungarian','hungaroring','budapest']],
-  ['zandvoort', ['netherlands','dutch','zandvoort']],
-  ['monza', ['italy','italian','monza']],
-  ['baku', ['azerbaijan','baku']],
-  ['marina_bay', ['singapore','marina bay']],
-  ['cota', ['united states','usa','austin','americas','cota']],
-  ['mexico_city', ['mexico','mexican','mexico city','rodriguez','hermanos']],
-  ['interlagos', ['brazil','brazilian','sao paulo','são paulo','interlagos','jose carlos pace']],
+const PDX_H34C_ROUND_TRACKS = {
+  1:'albert_park', 2:'shanghai', 3:'suzuka', 4:'bahrain', 5:'jeddah', 6:'miami',
+  7:'gilles_villeneuve', 8:'monaco', 9:'barcelona_catalunya', 10:'red_bull_ring',
+  11:'silverstone', 12:'spa', 13:'hungaroring', 14:'zandvoort', 15:'monza',
+  16:'madrid_madring', 17:'baku', 18:'marina_bay', 19:'cota', 20:'mexico_city',
+  21:'interlagos', 22:'las_vegas', 23:'lusail', 24:'yas_marina'
+};
+const PDX_H34C_NAME_TRACKS = [
   ['las_vegas', ['las vegas','vegas']],
   ['lusail', ['qatar','lusail','losail']],
   ['yas_marina', ['abu dhabi','yas marina','uae','united arab emirates']],
-  ['istanbul_park', ['turkey','turkish','istanbul']],
-  ['portimao', ['portugal','portimao','portimão','algarve']]
+  ['mexico_city', ['mexico city','hermanos rodriguez','rodriguez']],
+  ['cota', ['united states grand prix','austin','circuit americas','cota']],
+  ['interlagos', ['brazil','brazilian','sao paulo','são paulo','interlagos','jose carlos pace']],
+  ['marina_bay', ['singapore','marina bay']],
+  ['baku', ['azerbaijan','baku']],
+  ['madrid_madring', ['madrid','madring']],
+  ['monza', ['italian grand prix','monza']],
+  ['zandvoort', ['dutch','netherlands','zandvoort']],
+  ['hungaroring', ['hungary','hungarian','hungaroring','budapest']],
+  ['spa', ['belgium','belgian','spa','francorchamps']],
+  ['silverstone', ['british','great britain','silverstone']],
+  ['red_bull_ring', ['austria','austrian','spielberg','red bull ring']],
+  ['barcelona_catalunya', ['barcelona','catalunya','catalonia','montmelo','spanish grand prix']],
+  ['gilles_villeneuve', ['canadian grand prix','canada','montreal','villeneuve','gilles']],
+  ['monaco', ['monaco','monte carlo']],
+  ['imola', ['emilia romagna','imola','enzo ferrari']],
+  ['miami', ['miami']],
+  ['jeddah', ['saudi','jeddah','corniche']],
+  ['bahrain', ['bahrain','sakhir']],
+  ['suzuka', ['japanese','japan','suzuka']],
+  ['shanghai', ['chinese','china','shanghai']],
+  ['albert_park', ['australian','australia','melbourne','albert park']]
 ];
 function pdxH34cTracks() { return window.paddoxTracks || window.PADDOX_TRACKS || {}; }
+function pdxH34cTrackByKey(key = '') {
+  const tracks = pdxH34cTracks();
+  if (tracks[key]) return tracks[key];
+  if (key === 'madrid_madring') return null;
+  return null;
+}
 function pdxH34cMatchTrack(source = {}) {
   const tracks = pdxH34cTracks();
-  const hay = pdxH34cClean([
-    source?.id, source?.key, source?.name, source?.raceName, source?.grandPrix, source?.eventName,
-    source?.circuit, source?.circuitName, source?.location, source?.locality, source?.country,
-    source?.Circuit?.circuitName, source?.Circuit?.Location?.locality, source?.Circuit?.Location?.country
+  const roundValue = Number(source?.round || source?.raceRound || source?.Round || 0);
+  const roundKey = roundValue ? PDX_H34C_ROUND_TRACKS[roundValue] : '';
+  const roundTrack = pdxH34cTrackByKey(roundKey);
+  if (roundTrack) return roundTrack;
+
+  const raceHay = pdxH34cClean([
+    source?.name, source?.raceName, source?.grandPrix, source?.eventName,
+    source?.circuit, source?.circuitName, source?.Circuit?.circuitName,
+    source?.location, source?.locality, source?.Circuit?.Location?.locality
   ].filter(Boolean).join(' '));
-  for (const [key, aliases] of PDX_H34C_ALIASES) {
+
+  for (const [key, aliases] of PDX_H34C_NAME_TRACKS) {
     if (!tracks[key]) continue;
-    if (aliases.some(alias => {
-      const a = pdxH34cClean(alias);
-      return hay.includes(a) || a.includes(hay);
-    })) return tracks[key];
+    if (aliases.some(alias => raceHay.includes(pdxH34cClean(alias)))) return tracks[key];
   }
+
+  const countryHay = pdxH34cClean([source?.country, source?.Circuit?.Location?.country].filter(Boolean).join(' '));
+  const safeCountryMap = {
+    australia:'albert_park', china:'shanghai', japan:'suzuka', bahrain:'bahrain',
+    saudi:'jeddah', monaco:'monaco', canada:'gilles_villeneuve', austria:'red_bull_ring',
+    belgium:'spa', hungary:'hungaroring', netherlands:'zandvoort', azerbaijan:'baku',
+    singapore:'marina_bay', mexico:'mexico_city', brazil:'interlagos', qatar:'lusail'
+  };
+  for (const [country, key] of Object.entries(safeCountryMap)) {
+    if (countryHay.includes(country) && tracks[key]) return tracks[key];
+  }
+
   const values = Object.values(tracks);
   return values.find(track => {
-    const t = pdxH34cClean([track.id, track.circuitName, track.raceName, track.country, track.location].join(' '));
-    return hay && (hay.includes(t) || t.includes(hay));
+    const t = pdxH34cClean([track.id, track.circuitName, track.raceName, track.location].join(' '));
+    return raceHay && (raceHay.includes(t) || t.includes(raceHay));
   }) || tracks.monaco || values[0] || null;
 }
 function pdxH34cSectorSVG(track, mode = 'mini') {
