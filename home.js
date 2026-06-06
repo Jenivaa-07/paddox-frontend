@@ -3632,46 +3632,29 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
       <div class="container">
         <div class="section-head race-control-head">
           <div class="reveal-up in-view">
-            <div class="section-label">PADDOX CIRCUIT COMMAND</div>
+            <div class="section-label">LIVE RACE CONTROL</div>
             <h2 class="section-title">TRACK <span class="accent">MODE</span></h2>
           </div>
-          <p class="race-control-sub reveal-up in-view">FastF1 true-sector circuit data rebuilt as a premium PADDOX command deck for the next Grand Prix.</p>
+          <p class="race-control-sub reveal-up in-view">Python/FastF1 true-sector circuit map synced with the live next-race countdown.</p>
         </div>
         <div class="h34c-fastf1-panel liquid-sweep">
-          <div class="h34c-fastf1-stage h34d-command-stage">
-            <div class="h34d-stage-topline">
-              <span class="h34d-live-dot"></span>
-              <span>True-sector route visual</span>
-              <strong>${pdxH34cEsc(track?.id || 'pending')}</strong>
-            </div>
-            <div class="h34c-fastf1-frame h34d-command-frame" id="h34c-fastf1-frame">
-              <div class="h34d-map-grid" aria-hidden="true"></div>
+          <div class="h34c-fastf1-stage">
+            <div class="h34c-fastf1-frame" id="h34c-fastf1-frame">
               ${pdxH34cSectorSVG(track, 'large')}
-              <div class="h34d-corner h34d-c1"></div><div class="h34d-corner h34d-c2"></div><div class="h34d-corner h34d-c3"></div><div class="h34d-corner h34d-c4"></div>
             </div>
-            <div class="h34c-track-meta h34d-track-meta">
+            <div class="h34c-track-meta">
               <span class="h34c-track-pill"><strong>Source</strong> FastF1 Telemetry</span>
-              <span class="h34c-track-pill"><strong>Sector</strong> True Boundary</span>
-              <span class="h34c-track-pill"><strong>Motion</strong> Live Pulse</span>
-            </div>
-            <div class="h34d-stage-footer">
-              <span><b>S1</b> Attack</span><span><b>S2</b> Flow</span><span><b>S3</b> Finish</span>
+              <span class="h34c-track-pill"><strong>Map</strong> True Sector Path</span>
             </div>
           </div>
           <div class="h34c-fastf1-info">
             <div class="h34c-kicker">FASTF1 TRUE SECTOR MODE</div>
             <h3 id="rc-race-name">${splitRaceName(raceName)}</h3>
             <p id="rc-race-meta">${pdxH34cEsc(circuitLabel)} · ${pdxH34cEsc(location)}</p>
-            <div class="h34c-chip-row h34d-chip-row">
+            <div class="h34c-chip-row">
               <span class="h34c-chip">Round ${pdxH34cEsc(round)}</span>
               <span class="h34c-chip">Season ${pdxH34cEsc(season)}</span>
               <span class="h34c-chip">Animated Path</span>
-            </div>
-            <div class="h34d-command-matrix">
-              <div><span>Map Mode</span><strong>Sector SVG</strong></div>
-              <div><span>Route</span><strong>${track ? 'Verified' : 'Pending'}</strong></div>
-              <div><span>Pulse</span><strong>Animated</strong></div>
-              <div><span>Sync</span><strong>Countdown</strong></div>
             </div>
             <div class="h34c-sector-stack">${sectorCards(track)}</div>
             <div class="h34c-sync-card">
