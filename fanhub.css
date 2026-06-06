@@ -7666,3 +7666,35 @@ button[data-tab="ai-studio"],
 #sec-calendar .section-label{
   overflow:hidden;
 }
+
+
+/* ============================================================
+   PADDOX H3.4C.1 — FastF1 True Sector Circuit Maps
+   Replaces Formula Timer image maps with Python/FastF1 SVG data.
+   ============================================================ */
+.pdx-fastf1-track-svg{width:100%;height:100%;overflow:visible;display:block;filter:drop-shadow(0 22px 36px rgba(0,0,0,.55));}
+.pdx-fastf1-shadow,.pdx-fastf1-base,.pdx-fastf1-glow,.pdx-fastf1-sector{fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.pdx-fastf1-shadow{stroke:#000;stroke-width:7.8;opacity:.64;}
+.pdx-fastf1-glow{stroke:rgba(232,0,45,.20);stroke-width:9.6;filter:blur(2.2px);opacity:.95;}
+.pdx-fastf1-base{stroke:rgba(255,255,255,.18);stroke-width:4.4;}
+.pdx-fastf1-sector{stroke-width:3.15;filter:drop-shadow(0 0 7px rgba(255,255,255,.16));stroke-dasharray:720;stroke-dashoffset:720;animation:pdxSectorReveal 1.25s cubic-bezier(.2,.75,.2,1) forwards;animation-delay:var(--pdx-sector-delay,0ms);}
+.pdx-fastf1-s1{stroke:#e10600;filter:drop-shadow(0 0 9px rgba(225,6,0,.45));}
+.pdx-fastf1-s2{stroke:#00d2ff;filter:drop-shadow(0 0 9px rgba(0,210,255,.36));}
+.pdx-fastf1-s3{stroke:#ffd400;filter:drop-shadow(0 0 9px rgba(255,212,0,.36));}
+.pdx-fastf1-start{fill:#fff;stroke:#e10600;stroke-width:1.35;filter:drop-shadow(0 0 8px rgba(255,255,255,.5));}
+.pdx-fastf1-dot{fill:#e10600;stroke:#fff;stroke-width:1.25;filter:drop-shadow(0 0 10px rgba(225,6,0,.9));}
+.pdx-fastf1-label{font-family:var(--font-c, var(--font-condensed, 'Barlow Condensed', sans-serif));font-weight:900;font-size:10px;letter-spacing:.06em;paint-order:stroke;stroke:#050505;stroke-width:3px;stroke-linejoin:round;}
+@keyframes pdxSectorReveal{to{stroke-dashoffset:0;}}
+
+#sec-calendar .rc-track-art.h34c-fastf1-art{height:224px;padding:18px;border-radius:24px;border:1px solid rgba(255,255,255,.105);background:radial-gradient(circle at 50% 52%,rgba(255,255,255,.055),transparent 30%),radial-gradient(circle at 50% 58%,rgba(225,6,0,.14),transparent 58%),linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));overflow:hidden;position:relative;}
+#sec-calendar .rc-track-art.h34c-fastf1-art::before{content:'FASTF1 TRUE SECTOR';position:absolute;left:14px;top:13px;z-index:3;font-family:var(--font-c);font-size:.55rem;font-weight:900;letter-spacing:.16em;color:rgba(255,255,255,.42);}
+#sec-calendar .rc-track-art.h34c-fastf1-art::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.06) 42%,transparent 62%);transform:translateX(-120%);transition:transform .7s ease;pointer-events:none;}
+#sec-calendar .rcard:hover .rc-track-art.h34c-fastf1-art::after{transform:translateX(120%);}
+#sec-calendar .h34c-mini-map{position:absolute;inset:32px 16px 18px;display:grid;place-items:center;}
+#sec-calendar .h34c-mini-map .pdx-fastf1-track-svg{height:100%;transform:scale(1.02);transition:transform .45s cubic-bezier(.34,1.56,.64,1);}
+#sec-calendar .rcard:hover .h34c-mini-map .pdx-fastf1-track-svg{transform:scale(1.09) rotate(-1deg);}
+#sec-calendar .h34c-map-badge{position:absolute;right:12px;bottom:10px;z-index:5;font-family:var(--font-c);font-size:.52rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.68);background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.11);border-radius:999px;padding:6px 9px;backdrop-filter:blur(10px);}
+#sec-calendar .h34c-track-missing{height:100%;display:grid;place-items:center;text-align:center;font-family:var(--font-c);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);}
+#sec-calendar .rc-track-art.h34c-fastf1-art .rc-track-fallback,#sec-calendar .rc-track-art.h34c-fastf1-art .rc-track-glow,#sec-calendar .rc-track-art.h34c-fastf1-art .rc-track-label{display:none!important;}
+#sec-calendar .rc-svg-source{color:rgba(255,255,255,.48)!important;}
+@media(max-width:700px){#sec-calendar .rc-track-art.h34c-fastf1-art{height:210px}.pdx-fastf1-label{font-size:8px}}

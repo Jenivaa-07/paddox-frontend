@@ -2,7 +2,7 @@
    PADDOX — fanhub.js   |   Digital Fan Hub Logic
    ============================================================ */
 'use strict';
-console.log('PADDOX H3.3A.12 Fan Hub calendar lock loaded');
+console.log('PADDOX H3.4C.1 Fan Hub FastF1 circuit maps loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
@@ -269,96 +269,150 @@ function raceFlagHTML(race = {}, className = 'race-flag-img') {
   return fanFlagImgHTML(code, race.country || race.location || race.name || 'Race', className);
 }
 
-/* ── Phase H3.3A.11: Formula Timer Direct Circuit Image Loader ── */
-function paddoxRaceCircuit(race = {}) {
-  const verified = window.PADDOX_CIRCUIT_MAP?.getCircuit?.(race);
-  if (verified) return { ...verified, verified: true };
 
-  const label = safeText(race.circuit || race.name || race.raceName, 'Circuit image pending');
+/* ============================================================
+   PADDOX H3.4C.1 — FastF1 Circuit Map Helpers
+   Uses frontend/data/paddoxTracks.generated.js from Python/FastF1.
+   ============================================================ */
+function pdxH34cText(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text && text !== '[object Object]' ? text : fallback;
+}
+function pdxH34cEsc(value = '') {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function pdxH34cClean(value = '') {
+  return String(value || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/grand prix|\bgp\b|circuit|autodromo|autodrome|international|street|de |of the|the/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+const PDX_H34C_ALIASES = [
+  ['albert_park', ['australia','australian','melbourne','albert park']],
+  ['shanghai', ['china','chinese','shanghai']],
+  ['suzuka', ['japan','japanese','suzuka']],
+  ['bahrain', ['bahrain','sakhir']],
+  ['jeddah', ['saudi','jeddah','corniche']],
+  ['miami', ['miami']],
+  ['imola', ['emilia romagna','imola','enzo ferrari']],
+  ['monaco', ['monaco','monte carlo']],
+  ['gilles_villeneuve', ['canada','canadian','montreal','villeneuve','gilles']],
+  ['barcelona_catalunya', ['barcelona','catalunya','catalonia','montmelo','spanish grand prix']],
+  ['red_bull_ring', ['austria','austrian','spielberg','red bull ring']],
+  ['silverstone', ['britain','british','great britain','united kingdom','silverstone']],
+  ['spa', ['belgium','belgian','spa','francorchamps']],
+  ['hungaroring', ['hungary','hungarian','hungaroring','budapest']],
+  ['zandvoort', ['netherlands','dutch','zandvoort']],
+  ['monza', ['italy','italian','monza']],
+  ['baku', ['azerbaijan','baku']],
+  ['marina_bay', ['singapore','marina bay']],
+  ['cota', ['united states','usa','austin','americas','cota']],
+  ['mexico_city', ['mexico','mexican','mexico city','rodriguez','hermanos']],
+  ['interlagos', ['brazil','brazilian','sao paulo','são paulo','interlagos','jose carlos pace']],
+  ['las_vegas', ['las vegas','vegas']],
+  ['lusail', ['qatar','lusail','losail']],
+  ['yas_marina', ['abu dhabi','yas marina','uae','united arab emirates']],
+  ['istanbul_park', ['turkey','turkish','istanbul']],
+  ['portimao', ['portugal','portimao','portimão','algarve']]
+];
+function pdxH34cTracks() { return window.paddoxTracks || window.PADDOX_TRACKS || {}; }
+function pdxH34cMatchTrack(source = {}) {
+  const tracks = pdxH34cTracks();
+  const hay = pdxH34cClean([
+    source?.id, source?.key, source?.name, source?.raceName, source?.grandPrix, source?.eventName,
+    source?.circuit, source?.circuitName, source?.location, source?.locality, source?.country,
+    source?.Circuit?.circuitName, source?.Circuit?.Location?.locality, source?.Circuit?.Location?.country
+  ].filter(Boolean).join(' '));
+  for (const [key, aliases] of PDX_H34C_ALIASES) {
+    if (!tracks[key]) continue;
+    if (aliases.some(alias => {
+      const a = pdxH34cClean(alias);
+      return hay.includes(a) || a.includes(hay);
+    })) return tracks[key];
+  }
+  const values = Object.values(tracks);
+  return values.find(track => {
+    const t = pdxH34cClean([track.id, track.circuitName, track.raceName, track.country, track.location].join(' '));
+    return hay && (hay.includes(t) || t.includes(hay));
+  }) || tracks.monaco || values[0] || null;
+}
+function pdxH34cSectorSVG(track, mode = 'mini') {
+  if (!track) return '<div class="h34c-track-missing">Track map pending</div>';
+  const viewBox = pdxH34cEsc(track.viewBox || '0 0 300 180');
+  const basePath = pdxH34cEsc(mode === 'mini' ? (track.miniPath || track.detailedPath) : (track.detailedPath || track.miniPath));
+  const motionPath = pdxH34cEsc(track.detailedPath || track.miniPath || '');
+  const sectors = Array.isArray(track.sectorPaths) ? track.sectorPaths : [];
+  const sectorMarkup = sectors.map((sector, index) => {
+    const label = pdxH34cEsc(String(sector.label || `S${index + 1}`).toUpperCase());
+    const cls = label.toLowerCase();
+    const delay = 120 + index * 170;
+    return `<path class="pdx-fastf1-sector pdx-fastf1-${cls}" data-sector="${label}" style="--pdx-sector-delay:${delay}ms" d="${pdxH34cEsc(sector.path || '')}"></path>`;
+  }).join('');
+  const labels = mode === 'large' ? sectors.map((sector, index) => {
+    const label = pdxH34cEsc(String(sector.label || `S${index + 1}`).toUpperCase());
+    const point = track.sectors?.[index] || sector.end || sector.start || {};
+    return `<text class="pdx-fastf1-label pdx-fastf1-${label.toLowerCase()}" x="${Number(point.x || 0)}" y="${Number(point.y || 0)}" fill="${pdxH34cEsc(sector.color || '#fff')}">${label}</text>`;
+  }).join('') : '';
+  const sf = track.startFinish || {};
+  const sx = Number(sf.x || 0), sy = Number(sf.y || 0);
+  const dotR = mode === 'large' ? 3.9 : 3.1;
+  return `<svg class="pdx-fastf1-track-svg pdx-fastf1-${mode}" viewBox="${viewBox}" role="img" aria-label="${pdxH34cEsc(track.circuitName || track.raceName || 'Circuit map')}">
+    <path class="pdx-fastf1-shadow" d="${basePath}"></path>
+    <path class="pdx-fastf1-glow" d="${basePath}"></path>
+    <path class="pdx-fastf1-base" d="${basePath}"></path>
+    ${sectorMarkup}
+    <circle class="pdx-fastf1-start" cx="${sx}" cy="${sy}" r="${mode === 'large' ? 4.2 : 3.2}"></circle>
+    <circle class="pdx-fastf1-dot" r="${dotR}"><animateMotion dur="${mode === 'large' ? 9 : 7}s" repeatCount="indefinite" path="${motionPath}"></animateMotion></circle>
+    ${labels}
+  </svg>`;
+}
+
+
+/* ── Phase H3.4C.1: FastF1 True Sector Circuit Maps ── */
+function paddoxRaceCircuit(race = {}) {
+  const track = pdxH34cMatchTrack(race);
+  if (!track) {
+    const label = safeText(race.circuit || race.name || race.raceName, 'Circuit map pending');
+    return { id:'pending', label, country:safeText(race.country || race.location, ''), verified:false, track:null };
+  }
   return {
-    id: 'pending',
-    file: '',
-    label,
-    country: safeText(race.country || race.location, ''),
-    location: safeText(race.location || race.locality, ''),
-    verified: false,
-    source: 'pending',
-    timerSlugs: []
+    id: track.id,
+    label: track.circuitName || track.raceName || track.id,
+    country: track.country || '',
+    location: track.location || '',
+    verified: true,
+    source: 'fastf1-true-sector',
+    track
   };
 }
-
-function paddoxCircuitCandidates(circuit = {}) {
-  if (!circuit?.verified) return [];
-  return window.PADDOX_CIRCUIT_MAP?.candidatePaths?.(circuit) || [];
-}
-
+function paddoxCircuitCandidates() { return []; }
 function paddoxCircuitPreviewHTML(race = {}, index = 0) {
   const circuit = paddoxRaceCircuit(race);
-  const candidates = paddoxCircuitCandidates(circuit);
-  const safeLabel = safeText(circuit.label || race.circuit || race.name || 'Circuit').replace(/"/g, '&quot;');
+  const track = circuit.track;
   const safeId = safeText(circuit.id || 'pending');
-
+  const source = track?.sourceType || 'fastf1-telemetry';
   return `
-    <div class="rc-track-art rc-ft-image-art ${circuit.verified ? 'is-verified-svg is-loading-svg is-formula-timer-image' : 'is-missing-svg'}"
-      data-circuit="${safeId}"
-      data-ft-alt="${safeLabel} circuit map"
-      data-sources="${candidates.join('|')}"
+    <div class="rc-track-art h34c-fastf1-art ${track ? 'has-svg has-fastf1-svg' : 'is-missing-svg'}"
+      data-circuit="${pdxH34cEsc(safeId)}"
+      data-fastf1-source="${pdxH34cEsc(source)}"
       style="--rc-delay:${index * 70}ms">
-      <div class="rc-track-bg"></div>
-      <div class="rc-track-fallback">
-        <span>${circuit.verified ? 'IMAGE PENDING' : 'IMAGE PENDING'}</span>
-        <small>${circuit.verified ? 'Trying Formula Timer image source' : 'No verified Formula Timer mapping yet'}</small>
-      </div>
-      <div class="rc-track-glow"></div>
-      <div class="rc-track-label" aria-hidden="true"></div>
+      <div class="h34c-mini-map">${pdxH34cSectorSVG(track, 'mini')}</div>
+      <div class="h34c-map-badge">${track ? 'TRUE SECTOR' : 'PENDING'}</div>
     </div>`;
 }
-
-function paddoxLoadFormulaTimerImage(card, sources = [], idx = 0) {
-  if (!card) return;
-  const src = sources[idx];
-
-  if (!src) {
-    card.classList.remove('is-loading-svg');
-    card.classList.add('is-missing-svg');
-    const small = card.querySelector('.rc-track-fallback small');
-    if (small) small.textContent = 'Formula Timer image unavailable';
-    return;
-  }
-
-  const img = document.createElement('img');
-  img.className = 'rc-track-svg rc-track-img rc-formula-timer-img';
-  img.src = src;
-  img.alt = card.dataset.ftAlt || 'Circuit map';
-  img.loading = 'lazy';
-  img.decoding = 'async';
-  img.referrerPolicy = 'no-referrer';
-
-  img.addEventListener('load', () => {
-    card.querySelectorAll('.rc-track-img').forEach(old => {
-      if (old !== img) old.remove();
-    });
-    card.classList.add('has-svg', 'has-formula-timer-image');
-    card.classList.remove('is-missing-svg', 'is-loading-svg');
-  }, { once: true });
-
-  img.addEventListener('error', () => {
-    img.remove();
-    paddoxLoadFormulaTimerImage(card, sources, idx + 1);
-  }, { once: true });
-
-  const bg = card.querySelector('.rc-track-bg');
-  bg?.insertAdjacentElement('afterend', img);
-}
-
+function paddoxLoadFormulaTimerImage() { return; }
 async function hydratePaddoxCircuitSVGs(root = document) {
-  const cards = [...root.querySelectorAll('.rc-track-art.is-formula-timer-image[data-sources]')];
-
-  cards.forEach(card => {
-    const sources = String(card.dataset.sources || '').split('|').filter(Boolean);
-    paddoxLoadFormulaTimerImage(card, sources, 0);
+  const cards = [...root.querySelectorAll('.h34c-fastf1-art')];
+  cards.forEach((card, index) => {
+    card.querySelectorAll('.pdx-fastf1-sector').forEach((path, pIndex) => {
+      path.style.setProperty('--pdx-sector-delay', `${120 + index * 35 + pIndex * 150}ms`);
+    });
   });
 }
+
 
 function bestString(value, keys = []) {
   if (!value) return '';

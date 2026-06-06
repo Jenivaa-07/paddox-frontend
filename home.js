@@ -1,6 +1,7 @@
 /* ============================================================
    PADDOX — home.js
    Landing Page Logic
+   Phase H3.4C.1 FastF1 circuit maps integration
    ============================================================ */
 
 'use strict';
@@ -3415,52 +3416,115 @@ setInterval(() => {
 })();
 
 
-/* ============================================================
-   Phase H3.3B.4 — Home Track Auto Refresh + Text Cleanup
-   Replaces fake/random SVG Track Mode with the next race's
-   polished next-race circuit image, synced from backend countdown.
-   ============================================================ */
-(function initH33BHomeTrackMode(){
-  const SLUGS = [
-    { keys:['australia','melbourne','albert park'], slugs:['melbourne','albert-park','albert_park'], label:'Albert Park Circuit' },
-    { keys:['china','shanghai'], slugs:['shanghai'], label:'Shanghai International Circuit' },
-    { keys:['japan','suzuka'], slugs:['suzuka'], label:'Suzuka Circuit' },
-    { keys:['miami'], slugs:['miami'], label:'Miami International Autodrome' },
-    { keys:['canada','montreal','montréal','villeneuve','gilles'], slugs:['villeneuve','montreal','gilles-villeneuve','gilles_villeneuve'], label:'Circuit Gilles Villeneuve' },
-    { keys:['monaco','monte carlo'], slugs:['monaco'], label:'Circuit de Monaco' },
-    { keys:['barcelona','catalunya'], slugs:['catalunya','barcelona','barcelona-catalunya','barcelona_catalunya'], label:'Circuit de Barcelona-Catalunya' },
-    { keys:['austria','spielberg','red bull ring'], slugs:['red_bull_ring','red-bull-ring','spielberg','austria'], label:'Red Bull Ring' },
-    { keys:['britain','british','silverstone','united kingdom'], slugs:['silverstone'], label:'Silverstone Circuit' },
-    { keys:['belgium','belgian','spa','francorchamps'], slugs:['spa','spa-francorchamps','spa_francorchamps'], label:'Circuit de Spa-Francorchamps' },
-    { keys:['hungary','hungarian','hungaroring'], slugs:['hungaroring','hungary'], label:'Hungaroring' },
-    { keys:['netherlands','dutch','zandvoort'], slugs:['zandvoort'], label:'Circuit Zandvoort' },
-    { keys:['italy','italian','monza'], slugs:['monza'], label:'Autodromo Nazionale Monza' },
-    { keys:['spain','spanish','madrid','madring'], slugs:['madrid','madring'], label:'Madring' },
-    { keys:['azerbaijan','baku'], slugs:['baku'], label:'Baku City Circuit' },
-    { keys:['singapore','marina bay'], slugs:['marina_bay','marina-bay','singapore'], label:'Marina Bay Street Circuit' },
-    { keys:['united states','usa','austin','americas','cota'], slugs:['americas','austin','cota','circuit-of-the-americas'], label:'Circuit of the Americas' },
-    { keys:['mexico','mexican','rodriguez','hermanos'], slugs:['rodriguez','mexico-city','hermanos-rodriguez','hermanos_rodriguez'], label:'Autódromo Hermanos Rodríguez' },
-    { keys:['brazil','brazilian','sao paulo','são paulo','interlagos'], slugs:['interlagos','sao-paulo','sao_paulo','brazil'], label:'Autódromo José Carlos Pace' },
-    { keys:['las vegas','vegas'], slugs:['vegas','las-vegas','las_vegas'], label:'Las Vegas Strip Circuit' },
-    { keys:['qatar','lusail','losail'], slugs:['losail','lusail','qatar'], label:'Lusail International Circuit' },
-    { keys:['abu dhabi','yas marina','uae','united arab emirates'], slugs:['yas_marina','yas-marina','abu-dhabi','abu_dhabi'], label:'Yas Marina Circuit' }
-  ];
 
-  function clean(value){
-    return String(value || '')
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/grand prix|gp|circuit|autodromo|autodrome|street circuit|international|de |of the/g, ' ')
-      .replace(/[^a-z0-9]+/g, ' ')
-      .trim();
+/* ============================================================
+   PADDOX H3.4C.1 — FastF1 Circuit Map Helpers
+   Uses frontend/data/paddoxTracks.generated.js from Python/FastF1.
+   ============================================================ */
+function pdxH34cText(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text && text !== '[object Object]' ? text : fallback;
+}
+function pdxH34cEsc(value = '') {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function pdxH34cClean(value = '') {
+  return String(value || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/grand prix|\bgp\b|circuit|autodromo|autodrome|international|street|de |of the|the/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+const PDX_H34C_ALIASES = [
+  ['albert_park', ['australia','australian','melbourne','albert park']],
+  ['shanghai', ['china','chinese','shanghai']],
+  ['suzuka', ['japan','japanese','suzuka']],
+  ['bahrain', ['bahrain','sakhir']],
+  ['jeddah', ['saudi','jeddah','corniche']],
+  ['miami', ['miami']],
+  ['imola', ['emilia romagna','imola','enzo ferrari']],
+  ['monaco', ['monaco','monte carlo']],
+  ['gilles_villeneuve', ['canada','canadian','montreal','villeneuve','gilles']],
+  ['barcelona_catalunya', ['barcelona','catalunya','catalonia','montmelo','spanish grand prix']],
+  ['red_bull_ring', ['austria','austrian','spielberg','red bull ring']],
+  ['silverstone', ['britain','british','great britain','united kingdom','silverstone']],
+  ['spa', ['belgium','belgian','spa','francorchamps']],
+  ['hungaroring', ['hungary','hungarian','hungaroring','budapest']],
+  ['zandvoort', ['netherlands','dutch','zandvoort']],
+  ['monza', ['italy','italian','monza']],
+  ['baku', ['azerbaijan','baku']],
+  ['marina_bay', ['singapore','marina bay']],
+  ['cota', ['united states','usa','austin','americas','cota']],
+  ['mexico_city', ['mexico','mexican','mexico city','rodriguez','hermanos']],
+  ['interlagos', ['brazil','brazilian','sao paulo','são paulo','interlagos','jose carlos pace']],
+  ['las_vegas', ['las vegas','vegas']],
+  ['lusail', ['qatar','lusail','losail']],
+  ['yas_marina', ['abu dhabi','yas marina','uae','united arab emirates']],
+  ['istanbul_park', ['turkey','turkish','istanbul']],
+  ['portimao', ['portugal','portimao','portimão','algarve']]
+];
+function pdxH34cTracks() { return window.paddoxTracks || window.PADDOX_TRACKS || {}; }
+function pdxH34cMatchTrack(source = {}) {
+  const tracks = pdxH34cTracks();
+  const hay = pdxH34cClean([
+    source?.id, source?.key, source?.name, source?.raceName, source?.grandPrix, source?.eventName,
+    source?.circuit, source?.circuitName, source?.location, source?.locality, source?.country,
+    source?.Circuit?.circuitName, source?.Circuit?.Location?.locality, source?.Circuit?.Location?.country
+  ].filter(Boolean).join(' '));
+  for (const [key, aliases] of PDX_H34C_ALIASES) {
+    if (!tracks[key]) continue;
+    if (aliases.some(alias => {
+      const a = pdxH34cClean(alias);
+      return hay.includes(a) || a.includes(hay);
+    })) return tracks[key];
   }
-  function text(value, fallback){
-    const t = String(value ?? '').trim();
-    return t && t !== '[object Object]' ? t : (fallback || '');
-  }
-  function esc(value){
-    return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-  }
+  const values = Object.values(tracks);
+  return values.find(track => {
+    const t = pdxH34cClean([track.id, track.circuitName, track.raceName, track.country, track.location].join(' '));
+    return hay && (hay.includes(t) || t.includes(hay));
+  }) || tracks.monaco || values[0] || null;
+}
+function pdxH34cSectorSVG(track, mode = 'mini') {
+  if (!track) return '<div class="h34c-track-missing">Track map pending</div>';
+  const viewBox = pdxH34cEsc(track.viewBox || '0 0 300 180');
+  const basePath = pdxH34cEsc(mode === 'mini' ? (track.miniPath || track.detailedPath) : (track.detailedPath || track.miniPath));
+  const motionPath = pdxH34cEsc(track.detailedPath || track.miniPath || '');
+  const sectors = Array.isArray(track.sectorPaths) ? track.sectorPaths : [];
+  const sectorMarkup = sectors.map((sector, index) => {
+    const label = pdxH34cEsc(String(sector.label || `S${index + 1}`).toUpperCase());
+    const cls = label.toLowerCase();
+    const delay = 120 + index * 170;
+    return `<path class="pdx-fastf1-sector pdx-fastf1-${cls}" data-sector="${label}" style="--pdx-sector-delay:${delay}ms" d="${pdxH34cEsc(sector.path || '')}"></path>`;
+  }).join('');
+  const labels = mode === 'large' ? sectors.map((sector, index) => {
+    const label = pdxH34cEsc(String(sector.label || `S${index + 1}`).toUpperCase());
+    const point = track.sectors?.[index] || sector.end || sector.start || {};
+    return `<text class="pdx-fastf1-label pdx-fastf1-${label.toLowerCase()}" x="${Number(point.x || 0)}" y="${Number(point.y || 0)}" fill="${pdxH34cEsc(sector.color || '#fff')}">${label}</text>`;
+  }).join('') : '';
+  const sf = track.startFinish || {};
+  const sx = Number(sf.x || 0), sy = Number(sf.y || 0);
+  const dotR = mode === 'large' ? 3.9 : 3.1;
+  return `<svg class="pdx-fastf1-track-svg pdx-fastf1-${mode}" viewBox="${viewBox}" role="img" aria-label="${pdxH34cEsc(track.circuitName || track.raceName || 'Circuit map')}">
+    <path class="pdx-fastf1-shadow" d="${basePath}"></path>
+    <path class="pdx-fastf1-glow" d="${basePath}"></path>
+    <path class="pdx-fastf1-base" d="${basePath}"></path>
+    ${sectorMarkup}
+    <circle class="pdx-fastf1-start" cx="${sx}" cy="${sy}" r="${mode === 'large' ? 4.2 : 3.2}"></circle>
+    <circle class="pdx-fastf1-dot" r="${dotR}"><animateMotion dur="${mode === 'large' ? 9 : 7}s" repeatCount="indefinite" path="${motionPath}"></animateMotion></circle>
+    ${labels}
+  </svg>`;
+}
+
+
+/* ============================================================
+   Phase H3.4C.1 — Home Track Mode FastF1 True Sector Map
+   Replaces Formula Timer images with Python/FastF1 generated SVG.
+   ============================================================ */
+(function initH34C1HomeFastF1TrackMode(){
+  'use strict';
+  let lastRenderKey = '';
   function getRace(){
     try {
       const race = window.HOME_F1?.nextRace || HOME_F1?.nextRace || null;
@@ -3474,21 +3538,6 @@ setInterval(() => {
     const name = document.querySelector('.cs-name')?.textContent || '';
     const circuit = document.querySelector('.cs-circuit')?.textContent || '';
     return { name, circuit, location: circuit };
-  }
-  function getCircuit(race){
-    const hay = clean([race?.name, race?.raceName, race?.circuit, race?.location, race?.country, race?.locality].filter(Boolean).join(' '));
-    const found = SLUGS.find(item => item.keys.some(k => hay.includes(clean(k)) || clean(k).includes(hay)));
-    return found || { slugs:['monaco'], label:text(race?.circuit, 'Circuit image') };
-  }
-  function imageUrl(slug, width){
-    return `https://formula-timer.com/_next/image?url=%2Fcircuits%2F${encodeURIComponent(slug)}.png&w=${width || 3840}&q=75`;
-  }
-  function imageSources(circuit){
-    const out = [];
-    (circuit.slugs || []).forEach(slug => {
-      [3840,1920,1200,828].forEach(width => out.push(imageUrl(slug, width)));
-    });
-    return out;
   }
   function raceDate(race){
     const raw = race?.date || race?.raceDate || race?.startDate || '';
@@ -3516,9 +3565,9 @@ setInterval(() => {
     return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
   }
   function splitRaceName(name){
-    const value = text(name, 'Next Grand Prix');
+    const value = pdxH34cText(name, 'Next Grand Prix');
     const parts = value.replace(/Grand Prix/i, '').trim();
-    return parts ? `${esc(parts)} <span class="accent">GRAND PRIX</span>` : esc(value);
+    return parts ? `${pdxH34cEsc(parts)} <span class="accent">GRAND PRIX</span>` : pdxH34cEsc(value);
   }
   function ensureSection(){
     let section = document.getElementById('race-control-section');
@@ -3534,70 +3583,26 @@ setInterval(() => {
     }
     return section;
   }
-  function loadImage(frame, sources, alt){
-    if (!frame) return;
-    let idx = 0;
-    const cleanSources = [...new Set((sources || []).filter(Boolean))];
-
-    function showPending(message = 'Circuit source unavailable'){
-      frame.innerHTML = `<div class="h33b-image-pending"><strong>IMAGE SYNCING</strong><small>${esc(message)}</small></div>`;
-      frame.dataset.loadedSrc = '';
-    }
-
-    function tryNext(){
-      const src = cleanSources[idx];
-      if (!src) {
-        showPending('Circuit image unavailable');
-        return;
-      }
-
-      /* Avoid endless reload loops when boot() runs again after the same image already loaded. */
-      if (frame.dataset.loadedSrc === src && frame.querySelector('.h33b-circuit-img')) return;
-
-      frame.innerHTML = `<div class="h33b-image-pending h33b-image-loading"><strong>LOADING RACE MAP</strong><small>Countdown circuit image</small></div>`;
-
-      const img = document.createElement('img');
-      img.className = 'h33b-circuit-img';
-      img.alt = alt || 'Circuit map';
-      img.decoding = 'async';
-      img.loading = 'eager';
-      img.referrerPolicy = 'no-referrer';
-
-      img.addEventListener('load', () => {
-        frame.dataset.loadedSrc = src;
-        frame.querySelectorAll('.h33b-image-pending').forEach(el => el.remove());
-        img.classList.add('is-loaded');
-      }, { once: true });
-
-      img.addEventListener('error', () => {
-        idx += 1;
-        tryNext();
-      }, { once: true });
-
-      /* Append first, then set src. This matches the working Fan Hub loader and lets the browser paint immediately. */
-      frame.appendChild(img);
-      img.src = src;
-    }
-
-    tryNext();
+  function sectorCards(track){
+    const sectors = Array.isArray(track?.sectorPaths) ? track.sectorPaths : [];
+    return sectors.map((s, index) => {
+      const label = pdxH34cEsc(s.label || `S${index + 1}`);
+      const cls = String(label).toLowerCase();
+      const points = Number(s.pointCount || 0);
+      return `<div class="h34c-sector ${cls}"><span>${label}</span><strong>${points || '—'} pts</strong></div>`;
+    }).join('') || '<div class="h34c-sector s1"><span>S1</span><strong>Syncing</strong></div><div class="h34c-sector s2"><span>S2</span><strong>Syncing</strong></div><div class="h34c-sector s3"><span>S3</span><strong>Syncing</strong></div>';
   }
   function render(){
-    if (window.__PADDOX_H32C_RAF) {
-      cancelAnimationFrame(window.__PADDOX_H32C_RAF);
-      window.__PADDOX_H32C_RAF = null;
-    }
+    if (window.__PADDOX_H32C_RAF) { cancelAnimationFrame(window.__PADDOX_H32C_RAF); window.__PADDOX_H32C_RAF = null; }
     const race = getRace() || {};
-    const circuit = getCircuit(race);
+    const track = pdxH34cMatchTrack(race);
     const section = ensureSection();
-    const raceName = text(race.name || race.raceName || race.grandPrix || race.eventName, 'Next Grand Prix');
-    const circuitLabel = text(race.circuit || circuit.label, circuit.label);
-    const location = [race.location || race.locality, race.country].filter(Boolean).join(' · ') || circuitLabel;
-    const round = text(race.round, '—');
-    const season = text(race.season, new Date().getFullYear());
-    const sources = imageSources(circuit);
-
-    section.classList.remove('h32c-track-foundation','h32a-track-mode');
-    section.classList.add('h33b-track-sync');
+    const raceName = pdxH34cText(race.name || race.raceName || race.grandPrix || race.eventName || track?.raceName, track?.raceName || 'Next Grand Prix');
+    const circuitLabel = pdxH34cText(race.circuit || race.circuitName || track?.circuitName, track?.circuitName || 'Circuit map');
+    const location = [race.location || race.locality || track?.location, race.country || track?.country].filter(Boolean).join(' · ') || circuitLabel;
+    const round = pdxH34cText(race.round, '—');
+    const season = pdxH34cText(race.season, new Date().getFullYear());
+    section.className = 'race-control-section section h34c-fastf1-track';
     section.innerHTML = `
       <div class="container">
         <div class="section-head race-control-head">
@@ -3605,90 +3610,76 @@ setInterval(() => {
             <div class="section-label">LIVE RACE CONTROL</div>
             <h2 class="section-title">TRACK <span class="accent">MODE</span></h2>
           </div>
-          <p class="race-control-sub reveal-up in-view">Next race circuit updates from the live race calendar.</p>
+          <p class="race-control-sub reveal-up in-view">Python/FastF1 true-sector circuit map synced with the live next-race countdown.</p>
         </div>
-        <div class="h33b-track-panel liquid-sweep">
-          <div class="h33b-circuit-stage">
-            <div class="h33b-circuit-frame" id="h33b-circuit-frame">
-              <div class="h33b-image-pending"><strong>LOADING RACE MAP</strong><small>Countdown circuit image</small></div>
+        <div class="h34c-fastf1-panel liquid-sweep">
+          <div class="h34c-fastf1-stage">
+            <div class="h34c-fastf1-frame" id="h34c-fastf1-frame">
+              ${pdxH34cSectorSVG(track, 'large')}
             </div>
-            <div class="h33b-circuit-meta">
-              <span class="h33b-circuit-pill"><strong>Next</strong> ${esc(text(raceName, 'Grand Prix'))}</span>
-              <span class="h33b-circuit-pill"><strong>Map</strong> Live Circuit</span>
+            <div class="h34c-track-meta">
+              <span class="h34c-track-pill"><strong>Source</strong> FastF1 Telemetry</span>
+              <span class="h34c-track-pill"><strong>Map</strong> True Sector Path</span>
             </div>
           </div>
-          <div class="h33b-info">
-            <div class="h33b-kicker">COUNTDOWN CIRCUIT LIVE</div>
+          <div class="h34c-fastf1-info">
+            <div class="h34c-kicker">FASTF1 TRUE SECTOR MODE</div>
             <h3 id="rc-race-name">${splitRaceName(raceName)}</h3>
-            <p id="rc-race-meta">${esc(circuitLabel)} · ${esc(location)}</p>
-            <div class="h33b-chip-row">
-              <span class="h33b-chip">Round ${esc(round)}</span>
-              <span class="h33b-chip">Season ${esc(season)}</span>
-              <span class="h33b-chip">Live Countdown</span>
+            <p id="rc-race-meta">${pdxH34cEsc(circuitLabel)} · ${pdxH34cEsc(location)}</p>
+            <div class="h34c-chip-row">
+              <span class="h34c-chip">Round ${pdxH34cEsc(round)}</span>
+              <span class="h34c-chip">Season ${pdxH34cEsc(season)}</span>
+              <span class="h34c-chip">Animated Path</span>
             </div>
-            <div class="h33b-sync-card">
-              <div class="h33b-sync-top"><span>Next race pulse</span><strong id="h33b-track-countdown">${esc(countdownText(race))}</strong></div>
-              <div class="h33b-sync-rail"><span></span></div>
+            <div class="h34c-sector-stack">${sectorCards(track)}</div>
+            <div class="h34c-sync-card">
+              <div class="h34c-sync-top"><span>Next race pulse</span><strong id="h34c-track-countdown">${pdxH34cEsc(countdownText(race))}</strong></div>
             </div>
             <div class="h33b-data-grid">
-              <div class="h33b-data-row"><span>Circuit</span><strong>${esc(circuitLabel)}</strong></div>
-              <div class="h33b-data-row"><span>Date</span><strong>${esc(formatDate(race))}</strong></div>
-              <div class="h33b-data-row"><span>Status</span><strong id="rc-status">Backend Synced</strong></div>
+              <div class="h33b-data-row"><span>Circuit</span><strong>${pdxH34cEsc(circuitLabel)}</strong></div>
+              <div class="h33b-data-row"><span>Date</span><strong>${pdxH34cEsc(formatDate(race))}</strong></div>
+              <div class="h33b-data-row"><span>Status</span><strong id="rc-status">FastF1 Map Synced</strong></div>
             </div>
-            <a href="fanhub.html" class="h33b-track-cta">View Race Calendar →</a>
+            <a href="fanhub.html" class="h34c-track-cta">View Race Calendar →</a>
           </div>
         </div>
       </div>`;
-
-    const frame = document.getElementById('h33b-circuit-frame');
-    if (frame) loadImage(frame, sources, `${circuitLabel} circuit map`);
   }
   function refreshCountdownOnly(){
     const race = getRace() || {};
-    const el = document.getElementById('h33b-track-countdown');
+    const el = document.getElementById('h34c-track-countdown');
     if (el) el.textContent = countdownText(race);
   }
-  let lastRenderKey = '';
   function boot(){
     try {
       const race = getRace() || {};
-      const circuit = getCircuit(race);
-      const key = [race.name || race.raceName, race.date || race.raceDate, circuit.slugs?.[0]].join('|');
-      if (key && key === lastRenderKey && document.querySelector('#h33b-circuit-frame .h33b-circuit-img')) return;
+      const track = pdxH34cMatchTrack(race);
+      const key = [race.name || race.raceName, race.date || race.raceDate, track?.id].join('|');
+      if (key && key === lastRenderKey && document.querySelector('#h34c-fastf1-frame .pdx-fastf1-track-svg')) return;
       lastRenderKey = key;
       render();
-    } catch (err) { console.warn('H3.3B Track Mode sync failed', err); }
+    } catch (err) { console.warn('H3.4C.1 FastF1 Track Mode failed', err); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
   window.addEventListener('load', boot);
   [900, 2200, 4200].forEach(ms => setTimeout(boot, ms));
   setInterval(refreshCountdownOnly, 1000);
-
-  /* Refresh the race source periodically so Track Mode changes when backend next-race data changes. */
   async function refreshTrackRaceSource(){
     try {
       if (window.PaddoxAPI?.f1?.schedule) {
         const scheduleData = await window.PaddoxAPI.f1.schedule();
         const list = extractRaceList(scheduleData || {});
-        if (Array.isArray(list) && list.length) {
-          HOME_F1.schedule = list;
-          window.HOME_F1 = HOME_F1;
-        }
+        if (Array.isArray(list) && list.length) { HOME_F1.schedule = list; window.HOME_F1 = HOME_F1; }
       }
       if (window.PaddoxAPI?.f1?.nextRace) {
         const nextData = await window.PaddoxAPI.f1.nextRace();
         const next = nextData?.data?.race || nextData?.data || nextData?.race || null;
-        if (next && typeof next === 'object') {
-          HOME_F1.nextRace = next;
-          window.HOME_F1 = HOME_F1;
-        }
+        if (next && typeof next === 'object') { HOME_F1.nextRace = next; window.HOME_F1 = HOME_F1; }
       }
       lastRenderKey = '';
       boot();
-    } catch (err) {
-      console.warn('Track Mode auto refresh skipped', err);
-    }
+    } catch (err) { console.warn('FastF1 Track Mode auto refresh skipped', err); }
   }
   setInterval(refreshTrackRaceSource, 10 * 60 * 1000);
 })();

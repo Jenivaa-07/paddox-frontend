@@ -8832,3 +8832,54 @@ body .nl-trust {
   .h33e4-vault-mini{grid-template-columns:repeat(3,1fr) !important;gap:8px !important;}
   .h33e4-vault-mini .vault-badge{height:78px !important;border-radius:16px !important;}
 }
+
+
+/* ============================================================
+   PADDOX H3.4C.1 — FastF1 True Sector Circuit Maps
+   Replaces Formula Timer image maps with Python/FastF1 SVG data.
+   ============================================================ */
+.pdx-fastf1-track-svg{width:100%;height:100%;overflow:visible;display:block;filter:drop-shadow(0 22px 36px rgba(0,0,0,.55));}
+.pdx-fastf1-shadow,.pdx-fastf1-base,.pdx-fastf1-glow,.pdx-fastf1-sector{fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.pdx-fastf1-shadow{stroke:#000;stroke-width:7.8;opacity:.64;}
+.pdx-fastf1-glow{stroke:rgba(232,0,45,.20);stroke-width:9.6;filter:blur(2.2px);opacity:.95;}
+.pdx-fastf1-base{stroke:rgba(255,255,255,.18);stroke-width:4.4;}
+.pdx-fastf1-sector{stroke-width:3.15;filter:drop-shadow(0 0 7px rgba(255,255,255,.16));stroke-dasharray:720;stroke-dashoffset:720;animation:pdxSectorReveal 1.25s cubic-bezier(.2,.75,.2,1) forwards;animation-delay:var(--pdx-sector-delay,0ms);}
+.pdx-fastf1-s1{stroke:#e10600;filter:drop-shadow(0 0 9px rgba(225,6,0,.45));}
+.pdx-fastf1-s2{stroke:#00d2ff;filter:drop-shadow(0 0 9px rgba(0,210,255,.36));}
+.pdx-fastf1-s3{stroke:#ffd400;filter:drop-shadow(0 0 9px rgba(255,212,0,.36));}
+.pdx-fastf1-start{fill:#fff;stroke:#e10600;stroke-width:1.35;filter:drop-shadow(0 0 8px rgba(255,255,255,.5));}
+.pdx-fastf1-dot{fill:#e10600;stroke:#fff;stroke-width:1.25;filter:drop-shadow(0 0 10px rgba(225,6,0,.9));}
+.pdx-fastf1-label{font-family:var(--font-c, var(--font-condensed, 'Barlow Condensed', sans-serif));font-weight:900;font-size:10px;letter-spacing:.06em;paint-order:stroke;stroke:#050505;stroke-width:3px;stroke-linejoin:round;}
+@keyframes pdxSectorReveal{to{stroke-dashoffset:0;}}
+
+#race-control-section.h34c-fastf1-track{padding:92px 0!important;background:radial-gradient(circle at 16% 0%,rgba(225,6,0,.12),transparent 34%),linear-gradient(180deg,#070707 0%,#030303 100%)!important;}
+.h34c-fastf1-track .race-control-sub{color:rgba(255,255,255,.62)!important;max-width:760px!important;}
+.h34c-fastf1-panel{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:28px;align-items:stretch;border:1px solid rgba(255,255,255,.105);border-radius:34px;background:radial-gradient(circle at 28% 20%,rgba(225,6,0,.18),transparent 32%),linear-gradient(145deg,rgba(255,255,255,.078),rgba(255,255,255,.025));box-shadow:0 34px 95px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.09);overflow:hidden;position:relative;}
+.h34c-fastf1-panel::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.07) 42%,transparent 64%);transform:translateX(-115%);animation:h34cPanelSweep 7.5s ease-in-out infinite;pointer-events:none;}
+@keyframes h34cPanelSweep{0%,48%{transform:translateX(-115%)}72%,100%{transform:translateX(115%)}}
+.h34c-fastf1-stage{min-height:455px;padding:30px;position:relative;background:radial-gradient(circle at 50% 52%,rgba(255,255,255,.06),transparent 30%),radial-gradient(circle at 50% 56%,rgba(225,6,0,.14),transparent 58%);display:grid;place-items:center;}
+.h34c-fastf1-frame{width:min(100%,720px);height:360px;border-radius:28px;border:1px solid rgba(255,255,255,.105);background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.06),transparent 32%),linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));padding:22px;position:relative;overflow:visible;}
+.h34c-fastf1-frame::before{content:'FASTF1 TRUE SECTOR MAP';position:absolute;left:20px;top:16px;font-family:var(--font-condensed);font-size:.62rem;font-weight:900;letter-spacing:.18em;color:rgba(255,255,255,.42);z-index:3;}
+.h34c-fastf1-frame .pdx-fastf1-track-svg{height:100%;}
+.h34c-track-meta{position:absolute;left:30px;right:30px;bottom:24px;display:flex;gap:10px;flex-wrap:wrap;z-index:5;}
+.h34c-track-pill{padding:8px 12px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(0,0,0,.42);backdrop-filter:blur(14px);font-family:var(--font-condensed);font-size:.66rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.76);}
+.h34c-track-pill strong{color:#fff;margin-right:5px;}
+.h34c-fastf1-info{padding:42px 36px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
+.h34c-kicker{font-family:var(--font-condensed);font-size:.72rem;font-weight:900;letter-spacing:.24em;color:#e10600;text-transform:uppercase;margin-bottom:12px;}
+.h34c-fastf1-info h3{font-family:var(--font-display);font-size:clamp(3rem,5vw,5rem);line-height:.9;letter-spacing:.04em;text-transform:uppercase;margin:0 0 16px;}
+.h34c-fastf1-info p{color:rgba(255,255,255,.64);line-height:1.65;margin:0 0 18px;}
+.h34c-chip-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;}
+.h34c-chip{font-family:var(--font-condensed);font-size:.72rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.78);padding:8px 11px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.045);border-radius:999px;}
+.h34c-sector-stack{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 18px;}
+.h34c-sector{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);border-radius:16px;padding:12px;}
+.h34c-sector span{display:block;font-family:var(--font-condensed);font-weight:900;letter-spacing:.16em;font-size:.72rem;text-transform:uppercase;margin-bottom:4px;}
+.h34c-sector strong{font-family:var(--font-condensed);font-size:1.05rem;color:#fff;}
+.h34c-sector.s1 span{color:#e10600}.h34c-sector.s2 span{color:#00d2ff}.h34c-sector.s3 span{color:#ffd400}
+.h34c-sync-card{border:1px solid rgba(255,255,255,.1);border-radius:20px;background:rgba(0,0,0,.28);padding:16px;margin-bottom:18px;}
+.h34c-sync-top{display:flex;justify-content:space-between;gap:12px;font-family:var(--font-condensed);letter-spacing:.12em;text-transform:uppercase;font-size:.72rem;color:rgba(255,255,255,.56);}
+.h34c-sync-top strong{color:#e10600;font-size:1rem;}
+.h34c-track-cta{display:inline-flex;align-items:center;justify-content:center;margin-top:4px;width:max-content;padding:13px 24px;background:#e10600;color:#fff;font-family:var(--font-condensed);font-size:.82rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);transition:.3s ease;}
+.h34c-track-cta:hover{background:#ff1e00;transform:translateY(-2px);box-shadow:0 14px 34px rgba(225,6,0,.32);}
+.h34c-track-missing{height:100%;display:grid;place-items:center;text-align:center;color:rgba(255,255,255,.55);font-family:var(--font-condensed);letter-spacing:.14em;text-transform:uppercase;}
+@media(max-width:980px){.h34c-fastf1-panel{grid-template-columns:1fr}.h34c-fastf1-stage{min-height:360px}.h34c-fastf1-frame{height:300px}.h34c-sector-stack{grid-template-columns:1fr}}
+@media(max-width:620px){#race-control-section.h34c-fastf1-track{padding:72px 0!important}.h34c-fastf1-panel{border-radius:24px}.h34c-fastf1-stage{padding:18px;min-height:300px}.h34c-fastf1-frame{height:245px;padding:12px;border-radius:20px}.h34c-track-meta{left:18px;right:18px;bottom:16px}.h34c-fastf1-info{padding:30px 22px}.h34c-fastf1-info h3{font-size:3.1rem}.h34c-track-cta{width:100%;}.pdx-fastf1-label{font-size:8px}}
