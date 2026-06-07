@@ -651,113 +651,97 @@ function animateSingleCounter(el) {
 (function initParticles() {
   const canvas = document.getElementById('particles-canvas');
   if (!canvas) return;
-
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) {
-    canvas.style.display = 'none';
-    return;
-  }
-
-  const ctx = canvas.getContext('2d', { alpha: true });
-  let W = 0, H = 0, DPR = 1;
-  let particles = [];
-  let raf = null;
-  let last = 0;
-  let paused = false;
-
-  const isMobile = () => window.innerWidth < 760;
-  const targetCount = () => isMobile() ? 18 : 42;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], burst = false, burstTimer = null;
 
   function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 1.35);
-    W = Math.floor(window.innerWidth);
-    H = Math.floor(window.innerHeight);
-    canvas.width = Math.floor(W * DPR);
-    canvas.height = Math.floor(H * DPR);
-    canvas.style.width = `${W}px`;
-    canvas.style.height = `${H}px`;
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-    const desired = targetCount();
-    if (particles.length > desired) particles.length = desired;
-    while (particles.length < desired) particles.push(makeParticle(true));
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
   }
+  resize();
+  window.addEventListener('resize', resize);
 
-  function makeParticle(initial = false) {
-    const streak = Math.random() < 0.72;
-    const baseY = initial ? Math.random() * H : -20 + Math.random() * (H + 40);
-    return {
-      x: initial ? Math.random() * W : -120 - Math.random() * W * 0.35,
-      y: baseY,
-      vx: streak ? 4.2 + Math.random() * 5.8 : 1.2 + Math.random() * 2.2,
-      vy: streak ? -0.08 + Math.random() * 0.22 : -0.18 + Math.random() * 0.36,
-      len: streak ? 90 + Math.random() * 180 : 12 + Math.random() * 34,
-      size: streak ? 0.8 + Math.random() * 1.2 : 0.7 + Math.random() * 1.4,
-      alpha: streak ? 0.16 + Math.random() * 0.34 : 0.16 + Math.random() * 0.26,
-      red: Math.random() < 0.72,
-      streak,
-      pulse: Math.random() * Math.PI * 2,
-    };
-  }
+  /* Particle class */
+  class Particle {
+    constructor(isBurst = false) { this.reset(isBurst); }
 
-  function resetParticle(p) {
-    const fresh = makeParticle(false);
-    Object.assign(p, fresh);
-    p.y = Math.random() * H;
-  }
+    reset(isBurst = false) {
+      this.isBurst = isBurst;
+      this.type    = Math.random() < 0.72 ? 'spark' : 'dot';
+      this.x       = isBurst ? W * 0.5 + (Math.random() - 0.5) * 300
+                             : Math.random() * W;
+      this.y       = isBurst ? H * 0.5 + (Math.random() - 0.5) * 100
+                             : Math.random() * H;
+      const speed  = isBurst ? 5 + Math.random() * 5 : 1.1 + Math.random() * 1.8;
+      const angle  = isBurst ? Math.random() * Math.PI * 2
+                             : -Math.PI * 0.05 + (Math.random() - 0.5) * 0.4;
+      this.vx      = Math.cos(angle) * speed;
+      this.vy      = Math.sin(angle) * speed - (isBurst ? 0 : 0.05);
+      this.life    = 1;
+      this.decay   = isBurst ? 0.016 + Math.random() * 0.02
+                             : 0.003 + Math.random() * 0.004;
+      this.size    = this.type === 'spark'
+                     ? 0.6 + Math.random() * 1.6
+                     : 0.5 + Math.random() * 1.2;
+      const r      = Math.random();
+      this.color   = r < 0.65 ? 'rgba(232,0,45,'
+                   : r < 0.82 ? 'rgba(200,200,200,'
+                               : 'rgba(201,168,76,';
+    }
 
-  function draw(now) {
-    if (paused) return;
-    const dt = Math.min(32, now - last || 16) / 16;
-    last = now;
-    ctx.clearRect(0, 0, W, H);
-    ctx.globalCompositeOperation = 'lighter';
+    update() {
+      this.x    += this.vx;
+      this.y    += this.vy;
+      this.vy   += 0.012; // gentle gravity
+      this.life -= this.decay;
+      if (this.life <= 0 || this.x > W + 30 || this.x < -30 || this.y > H + 30) {
+        this.reset(false);
+      }
+    }
 
-    for (const p of particles) {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.pulse += 0.035 * dt;
-      const glow = p.alpha + Math.sin(p.pulse) * 0.05;
-
-      if (p.streak) {
-        const grad = ctx.createLinearGradient(p.x - p.len, p.y, p.x + p.len * 0.18, p.y);
-        const color = p.red ? '232,0,45' : '255,255,255';
-        grad.addColorStop(0, `rgba(${color},0)`);
-        grad.addColorStop(0.45, `rgba(${color},${Math.max(0.04, glow)})`);
-        grad.addColorStop(1, `rgba(${color},0)`);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = p.size;
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, this.life * 0.75);
+      if (this.type === 'spark') {
+        ctx.strokeStyle = `${this.color}1)`;
+        ctx.lineWidth   = this.size;
+        ctx.lineCap     = 'round';
         ctx.beginPath();
-        ctx.moveTo(p.x - p.len, p.y);
-        ctx.lineTo(p.x + p.len * 0.2, p.y + p.vy * 10);
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.vx * 7, this.y - this.vy * 7);
         ctx.stroke();
       } else {
-        const color = p.red ? '232,0,45' : '255,255,255';
-        ctx.fillStyle = `rgba(${color},${Math.max(0.05, glow)})`;
+        ctx.fillStyle = `${this.color}0.9)`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
       }
-
-      if (p.x > W + p.len + 160 || p.y < -80 || p.y > H + 80) resetParticle(p);
+      ctx.restore();
     }
-
-    ctx.globalCompositeOperation = 'source-over';
-    raf = requestAnimationFrame(draw);
   }
 
-  document.addEventListener('visibilitychange', () => {
-    paused = document.hidden;
-    if (!paused && !raf) {
-      last = performance.now();
-      raf = requestAnimationFrame(draw);
-    }
-  });
+  /* Spawn base particles */
+  for (let i = 0; i < 38; i++) particles.push(new Particle());
 
-  window.addEventListener('resize', () => requestAnimationFrame(resize), { passive: true });
-  resize();
-  last = performance.now();
-  raf = requestAnimationFrame(draw);
+  /* Occasional speed burst */
+  function triggerBurst() {
+    for (let i = 0; i < 14; i++) particles.push(new Particle(true));
+    burstTimer = setTimeout(triggerBurst, 9000 + Math.random() * 9000);
+  }
+  burstTimer = setTimeout(triggerBurst, 3000);
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    // Remove dead burst particles
+    particles = particles.filter(p => p.life > 0 || !p.isBurst);
+    // Keep base count stable
+    while (particles.filter(p => !p.isBurst).length < 38) {
+      particles.push(new Particle(false));
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
 })();
 
 /* ══════════════════════════════════════
@@ -983,29 +967,17 @@ setInterval(initRealCountdown, 10 * 60 * 1000);
 (function initSpeedLines() {
   const container = document.getElementById('speed-lines');
   if (!container) return;
-  container.innerHTML = '';
-  const isMobile = window.innerWidth < 760;
-  const configs = isMobile
-    ? [
-        { top:'22%', width:'58%', delay:'0s', dur:'2.6s', opacity:.55 },
-        { top:'44%', width:'70%', delay:'.65s', dur:'3.1s', opacity:.46 },
-        { top:'69%', width:'54%', delay:'1.2s', dur:'2.8s', opacity:.38 },
-      ]
-    : [
-        { top:'14%', width:'34%', delay:'0s', dur:'2.35s', opacity:.36 },
-        { top:'23%', width:'56%', delay:'.35s', dur:'2.8s', opacity:.42 },
-        { top:'32%', width:'42%', delay:'.95s', dur:'2.45s', opacity:.34 },
-        { top:'48%', width:'66%', delay:'.15s', dur:'3.15s', opacity:.52 },
-        { top:'57%', width:'36%', delay:'1.4s', dur:'2.55s', opacity:.36 },
-        { top:'68%', width:'60%', delay:'.75s', dur:'3.0s', opacity:.44 },
-        { top:'78%', width:'48%', delay:'1.8s', dur:'2.7s', opacity:.32 },
-        { top:'86%', width:'70%', delay:'1.05s', dur:'3.35s', opacity:.27 },
-      ];
-
-  configs.forEach((c, i) => {
+  const configs = [
+    { top:'16%', width:'56%', delay:'0s',   dur:'2.9s', opacity:.42 },
+    { top:'31%', width:'34%', delay:'.7s',  dur:'2.5s', opacity:.30 },
+    { top:'49%', width:'64%', delay:'1.25s', dur:'3.4s', opacity:.34 },
+    { top:'64%', width:'42%', delay:'.35s',  dur:'2.85s', opacity:.28 },
+    { top:'78%', width:'58%', delay:'1.05s',   dur:'3.2s',   opacity:.24 }
+  ];
+  configs.forEach(c => {
     const line = document.createElement('div');
-    line.className = 'speed-line h4-speed-line';
-    line.style.cssText = `top:${c.top};width:${c.width};animation-delay:${c.delay};animation-duration:${c.dur};opacity:${c.opacity};--h4-speed-index:${i}`;
+    line.className = 'speed-line';
+    line.style.cssText = `top:${c.top};width:${c.width};animation-delay:${c.delay};animation-duration:${c.dur};opacity:${c.opacity}`;
     container.appendChild(line);
   });
 })();
@@ -1987,7 +1959,7 @@ function initH2Cursor() {
     cursor.classList.add('is-visible');
   }, { passive: true });
 
-  const hoverSelectors = 'a, button, .pcard, .exp-card, .testi-card, .marquee-strip, .quote-inner';
+  const hoverSelectors = '.btn-primary, .btn-outline, .ov-btn, .pcard, .exp-card, .testi-card, .marquee-strip, .quote-inner, .race-lab-card, .race-lab-btn, .fan-pulse-card';
   document.addEventListener('mouseover', e => {
     if (e.target.closest(hoverSelectors)) cursor.classList.add('is-hovering');
   });
@@ -3894,76 +3866,4 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
   else boot();
   window.addEventListener('load', boot);
   [900, 2400, 5000].forEach(ms => setTimeout(render, ms));
-})();
-
-
-/* ============================================================
-   PADDOX H4.0 — Original Home Premium Motion Recovery
-   HTML/CSS/JS stack only. No React. No noisy particles.
-   ============================================================ */
-(function initH40PremiumRecovery(){
-  const run = () => {
-    document.body.classList.add('h40-premium-motion');
-
-    const cursor = document.getElementById('motion-cursor');
-    if (cursor && window.innerWidth >= 900 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      let x = window.innerWidth / 2, y = window.innerHeight / 2;
-      let tx = x, ty = y;
-      window.addEventListener('pointermove', (e) => {
-        tx = e.clientX; ty = e.clientY;
-        cursor.classList.add('is-visible');
-      }, { passive: true });
-      const hoverTarget = 'a,button,.pcard,.hero-live-card,.exp-card,.testi-card,.h33e4-module,.h33e4-passport-showcase,.marquee-item,.quote-inner,.cd-block';
-      document.addEventListener('pointerover', (e) => {
-        if (e.target.closest(hoverTarget)) cursor.classList.add('is-hovering');
-      });
-      document.addEventListener('pointerout', (e) => {
-        if (e.target.closest(hoverTarget)) cursor.classList.remove('is-hovering');
-      });
-      const follow = () => {
-        x += (tx - x) * 0.22;
-        y += (ty - y) * 0.22;
-        cursor.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%)`;
-        requestAnimationFrame(follow);
-      };
-      requestAnimationFrame(follow);
-    }
-
-    const hero = document.getElementById('hero');
-    const spotlight = document.getElementById('hero-spotlight');
-    if (hero && spotlight && window.innerWidth >= 900) {
-      hero.addEventListener('pointermove', (e) => {
-        const r = hero.getBoundingClientRect();
-        hero.style.setProperty('--h4mx', `${((e.clientX - r.left) / r.width) * 100}%`);
-        hero.style.setProperty('--h4my', `${((e.clientY - r.top) / r.height) * 100}%`);
-        spotlight.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
-        spotlight.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
-      }, { passive: true });
-    }
-
-    const nav = document.getElementById('navbar');
-    const setNav = () => nav && nav.classList.toggle('h40-nav-compact', window.scrollY > 30);
-    setNav();
-    window.addEventListener('scroll', () => requestAnimationFrame(setNav), { passive: true });
-
-    document.querySelectorAll('.hero-live-card,.pcard,.exp-card,.testi-card,.cd-block,.h33e4-module,.h33e4-passport-showcase').forEach(card => {
-      if (card.dataset.h40Tilt === '1') return;
-      card.dataset.h40Tilt = '1';
-      card.addEventListener('pointermove', (e) => {
-        if (window.innerWidth < 900) return;
-        const r = card.getBoundingClientRect();
-        const rx = ((e.clientY - r.top) / r.height - .5) * -5;
-        const ry = ((e.clientX - r.left) / r.width - .5) * 6;
-        card.style.setProperty('--h4rx', `${rx}deg`);
-        card.style.setProperty('--h4ry', `${ry}deg`);
-      }, { passive: true });
-      card.addEventListener('pointerleave', () => {
-        card.style.removeProperty('--h4rx');
-        card.style.removeProperty('--h4ry');
-      });
-    });
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
-  else run();
 })();
