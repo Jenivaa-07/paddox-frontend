@@ -721,11 +721,11 @@ function animateSingleCounter(el) {
   }
 
   /* Spawn base particles */
-  for (let i = 0; i < 38; i++) particles.push(new Particle());
+  for (let i = 0; i < 24; i++) particles.push(new Particle());
 
   /* Occasional speed burst */
   function triggerBurst() {
-    for (let i = 0; i < 14; i++) particles.push(new Particle(true));
+    for (let i = 0; i < 8; i++) particles.push(new Particle(true));
     burstTimer = setTimeout(triggerBurst, 9000 + Math.random() * 9000);
   }
   burstTimer = setTimeout(triggerBurst, 3000);
@@ -736,7 +736,7 @@ function animateSingleCounter(el) {
     // Remove dead burst particles
     particles = particles.filter(p => p.life > 0 || !p.isBurst);
     // Keep base count stable
-    while (particles.filter(p => !p.isBurst).length < 38) {
+    while (particles.filter(p => !p.isBurst).length < 24) {
       particles.push(new Particle(false));
     }
     requestAnimationFrame(loop);
@@ -1966,6 +1966,12 @@ function initH2Cursor() {
   document.addEventListener('mouseout', e => {
     if (e.target.closest(hoverSelectors)) cursor.classList.remove('is-hovering');
   });
+
+  const navBar = document.getElementById('navbar');
+  if (navBar) {
+    navBar.addEventListener('mouseenter', () => cursor.classList.add('is-hidden-nav'));
+    navBar.addEventListener('mouseleave', () => cursor.classList.remove('is-hidden-nav'));
+  }
 
   const tick = () => {
     x += (tx - x) * 0.18;
