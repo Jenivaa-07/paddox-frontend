@@ -31,17 +31,6 @@ body {
   font-family: var(--font-body);
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, transparent, rgba(225, 6, 0, .05), transparent),
-    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, .08), transparent 30rem);
-}
-
 ::selection {
   color: white;
   background: rgba(225, 6, 0, .72);
@@ -72,10 +61,4 @@ body::before {
     linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: linear-gradient(to bottom, black, transparent 70%);
-}
-
-@media (max-width: 768px) {
-  .paddox-container {
-    width: min(100% - 22px, 1180px);
-  }
 }
