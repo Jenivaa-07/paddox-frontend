@@ -839,6 +839,44 @@ function normalizeHomeRaceDate(race = {}) {
   return Number.isFinite(d.getTime()) ? d : null;
 }
 
+
+
+/* H4.0.3 — verified schedule fallback + stale next-race guard
+   Backend remains primary. This fallback only prevents the Home page from
+   showing an already-finished GP as the next race when /api/f1/next-race is stale. */
+const PADDOX_OFFICIAL_2026_F1_SCHEDULE = [
+  { round: 1, season: 2026, name: 'Australian Grand Prix', raceName: 'Australian Grand Prix', circuit: 'Albert Park Circuit', location: 'Melbourne', country: 'Australia', date: '2026-03-08', time: '05:00:00Z' },
+  { round: 2, season: 2026, name: 'Chinese Grand Prix', raceName: 'Chinese Grand Prix', circuit: 'Shanghai International Circuit', location: 'Shanghai', country: 'China', date: '2026-03-15', time: '07:00:00Z' },
+  { round: 3, season: 2026, name: 'Japanese Grand Prix', raceName: 'Japanese Grand Prix', circuit: 'Suzuka Circuit', location: 'Suzuka', country: 'Japan', date: '2026-03-29', time: '05:00:00Z' },
+  { round: 4, season: 2026, name: 'Miami Grand Prix', raceName: 'Miami Grand Prix', circuit: 'Miami International Autodrome', location: 'Miami', country: 'United States', date: '2026-05-03', time: '20:00:00Z' },
+  { round: 5, season: 2026, name: 'Canadian Grand Prix', raceName: 'Canadian Grand Prix', circuit: 'Circuit Gilles Villeneuve', location: 'Montreal', country: 'Canada', date: '2026-05-24', time: '18:00:00Z' },
+  { round: 6, season: 2026, name: 'Monaco Grand Prix', raceName: 'Monaco Grand Prix', circuit: 'Circuit de Monaco', location: 'Monte Carlo', country: 'Monaco', date: '2026-06-07', time: '13:00:00Z' },
+  { round: 7, season: 2026, name: 'Barcelona-Catalunya Grand Prix', raceName: 'Barcelona-Catalunya Grand Prix', circuit: 'Circuit de Barcelona-Catalunya', location: 'Barcelona-Catalunya', country: 'Spain', date: '2026-06-14', time: '13:00:00Z' },
+  { round: 8, season: 2026, name: 'Austrian Grand Prix', raceName: 'Austrian Grand Prix', circuit: 'Red Bull Ring', location: 'Spielberg', country: 'Austria', date: '2026-06-28', time: '13:00:00Z' },
+  { round: 9, season: 2026, name: 'British Grand Prix', raceName: 'British Grand Prix', circuit: 'Silverstone Circuit', location: 'Silverstone', country: 'Great Britain', date: '2026-07-05', time: '14:00:00Z' },
+  { round: 10, season: 2026, name: 'Belgian Grand Prix', raceName: 'Belgian Grand Prix', circuit: 'Circuit de Spa-Francorchamps', location: 'Spa-Francorchamps', country: 'Belgium', date: '2026-07-19', time: '13:00:00Z' },
+  { round: 11, season: 2026, name: 'Hungarian Grand Prix', raceName: 'Hungarian Grand Prix', circuit: 'Hungaroring', location: 'Budapest', country: 'Hungary', date: '2026-07-26', time: '13:00:00Z' },
+  { round: 12, season: 2026, name: 'Dutch Grand Prix', raceName: 'Dutch Grand Prix', circuit: 'Circuit Zandvoort', location: 'Zandvoort', country: 'Netherlands', date: '2026-08-23', time: '13:00:00Z' },
+  { round: 13, season: 2026, name: 'Italian Grand Prix', raceName: 'Italian Grand Prix', circuit: 'Autodromo Nazionale Monza', location: 'Monza', country: 'Italy', date: '2026-09-06', time: '13:00:00Z' },
+  { round: 14, season: 2026, name: 'Spanish Grand Prix', raceName: 'Spanish Grand Prix', circuit: 'Madring', location: 'Madrid', country: 'Spain', date: '2026-09-13', time: '13:00:00Z' },
+  { round: 15, season: 2026, name: 'Azerbaijan Grand Prix', raceName: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', location: 'Baku', country: 'Azerbaijan', date: '2026-09-27', time: '11:00:00Z' },
+  { round: 16, season: 2026, name: 'Singapore Grand Prix', raceName: 'Singapore Grand Prix', circuit: 'Marina Bay Street Circuit', location: 'Singapore', country: 'Singapore', date: '2026-10-11', time: '12:00:00Z' },
+  { round: 17, season: 2026, name: 'United States Grand Prix', raceName: 'United States Grand Prix', circuit: 'Circuit of The Americas', location: 'Austin', country: 'United States', date: '2026-10-25', time: '19:00:00Z' },
+  { round: 18, season: 2026, name: 'Mexico City Grand Prix', raceName: 'Mexico City Grand Prix', circuit: 'Autodromo Hermanos Rodriguez', location: 'Mexico City', country: 'Mexico', date: '2026-11-01', time: '20:00:00Z' },
+  { round: 19, season: 2026, name: 'São Paulo Grand Prix', raceName: 'São Paulo Grand Prix', circuit: 'Autodromo Jose Carlos Pace', location: 'São Paulo', country: 'Brazil', date: '2026-11-08', time: '17:00:00Z' },
+  { round: 20, season: 2026, name: 'Las Vegas Grand Prix', raceName: 'Las Vegas Grand Prix', circuit: 'Las Vegas Strip Circuit', location: 'Las Vegas', country: 'United States', date: '2026-11-21', time: '06:00:00Z' },
+  { round: 21, season: 2026, name: 'Qatar Grand Prix', raceName: 'Qatar Grand Prix', circuit: 'Lusail International Circuit', location: 'Lusail', country: 'Qatar', date: '2026-11-29', time: '16:00:00Z' },
+  { round: 22, season: 2026, name: 'Abu Dhabi Grand Prix', raceName: 'Abu Dhabi Grand Prix', circuit: 'Yas Marina Circuit', location: 'Abu Dhabi', country: 'United Arab Emirates', date: '2026-12-06', time: '13:00:00Z' }
+];
+function isHomeRaceStillUpcoming(race = {}, raceDate = null) {
+  const d = raceDate || normalizeHomeRaceDate(race);
+  return Boolean(d && d.getTime() > Date.now());
+}
+function mergeHomeScheduleWithOfficial(schedule = []) {
+  const live = extractRaceList(schedule || []);
+  return live.length ? live : PADDOX_OFFICIAL_2026_F1_SCHEDULE;
+}
+
 function findHomeNextRaceFromSchedule(list = []) {
   const races = extractRaceList(list);
   if (!races.length) return null;
@@ -853,39 +891,49 @@ function findHomeNextRaceFromSchedule(list = []) {
 }
 
 async function getHomeNextRaceSource() {
-  /* 1) Prefer backend next-race endpoint. */
+  let backendCandidate = null;
+
+  /* 1) Try backend next-race endpoint, but reject stale/past races. */
   try {
     const data = await PaddoxAPI.f1.nextRace();
     const race = data?.data?.race || data?.race || null;
     if (data?.success !== false && race) {
-      return {
+      const raceDate = normalizeHomeRaceDate({ ...race, raceDate: data?.data?.raceDate || race.raceDate || race.date });
+      backendCandidate = {
         race,
-        raceDate: normalizeHomeRaceDate({ ...race, raceDate: data?.data?.raceDate || race.raceDate || race.date }),
+        raceDate,
         schedule: extractRaceList(data || {}),
         source: 'nextRace'
       };
+      if (isHomeRaceStillUpcoming(race, raceDate)) return backendCandidate;
+      console.warn('Backend next-race is stale/past; checking full schedule instead', race?.name || race?.raceName || race);
     }
   } catch (err) {
     console.warn('Next race endpoint unavailable, trying schedule fallback', err);
   }
 
-  /* 2) Fallback to live schedule endpoint, same source used by Track Mode. */
+  /* 2) Prefer full schedule endpoint for the true upcoming race. */
   try {
     const scheduleData = await PaddoxAPI.f1.schedule();
-    const schedule = extractRaceList(scheduleData || {});
+    const schedule = mergeHomeScheduleWithOfficial(scheduleData || {});
     const selected = findHomeNextRaceFromSchedule(schedule);
-    if (selected?.race) {
+    if (selected?.race && isHomeRaceStillUpcoming(selected.race, selected.date)) {
       return { race: selected.race, raceDate: selected.date, schedule, source: 'schedule' };
     }
   } catch (err) {
     console.warn('Schedule fallback unavailable', err);
   }
 
-  /* 3) Last resort: use whatever Home F1 already loaded. */
-  const existing = HOME_F1.nextRace ? { race: HOME_F1.nextRace, date: normalizeHomeRaceDate(HOME_F1.nextRace) } : findHomeNextRaceFromSchedule(HOME_F1.schedule || []);
-  if (existing?.race) {
-    return { race: existing.race, raceDate: existing.date, schedule: HOME_F1.schedule || [], source: 'memory' };
+  /* 3) Official 2026 calendar fallback prevents Monaco/track mismatches when APIs are stale. */
+  const officialSelected = findHomeNextRaceFromSchedule(PADDOX_OFFICIAL_2026_F1_SCHEDULE);
+  if (officialSelected?.race) {
+    return { race: officialSelected.race, raceDate: officialSelected.date, schedule: PADDOX_OFFICIAL_2026_F1_SCHEDULE, source: 'official-fallback' };
   }
+
+  /* 4) Last resort: show backend candidate even if stale instead of blank UI. */
+  if (backendCandidate?.race) return backendCandidate;
+  const existing = HOME_F1.nextRace ? { race: HOME_F1.nextRace, date: normalizeHomeRaceDate(HOME_F1.nextRace) } : findHomeNextRaceFromSchedule(HOME_F1.schedule || []);
+  if (existing?.race) return { race: existing.race, raceDate: existing.date, schedule: HOME_F1.schedule || [], source: 'memory' };
   return null;
 }
 
@@ -3560,7 +3608,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     try {
       const race = window.HOME_F1?.nextRace || HOME_F1?.nextRace || null;
       if (race) return race;
-      const schedule = window.HOME_F1?.schedule || HOME_F1?.schedule || [];
+      const schedule = mergeHomeScheduleWithOfficial(window.HOME_F1?.schedule || HOME_F1?.schedule || []);
       if (Array.isArray(schedule) && schedule.length) {
         const now = Date.now();
         return schedule.find(r => new Date(`${r.date || r.raceDate || ''}T${r.time || '13:00:00Z'}`).getTime() >= now) || schedule[0];
