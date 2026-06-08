@@ -6,6 +6,8 @@
 
 'use strict';
 
+/* PADDOX H4.0.5 — visual-only package, realtime logic preserved. */
+
 /* ── HOME DATA STATE: loaded from backend only ── */
 let PRODUCTS = [];
 let QUOTES = [];
