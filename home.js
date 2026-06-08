@@ -3921,3 +3921,6 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
   window.addEventListener('load', boot);
   [900, 2400, 5000].forEach(ms => setTimeout(render, ms));
 })();
+
+
+/* PADDOX H4.0.4: visual-only package; realtime logic preserved from H4.0.3. */

@@ -9459,3 +9459,346 @@ body .h34c-fastf1-info {
   body #navbar .nav-links { display: none !important; }
   body .hero-stats { position: relative !important; right: auto !important; bottom: auto !important; margin: 18px 24px 0 !important; justify-content: flex-start !important; }
 }
+
+
+/* ============================================================
+   PADDOX H4.0.4 — Home Visual Premium Recovery
+   Logic untouched. Visual-only recovery after H4.0.3.
+   Focus: visible hero wallpaper, stronger hierarchy, sharper cards,
+   premium Track Mode, better lower-section contrast.
+   ============================================================ */
+
+/* Global visual sharpening */
+body {
+  background:
+    radial-gradient(circle at 78% 8%, rgba(232,0,45,.09), transparent 28%),
+    radial-gradient(circle at 8% 54%, rgba(0,210,190,.045), transparent 34%),
+    #050505 !important;
+}
+.section-title,
+.grid-strip-title,
+.paddox-lab-title,
+.race-lab-title,
+.hero-h1 {
+  text-shadow: 0 18px 46px rgba(0,0,0,.72) !important;
+}
+.section-label,
+.cs-label,
+.h34d2-kicker,
+.h34c-kicker {
+  color: #ff163d !important;
+  text-shadow: 0 0 18px rgba(232,0,45,.24) !important;
+}
+.container,
+.cs-inner,
+.race-control-inner,
+.footer-inner {
+  width: min(100% - 96px, 1280px) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Navbar stays compact but the logo/nav breathe better on wide screens. */
+body #navbar {
+  background: linear-gradient(180deg, rgba(5,5,5,.96), rgba(5,5,5,.82)) !important;
+  border-bottom: 1px solid rgba(255,255,255,.06) !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,.26) !important;
+}
+body #navbar .nav-link.active {
+  background: linear-gradient(135deg, #e8002d, #a00025) !important;
+}
+body #navbar .nav-link:not(.active) {
+  background: rgba(255,255,255,.018) !important;
+}
+body #navbar .nav-link:hover:not(.active) {
+  background: rgba(255,255,255,.065) !important;
+  color: #fff !important;
+}
+
+/* Hero: recover the wallpaper and luxury cinematic depth. */
+.hero {
+  min-height: 100vh !important;
+  background: #050505 !important;
+}
+.hero-bg-image {
+  opacity: .98 !important;
+  filter: brightness(.72) saturate(1.08) contrast(1.13) !important;
+  transform: scale(1.025) !important;
+  background-position: 62% center !important;
+}
+.hero:hover .hero-bg-image { transform: scale(1.012) !important; }
+.hero-overlay {
+  background:
+    linear-gradient(98deg, rgba(3,3,3,.94) 0%, rgba(6,6,6,.73) 38%, rgba(10,0,3,.38) 68%, rgba(7,7,7,.52) 100%),
+    radial-gradient(circle at 73% 34%, rgba(232,0,45,.25), transparent 32%),
+    radial-gradient(circle at 50% 18%, rgba(255,255,255,.055), transparent 23%),
+    linear-gradient(to bottom, rgba(7,7,7,.40) 0%, rgba(7,7,7,.10) 46%, rgba(7,7,7,1) 100%) !important;
+}
+.hero-grid-lines {
+  opacity: .28 !important;
+  background-size: 78px 78px !important;
+  mask-image: linear-gradient(to right, black 0 66%, transparent 100%) !important;
+}
+.hero-content {
+  padding-top: clamp(92px, 13vh, 142px) !important;
+  padding-left: max(48px, calc((100vw - 1280px) / 2)) !important;
+  padding-bottom: 130px !important;
+}
+.hero-eyebrow { margin-bottom: 18px !important; }
+.hero-h1 {
+  font-size: clamp(6.2rem, 12.2vw, 12.8rem) !important;
+  line-height: .82 !important;
+  letter-spacing: 3px !important;
+  margin-bottom: 24px !important;
+}
+.hero-sub {
+  max-width: 620px !important;
+  color: rgba(255,255,255,.78) !important;
+  font-size: clamp(.96rem, 1.08vw, 1.12rem) !important;
+  line-height: 1.74 !important;
+}
+.hero-ticker {
+  border-radius: 999px !important;
+  background: rgba(232,0,45,.105) !important;
+  border-color: rgba(232,0,45,.30) !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.hero-live-grid { gap: 14px !important; margin-top: 16px !important; }
+.hero-live-card {
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(232,0,45,.16), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.025)) !important;
+  border-color: rgba(255,255,255,.13) !important;
+}
+.hero-stats .stat-item {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(232,0,45,.13), transparent 38%),
+    linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.022)) !important;
+  border-color: rgba(255,255,255,.13) !important;
+}
+
+/* Countdown strip: make the live race bar feel like a premium status console. */
+.countdown-strip {
+  background:
+    linear-gradient(90deg, rgba(232,0,45,.13), rgba(232,0,45,.045) 38%, rgba(0,0,0,.64)),
+    #080808 !important;
+  border-top: 1px solid rgba(232,0,45,.24) !important;
+  border-bottom: 1px solid rgba(255,255,255,.065) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 20px 60px rgba(0,0,0,.26) !important;
+}
+.cs-name { color: #fff !important; font-size: clamp(2rem, 3.2vw, 3rem) !important; }
+.cs-circuit { color: rgba(255,255,255,.68) !important; }
+.cd-block {
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.025)) !important;
+  border-color: rgba(255,255,255,.12) !important;
+  border-bottom-color: rgba(232,0,45,.74) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.26) !important;
+}
+
+/* Track Mode: premium command panel without touching realtime sync. */
+#race-control-section.h34c-fastf1-track,
+#race-control-section.h34d2-track-polish {
+  padding: clamp(90px, 9vw, 124px) 0 !important;
+  background:
+    radial-gradient(circle at 16% 6%, rgba(232,0,45,.18), transparent 32%),
+    radial-gradient(circle at 86% 66%, rgba(255,255,255,.055), transparent 28%),
+    linear-gradient(180deg, #050505 0%, #0a0a0a 54%, #050505 100%) !important;
+}
+.h34d2-head,
+.h34c-fastf1-track .race-control-head {
+  margin-bottom: 42px !important;
+}
+.h34c-fastf1-panel,
+.h34d2-panel {
+  grid-template-columns: minmax(0, 1.18fr) minmax(360px, .82fr) !important;
+  gap: 0 !important;
+  border-radius: 32px !important;
+  border-color: rgba(255,255,255,.13) !important;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(232,0,45,.20), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,.082), rgba(255,255,255,.020)) !important;
+  box-shadow: 0 38px 110px rgba(0,0,0,.70), inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+.h34c-fastf1-stage,
+.h34d2-stage {
+  min-height: 480px !important;
+  padding: clamp(28px, 3vw, 46px) !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,255,255,.075), transparent 28%),
+    radial-gradient(circle at 50% 52%, rgba(232,0,45,.16), transparent 52%) !important;
+}
+.h34c-fastf1-frame,
+.h34d2-frame {
+  width: min(100%, 760px) !important;
+  height: 384px !important;
+  border-radius: 30px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.015)),
+    radial-gradient(circle at 50% 50%, rgba(232,0,45,.10), transparent 52%) !important;
+  border-color: rgba(255,255,255,.145) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 24px 70px rgba(0,0,0,.42) !important;
+}
+.h34c-fastf1-frame::before {
+  color: rgba(255,255,255,.58) !important;
+  letter-spacing: .22em !important;
+}
+.h34c-fastf1-info,
+.h34d2-info {
+  padding: clamp(38px, 4.3vw, 58px) clamp(34px, 3.2vw, 48px) !important;
+  background:
+    linear-gradient(135deg, rgba(0,0,0,.16), rgba(232,0,45,.045)) !important;
+  border-left: 1px solid rgba(255,255,255,.075) !important;
+}
+.h34c-fastf1-info h3,
+.h34d2-info h3 {
+  font-size: clamp(3.7rem, 5.4vw, 6.2rem) !important;
+  line-height: .82 !important;
+  color: #fff !important;
+}
+.h34d2-countdown-card,
+.h33b-data-grid > div,
+.h34d2-data-grid > div {
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(0,0,0,.22)) !important;
+  border-color: rgba(255,255,255,.13) !important;
+}
+.h34c-chip,
+.h34d2-chip-row .h34c-chip {
+  background: rgba(255,255,255,.065) !important;
+  border-color: rgba(255,255,255,.14) !important;
+  color: rgba(255,255,255,.82) !important;
+}
+.h34d2-track-cta,
+.h34c-track-cta {
+  margin-top: 16px !important;
+  box-shadow: 0 14px 34px rgba(232,0,45,.24) !important;
+}
+
+/* Featured Merch: cleaner product cards with premium spacing. */
+.featured-section {
+  background:
+    radial-gradient(circle at 84% 10%, rgba(232,0,45,.09), transparent 30%),
+    linear-gradient(180deg, #090909 0%, #070707 100%) !important;
+}
+.products-grid { gap: 26px !important; }
+.pcard {
+  border-radius: 22px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.062), rgba(255,255,255,.018)) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow: 0 20px 55px rgba(0,0,0,.34) !important;
+}
+.pcard-img-wrap {
+  height: clamp(230px, 18vw, 292px) !important;
+  border-radius: 20px 20px 0 0 !important;
+}
+.pcard-info { padding: 20px 20px 22px !important; }
+.pcard-name { color: #fff !important; font-size: 1.24rem !important; }
+.pcard-team { color: rgba(255,255,255,.48) !important; }
+.pcard:hover { box-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(232,0,45,.18) !important; }
+
+/* Teams/Quote/Beyond/Fan Pulse: recover contrast and sharpness. */
+.home-grid-strip-section,
+.quote-section,
+.experience-section,
+.fan-pulse-section {
+  background:
+    radial-gradient(circle at 15% 12%, rgba(232,0,45,.10), transparent 30%),
+    linear-gradient(180deg, #070707, #090909) !important;
+}
+.quote-section.h33d-quotes .quote-inner,
+.quote-inner {
+  border-radius: 28px !important;
+  border-color: rgba(255,255,255,.13) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(232,0,45,.13), transparent 35%),
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.020)) !important;
+  box-shadow: 0 34px 95px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.exp-card,
+.fan-pulse-card {
+  border-radius: 22px !important;
+  border-color: rgba(255,255,255,.10) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.058), rgba(255,255,255,.018)) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.34) !important;
+}
+.exp-card-img { filter: brightness(.48) saturate(.84) contrast(1.06) !important; }
+.exp-card:hover .exp-card-img { filter: brightness(.60) saturate(1) contrast(1.08) !important; }
+.exp-title,
+.fan-pulse-card h3 { color: #fff !important; }
+.exp-desc,
+.fan-pulse-card p { color: rgba(255,255,255,.68) !important; }
+
+/* Race Lab: keep accepted command deck, just make it less muddy in screenshots. */
+.h33e4-race-lab,
+.h33e2-race-lab,
+.paddox-lab-section {
+  background:
+    radial-gradient(circle at 18% 4%, rgba(232,0,45,.20), transparent 30%),
+    radial-gradient(circle at 88% 62%, rgba(0,210,190,.06), transparent 34%),
+    linear-gradient(135deg, #050505 0%, #0b0b0b 54%, #060606 100%) !important;
+}
+.paddox-lab-shell,
+.h33e2-race-lab .paddox-lab-shell,
+.h33e4-race-lab .paddox-lab-shell {
+  border-color: rgba(255,255,255,.14) !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(232,0,45,.15), transparent 28%),
+    linear-gradient(145deg, rgba(255,255,255,.078), rgba(255,255,255,.018)) !important;
+  box-shadow: 0 38px 110px rgba(0,0,0,.66), inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+.lab-card,
+.h33e2-race-lab .lab-card,
+.h33e4-race-lab .lab-card {
+  border-color: rgba(255,255,255,.12) !important;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(232,0,45,.12), transparent 36%),
+    linear-gradient(155deg, rgba(255,255,255,.066), rgba(5,5,5,.80)) !important;
+}
+
+/* Footer: sharper, not foggy. */
+.site-footer,
+footer {
+  background: linear-gradient(180deg, #060606, #030303) !important;
+  border-top: 1px solid rgba(255,255,255,.09) !important;
+}
+.footer-tagline,
+.footer-desc,
+.footer-copy,
+.footer-links a,
+.footer-col ul a { color: rgba(255,255,255,.58) !important; }
+.footer-col-title { color: #fff !important; }
+
+@media (max-width: 1280px) {
+  .container,
+  .cs-inner,
+  .race-control-inner,
+  .footer-inner { width: min(100% - 56px, 1180px) !important; }
+  .hero-content { padding-left: 44px !important; }
+  .h34c-fastf1-panel,
+  .h34d2-panel { grid-template-columns: 1fr !important; }
+  .h34c-fastf1-info,
+  .h34d2-info { border-left: 0 !important; border-top: 1px solid rgba(255,255,255,.075) !important; }
+}
+@media (max-width: 820px) {
+  .container,
+  .cs-inner,
+  .race-control-inner,
+  .footer-inner { width: min(100% - 36px, 100%) !important; }
+  .hero-bg-image { background-position: 68% center !important; filter: brightness(.58) saturate(.95) !important; }
+  .hero-overlay {
+    background:
+      linear-gradient(100deg, rgba(3,3,3,.94), rgba(5,5,5,.72)),
+      linear-gradient(to bottom, rgba(7,7,7,.16), rgba(7,7,7,1)) !important;
+  }
+  .hero-content { padding-inline: 24px !important; padding-top: 112px !important; padding-bottom: 44px !important; }
+  .hero-h1 { font-size: clamp(4.8rem, 22vw, 7rem) !important; }
+  .products-grid { gap: 18px !important; }
+  .h34c-fastf1-stage,
+  .h34d2-stage { min-height: 350px !important; padding: 20px !important; }
+  .h34c-fastf1-frame,
+  .h34d2-frame { height: 280px !important; border-radius: 22px !important; }
+  .h34c-fastf1-info h3,
+  .h34d2-info h3 { font-size: clamp(3rem, 17vw, 4.4rem) !important; }
+}
