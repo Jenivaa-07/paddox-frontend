@@ -10106,3 +10106,287 @@ footer::before{
   .exp-card{ min-height:240px !important; }
   .site-footer .container, footer .container{ width:min(100% - 36px,100%) !important; }
 }
+
+
+/* ============================================================
+   PADDOX H4.0.6 — Alignment, Border + Navbar Cleanup
+   Visual-only. Realtime race/countdown/track sync untouched.
+   ============================================================ */
+
+/* Global section rail: every major block now sits on the same premium grid. */
+body .container,
+body .cs-inner,
+body .race-control-inner,
+body .footer-inner {
+  width: min(100% - 88px, 1240px) !important;
+  margin-inline: auto !important;
+}
+body .section-head,
+body .h34d2-head,
+body .race-control-head {
+  align-items: flex-end !important;
+  gap: 28px !important;
+}
+body .section-title,
+body .grid-strip-title,
+body .paddox-lab-title {
+  letter-spacing: .055em !important;
+}
+body .section-label,
+body .cs-label,
+body .hero-eyebrow,
+body .h34d2-kicker,
+body .h34c-kicker {
+  letter-spacing: .24em !important;
+}
+
+/* Navbar: sharper capsule, single-line labels, better left/right balance. */
+body #navbar {
+  height: 58px !important;
+  background: rgba(4,4,4,.92) !important;
+  border-bottom: 1px solid rgba(255,255,255,.075) !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.34) !important;
+}
+body #navbar.scrolled { height: 54px !important; }
+body #navbar .nav-inner {
+  width: min(100% - 42px, 1240px) !important;
+  height: 100% !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  gap: 18px !important;
+}
+body #navbar .nav-logo { min-width: 128px !important; gap: 9px !important; }
+body #navbar .helmet-wrap { width: 30px !important; height: 30px !important; }
+body #navbar .brand-logo-icon { width: 22px !important; height: 22px !important; object-fit: contain !important; }
+body #navbar .logo-text {
+  font-size: 1.32rem !important;
+  letter-spacing: .20em !important;
+  white-space: nowrap !important;
+}
+body #navbar .nav-links {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 580px !important;
+  justify-content: center !important;
+  gap: 5px !important;
+}
+body #navbar .nav-link {
+  min-width: 74px !important;
+  justify-content: center !important;
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  font-size: .68rem !important;
+  letter-spacing: .14em !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  border: 1px solid rgba(255,255,255,.055) !important;
+}
+body #navbar .nl-label { white-space: nowrap !important; display: inline-block !important; }
+body #navbar .nav-right { gap: 8px !important; min-width: 150px !important; justify-content: flex-end !important; }
+body #navbar .nav-search-btn,
+body #navbar .nav-cart-btn { width: 30px !important; height: 30px !important; }
+body #navbar .nav-cta-btn {
+  min-height: 31px !important;
+  padding: 8px 17px !important;
+  font-size: .68rem !important;
+  letter-spacing: .16em !important;
+  white-space: nowrap !important;
+}
+
+/* Hero: reduce blank right side but keep the dark cinematic mood. */
+body .hero-content {
+  max-width: 760px !important;
+  padding-top: clamp(98px, 12vh, 132px) !important;
+  padding-bottom: 112px !important;
+}
+body .hero-h1 {
+  font-size: clamp(6rem, 11.4vw, 11.8rem) !important;
+  max-width: 760px !important;
+}
+body .hero-bg-image {
+  background-position: 65% center !important;
+  filter: brightness(.78) saturate(1.12) contrast(1.14) !important;
+}
+body .hero-overlay {
+  background:
+    linear-gradient(100deg, rgba(3,3,3,.95) 0%, rgba(5,5,5,.72) 34%, rgba(10,0,3,.31) 62%, rgba(5,5,5,.42) 100%),
+    radial-gradient(circle at 72% 38%, rgba(232,0,45,.28), transparent 30%),
+    radial-gradient(circle at 82% 55%, rgba(255,255,255,.06), transparent 24%),
+    linear-gradient(to bottom, rgba(7,7,7,.22), rgba(7,7,7,1) 98%) !important;
+}
+body .hero-live-grid {
+  max-width: 470px !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+}
+body .hero-live-card {
+  min-height: 64px !important;
+  padding: 12px 13px !important;
+  border-radius: 16px !important;
+}
+body .hero-live-card strong { font-size: .88rem !important; line-height: 1.08 !important; }
+body .hero-stats { right: max(44px, calc((100vw - 1240px) / 2)) !important; bottom: 60px !important; }
+
+/* Countdown: align left/right edges and clean borders. */
+body .countdown-strip {
+  margin-top: 0 !important;
+  border-radius: 0 !important;
+}
+body .cs-inner {
+  padding-block: 2px !important;
+}
+body .cs-race { min-width: 0 !important; }
+body .cs-name { letter-spacing: .055em !important; }
+body .cd-block {
+  min-width: 72px !important;
+  padding: 15px 20px !important;
+}
+
+/* Track Mode: fix right-title clipping and make panel borders intentional. */
+body .h34c-fastf1-panel,
+body .h34d2-panel {
+  grid-template-columns: minmax(0, 1.04fr) minmax(430px, .96fr) !important;
+  max-width: 1240px !important;
+  margin-inline: auto !important;
+  overflow: hidden !important;
+}
+body .h34c-fastf1-info,
+body .h34d2-info {
+  min-width: 0 !important;
+  padding-inline: clamp(34px, 3vw, 44px) !important;
+}
+body .h34c-fastf1-info h3,
+body .h34d2-info h3,
+body #rc-race-name {
+  font-size: clamp(3.05rem, 4.05vw, 4.75rem) !important;
+  line-height: .86 !important;
+  letter-spacing: .035em !important;
+  max-width: 100% !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+body .h34c-fastf1-info p,
+body .h34d2-info p { max-width: 430px !important; }
+body .h34d2-data-grid,
+body .h33b-data-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 9px !important;
+}
+body .h34d2-countdown-card,
+body .h34d2-data-grid > div,
+body .h33b-data-grid > div {
+  border-radius: 14px !important;
+  border: 1px solid rgba(255,255,255,.11) !important;
+}
+
+/* Featured merch: align card borders and avoid cramped top areas. */
+body .featured-section .section-head { margin-bottom: 44px !important; }
+body .products-grid { gap: 22px !important; }
+body .pcard {
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,.105) !important;
+}
+body .pcard-img-wrap {
+  margin: 10px 10px 0 !important;
+  width: calc(100% - 20px) !important;
+  height: clamp(222px, 17vw, 274px) !important;
+  border-radius: 16px !important;
+}
+body .pcard-info { padding: 18px 18px 20px !important; min-height: 132px !important; }
+body .pcard-name { min-height: 42px !important; }
+
+/* Teams strip: stop the first/last cars from looking accidentally cut. */
+body .home-grid-strip-section { padding-top: 88px !important; padding-bottom: 96px !important; }
+body .marquee-strip {
+  min-height: 154px !important;
+  padding: 26px 0 30px !important;
+  overflow: hidden !important;
+}
+body .marquee-strip::before,
+body .marquee-strip::after { width: 28px !important; opacity: .72 !important; }
+body .marquee-track {
+  gap: 26px !important;
+  padding-left: max(34px, calc((100vw - 1240px) / 2)) !important;
+  padding-right: 34px !important;
+}
+body .marquee-team {
+  min-width: clamp(290px, 26vw, 380px) !important;
+  min-height: 104px !important;
+  border-radius: 18px !important;
+}
+body .marquee-team-car-wrap { min-height: 62px !important; }
+body .team-car-img { max-height: 70px !important; object-fit: contain !important; }
+
+/* Quote + Beyond + Fan Pulse: equal border language and stronger spacing. */
+body .quote-section { padding: 104px 0 !important; }
+body .quote-inner {
+  width: min(100%, 620px) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+body .experience-section .section-head,
+body .testi-section .section-head { margin-bottom: 42px !important; }
+body .exp-grid,
+body .testi-grid { gap: 20px !important; }
+body .exp-card,
+body .testi-card,
+body .fan-voice-card {
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,.105) !important;
+}
+body .exp-card { min-height: 252px !important; }
+body .testi-card,
+body .fan-voice-card { min-height: 230px !important; }
+
+/* Race Lab: keep accepted design but align shell edge with other sections. */
+body .h33e4-race-lab .container,
+body .h33e2-race-lab .container,
+body .paddox-lab-section .container { width: min(100% - 88px, 1240px) !important; }
+body .paddox-lab-shell,
+body .h33e2-race-lab .paddox-lab-shell,
+body .h33e4-race-lab .paddox-lab-shell {
+  border-radius: 26px !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+}
+
+/* Footer edge alignment. */
+body .site-footer .container,
+body footer .container { width: min(100% - 88px, 1240px) !important; }
+
+@media (max-width: 1280px) {
+  body .container,
+  body .cs-inner,
+  body .race-control-inner,
+  body .footer-inner,
+  body .h33e4-race-lab .container,
+  body .h33e2-race-lab .container,
+  body .paddox-lab-section .container,
+  body .site-footer .container,
+  body footer .container { width: min(100% - 56px, 1160px) !important; }
+  body .h34c-fastf1-panel,
+  body .h34d2-panel { grid-template-columns: 1fr !important; }
+  body .h34c-fastf1-info h3,
+  body .h34d2-info h3,
+  body #rc-race-name { font-size: clamp(3.3rem, 10vw, 5.4rem) !important; }
+  body .hero-live-grid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; max-width: 520px !important; }
+}
+@media (max-width: 760px) {
+  body .container,
+  body .cs-inner,
+  body .race-control-inner,
+  body .footer-inner,
+  body .h33e4-race-lab .container,
+  body .h33e2-race-lab .container,
+  body .paddox-lab-section .container,
+  body .site-footer .container,
+  body footer .container { width: min(100% - 34px, 100%) !important; }
+  body #navbar { height: 56px !important; }
+  body #navbar .nav-inner { width: min(100% - 28px, 100%) !important; }
+  body #navbar .nav-logo { min-width: auto !important; }
+  body #navbar .logo-text { font-size: 1.18rem !important; }
+  body .hero-content { padding-inline: 22px !important; }
+  body .hero-live-grid { grid-template-columns: 1fr !important; max-width: 100% !important; }
+  body .hero-stats { position: relative !important; right: auto !important; bottom: auto !important; margin: 20px 22px 0 !important; }
+  body .cd-block { min-width: 0 !important; padding: 14px 12px !important; }
+  body .marquee-track { padding-left: 18px !important; }
+  body .marquee-team { min-width: 270px !important; }
+}
