@@ -1275,9 +1275,10 @@ function openModal(id) {
   /* Image */
   const wrap = document.getElementById('modal-img-wrap');
   wrap.style.background = p.gradient || 'linear-gradient(135deg,#111,#1a1a1a)';
+  wrap.classList.toggle('modal-img-has-photo', Boolean(p.image));
   wrap.innerHTML = `
-    <img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;filter:brightness(.85)"
-      onerror="this.outerHTML='<span style=font-size:6rem>${p.emoji}</span>'"/>
+    <img class="modal-product-img" src="${escapeHTML(p.image)}" alt="${escapeHTML(p.name)}"
+      onerror="this.outerHTML='<span class=&quot;modal-fallback-icon&quot;>${escapeHTML(p.emoji)}</span>'"/>
   `;
 
   /* Product options: sizes only for apparel, quantity for all other categories */
