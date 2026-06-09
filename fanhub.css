@@ -8441,3 +8441,78 @@ body #navbar .nav-cta-btn,
 body #navbar .nav-cta-btn .cta-arrow{
   color: #fff !important;
 }
+
+/* ============================================================
+   PADDOX F1.5 — Quotes Logo + Share Preview Premium Polish
+   Scope: quotes section only. Navbar/hero/wallpapers/backend untouched.
+   ============================================================ */
+.qf-brand.qf-brand-final{
+  min-width:160px!important;
+  justify-content:flex-end!important;
+  opacity:.96!important;
+  filter:drop-shadow(0 0 16px rgba(232,0,45,.12));
+}
+.qf-brand-lockup-img{
+  width:150px!important;
+  height:auto!important;
+  display:block!important;
+  object-fit:contain!important;
+  opacity:.96!important;
+}
+.qf-brand-icon-wrap,.qf-brand-icon,.qf-brand-wordmark{
+  display:none!important;
+}
+.qf-premium-card .qf-footer{
+  align-items:center!important;
+  gap:18px!important;
+}
+.qf-premium-card .qf-drv{
+  min-width:0!important;
+}
+.qf-premium-card .qf-dname{
+  letter-spacing:.5px!important;
+}
+.quote-preview-card{
+  width:min(640px,96vw)!important;
+  padding:22px!important;
+  border-radius:24px!important;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(232,0,45,.16),transparent 34%),
+    linear-gradient(145deg,rgba(18,18,22,.96),rgba(5,5,7,.98))!important;
+  border:1px solid rgba(255,255,255,.15)!important;
+  box-shadow:0 34px 110px rgba(0,0,0,.76),0 0 0 1px rgba(232,0,45,.10),0 0 54px rgba(232,0,45,.14)!important;
+}
+.quote-preview-kicker{
+  color:#ff1746!important;
+  letter-spacing:3.8px!important;
+}
+.quote-preview-card h3{
+  font-size:2.35rem!important;
+  line-height:.9!important;
+}
+.quote-preview-card p{
+  max-width:460px!important;
+  line-height:1.55!important;
+}
+.quote-preview-frame{
+  background:linear-gradient(180deg,#050507,#020203)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  padding:12px!important;
+  border-radius:20px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 20px 50px rgba(0,0,0,.38)!important;
+}
+.quote-preview-frame img{
+  border-radius:14px!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.46)!important;
+}
+.quote-preview-actions button{
+  border-radius:0!important;
+  clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)!important;
+  min-width:150px!important;
+}
+@media(max-width:720px){
+  .qf-brand-lockup-img{width:122px!important;}
+  .quote-preview-card{padding:16px!important;}
+  .quote-preview-card h3{font-size:1.85rem!important;}
+  .quote-preview-actions button{flex:1 1 100%;}
+}

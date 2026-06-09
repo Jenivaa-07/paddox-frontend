@@ -1897,8 +1897,7 @@ function renderRealtimeQuotes() {
           </div>
 
           <div class="qf-brand qf-brand-mark compact qf-brand-final">
-            <span class="qf-brand-icon-wrap"><img src="${PADDOX_BRAND_ICON}" alt="PADDOX logo" class="qf-brand-icon" loading="lazy"></span>
-            <span class="qf-brand-wordmark">PADDO<span>X</span></span>
+            <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX Motorsport Lifestyle" class="qf-brand-lockup-img" loading="lazy">
           </div>
         </div>
       </div>
@@ -2154,7 +2153,8 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = accent;
   ctx.fillRect(cardX, cardY, cardW, 10);
 
-  const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
+  const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
+  const brandIcon = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
   const img = await loadQuoteImageForCanvas(quoteImageValue(q));
 
   // Slightly slimmer header for better balance
@@ -2170,10 +2170,15 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.strokeStyle = glassLine;
   ctx.stroke();
 
-  drawPaddoxAlignedBrand(ctx, 128, 131, brandLogo, { size: 84, fontSize: 76, gap: 16, letterGap: 5 });
-  ctx.font = '800 22px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.66)';
-  ctx.fillText('FAN HUB • VIP QUOTE CARD', 230, 219);
+  // Official PADDOX horizontal lockup — clearer than the old dark icon/text rendering
+  if (brandLockup) {
+    drawPaddoxLockupCanvas(ctx, 128, 128, brandLockup, { width: 300, height: 68 });
+  } else {
+    drawPaddoxAlignedBrand(ctx, 128, 131, brandIcon, { size: 72, fontSize: 64, gap: 14, letterGap: 4 });
+  }
+  ctx.font = '800 21px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.68)';
+  ctx.fillText('FAN HUB • VIP QUOTE CARD', 132, 216);
 
   // Premium chip
   const chipText = String(q.era || 'QUOTE').toUpperCase();
@@ -2252,9 +2257,9 @@ async function buildQuoteShareCanvas(q = {}) {
   if (img) {
     const s = Math.min(img.width, img.height), sx = (img.width - s)/2, sy = (img.height - s)/2;
     ctx.drawImage(img, sx, sy, s, s, portraitCx - 90, portraitCy - 90, 180, 180);
-  } else if (brandLogo) {
-    const s = Math.min(brandLogo.width, brandLogo.height), sx = (brandLogo.width - s)/2, sy = (brandLogo.height - s)/2;
-    ctx.drawImage(brandLogo, sx, sy, s, s, portraitCx - 90, portraitCy - 90, 180, 180);
+  } else if (brandIcon) {
+    const s = Math.min(brandIcon.width, brandIcon.height), sx = (brandIcon.width - s)/2, sy = (brandIcon.height - s)/2;
+    ctx.drawImage(brandIcon, sx, sy, s, s, portraitCx - 90, portraitCy - 90, 180, 180);
   }
   ctx.restore();
 
@@ -2266,7 +2271,11 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.fillStyle = footer; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.11)'; ctx.lineWidth = 1.1; ctx.stroke();
   ctx.font = '800 22px Barlow Condensed, Arial, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.80)';
   ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1147);
-  drawPaddoxAlignedBrand(ctx, 730, 1110, brandLogo, { size: 52, fontSize: 50, gap: 13, letterGap: 3 });
+  if (brandLockup) {
+    drawPaddoxLockupCanvas(ctx, 720, 1115, brandLockup, { width: 220, height: 54 });
+  } else {
+    drawPaddoxAlignedBrand(ctx, 730, 1110, brandIcon, { size: 52, fontSize: 50, gap: 13, letterGap: 3 });
+  }
 
   const vignette = ctx.createRadialGradient(W/2, H/2, 160, W/2, H/2, 730);
   vignette.addColorStop(0, 'rgba(0,0,0,0)'); vignette.addColorStop(1, 'rgba(0,0,0,.26)');
