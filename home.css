@@ -14577,3 +14577,182 @@ body .modal-wish-btn{
     font-size: clamp(1.62rem, 9vw, 2.05rem) !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.28 — QUICK VIEW MOBILE MODAL READABILITY LOCK
+   Scope: mobile Quick View modal only. Desktop modal, Featured Merch
+   grid, navbar, hero, track, teams, footer, and realtime logic untouched.
+   Fix: stop product modal from feeling like a cropped desktop modal on
+   iPhone/Android widths; improve image, title, size chips and CTA flow.
+   ============================================================ */
+@media (max-width: 620px){
+  body .modal-overlay{
+    padding: 8px !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  body .modal-box{
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 92dvh !important;
+    grid-template-columns: 1fr !important;
+    border-radius: 22px 22px 0 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background:
+      radial-gradient(circle at 78% 8%, rgba(232,0,45,.16), transparent 28%),
+      linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.012)),
+      #080808 !important;
+  }
+
+  body .modal-box::before{
+    display: none !important;
+    content: none !important;
+  }
+
+  body .modal-close{
+    top: 12px !important;
+    right: 12px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 14px !important;
+    z-index: 8 !important;
+  }
+
+  body .modal-img-wrap{
+    min-height: 248px !important;
+    height: 248px !important;
+    padding: 14px 14px 10px !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,.12), transparent 35%),
+      linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.018) 54%, rgba(0,0,0,.28)),
+      #101010 !important;
+  }
+
+  body .modal-img-wrap::before,
+  body .modal-img-wrap::after{
+    display: none !important;
+    content: none !important;
+  }
+
+  body .modal-product-img{
+    width: min(88%, 292px) !important;
+    max-width: 292px !important;
+    max-height: 216px !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    border-radius: 14px !important;
+    background: #f7f7f7 !important;
+    box-shadow: 0 22px 48px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.10) !important;
+  }
+
+  body .modal-info{
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 22px 18px 26px !important;
+    gap: 12px !important;
+    overflow: visible !important;
+    justify-content: flex-start !important;
+  }
+
+  body .modal-team{
+    font-size: .62rem !important;
+    letter-spacing: .42em !important;
+    margin: 0 0 2px !important;
+  }
+
+  body .modal-name{
+    max-width: 100% !important;
+    font-size: clamp(1.36rem, 7.2vw, 1.72rem) !important;
+    line-height: 1.08 !important;
+    letter-spacing: .035em !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  body .modal-rating{
+    font-size: .82rem !important;
+    margin: 2px 0 0 !important;
+  }
+
+  body .modal-price{
+    font-size: clamp(1.9rem, 9vw, 2.28rem) !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  body .modal-desc{
+    max-width: 100% !important;
+    font-size: .86rem !important;
+    line-height: 1.58 !important;
+    color: rgba(255,255,255,.70) !important;
+  }
+
+  body .modal-divider{
+    margin: 2px 0 !important;
+  }
+
+  body .modal-options{
+    width: 100% !important;
+  }
+
+  body .modal-size-label{
+    font-size: .62rem !important;
+    letter-spacing: .32em !important;
+    margin-bottom: 8px !important;
+  }
+
+  body .size-opts{
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+    width: 100% !important;
+  }
+
+  body .size-btn{
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 42px !important;
+    border-radius: 10px !important;
+    font-size: .84rem !important;
+  }
+
+  body .modal-add-btn{
+    width: 100% !important;
+    min-height: 54px !important;
+    margin-top: 8px !important;
+    clip-path: polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%) !important;
+    font-size: .78rem !important;
+    letter-spacing: .20em !important;
+    gap: 10px !important;
+  }
+
+  body .modal-wish-btn{
+    width: 100% !important;
+    min-height: 46px !important;
+    font-size: .76rem !important;
+    letter-spacing: .16em !important;
+  }
+}
+
+@media (max-width: 390px){
+  body .modal-img-wrap{
+    height: 232px !important;
+    min-height: 232px !important;
+  }
+  body .modal-product-img{
+    width: min(86%, 270px) !important;
+    max-width: 270px !important;
+    max-height: 200px !important;
+  }
+  body .modal-info{
+    padding: 20px 16px 24px !important;
+  }
+  body .modal-name{
+    font-size: clamp(1.26rem, 6.9vw, 1.58rem) !important;
+  }
+}
