@@ -3692,7 +3692,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
             <div class="section-label">LIVE RACE CONTROL</div>
             <h2 class="section-title">TRACK <span class="accent">MODE</span></h2>
           </div>
-          <p class="race-control-sub reveal-up in-view">Premium circuit view synced with the next-race countdown.</p>
+          
         </div>
         <div class="h34c-fastf1-panel h34d2-panel liquid-sweep">
           <div class="h34c-fastf1-stage h34d2-stage">
