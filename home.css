@@ -13525,3 +13525,48 @@ body #race-control-section .h33b-data-row{
     height: 56px !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.21 — Mobile Team Strip Real Motion Fix
+   Reason: previous mobile CSS kept transform: translate3d(0,0,0) !important
+   on .marquee-track, which overrode the keyframe transform and made the
+   strip look static. This phase lets JS own mobile motion safely.
+   Desktop remains untouched.
+   ============================================================ */
+@media (max-width: 768px) {
+  body .marquee-strip {
+    overflow: hidden !important;
+    width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+  }
+
+  body .marquee-track {
+    animation: none !important;
+    transition: none !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    will-change: transform !important;
+  }
+
+  body .marquee-track.paddox-mobile-marquee-running {
+    animation: none !important;
+  }
+
+  body .marquee-team {
+    flex: 0 0 calc(100vw - 58px) !important;
+    width: calc(100vw - 58px) !important;
+    min-width: calc(100vw - 58px) !important;
+    max-width: 340px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body .marquee-team {
+    flex-basis: calc(100vw - 50px) !important;
+    width: calc(100vw - 50px) !important;
+    min-width: calc(100vw - 50px) !important;
+  }
+}

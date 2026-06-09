@@ -3927,3 +3927,95 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
 
 
 /* PADDOX H4.0.4: visual-only package; realtime logic preserved from H4.0.3. */
+
+/* ============================================================
+   PADDOX H4.0.21 — Force mobile constructor strip motion
+   CSS transform had an !important lock from older mobile overrides, so
+   this small controller owns the transform on mobile with inline priority.
+   Desktop behavior is untouched.
+   ============================================================ */
+(function initPaddoxMobileTeamStripMotion(){
+  let raf = 0;
+  let x = 0;
+  let last = 0;
+  let trackRef = null;
+
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    last = 0;
+    if (trackRef) {
+      trackRef.classList.remove('paddox-mobile-marquee-running');
+      trackRef.style.removeProperty('transform');
+    }
+  }
+
+  function getHalfWidth(track) {
+    const children = Array.from(track.children);
+    if (!children.length) return 0;
+    const halfCount = Math.max(1, Math.floor(children.length / 2));
+    const first = children[0];
+    const lastItem = children[halfCount - 1];
+    if (!first || !lastItem) return track.scrollWidth / 2;
+    const firstRect = first.getBoundingClientRect();
+    const lastRect = lastItem.getBoundingClientRect();
+    return Math.max(1, (lastRect.right - firstRect.left) + 16);
+  }
+
+  function start() {
+    const track = document.getElementById('marquee-track');
+    if (!track || window.innerWidth > 768) {
+      stop();
+      return;
+    }
+
+    if (track.children.length < 2) return;
+    trackRef = track;
+    track.classList.add('paddox-mobile-marquee-running');
+
+    const speed = window.innerWidth <= 390 ? 28 : 34; // px per second, visible but not distracting
+    const loopWidth = getHalfWidth(track);
+
+    const tick = now => {
+      if (window.innerWidth > 768) {
+        stop();
+        return;
+      }
+      if (!last) last = now;
+      const dt = Math.min(64, now - last) / 1000;
+      last = now;
+      x -= speed * dt;
+      if (Math.abs(x) >= loopWidth) x = 0;
+      track.style.setProperty('transform', `translate3d(${x}px, 0, 0)`, 'important');
+      track.style.setProperty('animation-play-state', 'running', 'important');
+      raf = requestAnimationFrame(tick);
+    };
+
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  function boot() {
+    stop();
+    x = 0;
+    setTimeout(start, 80);
+    setTimeout(start, 600);
+  }
+
+  window.addEventListener('resize', boot, { passive: true });
+  window.addEventListener('orientationchange', boot, { passive: true });
+  document.addEventListener('DOMContentLoaded', boot);
+
+  const originalRender = window.renderHomeMarquee;
+  if (typeof originalRender === 'function') {
+    window.renderHomeMarquee = function patchedRenderHomeMarquee(){
+      const result = originalRender.apply(this, arguments);
+      boot();
+      return result;
+    };
+  } else {
+    setInterval(() => {
+      const track = document.getElementById('marquee-track');
+      if (track && track !== trackRef) boot();
+    }, 1200);
+  }
+})();
