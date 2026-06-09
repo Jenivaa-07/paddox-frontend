@@ -14142,3 +14142,188 @@ body .modal-close{
     letter-spacing: .16em !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.25 — Featured Merch + Quick View Recovery Lock
+   Purpose: remove the over-designed H4.0.24 studio block while
+   keeping the stable merch/modal structure. Navbar, hero, track,
+   teams, footer, and realtime logic untouched.
+   ============================================================ */
+
+/* Keep product cards premium but stop the over-heavy treatment */
+body .featured-section .section-head{
+  margin-bottom: clamp(38px, 4.2vw, 58px) !important;
+}
+body .products-grid{
+  gap: clamp(20px, 1.8vw, 26px) !important;
+}
+body .pcard{
+  border-radius: 22px !important;
+  min-height: 442px !important;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(232,0,45,.055), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+    #080808 !important;
+  border-color: rgba(255,255,255,.085) !important;
+}
+body .pcard::before{
+  opacity: .22 !important;
+  border-radius: 21px !important;
+}
+body .pcard-img-wrap{
+  height: clamp(236px, 19.2vw, 288px) !important;
+  margin: 14px 14px 0 !important;
+  width: calc(100% - 28px) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(232,0,45,.12), transparent 44%),
+    #090909 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 14px 30px rgba(0,0,0,.26) !important;
+}
+body .pcard-img-wrap::before{
+  opacity: .16 !important;
+}
+body .pcard-img{
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+body .pcard:first-child .pcard-img{
+  object-fit: contain !important;
+  padding: clamp(20px, 2vw, 30px) !important;
+}
+body .pcard-overlay{
+  inset: 14px !important;
+  height: clamp(236px, 19.2vw, 288px) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(232,0,45,.18), transparent 37%),
+    linear-gradient(180deg, rgba(8,8,8,.34), rgba(7,7,7,.76)) !important;
+  backdrop-filter: blur(7px) saturate(1.12) !important;
+  -webkit-backdrop-filter: blur(7px) saturate(1.12) !important;
+  gap: 12px !important;
+}
+body .pcard-overlay::before{
+  opacity: .55 !important;
+  width: 44px !important;
+}
+body .ov-btn{
+  width: min(72%, 206px) !important;
+  min-height: 45px !important;
+  padding: 13px 20px !important;
+  border-radius: 999px !important;
+}
+body .pcard-info{
+  padding: 20px 20px 22px !important;
+}
+body .pcard-name{
+  min-height: 48px !important;
+}
+
+/* Quick View recovery: remove the ugly white floating block */
+body .modal-box{
+  width: min(92vw, 1080px) !important;
+  max-width: 1080px !important;
+  grid-template-columns: minmax(410px, .98fr) minmax(390px, .94fr) !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(232,0,45,.12), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,.046), rgba(255,255,255,.012)),
+    #080808 !important;
+  border: 1px solid rgba(255,255,255,.105) !important;
+  border-top: 2px solid rgba(232,0,45,.86) !important;
+}
+body .modal-img-wrap{
+  min-height: 540px !important;
+  padding: clamp(26px, 3vw, 42px) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,255,255,.50), transparent 42%),
+    linear-gradient(145deg, #f2f2f2 0%, #dedede 60%, #d3d3d3 100%) !important;
+  overflow:hidden !important;
+}
+body .modal-img-wrap::before{
+  display:none !important;
+  content:none !important;
+}
+body .modal-img-wrap::after{
+  background:
+    linear-gradient(180deg, rgba(232,0,45,.82) 0 2px, transparent 2px),
+    radial-gradient(circle at 50% 112%, rgba(0,0,0,.16), transparent 36%) !important;
+  opacity: .62 !important;
+}
+body .modal-product-img{
+  position:relative !important;
+  z-index:2 !important;
+  width:auto !important;
+  max-width: 86% !important;
+  max-height: 500px !important;
+  object-fit: contain !important;
+  object-position:center center !important;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,.15)) !important;
+  transform:none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+body .modal-info{
+  padding: clamp(40px, 3.25vw, 54px) clamp(36px, 3.25vw, 50px) !important;
+  gap: 15px !important;
+}
+body .modal-name{
+  font-size: clamp(2rem, 2.45vw, 2.8rem) !important;
+  line-height: 1.08 !important;
+  max-width: 96% !important;
+}
+body .modal-desc{
+  line-height: 1.72 !important;
+  max-width: 520px !important;
+}
+body .modal-add-btn{
+  margin-top: 14px !important;
+  min-height: 64px !important;
+  background: #f00032 !important;
+  box-shadow: 0 18px 42px rgba(232,0,45,.25), inset 0 1px 0 rgba(255,255,255,.15) !important;
+}
+body .modal-close{
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 15px !important;
+}
+
+@media (max-width: 1060px){
+  body .modal-box{
+    grid-template-columns: 1fr !important;
+    width: min(94vw, 760px) !important;
+  }
+  body .modal-img-wrap{
+    min-height: 380px !important;
+  }
+  body .modal-product-img{
+    max-height: 330px !important;
+  }
+}
+@media (max-width: 620px){
+  body .pcard{
+    min-height: 420px !important;
+  }
+  body .pcard-img-wrap,
+  body .pcard-overlay{
+    height: 230px !important;
+  }
+  body .modal-box{
+    width: calc(100vw - 24px) !important;
+  }
+  body .modal-img-wrap{
+    min-height: 300px !important;
+    padding: 18px !important;
+  }
+  body .modal-product-img{
+    max-width: 88% !important;
+    max-height: 250px !important;
+  }
+  body .modal-info{
+    padding: 28px 20px 30px !important;
+  }
+}
