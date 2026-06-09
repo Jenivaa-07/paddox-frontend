@@ -3602,3 +3602,254 @@ body .view-btn{
   body .pcard{ min-height: 430px !important; }
   body .pcard-img-wrap{ height: 250px !important; min-height: 250px !important; }
 }
+
+/* ============================================================
+   PADDOX SHOP S1.2 — HOME-LANGUAGE SHOP CONTAINMENT LOCK
+   Fixes the shop page looking like a separate dashboard/admin page.
+   Keeps product/filter/cart/checkout JS untouched.
+   ============================================================ */
+
+/* Navbar: keep the accepted Home lockup, but make Shop match the quiet Home scale */
+body #navbar{
+  height: 66px !important;
+  min-height: 66px !important;
+  background: rgba(5,5,5,.94) !important;
+  border-bottom: 1px solid rgba(232,0,45,.12) !important;
+}
+body #navbar .nav-inner{
+  width: min(calc(100% - 80px), 1340px) !important;
+  grid-template-columns: 164px minmax(500px, 1fr) auto !important;
+  gap: clamp(18px, 2.1vw, 30px) !important;
+}
+body #navbar .nav-logo.paddox-brand-lockup,
+body #navbar .brand-lockup-logo{
+  width: 164px !important;
+  min-width: 164px !important;
+  max-width: 164px !important;
+  max-height: 39px !important;
+}
+body #navbar .nav-links{
+  min-height: 46px !important;
+  padding: 5px !important;
+  gap: 5px !important;
+  background: rgba(255,255,255,.03) !important;
+  border-color: rgba(255,255,255,.075) !important;
+}
+body #navbar .nav-link{
+  min-height: 36px !important;
+  padding: 0 16px !important;
+  letter-spacing: .17em !important;
+}
+body #navbar .nav-search-btn,
+body #navbar .nav-cart-btn{
+  width: 40px !important;
+  height: 40px !important;
+}
+body #navbar .nav-cta-btn{
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 24px !important;
+}
+
+/* Hero: more Home-like cinematic intro, less generic shop billboard */
+body .shop-hero{
+  min-height: 54vh !important;
+  align-items: center !important;
+  border-bottom: 1px solid rgba(232,0,45,.13) !important;
+}
+body .shop-hero-bg{
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.86), rgba(0,0,0,.32)),
+    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1800&q=80') center 58%/cover no-repeat !important;
+  filter: brightness(.34) saturate(.85) contrast(1.08) !important;
+  transform: scale(1.02) !important;
+}
+body .shop-hero-overlay{
+  background:
+    radial-gradient(circle at 18% 34%, rgba(232,0,45,.20), transparent 34%),
+    linear-gradient(105deg, rgba(7,7,7,.98) 0%, rgba(7,7,7,.70) 48%, rgba(7,7,7,.42) 100%),
+    linear-gradient(to top, rgba(7,7,7,1) 0%, transparent 48%) !important;
+}
+body .shop-hero-content{
+  width: min(calc(100% - 120px), 1320px) !important;
+  margin: 0 auto !important;
+  padding: clamp(76px, 8vh, 96px) 0 clamp(50px, 6.5vh, 70px) !important;
+}
+body .shop-hero-title{
+  font-size: clamp(4.5rem, 5.8vw, 6.9rem) !important;
+  line-height: .88 !important;
+  text-shadow: 0 20px 55px rgba(0,0,0,.45) !important;
+}
+body .shop-hero-stats{
+  max-width: 408px !important;
+  padding: 14px 18px !important;
+  background: rgba(15,15,15,.50) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-left: 2px solid var(--red) !important;
+}
+
+/* Category bar: centered like a Home section control, not full-width admin tabs */
+body .cat-bar{
+  top: 66px !important;
+  background: rgba(8,8,8,.95) !important;
+  border-top: 1px solid rgba(232,0,45,.10) !important;
+  border-bottom: 1px solid rgba(232,0,45,.10) !important;
+  box-shadow: 0 12px 36px rgba(0,0,0,.38) !important;
+}
+body .cat-bar-inner{
+  width: min(calc(100% - 120px), 1320px) !important;
+  margin: 0 auto !important;
+  gap: 10px !important;
+  padding: 0 !important;
+}
+body .cat-tab{
+  min-height: 52px !important;
+  padding: 0 18px !important;
+  border-radius: 14px 14px 0 0 !important;
+  background: rgba(255,255,255,.026) !important;
+  border-left: 1px solid rgba(255,255,255,.04) !important;
+  border-right: 1px solid rgba(255,255,255,.04) !important;
+}
+body .cat-tab.on{
+  background: linear-gradient(180deg, rgba(232,0,45,.20), rgba(232,0,45,.06)) !important;
+  border-bottom-color: var(--red) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+/* Main shop: contain the whole layout like Home sections instead of viewport-flush dashboard */
+body .shop-layout{
+  width: min(calc(100% - 120px), 1320px) !important;
+  margin: 34px auto 110px !important;
+  display: grid !important;
+  grid-template-columns: 236px minmax(0, 1fr) !important;
+  gap: 34px !important;
+  min-height: 0 !important;
+  background: transparent !important;
+}
+body .shop-sidebar{
+  top: 134px !important;
+  height: calc(100vh - 154px) !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(180deg, rgba(17,17,17,.92), rgba(7,7,7,.86)) !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.42) !important;
+  overflow: hidden auto !important;
+}
+body .sidebar-inner{
+  padding: 22px 18px !important;
+}
+body .filter-group-title{
+  font-size: .68rem !important;
+  letter-spacing: .24em !important;
+  color: rgba(255,255,255,.82) !important;
+}
+body .filter-group-title .filter-mark,
+body .filter-mark{
+  color: var(--red) !important;
+}
+body .team-fopt,
+body .fopt{
+  min-height: 42px !important;
+  padding: 7px 10px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.025) !important;
+  border: 1px solid rgba(255,255,255,.055) !important;
+}
+body .team-fopt:hover,
+body .fopt:hover{
+  border-color: rgba(232,0,45,.28) !important;
+  background: rgba(232,0,45,.045) !important;
+}
+
+/* Products: match Home card rhythm and prevent the scattered/tiny shop look */
+body .products-area{
+  padding: 0 !important;
+  background: transparent !important;
+  min-width: 0 !important;
+}
+body .shop-toolbar{
+  min-height: 64px !important;
+  margin-bottom: 30px !important;
+  padding: 16px 18px !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, rgba(232,0,45,.07), rgba(255,255,255,.025)) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.28) !important;
+}
+body .filter-toggle-btn,
+body .sort-select,
+body .view-btn{
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+body .products-grid{
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 26px !important;
+  align-items: stretch !important;
+}
+body .pcard{
+  min-height: 468px !important;
+  border-radius: 22px !important;
+  background: linear-gradient(180deg, rgba(18,18,18,.98), rgba(7,7,7,.98)) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: 0 22px 54px rgba(0,0,0,.38) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body .pcard-img-wrap{
+  height: 260px !important;
+  min-height: 260px !important;
+  margin: 14px 14px 0 !important;
+  border-radius: 18px !important;
+  background: #101010 !important;
+}
+body .pcard-info{
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 20px 20px 22px !important;
+}
+body .pcard-name{
+  font-size: 1.16rem !important;
+  min-height: 48px !important;
+  line-height: 1.16 !important;
+}
+body .pcard-foot{
+  margin-top: auto !important;
+  padding-top: 17px !important;
+}
+
+@media (min-width: 1500px){
+  body .shop-layout,
+  body .cat-bar-inner,
+  body .shop-hero-content{ max-width: 1360px !important; }
+  body .products-grid{ grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
+}
+@media (max-width: 1280px){
+  body #navbar .nav-inner{ width: min(calc(100% - 44px), 1180px) !important; grid-template-columns: 150px minmax(430px,1fr) auto !important; }
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{ width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
+  body .shop-layout,
+  body .cat-bar-inner,
+  body .shop-hero-content{ width: min(calc(100% - 64px), 1180px) !important; }
+  body .shop-layout{ grid-template-columns: 218px minmax(0,1fr) !important; gap: 28px !important; }
+  body .products-grid{ grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+}
+@media (max-width: 1060px){
+  body #navbar .nav-inner{ display:flex !important; width:min(calc(100% - 34px),100%) !important; }
+  body #navbar .nav-links{ display:none !important; }
+  body #navbar .hamburger{ display:flex !important; }
+  body .shop-layout{ display:block !important; width:min(calc(100% - 38px),100%) !important; margin-top: 24px !important; }
+  body .shop-sidebar{ position:relative !important; top:auto !important; height:auto !important; max-height: none !important; margin-bottom: 24px !important; }
+  body .products-grid{ grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+}
+@media (max-width: 620px){
+  body #navbar{ height:64px !important; min-height:64px !important; }
+  body .shop-hero{ min-height: 58vh !important; padding-top:64px !important; }
+  body .shop-hero-content,
+  body .cat-bar-inner{ width:min(calc(100% - 28px),100%) !important; }
+  body .shop-hero-title{ font-size: clamp(3.4rem, 16vw, 5rem) !important; }
+  body .cat-bar{ top:64px !important; }
+  body .products-grid{ grid-template-columns:1fr !important; }
+}
