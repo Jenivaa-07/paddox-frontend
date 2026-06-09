@@ -5,8 +5,8 @@
 console.log('PADDOX H3.4C.2 Fan Hub circuit identity matcher loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
-const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=A4_10C_3';
+const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-horizontal-white.png?v=F1';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=F1';
 
 /* Phase H3.4C.4 — PADDOX brand cleanup: AI Studio removed from Fan Hub UI. */
 function removePaddoxAiStudioUI() {
