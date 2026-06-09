@@ -13389,3 +13389,139 @@ body #race-control-section .h33b-data-row{
   from { transform: translate3d(0,0,0); }
   to { transform: translate3d(-50%,0,0); }
 }
+
+/* ============================================================
+   PADDOX H4.0.20 — Mobile Constructor Strip Final Motion Lock
+   Desktop untouched. This override makes the mobile Teams strip
+   a real moving single-card carousel instead of a static two-card row.
+   ============================================================ */
+@media (max-width: 768px) {
+  .home-grid-strip-section {
+    padding-top: 64px !important;
+    padding-bottom: 18px !important;
+    overflow: hidden !important;
+  }
+
+  .home-grid-strip-section .container {
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  .home-grid-strip-section .section-head {
+    margin-bottom: 24px !important;
+  }
+
+  .home-grid-strip-section .section-label {
+    font-size: .64rem !important;
+    letter-spacing: 3.2px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .grid-strip-title {
+    font-size: clamp(2.15rem, 13vw, 3rem) !important;
+    line-height: .92 !important;
+    max-width: 320px !important;
+  }
+
+  .marquee-strip {
+    width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+    min-height: 152px !important;
+    height: 152px !important;
+    padding: 14px 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    touch-action: pan-y !important;
+  }
+
+  .marquee-strip::before,
+  .marquee-strip::after {
+    width: 34px !important;
+    opacity: .96 !important;
+  }
+
+  .marquee-track {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    gap: 16px !important;
+    padding: 0 22px !important;
+    transform: translate3d(0,0,0) !important;
+    animation: paddoxMobileTeamRoll 26s linear infinite !important;
+    animation-play-state: running !important;
+    will-change: transform !important;
+  }
+
+  .marquee-strip:hover .marquee-track,
+  .marquee-strip:active .marquee-track,
+  .marquee-track:hover {
+    animation-play-state: running !important;
+  }
+
+  .marquee-team {
+    width: calc(100vw - 58px) !important;
+    min-width: calc(100vw - 58px) !important;
+    max-width: 340px !important;
+    height: 116px !important;
+    min-height: 116px !important;
+    padding: 13px 15px 9px !important;
+    border-radius: 16px !important;
+  }
+
+  .marquee-team-head {
+    gap: 12px !important;
+  }
+
+  .team-logo-orb {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .team-badge-img {
+    width: 23px !important;
+    height: 23px !important;
+    max-width: 23px !important;
+    max-height: 23px !important;
+  }
+
+  .marquee-team-name {
+    font-size: 1.02rem !important;
+    letter-spacing: 1px !important;
+    white-space: nowrap !important;
+  }
+
+  .marquee-team-car-wrap {
+    height: 61px !important;
+    margin-top: 3px !important;
+  }
+
+  .team-car-img {
+    object-position: left center !important;
+    transform: translateX(-4px) scale(1.03) !important;
+  }
+
+  @keyframes paddoxMobileTeamRoll {
+    0%   { transform: translate3d(0,0,0) !important; }
+    100% { transform: translate3d(calc(-50% - 8px),0,0) !important; }
+  }
+}
+
+@media (max-width: 390px) {
+  .marquee-strip {
+    min-height: 144px !important;
+    height: 144px !important;
+  }
+  .marquee-team {
+    width: calc(100vw - 50px) !important;
+    min-width: calc(100vw - 50px) !important;
+    height: 110px !important;
+    min-height: 110px !important;
+  }
+  .marquee-team-car-wrap {
+    height: 56px !important;
+  }
+}
