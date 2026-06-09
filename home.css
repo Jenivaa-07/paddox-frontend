@@ -11893,3 +11893,207 @@ body .footer-bottom{
   body .site-footer .footer-logo.h33e-footer-logo.paddox-footer-brand-lockup,
   body .site-footer .footer-lockup-logo{ width: min(270px, 78vw) !important; max-width: min(270px, 78vw) !important; }
 }
+
+/* ============================================================
+   PADDOX H4.0.13 — HERO RESTORE ONLY LOCK
+   Scope: Hero section only. Navbar/footer/product/modal are untouched.
+   Fix: restore premium left-led hero composition after H4.0.12 over-centered it.
+   ============================================================ */
+
+/* Desktop / tablet hero composition */
+body .hero,
+body .hero.h32a-hero{
+  min-height: 100svh !important;
+  padding-top: var(--nav-h) !important;
+  align-items: center !important;
+}
+
+body .hero-content,
+body .h32a-hero .hero-content{
+  width: min(100%, 860px) !important;
+  max-width: 860px !important;
+  padding-left: clamp(34px, 7vw, 112px) !important;
+  padding-right: 24px !important;
+  padding-top: clamp(60px, 8vh, 106px) !important;
+  text-align: left !important;
+  margin: 0 !important;
+}
+
+body .hero-eyebrow,
+body .h32a-hero .hero-eyebrow{
+  justify-content: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  margin-bottom: clamp(18px, 2.3vh, 26px) !important;
+}
+
+body .hero-h1,
+body .h32a-hero .hero-h1{
+  width: max-content !important;
+  max-width: min(760px, calc(100vw - 64px)) !important;
+  margin: 0 0 clamp(18px, 3vh, 30px) 0 !important;
+  text-align: left !important;
+  align-items: flex-start !important;
+  font-size: clamp(5.6rem, 10.8vw, 10.4rem) !important;
+  line-height: .84 !important;
+  letter-spacing: .015em !important;
+  transform: none !important;
+}
+
+body .hero-h1 .h1-line,
+body .h32a-hero .hero-h1 .h1-line{
+  text-align: left !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+body .hero-sub,
+body .h32a-hero .hero-sub{
+  max-width: 620px !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  margin-bottom: clamp(26px, 4vh, 40px) !important;
+  text-align: left !important;
+  font-size: clamp(.98rem, 1.08vw, 1.12rem) !important;
+  line-height: 1.72 !important;
+}
+
+body .hero-btns,
+body .h32a-hero .hero-btns{
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  margin-bottom: 32px !important;
+}
+
+body .hero-ticker,
+body .h32a-hero .hero-ticker{
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+body .hero-live-grid,
+body .h32a-hero .hero-live-grid{
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  max-width: 610px !important;
+  justify-content: start !important;
+}
+
+body .hero-stats,
+body .h32a-hero .hero-stats{
+  right: clamp(34px, 7vw, 112px) !important;
+  bottom: clamp(50px, 8vh, 88px) !important;
+}
+
+/* Restore the cinematic hero lighting without changing the navbar */
+body .h32a-hero .hero-overlay,
+body .hero .hero-overlay{
+  background:
+    linear-gradient(100deg, rgba(5,5,5,.98) 0%, rgba(5,5,5,.84) 44%, rgba(5,5,5,.44) 100%),
+    radial-gradient(circle at 78% 35%, rgba(232,0,45,.17), transparent 33%),
+    linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,.34) 44%, transparent 100%) !important;
+}
+
+/* Narrow desktop / tablet: keep hero left-led and readable */
+@media (max-width: 900px){
+  body .hero,
+  body .hero.h32a-hero{
+    min-height: 96svh !important;
+  }
+  body .hero-content,
+  body .h32a-hero .hero-content{
+    padding-left: clamp(26px, 7vw, 54px) !important;
+    padding-right: clamp(22px, 6vw, 42px) !important;
+    padding-top: clamp(52px, 7vh, 82px) !important;
+  }
+  body .hero-h1,
+  body .h32a-hero .hero-h1{
+    font-size: clamp(4.8rem, 18vw, 7.2rem) !important;
+    max-width: min(620px, calc(100vw - 52px)) !important;
+    line-height: .84 !important;
+  }
+  body .hero-stats,
+  body .h32a-hero .hero-stats{
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 24px 0 0 clamp(26px, 7vw, 54px) !important;
+    justify-content: flex-start !important;
+  }
+}
+
+/* Mobile: no centered poster layout — keep it like a premium landing hero */
+@media (max-width: 620px){
+  body .hero,
+  body .hero.h32a-hero{
+    min-height: auto !important;
+    padding-top: 64px !important;
+    padding-bottom: 40px !important;
+  }
+  body .hero-content,
+  body .h32a-hero .hero-content{
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    padding-top: 48px !important;
+    text-align: left !important;
+  }
+  body .hero-eyebrow,
+  body .h32a-hero .hero-eyebrow{
+    justify-content: flex-start !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    letter-spacing: .22em !important;
+  }
+  body .hero-h1,
+  body .h32a-hero .hero-h1{
+    width: auto !important;
+    max-width: 100% !important;
+    font-size: clamp(4.35rem, 20vw, 6.25rem) !important;
+    line-height: .83 !important;
+    text-align: left !important;
+  }
+  body .hero-sub,
+  body .h32a-hero .hero-sub{
+    max-width: 100% !important;
+    text-align: left !important;
+    font-size: .96rem !important;
+    line-height: 1.65 !important;
+  }
+  body .hero-btns,
+  body .h32a-hero .hero-btns{
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  body .hero-btns .btn-primary,
+  body .hero-btns .btn-outline{
+    justify-content: center !important;
+    min-width: 0 !important;
+  }
+  body .hero-live-grid,
+  body .h32a-hero .hero-live-grid{
+    grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+  }
+  body .hero-stats,
+  body .h32a-hero .hero-stats{
+    margin: 22px 24px 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
+  body .hero-stats .stat-divider{ display: none !important; }
+  body .hero-stats .stat-item{
+    text-align: left !important;
+    padding: 14px 12px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    background: rgba(255,255,255,.035) !important;
+  }
+  body .hero-stats .stat-num{
+    justify-content: flex-start !important;
+    font-size: 2.2rem !important;
+  }
+}
