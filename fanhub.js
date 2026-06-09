@@ -1977,13 +1977,21 @@ function loadQuoteImageForCanvas(src) {
     }
 
     const img = new Image();
+    let done = false;
+    const finish = value => {
+      if (done) return;
+      done = true;
+      resolve(value);
+    };
 
-    if (src.startsWith('http')) {
+    // Keep canvas export safe when images come from Cloudinary/CDN or local assets.
+    if (!src.startsWith('data:') && !src.startsWith('blob:')) {
       img.crossOrigin = 'anonymous';
     }
 
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
+    img.onload = () => finish(img);
+    img.onerror = () => finish(null);
+    setTimeout(() => finish(null), 3500);
     img.src = src;
   });
 }
