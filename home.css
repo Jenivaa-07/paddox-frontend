@@ -13685,3 +13685,113 @@ body #race-control-section .h33b-data-row{
     transform: translateX(-9px) scale(1) !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.23 — Mobile Team Car Fit Lock
+   Scope: mobile Teams on the Grid only.
+   Fix: keeps the moving strip from H4.0.21, but re-composes the
+   car layer so the car sits inside the card instead of being too
+   low/cropped at the wheel line.
+   ============================================================ */
+@media (max-width: 768px) {
+  body .home-grid-strip-section .marquee-strip {
+    min-height: 170px !important;
+    height: 170px !important;
+    padding: 16px 0 20px !important;
+  }
+
+  body .home-grid-strip-section .marquee-track {
+    gap: 18px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    align-items: center !important;
+  }
+
+  body .home-grid-strip-section .marquee-team {
+    height: 132px !important;
+    min-height: 132px !important;
+    padding: 16px 17px 12px !important;
+    border-radius: 17px !important;
+    overflow: hidden !important;
+    display: block !important;
+  }
+
+  body .home-grid-strip-section .marquee-team::before {
+    top: 51px !important;
+    left: 62px !important;
+    right: 20px !important;
+  }
+
+  body .home-grid-strip-section .marquee-team-head {
+    min-height: 42px !important;
+    position: relative !important;
+    z-index: 4 !important;
+  }
+
+  body .home-grid-strip-section .team-logo-orb {
+    width: 42px !important;
+    height: 42px !important;
+    flex-basis: 42px !important;
+  }
+
+  body .home-grid-strip-section .marquee-team-name {
+    font-size: 1.02rem !important;
+    max-width: calc(100% - 66px) !important;
+  }
+
+  body .home-grid-strip-section .marquee-team-car-wrap {
+    position: absolute !important;
+    left: 15px !important;
+    right: 13px !important;
+    bottom: 16px !important;
+    height: 66px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    z-index: 2 !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+
+  body .home-grid-strip-section .team-car-img {
+    width: 108% !important;
+    max-width: none !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    transform: translate3d(0, -1px, 0) scale(.98) !important;
+    transform-origin: center bottom !important;
+    filter: drop-shadow(0 14px 18px rgba(0,0,0,.58)) saturate(1.05) !important;
+  }
+
+  body .home-grid-strip-section .marquee-team:hover .team-car-img {
+    transform: translate3d(0, -1px, 0) scale(.98) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body .home-grid-strip-section .marquee-strip {
+    min-height: 166px !important;
+    height: 166px !important;
+  }
+
+  body .home-grid-strip-section .marquee-team {
+    height: 130px !important;
+    min-height: 130px !important;
+    padding: 15px 16px 12px !important;
+  }
+
+  body .home-grid-strip-section .marquee-team-car-wrap {
+    left: 14px !important;
+    right: 12px !important;
+    bottom: 16px !important;
+    height: 64px !important;
+  }
+
+  body .home-grid-strip-section .team-car-img {
+    width: 106% !important;
+    transform: translate3d(0, -1px, 0) scale(.97) !important;
+  }
+}
