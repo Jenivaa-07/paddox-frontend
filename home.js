@@ -6,7 +6,7 @@
 
 'use strict';
 
-/* PADDOX H4.0.5 — visual-only package, realtime logic preserved. */
+/* PADDOX H4.0.6 — professional visual lock; realtime logic preserved. */
 
 /* ── HOME DATA STATE: loaded from backend only ── */
 let PRODUCTS = [];

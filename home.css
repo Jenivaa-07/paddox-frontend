@@ -10390,3 +10390,506 @@ body footer .container { width: min(100% - 88px, 1240px) !important; }
   body .marquee-track { padding-left: 18px !important; }
   body .marquee-team { min-width: 270px !important; }
 }
+
+/* ============================================================
+   PADDOX H4.0.6 — Full Home Professional Visual Alignment Lock
+   Designer pass: navbar, hero title, section rhythm, cards, borders.
+   Realtime/data logic untouched.
+   ============================================================ */
+
+:root{
+  --pdx-page-max: 1240px;
+  --pdx-page-pad: clamp(22px, 4.2vw, 64px);
+  --pdx-red-soft: rgba(232,0,45,.16);
+  --pdx-border: rgba(255,255,255,.115);
+  --pdx-border-red: rgba(232,0,45,.30);
+  --pdx-card-bg: linear-gradient(145deg, rgba(24,24,24,.86), rgba(8,8,8,.92));
+  --pdx-card-bg-red: radial-gradient(circle at 16% 0%, rgba(232,0,45,.20), transparent 34%), linear-gradient(145deg, rgba(24,24,24,.88), rgba(7,7,7,.94));
+}
+
+html, body { max-width: 100%; overflow-x: hidden; }
+body { background: #050505 !important; }
+body::after{
+  content:'';
+  position: fixed;
+  inset: 0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(232,0,45,.08), transparent 30%),
+    radial-gradient(circle at 84% 64%, rgba(232,0,45,.055), transparent 34%),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,.012) 1px, transparent 1px);
+  background-size: auto, auto, 96px 96px, 96px 96px;
+  opacity: .46;
+}
+
+body .container,
+body .cs-inner,
+body .race-control-inner,
+body .footer-inner,
+body .h33e4-race-lab .container,
+body .h33e2-race-lab .container,
+body .paddox-lab-section .container,
+body .site-footer .container,
+body footer .container{
+  width: min(calc(100% - (var(--pdx-page-pad) * 2)), var(--pdx-page-max)) !important;
+  max-width: var(--pdx-page-max) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body .section { padding: clamp(84px, 8vw, 128px) 0 !important; }
+body .section-head{ margin-bottom: clamp(34px, 4vw, 54px) !important; align-items: flex-end !important; }
+body .section-title{
+  font-size: clamp(2.65rem, 4.7vw, 4.9rem) !important;
+  line-height: .90 !important;
+  letter-spacing: .055em !important;
+  text-wrap: balance;
+}
+body .section-label,
+body .cs-label,
+body .hero-eyebrow{
+  font-size: .72rem !important;
+  letter-spacing: .30em !important;
+  font-weight: 800 !important;
+}
+
+/* NAVBAR — readable premium command bar */
+body #navbar{
+  height: 72px !important;
+  background: linear-gradient(180deg, rgba(6,6,6,.98), rgba(6,6,6,.86)) !important;
+  border-bottom: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.42), inset 0 -1px 0 rgba(232,0,45,.08) !important;
+}
+body #navbar.scrolled{ height: 62px !important; background: rgba(4,4,4,.97) !important; }
+body #navbar .nav-inner{
+  width: min(calc(100% - 56px), 1280px) !important;
+  padding: 0 !important;
+  gap: 22px !important;
+}
+body #navbar .nav-logo{ min-width: 168px !important; gap: 11px !important; }
+body #navbar .helmet-wrap{
+  width: 40px !important;
+  height: 40px !important;
+  background: radial-gradient(circle at 38% 28%, rgba(255,255,255,.15), transparent 32%), rgba(232,0,45,.09) !important;
+  border: 1px solid rgba(232,0,45,.34) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 0 24px rgba(232,0,45,.12) !important;
+}
+body #navbar .brand-logo-icon{ width: 30px !important; height: 30px !important; object-fit: contain !important; padding: 0 !important; }
+body #navbar .logo-text{
+  font-size: 1.55rem !important;
+  letter-spacing: .24em !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+body #navbar .nav-links{
+  max-width: none !important;
+  flex: 1 1 auto !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  background: rgba(255,255,255,.035) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 999px !important;
+  padding: 5px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+body #navbar .nav-link{
+  min-width: auto !important;
+  height: 34px !important;
+  padding: 0 15px !important;
+  gap: 7px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  font-size: .76rem !important;
+  line-height: 1 !important;
+  letter-spacing: .16em !important;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,.68) !important;
+  white-space: nowrap !important;
+}
+body #navbar .nav-link.active{
+  color: #fff !important;
+  background: linear-gradient(135deg, #e8002d, #a60020) !important;
+  border-color: rgba(255,255,255,.18) !important;
+  box-shadow: 0 10px 28px rgba(232,0,45,.28), inset 0 1px 0 rgba(255,255,255,.25) !important;
+}
+body #navbar .nav-link:hover:not(.active){
+  color: #fff !important;
+  background: rgba(232,0,45,.10) !important;
+  border-color: rgba(232,0,45,.22) !important;
+}
+body #navbar .nl-label{ display:inline-block !important; white-space:nowrap !important; }
+body #navbar .nav-link .nl-icon{ width: 15px !important; height: 15px !important; color: currentColor !important; opacity: .95 !important; }
+body #navbar .nav-link.active .nl-icon{ color:#fff !important; }
+body #navbar .nl-underline{ display:none !important; }
+body #navbar .nav-right{ gap: 9px !important; min-width: 190px !important; justify-content: flex-end !important; }
+body #navbar .nav-search-btn,
+body #navbar .nav-cart-btn{
+  width: 38px !important;
+  height: 38px !important;
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.105) !important;
+}
+body #navbar .nav-search-btn:hover,
+body #navbar .nav-cart-btn:hover{ border-color: rgba(232,0,45,.48) !important; background: rgba(232,0,45,.12) !important; }
+body #navbar .nav-cta-btn{
+  min-height: 38px !important;
+  padding: 0 22px !important;
+  font-size: .78rem !important;
+  letter-spacing: .18em !important;
+  clip-path: polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%) !important;
+  box-shadow: 0 10px 28px rgba(232,0,45,.25) !important;
+}
+
+/* HERO — no broken RACE, better scale and balance */
+body .hero{
+  min-height: 100svh !important;
+  padding-top: 72px !important;
+  isolation: isolate;
+}
+body .hero-bg-image{
+  background-position: 68% center !important;
+  filter: brightness(.62) saturate(1.06) contrast(1.12) !important;
+  transform: scale(1.04) !important;
+}
+body .hero-overlay{
+  background:
+    linear-gradient(100deg, rgba(3,3,3,.98) 0%, rgba(5,5,5,.88) 31%, rgba(9,2,3,.55) 55%, rgba(5,5,5,.52) 100%),
+    radial-gradient(circle at 75% 39%, rgba(232,0,45,.30), transparent 31%),
+    radial-gradient(circle at 46% 80%, rgba(232,0,45,.11), transparent 34%),
+    linear-gradient(to bottom, rgba(7,7,7,.18), rgba(7,7,7,1) 96%) !important;
+}
+body .hero-content{
+  width: min(calc(100% - (var(--pdx-page-pad) * 2)), var(--pdx-page-max)) !important;
+  max-width: var(--pdx-page-max) !important;
+  margin-inline: auto !important;
+  padding: clamp(82px, 10vh, 118px) 0 clamp(128px, 16vh, 164px) !important;
+}
+body .hero-eyebrow{ margin-bottom: 20px !important; }
+body .hero-h1{
+  width: min(100%, 690px) !important;
+  max-width: 690px !important;
+  font-size: clamp(4.9rem, 8.25vw, 9.1rem) !important;
+  line-height: .86 !important;
+  letter-spacing: .025em !important;
+  margin-bottom: 26px !important;
+  display: block !important;
+  overflow: visible !important;
+  word-break: keep-all !important;
+}
+body .hero-h1 .h1-line,
+body .hero-h1 .h1-accent,
+body .h1-race-line{
+  display: block !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+}
+body .hero-h1 .h1-accent{
+  color: #ff0036 !important;
+  text-shadow: 0 0 30px rgba(232,0,45,.40), 0 12px 34px rgba(0,0,0,.42) !important;
+}
+body .hero-sub{
+  max-width: 570px !important;
+  font-size: clamp(.98rem, 1.08vw, 1.15rem) !important;
+  color: rgba(255,255,255,.72) !important;
+  line-height: 1.75 !important;
+  margin-bottom: 32px !important;
+}
+body .hero-btns{ margin-bottom: 28px !important; }
+body .btn-primary,
+body .btn-outline{
+  min-height: 48px !important;
+  padding: 0 30px !important;
+  align-items: center !important;
+  border-radius: 0 !important;
+}
+body .hero-ticker{
+  min-height: 34px !important;
+  border-radius: 999px !important;
+  background: rgba(232,0,45,.10) !important;
+  border-color: rgba(232,0,45,.30) !important;
+}
+body .hero-live-grid{
+  width: min(100%, 520px) !important;
+  max-width: 520px !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  gap: 12px !important;
+  margin-top: 18px !important;
+}
+body .hero-live-card{
+  min-height: 78px !important;
+  padding: 14px 15px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  background: radial-gradient(circle at 0 0, rgba(232,0,45,.20), transparent 38%), rgba(18,18,18,.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 14px 34px rgba(0,0,0,.28) !important;
+}
+body .hero-live-card span{ color: rgba(255,255,255,.52) !important; letter-spacing: .22em !important; }
+body .hero-live-card strong{ font-size: 1rem !important; color:#fff !important; }
+body .hero-stats{
+  right: max(var(--pdx-page-pad), calc((100vw - var(--pdx-page-max)) / 2)) !important;
+  bottom: 62px !important;
+  gap: 10px !important;
+  padding: 10px !important;
+  border-radius: 24px !important;
+  background: rgba(12,12,12,.64) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  backdrop-filter: blur(16px) !important;
+}
+body .stat-item{
+  min-width: 92px !important;
+  text-align: left !important;
+  padding: 12px 14px !important;
+  border-radius: 17px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.018)) !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+}
+body .stat-num{ justify-content:flex-start !important; font-size: 2.45rem !important; }
+body .stat-label{ font-size: .58rem !important; letter-spacing: .22em !important; color: rgba(255,255,255,.50) !important; }
+body .stat-sep{ color: var(--red) !important; }
+body .stat-divider{ display:none !important; }
+
+/* Countdown — premium race-control strip */
+body .countdown-strip{
+  padding: 46px 0 !important;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(232,0,45,.18), transparent 34%),
+    linear-gradient(180deg, rgba(16,6,8,.86), rgba(7,7,7,.96)) !important;
+  border-top: 1px solid rgba(232,0,45,.22) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+body .cs-inner{
+  padding: 22px 28px !important;
+  border-radius: 26px !important;
+  background: rgba(255,255,255,.035) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 26px 60px rgba(0,0,0,.28) !important;
+}
+body .cs-name{ font-size: clamp(2.2rem, 3.8vw, 4.15rem) !important; line-height: .92 !important; }
+body .cs-flag{ width: 54px !important; height: 38px !important; border-radius: 12px !important; }
+body .cd-block{
+  min-width: 84px !important;
+  padding: 17px 18px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.025)) !important;
+  border: 1px solid rgba(255,255,255,.11) !important;
+  border-bottom: 2px solid rgba(232,0,45,.65) !important;
+}
+body .cd-num{ font-size: 2.55rem !important; }
+
+/* Track Mode — wider cinematic panel */
+body .race-control-section,
+body .h34c-fastf1-section,
+body .h34d2-section{ padding: clamp(88px, 8vw, 130px) 0 !important; }
+body .h34c-fastf1-panel,
+body .h34d2-panel,
+body .race-control-panel{
+  width: min(calc(100% - (var(--pdx-page-pad) * 2)), var(--pdx-page-max)) !important;
+  max-width: var(--pdx-page-max) !important;
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, .92fr) !important;
+  gap: clamp(28px, 4vw, 56px) !important;
+  padding: clamp(24px, 3.2vw, 42px) !important;
+  border-radius: 30px !important;
+  background: radial-gradient(circle at 16% 0%, rgba(232,0,45,.24), transparent 36%), linear-gradient(145deg, rgba(26,26,26,.92), rgba(8,8,8,.96)) !important;
+  border: 1px solid rgba(255,255,255,.125) !important;
+  box-shadow: 0 34px 90px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+body .h34c-fastf1-visual,
+body .h34d2-visual,
+body .race-control-visual{
+  border-radius: 24px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.025)) !important;
+  border: 1px solid rgba(255,255,255,.115) !important;
+  min-height: 360px !important;
+}
+body .h34c-fastf1-info,
+body .h34d2-info,
+body .race-control-copy{ padding: clamp(14px, 2vw, 24px) 0 !important; }
+body .h34c-fastf1-info h3,
+body .h34d2-info h3,
+body #rc-race-name{
+  font-size: clamp(3.15rem, 4.45vw, 5.35rem) !important;
+  line-height: .84 !important;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  text-wrap: balance !important;
+}
+body .h34d2-data-grid > div,
+body .h33b-data-grid > div,
+body .h34d2-countdown-card{
+  padding: 13px 15px !important;
+  background: rgba(255,255,255,.045) !important;
+}
+
+/* Cards — equal professional product grid */
+body .featured-section{
+  background: radial-gradient(circle at 22% 0%, rgba(232,0,45,.11), transparent 31%), #080808 !important;
+  border-top: 1px solid rgba(255,255,255,.06) !important;
+}
+body .products-grid{ grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 24px !important; }
+body .pcard{
+  min-height: 430px !important;
+  border-radius: 22px !important;
+  background: var(--pdx-card-bg) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 20px 50px rgba(0,0,0,.28) !important;
+}
+body .pcard:hover{ transform: translateY(-8px) !important; border-color: rgba(232,0,45,.42) !important; box-shadow: 0 32px 78px rgba(0,0,0,.46), 0 0 0 1px rgba(232,0,45,.10) !important; }
+body .pcard-img-wrap{ height: clamp(220px, 17vw, 286px) !important; border-radius: 18px !important; background: rgba(255,255,255,.04) !important; }
+body .pcard-img{ object-fit: cover !important; }
+body .pcard-info{ min-height: 140px !important; display:flex !important; flex-direction:column !important; }
+body .pcard-name{ font-size: 1.28rem !important; min-height: 48px !important; }
+body .pcard-foot{ margin-top:auto !important; }
+
+/* Teams strip — taller, less cut, more premium */
+body .home-grid-strip-section{
+  padding: clamp(88px, 7vw, 118px) 0 !important;
+  background: linear-gradient(180deg, #060606, #090909) !important;
+  border-top: 1px solid rgba(255,255,255,.055) !important;
+}
+body .marquee-strip{
+  min-height: 184px !important;
+  padding: 34px 0 38px !important;
+  border-top: 1px solid rgba(255,255,255,.07) !important;
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  background: radial-gradient(circle at 20% 50%, rgba(232,0,45,.09), transparent 32%), rgba(255,255,255,.02) !important;
+}
+body .marquee-track{ gap: 30px !important; padding-left: max(var(--pdx-page-pad), calc((100vw - var(--pdx-page-max)) / 2)) !important; }
+body .marquee-team{
+  min-width: clamp(330px, 28vw, 420px) !important;
+  min-height: 124px !important;
+  padding: 20px 22px !important;
+  border-radius: 22px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)) !important;
+  border: 1px solid rgba(255,255,255,.115) !important;
+}
+body .marquee-team-car-wrap{ min-height: 76px !important; }
+body .team-car-img{ max-height: 84px !important; filter: drop-shadow(0 18px 20px rgba(0,0,0,.34)) !important; }
+
+/* Quote — fill the empty zone and match VIP card language */
+body .quote-section{
+  padding: clamp(98px, 8vw, 138px) 0 !important;
+  background: radial-gradient(circle at 36% 45%, rgba(232,0,45,.13), transparent 31%), radial-gradient(circle at 72% 52%, rgba(0,120,105,.10), transparent 28%), #050505 !important;
+}
+body .quote-inner{
+  width: min(100%, 760px) !important;
+  min-height: 430px !important;
+  padding: clamp(46px, 5vw, 70px) clamp(32px, 5vw, 72px) !important;
+  border-radius: 32px !important;
+  background: radial-gradient(circle at 12% 0%, rgba(232,0,45,.22), transparent 38%), linear-gradient(145deg, rgba(28,28,28,.84), rgba(7,7,7,.88)) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  box-shadow: 0 34px 110px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+body .quote-text{ font-size: clamp(1.55rem, 2vw, 2.18rem) !important; line-height: 1.32 !important; max-width: 620px !important; }
+body .quote-avatar{ width: 68px !important; height: 68px !important; }
+
+/* Beyond + Fan Pulse */
+body .experience-section,
+body .testi-section{ background: linear-gradient(180deg, #080808, #050505) !important; }
+body .exp-grid,
+body .testi-grid{ gap: 24px !important; }
+body .exp-card,
+body .testi-card,
+body .fan-voice-card{
+  min-height: 268px !important;
+  padding: 24px !important;
+  border-radius: 23px !important;
+  background: var(--pdx-card-bg-red) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 18px 48px rgba(0,0,0,.25) !important;
+}
+body .exp-card:hover,
+body .testi-card:hover,
+body .fan-voice-card:hover{ border-color: rgba(232,0,45,.38) !important; }
+body .exp-title{ font-size: 1.5rem !important; }
+body .exp-desc,
+body .testi-text{ color: rgba(255,255,255,.66) !important; line-height: 1.68 !important; }
+
+/* Race Lab — preserve accepted design, remove boxy feel */
+body .h33e4-race-lab,
+body .paddox-lab-section{ padding: clamp(94px, 8vw, 140px) 0 !important; }
+body .paddox-lab-shell,
+body .h33e2-race-lab .paddox-lab-shell,
+body .h33e4-race-lab .paddox-lab-shell{
+  border-radius: 34px !important;
+  padding: clamp(24px, 3vw, 36px) !important;
+  background: radial-gradient(circle at 9% 0%, rgba(232,0,45,.25), transparent 36%), linear-gradient(145deg, rgba(25,25,25,.88), rgba(6,6,6,.95)) !important;
+  border: 1px solid rgba(255,255,255,.135) !important;
+  box-shadow: 0 42px 120px rgba(0,0,0,.54), inset 0 1px 0 rgba(255,255,255,.075) !important;
+}
+body .paddox-lab-feature,
+body .paddox-lab-side-card,
+body .h33e4-passport-showcase,
+body .h33e4-strategy-panel,
+body .h33e4-vault-panel{
+  border-radius: 25px !important;
+  border: 1px solid rgba(255,255,255,.115) !important;
+}
+
+body .site-footer,
+body footer{ border-top: 1px solid rgba(255,255,255,.08) !important; }
+
+@media (max-width: 1180px){
+  body #navbar .nav-inner{ width: min(calc(100% - 34px), 100%) !important; gap: 14px !important; }
+  body #navbar .nav-logo{ min-width: 142px !important; }
+  body #navbar .logo-text{ font-size: 1.35rem !important; letter-spacing: .20em !important; }
+  body #navbar .nav-link{ padding: 0 11px !important; font-size: .69rem !important; letter-spacing: .13em !important; }
+  body #navbar .nav-right{ min-width: 154px !important; }
+  body #navbar .nav-cta-btn{ padding: 0 16px !important; }
+  body .products-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body .h34c-fastf1-panel,
+  body .h34d2-panel,
+  body .race-control-panel{ grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 760px){
+  :root{ --pdx-page-pad: 18px; }
+  body #navbar{ height: 60px !important; }
+  body #navbar .nav-inner{ width: min(calc(100% - 24px), 100%) !important; }
+  body #navbar .nav-logo{ min-width: auto !important; }
+  body #navbar .helmet-wrap{ width: 36px !important; height: 36px !important; }
+  body #navbar .brand-logo-icon{ width: 28px !important; height: 28px !important; }
+  body #navbar .logo-text{ font-size: 1.22rem !important; }
+  body #navbar .nav-links{ display: none !important; }
+  body #navbar .nav-right{ min-width: auto !important; }
+  body #navbar .nav-search-btn,
+  body #navbar .nav-cart-btn{ width: 35px !important; height: 35px !important; }
+  body #navbar .nav-cta-btn{ display: none !important; }
+  body .hamburger{ display:flex !important; }
+
+  body .hero{ padding-top: 60px !important; }
+  body .hero-content{ padding-top: 72px !important; padding-bottom: 48px !important; }
+  body .hero-h1{ font-size: clamp(4.25rem, 18.5vw, 5.85rem) !important; width: 100% !important; max-width: 100% !important; }
+  body .hero-sub{ max-width: 100% !important; }
+  body .hero-btns{ gap: 12px !important; }
+  body .btn-primary,
+  body .btn-outline{ width: 100% !important; justify-content:center !important; }
+  body .hero-live-grid{ grid-template-columns: 1fr !important; }
+  body .hero-stats{
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 var(--pdx-page-pad) 32px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  }
+  body .stat-item{ min-width:0 !important; padding: 10px 8px !important; }
+  body .stat-num{ font-size: 2rem !important; min-width:0 !important; }
+  body .stat-sep{ font-size:.72rem !important; }
+  body .stat-label{ font-size:.50rem !important; letter-spacing:.16em !important; }
+
+  body .cs-inner{ padding: 24px 18px !important; }
+  body .cd-blocks{ grid-template-columns: repeat(2, minmax(0, 1fr)) !important; width: 100% !important; max-width: 320px !important; }
+  body .cd-block{ min-width: 0 !important; }
+  body .products-grid{ grid-template-columns: 1fr !important; }
+  body .pcard{ max-width: 430px !important; width: 100% !important; }
+  body .quote-inner{ min-height: 360px !important; }
+  body .marquee-team{ min-width: 292px !important; }
+}
