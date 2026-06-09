@@ -8379,3 +8379,65 @@ body .hub-hero::after{
   body .hub-hero{padding-top:64px!important;}
   body .hub-tabs-bar{top:64px!important;}
 }
+
+/* ============================================================
+   Fan Hub Phase F1.4 — Exact Nav Icon Color Match
+   Fix: active Fan Hub icon was forced red by older Fan Hub icon rules.
+   Home/Shop active pill uses white/currentColor icons.
+   ============================================================ */
+body #navbar .nav-link .nl-icon,
+body #navbar .nav-link .nl-icon::before,
+body #navbar .search-icon-anim,
+body #navbar .cart-icon-anim,
+body #navbar .search-icon-anim::before,
+body #navbar .cart-icon-anim::before,
+body #navbar .cta-arrow,
+body #navbar .cta-arrow::before{
+  color: currentColor !important;
+}
+
+body #navbar .nav-link .nl-icon{
+  width: 16px !important;
+  height: 16px !important;
+  opacity: .82 !important;
+  color: currentColor !important;
+}
+
+body #navbar .nav-link.active .nl-icon,
+body #navbar .nav-link:hover .nl-icon{
+  color: currentColor !important;
+  opacity: 1 !important;
+  transform: translateY(-1px) scale(1.04) !important;
+}
+
+body #navbar .nav-link.active .nl-icon::before,
+body #navbar .nav-link:hover .nl-icon::before{
+  background: currentColor !important;
+}
+
+body #navbar .nav-link.active{
+  color: #fff !important;
+}
+
+body #navbar .nav-link:not(.active){
+  color: rgba(255,255,255,.66) !important;
+}
+
+body #navbar .nav-link:not(.active):hover{
+  color: #fff !important;
+}
+
+body #navbar .nav-search-btn,
+body #navbar .nav-cart-btn{
+  color: rgba(255,255,255,.84) !important;
+}
+
+body #navbar .nav-search-btn:hover,
+body #navbar .nav-cart-btn:hover{
+  color: #fff !important;
+}
+
+body #navbar .nav-cta-btn,
+body #navbar .nav-cta-btn .cta-arrow{
+  color: #fff !important;
+}
