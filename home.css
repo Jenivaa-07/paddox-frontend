@@ -13795,3 +13795,350 @@ body #race-control-section .h33b-data-row{
     transform: translate3d(0, -1px, 0) scale(.97) !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.24 — Featured Merch + Quick View Final Premium Polish
+   Scope: Featured Merch cards + hover overlay + Quick View modal only.
+   Desktop/mobile nav, hero, track mode, teams strip, footer logic untouched.
+   ============================================================ */
+
+/* Featured Merch: final luxury spacing and card consistency */
+body .featured-section{
+  background:
+    radial-gradient(circle at 12% 0%, rgba(232,0,45,.14), transparent 31%),
+    radial-gradient(circle at 76% 8%, rgba(255,255,255,.035), transparent 26%),
+    linear-gradient(180deg,#070707 0%,#030303 100%) !important;
+}
+body .featured-section .section-head{
+  margin-bottom: clamp(42px, 4.8vw, 70px) !important;
+}
+body .featured-section .section-title{
+  letter-spacing: .035em !important;
+  text-shadow: 0 22px 60px rgba(0,0,0,.55) !important;
+}
+body .featured-section .section-title .accent{
+  text-shadow: 0 0 38px rgba(232,0,45,.18) !important;
+}
+body .featured-section .see-all{
+  min-height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 11px 20px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 18px 36px rgba(0,0,0,.22) !important;
+}
+body .products-grid{
+  gap: clamp(22px, 2vw, 30px) !important;
+}
+body .pcard{
+  border-radius: 25px !important;
+  min-height: 466px !important;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(232,0,45,.075), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.014)),
+    #080808 !important;
+  border-color: rgba(255,255,255,.09) !important;
+}
+body .pcard::before{
+  content:'' !important;
+  position:absolute !important;
+  inset:1px !important;
+  border-radius:24px !important;
+  pointer-events:none !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.07), transparent 35%) !important;
+  opacity:.42 !important;
+  z-index:1 !important;
+}
+body .pcard:hover{
+  transform: translateY(-8px) scale(1.006) !important;
+  border-color: rgba(232,0,45,.46) !important;
+  box-shadow:
+    0 34px 90px rgba(0,0,0,.62),
+    0 0 0 1px rgba(232,0,45,.10),
+    0 0 42px rgba(232,0,45,.10),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+body .pcard-img-wrap{
+  height: clamp(246px, 20.5vw, 312px) !important;
+  border-radius: 21px !important;
+  margin: 15px 15px 0 !important;
+  width: calc(100% - 30px) !important;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(232,0,45,.16), transparent 43%),
+    radial-gradient(circle at 50% 125%, rgba(255,255,255,.07), transparent 28%),
+    #0b0b0b !important;
+  border: 1px solid rgba(255,255,255,.085) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.065), 0 18px 40px rgba(0,0,0,.30) !important;
+}
+body .pcard-img-wrap::before{
+  content:'' !important;
+  position:absolute !important;
+  inset:0 !important;
+  pointer-events:none !important;
+  background:
+    linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 48%, transparent 58%),
+    linear-gradient(180deg, rgba(255,255,255,.04), transparent 34%) !important;
+  opacity:.38 !important;
+  z-index:2 !important;
+}
+body .pcard-img{
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+body .pcard:first-child .pcard-img{
+  object-fit: contain !important;
+  object-position: center center !important;
+  padding: clamp(22px, 2.2vw, 34px) !important;
+}
+body .pcard-img-overlay{
+  background:
+    linear-gradient(to top, rgba(7,7,7,.96) 0%, rgba(7,7,7,.64) 28%, rgba(7,7,7,.12) 68%, transparent 100%),
+    linear-gradient(120deg, rgba(232,0,45,.09), transparent 45%) !important;
+}
+
+/* Hover overlay: less flat, more premium glass action layer */
+body .pcard-overlay{
+  inset: 15px !important;
+  height: clamp(246px, 20.5vw, 312px) !important;
+  border-radius: 21px !important;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(232,0,45,.24), transparent 38%),
+    linear-gradient(180deg, rgba(9,9,9,.28), rgba(7,7,7,.82)) !important;
+  backdrop-filter: blur(9px) saturate(1.18) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(1.18) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+  gap: 14px !important;
+}
+body .pcard-overlay::before{
+  content:'' !important;
+  width: 54px !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, var(--red), transparent) !important;
+  opacity: .9 !important;
+  margin-bottom: 2px !important;
+}
+body .ov-btn{
+  width: min(74%, 218px) !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  padding: 14px 22px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border-radius: 999px !important;
+  font-size: .82rem !important;
+  letter-spacing: .22em !important;
+  box-shadow: 0 16px 34px rgba(232,0,45,.28), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+body .ov-btn.outline{
+  background: rgba(255,255,255,.045) !important;
+  border-color: rgba(255,255,255,.28) !important;
+  color: rgba(255,255,255,.92) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 26px rgba(0,0,0,.22) !important;
+}
+body .ov-btn.outline:hover{
+  border-color: rgba(232,0,45,.50) !important;
+  background: rgba(232,0,45,.11) !important;
+}
+body .pbadge{
+  z-index: 6 !important;
+  top: 16px !important;
+  left: 16px !important;
+  letter-spacing: .18em !important;
+}
+body .pwish{
+  z-index: 6 !important;
+  top: 16px !important;
+  right: 16px !important;
+  width: 38px !important;
+  height: 38px !important;
+}
+body .pcard-info{
+  padding: 22px 22px 24px !important;
+}
+body .pcard-team{
+  font-size: .58rem !important;
+  letter-spacing: .36em !important;
+  margin-bottom: 10px !important;
+  color: rgba(255,255,255,.48) !important;
+}
+body .pcard-name{
+  font-size: 1.22rem !important;
+  line-height: 1.22 !important;
+  letter-spacing: .035em !important;
+  min-height: 52px !important;
+}
+body .pcard-foot{
+  padding-top: 18px !important;
+}
+body .pcard-price{
+  font-size: 1.18rem !important;
+}
+body .pcard-rating{
+  font-size: .72rem !important;
+}
+
+/* Quick View modal: final premium studio framing */
+body .modal-overlay{
+  background:
+    radial-gradient(circle at 50% 32%, rgba(232,0,45,.18), transparent 35%),
+    radial-gradient(circle at 16% 68%, rgba(255,255,255,.035), transparent 24%),
+    rgba(0,0,0,.84) !important;
+}
+body .modal-box{
+  width: min(100%, 1128px) !important;
+  max-width: 1128px !important;
+  grid-template-columns: minmax(430px, 1fr) minmax(392px, .92fr) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 86% 16%, rgba(232,0,45,.11), transparent 30%),
+    linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.014)),
+    #080808 !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-top: 2px solid rgba(232,0,45,.95) !important;
+}
+body .modal-img-wrap{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height: 562px !important;
+  padding: clamp(30px, 3.2vw, 46px) !important;
+  background:
+    radial-gradient(circle at 52% 45%, rgba(255,255,255,.54), transparent 42%),
+    radial-gradient(circle at 50% 110%, rgba(0,0,0,.18), transparent 31%),
+    linear-gradient(145deg, #f7f7f7 0%, #dedede 55%, #cfcfcf 100%) !important;
+}
+body .modal-img-wrap::before{
+  content:'' !important;
+  position:absolute !important;
+  inset: clamp(28px, 3vw, 44px) !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72)),
+    radial-gradient(circle at 50% 105%, rgba(0,0,0,.12), transparent 38%) !important;
+  border: 1px solid rgba(0,0,0,.035) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.65) !important;
+  pointer-events:none !important;
+}
+body .modal-img-wrap::after{
+  background:
+    linear-gradient(180deg, rgba(232,0,45,.95) 0 2px, transparent 2px),
+    radial-gradient(circle at 50% 116%, rgba(0,0,0,.23), transparent 35%) !important;
+}
+body .modal-product-img{
+  position: relative !important;
+  z-index: 2 !important;
+  max-width: 82% !important;
+  max-height: 500px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  filter: drop-shadow(0 24px 34px rgba(0,0,0,.16)) !important;
+  transform: none !important;
+}
+body .modal-info{
+  padding: clamp(42px, 3.5vw, 58px) clamp(38px, 3.5vw, 54px) !important;
+  gap: 16px !important;
+}
+body .modal-team{
+  margin-bottom: 10px !important;
+  letter-spacing: .48em !important;
+}
+body .modal-name{
+  font-size: clamp(2rem, 2.55vw, 2.95rem) !important;
+  line-height: 1.09 !important;
+  max-width: 96% !important;
+}
+body .modal-rating{
+  margin-top: 2px !important;
+}
+body .modal-price{
+  margin: 4px 0 6px !important;
+}
+body .modal-desc{
+  max-width: 520px !important;
+  line-height: 1.78 !important;
+  color: rgba(255,255,255,.70) !important;
+}
+body .modal-divider{
+  margin: 8px 0 6px !important;
+}
+body .size-opts{
+  gap: 12px !important;
+  margin-top: 8px !important;
+}
+body .size-btn{
+  min-width: 60px !important;
+  height: 44px !important;
+  border-radius: 9px !important;
+}
+body .modal-add-btn{
+  margin-top: 16px !important;
+  min-height: 68px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap: 14px !important;
+  background: linear-gradient(135deg, #f00032, #d60027) !important;
+  box-shadow: 0 22px 54px rgba(232,0,45,.28), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+body .modal-add-btn:hover{
+  background: linear-gradient(135deg, #ff123f, #e8002d) !important;
+  transform: translateY(-2px) !important;
+}
+body .modal-close{
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.06) !important;
+}
+
+@media (max-width: 1060px){
+  body .modal-box{
+    grid-template-columns: 1fr !important;
+  }
+  body .modal-img-wrap{
+    min-height: 390px !important;
+  }
+  body .modal-product-img{
+    max-height: 330px !important;
+  }
+}
+@media (max-width: 620px){
+  body .featured-section .section-head{
+    margin-bottom: 28px !important;
+  }
+  body .pcard{
+    max-width: 100% !important;
+    min-height: 440px !important;
+  }
+  body .pcard-img-wrap,
+  body .pcard-overlay{
+    height: 238px !important;
+  }
+  body .modal-img-wrap{
+    min-height: 288px !important;
+    padding: 16px !important;
+  }
+  body .modal-img-wrap::before{
+    inset: 18px !important;
+    border-radius: 16px !important;
+  }
+  body .modal-product-img{
+    max-width: 86% !important;
+    max-height: 236px !important;
+  }
+  body .modal-info{
+    padding: 28px 20px 30px !important;
+    gap: 13px !important;
+  }
+  body .modal-name{
+    font-size: 1.55rem !important;
+  }
+  body .modal-add-btn{
+    min-height: 58px !important;
+    letter-spacing: .16em !important;
+  }
+}
