@@ -3303,3 +3303,302 @@ body{background:#050505!important;text-rendering:geometricPrecision;}
   .modal-price{font-size:2.15rem!important;}
   .modal-actions{grid-template-columns:1fr!important;}
 }
+
+/* ============================================================
+   PADDOX SHOP S1.1 — HOME-SYNC NAVBAR + PRODUCT LANGUAGE LOCK
+   Fixes: shop navbar now matches locked Home proportions/pill system,
+   and shop cards use the same rounded premium card language.
+   Visual-only. Product/filter/cart/checkout logic untouched.
+   ============================================================ */
+
+/* NAVBAR — exact Home style rhythm */
+body #navbar{
+  height: 68px !important;
+  min-height: 68px !important;
+  background: rgba(4,4,4,.94) !important;
+  backdrop-filter: blur(18px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.3) !important;
+  border-bottom: 1px solid rgba(232,0,45,.14) !important;
+  box-shadow: none !important;
+}
+body #navbar.scrolled{
+  height: 58px !important;
+  min-height: 58px !important;
+  background: rgba(4,4,4,.985) !important;
+  box-shadow: 0 10px 34px rgba(0,0,0,.36), 0 1px 0 rgba(232,0,45,.22) !important;
+}
+body #navbar .nav-inner{
+  width: min(calc(100% - 72px), 1420px) !important;
+  max-width: 1420px !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  grid-template-columns: 185px minmax(520px, 1fr) auto !important;
+  align-items: center !important;
+  gap: clamp(18px, 2.4vw, 36px) !important;
+}
+body #navbar .nav-logo.paddox-brand-lockup{
+  width: 185px !important;
+  min-width: 185px !important;
+  max-width: 185px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+body #navbar .brand-lockup-logo{
+  display: block !important;
+  width: 185px !important;
+  min-width: 185px !important;
+  max-width: 185px !important;
+  height: auto !important;
+  max-height: 44px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.42)) drop-shadow(0 0 10px rgba(232,0,45,.10)) !important;
+}
+body #navbar.scrolled .nav-logo.paddox-brand-lockup,
+body #navbar.scrolled .brand-lockup-logo{
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  max-height: 40px !important;
+}
+body #navbar .nav-links{
+  justify-self: center !important;
+  flex: initial !important;
+  width: auto !important;
+  min-height: 48px !important;
+  padding: 5px !important;
+  gap: 6px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.035) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+body #navbar .nav-link{
+  min-width: 0 !important;
+  min-height: 38px !important;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: transparent !important;
+  font-size: .76rem !important;
+  letter-spacing: .18em !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  color: rgba(255,255,255,.66) !important;
+  box-shadow: none !important;
+}
+body #navbar .nav-link:hover{
+  color: #fff !important;
+  background: rgba(255,255,255,.045) !important;
+}
+body #navbar .nav-link.active{
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--red), #c9002b) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 12px 28px rgba(232,0,45,.30) !important;
+}
+body #navbar .nav-link .nl-icon{
+  width: 16px !important;
+  height: 16px !important;
+  font-size: .95rem !important;
+  color: currentColor !important;
+  opacity: .82 !important;
+}
+body #navbar .nav-link.active .nl-icon,
+body #navbar .nav-link:hover .nl-icon{
+  color: currentColor !important;
+  opacity: 1 !important;
+  transform: translateY(-1px) scale(1.04) !important;
+}
+body #navbar .nav-link .nl-underline{ display: none !important; }
+body #navbar .nav-right{
+  justify-self: end !important;
+  gap: 10px !important;
+  min-width: 190px !important;
+  justify-content: flex-end !important;
+}
+body #navbar .nav-search-btn,
+body #navbar .nav-cart-btn{
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  background: rgba(255,255,255,.018) !important;
+}
+body #navbar .nav-search-btn:hover,
+body #navbar .nav-cart-btn:hover{
+  border-color: rgba(232,0,45,.55) !important;
+  background: rgba(232,0,45,.07) !important;
+}
+body #navbar .search-icon-anim,
+body #navbar .cart-icon-anim{
+  width: 18px !important;
+  height: 18px !important;
+  color: rgba(255,255,255,.84) !important;
+}
+body #navbar .nav-cta-btn{
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 26px !important;
+  letter-spacing: .18em !important;
+  font-size: .78rem !important;
+  font-weight: 900 !important;
+}
+
+/* SHOP HERO — reduce mismatch with Home rhythm without changing content */
+body .shop-hero{
+  min-height: 58vh !important;
+  align-items: center !important;
+  padding-top: 68px !important;
+  background: #060606 !important;
+}
+body .shop-hero-content{
+  width: min(calc(100% - 88px), 1320px) !important;
+  padding: clamp(78px, 8vh, 96px) 0 clamp(54px, 7vh, 78px) !important;
+}
+body .shop-hero-title{
+  font-size: clamp(4.7rem, 6.25vw, 7.4rem) !important;
+  line-height: .88 !important;
+  letter-spacing: .01em !important;
+  max-width: 640px !important;
+}
+body .shop-hero-sub{
+  max-width: 590px !important;
+  line-height: 1.72 !important;
+}
+body .shop-hero-stats{
+  border-radius: 0 !important;
+  max-width: 430px !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.34) !important;
+}
+
+/* CATEGORY + PRODUCTS — match Home visual language more closely */
+body .cat-bar{ top: 68px !important; }
+body .cat-bar-inner{
+  width: min(calc(100% - 88px), 1320px) !important;
+  padding: 0 !important;
+  gap: 8px !important;
+}
+body .cat-tab{
+  min-height: 54px !important;
+  padding: 0 17px !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+body .shop-layout{
+  grid-template-columns: 280px minmax(0,1fr) !important;
+}
+body .products-area{
+  padding: 34px 42px 86px !important;
+}
+body .products-grid{
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+  gap: 24px !important;
+  align-items: stretch !important;
+}
+body .pcard{
+  min-height: 470px !important;
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, #111 0%, #080808 100%) !important;
+  border: 1px solid rgba(255,255,255,.085) !important;
+  box-shadow: 0 22px 48px rgba(0,0,0,.30) !important;
+}
+body .pcard:hover{
+  transform: translateY(-8px) !important;
+  border-color: rgba(232,0,45,.35) !important;
+  box-shadow: 0 30px 68px rgba(0,0,0,.46), 0 0 0 1px rgba(232,0,45,.12) !important;
+}
+body .pcard-img-wrap{
+  height: 260px !important;
+  min-height: 260px !important;
+  margin: 14px 14px 0 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255,255,255,.055) !important;
+  background: #101010 !important;
+}
+body .pcard-info{ padding: 20px 20px 22px !important; }
+body .pcard-name{
+  font-size: 1.18rem !important;
+  line-height: 1.16 !important;
+  min-height: 46px !important;
+}
+body .pcard-foot{
+  margin-top: auto !important;
+  padding-top: 16px !important;
+  border-top: 1px solid rgba(255,255,255,.07) !important;
+}
+body .pcard-price{ font-size: 1.48rem !important; }
+body .pwish{ border-radius: 999px !important; }
+
+/* Toolbar: cleaner like Home command controls */
+body .shop-toolbar{
+  margin-bottom: 32px !important;
+  padding-bottom: 20px !important;
+  border-bottom: 1px solid rgba(255,255,255,.075) !important;
+}
+body .filter-toggle-btn,
+body .sort-select,
+body .view-btn{
+  border-radius: 0 !important;
+}
+
+@media (max-width: 1280px){
+  body #navbar .nav-inner{
+    width: min(calc(100% - 44px), 1180px) !important;
+    grid-template-columns: 165px minmax(450px, 1fr) auto !important;
+    gap: 18px !important;
+  }
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{
+    width: 165px !important;
+    min-width: 165px !important;
+    max-width: 165px !important;
+  }
+  body #navbar .nav-link{ padding-inline: 14px !important; letter-spacing: .15em !important; }
+  body #navbar .nav-right{ min-width: 174px !important; }
+  body #navbar .nav-cta-btn{ padding-inline: 22px !important; }
+}
+@media (max-width: 1060px){
+  body #navbar .nav-inner{
+    width: min(calc(100% - 34px), 100%) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  body #navbar .nav-links{ display: none !important; }
+  body #navbar .hamburger{ display: flex !important; }
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{
+    width: 170px !important;
+    min-width: 170px !important;
+    max-width: 170px !important;
+  }
+  body .products-grid{ grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+}
+@media(max-width:900px){
+  body .shop-hero-content,
+  body .cat-bar-inner{ width: min(100% - 36px, 100%) !important; }
+  body .shop-layout{ display: block !important; }
+  body .products-area{ padding: 28px 18px 64px !important; }
+}
+@media(max-width:560px){
+  body #navbar{ height: 64px !important; min-height: 64px !important; }
+  body #navbar .nav-inner{ width: min(calc(100% - 24px), 100%) !important; }
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{ width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
+  body #navbar .nav-search-btn{ display: none !important; }
+  body #navbar .nav-cta-btn{ display: none !important; }
+  body .shop-hero{ min-height: 58vh !important; padding-top: 64px !important; }
+  body .shop-hero-content{ padding: 64px 0 44px !important; }
+  body .shop-hero-title{ font-size: clamp(3.35rem, 16vw, 5rem) !important; }
+  body .shop-hero-stats{ width: 100% !important; }
+  body .products-grid{ grid-template-columns: 1fr !important; }
+  body .pcard{ min-height: 430px !important; }
+  body .pcard-img-wrap{ height: 250px !important; min-height: 250px !important; }
+}
