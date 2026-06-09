@@ -15017,3 +15017,138 @@ body .exp-card:nth-child(4){ margin-top: 28px !important; }
     font-size: .70rem !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.30 — SECTION RHYTHM + RACE LAB CROP FIX
+   Scope: Beyond the Track / Fan Pulse / Race Lab spacing only.
+   Navbar, hero, Track Mode, merch, modal, teams, footer untouched.
+   ============================================================ */
+
+/* The H4.0.29 Beyond cards were too tall/staggered and pushed the next
+   sections into an awkward rhythm. This locks the section back to a
+   cleaner premium grid without the huge vertical jump. */
+body .experience-section{
+  padding-top: 104px !important;
+  padding-bottom: 104px !important;
+  overflow: visible !important;
+}
+
+body .experience-section .section-head{
+  margin-bottom: 48px !important;
+}
+
+body .experience-section .section-title{
+  font-size: clamp(3.65rem, 6.6vw, 7.25rem) !important;
+  line-height: .9 !important;
+}
+
+body .exp-grid{
+  gap: 22px !important;
+}
+
+body .exp-card,
+body .exp-card.exp-card-wide{
+  min-height: 360px !important;
+  border-radius: 26px !important;
+}
+
+body .exp-card:nth-child(n){
+  margin-top: 0 !important;
+}
+
+body .exp-card::after{
+  border-radius: 25px !important;
+}
+
+body .exp-card-content{
+  padding: 30px 30px 28px !important;
+}
+
+body .exp-icon{
+  width: 46px !important;
+  height: 46px !important;
+  margin-bottom: 24px !important;
+}
+
+body .exp-title{
+  font-size: clamp(2.05rem, 2.3vw, 2.65rem) !important;
+  line-height: .9 !important;
+  margin-bottom: 16px !important;
+}
+
+body .exp-desc{
+  font-size: .92rem !important;
+  line-height: 1.55 !important;
+  margin-bottom: 18px !important;
+}
+
+/* Fan Pulse to Race Lab transition: the Race Lab title was getting visually
+   clipped at the top in full-page view. Give it its own breathing room and
+   prevent reveal/overflow clipping. */
+body .testi-section{
+  padding-bottom: 102px !important;
+  overflow: visible !important;
+}
+
+body #paddox-race-lab.h33e4-race-lab{
+  padding-top: 108px !important;
+  margin-top: 0 !important;
+  overflow: visible !important;
+}
+
+body #paddox-race-lab .container,
+body #paddox-race-lab .h33e4-lab-shell,
+body #paddox-race-lab .h33e4-lab-head,
+body #paddox-race-lab .h33e4-title-block{
+  overflow: visible !important;
+}
+
+body #paddox-race-lab .h33e4-title{
+  padding-top: 6px !important;
+  margin-top: 0 !important;
+  line-height: .9 !important;
+}
+
+/* Full-page screenshot rhythm: keep the command deck slightly lower so the
+   top of RACE LAB never hides behind the previous dark transition band. */
+body #paddox-race-lab .h33e4-lab-shell{
+  padding-top: 40px !important;
+}
+
+@media (max-width: 980px){
+  body .experience-section .section-title{
+    font-size: clamp(3rem, 9vw, 5.2rem) !important;
+  }
+  body .exp-card,
+  body .exp-card.exp-card-wide{
+    min-height: 300px !important;
+  }
+}
+
+@media (max-width: 620px){
+  body .experience-section{
+    padding-top: 72px !important;
+    padding-bottom: 70px !important;
+  }
+  body .experience-section .section-title{
+    font-size: clamp(2.35rem, 12.5vw, 3.35rem) !important;
+    line-height: .94 !important;
+  }
+  body .exp-card,
+  body .exp-card.exp-card-wide{
+    min-height: 235px !important;
+  }
+  body .exp-card-content{
+    padding: 20px !important;
+  }
+  body .testi-section{
+    padding-bottom: 78px !important;
+  }
+  body #paddox-race-lab.h33e4-race-lab{
+    padding-top: 82px !important;
+  }
+  body #paddox-race-lab .h33e4-title{
+    font-size: clamp(3.05rem, 16vw, 4.3rem) !important;
+    line-height: .9 !important;
+  }
+}
