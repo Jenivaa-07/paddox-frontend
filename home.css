@@ -11399,3 +11399,166 @@ body .site-footer .footer-lockup-logo{
     width: min(310px, 82vw) !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.11 — Logo scale + Quick View image framing fix
+   Scope: visual polish only; no realtime/product logic changes.
+   ============================================================ */
+
+/* NAVBAR: keep the single official lockup, but make it readable without duplicating icon */
+body #navbar{
+  --nav-h: 82px !important;
+}
+body #navbar.scrolled{
+  height: 68px !important;
+}
+body #navbar .nav-inner{
+  padding-inline: clamp(44px, 7vw, 116px) !important;
+  gap: clamp(22px, 3vw, 46px) !important;
+}
+body #navbar .nav-logo.paddox-brand-lockup{
+  min-width: clamp(220px, 17.4vw, 305px) !important;
+  width: clamp(220px, 17.4vw, 305px) !important;
+}
+body #navbar .brand-lockup-logo{
+  max-height: 58px !important;
+  filter: drop-shadow(0 0 18px rgba(232,0,45,.16)) drop-shadow(0 10px 24px rgba(0,0,0,.38)) !important;
+}
+body #navbar.scrolled .nav-logo.paddox-brand-lockup{
+  width: clamp(196px, 14.8vw, 270px) !important;
+  min-width: clamp(196px, 14.8vw, 270px) !important;
+}
+body #navbar.scrolled .brand-lockup-logo{
+  max-height: 48px !important;
+}
+body #navbar .nav-links{
+  min-height: 58px !important;
+  padding: 8px 12px !important;
+}
+body #navbar .nav-link{
+  min-height: 44px !important;
+  padding-inline: clamp(18px, 1.35vw, 28px) !important;
+}
+body #navbar .nav-right{
+  gap: 12px !important;
+}
+
+/* FOOTER: make the official horizontal logo feel intentional and not tiny */
+body .site-footer .footer-logo.h33e-footer-logo.paddox-footer-brand-lockup{
+  width: clamp(330px, 28vw, 470px) !important;
+  margin-bottom: 30px !important;
+}
+body .site-footer .footer-lockup-logo{
+  max-height: 104px !important;
+  filter: drop-shadow(0 0 18px rgba(232,0,45,.14)) drop-shadow(0 12px 32px rgba(0,0,0,.42)) !important;
+}
+
+/* QUICK VIEW: remove the giant blank white area and center product image professionally */
+body .modal-box{
+  width: min(100%, 1180px) !important;
+  max-width: 1180px !important;
+  grid-template-columns: minmax(420px, 1fr) minmax(390px, .88fr) !important;
+  border-radius: 34px !important;
+}
+body .modal-img-wrap{
+  min-height: 610px !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(22px, 2.5vw, 38px) !important;
+  background:
+    radial-gradient(circle at 52% 45%, rgba(255,255,255,.34), transparent 36%),
+    linear-gradient(145deg, #f2f2f2 0%, #d9d9d9 54%, #c9c9c9 100%) !important;
+}
+body .modal-product-img{
+  display: block !important;
+  width: min(100%, 620px) !important;
+  height: min(100%, 570px) !important;
+  max-width: 100% !important;
+  max-height: 570px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin: auto !important;
+  transform: none !important;
+  filter: drop-shadow(0 30px 48px rgba(0,0,0,.16)) !important;
+  background: transparent !important;
+}
+body .modal-img-wrap.modal-img-has-photo::before{
+  content:'';
+  position:absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.18), transparent 68%);
+  pointer-events:none;
+  z-index: 0;
+}
+body .modal-img-wrap.modal-img-has-photo::after{
+  background:
+    linear-gradient(180deg, rgba(232,0,45,.85) 0 2px, transparent 2px),
+    linear-gradient(120deg, rgba(255,255,255,.28), transparent 28%, transparent 72%, rgba(0,0,0,.10)) !important;
+}
+body .modal-info{
+  padding: clamp(42px, 4vw, 64px) clamp(38px, 3.8vw, 58px) !important;
+}
+body .modal-name{
+  font-size: clamp(2rem, 2.65vw, 3rem) !important;
+  line-height: 1.1 !important;
+  max-width: 100% !important;
+}
+body .modal-add-btn span:first-child{
+  white-space: nowrap !important;
+}
+
+/* Merch cards: keep the first product logo crisp and less oversized in product-card image frame */
+body .pcard:first-child .pcard-img{
+  object-fit: contain !important;
+  padding: 18px !important;
+  background: radial-gradient(circle at 50% 45%, rgba(232,0,45,.18), transparent 45%), #050505 !important;
+}
+
+@media (max-width: 1180px){
+  body #navbar .nav-logo.paddox-brand-lockup{
+    min-width: 198px !important;
+    width: 198px !important;
+  }
+  body #navbar .brand-lockup-logo{ max-height: 48px !important; }
+  body #navbar .nav-link{ padding-inline: 16px !important; }
+}
+@media (max-width: 980px){
+  body .modal-box{
+    grid-template-columns: 1fr !important;
+    max-height: 92vh !important;
+  }
+  body .modal-img-wrap{
+    min-height: 420px !important;
+  }
+  body .modal-product-img{
+    height: 390px !important;
+    max-height: 390px !important;
+  }
+}
+@media (max-width: 820px){
+  body #navbar .nav-logo.paddox-brand-lockup{
+    min-width: 58px !important;
+    width: 58px !important;
+  }
+  body #navbar .brand-lockup-logo{
+    max-height: 44px !important;
+  }
+}
+@media (max-width: 560px){
+  body .modal-img-wrap{
+    min-height: 300px !important;
+  }
+  body .modal-product-img{
+    height: 280px !important;
+    max-height: 280px !important;
+  }
+  body .site-footer .footer-logo.h33e-footer-logo.paddox-footer-brand-lockup{
+    width: min(310px, 84vw) !important;
+  }
+}
