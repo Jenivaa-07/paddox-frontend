@@ -4262,3 +4262,217 @@ body .shop-toolbar{
     opacity:1 !important;
   }
 }
+
+/* ============================================================
+   PADDOX SHOP S1.5 — QUICK VIEW DESKTOP FIT LOCK
+   Keeps S1.4 grid/list views and fixes desktop quick-view height/readability.
+   ============================================================ */
+body .modal-overlay{
+  padding: clamp(16px, 2.4vw, 34px) !important;
+  align-items:center !important;
+  overflow:auto !important;
+}
+body .modal-box{
+  width:min(1120px, 94vw) !important;
+  max-width:1120px !important;
+  max-height:min(780px, 88vh) !important;
+  grid-template-columns:minmax(430px, .92fr) minmax(430px, 1fr) !important;
+  border-radius:22px !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-top:2px solid var(--red) !important;
+  overflow:hidden !important;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.035), rgba(255,255,255,.01) 44%, rgba(232,0,45,.045)),
+    #0b0b0b !important;
+  box-shadow:0 34px 110px rgba(0,0,0,.72), 0 0 0 1px rgba(232,0,45,.08) !important;
+}
+body .modal-left{
+  min-height:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:34px !important;
+  background:
+    radial-gradient(circle at 45% 42%, rgba(255,255,255,.08), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.015) 48%, rgba(0,0,0,.28)) !important;
+  border-right:1px solid rgba(255,255,255,.07) !important;
+}
+body .modal-img-main{
+  width:100% !important;
+  min-height:0 !important;
+  height:min(520px, 68vh) !important;
+  border-radius:18px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  overflow:hidden !important;
+  background:linear-gradient(145deg, #f3f3f3, #d9d9d9) !important;
+  box-shadow:0 24px 70px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.22) !important;
+}
+body .modal-img-main img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center bottom !important;
+  filter:none !important;
+  background:#fff !important;
+}
+body .modal-img-thumbs{
+  display:none !important;
+}
+body .modal-badges{
+  top:22px !important;
+  left:22px !important;
+  z-index:8 !important;
+}
+body .modal-right{
+  padding:44px 46px 34px !important;
+  gap:14px !important;
+  min-height:0 !important;
+  overflow:auto !important;
+  scrollbar-width:thin !important;
+  scrollbar-color:rgba(232,0,45,.65) transparent !important;
+  background:
+    radial-gradient(circle at 28% 5%, rgba(232,0,45,.16), transparent 34%),
+    linear-gradient(160deg, rgba(232,0,45,.08), transparent 42%) !important;
+}
+body .modal-close{
+  top:18px !important;
+  right:18px !important;
+  width:42px !important;
+  height:42px !important;
+  border-radius:12px !important;
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  backdrop-filter:blur(12px) !important;
+}
+body .modal-team{
+  font-size:.68rem !important;
+  letter-spacing:5px !important;
+  margin-bottom:4px !important;
+}
+body .modal-name{
+  font-size:clamp(2.35rem, 3.2vw, 3.55rem) !important;
+  line-height:.96 !important;
+  letter-spacing:1.4px !important;
+  max-width:540px !important;
+}
+body .modal-rating{
+  font-size:.9rem !important;
+  margin-top:2px !important;
+}
+body .modal-price-wrap{
+  margin-top:2px !important;
+  gap:14px !important;
+}
+body .modal-price{
+  font-size:clamp(2rem, 3vw, 3.1rem) !important;
+  line-height:1 !important;
+}
+body .modal-original{
+  font-size:.92rem !important;
+}
+body .modal-desc{
+  font-size:.94rem !important;
+  line-height:1.65 !important;
+  max-width:560px !important;
+  color:#b8b8b8 !important;
+}
+body .modal-divider{
+  margin:6px 0 2px !important;
+  background:rgba(255,255,255,.12) !important;
+}
+body .modal-option-label{
+  letter-spacing:3px !important;
+}
+body .size-opts{
+  gap:10px !important;
+}
+body .sz{
+  min-width:54px !important;
+  padding:10px 16px !important;
+  border-radius:9px !important;
+  font-weight:700 !important;
+}
+body .modal-actions{
+  margin-top:6px !important;
+}
+body .modal-add-btn{
+  min-height:56px !important;
+  border-radius:0 !important;
+  clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%) !important;
+  font-size:1rem !important;
+}
+body .modal-wish-btn{
+  border-radius:12px !important;
+  min-width:56px !important;
+  height:56px !important;
+}
+body .modal-meta{
+  padding-top:2px !important;
+}
+
+@media (max-width: 980px){
+  body .modal-box{
+    grid-template-columns:1fr !important;
+    width:min(560px, 94vw) !important;
+    max-height:88vh !important;
+    overflow:auto !important;
+  }
+  body .modal-left{
+    padding:22px !important;
+    border-right:0 !important;
+    border-bottom:1px solid rgba(255,255,255,.08) !important;
+  }
+  body .modal-img-main{
+    height:280px !important;
+  }
+  body .modal-right{
+    padding:28px 24px 26px !important;
+    overflow:visible !important;
+  }
+  body .modal-name{
+    font-size:2.15rem !important;
+  }
+  body .modal-price{
+    font-size:2.05rem !important;
+  }
+}
+
+@media (max-width: 520px){
+  body .modal-overlay{
+    padding:10px !important;
+    align-items:flex-start !important;
+  }
+  body .modal-box{
+    width:100% !important;
+    max-height:calc(100vh - 20px) !important;
+    border-radius:18px !important;
+  }
+  body .modal-left{
+    padding:16px !important;
+  }
+  body .modal-img-main{
+    height:220px !important;
+    border-radius:14px !important;
+  }
+  body .modal-right{
+    padding:22px 18px 22px !important;
+    gap:11px !important;
+  }
+  body .modal-name{
+    font-size:1.72rem !important;
+    letter-spacing:.8px !important;
+  }
+  body .modal-desc{
+    font-size:.84rem !important;
+    line-height:1.55 !important;
+  }
+  body .modal-actions{
+    flex-direction:column !important;
+  }
+  body .modal-add-btn,
+  body .modal-wish-btn{
+    width:100% !important;
+  }
+}
