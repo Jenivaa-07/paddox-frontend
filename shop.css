@@ -3853,3 +3853,214 @@ body .pcard-foot{
   body .cat-bar{ top:64px !important; }
   body .products-grid{ grid-template-columns:1fr !important; }
 }
+
+/* ============================================================
+   PADDOX SHOP S1.3 — GRID/LIST VIEW PROPORTION + SECTION LOCK
+   Fixes the broken list-view crop and finalizes Shop containment.
+   Keeps navbar/home language and all JS logic untouched.
+   ============================================================ */
+
+/* Keep shop product area from feeling too low or over-spread */
+body .shop-layout{
+  margin-top: 26px !important;
+  gap: 30px !important;
+}
+body .shop-toolbar{
+  margin-bottom: 26px !important;
+}
+
+/* Grid mode: premium card grid, consistent with Home merch but slightly more compact for shop density */
+body .products-grid:not(.list-view){
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 24px !important;
+}
+body .products-grid:not(.list-view) .pcard{
+  min-height: 452px !important;
+}
+body .products-grid:not(.list-view) .pcard-img-wrap{
+  height: 244px !important;
+  min-height: 244px !important;
+}
+body .products-grid:not(.list-view) .pcard-name{
+  font-size: 1.12rem !important;
+  min-height: 46px !important;
+}
+
+/* Product image treatment: remove harsh top crop and preserve product/card image quality */
+body .pcard-img{
+  object-position: center center !important;
+}
+body .pcard-img-wrap::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius: inherit;
+  background:
+    linear-gradient(to top, rgba(0,0,0,.36), transparent 52%),
+    radial-gradient(circle at 50% 18%, rgba(255,255,255,.055), transparent 36%);
+  z-index:2;
+}
+body .pcard-overlay,
+body .pbadge,
+body .pwish{
+  z-index:5 !important;
+}
+
+/* List view: previous patches were still forcing grid-card behavior. This is the real fix. */
+body .products-grid.list-view{
+  display:grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  align-items: stretch !important;
+}
+body .products-grid.list-view .pcard{
+  display:grid !important;
+  grid-template-columns: 238px minmax(0, 1fr) auto !important;
+  align-items: stretch !important;
+  min-height: 210px !important;
+  height: auto !important;
+  border-radius: 20px !important;
+  overflow:hidden !important;
+  transform:none !important;
+}
+body .products-grid.list-view .pcard:hover{
+  transform: translateY(-4px) !important;
+}
+body .products-grid.list-view .pcard-img-wrap{
+  height: 100% !important;
+  min-height: 210px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+body .products-grid.list-view .pcard-info{
+  padding: 24px 26px !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+}
+body .products-grid.list-view .pcard-team{
+  margin-bottom: 7px !important;
+}
+body .products-grid.list-view .pcard-name{
+  font-size: 1.45rem !important;
+  min-height: 0 !important;
+  max-width: 520px !important;
+  margin-bottom: 18px !important;
+}
+body .products-grid.list-view .pcard-foot{
+  margin-top: 12px !important;
+  padding-top: 18px !important;
+  border-top: 1px solid rgba(255,255,255,.075) !important;
+  max-width: 520px !important;
+}
+body .products-grid.list-view .pcard-price{
+  font-size: 1.75rem !important;
+}
+body .products-grid.list-view .pcard-overlay{
+  inset:auto 18px 18px auto !important;
+  width:auto !important;
+  height:auto !important;
+  padding:0 !important;
+  background:transparent !important;
+  opacity:1 !important;
+  display:flex !important;
+  flex-direction:row !important;
+  gap:10px !important;
+  justify-content:flex-end !important;
+  align-items:center !important;
+}
+body .products-grid.list-view .ov-btn{
+  width:auto !important;
+  min-width: 132px !important;
+  padding: 11px 18px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,.28) !important;
+}
+body .products-grid.list-view .ov-btn.outline{
+  background: rgba(255,255,255,.05) !important;
+  backdrop-filter: blur(10px) !important;
+}
+body .products-grid.list-view .pbadge{
+  top: 14px !important;
+  left: 14px !important;
+}
+body .products-grid.list-view .pwish{
+  top: 14px !important;
+  right: 14px !important;
+}
+
+/* Sidebar sizing: keep premium panel, but avoid heavy admin rail feel */
+body .shop-sidebar{
+  max-height: 640px !important;
+}
+body .team-fopt,
+body .fopt{
+  min-height: 39px !important;
+}
+
+/* Toolbar visual polish */
+body .toolbar-left,
+body .toolbar-right{
+  min-width:0 !important;
+}
+body .results-count{
+  white-space: nowrap !important;
+}
+body .view-btn.on{
+  box-shadow: 0 0 0 1px rgba(232,0,45,.28), 0 12px 26px rgba(232,0,45,.16) !important;
+}
+
+@media (max-width: 1400px){
+  body .products-grid:not(.list-view){
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 1060px){
+  body .products-grid:not(.list-view){
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body .products-grid.list-view .pcard{
+    grid-template-columns: 190px minmax(0,1fr) !important;
+  }
+  body .products-grid.list-view .pcard-overlay{
+    position: static !important;
+    grid-column: 1 / -1 !important;
+    padding: 0 20px 20px !important;
+    justify-content:flex-start !important;
+  }
+}
+@media (max-width: 620px){
+  body .products-grid:not(.list-view),
+  body .products-grid.list-view{
+    grid-template-columns: 1fr !important;
+  }
+  body .products-grid.list-view .pcard{
+    display:flex !important;
+    flex-direction:column !important;
+    min-height: 0 !important;
+  }
+  body .products-grid.list-view .pcard-img-wrap{
+    height: 245px !important;
+    min-height: 245px !important;
+    margin: 14px 14px 0 !important;
+    border-radius: 16px !important;
+  }
+  body .products-grid.list-view .pcard-info{
+    padding: 20px !important;
+  }
+  body .products-grid.list-view .pcard-name{
+    font-size: 1.18rem !important;
+  }
+  body .products-grid.list-view .pcard-overlay{
+    position:absolute !important;
+    inset:14px !important;
+    background:rgba(7,7,7,.72) !important;
+    opacity:0 !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    padding:0 !important;
+  }
+  body .products-grid.list-view .pcard:hover .pcard-overlay{
+    opacity:1 !important;
+  }
+}
