@@ -14453,3 +14453,127 @@ body .modal-close{
   body .modal-info{ padding: 24px 18px 28px !important; gap: 12px !important; }
   body .modal-name{ font-size: 1.45rem !important; }
 }
+
+/* ============================================================
+   PADDOX H4.0.27 — QUICK VIEW PRODUCT STAGE FINAL LOCK
+   Scope: Quick View modal only. Other sections untouched.
+   Fix: make product photo larger, remove excess empty stage feeling,
+        keep CTA visible and modal balanced.
+   ============================================================ */
+body .modal-overlay{
+  padding: clamp(18px, 2.5vw, 34px) !important;
+  align-items: center !important;
+}
+body .modal-box{
+  width: min(100%, 1080px) !important;
+  max-width: 1080px !important;
+  max-height: min(84vh, 720px) !important;
+  grid-template-columns: minmax(420px, .96fr) minmax(420px, 1fr) !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+}
+body .modal-img-wrap{
+  min-height: 500px !important;
+  height: auto !important;
+  padding: clamp(18px, 2.2vw, 28px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background:
+    radial-gradient(circle at 48% 46%, rgba(255,255,255,.11), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.018) 48%, rgba(0,0,0,.24)),
+    #101010 !important;
+}
+body .modal-img-wrap::before,
+body .modal-img-wrap::after{
+  opacity: .18 !important;
+}
+body .modal-product-img{
+  width: min(92%, 540px) !important;
+  height: auto !important;
+  max-width: 540px !important;
+  max-height: 520px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  border-radius: 18px !important;
+  box-shadow: 0 28px 70px rgba(0,0,0,.42) !important;
+  background: #f7f7f7 !important;
+}
+body .modal-info{
+  padding: clamp(34px, 3vw, 48px) clamp(34px, 3vw, 48px) 34px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 18px !important;
+  overflow-y: auto !important;
+}
+body .modal-team{ margin-bottom: 2px !important; }
+body .modal-name{
+  font-size: clamp(2rem, 2.1vw, 2.55rem) !important;
+  line-height: 1.06 !important;
+  margin-bottom: 0 !important;
+}
+body .modal-rating{ margin-top: 2px !important; }
+body .modal-price{
+  font-size: clamp(2.15rem, 2.45vw, 2.75rem) !important;
+  line-height: .95 !important;
+}
+body .modal-desc{
+  margin: 0 !important;
+  font-size: .92rem !important;
+  line-height: 1.62 !important;
+  max-width: 96% !important;
+}
+body .modal-divider{ margin: 2px 0 0 !important; }
+body .modal-options{ margin-top: 0 !important; }
+body .modal-add-btn{
+  margin-top: 4px !important;
+  min-height: 58px !important;
+  width: 100% !important;
+}
+body .modal-wish-btn{
+  min-height: 48px !important;
+}
+
+@media (max-width: 1060px){
+  body .modal-box{
+    width: min(100%, 760px) !important;
+    grid-template-columns: 1fr !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  body .modal-img-wrap{
+    min-height: 360px !important;
+    padding: 22px !important;
+  }
+  body .modal-product-img{
+    width: min(88%, 420px) !important;
+    max-height: 330px !important;
+  }
+  body .modal-info{
+    justify-content: flex-start !important;
+    padding: 28px 24px 32px !important;
+  }
+}
+
+@media (max-width: 620px){
+  body .modal-overlay{
+    padding: 10px !important;
+    align-items: flex-end !important;
+  }
+  body .modal-box{
+    border-radius: 24px 24px 0 0 !important;
+  }
+  body .modal-img-wrap{
+    min-height: 300px !important;
+    padding: 18px !important;
+  }
+  body .modal-product-img{
+    width: min(92%, 320px) !important;
+    max-height: 270px !important;
+    border-radius: 14px !important;
+  }
+  body .modal-name{
+    font-size: clamp(1.62rem, 9vw, 2.05rem) !important;
+  }
+}
