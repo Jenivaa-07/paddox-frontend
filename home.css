@@ -12614,3 +12614,465 @@ body #race-control-section .h33b-data-row{
   body #race-control-section .h34d2-info h3,
   body #race-control-section #rc-race-name{ font-size: clamp(2rem, 12vw, 2.65rem) !important; }
 }
+
+/* ============================================================
+   PADDOX H4.0.17 — MOBILE FULL PAGE READABILITY LOCK
+   Scope: mobile-only visual polish. Desktop + navbar untouched.
+   ============================================================ */
+
+@media (max-width: 620px){
+  html, body{
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  body{
+    background: #050505 !important;
+  }
+
+  body .container{
+    max-width: 100% !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  body .section,
+  body .featured-section,
+  body .home-grid-strip-section,
+  body .experience-section,
+  body .testi-section,
+  body .paddox-lab-section{
+    padding-top: 58px !important;
+    padding-bottom: 62px !important;
+  }
+
+  body .section-head,
+  body .section-head--compact,
+  body .h33e4-lab-head{
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    margin-bottom: 22px !important;
+  }
+
+  body .section-label,
+  body .h33e4-kicker,
+  body .cs-label{
+    font-size: .58rem !important;
+    letter-spacing: .22em !important;
+    line-height: 1.15 !important;
+  }
+
+  body .section-title,
+  body .grid-strip-title,
+  body .h33e4-title{
+    font-size: clamp(2.15rem, 10vw, 2.85rem) !important;
+    line-height: .94 !important;
+    letter-spacing: .03em !important;
+    max-width: 100% !important;
+  }
+
+  body .see-all{
+    align-self: flex-start !important;
+    padding: 8px 13px !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    border-radius: 999px !important;
+    font-size: .58rem !important;
+    letter-spacing: .18em !important;
+  }
+
+  /* Hero mobile: keep the accepted layout, only improve readability */
+  body .hero{
+    min-height: auto !important;
+    padding-top: calc(var(--nav-h) + 26px) !important;
+    padding-bottom: 54px !important;
+  }
+
+  body .hero-content{
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  body .hero-eyebrow{
+    font-size: .56rem !important;
+    letter-spacing: .22em !important;
+    margin-bottom: 12px !important;
+  }
+
+  body .hero-h1{
+    font-size: clamp(4.2rem, 22vw, 5.55rem) !important;
+    line-height: .84 !important;
+    margin-bottom: 16px !important;
+    max-width: 100% !important;
+  }
+
+  body .hero-sub{
+    max-width: 92% !important;
+    font-size: .84rem !important;
+    line-height: 1.55 !important;
+    margin-bottom: 20px !important;
+  }
+
+  body .hero-btns{
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+  }
+
+  body .btn-primary,
+  body .btn-outline{
+    width: 100% !important;
+    min-height: 44px !important;
+    padding: 12px 10px !important;
+    justify-content: center !important;
+    font-size: .72rem !important;
+    letter-spacing: .18em !important;
+  }
+
+  body .hero-ticker{
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 10px 12px !important;
+    font-size: .58rem !important;
+    letter-spacing: .14em !important;
+    overflow: hidden !important;
+  }
+
+  body .ticker-text{
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  body .hero-live-grid{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 12px !important;
+  }
+
+  body .hero-live-card{
+    width: 100% !important;
+    min-height: 72px !important;
+    padding: 12px 13px !important;
+    border-radius: 15px !important;
+  }
+
+  body .hero-live-card span{
+    font-size: .56rem !important;
+    letter-spacing: .17em !important;
+  }
+
+  body .hero-live-card strong{
+    display: block !important;
+    max-width: 100% !important;
+    font-size: 1rem !important;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    padding-left: 0 !important;
+  }
+
+  body .hero-live-card small{
+    font-size: .7rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body .hero-stats{
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: calc(100% - 36px) !important;
+    margin: 18px auto 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+
+  body .hero-stats .stat-divider{ display: none !important; }
+  body .hero-stats .stat-item{
+    min-width: 0 !important;
+    padding: 11px 8px !important;
+    text-align: left !important;
+    border-radius: 13px !important;
+  }
+  body .hero-stats .stat-num{
+    justify-content: flex-start !important;
+    font-size: 1.75rem !important;
+  }
+  body .hero-stats .stat-sep{ font-size: .6rem !important; letter-spacing: .16em !important; }
+  body .hero-stats .stat-label{ font-size: .48rem !important; letter-spacing: .16em !important; }
+
+  /* Countdown */
+  body .countdown-strip{
+    padding: 36px 0 !important;
+  }
+  body .cs-inner{
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    gap: 20px !important;
+  }
+  body .cs-name{
+    font-size: clamp(1.65rem, 8vw, 2.2rem) !important;
+    line-height: .96 !important;
+  }
+  body .cd-blocks{
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  body .cd-block{
+    padding: 13px 7px !important;
+    border-radius: 13px !important;
+  }
+  body .cd-num{ font-size: 1.8rem !important; }
+  body .cd-lbl{ font-size: .48rem !important; letter-spacing: .14em !important; }
+
+  /* Track mode mobile */
+  body #race-control-section.h34c-fastf1-track,
+  body #race-control-section.h34d2-track-polish{
+    padding-top: 58px !important;
+    padding-bottom: 64px !important;
+  }
+  body #race-control-section .h34c-fastf1-panel,
+  body #race-control-section .h34d2-panel{
+    width: calc(100% - 36px) !important;
+    border-radius: 22px !important;
+  }
+  body #race-control-section .h34c-fastf1-stage,
+  body #race-control-section .h34d2-stage{
+    min-height: 235px !important;
+    padding: 16px !important;
+  }
+  body #race-control-section .h34c-fastf1-frame,
+  body #race-control-section .h34d2-frame{
+    max-width: 100% !important;
+    aspect-ratio: 1.28 / 1 !important;
+  }
+  body #race-control-section .h34c-fastf1-info,
+  body #race-control-section .h34d2-info{
+    padding: 22px 18px 24px !important;
+  }
+  body #race-control-section .h34c-fastf1-info h3,
+  body #race-control-section .h34d2-info h3,
+  body #race-control-section #rc-race-name{
+    font-size: clamp(1.85rem, 10.5vw, 2.55rem) !important;
+    line-height: .92 !important;
+    max-width: 100% !important;
+  }
+  body #race-control-section .h33b-data-row,
+  body #race-control-section .h34d2-data-row{
+    grid-template-columns: 1fr !important;
+    text-align: left !important;
+  }
+  body #race-control-section .h33b-data-row strong,
+  body #race-control-section .h34d2-data-row strong{
+    text-align: left !important;
+  }
+
+  /* Product cards */
+  body .products-grid{
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  body .pcard{
+    width: 100% !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+  body .pcard-img-wrap{
+    height: 215px !important;
+    margin: 10px 10px 0 !important;
+    width: calc(100% - 20px) !important;
+    border-radius: 16px !important;
+  }
+  body .pcard-info{
+    padding: 15px !important;
+  }
+  body .pcard-team{
+    font-size: .54rem !important;
+    letter-spacing: .2em !important;
+  }
+  body .pcard-name{
+    font-size: 1rem !important;
+    line-height: 1.16 !important;
+  }
+  body .pcard-price{ font-size: 1.1rem !important; }
+
+  /* Team strip: make it intentionally horizontal, not squeezed */
+  body .marquee-strip{
+    margin-top: 6px !important;
+    min-height: 118px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  body .marquee-strip::-webkit-scrollbar{ display: none !important; }
+  body .marquee-track{
+    width: max-content !important;
+    animation: none !important;
+    transform: none !important;
+    gap: 12px !important;
+  }
+  body .marquee-team{
+    min-width: 230px !important;
+    width: 230px !important;
+    min-height: 84px !important;
+    flex: 0 0 230px !important;
+  }
+
+  /* Quote card */
+  body .testi-section{
+    padding-top: 56px !important;
+    padding-bottom: 60px !important;
+  }
+  body .quote-card,
+  body .testi-card.featured-quote,
+  body .home-quote-card{
+    width: calc(100% - 36px) !important;
+    max-width: 340px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* Beyond + Fan Pulse */
+  body .exp-grid,
+  body .testi-grid{
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  body .exp-card,
+  body .testi-card,
+  body .fan-voice-card{
+    width: 100% !important;
+    padding: 18px !important;
+    border-radius: 17px !important;
+  }
+  body .exp-card h3,
+  body .fan-voice-card h3,
+  body .testi-card h3{
+    font-size: 1.15rem !important;
+    line-height: 1.05 !important;
+  }
+  body .exp-card p,
+  body .fan-voice-card p,
+  body .testi-card p{
+    font-size: .78rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Race Lab: convert to clean stacked mobile cards */
+  body .paddox-lab-section{
+    padding-top: 62px !important;
+    padding-bottom: 70px !important;
+  }
+  body .h33e4-lab-shell{
+    width: calc(100% - 36px) !important;
+    margin: 0 auto !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+  body .h33e4-lab-head{
+    margin-bottom: 18px !important;
+  }
+  body .h33e4-live-chip{
+    width: 100% !important;
+    justify-content: center !important;
+    min-height: 38px !important;
+    font-size: .56rem !important;
+    letter-spacing: .16em !important;
+  }
+  body .h33e4-command-grid{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  body .h33e4-passport-panel,
+  body .h33e4-feature-panel,
+  body .h33e4-prediction-panel,
+  body .h33e4-vault-panel{
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 18px !important;
+    border-radius: 18px !important;
+  }
+  body .h33e4-passport-panel{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  body .h33e4-passport-visual{
+    min-height: 180px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  body .h33e4-passport-book{
+    transform: scale(.88) rotate(-6deg) !important;
+  }
+  body .h33e4-passport-copy h3,
+  body .h33e4-feature-panel h3{
+    font-size: clamp(1.55rem, 8vw, 2rem) !important;
+    line-height: .95 !important;
+  }
+  body .prediction-picks,
+  body .h33e4-picks{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  body .prediction-picks button,
+  body .h33e4-picks button,
+  body .passport-actions a,
+  body .passport-actions button,
+  body .h33e4-actions a,
+  body .h33e4-actions button{
+    width: 100% !important;
+    min-height: 38px !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  body .badge-vault-mini,
+  body .h33e4-vault-mini{
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 390px){
+  body .container,
+  body .hero-content,
+  body .cs-inner{
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  body .hero-h1{ font-size: clamp(3.75rem, 22vw, 4.85rem) !important; }
+  body .hero-btns{ grid-template-columns: 1fr !important; }
+  body .hero-stats{ width: calc(100% - 30px) !important; }
+  body .hero-stats .stat-num{ font-size: 1.45rem !important; }
+  body .section-title,
+  body .grid-strip-title,
+  body .h33e4-title{ font-size: clamp(1.9rem, 10vw, 2.35rem) !important; }
+  body .pcard-img-wrap{ height: 195px !important; }
+  body .marquee-team{ min-width: 215px !important; width: 215px !important; flex-basis: 215px !important; }
+  body .h33e4-lab-shell,
+  body #race-control-section .h34c-fastf1-panel,
+  body #race-control-section .h34d2-panel{ width: calc(100% - 24px) !important; }
+}
