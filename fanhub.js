@@ -2151,34 +2151,38 @@ async function buildQuoteShareCanvas(q = {}) {
   const ctx = canvas.getContext('2d');
 
   const accent = '#e8002d';
-  const gold = '#d7b46a';
-  const glassLine = 'rgba(255,255,255,.14)';
+  const accent2 = '#ff2d55';
+  const glass = 'rgba(255,255,255,.15)';
 
-  // Deep story background
+  const brandIcon = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
+  const brandLock = await loadQuoteImageForCanvas(typeof PADDOX_BRAND_HORIZONTAL !== 'undefined' ? PADDOX_BRAND_HORIZONTAL : PADDOX_BRAND_LOCKUP) || await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
+  const driverImg = await loadQuoteImageForCanvas(quoteImageValue(q));
+
+  // Background
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#030407');
-  bg.addColorStop(.45, '#070911');
-  bg.addColorStop(1, '#070205');
+  bg.addColorStop(0, '#030306');
+  bg.addColorStop(.45, '#080a11');
+  bg.addColorStop(1, '#070105');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // Cinematic red glow fields
+  // Red atmosphere
   ctx.save();
   ctx.filter = 'blur(120px)';
-  ctx.globalAlpha = .34;
+  ctx.globalAlpha = .42;
   ctx.fillStyle = accent;
-  ctx.beginPath(); ctx.arc(60, 120, 260, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = .22;
-  ctx.beginPath(); ctx.arc(1000, 1085, 310, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(55, 110, 290, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = .25;
+  ctx.beginPath(); ctx.arc(1005, 1040, 360, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   ctx.filter = 'none';
 
-  // Motorsport diagonal texture
+  // Diagonal premium texture
   ctx.save();
-  ctx.globalAlpha = .13;
+  ctx.globalAlpha = .16;
   ctx.strokeStyle = accent;
   ctx.lineWidth = 1;
-  for (let x = -H; x < W + H; x += 45) {
+  for (let x = -H; x < W + H; x += 44) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x + H, H);
@@ -2186,269 +2190,311 @@ async function buildQuoteShareCanvas(q = {}) {
   }
   ctx.restore();
 
-  // Main outer luxury shell
-  const cardX = 70, cardY = 72, cardW = W - 140, cardH = H - 128;
-  roundedRect(ctx, cardX, cardY, cardW, cardH, 40);
-  const shell = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
-  shell.addColorStop(0, 'rgba(10,12,18,.99)');
-  shell.addColorStop(.5, 'rgba(4,6,11,.985)');
-  shell.addColorStop(1, 'rgba(14,4,9,.985)');
-  ctx.fillStyle = shell;
+  // Outer premium frame
+  const ox = 68, oy = 58, ow = 944, oh = 1238;
+  roundedRect(ctx, ox, oy, ow, oh, 42);
+  const outerGrad = ctx.createLinearGradient(ox, oy, ox + ow, oy + oh);
+  outerGrad.addColorStop(0, 'rgba(18,20,27,.99)');
+  outerGrad.addColorStop(.38, 'rgba(5,7,12,.99)');
+  outerGrad.addColorStop(1, 'rgba(18,4,10,.99)');
+  ctx.fillStyle = outerGrad;
   ctx.fill();
-  ctx.lineWidth = 2.2;
-  ctx.strokeStyle = 'rgba(255,255,255,.16)';
+  ctx.lineWidth = 2.4;
+  ctx.strokeStyle = 'rgba(255,255,255,.20)';
   ctx.stroke();
 
-  // Red top blade + subtle inner outline
-  ctx.fillStyle = accent;
-  ctx.fillRect(cardX, cardY, cardW, 10);
-  roundedRect(ctx, cardX + 16, cardY + 16, cardW - 32, cardH - 32, 32);
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(255,255,255,.065)';
-  ctx.stroke();
-
-  // Load brand/driver images
-  const brandIcon = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  const brandLock = await loadQuoteImageForCanvas(typeof PADDOX_BRAND_HORIZONTAL !== 'undefined' ? PADDOX_BRAND_HORIZONTAL : PADDOX_BRAND_LOCKUP) || await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
-  const driverImg = await loadQuoteImageForCanvas(quoteImageValue(q));
-
-  // Premium header bar
-  const headerX = 110, headerY = 110, headerW = 860, headerH = 120;
-  roundedRect(ctx, headerX, headerY, headerW, headerH, 28);
-  const headerGrad = ctx.createLinearGradient(headerX, headerY, headerX + headerW, headerY + headerH);
-  headerGrad.addColorStop(0, 'rgba(255,255,255,.085)');
-  headerGrad.addColorStop(.48, 'rgba(255,255,255,.032)');
-  headerGrad.addColorStop(1, 'rgba(232,0,45,.13)');
-  ctx.fillStyle = headerGrad;
-  ctx.fill();
-  ctx.lineWidth = 1.3;
-  ctx.strokeStyle = glassLine;
-  ctx.stroke();
-
+  // Glow outline
   ctx.save();
-  ctx.globalAlpha = .10;
+  ctx.shadowColor = accent;
+  ctx.shadowBlur = 18;
+  roundedRect(ctx, ox, oy, ow, oh, 42);
+  ctx.strokeStyle = 'rgba(232,0,45,.58)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+
+  // Top red blade
+  ctx.fillStyle = accent;
+  ctx.fillRect(ox, oy, ow, 10);
+
+  // Inner inset frame
+  roundedRect(ctx, ox + 18, oy + 18, ow - 36, oh - 36, 34);
+  ctx.lineWidth = 1.1;
+  ctx.strokeStyle = 'rgba(255,255,255,.085)';
+  ctx.stroke();
+
+  // Header
+  const hx = 110, hy = 102, hw = 860, hh = 128;
+  roundedRect(ctx, hx, hy, hw, hh, 28);
+  const hgrad = ctx.createLinearGradient(hx, hy, hx + hw, hy + hh);
+  hgrad.addColorStop(0, 'rgba(255,255,255,.11)');
+  hgrad.addColorStop(.42, 'rgba(255,255,255,.045)');
+  hgrad.addColorStop(1, 'rgba(232,0,45,.16)');
+  ctx.fillStyle = hgrad;
+  ctx.fill();
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = glass;
+  ctx.stroke();
+
+  // Header diagonal sheen
+  ctx.save();
+  ctx.globalAlpha = .14;
   ctx.fillStyle = '#fff';
-  ctx.fillRect(headerX + 22, headerY + 18, headerW - 44, 1);
+  ctx.beginPath();
+  ctx.moveTo(hx + 420, hy);
+  ctx.lineTo(hx + 600, hy);
+  ctx.lineTo(hx + 460, hy + hh);
+  ctx.lineTo(hx + 280, hy + hh);
+  ctx.closePath();
+  ctx.fill();
   ctx.restore();
 
   if (brandLock) {
-    drawQuoteBrandImage(ctx, brandLock, headerX + 26, headerY + 22, 310, 62, 1);
+    drawQuoteBrandImage(ctx, brandLock, hx + 28, hy + 30, 325, 60, 1);
   } else {
-    drawPaddoxAlignedBrand(ctx, headerX + 26, headerY + 20, brandIcon, { size: 72, fontSize: 62, gap: 14, letterGap: 4 });
+    drawPaddoxAlignedBrand(ctx, hx + 28, hy + 72, brandIcon, { size: 72, fontSize: 62, gap: 14, letterGap: 4 });
   }
 
-  ctx.font = '800 22px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.66)';
-  ctx.fillText('FAN HUB • VIP QUOTE CARD', headerX + 28, headerY + 101);
+  ctx.font = '900 22px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.72)';
+  ctx.fillText('FAN HUB • VIP QUOTE CARD', hx + 28, hy + 102);
 
-  // Status capsule
-  const chipText = String(q.era || 'QUOTE').toUpperCase();
-  const chipX = 748, chipY = 126, chipW = 190, chipH = 58;
-  roundedRect(ctx, chipX, chipY, chipW, chipH, 21);
-  const chipGrad = ctx.createLinearGradient(chipX, chipY, chipX + chipW, chipY + chipH);
-  chipGrad.addColorStop(0, 'rgba(232,0,45,.22)');
-  chipGrad.addColorStop(1, 'rgba(255,255,255,.045)');
-  ctx.fillStyle = chipGrad;
+  // Status pill
+  const chipText = String(q.era || 'CURRENT').toUpperCase();
+  const cx = 748, cy = 124, cw = 190, ch = 58;
+  roundedRect(ctx, cx, cy, cw, ch, 22);
+  const cgrad = ctx.createLinearGradient(cx, cy, cx + cw, cy + ch);
+  cgrad.addColorStop(0, 'rgba(255,255,255,.055)');
+  cgrad.addColorStop(.55, 'rgba(232,0,45,.19)');
+  cgrad.addColorStop(1, 'rgba(0,0,0,.20)');
+  ctx.fillStyle = cgrad;
   ctx.fill();
+  ctx.strokeStyle = 'rgba(232,0,45,.62)';
   ctx.lineWidth = 1.6;
-  ctx.strokeStyle = 'rgba(232,0,45,.50)';
   ctx.stroke();
   ctx.save();
-  ctx.shadowColor = 'rgba(232,0,45,.55)';
-  ctx.shadowBlur = 14;
-  drawQuoteGlowLine(ctx, chipX + 24, chipY + chipH - 10, chipW - 48);
+  ctx.shadowColor = accent2;
+  ctx.shadowBlur = 16;
+  drawQuoteGlowLine(ctx, cx + 26, cy + ch - 9, cw - 52);
   ctx.restore();
-
   ctx.font = '900 25px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#fff';
-  ctx.fillText(chipText, chipX + chipW / 2, chipY + chipH / 2 + 1);
+  ctx.fillText(chipText, cx + cw / 2, cy + ch / 2 + 1);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
-  // Divider
-  ctx.strokeStyle = 'rgba(255,255,255,.08)';
+  // Large quote panel subtle texture block
+  const qx = 110, qy = 252, qw = 860, qh = 412;
+  roundedRect(ctx, qx, qy, qw, qh, 18);
+  const qgrad = ctx.createLinearGradient(qx, qy, qx + qw, qy + qh);
+  qgrad.addColorStop(0, 'rgba(255,255,255,.012)');
+  qgrad.addColorStop(.6, 'rgba(0,0,0,.025)');
+  qgrad.addColorStop(1, 'rgba(232,0,45,.075)');
+  ctx.fillStyle = qgrad;
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255,255,255,.075)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(110, 264);
   ctx.lineTo(970, 264);
   ctx.stroke();
 
-  // Quote area
-  ctx.font = '136px Georgia, serif';
-  ctx.fillStyle = 'rgba(232,0,45,.96)';
-  ctx.fillText('“', 118, 386);
-
+  // Quote mark + text
+  ctx.font = '140px Georgia, serif';
+  ctx.fillStyle = accent;
+  ctx.fillText('“', 124, 384);
   ctx.save();
-  ctx.globalAlpha = .35;
-  drawQuoteGlowLine(ctx, 170, 360, 132);
+  ctx.globalAlpha = .46;
+  drawQuoteGlowLine(ctx, 186, 360, 132);
   ctx.restore();
 
-  ctx.font = '60px Barlow Condensed, Arial, sans-serif';
+  const quoteText = String(q.text || '');
+  const textLen = quoteText.length;
+  let qFont = textLen > 135 ? 50 : textLen > 95 ? 55 : 61;
+  ctx.font = `500 ${qFont}px Barlow Condensed, Arial, sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,.965)';
-  wrapCanvasText(ctx, q.text || '', 132, 392, 820, 78, 5);
-
-  // Very subtle quote block vignette
-  const qGlow = ctx.createRadialGradient(780, 500, 40, 780, 500, 420);
-  qGlow.addColorStop(0, 'rgba(232,0,45,.12)');
-  qGlow.addColorStop(1, 'rgba(232,0,45,0)');
-  ctx.fillStyle = qGlow;
-  ctx.fillRect(110, 300, 860, 300);
+  const lineH = Math.round(qFont * 1.33);
+  wrapCanvasText(ctx, quoteText, 132, 418, 810, lineH, 5);
 
   // Driver VIP panel
-  const infoX = 110, infoY = 688, infoW = 860, infoH = 282;
-  roundedRect(ctx, infoX, infoY, infoW, infoH, 34);
-  const infoGrad = ctx.createLinearGradient(infoX, infoY, infoX + infoW, infoY + infoH);
-  infoGrad.addColorStop(0, 'rgba(255,255,255,.105)');
-  infoGrad.addColorStop(.38, 'rgba(12,14,22,.82)');
-  infoGrad.addColorStop(1, 'rgba(232,0,45,.23)');
-  ctx.fillStyle = infoGrad;
+  const ix = 110, iy = 702, iw = 860, ih = 282;
+  roundedRect(ctx, ix, iy, iw, ih, 36);
+  const igrad = ctx.createLinearGradient(ix, iy, ix + iw, iy + ih);
+  igrad.addColorStop(0, 'rgba(255,255,255,.12)');
+  igrad.addColorStop(.28, 'rgba(18,21,29,.86)');
+  igrad.addColorStop(.63, 'rgba(70,7,22,.78)');
+  igrad.addColorStop(1, 'rgba(232,0,45,.30)');
+  ctx.fillStyle = igrad;
   ctx.fill();
-  ctx.lineWidth = 1.5;
-  ctx.strokeStyle = 'rgba(255,255,255,.15)';
+  ctx.lineWidth = 1.7;
+  ctx.strokeStyle = 'rgba(255,255,255,.18)';
   ctx.stroke();
 
+  // Driver panel top glow
   ctx.save();
-  ctx.globalAlpha = .20;
+  ctx.shadowColor = accent;
+  ctx.shadowBlur = 16;
+  drawQuoteGlowLine(ctx, ix + 36, iy + 64, 230);
+  ctx.restore();
+
+  // Decorative diagonal glass overlay
+  ctx.save();
+  ctx.globalAlpha = .12;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.moveTo(ix + 260, iy);
+  ctx.lineTo(ix + 440, iy);
+  ctx.lineTo(ix + 295, iy + ih);
+  ctx.lineTo(ix + 120, iy + ih);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Dot matrix on right
+  ctx.save();
+  ctx.globalAlpha = .19;
   ctx.fillStyle = accent;
-  for (let i = 0; i < 9; i++) {
-    ctx.fillRect(infoX + infoW - 330 + i * 18, infoY + 170, 3, 3);
-    ctx.fillRect(infoX + infoW - 325 + i * 18, infoY + 190, 3, 3);
+  for (let r = 0; r < 7; r++) {
+    for (let c = 0; c < 15; c++) {
+      ctx.fillRect(ix + 500 + c * 13, iy + 122 + r * 13, 2.4, 2.4);
+    }
   }
   ctx.restore();
 
-  // Driver label + line
+  // Label
   ctx.font = '900 17px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = accent;
-  ctx.fillText('DRIVER', infoX + 34, infoY + 78);
-  drawQuoteGlowLine(ctx, infoX + 105, infoY + 72, 160);
+  ctx.fillText('DRIVER', ix + 38, iy + 86);
 
-  // Driver name sizing
-  const driverText = String(q.driver || 'F1 Driver').toUpperCase();
-  let driverFont = 62;
-  ctx.font = `900 ${driverFont}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
-  while (ctx.measureText(driverText).width > 500 && driverFont > 46) {
-    driverFont -= 2;
-    ctx.font = `900 ${driverFont}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
+  // Driver name
+  const driverName = String(q.driver || 'F1 Driver').toUpperCase();
+  let nameFont = 66;
+  ctx.font = `900 ${nameFont}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
+  while (ctx.measureText(driverName).width > 500 && nameFont > 46) {
+    nameFont -= 2;
+    ctx.font = `900 ${nameFont}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
   }
   ctx.fillStyle = '#fff';
-  ctx.fillText(driverText, infoX + 34, infoY + 146);
+  ctx.fillText(driverName, ix + 38, iy + 154);
 
-  ctx.font = '34px Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.78)';
-  ctx.fillText(String(q.team || q.era || 'PADDOX Quote Library'), infoX + 34, infoY + 195);
+  ctx.font = '35px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.80)';
+  ctx.fillText(String(q.team || q.era || 'PADDOX Quote Library'), ix + 38, iy + 205);
 
-  // Pill row
-  const tag = `${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'RACECRAFT').toUpperCase()}`;
-  roundedRect(ctx, infoX + 34, infoY + 218, 260, 42, 18);
-  ctx.fillStyle = 'rgba(0,0,0,.22)';
+  // Tag pill
+  roundedRect(ctx, ix + 38, iy + 226, 270, 42, 20);
+  ctx.fillStyle = 'rgba(0,0,0,.24)';
   ctx.fill();
   ctx.strokeStyle = 'rgba(255,255,255,.18)';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1.2;
   ctx.stroke();
   ctx.font = '900 22px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.78)';
-  ctx.fillText(tag, infoX + 54, infoY + 246);
+  ctx.fillText(`${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'RACECRAFT').toUpperCase()}`, ix + 58, iy + 254);
 
-  // Portrait glow + ring
-  const portraitCx = infoX + infoW - 168;
-  const portraitCy = infoY + infoH / 2;
+  // Portrait
+  const pcx = ix + iw - 172;
+  const pcy = iy + ih / 2;
   ctx.save();
-  ctx.filter = 'blur(26px)';
-  ctx.globalAlpha = .30;
+  ctx.filter = 'blur(30px)';
+  ctx.globalAlpha = .42;
   ctx.fillStyle = accent;
   ctx.beginPath();
-  ctx.arc(portraitCx, portraitCy, 124, 0, Math.PI * 2);
+  ctx.arc(pcx, pcy, 132, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
   ctx.filter = 'none';
 
   ctx.beginPath();
-  ctx.arc(portraitCx, portraitCy, 110, 0, Math.PI * 2);
-  const ring = ctx.createLinearGradient(portraitCx - 110, portraitCy - 110, portraitCx + 110, portraitCy + 110);
-  ring.addColorStop(0, '#ff3558');
-  ring.addColorStop(.52, '#e8002d');
-  ring.addColorStop(1, '#4a0814');
+  ctx.arc(pcx, pcy, 112, 0, Math.PI * 2);
+  const ring = ctx.createLinearGradient(pcx - 112, pcy - 112, pcx + 112, pcy + 112);
+  ring.addColorStop(0, '#ff3d61');
+  ring.addColorStop(.45, '#e8002d');
+  ring.addColorStop(1, '#390812');
   ctx.fillStyle = ring;
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(portraitCx, portraitCy, 97, 0, Math.PI * 2);
-  ctx.fillStyle = '#080a10';
+  ctx.arc(pcx, pcy, 98, 0, Math.PI * 2);
+  ctx.fillStyle = '#06080e';
   ctx.fill();
 
   ctx.save();
   ctx.beginPath();
-  ctx.arc(portraitCx, portraitCy, 91, 0, Math.PI * 2);
+  ctx.arc(pcx, pcy, 91, 0, Math.PI * 2);
   ctx.clip();
   if (driverImg) {
     const s = Math.min(driverImg.width, driverImg.height);
     const sx = (driverImg.width - s) / 2;
     const sy = (driverImg.height - s) / 2;
-    ctx.drawImage(driverImg, sx, sy, s, s, portraitCx - 91, portraitCy - 91, 182, 182);
+    ctx.drawImage(driverImg, sx, sy, s, s, pcx - 91, pcy - 91, 182, 182);
   } else if (brandIcon) {
     const s = Math.min(brandIcon.width, brandIcon.height);
     const sx = (brandIcon.width - s) / 2;
     const sy = (brandIcon.height - s) / 2;
-    ctx.drawImage(brandIcon, sx, sy, s, s, portraitCx - 91, portraitCy - 91, 182, 182);
+    ctx.drawImage(brandIcon, sx, sy, s, s, pcx - 91, pcy - 91, 182, 182);
   }
   ctx.restore();
 
   ctx.save();
-  ctx.strokeStyle = 'rgba(255,255,255,.62)';
+  ctx.strokeStyle = 'rgba(255,255,255,.68)';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.arc(portraitCx, portraitCy, 114, -0.86, 0.55);
+  ctx.arc(pcx, pcy, 116, -0.7, 0.7);
   ctx.stroke();
   ctx.restore();
 
   // Footer
-  const footerX = 110, footerY = 1090, footerW = 860, footerH = 94;
-  roundedRect(ctx, footerX, footerY, footerW, footerH, 28);
-  const footGrad = ctx.createLinearGradient(footerX, footerY, footerX + footerW, footerY + footerH);
-  footGrad.addColorStop(0, 'rgba(255,255,255,.075)');
-  footGrad.addColorStop(.58, 'rgba(255,255,255,.04)');
-  footGrad.addColorStop(1, 'rgba(232,0,45,.16)');
-  ctx.fillStyle = footGrad;
+  const fx = 110, fy = 1104, fw = 860, fh = 92;
+  roundedRect(ctx, fx, fy, fw, fh, 28);
+  const fgrad = ctx.createLinearGradient(fx, fy, fx + fw, fy + fh);
+  fgrad.addColorStop(0, 'rgba(255,255,255,.085)');
+  fgrad.addColorStop(.55, 'rgba(255,255,255,.04)');
+  fgrad.addColorStop(1, 'rgba(232,0,45,.17)');
+  ctx.fillStyle = fgrad;
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,.12)';
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1.3;
+  ctx.strokeStyle = 'rgba(255,255,255,.15)';
   ctx.stroke();
 
-  ctx.font = '900 22px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.82)';
-  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', footerX + 36, footerY + 57);
+  // Footer icons/text
+  drawQuoteIconShield(ctx, fx + 36, fy + 28);
+  ctx.font = '900 21px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.84)';
+  ctx.fillText('SAVE', fx + 82, fy + 58);
 
-  ctx.save();
-  ctx.strokeStyle = accent;
-  ctx.globalAlpha = .75;
+  ctx.strokeStyle = 'rgba(232,0,45,.75)';
+  ctx.beginPath(); ctx.moveTo(fx + 170, fy + 28); ctx.lineTo(fx + 170, fy + 65); ctx.stroke();
+
+  drawQuoteIconShare(ctx, fx + 198, fy + 30);
+  ctx.fillText('SHARE', fx + 270, fy + 58);
+
+  ctx.beginPath(); ctx.moveTo(fx + 355, fy + 28); ctx.lineTo(fx + 355, fy + 65); ctx.stroke();
+
+  drawQuoteIconStar(ctx, fx + 394, fy + 47);
+  ctx.fillText('SUPPORT YOUR GRID', fx + 430, fy + 58);
+
+  // Brand footer split
   ctx.beginPath();
-  ctx.moveTo(575, footerY + 22);
-  ctx.lineTo(575, footerY + 72);
+  ctx.moveTo(fx + 545, fy + 22);
+  ctx.quadraticCurveTo(fx + 588, fy + 38, fx + 620, fy + 22);
+  ctx.strokeStyle = 'rgba(232,0,45,.75)';
+  ctx.lineWidth = 2;
   ctx.stroke();
-  ctx.restore();
 
   if (brandLock) {
-    drawQuoteBrandImage(ctx, brandLock, footerX + 620, footerY + 27, 210, 48, .98);
+    drawQuoteBrandImage(ctx, brandLock, fx + 610, fy + 25, 230, 48, .98);
   } else {
-    drawPaddoxAlignedBrand(ctx, footerX + 620, footerY + 24, brandIcon, { size: 52, fontSize: 50, gap: 13, letterGap: 3 });
+    drawPaddoxAlignedBrand(ctx, fx + 610, fy + 25, brandIcon, { size: 52, fontSize: 50, gap: 13, letterGap: 3 });
   }
 
-  // Outer glow rim
-  ctx.save();
-  ctx.globalAlpha = .55;
-  ctx.shadowColor = accent;
-  ctx.shadowBlur = 20;
-  roundedRect(ctx, cardX, cardY, cardW, cardH, 40);
-  ctx.strokeStyle = 'rgba(232,0,45,.52)';
-  ctx.lineWidth = 1.4;
-  ctx.stroke();
-  ctx.restore();
-
-  const vignette = ctx.createRadialGradient(W / 2, H / 2, 150, W / 2, H / 2, 730);
+  // Final vignette
+  const vignette = ctx.createRadialGradient(W / 2, H / 2, 130, W / 2, H / 2, 760);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
-  vignette.addColorStop(1, 'rgba(0,0,0,.28)');
+  vignette.addColorStop(1, 'rgba(0,0,0,.30)');
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
 
