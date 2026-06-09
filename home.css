@@ -12097,3 +12097,114 @@ body .hero .hero-overlay{
     font-size: 2.2rem !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.14 — HERO LIVE CARDS READABILITY LOCK
+   Scope: Hero lower live cards only. Navbar, hero title, footer, products, modal untouched.
+   Fix: remove red-dot text collision, reduce truncation, and make live chips readable.
+   ============================================================ */
+
+body .hero-live-grid,
+body .h32a-hero .hero-live-grid{
+  width: min(760px, calc(100vw - 220px)) !important;
+  max-width: 760px !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+body .hero-live-card,
+body .h32a-hero .hero-live-card{
+  position: relative !important;
+  min-height: 82px !important;
+  padding: 15px 16px 14px 20px !important;
+  border-radius: 19px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-left: 2px solid rgba(232,0,45,.72) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(232,0,45,.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.078), rgba(255,255,255,.026)) !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  overflow: hidden !important;
+}
+
+body .hero-live-card::after,
+body .h32a-hero .hero-live-card::after{
+  display: none !important;
+  content: none !important;
+}
+
+body .hero-live-card span,
+body .h32a-hero .hero-live-card span{
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: .58rem !important;
+  letter-spacing: .22em !important;
+  line-height: 1 !important;
+  margin-bottom: 8px !important;
+  color: rgba(255,255,255,.58) !important;
+}
+
+body .hero-live-card span::before,
+body .h32a-hero .hero-live-card span::before{
+  content: '' !important;
+  display: inline-block !important;
+  width: 7px !important;
+  height: 7px !important;
+  flex: 0 0 7px !important;
+  border-radius: 50% !important;
+  background: var(--red) !important;
+  box-shadow: 0 0 0 5px rgba(232,0,45,.13), 0 0 18px rgba(232,0,45,.45) !important;
+}
+
+body .hero-live-card strong,
+body .h32a-hero .hero-live-card strong{
+  max-width: 100% !important;
+  font-size: clamp(.98rem, 1.05vw, 1.24rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: .035em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: #fff !important;
+}
+
+body .hero-live-card small,
+body .h32a-hero .hero-live-card small{
+  max-width: 100% !important;
+  margin-top: 7px !important;
+  font-size: .74rem !important;
+  line-height: 1.25 !important;
+  color: rgba(255,255,255,.64) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 1180px){
+  body .hero-live-grid,
+  body .h32a-hero .hero-live-grid{
+    width: min(680px, calc(100vw - 96px)) !important;
+  }
+}
+
+@media (max-width: 900px){
+  body .hero-live-grid,
+  body .h32a-hero .hero-live-grid{
+    width: min(620px, calc(100vw - 52px)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 620px){
+  body .hero-live-grid,
+  body .h32a-hero .hero-live-grid{
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+  }
+  body .hero-live-card,
+  body .h32a-hero .hero-live-card{
+    min-height: 76px !important;
+  }
+}
