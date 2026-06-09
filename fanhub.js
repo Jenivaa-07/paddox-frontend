@@ -5,8 +5,9 @@
 console.log('PADDOX H3.4C.2 Fan Hub circuit identity matcher loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
-const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-horizontal-white.png?v=F1';
-const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=F1';
+const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-lockup-quote-clean.png?v=18_3_1';
+const PADDOX_BRAND_HORIZONTAL = 'assets/paddox-logo-horizontal-white.png?v=F1_6';
+const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=A4_10C_3';
 
 /* Phase H3.4C.4 — PADDOX brand cleanup: AI Studio removed from Fan Hub UI. */
 function removePaddoxAiStudioUI() {
@@ -1897,7 +1898,8 @@ function renderRealtimeQuotes() {
           </div>
 
           <div class="qf-brand qf-brand-mark compact qf-brand-final">
-            <img src="${PADDOX_BRAND_LOCKUP}" alt="PADDOX Motorsport Lifestyle" class="qf-brand-lockup-img" loading="lazy">
+            <span class="qf-brand-icon-wrap"><img src="${PADDOX_BRAND_ICON}" alt="PADDOX logo" class="qf-brand-icon" loading="lazy"></span>
+            <span class="qf-brand-wordmark">PADDO<span>X</span></span>
           </div>
         </div>
       </div>
@@ -2090,6 +2092,22 @@ function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 8) {
   return y + lines.length * lineHeight;
 }
 
+function drawBrandLockupCanvas(ctx, src, x, y, maxW, maxH, opacity = 1) {
+  if (!src) return { width: 0, height: 0 };
+  const ratio = src.width / src.height;
+  let width = maxW;
+  let height = width / ratio;
+  if (height > maxH) {
+    height = maxH;
+    width = height * ratio;
+  }
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.drawImage(src, x, y, width, height);
+  ctx.restore();
+  return { width, height };
+}
+
 function roundedRect(ctx, x, y, w, h, r) {
   const radius = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
@@ -2110,22 +2128,24 @@ async function buildQuoteShareCanvas(q = {}) {
   const ctx = canvas.getContext('2d');
 
   const accent = '#e8002d';
+  const accentSoft = 'rgba(232,0,45,.18)';
+  const gold = '#d4b06a';
   const glassLine = 'rgba(255,255,255,.12)';
 
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#040407');
-  bg.addColorStop(.48, '#080a10');
-  bg.addColorStop(1, '#060306');
+  bg.addColorStop(0, '#05060a');
+  bg.addColorStop(.42, '#090c13');
+  bg.addColorStop(1, '#050306');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
   ctx.save();
-  ctx.filter = 'blur(120px)';
-  ctx.globalAlpha = .32;
-  ctx.fillStyle = '#e8002d';
-  ctx.beginPath(); ctx.arc(120, 132, 220, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = .22;
-  ctx.beginPath(); ctx.arc(958, 1122, 275, 0, Math.PI * 2); ctx.fill();
+  ctx.filter = 'blur(130px)';
+  ctx.globalAlpha = .34;
+  ctx.fillStyle = accent;
+  ctx.beginPath(); ctx.arc(110, 110, 240, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = .18;
+  ctx.beginPath(); ctx.arc(910, 1180, 270, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   ctx.filter = 'none';
 
@@ -2133,153 +2153,226 @@ async function buildQuoteShareCanvas(q = {}) {
   ctx.globalAlpha = .16;
   ctx.strokeStyle = accent;
   ctx.lineWidth = 1;
-  for (let x = -H; x < W + H; x += 52) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + H, H); ctx.stroke();
+  for (let x = -H; x < W + H; x += 42) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x + H, H);
+    ctx.stroke();
   }
   ctx.restore();
 
-  const cardX = 70, cardY = 74, cardW = W - 140, cardH = H - 132;
-  roundedRect(ctx, cardX, cardY, cardW, cardH, 38);
-  const shell = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
-  shell.addColorStop(0, 'rgba(9,11,17,.98)');
-  shell.addColorStop(.48, 'rgba(5,7,12,.96)');
-  shell.addColorStop(1, 'rgba(12,5,10,.97)');
+  const shellX = 70, shellY = 74, shellW = W - 140, shellH = H - 132;
+  roundedRect(ctx, shellX, shellY, shellW, shellH, 38);
+  const shell = ctx.createLinearGradient(shellX, shellY, shellX + shellW, shellY + shellH);
+  shell.addColorStop(0, 'rgba(7,10,16,.985)');
+  shell.addColorStop(.52, 'rgba(5,7,12,.965)');
+  shell.addColorStop(1, 'rgba(12,4,9,.975)');
   ctx.fillStyle = shell;
   ctx.fill();
   ctx.lineWidth = 2.2;
-  ctx.strokeStyle = 'rgba(255,255,255,.18)';
+  ctx.strokeStyle = 'rgba(255,255,255,.16)';
+  ctx.stroke();
+
+  roundedRect(ctx, shellX + 10, shellY + 10, shellW - 20, shellH - 20, 32);
+  ctx.lineWidth = 1.1;
+  ctx.strokeStyle = 'rgba(255,255,255,.06)';
   ctx.stroke();
 
   ctx.fillStyle = accent;
-  ctx.fillRect(cardX, cardY, cardW, 10);
+  ctx.fillRect(shellX, shellY, shellW, 10);
 
-  const brandLockup = await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
-  const brandIcon = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
+  const brandLogo = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
+  const brandLock = await loadQuoteImageForCanvas(PADDOX_BRAND_HORIZONTAL) || await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const img = await loadQuoteImageForCanvas(quoteImageValue(q));
 
-  // Slightly slimmer header for better balance
   const headerX = 110, headerY = 110, headerW = 860, headerH = 118;
   roundedRect(ctx, headerX, headerY, headerW, headerH, 28);
   const header = ctx.createLinearGradient(headerX, headerY, headerX + headerW, headerY + headerH);
   header.addColorStop(0, 'rgba(255,255,255,.075)');
-  header.addColorStop(.58, 'rgba(255,255,255,.035)');
-  header.addColorStop(1, 'rgba(232,0,45,.10)');
+  header.addColorStop(.46, 'rgba(255,255,255,.035)');
+  header.addColorStop(1, 'rgba(232,0,45,.12)');
   ctx.fillStyle = header;
   ctx.fill();
   ctx.lineWidth = 1.2;
   ctx.strokeStyle = glassLine;
   ctx.stroke();
 
-  // Official PADDOX horizontal lockup — clearer than the old dark icon/text rendering
-  if (brandLockup) {
-    drawPaddoxLockupCanvas(ctx, 128, 128, brandLockup, { width: 300, height: 68 });
+  if (brandLock) {
+    drawBrandLockupCanvas(ctx, brandLock, 128, 132, 380, 70, 1);
   } else {
-    drawPaddoxAlignedBrand(ctx, 128, 131, brandIcon, { size: 72, fontSize: 64, gap: 14, letterGap: 4 });
+    drawPaddoxAlignedBrand(ctx, 128, 132, brandLogo, { size: 84, fontSize: 76, gap: 16, letterGap: 5 });
   }
   ctx.font = '800 21px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.68)';
-  ctx.fillText('FAN HUB • VIP QUOTE CARD', 132, 216);
+  ctx.fillText('FAN HUB • VIP QUOTE CARD', 130, 214);
 
-  // Premium chip
   const chipText = String(q.era || 'QUOTE').toUpperCase();
   roundedRect(ctx, 746, 126, 192, 56, 19);
   const chip = ctx.createLinearGradient(746, 126, 938, 182);
-  chip.addColorStop(0, 'rgba(232,0,45,.22)');
-  chip.addColorStop(1, 'rgba(255,255,255,.045)');
+  chip.addColorStop(0, 'rgba(232,0,45,.20)');
+  chip.addColorStop(.55, 'rgba(232,0,45,.10)');
+  chip.addColorStop(1, 'rgba(255,255,255,.05)');
   ctx.fillStyle = chip;
   ctx.fill();
-  ctx.strokeStyle = 'rgba(232,0,45,.42)'; ctx.lineWidth = 1.4; ctx.stroke();
-  ctx.font = '800 24px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(chipText, 842, 154);
-  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.strokeStyle = 'rgba(232,0,45,.38)';
+  ctx.lineWidth = 1.3;
+  ctx.stroke();
+  ctx.font = '800 12px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.56)';
+  ctx.fillText('STATUS', 774, 148);
+  ctx.font = '800 25px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(chipText, 842, 159);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
 
-  ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(110, 264); ctx.lineTo(970, 264); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(110, 262);
+  ctx.lineTo(970, 262);
+  ctx.stroke();
 
-  // Quote area moved upward and tightened a little
-  ctx.font = '122px Georgia, serif';
-  ctx.fillStyle = 'rgba(232,0,45,.92)';
-  ctx.fillText('“', 122, 378);
+  ctx.font = '132px Georgia, serif';
+  ctx.fillStyle = 'rgba(232,0,45,.95)';
+  ctx.fillText('“', 118, 386);
 
   ctx.font = '58px Barlow Condensed, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.96)';
-  wrapCanvasText(ctx, q.text || '', 132, 388, 810, 76, 5);
+  ctx.fillStyle = 'rgba(255,255,255,.97)';
+  wrapCanvasText(ctx, q.text || '', 132, 392, 808, 76, 5);
 
-  // Separator before VIP panel moved upward
   ctx.save();
-  ctx.globalAlpha = .50;
-  const shine = ctx.createLinearGradient(112, 660, 968, 660);
+  ctx.globalAlpha = .56;
+  const shine = ctx.createLinearGradient(112, 654, 968, 654);
   shine.addColorStop(0, 'rgba(255,255,255,0)');
   shine.addColorStop(.5, 'rgba(255,255,255,.12)');
   shine.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.strokeStyle = shine;
-  ctx.beginPath(); ctx.moveTo(112, 650); ctx.lineTo(968, 650); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(112, 646);
+  ctx.lineTo(968, 646);
+  ctx.stroke();
   ctx.restore();
 
-  // VIP driver card moved up to reduce dead middle space
-  const infoX = 110, infoY = 676, infoW = 860, infoH = 284;
-  roundedRect(ctx, infoX, infoY, infoW, infoH, 32);
+  const infoX = 110, infoY = 682, infoW = 860, infoH = 278;
+  roundedRect(ctx, infoX, infoY, infoW, infoH, 34);
   const info = ctx.createLinearGradient(infoX, infoY, infoX + infoW, infoY + infoH);
-  info.addColorStop(0, 'rgba(255,255,255,.10)');
-  info.addColorStop(.42, 'rgba(13,15,22,.72)');
-  info.addColorStop(1, 'rgba(232,0,45,.17)');
+  info.addColorStop(0, 'rgba(255,255,255,.105)');
+  info.addColorStop(.35, 'rgba(14,16,24,.76)');
+  info.addColorStop(1, 'rgba(232,0,45,.22)');
   ctx.fillStyle = info;
   ctx.fill();
-  ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(255,255,255,.13)'; ctx.stroke();
+  ctx.lineWidth = 1.4;
+  ctx.strokeStyle = 'rgba(255,255,255,.14)';
+  ctx.stroke();
 
-  roundedRect(ctx, infoX + 1, infoY + 1, infoW - 2, 88, 31);
-  const hi = ctx.createLinearGradient(infoX, infoY, infoX, infoY + 88);
-  hi.addColorStop(0, 'rgba(255,255,255,.12)'); hi.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = hi; ctx.fill();
+  roundedRect(ctx, infoX + 2, infoY + 2, infoW - 4, 90, 30);
+  const hi = ctx.createLinearGradient(infoX, infoY, infoX, infoY + 90);
+  hi.addColorStop(0, 'rgba(255,255,255,.11)');
+  hi.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hi;
+  ctx.fill();
 
-  ctx.fillStyle = accent; roundedRect(ctx, infoX + 34, infoY + 62, 164, 7, 5); ctx.fill();
-  ctx.font = '800 62px Bebas Neue, Impact, Arial Narrow, sans-serif';
+  ctx.fillStyle = accent;
+  roundedRect(ctx, infoX + 34, infoY + 62, 168, 7, 6);
+  ctx.fill();
+
+  ctx.font = '800 60px Bebas Neue, Impact, Arial Narrow, sans-serif';
   ctx.fillStyle = '#fff';
-  ctx.fillText(String(q.driver || 'F1 Driver').toUpperCase(), infoX + 34, infoY + 138);
+  const driverText = String(q.driver || 'F1 Driver').toUpperCase();
+  const maxDriverWidth = 520;
+  while (ctx.measureText(driverText).width > maxDriverWidth && parseInt(ctx.font.match(/(\d+)px/)[1],10) > 44) {
+    const current = parseInt(ctx.font.match(/(\d+)px/)[1],10) - 2;
+    ctx.font = `800 ${current}px Bebas Neue, Impact, Arial Narrow, sans-serif`;
+  }
+  ctx.fillText(driverText, infoX + 34, infoY + 140);
+
   ctx.font = '34px Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.78)';
-  ctx.fillText(String(q.team || q.era || 'PADDOX Quote Library'), infoX + 34, infoY + 188);
+  ctx.fillStyle = 'rgba(255,255,255,.80)';
+  ctx.fillText(String(q.team || q.era || 'PADDOX Quote Library'), infoX + 34, infoY + 190);
+
   ctx.font = '800 23px Barlow Condensed, Arial, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.56)';
-  ctx.fillText(`${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'MOTIVATION').toUpperCase()}`, infoX + 34, infoY + 232);
+  ctx.fillText(`${String(q.era || 'CURRENT').toUpperCase()} • ${String(q.category || 'RACE-WEEKEND').toUpperCase()}`, infoX + 34, infoY + 232);
 
-  const portraitCx = infoX + infoW - 166;
+  const portraitCx = infoX + infoW - 168;
   const portraitCy = infoY + infoH / 2;
-  ctx.save(); ctx.filter = 'blur(20px)'; ctx.globalAlpha = .26; ctx.fillStyle = accent;
-  ctx.beginPath(); ctx.arc(portraitCx, portraitCy, 118, 0, Math.PI * 2); ctx.fill(); ctx.restore(); ctx.filter = 'none';
-  ctx.beginPath(); ctx.arc(portraitCx, portraitCy, 106, 0, Math.PI * 2);
+  ctx.save();
+  ctx.filter = 'blur(28px)';
+  ctx.globalAlpha = .30;
+  ctx.fillStyle = accent;
+  ctx.beginPath();
+  ctx.arc(portraitCx, portraitCy, 120, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  ctx.filter = 'none';
+
+  ctx.beginPath();
+  ctx.arc(portraitCx, portraitCy, 108, 0, Math.PI * 2);
   const ring = ctx.createLinearGradient(portraitCx - 108, portraitCy - 108, portraitCx + 108, portraitCy + 108);
-  ring.addColorStop(0, '#ff2850'); ring.addColorStop(.55, '#e8002d'); ring.addColorStop(1, '#4b0b16');
-  ctx.fillStyle = ring; ctx.fill();
-  ctx.beginPath(); ctx.arc(portraitCx, portraitCy, 95, 0, Math.PI * 2); ctx.fillStyle = '#080a10'; ctx.fill();
-  ctx.save(); ctx.beginPath(); ctx.arc(portraitCx, portraitCy, 90, 0, Math.PI * 2); ctx.clip();
+  ring.addColorStop(0, '#ff3157');
+  ring.addColorStop(.55, '#e8002d');
+  ring.addColorStop(1, '#4d0a16');
+  ctx.fillStyle = ring;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(portraitCx, portraitCy, 95, 0, Math.PI * 2);
+  ctx.fillStyle = '#090b10';
+  ctx.fill();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(portraitCx, portraitCy, 90, 0, Math.PI * 2);
+  ctx.clip();
   if (img) {
-    const s = Math.min(img.width, img.height), sx = (img.width - s)/2, sy = (img.height - s)/2;
+    const s = Math.min(img.width, img.height);
+    const sx = (img.width - s) / 2;
+    const sy = (img.height - s) / 2;
     ctx.drawImage(img, sx, sy, s, s, portraitCx - 90, portraitCy - 90, 180, 180);
-  } else if (brandIcon) {
-    const s = Math.min(brandIcon.width, brandIcon.height), sx = (brandIcon.width - s)/2, sy = (brandIcon.height - s)/2;
-    ctx.drawImage(brandIcon, sx, sy, s, s, portraitCx - 90, portraitCy - 90, 180, 180);
+  } else if (brandLogo) {
+    const s = Math.min(brandLogo.width, brandLogo.height);
+    const sx = (brandLogo.width - s) / 2;
+    const sy = (brandLogo.height - s) / 2;
+    ctx.drawImage(brandLogo, sx, sy, s, s, portraitCx - 90, portraitCy - 90, 180, 180);
   }
   ctx.restore();
 
-  // Footer slightly higher and a little lighter
-  const footerX = 110, footerY = 1088, footerW = 860, footerH = 96;
+  const footerX = 110, footerY = 1086, footerW = 860, footerH = 96;
   roundedRect(ctx, footerX, footerY, footerW, footerH, 30);
   const footer = ctx.createLinearGradient(footerX, footerY, footerX + footerW, footerY + footerH);
-  footer.addColorStop(0, 'rgba(255,255,255,.08)'); footer.addColorStop(.7, 'rgba(255,255,255,.045)'); footer.addColorStop(1, 'rgba(232,0,45,.14)');
-  ctx.fillStyle = footer; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.11)'; ctx.lineWidth = 1.1; ctx.stroke();
-  ctx.font = '800 22px Barlow Condensed, Arial, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.80)';
-  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 145, 1147);
-  if (brandLockup) {
-    drawPaddoxLockupCanvas(ctx, 720, 1115, brandLockup, { width: 220, height: 54 });
+  footer.addColorStop(0, 'rgba(255,255,255,.07)');
+  footer.addColorStop(.66, 'rgba(255,255,255,.04)');
+  footer.addColorStop(1, 'rgba(232,0,45,.16)');
+  ctx.fillStyle = footer;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.11)';
+  ctx.lineWidth = 1.1;
+  ctx.stroke();
+
+  ctx.font = '800 20px Barlow Condensed, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.78)';
+  ctx.fillText('SAVE • SHARE • SUPPORT YOUR GRID', 146, 1142);
+
+  if (brandLock) {
+    drawBrandLockupCanvas(ctx, brandLock, 728, 1110, 184, 42, .98);
   } else {
-    drawPaddoxAlignedBrand(ctx, 730, 1110, brandIcon, { size: 52, fontSize: 50, gap: 13, letterGap: 3 });
+    drawPaddoxAlignedBrand(ctx, 730, 1108, brandLogo, { size: 52, fontSize: 50, gap: 13, letterGap: 3 });
   }
 
-  const vignette = ctx.createRadialGradient(W/2, H/2, 160, W/2, H/2, 730);
-  vignette.addColorStop(0, 'rgba(0,0,0,0)'); vignette.addColorStop(1, 'rgba(0,0,0,.26)');
-  ctx.fillStyle = vignette; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  ctx.globalAlpha = .14;
+  ctx.strokeStyle = gold;
+  ctx.strokeRect(shellX + 17, shellY + 17, shellW - 34, shellH - 34);
+  ctx.restore();
+
+  const vignette = ctx.createRadialGradient(W / 2, H / 2, 160, W / 2, H / 2, 730);
+  vignette.addColorStop(0, 'rgba(0,0,0,0)');
+  vignette.addColorStop(1, 'rgba(0,0,0,.28)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, W, H);
 
   return canvas;
 }
@@ -2298,8 +2391,8 @@ function ensureQuotePreviewModal() {
       <div class="quote-preview-card" onclick="event.stopPropagation()">
         <button class="quote-preview-close" type="button" onclick="closeQuoteImagePreview()">✕</button>
         <div class="quote-preview-kicker">PADDOX SHARE PREVIEW</div>
-        <h3>Preview Quote Image</h3>
-        <p>Check the final image before downloading or sharing.</p>
+        <h3>Luxury Story Card Preview</h3>
+        <p>Preview the premium quote card before downloading or sharing it to stories.</p>
         <div class="quote-preview-frame">
           <img id="quote-preview-img" alt="PADDOX quote preview">
         </div>
