@@ -8234,3 +8234,148 @@ body .hub-tabs-bar{
   body .hub-hero{ padding-top: 60px !important; }
   body .hub-tabs-bar{ top: 60px !important; }
 }
+
+/* ============================================================
+   PADDOX FAN HUB F1.3 — EXACT HOME/SHOP NAVBAR + HERO BADGE CLEANUP
+   Fixes navbar mismatch by restoring the accepted Home/Shop scale.
+   Removes the unwanted generated FAN CONTROL text.
+   ============================================================ */
+body #navbar{
+  height:66px!important;
+  min-height:66px!important;
+  background:rgba(5,5,5,.94)!important;
+  border-bottom:1px solid rgba(232,0,45,.12)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(20px)!important;
+}
+body #navbar.scrolled{
+  height:54px!important;
+  min-height:54px!important;
+  background:rgba(5,5,5,.98)!important;
+  box-shadow:0 14px 45px rgba(0,0,0,.45),0 1px 0 rgba(232,0,45,.25)!important;
+}
+body #navbar .nav-inner{
+  width:min(calc(100% - 80px),1340px)!important;
+  height:100%!important;
+  display:grid!important;
+  grid-template-columns:164px minmax(500px,1fr) auto!important;
+  align-items:center!important;
+  justify-content:normal!important;
+  gap:clamp(18px,2.1vw,30px)!important;
+  padding:0!important;
+  margin:0 auto!important;
+}
+body #navbar .nav-logo.paddox-brand-lockup{
+  width:164px!important;
+  min-width:164px!important;
+  max-width:164px!important;
+  height:42px!important;
+  display:flex!important;
+  align-items:center!important;
+}
+body #navbar .brand-lockup-logo{
+  width:164px!important;
+  min-width:164px!important;
+  max-width:164px!important;
+  max-height:39px!important;
+  height:auto!important;
+  object-fit:contain!important;
+  filter:drop-shadow(0 10px 22px rgba(232,0,45,.14))!important;
+}
+body #navbar .helmet-wrap,
+body #navbar .logo-text{display:none!important;}
+body #navbar .nav-links{
+  justify-self:center!important;
+  width:auto!important;
+  flex:none!important;
+  justify-content:center!important;
+  min-height:46px!important;
+  height:46px!important;
+  padding:5px!important;
+  gap:5px!important;
+  background:rgba(255,255,255,.03)!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  border-radius:999px!important;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.42),0 18px 45px rgba(0,0,0,.30)!important;
+}
+body #navbar .nav-link{
+  min-height:36px!important;
+  height:36px!important;
+  padding:0 16px!important;
+  border-radius:999px!important;
+  font-size:.78rem!important;
+  letter-spacing:.17em!important;
+  line-height:1!important;
+  color:rgba(255,255,255,.62)!important;
+  transition:all .28s cubic-bezier(.4,0,.2,1)!important;
+}
+body #navbar .nav-link .nl-icon{
+  font-size:1rem!important;
+  opacity:.9!important;
+}
+body #navbar .nav-link.active{
+  background:linear-gradient(135deg,var(--red),#ff1242)!important;
+  color:#fff!important;
+  box-shadow:0 10px 28px rgba(232,0,45,.35),inset 0 1px 0 rgba(255,255,255,.20)!important;
+}
+body #navbar .nav-link:hover{color:#fff!important;background:rgba(255,255,255,.055)!important;}
+body #navbar .nav-link.active:hover{background:linear-gradient(135deg,var(--red),#ff1242)!important;}
+body #navbar .nl-underline{display:none!important;}
+body #navbar .nav-right{
+  justify-self:end!important;
+  gap:10px!important;
+}
+body #navbar .nav-search-btn,
+body #navbar .nav-cart-btn{
+  width:40px!important;
+  height:40px!important;
+  background:rgba(255,255,255,.035)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  color:rgba(255,255,255,.78)!important;
+}
+body #navbar .cart-badge{
+  top:-4px!important;
+  right:-4px!important;
+  width:16px!important;
+  height:16px!important;
+  font-size:.55rem!important;
+}
+body #navbar .nav-cta-btn{
+  height:42px!important;
+  min-height:42px!important;
+  padding:0 24px!important;
+  font-size:.82rem!important;
+  letter-spacing:2px!important;
+  background:var(--red)!important;
+  box-shadow:none!important;
+}
+body #navbar .nav-search-drawer.open{height:56px!important;}
+body .hub-hero{padding-top:66px!important;}
+body .hub-tabs-bar{top:66px!important;}
+body .hub-hero::after{
+  content:none!important;
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
+@media(max-width:1280px){
+  body #navbar .nav-inner{width:min(calc(100% - 44px),1180px)!important;grid-template-columns:150px minmax(430px,1fr) auto!important;}
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{width:150px!important;min-width:150px!important;max-width:150px!important;}
+  body #navbar .nav-link{padding-inline:14px!important;letter-spacing:.15em!important;}
+}
+@media(max-width:1060px){
+  body #navbar .nav-inner{display:flex!important;width:min(calc(100% - 34px),100%)!important;}
+  body #navbar .nav-links{display:none!important;}
+  body #navbar .hamburger{display:flex!important;}
+}
+@media(max-width:620px){
+  body #navbar{height:64px!important;min-height:64px!important;}
+  body #navbar .nav-inner{width:min(calc(100% - 24px),100%)!important;}
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{width:150px!important;min-width:150px!important;max-width:150px!important;}
+  body #navbar .nav-search-btn{display:none!important;}
+  body #navbar .nav-cta-btn{display:none!important;}
+  body .hub-hero{padding-top:64px!important;}
+  body .hub-tabs-bar{top:64px!important;}
+}
