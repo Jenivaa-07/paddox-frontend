@@ -4064,3 +4064,201 @@ body .view-btn.on{
     opacity:1 !important;
   }
 }
+
+/* ============================================================
+   PADDOX SHOP S1.4 — LIST VIEW ACTION + CARD BALANCE LOCK
+   Fixes list-view cropped buttons and keeps grid-view untouched.
+   ============================================================ */
+
+/* Grid view stays as the accepted premium card layout */
+body .products-grid:not(.list-view) .pcard-overlay{
+  position:absolute !important;
+  inset:0 !important;
+  width:auto !important;
+  height:auto !important;
+  padding:0 !important;
+  background:rgba(7,7,7,.72) !important;
+  opacity:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:12px !important;
+}
+body .products-grid:not(.list-view) .pcard:hover .pcard-overlay{
+  opacity:1 !important;
+}
+
+/* List view: make it a true readable shop row, not image-only cards */
+body .products-grid.list-view{
+  max-width: 980px !important;
+  gap: 18px !important;
+}
+body .products-grid.list-view .pcard{
+  position:relative !important;
+  grid-template-columns: 250px minmax(0,1fr) 230px !important;
+  min-height: 190px !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.055), rgba(255,255,255,.015) 44%, rgba(232,0,45,.035)),
+    #0d0d0d !important;
+}
+body .products-grid.list-view .pcard-img-wrap{
+  position: static !important;
+  height: 190px !important;
+  min-height: 190px !important;
+  overflow: hidden !important;
+  border-radius: 18px 0 0 18px !important;
+}
+body .products-grid.list-view .pcard-img{
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center center !important;
+}
+body .products-grid.list-view .pcard-info{
+  padding: 26px 26px !important;
+  justify-content: center !important;
+  border-left: 1px solid rgba(255,255,255,.045) !important;
+}
+body .products-grid.list-view .pcard-name{
+  font-size: 1.38rem !important;
+  letter-spacing: .6px !important;
+  max-width: 480px !important;
+  line-height: 1.12 !important;
+}
+body .products-grid.list-view .pcard-foot{
+  max-width: 480px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap: 20px !important;
+}
+body .products-grid.list-view .pcard-rating{
+  white-space:nowrap !important;
+}
+
+/* Important fix: action buttons belong on the right in list view, never clipped over the image */
+body .products-grid.list-view .pcard-overlay{
+  position:absolute !important;
+  inset: 0 22px 0 auto !important;
+  width: 190px !important;
+  height:100% !important;
+  padding: 0 !important;
+  background: transparent !important;
+  opacity: 1 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  justify-content:center !important;
+  gap:12px !important;
+  z-index:6 !important;
+  pointer-events:none !important;
+}
+body .products-grid.list-view .pcard-overlay .ov-btn{
+  pointer-events:auto !important;
+  width:100% !important;
+  min-width:0 !important;
+  padding: 12px 16px !important;
+  border-radius: 999px !important;
+  font-size:.76rem !important;
+  letter-spacing:1.8px !important;
+  white-space:nowrap !important;
+  transform:none !important;
+}
+body .products-grid.list-view .pcard-overlay .ov-btn:hover{
+  transform: translateY(-2px) !important;
+}
+body .products-grid.list-view .pcard-overlay .ov-btn.outline{
+  background: rgba(255,255,255,.045) !important;
+  border-color: rgba(255,255,255,.18) !important;
+}
+body .products-grid.list-view .pcard::after{
+  content:'';
+  grid-column:3;
+  grid-row:1;
+  min-width: 230px;
+  border-left:1px solid rgba(255,255,255,.055);
+  background: radial-gradient(circle at 60% 50%, rgba(232,0,45,.08), transparent 58%);
+  pointer-events:none;
+}
+body .products-grid.list-view .pbadge{
+  top: 14px !important;
+  left: 14px !important;
+}
+body .products-grid.list-view .pwish{
+  top: 18px !important;
+  right: 18px !important;
+}
+
+/* Sidebar and toolbar: keep the good contained look but prevent cramped product region */
+body .shop-layout{
+  grid-template-columns: 220px minmax(0, 1fr) !important;
+  gap: 32px !important;
+}
+body .products-area{
+  min-width:0 !important;
+}
+body .shop-toolbar{
+  width:100% !important;
+}
+
+@media (max-width: 1280px){
+  body .products-grid.list-view .pcard{
+    grid-template-columns: 220px minmax(0,1fr) 200px !important;
+  }
+  body .products-grid.list-view .pcard-overlay{
+    width: 166px !important;
+  }
+}
+@media (max-width: 1060px){
+  body .products-grid.list-view{
+    max-width:100% !important;
+  }
+  body .products-grid.list-view .pcard{
+    grid-template-columns: 210px minmax(0,1fr) !important;
+    min-height: 210px !important;
+  }
+  body .products-grid.list-view .pcard::after{ display:none !important; }
+  body .products-grid.list-view .pcard-img-wrap{
+    position:relative !important;
+    height:210px !important;
+  }
+  body .products-grid.list-view .pcard-overlay{
+    position:absolute !important;
+    inset:auto 18px 18px 18px !important;
+    width:auto !important;
+    height:auto !important;
+    flex-direction:row !important;
+    justify-content:center !important;
+  }
+  body .products-grid.list-view .pcard-overlay .ov-btn{
+    width:auto !important;
+    min-width:128px !important;
+  }
+}
+@media (max-width: 620px){
+  body .products-grid.list-view .pcard{
+    display:flex !important;
+    flex-direction:column !important;
+  }
+  body .products-grid.list-view .pcard-img-wrap{
+    position:relative !important;
+    height:240px !important;
+    min-height:240px !important;
+    border-radius:16px !important;
+  }
+  body .products-grid.list-view .pcard-info{
+    border-left:0 !important;
+  }
+  body .products-grid.list-view .pcard-overlay{
+    inset:14px !important;
+    background:rgba(7,7,7,.72) !important;
+    opacity:0 !important;
+    flex-direction:column !important;
+    align-items:center !important;
+  }
+  body .products-grid.list-view .pcard:hover .pcard-overlay,
+  body .products-grid.list-view .pcard:focus-within .pcard-overlay{
+    opacity:1 !important;
+  }
+}
