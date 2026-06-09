@@ -14756,3 +14756,264 @@ body .modal-wish-btn{
     font-size: clamp(1.26rem, 6.9vw, 1.58rem) !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.29 — BEYOND THE TRACK PREMIUM EXPERIENCE LOCK
+   Scope: Beyond the Track section only. Navbar/hero/products/modal/teams/footer untouched.
+   ============================================================ */
+
+body .experience-section{
+  position: relative !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 7% 8%, rgba(232,0,45,.18), transparent 34%),
+    radial-gradient(circle at 88% 44%, rgba(255,255,255,.045), transparent 32%),
+    linear-gradient(180deg, #050505 0%, #080808 56%, #050505 100%) !important;
+  border-top: 1px solid rgba(232,0,45,.10) !important;
+  border-bottom: 1px solid rgba(232,0,45,.10) !important;
+  padding-top: 124px !important;
+  padding-bottom: 126px !important;
+}
+
+body .experience-section::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.32;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 74%);
+}
+
+body .experience-section .container{
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+body .experience-section .section-head{
+  margin-bottom: 68px !important;
+  max-width: 1160px !important;
+}
+
+body .experience-section .section-label{
+  color: var(--red) !important;
+  letter-spacing: .42em !important;
+}
+
+body .experience-section .section-title{
+  font-size: clamp(4.1rem, 7.6vw, 8.15rem) !important;
+  letter-spacing: .03em !important;
+  line-height: .86 !important;
+  text-shadow: 0 22px 64px rgba(0,0,0,.72) !important;
+}
+
+body .experience-section .h33e-section-sub,
+body .experience-section .section-sub{
+  max-width: 640px !important;
+  margin-top: 26px !important;
+  color: rgba(255,255,255,.60) !important;
+  font-size: clamp(1rem, 1.35vw, 1.25rem) !important;
+  line-height: 1.65 !important;
+}
+
+body .exp-grid{
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 28px !important;
+  align-items: stretch !important;
+}
+
+body .exp-card,
+body .exp-card.exp-card-wide{
+  grid-column: auto !important;
+  min-height: 430px !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018) 46%, rgba(0,0,0,.48)) !important;
+  box-shadow:
+    0 34px 96px rgba(0,0,0,.52),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+  transform: translateZ(0) !important;
+}
+
+body .exp-card::before{
+  z-index: 1 !important;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(232,0,45,.26), transparent 34%),
+    radial-gradient(circle at 84% 8%, rgba(255,255,255,.055), transparent 26%),
+    linear-gradient(180deg, rgba(0,0,0,.04) 0%, rgba(0,0,0,.34) 44%, rgba(0,0,0,.86) 100%) !important;
+}
+
+body .exp-card::after{
+  content:'';
+  position:absolute;
+  inset:1px;
+  z-index: 1;
+  pointer-events:none;
+  border-radius: 29px;
+  background:
+    linear-gradient(125deg, rgba(255,255,255,.10), transparent 27%, transparent 66%, rgba(232,0,45,.06)),
+    linear-gradient(90deg, rgba(232,0,45,.75), transparent 42%) left top / 46% 2px no-repeat;
+  opacity:.84;
+}
+
+body .exp-card-img{
+  inset: 0 !important;
+  opacity: .72 !important;
+  filter: brightness(.42) saturate(.72) contrast(1.08) !important;
+  transform: scale(1.02) !important;
+}
+
+body .exp-card:hover{
+  transform: translateY(-10px) !important;
+  border-color: rgba(232,0,45,.36) !important;
+  box-shadow:
+    0 42px 120px rgba(0,0,0,.68),
+    0 0 0 1px rgba(232,0,45,.11),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+body .exp-card:hover .exp-card-img{
+  transform: scale(1.08) !important;
+  filter: brightness(.54) saturate(.95) contrast(1.12) !important;
+}
+
+body .exp-card-content{
+  min-height: 100% !important;
+  padding: 34px 34px 32px !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
+  z-index: 3 !important;
+}
+
+body .exp-icon{
+  width: 54px !important;
+  height: 54px !important;
+  margin-bottom: 34px !important;
+  border-radius: 50% !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .86rem !important;
+  letter-spacing: .12em !important;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,.95) !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.14), transparent 32%),
+    rgba(232,0,45,.15) !important;
+  border: 1px solid rgba(232,0,45,.48) !important;
+  box-shadow: 0 0 0 8px rgba(232,0,45,.035), 0 16px 36px rgba(0,0,0,.28) !important;
+  animation: none !important;
+}
+
+body .exp-title{
+  max-width: 260px !important;
+  margin-bottom: 22px !important;
+  font-size: clamp(2.35rem, 2.75vw, 3.3rem) !important;
+  line-height: .86 !important;
+  letter-spacing: .035em !important;
+  color: rgba(255,255,255,.98) !important;
+  text-shadow: 0 14px 34px rgba(0,0,0,.56) !important;
+}
+
+body .exp-desc{
+  max-width: 270px !important;
+  margin-bottom: 24px !important;
+  color: rgba(255,255,255,.66) !important;
+  font-size: 1rem !important;
+  line-height: 1.62 !important;
+  font-weight: 500 !important;
+}
+
+body .exp-link{
+  width: fit-content !important;
+  min-height: 42px !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 12px 20px !important;
+  border-radius: 999px !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .82rem !important;
+  letter-spacing: .19em !important;
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,.92) !important;
+  background: rgba(255,255,255,.062) !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
+  transition: transform .28s ease, border-color .28s ease, background .28s ease, color .28s ease !important;
+}
+
+body .exp-card:hover .exp-link{
+  transform: translateX(4px) !important;
+  color: #fff !important;
+  background: rgba(232,0,45,.15) !important;
+  border-color: rgba(232,0,45,.38) !important;
+}
+
+body .exp-card:nth-child(2){ margin-top: 34px !important; }
+body .exp-card:nth-child(3){ margin-top: 72px !important; }
+body .exp-card:nth-child(4){ margin-top: 28px !important; }
+
+@media (max-width: 980px){
+  body .exp-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body .exp-card:nth-child(n){ margin-top: 0 !important; }
+  body .exp-card{ min-height: 360px !important; }
+}
+
+@media (max-width: 620px){
+  body .experience-section{
+    padding-top: 78px !important;
+    padding-bottom: 76px !important;
+  }
+  body .experience-section .section-head{
+    margin-bottom: 34px !important;
+  }
+  body .experience-section .section-title{
+    font-size: clamp(2.55rem, 14vw, 3.8rem) !important;
+    line-height: .92 !important;
+  }
+  body .experience-section .h33e-section-sub,
+  body .experience-section .section-sub{
+    font-size: .95rem !important;
+    line-height: 1.55 !important;
+    margin-top: 16px !important;
+  }
+  body .exp-grid{
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  body .exp-card,
+  body .exp-card.exp-card-wide{
+    min-height: 255px !important;
+    border-radius: 22px !important;
+  }
+  body .exp-card::after{ border-radius: 21px !important; }
+  body .exp-card-content{
+    padding: 22px !important;
+  }
+  body .exp-icon{
+    width: 40px !important;
+    height: 40px !important;
+    margin-bottom: 18px !important;
+    font-size: .72rem !important;
+  }
+  body .exp-title{
+    font-size: clamp(1.85rem, 9vw, 2.45rem) !important;
+    margin-bottom: 12px !important;
+  }
+  body .exp-desc{
+    font-size: .88rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 14px !important;
+  }
+  body .exp-link{
+    min-height: 36px !important;
+    padding: 10px 15px !important;
+    font-size: .70rem !important;
+  }
+}
