@@ -6,6 +6,7 @@ console.log('PADDOX H3.4C.2 Fan Hub circuit identity matcher loaded');
 
 /* Phase 18.0.1 — PADDOX brand lockup used by quotes/share cards. */
 const PADDOX_BRAND_LOCKUP = 'assets/paddox-logo-horizontal-white.png?v=F1';
+const PADDOX_BRAND_HORIZONTAL = 'assets/paddox-logo-horizontal-white.png?v=F1_7_2';
 const PADDOX_BRAND_ICON = 'assets/paddox-logo-icon-web.png?v=F1';
 
 /* Phase H3.4C.4 — PADDOX brand cleanup: AI Studio removed from Fan Hub UI. */
@@ -2208,7 +2209,7 @@ async function buildQuoteShareCanvas(q = {}) {
 
   // Load brand/driver images
   const brandIcon = await loadQuoteImageForCanvas(PADDOX_BRAND_ICON);
-  const brandLock = await loadQuoteImageForCanvas(PADDOX_BRAND_HORIZONTAL) || await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
+  const brandLock = await loadQuoteImageForCanvas(typeof PADDOX_BRAND_HORIZONTAL !== 'undefined' ? PADDOX_BRAND_HORIZONTAL : PADDOX_BRAND_LOCKUP) || await loadQuoteImageForCanvas(PADDOX_BRAND_LOCKUP);
   const driverImg = await loadQuoteImageForCanvas(quoteImageValue(q));
 
   // Premium header bar
