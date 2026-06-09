@@ -13236,3 +13236,156 @@ body #race-control-section .h33b-data-row{
     flex-basis: 212px !important;
   }
 }
+
+/* ============================================================
+   Phase H4.0.19 — Mobile Team Strip Motion + Card Proportion Fix
+   Desktop/nav/hero untouched. This only corrects the mobile Teams on
+   the Grid strip so it feels intentional and visibly moves again.
+   ============================================================ */
+@media (max-width: 768px) {
+  .home-grid-strip-section {
+    padding-top: 64px !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .home-grid-strip-section .section-head {
+    margin-bottom: 24px !important;
+  }
+
+  .grid-strip-title {
+    max-width: 340px !important;
+    line-height: .92 !important;
+  }
+
+  .marquee-strip {
+    min-height: 152px !important;
+    padding: 16px 0 20px !important;
+    overflow: hidden !important;
+    touch-action: pan-y !important;
+    background:
+      linear-gradient(90deg, rgba(232,0,45,.075), transparent 26%, transparent 74%, rgba(232,0,45,.04)),
+      linear-gradient(180deg, rgba(12,14,18,.94), rgba(5,7,10,.98)) !important;
+  }
+
+  .marquee-strip::before,
+  .marquee-strip::after {
+    width: 30px !important;
+  }
+
+  .marquee-track {
+    display: inline-flex !important;
+    width: max-content !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 0 18px !important;
+    animation: paddoxMobileTeamRoll 46s linear infinite !important;
+    animation-play-state: running !important;
+    transform: translate3d(0,0,0) !important;
+    will-change: transform !important;
+  }
+
+  .marquee-strip:hover .marquee-track,
+  .marquee-track:hover,
+  .marquee-strip:active .marquee-track {
+    animation-play-state: running !important;
+  }
+
+  .marquee-team {
+    width: calc(100vw - 58px) !important;
+    min-width: calc(100vw - 58px) !important;
+    max-width: 340px !important;
+    height: 118px !important;
+    min-height: 118px !important;
+    padding: 13px 15px 9px !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background:
+      radial-gradient(circle at 14% 20%, color-mix(in srgb, var(--team-color,#e8002d) 28%, transparent), transparent 36%),
+      linear-gradient(105deg, rgba(255,255,255,.05), rgba(255,255,255,.012) 42%, rgba(0,0,0,.14)),
+      linear-gradient(180deg, #171b22 0%, #090d13 100%) !important;
+  }
+
+  .marquee-team:hover {
+    transform: none !important;
+  }
+
+  .marquee-team-head {
+    gap: 12px !important;
+    align-items: center !important;
+  }
+
+  .team-logo-orb {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .team-badge-img {
+    width: 21px !important;
+    height: 21px !important;
+    max-width: 21px !important;
+    max-height: 21px !important;
+  }
+
+  .marquee-team-name {
+    font-size: 1.05rem !important;
+    letter-spacing: .8px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: calc(100vw - 130px) !important;
+  }
+
+  .marquee-team-car-wrap {
+    height: 70px !important;
+    margin-top: 0 !important;
+    transform: translateY(-2px) !important;
+  }
+
+  .team-car-img {
+    width: 112% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: left bottom !important;
+    transform: translateX(-4px) scale(1.04) !important;
+  }
+
+  .marquee-team:hover .team-car-img {
+    transform: translateX(-4px) scale(1.04) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .marquee-team {
+    width: calc(100vw - 48px) !important;
+    min-width: calc(100vw - 48px) !important;
+  }
+
+  .marquee-track {
+    gap: 12px !important;
+    padding: 0 16px !important;
+    animation-duration: 42s !important;
+  }
+
+  .marquee-team-name {
+    font-size: 1rem !important;
+    max-width: 218px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  .marquee-team {
+    height: 112px !important;
+    min-height: 112px !important;
+  }
+
+  .marquee-team-car-wrap {
+    height: 64px !important;
+  }
+}
+
+@keyframes paddoxMobileTeamRoll {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(-50%,0,0); }
+}
