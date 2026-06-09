@@ -14327,3 +14327,129 @@ body .modal-close{
     padding: 28px 20px 30px !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.26 — Merch hover + Quick View clean recovery
+   Scope: Featured Merch cards and product Quick View only.
+   ============================================================ */
+body .pcard-overlay{
+  inset: 14px !important;
+  height: auto !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(180deg, rgba(5,5,5,.24), rgba(5,5,5,.74) 74%, rgba(5,5,5,.88)),
+    radial-gradient(circle at 50% 42%, rgba(232,0,45,.16), transparent 38%) !important;
+  backdrop-filter: blur(3px) saturate(1.04) !important;
+  -webkit-backdrop-filter: blur(3px) saturate(1.04) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 18px 42px rgba(0,0,0,.42) !important;
+}
+body .pcard:hover .pcard-img{
+  transform: scale(1.025) !important;
+  filter: brightness(.86) contrast(1.05) !important;
+}
+body .ov-btn{
+  width: min(68%, 210px) !important;
+  min-height: 50px !important;
+  padding: 13px 18px !important;
+  border-radius: 999px !important;
+  letter-spacing: .20em !important;
+  box-shadow: 0 16px 34px rgba(232,0,45,.28) !important;
+}
+body .ov-btn.outline{
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.28) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 28px rgba(0,0,0,.28) !important;
+}
+
+body .modal-overlay{
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(18px, 2.5vw, 34px) !important;
+  background: rgba(0,0,0,.86) !important;
+}
+body .modal-box{
+  width: min(100%, 1080px) !important;
+  height: auto !important;
+  max-height: calc(100vh - 72px) !important;
+  grid-template-columns: minmax(390px, .98fr) minmax(390px, 1.02fr) !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 76% 6%, rgba(232,0,45,.18), transparent 26%),
+    linear-gradient(145deg, rgba(255,255,255,.050), rgba(255,255,255,.012)),
+    #080808 !important;
+}
+body .modal-box::before{
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,255,255,.07) calc(50% - 1px), rgba(255,255,255,.07) calc(50% + 1px), transparent calc(50% + 1px)) !important;
+  opacity:.75 !important;
+}
+body .modal-img-wrap{
+  min-height: min(620px, calc(100vh - 76px)) !important;
+  height: auto !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding: clamp(28px, 3vw, 46px) !important;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255,255,255,.08), transparent 32%),
+    linear-gradient(145deg, #121212, #070707) !important;
+}
+body .modal-img-wrap::after{
+  background:
+    linear-gradient(180deg, rgba(232,0,45,.85) 0 2px, transparent 2px),
+    radial-gradient(circle at 50% 105%, rgba(232,0,45,.12), transparent 34%) !important;
+  opacity:.9 !important;
+}
+body .modal-product-img{
+  width: auto !important;
+  height: auto !important;
+  max-width: min(78%, 430px) !important;
+  max-height: min(82%, 540px) !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  border-radius: 18px !important;
+  background: #f3f3f3 !important;
+  box-shadow: 0 34px 80px rgba(0,0,0,.46), 0 0 0 1px rgba(255,255,255,.10) !important;
+  transform: none !important;
+}
+body .modal-info{
+  padding: clamp(34px, 3.2vw, 48px) clamp(30px, 3vw, 46px) !important;
+  gap: 14px !important;
+  overflow-y: auto !important;
+}
+body .modal-name{
+  font-size: clamp(1.9rem, 2.45vw, 2.65rem) !important;
+  line-height: 1.10 !important;
+  max-width: 100% !important;
+}
+body .modal-price{
+  font-size: clamp(2.1rem, 3vw, 2.75rem) !important;
+}
+body .modal-desc{
+  font-size: .95rem !important;
+  line-height: 1.72 !important;
+}
+body .modal-add-btn{
+  min-height: 58px !important;
+  margin-top: 6px !important;
+  font-size: .95rem !important;
+  letter-spacing: .24em !important;
+}
+body .modal-close{
+  width: 42px !important;
+  height: 42px !important;
+}
+@media (max-width: 980px){
+  body .modal-box{ grid-template-columns: 1fr !important; max-height: 90vh !important; overflow-y: auto !important; }
+  body .modal-img-wrap{ min-height: 390px !important; }
+  body .modal-product-img{ max-width: min(82%, 380px) !important; max-height: 340px !important; }
+}
+@media (max-width: 560px){
+  body .modal-overlay{ align-items: flex-end !important; padding: 10px !important; }
+  body .modal-img-wrap{ min-height: 280px !important; padding: 20px !important; }
+  body .modal-product-img{ max-height: 238px !important; max-width: 86% !important; }
+  body .modal-info{ padding: 24px 18px 28px !important; gap: 12px !important; }
+  body .modal-name{ font-size: 1.45rem !important; }
+}
