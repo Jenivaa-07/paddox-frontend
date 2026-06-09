@@ -11562,3 +11562,334 @@ body .pcard:first-child .pcard-img{
     width: min(310px, 84vw) !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.12 — Header/Footer/Modal Proportion Lock
+   Goal: stop oversized logo + oversized typography corrections.
+   Scope: visual-only CSS override. Existing realtime/product logic preserved.
+   ============================================================ */
+
+/* Global width discipline: keep the page premium and centered */
+body{
+  --pdx-page-max-final: 1280px;
+  --pdx-pad-final: clamp(24px, 4.5vw, 72px);
+}
+body .container,
+body .cs-inner,
+body .race-control-inner,
+body .footer-inner,
+body .site-footer .footer-grid{
+  width: min(calc(100% - (var(--pdx-pad-final) * 2)), var(--pdx-page-max-final)) !important;
+  max-width: var(--pdx-page-max-final) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* NAVBAR — one clean professional bar, no oversized logo, no cramped links */
+body #navbar{
+  height: 70px !important;
+  min-height: 70px !important;
+  background: linear-gradient(180deg, rgba(5,5,5,.97), rgba(5,5,5,.89)) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,.38), inset 0 -1px 0 rgba(232,0,45,.08) !important;
+}
+body #navbar.scrolled{
+  height: 62px !important;
+  min-height: 62px !important;
+}
+body #navbar .nav-inner{
+  width: min(calc(100% - 72px), 1420px) !important;
+  max-width: 1420px !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  grid-template-columns: 185px minmax(520px, 1fr) auto !important;
+  align-items: center !important;
+  gap: clamp(18px, 2.4vw, 36px) !important;
+}
+body #navbar .nav-logo.paddox-brand-lockup{
+  width: 185px !important;
+  min-width: 185px !important;
+  max-width: 185px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow: visible !important;
+}
+body #navbar .brand-lockup-logo{
+  width: 185px !important;
+  max-width: 185px !important;
+  height: auto !important;
+  max-height: 44px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.42)) drop-shadow(0 0 10px rgba(232,0,45,.10)) !important;
+}
+body #navbar.scrolled .nav-logo.paddox-brand-lockup,
+body #navbar.scrolled .brand-lockup-logo{
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  max-height: 40px !important;
+}
+body #navbar .nav-links{
+  justify-self: center !important;
+  width: auto !important;
+  min-height: 48px !important;
+  padding: 5px !important;
+  gap: 6px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.035) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+body #navbar .nav-link{
+  min-height: 38px !important;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  font-size: .76rem !important;
+  letter-spacing: .18em !important;
+  white-space: nowrap !important;
+}
+body #navbar .nl-icon{ font-size: .95rem !important; }
+body #navbar .nav-right{
+  justify-self: end !important;
+  gap: 10px !important;
+}
+body #navbar .nav-search-btn,
+body #navbar .nav-cart-btn{
+  width: 42px !important;
+  height: 42px !important;
+}
+body #navbar .nav-cta-btn{
+  min-height: 44px !important;
+  padding: 0 26px !important;
+  letter-spacing: .18em !important;
+  font-size: .78rem !important;
+}
+
+/* HERO — reduce the overblown title so it does not dominate/crop the viewport */
+body .hero{
+  padding-top: 70px !important;
+  min-height: 94vh !important;
+}
+body .hero-content{
+  max-width: 720px !important;
+  padding-left: var(--pdx-pad-final) !important;
+  padding-top: clamp(48px, 7vh, 74px) !important;
+}
+body .hero-h1{
+  font-size: clamp(5rem, 9.15vw, 9rem) !important;
+  line-height: .86 !important;
+  letter-spacing: .018em !important;
+  margin-bottom: 24px !important;
+}
+body .hero-sub{
+  max-width: 610px !important;
+  font-size: clamp(.95rem, 1.05vw, 1.08rem) !important;
+  line-height: 1.72 !important;
+}
+body .hero-btns{ margin-bottom: 34px !important; }
+body .hero-live-grid{
+  max-width: 570px !important;
+}
+body .hero-live-card strong{
+  max-width: 150px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+body .hero-stats{
+  right: var(--pdx-pad-final) !important;
+}
+
+/* SECTION TITLES — strong but not browser-cropped or absurdly huge */
+body .section{
+  padding-top: clamp(82px, 7.5vw, 108px) !important;
+  padding-bottom: clamp(82px, 7.5vw, 112px) !important;
+}
+body .section-head{
+  margin-bottom: clamp(34px, 3.7vw, 50px) !important;
+}
+body .section-title,
+body .grid-strip-title,
+body .paddox-lab-title{
+  font-size: clamp(2.85rem, 4.65vw, 5.2rem) !important;
+  line-height: .92 !important;
+  letter-spacing: .045em !important;
+  max-width: 100% !important;
+}
+body .featured-section .section-title{
+  font-size: clamp(3.15rem, 5.05vw, 5.6rem) !important;
+}
+body .section-label{
+  font-size: .68rem !important;
+  letter-spacing: .28em !important;
+}
+
+/* FEATURED MERCH — balanced product cards inside a normal viewport */
+body .products-grid{
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 24px !important;
+}
+body .pcard{
+  border-radius: 24px !important;
+  min-height: 470px !important;
+}
+body .pcard-img-wrap{
+  height: 260px !important;
+  margin: 14px 14px 0 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+}
+body .pcard-info{ padding: 20px 20px 22px !important; }
+body .pcard-name{
+  font-size: 1.18rem !important;
+  min-height: 46px !important;
+}
+body .pcard:first-child .pcard-img{
+  padding: 20px !important;
+}
+
+/* QUICK VIEW — real product showcase, no giant white empty block, no cropping */
+body .modal-overlay{
+  padding: 36px !important;
+  align-items: center !important;
+}
+body .modal-box{
+  width: min(100%, 1120px) !important;
+  max-width: 1120px !important;
+  max-height: min(86vh, 760px) !important;
+  grid-template-columns: minmax(420px, .98fr) minmax(390px, .9fr) !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+}
+body .modal-img-wrap{
+  min-height: 560px !important;
+  height: 100% !important;
+  padding: 34px !important;
+  background:
+    radial-gradient(circle at 50% 43%, rgba(255,255,255,.32), transparent 38%),
+    linear-gradient(145deg, #f4f4f4 0%, #e0e0e0 55%, #d0d0d0 100%) !important;
+}
+body .modal-product-img{
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 560px !important;
+  max-height: 500px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin: auto !important;
+}
+body .modal-info{
+  padding: clamp(38px, 3.2vw, 54px) clamp(36px, 3vw, 50px) !important;
+  overflow-y: auto !important;
+}
+body .modal-name{
+  font-size: clamp(2.1rem, 2.35vw, 2.75rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: .025em !important;
+}
+body .modal-price{ font-size: clamp(2.2rem, 2.7vw, 3rem) !important; }
+body .modal-desc{ font-size: .94rem !important; line-height: 1.72 !important; }
+body .modal-close{
+  top: 22px !important;
+  right: 22px !important;
+}
+
+/* FOOTER — one official logo, not oversized, aligned like a premium brand footer */
+body .site-footer{
+  padding: 76px 0 34px !important;
+}
+body .site-footer .footer-grid{
+  display: grid !important;
+  grid-template-columns: minmax(320px, 1.35fr) repeat(3, minmax(150px, .65fr)) !important;
+  gap: clamp(48px, 7vw, 110px) !important;
+  align-items: start !important;
+}
+body .site-footer .footer-brand{ max-width: 420px !important; }
+body .site-footer .footer-logo.h33e-footer-logo.paddox-footer-brand-lockup{
+  width: 315px !important;
+  max-width: 315px !important;
+  margin-bottom: 24px !important;
+}
+body .site-footer .footer-lockup-logo{
+  width: 315px !important;
+  max-width: 315px !important;
+  max-height: 76px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+}
+body .footer-tagline{
+  max-width: 380px !important;
+  line-height: 1.7 !important;
+}
+body .footer-bottom{
+  width: min(calc(100% - (var(--pdx-pad-final) * 2)), var(--pdx-page-max-final)) !important;
+  max-width: var(--pdx-page-max-final) !important;
+  margin-inline: auto !important;
+}
+
+@media (max-width: 1280px){
+  body #navbar .nav-inner{
+    width: min(calc(100% - 44px), 1180px) !important;
+    grid-template-columns: 165px minmax(450px, 1fr) auto !important;
+    gap: 18px !important;
+  }
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{
+    width: 165px !important;
+    min-width: 165px !important;
+    max-width: 165px !important;
+  }
+  body #navbar .nav-link{ padding-inline: 14px !important; letter-spacing: .15em !important; }
+  body #navbar .nav-cta-btn{ padding-inline: 22px !important; }
+}
+@media (max-width: 1060px){
+  body #navbar .nav-inner{
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  body #navbar .nav-links{ display: none !important; }
+  body #navbar .hamburger{ display: flex !important; }
+  body #navbar .nav-logo.paddox-brand-lockup,
+  body #navbar .brand-lockup-logo{
+    width: 170px !important;
+    min-width: 170px !important;
+    max-width: 170px !important;
+  }
+  body .products-grid{ grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  body .modal-box{ grid-template-columns: 1fr !important; max-height: 90vh !important; overflow-y: auto !important; }
+  body .modal-img-wrap{ min-height: 380px !important; }
+  body .modal-product-img{ max-height: 340px !important; }
+  body .site-footer .footer-grid{ grid-template-columns: 1fr 1fr !important; }
+}
+@media (max-width: 620px){
+  body #navbar{ height: 64px !important; min-height: 64px !important; }
+  body #navbar .nav-inner{ width: calc(100% - 28px) !important; }
+  body #navbar .nav-logo.paddox-brand-lockup{ width: 52px !important; min-width: 52px !important; max-width: 52px !important; }
+  body #navbar .brand-lockup-logo{
+    content: url('assets/paddox-logo-icon-nav.png?v=H4_0_12') !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    padding: 5px !important;
+    border-radius: 15px !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)) !important;
+    border: 1px solid rgba(255,255,255,.14) !important;
+  }
+  body .hero{ padding-top:64px !important; }
+  body .hero-h1{ font-size: clamp(4.3rem, 20vw, 6.2rem) !important; }
+  body .section-title, body .featured-section .section-title{ font-size: clamp(2.7rem, 13vw, 4rem) !important; }
+  body .products-grid{ grid-template-columns: 1fr !important; }
+  body .modal-overlay{ padding: 10px !important; align-items: flex-end !important; }
+  body .modal-box{ border-radius: 24px 24px 0 0 !important; }
+  body .modal-img-wrap{ min-height: 280px !important; padding: 18px !important; }
+  body .modal-product-img{ max-height: 250px !important; }
+  body .site-footer .footer-grid{ grid-template-columns: 1fr !important; gap: 34px !important; }
+  body .site-footer .footer-logo.h33e-footer-logo.paddox-footer-brand-lockup,
+  body .site-footer .footer-lockup-logo{ width: min(270px, 78vw) !important; max-width: min(270px, 78vw) !important; }
+}
