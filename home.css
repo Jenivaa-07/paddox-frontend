@@ -12250,3 +12250,367 @@ body .h32a-hero .hero-live-card small{
     max-width: 100% !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.16 — TRACK MODE + MOBILE RESPONSIVE LOCK
+   Scope: Track Mode desktop/mobile and mobile section readability.
+   Navbar and hero desktop layout untouched.
+   ============================================================ */
+
+/* Track Mode: prevent title overflow and make panel feel balanced */
+body #race-control-section.h34c-fastf1-track,
+body #race-control-section.h34d2-track-polish{
+  overflow: hidden !important;
+}
+
+body #race-control-section .container{
+  max-width: 1260px !important;
+}
+
+body #race-control-section .h34c-fastf1-panel,
+body #race-control-section .h34d2-panel{
+  width: min(100%, 1120px) !important;
+  margin: 0 auto !important;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr) !important;
+  gap: clamp(26px, 3.4vw, 46px) !important;
+  padding: clamp(24px, 3vw, 38px) !important;
+  overflow: hidden !important;
+}
+
+body #race-control-section .h34c-fastf1-stage,
+body #race-control-section .h34d2-stage{
+  min-width: 0 !important;
+  min-height: clamp(360px, 34vw, 470px) !important;
+  padding: clamp(20px, 2.8vw, 34px) !important;
+}
+
+body #race-control-section .h34c-fastf1-frame,
+body #race-control-section .h34d2-frame{
+  width: min(100%, 520px) !important;
+  height: auto !important;
+  aspect-ratio: 1.34 / 1 !important;
+  min-height: 0 !important;
+}
+
+body #race-control-section .h34c-fastf1-info,
+body #race-control-section .h34d2-info{
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: clamp(14px, 1.8vw, 24px) 0 !important;
+  overflow: hidden !important;
+}
+
+body #race-control-section .h34c-fastf1-info h3,
+body #race-control-section .h34d2-info h3,
+body #race-control-section #rc-race-name{
+  max-width: 100% !important;
+  font-size: clamp(2.9rem, 3.85vw, 4.55rem) !important;
+  line-height: .86 !important;
+  letter-spacing: .025em !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-wrap: balance !important;
+}
+
+body #race-control-section #rc-race-name .accent{
+  display: block !important;
+  color: #fff !important;
+}
+
+body #race-control-section .h34c-fastf1-info p,
+body #race-control-section .h34d2-info p,
+body #race-control-section #rc-race-meta{
+  max-width: 100% !important;
+  font-size: .9rem !important;
+  line-height: 1.55 !important;
+}
+
+body #race-control-section .h34d2-countdown-card,
+body #race-control-section .h33b-data-row{
+  max-width: 100% !important;
+}
+
+/* Tablet: stack Track Mode cleanly */
+@media (max-width: 980px){
+  body #race-control-section .h34c-fastf1-panel,
+  body #race-control-section .h34d2-panel{
+    width: min(100%, 760px) !important;
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    border-radius: 28px !important;
+  }
+  body #race-control-section .h34c-fastf1-stage,
+  body #race-control-section .h34d2-stage{
+    min-height: 360px !important;
+    padding: 28px !important;
+  }
+  body #race-control-section .h34c-fastf1-info,
+  body #race-control-section .h34d2-info{
+    padding: 34px 30px 38px !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.08) !important;
+  }
+  body #race-control-section .h34c-fastf1-info h3,
+  body #race-control-section .h34d2-info h3,
+  body #race-control-section #rc-race-name{
+    font-size: clamp(2.75rem, 9vw, 4rem) !important;
+  }
+}
+
+/* Mobile global readability: keep sections premium instead of skinny/tiny */
+@media (max-width: 620px){
+  :root{ --pdx-page-pad: 20px; }
+
+  body .section,
+  body .featured-section,
+  body .home-grid-strip-section,
+  body .experience-section,
+  body .testi-section,
+  body .paddox-lab-section{
+    padding-top: 70px !important;
+    padding-bottom: 72px !important;
+  }
+
+  body .container{
+    width: 100% !important;
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  body .section-head{
+    margin-bottom: 28px !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+
+  body .section-title{
+    font-size: clamp(2.35rem, 11.5vw, 3.45rem) !important;
+    line-height: .95 !important;
+    letter-spacing: .035em !important;
+  }
+
+  body .section-label{
+    font-size: .58rem !important;
+    letter-spacing: .22em !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Track Mode mobile */
+  body #race-control-section.h34c-fastf1-track,
+  body #race-control-section.h34d2-track-polish{
+    padding: 72px 0 76px !important;
+  }
+
+  body #race-control-section .race-control-head,
+  body #race-control-section .h34d2-head{
+    margin-bottom: 26px !important;
+  }
+
+  body #race-control-section .h34c-fastf1-panel,
+  body #race-control-section .h34d2-panel{
+    width: calc(100% - 40px) !important;
+    border-radius: 24px !important;
+    margin: 0 auto !important;
+  }
+
+  body #race-control-section .h34c-fastf1-stage,
+  body #race-control-section .h34d2-stage{
+    min-height: 270px !important;
+    padding: 18px !important;
+  }
+
+  body #race-control-section .h34c-fastf1-frame,
+  body #race-control-section .h34d2-frame{
+    width: 100% !important;
+    max-width: 310px !important;
+    aspect-ratio: 1.18 / 1 !important;
+    border-radius: 20px !important;
+    padding: 14px !important;
+  }
+
+  body #race-control-section .pdx-fastf1-track-svg{
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 210px !important;
+  }
+
+  body #race-control-section .h34d2-sector-legend{
+    left: 18px !important;
+    right: 18px !important;
+    bottom: 14px !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  body #race-control-section .h34d2-sector-legend span{
+    font-size: .48rem !important;
+    padding: 5px 7px !important;
+  }
+
+  body #race-control-section .h34c-fastf1-info,
+  body #race-control-section .h34d2-info{
+    padding: 26px 20px 28px !important;
+  }
+
+  body #race-control-section .h34c-kicker,
+  body #race-control-section .h34d2-kicker{
+    font-size: .56rem !important;
+    letter-spacing: .24em !important;
+    margin-bottom: 12px !important;
+  }
+
+  body #race-control-section .h34c-fastf1-info h3,
+  body #race-control-section .h34d2-info h3,
+  body #race-control-section #rc-race-name{
+    font-size: clamp(2.18rem, 12vw, 3.05rem) !important;
+    line-height: .9 !important;
+    letter-spacing: .02em !important;
+    margin-bottom: 12px !important;
+  }
+
+  body #race-control-section #rc-race-meta{
+    font-size: .76rem !important;
+    line-height: 1.45 !important;
+  }
+
+  body #race-control-section .h34d2-countdown-card{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    padding: 13px 14px !important;
+    border-radius: 15px !important;
+  }
+
+  body #race-control-section .h34d2-countdown-card strong{
+    text-align: left !important;
+    font-size: .92rem !important;
+  }
+
+  body #race-control-section .h34c-chip-row,
+  body #race-control-section .h34d2-chip-row{
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  body #race-control-section .h34c-chip,
+  body #race-control-section .h34d2-chip{
+    font-size: .52rem !important;
+    padding: 8px 9px !important;
+  }
+
+  body #race-control-section .h33b-data-grid,
+  body #race-control-section .h34d2-data-grid{
+    gap: 8px !important;
+  }
+
+  body #race-control-section .h33b-data-row{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 5px !important;
+    padding: 12px 13px !important;
+    border-radius: 14px !important;
+  }
+
+  body #race-control-section .h33b-data-row strong{
+    text-align: left !important;
+    font-size: .78rem !important;
+    line-height: 1.3 !important;
+  }
+
+  body #race-control-section .h34c-track-cta,
+  body #race-control-section .h34d2-track-cta{
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+    min-height: 44px !important;
+  }
+
+  /* Mobile product cards */
+  body .products-grid{
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  body .pcard{
+    max-width: 100% !important;
+    min-height: 0 !important;
+    border-radius: 20px !important;
+  }
+  body .pcard-img-wrap{
+    height: 230px !important;
+    margin: 12px 12px 0 !important;
+    width: calc(100% - 24px) !important;
+    border-radius: 18px !important;
+  }
+  body .pcard-info{
+    min-height: 126px !important;
+    padding: 16px !important;
+  }
+  body .pcard-name{
+    font-size: 1.08rem !important;
+    min-height: auto !important;
+  }
+
+  /* Mobile horizontal team strip: prevent cards from looking clipped */
+  body .home-grid-strip-section{
+    padding-bottom: 56px !important;
+  }
+  body .marquee-strip{
+    min-height: 126px !important;
+    padding: 18px 0 !important;
+  }
+  body .marquee-track{
+    gap: 12px !important;
+    padding: 0 18px !important;
+  }
+  body .marquee-team{
+    min-width: 245px !important;
+    min-height: 88px !important;
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+  }
+  body .marquee-team-car-wrap{
+    min-height: 52px !important;
+  }
+  body .team-car-img{
+    max-height: 58px !important;
+  }
+
+  /* Beyond / Fan Pulse mobile: readable cards */
+  body .exp-grid,
+  body .testi-grid{
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  body .exp-card,
+  body .testi-card,
+  body .fan-voice-card{
+    min-height: 0 !important;
+    padding: 20px !important;
+    border-radius: 18px !important;
+  }
+
+  /* Race Lab mobile */
+  body .paddox-lab-shell,
+  body .h33e4-race-lab .paddox-lab-shell{
+    border-radius: 24px !important;
+    padding: 18px !important;
+  }
+  body .paddox-lab-layout,
+  body .h33e4-command-grid{
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+/* Very narrow phones */
+@media (max-width: 390px){
+  body .container{ padding-left: 18px !important; padding-right: 18px !important; }
+  body #race-control-section .h34c-fastf1-panel,
+  body #race-control-section .h34d2-panel{ width: calc(100% - 28px) !important; }
+  body #race-control-section .h34c-fastf1-info h3,
+  body #race-control-section .h34d2-info h3,
+  body #race-control-section #rc-race-name{ font-size: clamp(2rem, 12vw, 2.65rem) !important; }
+}
