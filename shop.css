@@ -4476,3 +4476,110 @@ body .modal-meta{
     width:100% !important;
   }
 }
+
+/* ============================================================
+   PADDOX SHOP S1.6 — QUICK VIEW TRUE DESKTOP FIT LOCK
+   Fixes modal vertical fit after S1.5 without touching grid/list/nav/hero.
+   ============================================================ */
+@media (min-width: 981px){
+  body .modal-overlay{
+    padding:18px 22px !important;
+    align-items:center !important;
+  }
+  body .modal-box{
+    width:min(1060px, 92vw) !important;
+    max-height:min(690px, 84vh) !important;
+    grid-template-columns:minmax(390px,.88fr) minmax(430px,1fr) !important;
+    overflow:hidden !important;
+  }
+  body .modal-left{
+    padding:24px 30px !important;
+  }
+  body .modal-img-main{
+    height:min(430px, 56vh) !important;
+    width:min(100%, 430px) !important;
+  }
+  body .modal-right{
+    padding:34px 40px 26px !important;
+    gap:10px !important;
+    overflow:auto !important;
+  }
+  body .modal-team{
+    font-size:.6rem !important;
+    letter-spacing:4px !important;
+    margin-bottom:2px !important;
+  }
+  body .modal-name{
+    font-size:clamp(2.05rem, 2.65vw, 2.8rem) !important;
+    line-height:.96 !important;
+    letter-spacing:1px !important;
+    max-width:500px !important;
+  }
+  body .modal-rating{
+    font-size:.82rem !important;
+    margin-top:0 !important;
+  }
+  body .modal-price-wrap{
+    margin-top:0 !important;
+  }
+  body .modal-price{
+    font-size:clamp(1.85rem, 2.55vw, 2.55rem) !important;
+  }
+  body .modal-desc{
+    font-size:.86rem !important;
+    line-height:1.48 !important;
+    max-width:520px !important;
+    display:-webkit-box !important;
+    -webkit-line-clamp:5 !important;
+    -webkit-box-orient:vertical !important;
+    overflow:hidden !important;
+  }
+  body .modal-divider{
+    margin:3px 0 1px !important;
+  }
+  body .modal-option-label{
+    font-size:.6rem !important;
+    letter-spacing:2.5px !important;
+  }
+  body .size-opts{
+    gap:8px !important;
+  }
+  body .sz{
+    min-width:48px !important;
+    padding:8px 13px !important;
+    border-radius:8px !important;
+  }
+  body .modal-actions{
+    margin-top:4px !important;
+  }
+  body .modal-add-btn{
+    min-height:50px !important;
+    font-size:.9rem !important;
+  }
+  body .modal-wish-btn{
+    height:50px !important;
+    min-width:50px !important;
+  }
+  body .modal-meta{
+    display:none !important;
+  }
+}
+
+@media (min-width: 981px) and (max-height: 760px){
+  body .modal-box{
+    max-height:calc(100vh - 34px) !important;
+  }
+  body .modal-img-main{
+    height:min(380px, 50vh) !important;
+  }
+  body .modal-right{
+    padding:26px 36px 22px !important;
+    gap:8px !important;
+  }
+  body .modal-name{
+    font-size:clamp(1.9rem, 2.35vw, 2.45rem) !important;
+  }
+  body .modal-desc{
+    -webkit-line-clamp:4 !important;
+  }
+}
