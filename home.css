@@ -15152,3 +15152,154 @@ body #paddox-race-lab .h33e4-lab-shell{
     line-height: .9 !important;
   }
 }
+
+/* ============================================================
+   PADDOX H4.0.31 — BEYOND CARD SIZE PROPORTION LOCK
+   Scope: Beyond the Track card scale only.
+   Navbar, hero, Track Mode, merch, modal, teams, Fan Pulse, Race Lab,
+   footer, and realtime logic untouched.
+   ============================================================ */
+
+/* The previous Beyond polish made the cards too tall and oversized. Lock the
+   section to a compact premium feature-card proportion instead of giant panels. */
+body .experience-section.h33e-polish{
+  padding-top: 92px !important;
+  padding-bottom: 90px !important;
+}
+
+body .experience-section.h33e-polish .section-head{
+  margin-bottom: 38px !important;
+}
+
+body .experience-section.h33e-polish .section-title{
+  font-size: clamp(3.35rem, 5.55vw, 6.05rem) !important;
+  line-height: .9 !important;
+}
+
+body .experience-section.h33e-polish .h33e-section-sub,
+body .experience-section.h33e-polish .section-sub{
+  max-width: 610px !important;
+  font-size: .98rem !important;
+  line-height: 1.55 !important;
+  margin-top: 16px !important;
+}
+
+body .experience-section.h33e-polish .exp-grid{
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+body .experience-section.h33e-polish .exp-card,
+body .experience-section.h33e-polish .exp-card.exp-card-wide{
+  height: clamp(300px, 22vw, 342px) !important;
+  min-height: 0 !important;
+  max-height: 342px !important;
+  border-radius: 22px !important;
+}
+
+body .experience-section.h33e-polish .exp-card:nth-child(n){
+  margin-top: 0 !important;
+}
+
+body .experience-section.h33e-polish .exp-card::after{
+  border-radius: 21px !important;
+}
+
+body .experience-section.h33e-polish .exp-card-content{
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 24px 24px 22px !important;
+  gap: 10px !important;
+  justify-content: flex-end !important;
+}
+
+body .experience-section.h33e-polish .exp-icon{
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  margin-bottom: 10px !important;
+  font-size: .74rem !important;
+}
+
+body .experience-section.h33e-polish .exp-title{
+  font-size: clamp(1.65rem, 1.65vw, 2.08rem) !important;
+  line-height: .92 !important;
+  letter-spacing: .045em !important;
+  margin-bottom: 8px !important;
+}
+
+body .experience-section.h33e-polish .exp-desc{
+  font-size: .84rem !important;
+  line-height: 1.48 !important;
+  max-width: 245px !important;
+  margin-bottom: 10px !important;
+}
+
+body .experience-section.h33e-polish .exp-link{
+  min-height: 34px !important;
+  padding: 9px 14px !important;
+  font-size: .68rem !important;
+  letter-spacing: .16em !important;
+}
+
+@media (max-width: 1180px){
+  body .experience-section.h33e-polish .exp-card,
+  body .experience-section.h33e-polish .exp-card.exp-card-wide{
+    height: 310px !important;
+    max-height: 310px !important;
+  }
+  body .experience-section.h33e-polish .exp-title{
+    font-size: clamp(1.48rem, 2vw, 1.9rem) !important;
+  }
+}
+
+@media (max-width: 980px){
+  body .experience-section.h33e-polish .exp-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body .experience-section.h33e-polish .exp-card,
+  body .experience-section.h33e-polish .exp-card.exp-card-wide{
+    height: 285px !important;
+    max-height: 285px !important;
+  }
+}
+
+@media (max-width: 620px){
+  body .experience-section.h33e-polish{
+    padding-top: 68px !important;
+    padding-bottom: 66px !important;
+  }
+  body .experience-section.h33e-polish .section-head{
+    margin-bottom: 26px !important;
+  }
+  body .experience-section.h33e-polish .section-title{
+    font-size: clamp(2.35rem, 12.4vw, 3.35rem) !important;
+  }
+  body .experience-section.h33e-polish .exp-grid{
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  body .experience-section.h33e-polish .exp-card,
+  body .experience-section.h33e-polish .exp-card.exp-card-wide{
+    height: auto !important;
+    min-height: 218px !important;
+    max-height: none !important;
+    border-radius: 20px !important;
+  }
+  body .experience-section.h33e-polish .exp-card-content{
+    padding: 20px !important;
+  }
+  body .experience-section.h33e-polish .exp-icon{
+    width: 38px !important;
+    height: 38px !important;
+    margin-bottom: 12px !important;
+  }
+  body .experience-section.h33e-polish .exp-title{
+    font-size: clamp(1.72rem, 8vw, 2.15rem) !important;
+  }
+  body .experience-section.h33e-polish .exp-desc{
+    max-width: 100% !important;
+    font-size: .86rem !important;
+  }
+}
