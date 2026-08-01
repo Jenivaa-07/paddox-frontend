@@ -2805,7 +2805,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   ready(() => {
     document.body.classList.add('h32a-home', 'h32a-section-ready');
-    removeH32AAIStudioLinks();
+    /* AI Studio permanently removed */
     initH32ANavShell();
     initH32AHeroShell();
     initH32AQuoteShell();
@@ -2816,20 +2816,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 120), { passive: true });
   });
 
-  function removeH32AAIStudioLinks() {
-    const selectors = [
-      'a[href*="aistudio"]',
-      '.nav-ai-icon',
-      '.mob-icon.nav-ai-icon'
-    ];
-    document.querySelectorAll(selectors.join(',')).forEach((el) => {
-      const holder = el.closest('li') || el.closest('a') || el;
-      holder.remove();
-    });
-
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) searchInput.placeholder = 'Search products, drivers, circuits, fan posts…';
-  }
+  /* AI Studio permanently removed — no cleanup needed */
 
   function initH32ANavShell() {
     const navbar = document.getElementById('navbar');
@@ -3206,11 +3193,7 @@ setInterval(() => {
   'use strict';
   function run(){
     document.querySelectorAll('#nav-active-indicator, .nav-active-indicator').forEach(el => el.remove());
-    document.querySelectorAll('a[href*="aistudio"]').forEach(el => {
-      const li = el.closest('li');
-      if (li) li.remove();
-      else el.remove();
-    });
+    /* AI Studio permanently removed */
     const h1 = document.querySelector('.hero-h1');
     if (h1 && h1.dataset.h32a3 !== '1') {
       h1.innerHTML = '<span class="h1-line animate-fade-up delay-2">LIVE</span><span class="h1-line animate-fade-up delay-3">THE</span><span class="h1-line h1-race-line animate-fade-up delay-4"><span class="h1-accent">RACE</span></span>';

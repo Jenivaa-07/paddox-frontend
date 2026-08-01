@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Collection – PADDOX Digital Collectibles</title>
+  <meta name="description" content="View and share your PADDOX digital F1 collectibles and achievement certificates." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="collectibles.css" />
+</head>
+<body>
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo" aria-label="PADDOX home">
+        <span class="nav__logo-icon">🏎️</span>
+        <span>PADDOX</span>
+      </a>
+      <ul class="nav__links" role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="fanhub.html">Fan Hub</a></li>
+        <li><a href="collectibles.html" aria-current="page">Collectibles</a></li>
+        <li><a href="account.html">Account</a></li>
+      </ul>
+      <button class="nav__menu-btn" id="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav-mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main-content">
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero__content">
+        <span class="hero__badge">🏆 Digital Collectibles</span>
+        <h1 id="hero-heading" class="hero__title">Your PADDOX Collection</h1>
+        <p class="hero__subtitle">Earn exclusive digital achievements for your F1 fandom. Non-transferable, verifiable, and uniquely yours.</p>
+      </div>
+      <div class="hero__stats" id="hero-stats" aria-live="polite">
+        <div class="stat-card" id="stat-owned">
+          <span class="stat-card__number">–</span>
+          <span class="stat-card__label">Collected</span>
+        </div>
+        <div class="stat-card" id="stat-rare">
+          <span class="stat-card__number">–</span>
+          <span class="stat-card__label">Rare+</span>
+        </div>
+        <div class="stat-card" id="stat-shared">
+          <span class="stat-card__number">–</span>
+          <span class="stat-card__label">Shared</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab navigation -->
+    <div class="tabs" role="tablist" aria-label="Collection sections">
+      <button class="tab tab--active" role="tab" id="tab-collection" aria-selected="true" aria-controls="panel-collection" data-tab="collection">My Collection</button>
+      <button class="tab" role="tab" id="tab-catalogue" aria-selected="false" aria-controls="panel-catalogue" data-tab="catalogue">All Collectibles</button>
+    </div>
+
+    <!-- My Collection panel -->
+    <section id="panel-collection" role="tabpanel" aria-labelledby="tab-collection" class="panel panel--active">
+      <div class="panel__header">
+        <div class="panel__filters" role="group" aria-label="Filter collection">
+          <button class="filter-btn filter-btn--active" data-filter="all" id="filter-all">All</button>
+          <button class="filter-btn" data-filter="legendary" id="filter-legendary">Legendary</button>
+          <button class="filter-btn" data-filter="epic" id="filter-epic">Epic</button>
+          <button class="filter-btn" data-filter="rare" id="filter-rare">Rare</button>
+          <button class="filter-btn" data-filter="uncommon" id="filter-uncommon">Uncommon</button>
+          <button class="filter-btn" data-filter="common" id="filter-common">Common</button>
+        </div>
+        <div class="panel__sort">
+          <label for="sort-select" class="sr-only">Sort by</label>
+          <select id="sort-select" class="sort-select" aria-label="Sort collectibles">
+            <option value="newest">Newest First</option>
+            <option value="rarity">By Rarity</option>
+            <option value="name">Alphabetical</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Auth gate -->
+      <div id="auth-gate" class="auth-gate" hidden>
+        <div class="auth-gate__icon" aria-hidden="true">🔐</div>
+        <h2 class="auth-gate__title">Sign in to view your collection</h2>
+        <p class="auth-gate__text">Your digital collectibles are tied to your PADDOX account.</p>
+        <a href="account.html" class="btn btn--primary" id="auth-gate-login-btn">Sign In</a>
+      </div>
+
+      <!-- Loading state -->
+      <div id="collection-loading" class="loading-state" aria-live="polite" aria-label="Loading collection">
+        <div class="spinner" role="status"><span class="sr-only">Loading…</span></div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="collection-empty" class="empty-state" hidden>
+        <div class="empty-state__icon" aria-hidden="true">🏆</div>
+        <h2 class="empty-state__title">No collectibles yet</h2>
+        <p class="empty-state__text">Complete achievements to earn your first digital collectible. Start by saving your fan preferences!</p>
+        <a href="account.html" class="btn btn--primary" id="earn-first-btn">Set Fan Preferences</a>
+      </div>
+
+      <!-- Collection grid -->
+      <ul id="collection-grid" class="collectible-grid" role="list" aria-label="Your collectible collection" aria-live="polite"></ul>
+    </section>
+
+    <!-- Catalogue panel -->
+    <section id="panel-catalogue" role="tabpanel" aria-labelledby="tab-catalogue" class="panel" hidden>
+      <div class="catalogue-intro">
+        <p>Discover all available PADDOX digital collectibles. Some are earned automatically; others require special achievements.</p>
+      </div>
+      <div id="catalogue-loading" class="loading-state" aria-live="polite" aria-label="Loading catalogue">
+        <div class="spinner" role="status"><span class="sr-only">Loading…</span></div>
+      </div>
+      <div id="catalogue-empty" class="empty-state" hidden>
+        <div class="empty-state__icon" aria-hidden="true">🎴</div>
+        <h2 class="empty-state__title">No collectibles available yet</h2>
+        <p class="empty-state__text">Check back soon for new releases.</p>
+      </div>
+      <ul id="catalogue-grid" class="collectible-grid catalogue-grid" role="list" aria-label="Collectibles catalogue" aria-live="polite"></ul>
+    </section>
+  </main>
+
+  <!-- Collectible Detail Modal -->
+  <div id="collectible-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal__backdrop" id="modal-backdrop"></div>
+    <div class="modal__panel" role="document">
+      <button class="modal__close" id="modal-close" aria-label="Close collectible details">✕</button>
+
+      <div class="modal__artwork-wrap">
+        <img id="modal-img" class="modal__artwork" src="" alt="" width="300" height="300" />
+        <span id="modal-rarity-badge" class="rarity-badge" aria-label="Rarity"></span>
+      </div>
+
+      <div class="modal__info">
+        <h2 id="modal-title" class="modal__title"></h2>
+        <p id="modal-desc" class="modal__desc"></p>
+
+        <dl class="modal__meta">
+          <div class="modal__meta-row" id="modal-edition-row">
+            <dt>Edition</dt>
+            <dd id="modal-edition">–</dd>
+          </div>
+          <div class="modal__meta-row">
+            <dt>Earned</dt>
+            <dd id="modal-issued-at">–</dd>
+          </div>
+          <div class="modal__meta-row" id="modal-cert-row">
+            <dt>Certificate ID</dt>
+            <dd id="modal-cert-id" class="modal__cert-id">–</dd>
+          </div>
+          <div class="modal__meta-row" id="modal-status-row">
+            <dt>Status</dt>
+            <dd id="modal-status">–</dd>
+          </div>
+        </dl>
+
+        <!-- Fingerprint verification -->
+        <div class="modal__verify" id="modal-verify-section">
+          <h3 class="modal__verify-title">Certificate Fingerprint</h3>
+          <code id="modal-fingerprint" class="modal__fingerprint"></code>
+          <div class="modal__fingerprint-note">
+            <span id="modal-fingerprint-version" class="fingerprint-version"></span>
+            Verify authenticity at <a id="modal-verify-link" href="#" class="modal__verify-link" target="_blank" rel="noopener noreferrer">paddox.vercel.app/verify</a>
+          </div>
+        </div>
+
+        <!-- Sharing controls -->
+        <div class="modal__sharing" id="modal-sharing-section">
+          <h3 class="modal__sharing-title">Certificate Sharing</h3>
+          <div class="modal__sharing-row">
+            <label class="toggle-label" for="sharing-toggle" id="sharing-label">
+              <span>Public certificate link</span>
+              <div class="toggle" role="switch">
+                <input type="checkbox" id="sharing-toggle" aria-describedby="sharing-desc" />
+                <span class="toggle__track"></span>
+                <span class="toggle__thumb"></span>
+              </div>
+            </label>
+            <p id="sharing-desc" class="modal__sharing-desc">When enabled, anyone with the link can verify this certificate. No personal information is revealed.</p>
+          </div>
+          <div id="sharing-link-wrap" class="sharing-link-wrap" hidden>
+            <input type="text" id="sharing-link-input" class="sharing-link-input" readonly aria-label="Public sharing link" />
+            <button class="btn btn--sm" id="copy-link-btn" aria-label="Copy sharing link">Copy</button>
+          </div>
+          <div id="sharing-copied" class="sharing-copied" aria-live="polite" hidden>✅ Copied to clipboard</div>
+        </div>
+
+        <div class="modal__actions">
+          <a id="modal-verify-btn" href="#" class="btn btn--outline" target="_blank" rel="noopener noreferrer">
+            🔍 Verify Certificate
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" hidden></div>
+
+  <script src="js/api.js"></script>
+  <script src="collectibles.js"></script>
+</body>
+</html>

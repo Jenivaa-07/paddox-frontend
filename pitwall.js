@@ -82,7 +82,7 @@ async function api(path, options = {}) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
     try {
-      const res = await fetch(`${API_BASE}${path}`, {
+      const res = await fetch(`${API_BASE}${path}`, { credentials: 'include',
         cache: 'no-store',
         signal: controller.signal,
         headers: { 'Accept': 'application/json' }

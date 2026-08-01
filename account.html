@@ -61,7 +61,6 @@
         <li><a href="index.html" class="nav-link"><span class="nl-icon nav-home-icon" aria-hidden="true"></span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
         <li><a href="shop.html" class="nav-link"><span class="nl-icon nav-shop-icon" aria-hidden="true"></span><span class="nl-label">Shop</span><span class="nl-underline"></span></a></li>
         <li><a href="fanhub.html" class="nav-link"><span class="nl-icon nav-fanhub-icon" aria-hidden="true"></span><span class="nl-label">Fan Hub</span><span class="nl-underline"></span></a></li>
-        <li><a href="aistudio.html" class="nav-link"><span class="nl-icon nav-ai-icon" aria-hidden="true"></span><span class="nl-label">AI Studio</span><span class="nl-underline"></span></a></li>
         <li><a href="pitwall.html" class="nav-link"><span class="nl-icon nav-pitwall-icon" aria-hidden="true"></span><span class="nl-label">Pit Wall</span><span class="nl-underline"></span></a></li>
         <li><a href="account.html" class="nav-link active"><span class="nl-icon nav-account-icon" aria-hidden="true"></span><span class="nl-label">Account</span><span class="nl-underline"></span></a></li>
       </ul>
@@ -80,7 +79,6 @@
       <a href="index.html" class="mob-link">Home</a>
       <a href="shop.html" class="mob-link">Shop</a>
       <a href="fanhub.html" class="mob-link">Fan Hub</a>
-      <a href="aistudio.html" class="mob-link"><span class="mob-icon nav-ai-icon" aria-hidden="true"></span>AI Studio</a>
       <a href="pitwall.html" class="mob-link">Pit Wall</a>
       <a href="account.html" class="mob-link active">Account</a>
     </div>
@@ -222,6 +220,7 @@
         <div class="acc-nav-item" data-page="orders"><span class="acc-icon acc-orders-icon" aria-hidden="true"></span> My Orders</div>
         <div class="acc-nav-item" data-page="wishlist"><span class="acc-icon acc-wishlist-icon" aria-hidden="true"></span> Wishlist</div>
         <div class="acc-nav-item" data-page="downloads"><span class="acc-icon acc-downloads-icon" aria-hidden="true"></span> Downloads</div>
+        <div class="acc-nav-item" data-page="collection"><span class="acc-icon acc-collection-icon" aria-hidden="true"></span> My Collection</div>
         <div class="acc-nav-divider"></div>
         <div class="acc-nav-item" data-page="profile"><span class="acc-icon acc-profile-icon" aria-hidden="true"></span> Profile Settings</div>
         <div class="acc-nav-item" data-page="notifications"><span class="acc-icon acc-notifications-icon" aria-hidden="true"></span> Notifications</div>
@@ -369,6 +368,41 @@
             <h3>No downloads yet</h3>
             <p>Downloads will appear here after you save digital assets from Fan Hub.</p>
             <button class="downloads-empty-btn" onclick="window.location.href='fanhub.html'">Explore Fan Hub <span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLLECTION -->
+      <div class="acc-page" id="page-collection">
+        <div class="page-header collection-page-head">
+          <div>
+            <div class="page-label">Digital Assets</div>
+            <div class="page-title">MY <span class="accent">COLLECTION</span></div>
+          </div>
+        </div>
+
+        <div class="collection-premium-shell">
+          <div class="collection-command-strip" id="collection-summary-strip">
+            <div class="collection-command-card">
+              <span>Earned Collectibles</span>
+              <strong id="col-summary-earned">0</strong>
+            </div>
+            <div class="collection-command-card">
+              <span>Latest Addition</span>
+              <strong id="col-summary-latest">—</strong>
+            </div>
+            <div class="collection-command-card">
+              <span>Certificates Shared</span>
+              <strong id="col-summary-shared">0</strong>
+            </div>
+          </div>
+
+          <div class="col-grid" id="collection-grid">
+            <div class="collection-empty-state">
+              <span class="collection-empty-icon" aria-hidden="true"></span>
+              <h3>No collectibles yet</h3>
+              <p>Earn PADDOX collectibles by completing achievements and participating in events.</p>
+            </div>
           </div>
         </div>
       </div>

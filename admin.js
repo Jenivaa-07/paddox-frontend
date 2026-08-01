@@ -46,380 +46,36 @@ var REAL_ASSETS = window.REAL_ASSETS || [];
    ADMIN AUTH GUARD
 ══════════════════════════════════════ */
 
-function getAdminToken() {
-  return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('accessToken') ||
-    ''
-  );
-}
 
 function redirectToLogin(message = 'Please login as admin') {
   alert(message);
   window.location.href = 'account.html';
 }
 
+
 async function checkAdminAccess() {
-  const token = getAdminToken();
-
-  if (!token) {
-    redirectToLogin('Please login first');
-    return false;
-  }
-
   try {
-    /*
-      We verify admin access using an actual admin endpoint.
-      This avoids false redirects when /api/auth/me does not return isAdmin.
-    */
-    const res = await fetch(
-      'https://paddox-backend.onrender.com/api/orders/admin/all?limit=1',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-
-    if (res.ok) {
+    const res = await fetch('https://paddox-backend.onrender.com/api/auth/me', { credentials: 'include' });
+    const data = await res.json();
+    if (res.ok && data.user && data.user.role === 'admin') {
       return true;
     }
-
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('paddox_access_token');
-      localStorage.removeItem('accessToken');
-
-      redirectToLogin('Admin session expired. Please login with admin account.');
-      return false;
-    }
-
-    console.warn('Admin guard check returned:', res.status);
-    return true;
-
-  } catch (err) {
-    console.error(err);
-    /* Do not block admin page for temporary network issues. */
-    return true;
-  }
+  } catch (err) {}
+  redirectToLogin('Please login as admin first');
+  return false;
 }
-
-
-
-/* ══════════════════════════════════════
-   PADDOX CLOUDINARY IMAGE UPLOAD BRIDGE
-   Reusable for Product, Fan Quotes, Fan Drivers, and User Profile images.
-══════════════════════════════════════ */
-const PADDOX_UPLOAD_API = 'https://paddox-backend.onrender.com/api/uploads/image';
-
-function dataUrlToFile(dataUrl, filename = 'paddox-image.jpg') {
-  const parts = String(dataUrl || '').split(',');
-  const mimeMatch = parts[0]?.match(/data:(.*?);base64/);
-  const mime = mimeMatch?.[1] || 'image/jpeg';
-  const binary = atob(parts[1] || '');
-  const bytes = new Uint8Array(binary.length);
-
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  return new File([bytes], filename, { type: mime });
-}
-
-async function uploadImageToCloudinaryBridge(fileOrDataUrl, context = 'admin') {
-  if (!fileOrDataUrl) return '';
-
-  if (typeof fileOrDataUrl === 'string' && /^https?:\/\//i.test(fileOrDataUrl)) {
-    return fileOrDataUrl;
-  }
-
-  const file =
-    typeof fileOrDataUrl === 'string'
-      ? dataUrlToFile(fileOrDataUrl, `paddox-${context}-${Date.now()}.jpg`)
-      : fileOrDataUrl;
-
-  const formData = new FormData();
-  formData.append('image', file);
-  formData.append('context', context);
-
-  const res = await fetch(PADDOX_UPLOAD_API, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${getAdminToken()}`
-    },
-    body: formData
-  });
-
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok || data.success === false) {
-    throw new Error(data.message || 'Cloudinary upload failed');
-  }
-
-  return data.data?.url || data.url || data.secure_url || '';
-}
-
-/* ══════════════════════════════════════
-   REALTIME ADMIN NOTIFICATION BRIDGE
-══════════════════════════════════════ */
-const ADMIN_SOCKET_URL = 'https://paddox-backend.onrender.com';
-let adminSocket = null;
-
-function initAdminNotificationSocket() {
-  if (adminSocket?.connected || typeof window.io !== 'function') return;
-  const token = getAdminToken();
-  if (!token) return;
-  adminSocket = window.io(ADMIN_SOCKET_URL, {
-    transports: ['websocket', 'polling'],
-    auth: { token },
-    query: { token },
-    withCredentials: true,
-    reconnection: true
-  });
-}
-
-function emitAdminDropNotification(kind, payload = {}) {
-  try {
-    initAdminNotificationSocket();
-    adminSocket?.emit('admin:new-drop', { kind, ...payload });
-  } catch (err) {
-    console.warn('Admin drop notification failed:', err.message);
-  }
-}
-
-function emitAdminRaceNotification(title, message, ref = '') {
-  try {
-    initAdminNotificationSocket();
-    adminSocket?.emit('admin:race-alert', { title, message, ref });
-    showToast('🏁 Race alert sent');
-  } catch (err) {
-    console.warn('Race notification failed:', err.message);
-  }
-}
-
-window.sendPaddoxRaceNotification = emitAdminRaceNotification;
-
-window.addEventListener('load', initAdminNotificationSocket);
-
-/* ══ DATA ══ */
-
-
-const ADM_USERS = [];
-
-
-
-const ADM_MOD = [];
-
-const TRAFFIC_DATA = [];
-const TOP_PRODUCTS = [];
-const GEO_DATA = [];
-const ENGAGEMENT_DATA = [];
-
-/* ══ PARTICLES ══ */
-(function(){
-  const canvas=document.getElementById('particles-canvas');if(!canvas)return;
-  const ctx=canvas.getContext('2d');let W,H,p=[];
-  function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}resize();
-  window.addEventListener('resize',resize);
-  class P{constructor(b=false){this.r(b)}
-    r(b=false){this.b=b;this.t=Math.random()<.55?'s':'d';
-      this.x=b?W*.5+(Math.random()-.5)*400:Math.random()*W;
-      this.y=b?H*.4+(Math.random()-.5)*200:Math.random()*H;
-      const sp=b?4+Math.random()*7:1.5+Math.random()*2.5,a=b?Math.random()*Math.PI*2:-.05+(Math.random()-.5)*.4;
-      this.vx=Math.cos(a)*sp;this.vy=Math.sin(a)*sp-(b?0:.2);
-      this.l=1;this.d=b?.018+Math.random()*.022:.003+Math.random()*.004;
-      this.sz=this.t==='s'?.6+Math.random()*1.6:.5+Math.random()*1.2;
-      const r=Math.random();this.c=r<.65?'rgba(232,0,45,':r<.82?'rgba(200,200,200,':'rgba(201,168,76,';}
-    update(){this.x+=this.vx;this.y+=this.vy;this.vy+=.012;this.l-=this.d;
-      if(this.l<=0||this.x>W+30||this.x<-30||this.y>H+30)this.r(false)}
-    draw(){ctx.save();ctx.globalAlpha=Math.max(0,this.l*.72);
-      if(this.t==='s'){ctx.strokeStyle=`${this.c}1)`;ctx.lineWidth=this.sz;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(this.x,this.y);ctx.lineTo(this.x-this.vx*7,this.y-this.vy*7);ctx.stroke()}
-      else{ctx.fillStyle=`${this.c}.9)`;ctx.beginPath();ctx.arc(this.x,this.y,this.sz,0,Math.PI*2);ctx.fill()}ctx.restore()}}
-  for(let i=0;i<60;i++)p.push(new P());
-  setTimeout(function burst(){for(let i=0;i<28;i++)p.push(new P(true));setTimeout(burst,9e3+Math.random()*8e3)},5e3);
-  function loop(){ctx.clearRect(0,0,W,H);p.forEach(x=>{x.update();x.draw()});p=p.filter(x=>x.l>0||!x.b);while(p.filter(x=>!x.b).length<60)p.push(new P());requestAnimationFrame(loop)}loop();
-})();
-
-/* ══ PAGE TRANSITION ══ */
-(function(){
-  const ov=document.getElementById('page-overlay');if(!ov)return;
-  document.querySelectorAll('a[href]').forEach(a=>{
-    const h=a.getAttribute('href');
-    if(!h||h.startsWith('#')||h.startsWith('http')||h.startsWith('mailto'))return;
-    a.addEventListener('click',e=>{e.preventDefault();ov.classList.add('slide-in');setTimeout(()=>location.href=h,480)});
-  });
-  window.addEventListener('load',()=>{ov.classList.remove('slide-in');ov.classList.add('slide-out');setTimeout(()=>ov.classList.remove('slide-out'),500)});
-})();
-
-/* ══ SCROLL REVEAL ══ */
-function initReveal(root=document){
-  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in-view');obs.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -20px 0px'});
-  root.querySelectorAll('.reveal-up').forEach(el=>obs.observe(el));
-}
-initReveal();
-
-/* ══ SIDEBAR TOGGLE ══ */
-const sidebar    = document.getElementById('admin-sidebar');
-const adminMain  = document.querySelector('.admin-main');
-const menuBtn    = document.getElementById('adm-menu-btn');
-let sidebarOpen  = true;
-
-menuBtn?.addEventListener('click', () => {
-  sidebarOpen = !sidebarOpen;
-  sidebar.classList.toggle('collapsed', !sidebarOpen);
-  adminMain.classList.toggle('expanded', !sidebarOpen);
-  /* Mobile open class */
-  if (window.innerWidth <= 900) {
-    sidebar.classList.toggle('mobile-open', sidebarOpen);
-    sidebar.classList.remove('collapsed');
-    adminMain.classList.remove('expanded');
-  }
-});
-
-/* Close sidebar on outside click (mobile) */
-document.addEventListener('click', e => {
-  if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-    sidebar.classList.remove('mobile-open');
-    sidebarOpen = false;
-  }
-});
-
-/* ══ NAV PAGE SWITCHING ══ */
-const PAGE_META = {
-  overview:   { title:'OVERVIEW',        action:'',  fn:null, hideAction:true },
-  orders:     { title:'ORDERS',          action:'', hideAction:true, fn:null },
-  products:   { title:'PRODUCTS',        action:'', hideAction:true, fn:null },
-  coupons:    { title:'COUPONS',         action:'', hideAction:true, fn:null },
-  inventory:  { title:'INVENTORY',       action:'Restock Low',    fn:()=>bulkRestockLowStock?.() },
-  assets: {
-  title:'DIGITAL ASSETS',
-  action:'+ Upload Asset',
-  fn:()=>openAssetModal()
-},
-  fanquotes:  { title:'FAN QUOTES',      action:'+ Add Quote',   fn:()=>openQuoteModal() },
-  fanpolls:   { title:'FAN POLLS',       action:'+ New Poll',    fn:()=>resetFanPollForm() },
-  fantrivia:  { title:'FAN TRIVIA',      action:'+ New Trivia',  fn:()=>resetFanTriviaForm() },
-  fandrivers: { title:'FAN DRIVERS',     action:'+ Add Image',   fn:()=>openDriverProfileModal() },
-  users:      { title:'USERS',           action:'Export Users',   fn:()=>showToast('📥 Exporting users…') },
-  analytics:  { title:'ANALYTICS',       action:'Download Report',fn:()=>downloadAnalyticsReport() },
-  moderation: { title:'MODERATION',      action:'Clear Reviewed', fn:()=>moderationClearReviewed() },
-};
-
-function switchPage(id) {
-  document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.adm-nav-item').forEach(n=>n.classList.remove('on'));
-  const page = document.getElementById(`adm-${id}`);
-  if (page) { page.classList.add('on'); initReveal(page); }
-  const navItem = document.querySelector(`.adm-nav-item[data-page="${id}"]`);
-  if (navItem) navItem.classList.add('on');
-  const meta = PAGE_META[id] || { title: id.toUpperCase(), action:'+ Add', fn:()=>{} };
-  const titleEl = document.getElementById('adm-topbar-title');
-  const actionBtn = document.getElementById('adm-action-btn');
-  if (titleEl) titleEl.textContent = meta.title;
-  if (actionBtn) {
-    actionBtn.textContent = meta.action || '';
-    actionBtn.onclick = meta.fn || null;
-    actionBtn.hidden = !!meta.hideAction;
-    actionBtn.classList.toggle('is-hidden', !!meta.hideAction);
-  }
-  if (id === 'products') {
-  bindProductAdminControls();
-  loadProducts();
-}
-if (id === 'coupons') {
-  bindCouponAdminControls();
-  loadCoupons();
-}
-
-if (id === 'assets') {
-  loadAssets();
-}
-if (id === 'orders') {
-  adminPhase9BindOrderFilters?.();
-  loadOrders();
-}
-if (id === 'inventory') {
-  bindInventoryAdminControls();
-  loadProducts();
-}
-if (id === 'users') {
-  loadUsers();
-}
-if (id === 'analytics') {
-  loadAnalyticsDashboard();
-}
-if (id === 'fanquotes') {
-  loadAdminQuotes();
-}
-if (id === 'fanpolls') {
-  loadFanPollsAdmin();
-  resetFanPollForm(false);
-}
-if (id === 'fantrivia') {
-  loadFanTriviaAdmin();
-  resetFanTriviaForm(false);
-}
-if (id === 'fandrivers') {
-  loadAdminDriverProfiles();
-}
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
-
-document.querySelectorAll('.adm-nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    switchPage(item.dataset.page);
-    /* Icon wiggle */
-    const icon = item.querySelector('.adm-icon');
-    if (icon) { icon.style.transform='scale(1.4) rotate(-8deg)'; setTimeout(()=>icon.style.transform='',350); }
-    /* Close mobile sidebar */
-    if (window.innerWidth <= 900) { sidebar.classList.remove('mobile-open'); sidebarOpen=false; }
-  });
-});
-
-/* ══ BAR CHART ══ */
-function renderBarChart() {
-  const container = document.getElementById('bar-chart');
-  if (!container) return;
-  const data = [
-    { m:'Jan', v:62 }, { m:'Feb', v:78 }, { m:'Mar', v:55 }, { m:'Apr', v:91 }, { m:'May', v:88 }
-  ];
-  const max = Math.max(...data.map(d=>d.v));
-  container.innerHTML = data.map(d => `
-    <div class="bc-col">
-      <div class="bc-wrap">
-        <div class="bc-bar" style="height:0%" data-v="₹${d.v}L" data-target="${(d.v/max)*100}%"></div>
-      </div>
-      <div class="bc-lbl">${d.m}</div>
-    </div>
-  `).join('');
-  /* Animate bars in */
-  setTimeout(() => {
-    container.querySelectorAll('.bc-bar').forEach(bar => {
-      bar.style.transition = 'height 1s cubic-bezier(.34,1.56,.64,1)';
-      bar.style.height = bar.dataset.target;
-    });
-  }, 200);
-}
-renderBarChart();
-
-/* ══ ORDERS TABLE ══ */
-let REAL_ORDERS = [];
 
 async function loadOrders() {
   try {
-    const token = getAdminToken();
-
-    if (!token) {
+    if (false) {
       REAL_ORDERS = [];
       renderOrders();
       return;
     }
 
-    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', {
+    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', { credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        }
     });
 
     if (res.status === 401 || res.status === 403) {
@@ -711,8 +367,7 @@ async function updateOrderStatus(orderId, status) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAdminToken()}`
-        },
+          },
         body: JSON.stringify({
           status,
           message: `Order status changed to ${status}`
@@ -913,12 +568,11 @@ async function updateOrderStatus(orderId) {
   try {
     showToast('⏳ Updating order status...');
 
-    const res = await fetch(`${'https://paddox-backend.onrender.com/api/orders/admin'}/${orderId}/status`, {
+    const res = await fetch(`${'https://paddox-backend.onrender.com/api/orders/admin'}/${orderId}/status`, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+        },
       body: JSON.stringify({
         status,
         message: `Order marked as ${status.replaceAll('_',' ')}`
@@ -1758,8 +1412,7 @@ async function updateProductStock(productId, stock) {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAdminToken()}`
-        },
+          },
         body: JSON.stringify({ stock: Number(stock) })
       }
     );
@@ -1812,8 +1465,7 @@ async function bulkRestockLowStock() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAdminToken()}`
-        },
+          },
         body: JSON.stringify({ targetStock: INVENTORY_RESTOCK_TARGET, threshold: INVENTORY_REORDER_POINT })
       }
     );
@@ -2024,7 +1676,7 @@ async function deleteAsset(id) {
 
   try {
 
-    const res = await fetch(`${ASSET_API_BASE}/${id}`, {
+    const res = await fetch(`${ASSET_API_BASE}/${id}`, { credentials: 'include',
       method: 'DELETE'
     });
 
@@ -2069,7 +1721,7 @@ async function saveAssetEdit() {
   try {
     showToast('✏️ Updating asset...');
 
-    const res = await fetch(`${ASSET_API_BASE}/${EDIT_ASSET_ID}`, {
+    const res = await fetch(`${ASSET_API_BASE}/${EDIT_ASSET_ID}`, { credentials: 'include',
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -2357,8 +2009,7 @@ async function loadUsers() {
       `${ADMIN_USERS_API}?limit=100`,
       {
         headers: {
-          Authorization: `Bearer ${getAdminToken()}`
-        }
+          }
       }
     );
 
@@ -2393,8 +2044,7 @@ async function toggleUserBan(userId) {
       {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${getAdminToken()}`
-        }
+          }
       }
     );
 
@@ -2425,8 +2075,7 @@ async function makeUserAdmin(userId) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAdminToken()}`
-        },
+          },
         body: JSON.stringify({ role: 'admin' })
       }
     );
@@ -2473,11 +2122,10 @@ async function deleteUserAdmin(userId) {
 
     showToast('⏳ Deleting user...');
 
-    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}`, {
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}`, { credentials: 'include',
       method: 'DELETE',
       headers: {
-        Authorization: `Bearer ${getAdminToken()}`
-      }
+        }
     });
 
     const data = await res.json().catch(() => ({}));
@@ -2503,8 +2151,8 @@ async function fetchUserPointSummary(userId) {
   if (panel) panel.innerHTML = '<div class="users-points-loading">Loading point activity…</div>';
 
   try {
-    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/fan-points/summary`, {
-      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/fan-points/summary`, { credentials: 'include',
+      headers: { }
     });
     const data = await res.json().catch(() => ({}));
 
@@ -2645,12 +2293,11 @@ async function submitUserPointAdjustment(userId) {
 
     showToast('⏳ Updating fan points...');
 
-    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/fan-points/adjust`, {
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/fan-points/adjust`, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+        },
       body: JSON.stringify({ mode, amount, reason })
     });
 
@@ -2763,12 +2410,11 @@ async function submitUserCreditAdjustment(userId) {
 
     showToast('⏳ Updating AI credits...');
 
-    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/ai-credits/adjust`, {
+    const res = await fetch(`${ADMIN_USER_POINTS_API}/${userId}/ai-credits/adjust`, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+        },
       body: JSON.stringify({ mode, amount, reason })
     });
 
@@ -3316,7 +2962,7 @@ window.ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE;
 function moderationHeaders(json = false) {
   return {
     ...(json ? { 'Content-Type': 'application/json' } : {}),
-    ...(getAdminToken() ? { Authorization: `Bearer ${getAdminToken()}` } : {})
+    
   };
 }
 
@@ -3423,7 +3069,7 @@ function moderationItemsFromFeed(posts = []) {
 }
 
 async function loadAdminModerationQueue() {
-  const res = await fetch(MODERATION_ADMIN_API, { headers: moderationHeaders() });
+  const res = await fetch(MODERATION_ADMIN_API, { credentials: 'include', headers: moderationHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) throw new Error(data.message || 'Admin moderation endpoint unavailable');
   const queue = data.data?.items || data.data?.queue || data.queue || data.items || data.data?.posts || data.posts || [];
@@ -3453,7 +3099,7 @@ function extractModerationPosts(data = {}) {
 }
 
 async function fetchModerationFeedEndpoint(url) {
-  const res = await fetch(url, { headers: moderationHeaders() });
+  const res = await fetch(url, { credentials: 'include', headers: moderationHeaders() });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) {
     throw new Error(data.message || `Feed route failed: ${res.status}`);
@@ -3632,7 +3278,7 @@ async function moderationDeleteItem(key) {
       url = `${base}/${encodeURIComponent(item.postId)}/comments/${encodeURIComponent(item.commentId || item.id)}`;
     }
     if (!url) throw new Error('Delete endpoint not available for this item');
-    const res = await fetch(url, { method:'DELETE', headers: moderationHeaders(true) });
+    const res = await fetch(url, { credentials: 'include', method:'DELETE', headers: moderationHeaders(true) });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
     ADM_MODERATION_QUEUE = ADM_MODERATION_QUEUE.filter(x => moderationKey(x) !== key);
@@ -4127,11 +3773,10 @@ async function saveProductEdit() {
         : '⏳ Updating product...'
     );
 
-    const res = await fetch(`${PRODUCT_API_BASE}/${EDIT_PRODUCT_ID}`, {
+    const res = await fetch(`${PRODUCT_API_BASE}/${EDIT_PRODUCT_ID}`, { credentials: 'include',
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+        },
       body: formData
     });
 
@@ -4408,8 +4053,7 @@ async function saveNewProduct() {
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${getAdminToken()}`
-        },
+          },
         body: formData
       }
     );
@@ -4702,8 +4346,7 @@ async function confirmDeleteProduct(id) {
       {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${getAdminToken()}`
-        }
+          }
       }
     );
 
@@ -4736,17 +4379,7 @@ function safeJsonParseAdmin(value) {
   try { return value ? JSON.parse(value) : null; } catch (err) { return null; }
 }
 
-function decodeAdminJwtPayload(token = '') {
-  try {
-    const part = String(token).split('.')[1];
-    if (!part) return null;
-    const normalized = part.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), '=');
-    return JSON.parse(atob(padded));
-  } catch (err) {
-    return null;
-  }
-}
+
 
 function pickAdminIdentityFromStorage() {
   const storageKeys = [
@@ -4778,16 +4411,7 @@ function pickAdminIdentityFromStorage() {
     if (name || email) return { name, email };
   }
 
-  const tokenPayload = decodeAdminJwtPayload(getAdminToken());
-  if (tokenPayload) {
-    const name =
-      tokenPayload.name ||
-      `${tokenPayload.firstName || ''} ${tokenPayload.lastName || ''}`.trim() ||
-      tokenPayload.username ||
-      '';
-    const email = tokenPayload.email || tokenPayload.userEmail || '';
-    if (name || email) return { name, email };
-  }
+  
 
   return { name: '', email: '' };
 }
@@ -4811,56 +4435,14 @@ function setAdminIdentityUI(identity = {}, loaded = false) {
     });
 }
 
+
 async function fetchAdminIdentity() {
-  const token = getAdminToken();
-  if (!token) return null;
-
-  const endpoints = [
-    'https://paddox-backend.onrender.com/api/auth/me',
-    'https://paddox-backend.onrender.com/api/users/me',
-    'https://paddox-backend.onrender.com/api/user/me'
-  ];
-
-  for (const url of endpoints) {
-    try {
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) continue;
-      const data = await res.json().catch(() => ({}));
-      const user = data.user || data.data?.user || data.data || data;
-      if (!user || typeof user !== 'object') continue;
-
-      const name =
-        `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
-        user.name ||
-        user.fullName ||
-        user.username ||
-        '';
-      const email = user.email || user.mail || user.userEmail || '';
-
-      if (name || email) {
-        localStorage.setItem('paddox_user', JSON.stringify(user));
-        return { name, email };
-      }
-    } catch (err) {
-      console.warn('Admin identity fetch skipped:', err.message);
-    }
-  }
-
+  try {
+    const res = await fetch('https://paddox-backend.onrender.com/api/auth/me', { credentials: 'include' });
+    const data = await res.json();
+    if (res.ok && data.user) return data.user;
+  } catch(e) {}
   return null;
-}
-
-function updateAdminTopbarDate() {
-  const sub = document.querySelector('.adm-topbar-sub');
-  if (!sub) return;
-  const dateText = new Date().toLocaleDateString('en-IN', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  });
-  sub.textContent = `${dateText} · Paddox Admin Panel`;
 }
 
 async function updateAdminIdentity() {
@@ -4889,8 +4471,7 @@ let EDIT_QUOTE_ID = null;
 function quoteAdminHeaders() {
   return {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${getAdminToken()}`
-  };
+    };
 }
 
 async function loadAdminQuotes() {
@@ -4910,7 +4491,6 @@ async function loadAdminQuotes() {
     </tr>
   `;
 
-  const token = getAdminToken();
   const endpoints = [
     { url: ADMIN_QUOTES_API, admin: true, label: 'admin' },
     { url: `${PUBLIC_QUOTES_API}?limit=200`, admin: false, label: 'public' }
@@ -4920,9 +4500,9 @@ async function loadAdminQuotes() {
 
   for (const endpoint of endpoints) {
     try {
-      const res = await fetch(endpoint.url, {
+      const res = await fetch(endpoint.url, { credentials: 'include',
         headers: endpoint.admin
-          ? { Authorization: `Bearer ${token}` }
+          ? { }
           : {}
       });
 
@@ -5686,8 +5266,7 @@ async function deleteQuote(id) {
       {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${getAdminToken()}`
-        }
+          }
       }
     );
 
@@ -5722,8 +5301,7 @@ let DRIVER_DRAG_BOUND = false;
 function driverProfileHeaders() {
   return {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${getAdminToken()}`
-  };
+    };
 }
 
 function isCloudinaryUrl(value = '') {
@@ -5814,8 +5392,8 @@ async function loadAdminDriverProfiles() {
   tbody.innerHTML = `<tr><td colspan="7" class="driver-empty-state">Loading driver profiles...</td></tr>`;
 
   try {
-    const res = await fetch(ADMIN_DRIVER_PROFILES_API, {
-      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    const res = await fetch(ADMIN_DRIVER_PROFILES_API, { credentials: 'include',
+      headers: { }
     });
 
     if (res.status === 401 || res.status === 403) {
@@ -6138,7 +5716,7 @@ async function migrateDriverProfilesToCloudinary() {
         image,
         isActive: profile.isActive !== false
       };
-      const res = await fetch(`${ADMIN_DRIVER_PROFILES_API}/${profile._id}`, {
+      const res = await fetch(`${ADMIN_DRIVER_PROFILES_API}/${profile._id}`, { credentials: 'include',
         method: 'PUT',
         headers: driverProfileHeaders(),
         body: JSON.stringify(body)
@@ -6162,9 +5740,9 @@ async function deleteDriverProfile(id) {
     const profile = REAL_DRIVER_PROFILES_ADMIN.find(p => String(p._id) === String(id));
     if (!confirm(`Delete image/profile for ${profile?.name || 'this driver'}?`)) return;
 
-    const res = await fetch(`${ADMIN_DRIVER_PROFILES_API}/${id}`, {
+    const res = await fetch(`${ADMIN_DRIVER_PROFILES_API}/${id}`, { credentials: 'include',
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${getAdminToken()}` }
+      headers: { }
     });
 
     const data = await res.json().catch(() => ({}));
@@ -6546,11 +6124,10 @@ async function deleteAdminOrder(orderId, orderLabel = '') {
   try {
     showToast('⏳ Deleting order...');
 
-    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}`, {
+    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}`, { credentials: 'include',
       method: 'DELETE',
       headers: {
-        Authorization: `Bearer ${getAdminToken()}`
-      }
+        }
     });
 
     const data = await res.json().catch(() => ({}));
@@ -6592,12 +6169,11 @@ async function updateOrderStatus(orderId, selectedStatus = null, reopenModal = t
   try {
     showToast('⏳ Updating order status...');
 
-    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}/status`, {
+    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}/status`, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+        },
       body: JSON.stringify({
         status,
         message: `Order marked as ${status.replaceAll('_',' ')}`
@@ -6836,13 +6412,7 @@ let HOME_CROP = {
   imgBox: null
 };
 
-function homeLogoTokenHeaders() {
-  const token = typeof getAdminToken === 'function' ? getAdminToken() : '';
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
-}
+function homeLogoTokenHeaders() { return { 'Content-Type': 'application/json' }; }
 
 function resetHomeLogoCrop() {
   const canvas = document.getElementById('home-logo-canvas');
@@ -6905,7 +6475,7 @@ async function loadHomeMarqueeLogosAdmin() {
   if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading marquee logos…</td></tr>';
 
   try {
-    const res = await fetch(HOME_MARQUEE_API, { headers: homeLogoTokenHeaders() });
+    const res = await fetch(HOME_MARQUEE_API, { credentials: 'include', headers: homeLogoTokenHeaders() });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'Failed to load logos');
 
@@ -7290,7 +6860,7 @@ async function saveHomeMarqueeLogo() {
   };
 
   try {
-    const res = await fetch(HOME_LOGO_EDIT_ID ? `${HOME_MARQUEE_API}/${HOME_LOGO_EDIT_ID}` : HOME_MARQUEE_API, {
+    const res = await fetch(HOME_LOGO_EDIT_ID ? `${HOME_MARQUEE_API}/${HOME_LOGO_EDIT_ID}` : HOME_MARQUEE_API, { credentials: 'include',
       method: HOME_LOGO_EDIT_ID ? 'PUT' : 'POST',
       headers: homeLogoTokenHeaders(),
       body: JSON.stringify(payload)
@@ -7313,7 +6883,7 @@ async function deleteHomeMarqueeLogo(id, name = 'logo') {
   if (!confirm(`Delete ${name} from home marquee?`)) return;
 
   try {
-    const res = await fetch(`${HOME_MARQUEE_API}/${id}`, { method:'DELETE', headers: homeLogoTokenHeaders() });
+    const res = await fetch(`${HOME_MARQUEE_API}/${id}`, { credentials: 'include', method:'DELETE', headers: homeLogoTokenHeaders() });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'Delete failed');
 
@@ -7476,7 +7046,7 @@ const ADMIN_POLL_FALLBACK_LOGOS = ADMIN_POLL_REAL_TEAM_LOGOS.map(team => ({
 function pollAdminHeaders(json = false) {
   return {
     ...(json ? { 'Content-Type': 'application/json' } : {}),
-    ...(getAdminToken() ? { Authorization: `Bearer ${getAdminToken()}` } : {})
+    
   };
 }
 
@@ -7553,7 +7123,7 @@ async function loadFanPollLogoOptions(force = false) {
     logos = publicData.data?.logos || publicData.logos || [];
 
     if (!Array.isArray(logos) || !logos.length) {
-      const adminRes = await fetch(adminApi, { headers: pollAdminHeaders() });
+      const adminRes = await fetch(adminApi, { credentials: 'include', headers: pollAdminHeaders() });
       const adminData = await adminRes.json().catch(() => ({}));
       logos = adminData.data?.logos || adminData.logos || [];
     }
@@ -7701,7 +7271,7 @@ async function loadFanPollsAdmin() {
   await loadFanPollLogoOptions();
 
   try {
-    const res = await fetch(FAN_POLLS_ADMIN_API, { headers: pollAdminHeaders() });
+    const res = await fetch(FAN_POLLS_ADMIN_API, { credentials: 'include', headers: pollAdminHeaders() });
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.success === false) {
@@ -7844,7 +7414,7 @@ async function saveFanPollAdmin() {
       resetVotes: !!document.getElementById('poll-reset-votes')?.checked
     };
 
-    const res = await fetch(id ? `${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}` : FAN_POLLS_ADMIN_API, {
+    const res = await fetch(id ? `${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}` : FAN_POLLS_ADMIN_API, { credentials: 'include',
       method: id ? 'PUT' : 'POST',
       headers: pollAdminHeaders(true),
       body: JSON.stringify(payload)
@@ -7869,7 +7439,7 @@ async function saveFanPollAdmin() {
 
 async function setFanPollActive(id) {
   try {
-    const res = await fetch(`${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}/active`, {
+    const res = await fetch(`${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}/active`, { credentials: 'include',
       method:'PUT',
       headers: pollAdminHeaders(true),
       body: JSON.stringify({ isActive:true })
@@ -7893,7 +7463,7 @@ async function deleteFanPollAdmin(id) {
   if (!confirm('Delete this poll?')) return;
 
   try {
-    const res = await fetch(`${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}`, {
+    const res = await fetch(`${FAN_POLLS_ADMIN_API}/${encodeURIComponent(id)}`, { credentials: 'include',
       method:'DELETE',
       headers: pollAdminHeaders()
     });
@@ -7928,7 +7498,7 @@ let ADMIN_FAN_TRIVIA = [];
 function triviaAdminHeaders(json = false) {
   return {
     ...(json ? { 'Content-Type': 'application/json' } : {}),
-    ...(getAdminToken() ? { Authorization: `Bearer ${getAdminToken()}` } : {})
+    
   };
 }
 
@@ -8001,7 +7571,7 @@ async function loadFanTriviaAdmin() {
   if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#777">Loading trivia…</td></tr>';
 
   try {
-    const res = await fetch(FAN_TRIVIA_ADMIN_API, { headers: triviaAdminHeaders() });
+    const res = await fetch(FAN_TRIVIA_ADMIN_API, { credentials: 'include', headers: triviaAdminHeaders() });
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.success === false) {
@@ -8117,7 +7687,7 @@ async function saveFanTriviaAdmin() {
       isActive
     };
 
-    const res = await fetch(id ? `${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}` : FAN_TRIVIA_ADMIN_API, {
+    const res = await fetch(id ? `${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}` : FAN_TRIVIA_ADMIN_API, { credentials: 'include',
       method: id ? 'PUT' : 'POST',
       headers: triviaAdminHeaders(true),
       body: JSON.stringify(payload)
@@ -8138,7 +7708,7 @@ async function saveFanTriviaAdmin() {
 
 async function toggleFanTriviaActive(id, makeActive = true) {
   try {
-    const res = await fetch(`${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}`, {
+    const res = await fetch(`${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}`, { credentials: 'include',
       method: 'PUT',
       headers: triviaAdminHeaders(true),
       body: JSON.stringify({ isActive: !!makeActive })
@@ -8155,7 +7725,7 @@ async function toggleFanTriviaActive(id, makeActive = true) {
 async function deleteFanTriviaAdmin(id) {
   if (!confirm('Delete this trivia question?')) return;
   try {
-    const res = await fetch(`${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}`, {
+    const res = await fetch(`${FAN_TRIVIA_ADMIN_API}/${encodeURIComponent(id)}`, { credentials: 'include',
       method:'DELETE',
       headers: triviaAdminHeaders()
     });
@@ -8638,12 +8208,10 @@ function adminNotifPrimeFromExistingOrders() {
 }
 
 async function adminNotifPollOrders() {
-  const token = getAdminToken();
-  if (!token) return;
 
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', {
-      headers: { Authorization: `Bearer ${token}` }
+    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', { credentials: 'include',
+      headers: { }
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return;
@@ -9276,8 +8844,8 @@ function renderCoupons() {
 
 async function loadCoupons() {
   try {
-    const res = await fetch(`${COUPON_API_BASE}/admin`, {
-      headers: { Authorization: `Bearer ${getAdminToken()}` }
+    const res = await fetch(`${COUPON_API_BASE}/admin`, { credentials: 'include',
+      headers: { }
     });
     const data = await res.json().catch(() => ({}));
 
@@ -9492,12 +9060,11 @@ async function saveCoupon() {
     const url = EDIT_COUPON_ID ? `${COUPON_API_BASE}/admin/${EDIT_COUPON_ID}` : `${COUPON_API_BASE}/admin`;
     const method = EDIT_COUPON_ID ? 'PUT' : 'POST';
 
-    const res = await fetch(url, {
+    const res = await fetch(url, { credentials: 'include',
       method,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+        },
       body: JSON.stringify(payload)
     });
 
@@ -9517,12 +9084,11 @@ async function toggleCouponStatus(id) {
   if (!coupon) return showToast('❌ Coupon not found');
 
   try {
-    const res = await fetch(`${COUPON_API_BASE}/admin/${id}`, {
+    const res = await fetch(`${COUPON_API_BASE}/admin/${id}`, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAdminToken()}`
-      },
+        },
       body: JSON.stringify({ isActive: coupon.isActive === false })
     });
     const data = await res.json().catch(() => ({}));
@@ -9538,9 +9104,9 @@ async function deleteCoupon(id) {
   if (!confirm('Delete this coupon code?')) return;
 
   try {
-    const res = await fetch(`${COUPON_API_BASE}/admin/${id}`, {
+    const res = await fetch(`${COUPON_API_BASE}/admin/${id}`, { credentials: 'include',
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${getAdminToken()}` }
+      headers: { }
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'Delete failed');
@@ -9560,7 +9126,7 @@ async function deleteCoupon(id) {
   window.REAL_PRODUCTS = REAL_PRODUCTS;
   window.REAL_ASSETS = REAL_ASSETS;
 
-  function assetToken() { return getAdminToken?.() || ''; }
+  function assetToken() { return ''; }
   function assetMoney(n) { return `₹${Number(n || 0).toLocaleString('en-IN')}`; }
   function assetEsc(v='') { return String(v ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
   function assetFileUrl(asset, kind='desktop') {
@@ -9667,9 +9233,9 @@ async function deleteCoupon(id) {
       formData.append('description', document.getElementById('asset-description')?.value || 'Uploaded from PADDOX Admin');
 
       showToast('⬆ Uploading wallpaper...');
-      const res = await fetch(`${ASSET_API_BASE}/upload`, {
+      const res = await fetch(`${ASSET_API_BASE}/upload`, { credentials: 'include',
         method: 'POST',
-        headers: { Authorization: `Bearer ${assetToken()}` },
+        headers: { },
         body: formData
       });
       const data = await res.json().catch(() => ({}));
@@ -9748,9 +9314,9 @@ async function deleteCoupon(id) {
       formData.append('description', document.getElementById('asset-description')?.value || '');
 
       showToast('⏳ Updating wallpaper asset...');
-      const res = await fetch(`${ASSET_API_BASE}/${encodeURIComponent(id)}`, {
+      const res = await fetch(`${ASSET_API_BASE}/${encodeURIComponent(id)}`, { credentials: 'include',
         method: 'PUT',
-        headers: { Authorization: `Bearer ${assetToken()}` },
+        headers: { },
         body: formData
       });
       const data = await res.json().catch(() => ({}));
@@ -10155,3 +9721,72 @@ async function deleteCoupon(id) {
     });
   });
 })();
+// --- COLLECTIBLES ADMIN LOGIC ---
+const COLLECTIBLES_API = `${API_BASE}/collectibles`;
+
+async function loadCollectibles() {
+  try {
+    const res = await fetch(`${COLLECTIBLES_API}/definitions`, { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to load definitions');
+    
+    const tbody = document.getElementById('collectibles-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = data.data.map(def => `
+      <tr>
+        <td><strong>${def.name}</strong></td>
+        <td>${def.tier}</td>
+        <td>${def.maxSupply || 'Unlimited'}</td>
+        <td>${def.issuedCount}</td>
+        <td><span class="sb ${def.isActive ? 's-sh' : 's-out'}">${def.isActive ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <button class="adm-btn-ghost" onclick="issueCollectible('${def.id}')">Issue</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Error loading collectibles:', err);
+  }
+}
+
+async function issueCollectible(defId) {
+  const userId = prompt('Enter User ID to issue to:');
+  if (!userId) return;
+  const reason = prompt('Enter mandatory reason for issuance:');
+  if (!reason) return;
+  
+  try {
+    const res = await fetch(`${COLLECTIBLES_API}/issue`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, collectibleDefinitionId: defId, evidenceType: 'admin_grant', evidenceData: { reason } })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert('Collectible issued successfully!');
+      loadCollectibles();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function openCollectibleModal() {
+  alert('Create Collectible Modal would open here.');
+}
+
+// Hook into page load
+document.addEventListener('DOMContentLoaded', () => {
+  const navItems = document.querySelectorAll('.adm-nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if (item.dataset.page === 'collectibles') {
+        loadCollectibles();
+      }
+    });
+  });
+});

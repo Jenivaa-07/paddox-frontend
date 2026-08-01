@@ -124,6 +124,9 @@
         <div class="adm-nav-item" data-page="fanpolls">
           <span class="adm-icon animate-icon"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-polls"></use></svg></span> Fan Polls
         </div>
+        <div class="adm-nav-item" data-page="collectibles">
+          <span class="adm-icon animate-icon">🏆</span> Collectibles
+        </div>
         <div class="adm-nav-item" data-page="fantrivia">
           <span class="adm-icon animate-icon"><svg class="pdx-svg" aria-hidden="true"><use href="#pdx-i-trivia"></use></svg></span> Fan Trivia
         </div>
@@ -908,6 +911,34 @@
         </div>
 
 
+        <!-- ── COLLECTIBLES ── -->
+        <div class="adm-page" id="adm-collectibles">
+          <section class="products-command-card reveal-up">
+            <div class="products-command-copy">
+              <div class="products-live-kicker"><span></span> PADDOX COLLECTIBLES</div>
+              <h2>DIGITAL ACHIEVEMENT COMMAND CENTER</h2>
+              <p>Create digital collectible definitions, issue achievements manually, upload validated Cloudinary artwork, and manage public certificates.</p>
+            </div>
+            <button class="products-command-btn" onclick="openCollectibleModal()">+ CREATE DEFINITION</button>
+          </section>
+
+          <div class="data-table-wrap products-table-wrap reveal-up delay-1">
+            <table class="data-table products-table">
+              <thead>
+                <tr>
+                  <th>Definition Name</th>
+                  <th>Tier</th>
+                  <th>Supply</th>
+                  <th>Issued</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="collectibles-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        
         <!-- ── FAN TRIVIA ── -->
         <div class="adm-page" id="adm-fantrivia">
           <section class="trivia-command-hero reveal-up">

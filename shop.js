@@ -57,9 +57,6 @@ function canonicalShopTeam(value = '') {
 
 function shopToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('accessToken') ||
     ''
   );
 }
@@ -197,7 +194,7 @@ async function applyCheckoutCoupon() {
       applyBtn.textContent = 'Checking...';
     }
 
-    const res = await fetch(`${COUPON_API_BASE}/validate`, {
+    const res = await fetch(`${COUPON_API_BASE}/validate`, { credentials: 'include',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, orderTotal: Math.max(0, getCartOriginalSubtotal() - getCartProductDiscount()) })
@@ -344,10 +341,9 @@ async function loadShopWishlist() {
       return;
     }
 
-    const res = await fetch(WISHLIST_API_BASE, {
+    const res = await fetch(WISHLIST_API_BASE, { credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        }
     });
 
     const data = await res.json().catch(() => ({}));
@@ -392,8 +388,7 @@ async function toggleWishlist(productId) {
       {
         method: isInWishlist ? 'DELETE' : 'POST',
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          }
       }
     );
 
@@ -1152,9 +1147,6 @@ document.getElementById('continue-btn')?.addEventListener('click', () => toggleC
 
 function getCheckoutToken() {
   return (
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('accessToken') ||
     ''
   );
 }
@@ -1235,8 +1227,8 @@ async function getSavedCheckoutAddress() {
   if (!token) return savedAddress;
 
   try {
-    const res = await fetch(SHOP_USER_PROFILE_API, {
-      headers: { Authorization: `Bearer ${token}` }
+    const res = await fetch(SHOP_USER_PROFILE_API, { credentials: 'include',
+      headers: { }
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) return savedAddress;
@@ -1496,12 +1488,11 @@ async function submitCheckoutForm(e) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span>Processing order...</span><span class="pdx-loading-dot" aria-hidden="true"></span>';
 
-    const orderRes = await fetch(ORDER_API_BASE, {
+    const orderRes = await fetch(ORDER_API_BASE, { credentials: 'include',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
+        },
       body: JSON.stringify({
         items: cart.map(item => ({
           product: item.id,

@@ -77,24 +77,16 @@ function demoLogin() {
 }
 
 async function authFetch(path, options = {}) {
-  const sessionId = localStorage.getItem('paddox_session_id') || '';
   const existingHeaders = options.headers || {};
-  const hasAuthHeader = Object.keys(existingHeaders).some(k => k.toLowerCase() === 'authorization');
-  const accessToken = window.TokenManager?.getAccess?.() || profileToken?.() || '';
 
   const res = await fetch(`${PADDOX_API_BASE}${path}`, {
     credentials: 'include',
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(accessToken && !hasAuthHeader ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...(sessionId ? { 'X-Paddox-Session-Id': sessionId } : {}),
       ...existingHeaders
     }
   });
-
-  const responseSessionId = res.headers.get('X-Paddox-Session-Id');
-  if (responseSessionId) localStorage.setItem('paddox_session_id', responseSessionId);
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.success === false) {
@@ -152,7 +144,7 @@ function handleAuthSuccess(data) {
     return;
   }
   if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
-  TokenManager.setAccess(data.data.accessToken);
+  /* Cookie is set by the backend response */
   loginUser(data.data.user);
 }
 
@@ -215,7 +207,7 @@ async function verifyTwoFactorLoginCode() {
     });
     cancelTwoFactorLogin();
     if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
-    TokenManager.setAccess(data.data.accessToken);
+    /* Cookie is set by the backend response */
     loginUser(data.data.user);
     showToast('🔥 Secure login successful');
   } catch (err) {
@@ -239,18 +231,13 @@ const PADDOX_API_BASE = 'https://paddox-backend.onrender.com/api';
    those names here because that stops the whole account page script. */
 window.TokenManager = window.TokenManager || (typeof TokenManager !== 'undefined' ? TokenManager : {
   getAccess() {
-    return localStorage.getItem('token') || localStorage.getItem('paddox_access_token') || localStorage.getItem('accessToken') || '';
+    return '';
   },
   setAccess(token = '') {
-    if (!token) return;
-    localStorage.setItem('token', token);
-    localStorage.setItem('paddox_access_token', token);
-    localStorage.setItem('accessToken', token);
+    /* Cookie-only auth: tokens are set by the backend via HttpOnly cookies */
   },
   clearAccess() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('paddox_access_token');
-    localStorage.removeItem('accessToken');
+    /* Cookie-only auth: no localStorage tokens to clear */
   }
 });
 
@@ -271,13 +258,13 @@ window.AuthAPI = window.AuthAPI || (typeof AuthAPI !== 'undefined' ? AuthAPI : {
     const token = window.TokenManager.getAccess();
     return authFetch('/auth/logout', {
       method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: token ? { } : {}
     }).catch(() => ({ success: true }));
   },
   getMe() {
     const token = window.TokenManager.getAccess();
     return authFetch('/auth/me', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: token ? { } : {}
     });
   }
 });
@@ -347,7 +334,7 @@ async function handleForgotPassword() {
   try {
     showToast('📩 Sending reset email...');
 
-    const res = await fetch(`${PADDOX_API_BASE}/auth/forgot-password`, {
+    const res = await fetch(`${PADDOX_API_BASE}/auth/forgot-password`, { credentials: 'include',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: cleanEmail })
@@ -602,30 +589,14 @@ document
 
 /* AUTO LOGIN */
 (async function restoreSession() {
-
-  const token =
-    TokenManager.getAccess();
-
-  if (!token) return;
-
+  /* Cookie-based session restoration — no token check needed */
   try {
-
-    const data =
-      await AuthAPI.getMe();
-
-    if (
-      data.success &&
-      data.data
-    ) {
-
+    const data = await AuthAPI.getMe();
+    if (data.success && data.data) {
       loginUser(data.data);
     }
-
   } catch (err) {
-
     console.error(err);
-
-    TokenManager.clearAccess();
   }
 })();
 /* ══ ACCOUNT NAV PAGES ══ */
@@ -731,14 +702,9 @@ function updateWishlistSummaryStrip() {
 
 async function loadWishlist() {
   try {
-    const token = profileToken();
-
-    if (!token) return;
-
-    const res = await fetch(ACCOUNT_WISHLIST_API, {
+    const res = await fetch(ACCOUNT_WISHLIST_API, { credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        }
     });
 
     const data = await res.json().catch(() => ({}));
@@ -763,17 +729,12 @@ async function loadWishlist() {
 
 async function removeWishlistProduct(productId) {
   try {
-    const token = profileToken();
-
-    if (!token) return;
-
     const res = await fetch(
       `${ACCOUNT_WISHLIST_API}/remove/${productId}`,
       {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          }
       }
     );
 
@@ -953,14 +914,9 @@ function assetDownloadedDate(asset) {
 
 async function loadDownloads() {
   try {
-    const token = profileToken();
-
-    if (!token) return;
-
-    const res = await fetch(ACCOUNT_DOWNLOADS_API, {
+    const res = await fetch(ACCOUNT_DOWNLOADS_API, { credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        }
     });
 
     const data = await res.json().catch(() => ({}));
@@ -1213,17 +1169,17 @@ async function downloadAccountAsset(assetId, preferredFormat = '') {
       showToast(`✅ Downloading ${name}`);
 
       /* Best-effort backend sync for free downloads. Never block the user. */
-      fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download?format=${encodeURIComponent(format)}`, {
+      fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download?format=${encodeURIComponent(format)}`, { credentials: 'include',
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { }
       }).catch(() => null);
 
       return;
     }
 
-    const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download?format=${encodeURIComponent(format)}`, {
+    const res = await fetch(`${ACCOUNT_ASSETS_API}/${assetId}/download?format=${encodeURIComponent(format)}`, { credentials: 'include',
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { }
     });
 
     const data = await res.json().catch(() => ({}));
@@ -2028,12 +1984,11 @@ async function saveNotifications(options = {}) {
     if (!silent) showToast('⏳ Saving notification settings...');
     setNotificationStatus('Saving live changes...', 'saving');
 
-    const res = await fetch(USER_NOTIFICATION_API, {
+    const res = await fetch(USER_NOTIFICATION_API, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${profileToken()}`
-      },
+        },
       body: JSON.stringify(payload)
     });
 
@@ -2247,23 +2202,19 @@ const USER_AVATAR_API =
 
 function profileToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('accessToken') ||
     ''
   );
 }
 
 
 function hasProfileToken() {
-  return !!String(profileToken() || '').trim();
+  return true; /* Cookie-based auth — always attempt requests */
 }
 
 function scheduleSecuritySessionsRefresh(delay = 650, showFeedback = false) {
   window.clearTimeout(window.__paddoxSecuritySessionTimer);
   window.__paddoxSecuritySessionTimer = window.setTimeout(() => {
-    if (!hasProfileToken()) {
-      console.log('PADDOX sessions sync skipped until auth token is ready');
+    if (false) { /* Cookie-auth: always attempt session sync */
       return;
     }
     refreshSecuritySessions(showFeedback);
@@ -2384,11 +2335,10 @@ async function uploadProfileAvatar(file) {
     const formData = new FormData();
     formData.append('avatar', file);
 
-    const res = await fetch(USER_AVATAR_API, {
+    const res = await fetch(USER_AVATAR_API, { credentials: 'include',
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${token}`
-      },
+        },
       body: formData
     });
 
@@ -2490,14 +2440,9 @@ function hydrateProfile(user = {}) {
 
 async function loadAccountProfile() {
   try {
-    const token = profileToken();
-
-    if (!token) return;
-
-    const res = await fetch(USER_PROFILE_API, {
+    const res = await fetch(USER_PROFILE_API, { credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        }
     });
 
     const data = await res.json();
@@ -2528,12 +2473,11 @@ async function saveProfile(){
   try {
     showToast('⏳ Saving profile...');
 
-    const res = await fetch(USER_PROFILE_API, {
+    const res = await fetch(USER_PROFILE_API, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${profileToken()}`
-      },
+        },
       body: JSON.stringify({
         firstName,
         lastName,
@@ -2573,12 +2517,11 @@ async function saveAddress() {
       }
     };
 
-    const res = await fetch(USER_PROFILE_API, {
+    const res = await fetch(USER_PROFILE_API, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${profileToken()}`
-      },
+        },
       body: JSON.stringify(body)
     });
 
@@ -2605,12 +2548,11 @@ async function savePreferences() {
     const favouriteTeam = getSelectedTeam();
     const favouriteDriver = document.getElementById('pf-driver')?.value || '';
 
-    const res = await fetch(USER_PREF_API, {
+    const res = await fetch(USER_PREF_API, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${profileToken()}`
-      },
+        },
       body: JSON.stringify({
         favouriteTeam,
         favouriteDriver,
@@ -2666,9 +2608,6 @@ const ACCOUNT_ORDERS_API =
 
 function getUserToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('accessToken') ||
     ''
   );
 }
@@ -2706,10 +2645,9 @@ async function loadMyOrders() {
 
     if (!token) return;
 
-    const res = await fetch(ACCOUNT_ORDERS_API, {
+    const res = await fetch(ACCOUNT_ORDERS_API, { credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        }
     });
 
     const data = await res.json();
@@ -3889,9 +3827,9 @@ function openOrderReceipt(orderId) {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const res = await fetch(USER_AVATAR_API, {
+      const res = await fetch(USER_AVATAR_API, { credentials: 'include',
         method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { },
         body: formData
       });
 
@@ -4059,7 +3997,7 @@ async function submitSecurityPassword() {
     const token = profileToken();
     await authFetch('/users/security/password', {
       method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { },
       body: JSON.stringify({ currentPassword: current, newPassword: pass })
     });
 
@@ -4140,7 +4078,7 @@ async function sendSecurityTwoFactorCode() {
     showToast('📩 Sending security code...');
     const data = await authFetch('/users/security/2fa/send', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { },
       body: JSON.stringify({ currentPassword, action: pendingTwoFactorAction })
     });
     document.getElementById('twofa-code-row')?.classList.add('show');
@@ -4162,7 +4100,7 @@ async function verifySecurityTwoFactorCode() {
     const token = profileToken();
     const data = await authFetch('/users/security/2fa/verify', {
       method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { },
       body: JSON.stringify({ code })
     });
     if (data.data?.user) {
@@ -4226,7 +4164,7 @@ async function refreshSecuritySessions(showFeedback = false) {
     }
 
     const data = await authFetch('/users/security/sessions', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { }
     });
 
     const sessions = data.data?.sessions || [];
@@ -4334,7 +4272,7 @@ async function revokeSecuritySession(sessionId) {
     const token = profileToken();
     await authFetch(`/users/security/sessions/${encodeURIComponent(sessionId)}`, {
       method: 'DELETE',
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: token ? { } : {}
     });
     showToast('✅ Session revoked');
     scheduleSecuritySessionsRefresh(300, true);

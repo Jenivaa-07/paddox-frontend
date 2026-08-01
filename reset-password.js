@@ -41,7 +41,7 @@
     setStatus('Securing your PADDOX account...');
 
     try {
-      const res = await fetch(`${API_BASE}/reset-password/${encodeURIComponent(token)}`, {
+      const res = await fetch(`${API_BASE}/reset-password/${encodeURIComponent(token)}`, { credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })

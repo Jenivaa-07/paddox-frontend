@@ -1,25 +1,52 @@
 /* ============================================================
    PADDOX Frontend — API Configuration
+   Phase 7: Authentication via HttpOnly cookies only.
+   Access and refresh tokens are never stored in localStorage
+   or sessionStorage. All requests use credentials:'include'.
    ============================================================ */
 const API_BASE = 'https://paddox-backend.onrender.com/api';
 const SOCKET_URL = 'https://paddox-backend.onrender.com';
 
-/* ── Token Management ── */
-const TokenManager = {
-  getAccess  : ()      => localStorage.getItem('paddox_access_token'),
-  setAccess  : (token) => localStorage.setItem('paddox_access_token', token),
-  clearAccess: ()      => localStorage.removeItem('paddox_access_token'),
+/*
+ * SECURITY NOTE (Vercel + Render cross-site arrangement):
+ * The frontend (paddox.vercel.app) and backend (paddox-backend.onrender.com)
+ * are on different origins. The backend sets cookies with SameSite=None;Secure
+ * in production. This requires the browser to allow third-party cookies.
+ * Modern browsers may block these in Incognito or with strict privacy settings.
+ * A same-site arrangement (custom domain proxied to the same apex domain) is
+ * the recommended long-term solution. This limitation is documented in OPERATIONS.md.
+ */
+
+let cachedCsrfToken = null;
+
+const fetchCsrfToken = async () => {
+  if (cachedCsrfToken) return cachedCsrfToken;
+  try {
+    const res = await fetch(`${API_BASE}/auth/csrf-token`, { credentials: 'include' });
+    const data = await res.json();
+    if (data.csrfToken) {
+      cachedCsrfToken = data.csrfToken;
+    }
+  } catch (err) {
+    console.warn('Failed to fetch CSRF token', err);
+  }
+  return cachedCsrfToken;
 };
 
-/* ── Base API Request ── */
+/* 🏆 Base API Request 🏆 */
 const apiRequest = async (endpoint, options = {}) => {
-  const token = TokenManager.getAccess();
+  const method = (options.method || 'GET').toUpperCase();
+  
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    await fetchCsrfToken();
+  }
+
   const config = {
     ...options,
-    credentials: 'include',
+    credentials: 'include',   // Always include cookies - no localStorage token
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(cachedCsrfToken ? { 'x-csrf-token': cachedCsrfToken } : {}),
       ...options.headers,
     },
   };
@@ -28,18 +55,17 @@ const apiRequest = async (endpoint, options = {}) => {
   }
   const res = await fetch(`${API_BASE}${endpoint}`, config);
 
-  /* Auto-refresh token on 401 */
+  /* Auto-refresh on 401 — backend sets new accessToken cookie via /auth/refresh */
   if (res.status === 401 && !endpoint.includes('/auth/refresh')) {
     const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST', credentials: 'include',
     });
     if (refreshRes.ok) {
-      const data = await refreshRes.json();
-      TokenManager.setAccess(data.data.accessToken);
-      config.headers.Authorization = `Bearer ${data.data.accessToken}`;
+      /* Backend has already rotated and set the new accessToken cookie.
+       * No token value is read or stored here. */
       return fetch(`${API_BASE}${endpoint}`, config).then(r => r.json());
     } else {
-      TokenManager.clearAccess();
+      /* Session expired — redirect to account page */
       window.location.href = '/account.html';
       return;
     }
@@ -138,12 +164,22 @@ const UserAPI = {
   getDownloads      : ()     => apiRequest('/users/downloads'),
 };
 
+/* ── Collectibles API ── */
+const CollectibleAPI = {
+  getCatalogue  : ()     => apiRequest('/collectibles'),
+  getOne        : (slug) => apiRequest(`/collectibles/${slug}`),
+  getMyCollection: ()    => apiRequest('/collectibles/me'),
+  getMyItem     : (id)   => apiRequest(`/collectibles/me/${id}`),
+  toggleSharing : (id, shareEnabled) => apiRequest(`/collectibles/me/${id}/sharing`, { method:'PATCH', body:{ shareEnabled } }),
+  verifyCertificate: (publicCertificateId, fingerprint) =>
+    apiRequest(`/collectibles/verify/${publicCertificateId}${fingerprint ? `?fingerprint=${encodeURIComponent(fingerprint)}` : ''}`),
+};
+
 /* ── WebSocket Connection ── */
 const connectSocket = () => {
   if (typeof io === 'undefined') return null;
-  const token = TokenManager.getAccess();
+  /* Phase 7: No token passed in socket auth — relies on credentialed cookie session */
   const socket = io(SOCKET_URL, {
-    auth       : { token },
     withCredentials: true,
     transports : ['websocket','polling'],
   });
@@ -184,12 +220,29 @@ const initRazorpayPayment = async (orderId, userInfo, onSuccess, onError) => {
   }
 };
 
+/*
+ * MIGRATION: Purge all legacy auth tokens from localStorage on first load.
+ * Authentication is now handled exclusively via HttpOnly cookies.
+ */
+(function migrateTokenStorage() {
+  if (typeof localStorage !== 'undefined') {
+    const authKeys = ['token', 'paddox_access_token', 'accessToken'];
+    authKeys.forEach(key => {
+      if (localStorage.getItem(key)) {
+        localStorage.removeItem(key);
+        console.info(`[PADDOX] Removed legacy "${key}" from localStorage.`);
+      }
+    });
+  }
+})();
+
 /* Export all APIs */
 window.PaddoxAPI = {
   auth: AuthAPI, product: ProductAPI, order: OrderAPI,
   cart: CartAPI, wishlist: WishlistAPI, payment: PaymentAPI,
   f1: F1API, asset: AssetAPI, fan: FanAPI, user: UserAPI,
-  connectSocket, TokenManager,
+  collectible: CollectibleAPI,
+  connectSocket,
 };
 
-console.log('🏎️ Paddox API client loaded');
+console.log('🏎️ Paddox API client loaded (cookie-auth mode)');

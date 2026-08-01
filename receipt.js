@@ -10,9 +10,6 @@ const BRAND_ICON_PATH = 'assets/paddox-logo-icon-official.png?v=18_0_14';
 
 function receiptToken() {
   return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('paddox_access_token') ||
-    localStorage.getItem('accessToken') ||
     ''
   );
 }
@@ -91,8 +88,8 @@ async function loadReceipt() {
   }
 
   try {
-    const res = await fetch(`${RECEIPT_ORDER_API}/${encodeURIComponent(orderId)}`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const res = await fetch(`${RECEIPT_ORDER_API}/${encodeURIComponent(orderId)}`, { credentials: 'include',
+      headers: { }
     });
 
     const data = await res.json().catch(() => ({}));
