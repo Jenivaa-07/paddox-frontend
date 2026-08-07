@@ -52,7 +52,7 @@ class VoiceAssistant {
           </div>
         </div>
         
-        <button id="voice-fab-btn" aria-label="Open Voice Assistant" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: #e10600; color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9998; display: flex; justify-content: center; align-items: center; transition: transform 0.2s;">
+        <button id="voice-fab-btn" aria-label="Open Voice Assistant" style="display: none !important;">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
