@@ -221,6 +221,7 @@
         <div class="acc-nav-item" data-page="wishlist"><span class="acc-icon acc-wishlist-icon" aria-hidden="true"></span> Wishlist</div>
         <div class="acc-nav-item" data-page="downloads"><span class="acc-icon acc-downloads-icon" aria-hidden="true"></span> Downloads</div>
         <div class="acc-nav-item" data-page="collection"><span class="acc-icon acc-collection-icon" aria-hidden="true"></span> My Collection</div>
+        <div class="acc-nav-item" data-page="fantasy"><span class="acc-icon acc-fantasy-icon" aria-hidden="true">⭐</span> Fantasy Team</div>
         <div class="acc-nav-divider"></div>
         <div class="acc-nav-item" data-page="profile"><span class="acc-icon acc-profile-icon" aria-hidden="true"></span> Profile Settings</div>
         <div class="acc-nav-item" data-page="notifications"><span class="acc-icon acc-notifications-icon" aria-hidden="true"></span> Notifications</div>
@@ -403,6 +404,22 @@
               <h3>No collectibles yet</h3>
               <p>Earn PADDOX collectibles by completing achievements and participating in events.</p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FANTASY TEAM -->
+      <div class="acc-page" id="page-fantasy">
+        <div class="page-header">
+          <div class="page-label">AI Predictions</div>
+          <div class="page-title">FANTASY <span class="accent">TEAM</span></div>
+        </div>
+        <div class="set-card reveal-up" style="margin-top: 20px;">
+          <div class="set-title"><span class="section-mini-icon" aria-hidden="true">⭐</span> My AI Predicted Lineup</div>
+          <p>Get data-driven fantasy picks powered by SHAP values and ML models.</p>
+          <div id="fantasy-prediction-results" style="margin-top: 15px;">
+            <button class="save-btn" onclick="fetchFantasyPredictions()">Generate AI Predictions</button>
+            <div id="fantasy-results-container" style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;"></div>
           </div>
         </div>
       </div>

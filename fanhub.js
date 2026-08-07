@@ -3579,12 +3579,55 @@ function renderFeedComments(post = {}) {
   `;
 }
 
+let CURRENT_SENTIMENT_FILTER = 'all';
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.sent-filter').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.sent-filter').forEach(b => b.classList.remove('on'));
+      e.target.classList.add('on');
+      CURRENT_SENTIMENT_FILTER = e.target.dataset.sent;
+      renderFanFeed();
+    });
+  });
+});
+
+function getSentimentBadgeHTML(text) {
+  const t = (text || '').toLowerCase();
+  let sent = 'neutral';
+  let badge = 'Neutral 😐';
+  let color = '#aaa';
+  let bg = 'rgba(255,255,255,0.05)';
+  
+  if (t.includes('love') || t.includes('great') || t.includes('amazing') || t.includes('good') || t.includes('win') || t.includes('p1') || t.includes('fast') || t.includes('incredible')) {
+    sent = 'positive';
+    badge = 'Positive 😊';
+    color = '#00ff88';
+    bg = 'rgba(0,255,0,0.1)';
+  } else if (t.includes('hate') || t.includes('terrible') || t.includes('bad') || t.includes('crash') || t.includes('slow') || t.includes('dnf') || t.includes('poor')) {
+    sent = 'negative';
+    badge = 'Negative 😠';
+    color = '#ff4444';
+    bg = 'rgba(255,0,0,0.1)';
+  }
+  
+  return {
+    sent,
+    html: `<span style="font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; background: ${bg}; color: ${color}; border: 1px solid ${color}40; margin-left: 8px;">${badge}</span>`
+  };
+}
+
 function renderFanFeed(posts = LIVE_FEED_POSTS) {
   const feedEl = document.getElementById('live-feed');
 
   if (!feedEl) return;
+  
+  const filteredPosts = posts.filter(post => {
+    if (CURRENT_SENTIMENT_FILTER === 'all') return true;
+    return getSentimentBadgeHTML(post.text).sent === CURRENT_SENTIMENT_FILTER;
+  });
 
-  if (!posts.length) {
+  if (!filteredPosts.length) {
     updateFanPointsDock({ posts: 0 });
     feedEl.innerHTML = `
       <div class="feed-empty fh-action-empty">
@@ -3596,7 +3639,7 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
     return;
   }
 
-  updateFanPointsDock({ posts: posts.length });
+  updateFanPointsDock({ posts: filteredPosts.length });
 
   feedEl.innerHTML = posts.map(post => {
     const user = post.user || {};
@@ -3615,6 +3658,8 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
     const liked = !!post.likedByCurrentUser;
     const canDeletePost = !!post.canDeletePost;
 
+    const sentiment = getSentimentBadgeHTML(post.text);
+
     return `
       <div class="feed-item premium" data-post-id="${postId}">
         <div class="feed-av">
@@ -3631,6 +3676,7 @@ function renderFanFeed(posts = LIVE_FEED_POSTS) {
             </div>
             <div class="feed-head-right">
               <div class="feed-time">${timeAgo(post.createdAt)}</div>
+              ${sentiment.html}
               ${canDeletePost ? `<button class="feed-delete-btn feed-post-delete-btn" type="button" title="Delete post" aria-label="Delete post" onclick="deleteFanPost('${postId}')"><span class="feed-delete-icon" aria-hidden="true"></span></button>` : ''}
             </div>
           </div>

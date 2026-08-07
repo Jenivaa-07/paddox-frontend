@@ -10,6 +10,7 @@
     rel="stylesheet"
   />
   <link rel="stylesheet" href="assets/css/voice-assistant.css" />
+  <link rel="stylesheet" href="chatbot.css">
 </head>
 <body class="page-transition-init">
 
@@ -249,6 +250,21 @@
 
       <div class="products-grid" id="products-grid">
         <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ PERSONALISED HIGHLIGHTS ░░ -->
+  <section class="section highlights-section" id="highlights">
+    <div class="container">
+      <div class="section-head">
+        <div class="reveal-up">
+          <div class="section-label">AI Curated</div>
+          <h2 class="section-title">YOUR <span class="accent">HIGHLIGHTS</span></h2>
+        </div>
+      </div>
+      <div class="highlights-carousel" id="highlights-carousel" style="display: flex; gap: 15px; overflow-x: auto; padding: 20px 0;">
+        <div style="color:var(--muted)">Loading personalised video highlights...</div>
       </div>
     </div>
   </section>
@@ -562,5 +578,6 @@
 <script src="data/paddoxTracks.generated.js?v=H3_4C_4"></script>
 <script src="home.js?v=H4_0_24"></script>
 <script src="assets/js/voice-assistant.js"></script>
+<script src="chatbot.js"></script>
 </body>
 </html>

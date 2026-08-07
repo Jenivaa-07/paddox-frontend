@@ -288,9 +288,47 @@ async function loadShopProducts() {
     renderProducts();
     updateShopHeroStats();
     syncWishlistButtons();
+    loadAIRecommendations();
   } catch (err) {
     console.error(err);
     showToast('Failed to load products');
+  }
+}
+
+async function loadAIRecommendations() {
+  const wrap = document.getElementById('ai-recommendations-wrap');
+  const grid = document.getElementById('ai-products-grid');
+  
+  if (!wrap || !grid || PRODUCTS.length === 0) return;
+  
+  try {
+    const res = await fetch(`https://paddox-backend.onrender.com/api/ai/recommendations`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    
+    if (!res.ok) throw new Error('AI backend not available');
+    const data = await res.json();
+    let aiProducts = [];
+    if (data.products && data.products.length > 0) {
+       aiProducts = PRODUCTS.filter(p => data.products.includes(p.id)).slice(0, 4);
+    }
+    
+    if (aiProducts.length > 0) {
+      grid.innerHTML = aiProducts.map((p, i) => cardHTML(p, i)).join('');
+      bindCardEvents(grid);
+      wrap.style.display = 'block';
+    } else {
+      throw new Error('No AI match');
+    }
+  } catch (e) {
+    console.warn("AI Recommendations Fallback:", e);
+    // Fallback: Take 4 top rated products as "AI Picks" for demonstration
+    const fallbackProducts = [...PRODUCTS].sort((a,b) => b.rating - a.rating).slice(0, 4);
+    if (fallbackProducts.length > 0) {
+      grid.innerHTML = fallbackProducts.map((p, i) => cardHTML(p, i)).join('');
+      bindCardEvents(grid);
+      wrap.style.display = 'block';
+    }
   }
 }
 

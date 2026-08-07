@@ -133,7 +133,7 @@ function updateHomeSeasonRaceCount(list = HOME_F1.schedule) {
 }
 
 function homeTeamLogoSrc(slug = '') {
-  return `assets/teams/${slug}.svg`;
+  return `assets/teams/${slug}.webp`;
 }
 
 window.homeLogoFallback = function homeLogoFallback(img) {
@@ -4002,3 +4002,31 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     }, 1200);
   }
 })();
+
+/* ══ PERSONALISED HIGHLIGHTS (CLIP/RAG) ══ */
+async function fetchHighlightMedia() {
+  const container = document.getElementById('highlights-carousel');
+  if (!container) return;
+  
+  // Simulated ML response for personalised highlights
+  setTimeout(() => {
+    const highlights = [
+      { id: 1, title: 'Epic Overtake at Turn 1', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1247265985.jpg', tag: 'Action' },
+      { id: 2, title: 'Pit Stop Mastery', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1471321773.jpg', tag: 'Strategy' },
+      { id: 3, title: 'Post-Race Celebrations', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1471442186.jpg', tag: 'Emotion' },
+      { id: 4, title: 'Qualifying Hot Lap', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1471439775.jpg', tag: 'Speed' }
+    ];
+    
+    container.innerHTML = highlights.map(h => `
+      <div style="flex: 0 0 280px; height: 160px; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">
+        <img src="${h.img}" alt="${h.title}" style="width: 100%; height: 100%; object-fit: cover;" />
+        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 15px; display: flex; flex-direction: column; justify-content: flex-end;">
+          <span style="background: var(--red); color: #fff; padding: 2px 6px; font-size: 0.6rem; border-radius: 4px; align-self: flex-start; margin-bottom: 5px; text-transform: uppercase; font-family: var(--font-c);">${h.tag}</span>
+          <h4 style="margin: 0; color: #fff; font-size: 1rem; font-family: var(--font-c); letter-spacing: 1px;">${h.title}</h4>
+        </div>
+      </div>
+    `).join('');
+  }, 1500);
+}
+
+document.addEventListener('DOMContentLoaded', fetchHighlightMedia);

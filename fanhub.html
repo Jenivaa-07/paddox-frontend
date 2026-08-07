@@ -237,6 +237,13 @@
         <!-- Live Feed -->
         <div class="comm-card reveal-up delay-4">
           <div class="comm-card-title"><span class="comm-title-icon fh-ico-feed" aria-hidden="true"></span>Fan Live Feed</div>
+          
+          <div class="sentiment-filter" id="sentiment-filter" style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+            <button class="sent-filter on" data-sent="all" style="background: rgba(255,255,255,0.2); border:none; color:#fff; padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer;">All</button>
+            <button class="sent-filter" data-sent="positive" style="background: rgba(0,255,0,0.1); color:#00ff88; border:1px solid rgba(0,255,0,0.3); padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer;">Positive 😊</button>
+            <button class="sent-filter" data-sent="neutral" style="background: rgba(255,255,255,0.05); color:#aaa; border:1px solid rgba(255,255,255,0.2); padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer;">Neutral 😐</button>
+            <button class="sent-filter" data-sent="negative" style="background: rgba(255,0,0,0.1); color:#ff4444; border:1px solid rgba(255,0,0,0.3); padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer;">Negative 😠</button>
+          </div>
           <div class="feed-compose" id="feed-compose">
             <textarea id="feed-post-input" maxlength="280" placeholder="Share your race thought with the Paddox grid..."></textarea>
             <div class="feed-compose-bottom">

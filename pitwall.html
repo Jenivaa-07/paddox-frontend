@@ -156,6 +156,28 @@
           </section>
         </aside>
       </div>
+      <div class="pit-layout" id="predictive-layout" style="display: none; margin-top: 2rem;">
+        <section class="pit-panel ai-panel" style="width: 100%;">
+          <div class="panel-head">
+            <div><span class="panel-tag ai-tag" style="background: linear-gradient(90deg, #ff0055, #a300ff); color: white; border: none;">AI Analytics Engine</span><h2>Temporal Race Predictor</h2></div>
+            <button class="mini-btn ai-btn" id="refresh-predictions" style="border-color: #a300ff; color: #a300ff;">Refresh Prediction</button>
+          </div>
+          <div class="predictive-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; padding: 1.5rem;">
+            <div class="predictive-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
+              <h3 style="margin-top: 0; color: #fff; font-size: 1.1rem; margin-bottom: 1rem;">Race Evolution</h3>
+              <canvas id="race-evolution-chart" style="width: 100%; max-height: 250px;"></canvas>
+            </div>
+            <div class="predictive-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
+              <h3 style="margin-top: 0; color: #fff; font-size: 1.1rem; margin-bottom: 1rem;">Driver Outcomes (Top 3 Win Probability)</h3>
+              <div id="driver-outcomes-list" class="outcomes-list" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+            </div>
+            <div class="predictive-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
+              <h3 style="margin-top: 0; color: #fff; font-size: 1.1rem; margin-bottom: 1rem;">Strategy Probabilities</h3>
+              <div id="strategy-probs-list" class="strategy-list" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+            </div>
+          </div>
+        </section>
+      </div>
 
       <section class="pit-panel session-panel">
         <div class="panel-head">
@@ -168,6 +190,7 @@
   </main>
 
   <div class="toast" id="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://paddox-backend.onrender.com/socket.io/socket.io.js"></script>
   <script src="pitwall.js?v=19_3"></script>
 </body>
