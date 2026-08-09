@@ -4030,3 +4030,504 @@ async function fetchHighlightMedia() {
 }
 
 document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
+
+/* ============================================================
+   PADDOX H4.1.0 - Cinematic Reality Pass
+   Adds homepage-only live deck and subtle interaction polish.
+   ============================================================ */
+(function initPaddoxCinematicRealityPass(){
+  const onReady = (fn) => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn, { once: true });
+    } else {
+      fn();
+    }
+  };
+
+  const textFrom = (root, selector, fallback) => {
+    const node = root && root.querySelector(selector);
+    const value = node ? node.textContent.trim() : '';
+    return value || fallback;
+  };
+
+  function createDeckCard(key, label, title, meta, meter) {
+    const card = document.createElement('article');
+    card.className = 'pdx-deck-card';
+    card.setAttribute('aria-label', label);
+    card.innerHTML = `
+      <div class="pdx-deck-kicker"><span class="pdx-deck-dot" aria-hidden="true"></span><span data-pdx-label>${label}</span></div>
+      <strong class="pdx-deck-title" data-pdx-title="${key}">${title}</strong>
+      <span class="pdx-deck-meta" data-pdx-meta="${key}">${meta}</span>
+      <span class="pdx-deck-meter" aria-hidden="true"><span style="--meter:${meter}%"></span></span>
+    `;
+    return card;
+  }
+
+  function syncHeroDeck(deck, liveGrid) {
+    if (!deck || !liveGrid) return;
+    const cards = Array.from(liveGrid.querySelectorAll('.hero-live-card'));
+    const payload = [
+      {
+        key: 'race',
+        title: textFrom(cards[0], 'strong', 'Race loading'),
+        meta: textFrom(cards[0], 'small', 'F1 schedule sync')
+      },
+      {
+        key: 'leader',
+        title: textFrom(cards[1], 'strong', 'Standings loading'),
+        meta: textFrom(cards[1], 'small', 'Driver form signal')
+      },
+      {
+        key: 'drop',
+        title: textFrom(cards[2], 'strong', 'Drop loading'),
+        meta: textFrom(cards[2], 'small', 'Shop inventory pulse')
+      }
+    ];
+
+    payload.forEach((item) => {
+      const title = deck.querySelector(`[data-pdx-title="${item.key}"]`);
+      const meta = deck.querySelector(`[data-pdx-meta="${item.key}"]`);
+      if (title) title.textContent = item.title;
+      if (meta) meta.textContent = item.meta;
+    });
+  }
+
+  function initHeroRaceDeck() {
+    const body = document.body;
+    if (!body) return;
+    body.classList.add('pdx-cinematic-home', 'pdx-hero-redesign');
+    document.getElementById('pdx-hero-race-deck')?.remove();
+  }
+
+  function loadScriptOnce(src) {
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function firstReachableModel(candidates) {
+    for (const candidate of candidates) {
+      const src = candidate.trim();
+      if (!src) continue;
+      try {
+        const response = await fetch(src, { method: 'HEAD' });
+        if (response.ok) return src;
+      } catch (err) {
+        try {
+          const response = await fetch(src, { method: 'GET', cache: 'force-cache' });
+          if (response.ok) return src;
+        } catch (ignored) {}
+      }
+    }
+    return '';
+  }
+
+  async function createPaddoxThreeModelScene({ mount, src, mode = 'car' }) {
+    if (!mount || !src) return null;
+
+    const [THREE, { GLTFLoader }, { OrbitControls }, { RoomEnvironment }] = await Promise.all([
+      import('https://esm.sh/three@0.160.0'),
+      import('https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'),
+      import('https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js'),
+      import('https://esm.sh/three@0.160.0/examples/jsm/environments/RoomEnvironment.js')
+    ]);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(mode === 'trophy' ? 30 : 24, 1, 0.01, 500);
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+      powerPreference: 'high-performance'
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 760 ? 1.45 : 1.75));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = mode === 'trophy' ? 0.92 : 1.22;
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    mount.replaceChildren(renderer.domElement);
+    renderer.domElement.tabIndex = 0;
+    renderer.domElement.setAttribute('aria-label', mode === 'trophy' ? 'Interactive 3D trophy viewer' : 'Interactive 3D Formula 1 car viewer');
+
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const roomEnvironment = new RoomEnvironment(renderer);
+    const environmentMap = pmrem.fromScene(roomEnvironment, 0.04).texture;
+    scene.environment = environmentMap;
+
+    const fill = new THREE.AmbientLight(0xffffff, mode === 'trophy' ? 0.18 : 0.24);
+    scene.add(fill);
+
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x050507, mode === 'trophy' ? 0.56 : 0.68);
+    scene.add(hemi);
+
+    const key = new THREE.DirectionalLight(0xffffff, mode === 'trophy' ? 8.2 : 7.4);
+    key.position.set(-5.6, 7.4, 6.8);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0xf2f6ff, mode === 'trophy' ? 7.8 : 6.2);
+    rim.position.set(5.8, 4.6, -5.2);
+    scene.add(rim);
+
+    const warm = new THREE.PointLight(0xf4b05c, mode === 'trophy' ? 54 : 22, 16);
+    warm.position.set(-2.8, 2.8, 2.8);
+    scene.add(warm);
+
+    const cyan = new THREE.PointLight(0x9fd7ff, mode === 'trophy' ? 26 : 18, 14);
+    cyan.position.set(3.6, 1.8, 3.6);
+    scene.add(cyan);
+
+    const backGlow = new THREE.PointLight(0xffffff, mode === 'trophy' ? 34 : 18, 18);
+    backGlow.position.set(0, 3.8, -4.8);
+    scene.add(backGlow);
+
+    const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(mode === 'trophy' ? 1.55 : 2.65, 64),
+      new THREE.ShadowMaterial({ color: 0x000000, opacity: mode === 'trophy' ? 0.28 : 0.20 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.98;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const loader = new GLTFLoader();
+    const gltf = await loader.loadAsync(src);
+    const model = gltf.scene;
+
+    if (mode === 'car') {
+      const sketchfabRoot = model.getObjectByName('Sketchfab_model');
+      if (sketchfabRoot) {
+        sketchfabRoot.position.set(0, 0, 0);
+        sketchfabRoot.rotation.set(-Math.PI / 2, 0, 0);
+        sketchfabRoot.updateMatrixWorld(true);
+        mount.dataset.sourceLevelReset = '1';
+      }
+    }
+
+    if (mode === 'trophy') {
+      const trophyMeshes = [];
+      model.traverse((node) => {
+        if (node.isMesh) trophyMeshes.push(node);
+      });
+      const primaryTrophyMesh = trophyMeshes.find((node) => /^GeometryNode_5$/i.test(node.name || '')) || trophyMeshes[0];
+      const removedTrophyMeshes = trophyMeshes.filter((node) => node !== primaryTrophyMesh);
+      removedTrophyMeshes.forEach((node) => node.parent?.remove(node));
+      mount.dataset.modelTrimmedNodes = String(removedTrophyMeshes.length);
+    }
+
+    let meshCount = 0;
+    model.traverse((node) => {
+      if (!node.isMesh) return;
+      meshCount += 1;
+      node.castShadow = true;
+      node.receiveShadow = true;
+      if (node.material) {
+        const materials = Array.isArray(node.material) ? node.material : [node.material];
+        materials.forEach((material) => {
+          const materialName = (material.name || '').toLowerCase();
+          material.side = THREE.DoubleSide;
+          material.envMapIntensity = mode === 'trophy' ? 3.4 : 2.35;
+          if (mode === 'trophy' && material.color && materialName.includes('metal')) {
+            material.color.set(0xc4c8ce);
+          }
+          if (mode === 'trophy' && material.color && materialName.includes('abudhabi')) {
+            material.color.set(0x8d9299);
+          }
+          if (typeof material.metalness === 'number') material.metalness = mode === 'trophy' ? Math.max(material.metalness, 0.96) : Math.min(material.metalness, 0.82);
+          if (typeof material.roughness === 'number') material.roughness = mode === 'trophy' ? Math.min(Math.max(material.roughness, 0.10), 0.18) : Math.min(Math.max(material.roughness, 0.24), 0.42);
+          if (material.transparent && typeof material.opacity === 'number') material.opacity = Math.max(material.opacity, 0.92);
+          if (material.map) material.map.colorSpace = THREE.SRGBColorSpace;
+          if (material.emissive) material.emissiveIntensity = Math.max(material.emissiveIntensity || 0, 0.02);
+          material.needsUpdate = true;
+        });
+      }
+    });
+
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const longest = Math.max(size.x, size.y, size.z) || 1;
+    const target = mode === 'trophy' ? 3.85 : 5.35;
+    const scale = target / longest;
+    model.scale.setScalar(scale);
+    model.position.set(
+      -center.x * scale,
+      (-center.y * scale) + (mode === 'trophy' ? -0.24 : -0.10),
+      -center.z * scale
+    );
+
+    const pivot = new THREE.Group();
+    pivot.rotation.set(
+      mode === 'trophy' ? -0.03 : 0,
+      mode === 'trophy' ? -0.42 : 0.34,
+      0
+    );
+    pivot.add(model);
+    scene.add(pivot);
+
+    const finalBox = new THREE.Box3().setFromObject(pivot);
+    const finalSize = new THREE.Vector3();
+    const finalCenter = new THREE.Vector3();
+    finalBox.getSize(finalSize);
+    finalBox.getCenter(finalCenter);
+    floor.position.set(finalCenter.x, finalBox.min.y - 0.03, finalCenter.z);
+    floor.scale.setScalar(mode === 'trophy' ? 1.34 : 1.18);
+    mount.dataset.modelMeshes = String(meshCount);
+    mount.dataset.modelBounds = `${size.x.toFixed(2)}x${size.y.toFixed(2)}x${size.z.toFixed(2)}`;
+    mount.dataset.modelFinalBounds = `${finalSize.x.toFixed(2)}x${finalSize.y.toFixed(2)}x${finalSize.z.toFixed(2)}`;
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.09;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.screenSpacePanning = true;
+    controls.panSpeed = mode === 'trophy' ? 0.62 : 0.72;
+    controls.rotateSpeed = mode === 'trophy' ? 0.75 : 0.62;
+    controls.zoomSpeed = mode === 'trophy' ? 1.18 : 1.12;
+    controls.zoomToCursor = true;
+    controls.autoRotate = false;
+    controls.autoRotateSpeed = mode === 'trophy' ? 0.18 : 0.14;
+    controls.minPolarAngle = mode === 'trophy' ? Math.PI * 0.16 : Math.PI * 0.26;
+    controls.maxPolarAngle = mode === 'trophy' ? Math.PI * 0.88 : Math.PI * 0.82;
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN
+    };
+    controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN
+    };
+    controls.addEventListener('start', () => {
+      controls.autoRotate = false;
+      mount.dataset.userInteracted = '1';
+    });
+    controls.addEventListener('change', () => {
+      mount.dataset.viewerDistance = camera.position.distanceTo(controls.target).toFixed(2);
+      mount.dataset.viewerPolar = controls.getPolarAngle().toFixed(2);
+      mount.dataset.viewerAzimuth = controls.getAzimuthalAngle().toFixed(2);
+    });
+
+    function frameCamera() {
+      const rect = mount.getBoundingClientRect();
+      const aspect = Math.max(0.5, rect.width / Math.max(1, rect.height));
+      const vFov = THREE.MathUtils.degToRad(camera.fov);
+      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
+      const fitHeightDistance = finalSize.y / (2 * Math.tan(vFov / 2));
+      const fitWidthDistance = finalSize.x / (2 * Math.tan(hFov / 2));
+      const distance = Math.max(fitHeightDistance, fitWidthDistance, finalSize.z * 1.8) * (mode === 'trophy' ? 1.15 : 0.72);
+      const viewAngle = mode === 'trophy' ? 0.20 : 0.18;
+      const targetX = finalCenter.x;
+      const targetY = finalCenter.y + finalSize.y * (mode === 'trophy' ? -0.06 : 0.06);
+      camera.position.set(
+        targetX + Math.sin(viewAngle) * distance,
+        finalCenter.y + finalSize.y * (mode === 'trophy' ? 0.18 : 0.34),
+        finalCenter.z + Math.cos(viewAngle) * distance
+      );
+      camera.near = Math.max(0.01, distance / 120);
+      camera.far = Math.max(80, distance * 120);
+      camera.lookAt(targetX, targetY, finalCenter.z);
+      camera.updateProjectionMatrix();
+      controls.target.set(targetX, targetY, finalCenter.z);
+      controls.minDistance = distance * (mode === 'trophy' ? 0.20 : 0.24);
+      controls.maxDistance = distance * (mode === 'trophy' ? 2.8 : 2.6);
+      controls.update();
+      mount.dataset.cameraDistance = distance.toFixed(2);
+    }
+
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const dollyTo = (targetPoint, factor) => {
+      controls.autoRotate = false;
+      mount.dataset.userInteracted = '1';
+      controls.target.copy(targetPoint);
+      const direction = camera.position.clone().sub(controls.target).normalize();
+      const currentDistance = camera.position.distanceTo(controls.target);
+      const nextDistance = THREE.MathUtils.clamp(currentDistance * factor, controls.minDistance, controls.maxDistance);
+      camera.position.copy(controls.target).addScaledVector(direction, nextDistance);
+      controls.update();
+      mount.dataset.doubleClickZoom = factor < 1 ? 'in' : 'out';
+    };
+    let ctrlZoomStart = null;
+    const onContextMenu = (event) => event.preventDefault();
+    const onCtrlZoomPointerMove = (event) => {
+      if (!ctrlZoomStart) return;
+      event.preventDefault();
+      const delta = event.clientY - ctrlZoomStart.y;
+      const factor = THREE.MathUtils.clamp(1 + (delta * 0.0045), 0.72, 1.28);
+      const direction = camera.position.clone().sub(controls.target).normalize();
+      const nextDistance = THREE.MathUtils.clamp(ctrlZoomStart.distance * factor, controls.minDistance, controls.maxDistance);
+      camera.position.copy(controls.target).addScaledVector(direction, nextDistance);
+      controls.update();
+      mount.dataset.ctrlDragZoom = '1';
+    };
+    const onCtrlZoomPointerUp = (event) => {
+      if (!ctrlZoomStart) return;
+      event.preventDefault();
+      renderer.domElement.releasePointerCapture?.(event.pointerId);
+      ctrlZoomStart = null;
+      renderer.domElement.removeEventListener('pointermove', onCtrlZoomPointerMove);
+      renderer.domElement.removeEventListener('pointerup', onCtrlZoomPointerUp);
+      renderer.domElement.removeEventListener('pointercancel', onCtrlZoomPointerUp);
+    };
+    const onCtrlZoomPointerDown = (event) => {
+      if (!event.ctrlKey || event.button !== 0) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      controls.autoRotate = false;
+      mount.dataset.userInteracted = '1';
+      ctrlZoomStart = {
+        y: event.clientY,
+        distance: camera.position.distanceTo(controls.target)
+      };
+      renderer.domElement.setPointerCapture?.(event.pointerId);
+      renderer.domElement.addEventListener('pointermove', onCtrlZoomPointerMove);
+      renderer.domElement.addEventListener('pointerup', onCtrlZoomPointerUp);
+      renderer.domElement.addEventListener('pointercancel', onCtrlZoomPointerUp);
+    };
+    const onDoubleClick = (event) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObject(pivot, true);
+      event.preventDefault();
+      if (hits.length) {
+        dollyTo(hits[0].point, mode === 'trophy' ? 0.34 : 0.38);
+        return;
+      }
+      dollyTo(finalCenter, mode === 'trophy' ? 1.85 : 1.65);
+    };
+    renderer.domElement.addEventListener('contextmenu', onContextMenu);
+    renderer.domElement.addEventListener('pointerdown', onCtrlZoomPointerDown, { capture: true });
+    renderer.domElement.addEventListener('dblclick', onDoubleClick);
+
+    function resize() {
+      const rect = mount.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      frameCamera();
+      camera.updateProjectionMatrix();
+    }
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(mount);
+    resize();
+
+    let raf = 0;
+    const tick = () => {
+      controls.update();
+      mount.dataset.viewerDistance = camera.position.distanceTo(controls.target).toFixed(2);
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+
+    return {
+      dispose() {
+        cancelAnimationFrame(raf);
+        observer.disconnect();
+        renderer.domElement.removeEventListener('contextmenu', onContextMenu);
+        renderer.domElement.removeEventListener('pointerdown', onCtrlZoomPointerDown, { capture: true });
+        renderer.domElement.removeEventListener('pointermove', onCtrlZoomPointerMove);
+        renderer.domElement.removeEventListener('pointerup', onCtrlZoomPointerUp);
+        renderer.domElement.removeEventListener('pointercancel', onCtrlZoomPointerUp);
+        renderer.domElement.removeEventListener('dblclick', onDoubleClick);
+        controls.dispose();
+        environmentMap.dispose();
+        if (typeof roomEnvironment.dispose === 'function') roomEnvironment.dispose();
+        pmrem.dispose();
+        renderer.dispose();
+      }
+    };
+  }
+
+  async function initHeroGarage() {
+    const stage = document.getElementById('pdx-car-stage');
+    const mount = document.getElementById('pdx-car-3d');
+    if (!stage || !mount) return;
+
+    const modelSrc = stage.dataset.modelSrc || '';
+    try {
+      await createPaddoxThreeModelScene({ mount, src: modelSrc, mode: 'car' });
+      stage.classList.add('has-3d-model');
+    } catch (err) {
+      stage.classList.add('is-image-fallback');
+      console.warn('PADDOX car GLTF unavailable; using image fallback', err);
+    }
+  }
+
+  async function initTrophyStage() {
+    const stage = document.getElementById('pdx-trophy-stage');
+    const mount = document.getElementById('pdx-trophy-3d');
+    if (!stage || !mount) return;
+
+    try {
+      await createPaddoxThreeModelScene({ mount, src: stage.dataset.modelSrc || '', mode: 'trophy' });
+      stage.classList.add('has-3d-model');
+    } catch (err) {
+      stage.classList.add('is-model-missing');
+      console.warn('PADDOX trophy GLTF unavailable; check .bin and texture files', err);
+    }
+  }
+
+  function bindPointerGlow() {
+    const selector = '.pcard, .exp-card, .testi-card, .fan-voice-card, .lab-card, .pdx-deck-card';
+    const bind = (card) => {
+      if (!card || card.dataset.pdxGlowReady === '1') return;
+      card.dataset.pdxGlowReady = '1';
+      card.addEventListener('pointermove', (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty('--mx', `${Math.max(0, Math.min(100, x)).toFixed(1)}%`);
+        card.style.setProperty('--my', `${Math.max(0, Math.min(100, y)).toFixed(1)}%`);
+      }, { passive: true });
+      card.addEventListener('pointerleave', () => {
+        card.style.removeProperty('--mx');
+        card.style.removeProperty('--my');
+      }, { passive: true });
+    };
+
+    document.querySelectorAll(selector).forEach(bind);
+
+    if ('MutationObserver' in window) {
+      const observer = new MutationObserver((records) => {
+        records.forEach((record) => {
+          record.addedNodes.forEach((node) => {
+            if (!(node instanceof Element)) return;
+            if (node.matches(selector)) bind(node);
+            node.querySelectorAll(selector).forEach(bind);
+          });
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  }
+
+  onReady(() => {
+    initHeroRaceDeck();
+    initHeroGarage();
+    initTrophyStage();
+    bindPointerGlow();
+  });
+})();

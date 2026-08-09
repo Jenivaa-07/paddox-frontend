@@ -1,0 +1,336 @@
+/* ============================================================
+   PADDOX C1.0 - Shared Cinematic Page Layer
+   Applies to Shop, Fan Hub, Pit Wall, Account, and Collectibles.
+   ============================================================ */
+body.pdx-cinematic-page{
+  --pdx-carbon:#05070d;
+  --pdx-panel:rgba(10,14,22,.82);
+  --pdx-line:rgba(255,255,255,.13);
+  --pdx-red:#e8002d;
+  --pdx-cyan:#32d6cf;
+  --pdx-gold:#d5b45f;
+  background:#05070d !important;
+  color:#fff;
+}
+
+body.pdx-cinematic-page::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(232,0,45,.10), transparent 26%, rgba(50,214,207,.08) 78%, transparent),
+    repeating-linear-gradient(116deg, transparent 0 42px, rgba(255,255,255,.026) 43px 44px),
+    #05070d;
+}
+
+body.pdx-cinematic-page .shop-hero,
+body.pdx-cinematic-page .hub-hero,
+body.pdx-cinematic-page .pit-hero,
+body.pdx-cinematic-page .hero{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  min-height:min(72svh,720px) !important;
+  background:#05070d !important;
+}
+
+body.pdx-cinematic-page .shop-hero-bg,
+body.pdx-cinematic-page .hub-hero-bg{
+  filter:brightness(.78) saturate(1.06) contrast(1.14) !important;
+  transform:scale(1.02) !important;
+}
+
+body.pdx-cinematic-page .shop-hero-overlay,
+body.pdx-cinematic-page .hub-hero-overlay{
+  background:
+    linear-gradient(95deg, rgba(5,7,13,.98) 0%, rgba(5,7,13,.80) 42%, rgba(5,7,13,.30) 72%, rgba(5,7,13,.72) 100%),
+    linear-gradient(to bottom, rgba(5,7,13,.18), rgba(5,7,13,.98) 100%) !important;
+}
+
+body.pdx-cinematic-page .pit-grid-bg,
+body.pdx-cinematic-page .shop-hero-grid,
+body.pdx-cinematic-page .hub-hero-grid{
+  opacity:.40 !important;
+  background-size:72px 72px !important;
+}
+
+body.pdx-cinematic-page .shop-hero::before,
+body.pdx-cinematic-page .hub-hero::before,
+body.pdx-cinematic-page .pit-hero::before,
+body.pdx-cinematic-page .hero::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(116deg, transparent 0 38px, rgba(255,255,255,.040) 39px 40px),
+    linear-gradient(105deg, transparent 0 45%, rgba(232,0,45,.16) 58%, transparent 73%);
+  mix-blend-mode:screen;
+  opacity:.55;
+}
+
+body.pdx-cinematic-page .shop-hero-content,
+body.pdx-cinematic-page .hub-hero-content,
+body.pdx-cinematic-page .pit-hero-content,
+body.pdx-cinematic-page .hero__content{
+  position:relative;
+  z-index:3 !important;
+}
+
+body.pdx-cinematic-page .shop-hero-title,
+body.pdx-cinematic-page .hub-hero-title,
+body.pdx-cinematic-page .pit-title,
+body.pdx-cinematic-page .hero__title{
+  letter-spacing:0 !important;
+  text-shadow:0 30px 90px rgba(0,0,0,.58);
+}
+
+body.pdx-cinematic-page .shop-hero-sub,
+body.pdx-cinematic-page .hub-hero-sub,
+body.pdx-cinematic-page .pit-sub,
+body.pdx-cinematic-page .hero__subtitle{
+  color:rgba(255,255,255,.74) !important;
+  text-wrap:balance;
+}
+
+body.pdx-cinematic-page .breadcrumb,
+body.pdx-cinematic-page .hero__badge{
+  border-radius:8px !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  background:rgba(255,255,255,.045) !important;
+  backdrop-filter:blur(12px);
+  letter-spacing:0 !important;
+}
+
+.pdx-page-command-deck{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  width:min(820px,100%);
+  margin-top:18px;
+}
+
+.pdx-page-command-card{
+  --mx:50%;
+  --my:30%;
+  position:relative;
+  overflow:hidden;
+  min-height:104px;
+  padding:15px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.12), transparent 27%),
+    linear-gradient(145deg, rgba(255,255,255,.088), rgba(255,255,255,.024)),
+    rgba(6,9,15,.82);
+  box-shadow:0 24px 70px rgba(0,0,0,.38);
+}
+
+.pdx-page-command-card::after{
+  content:'';
+  position:absolute;
+  left:15px;
+  right:15px;
+  bottom:13px;
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--pdx-red), var(--pdx-cyan));
+  opacity:.85;
+}
+
+.pdx-page-command-label{
+  display:block;
+  color:rgba(255,255,255,.52);
+  font-family:var(--font-condensed, Inter, sans-serif);
+  font-size:.70rem;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+
+.pdx-page-command-value{
+  display:block;
+  margin-top:12px;
+  color:#fff;
+  font-family:var(--font-condensed, Inter, sans-serif);
+  font-size:clamp(1.05rem,1.45vw,1.36rem);
+  font-weight:800;
+  line-height:1.08;
+  letter-spacing:0;
+}
+
+.pdx-page-command-meta{
+  display:block;
+  margin-top:7px;
+  color:rgba(255,255,255,.62);
+  font-size:.78rem;
+  line-height:1.35;
+}
+
+body.pdx-cinematic-page .shop-hero-stats,
+body.pdx-cinematic-page .hub-hero-chips,
+body.pdx-cinematic-page .hero__stats,
+body.pdx-cinematic-page .pit-hero-actions{
+  position:relative;
+  z-index:3;
+  border-radius:8px !important;
+}
+
+body.pdx-cinematic-page .hero-chip,
+body.pdx-cinematic-page .cat-tab,
+body.pdx-cinematic-page .filter-btn,
+body.pdx-cinematic-page .tab,
+body.pdx-cinematic-page .pit-primary,
+body.pdx-cinematic-page .pit-secondary,
+body.pdx-cinematic-page button,
+body.pdx-cinematic-page .btn{
+  border-radius:8px !important;
+}
+
+body.pdx-cinematic-page .shop-layout,
+body.pdx-cinematic-page .hub-main,
+body.pdx-cinematic-page .pit-dashboard,
+body.pdx-cinematic-page .collectibles-app,
+body.pdx-cinematic-page .account-shell,
+body.pdx-cinematic-page .auth-shell,
+body.pdx-cinematic-page main{
+  background:transparent !important;
+}
+
+body.pdx-cinematic-page .pcard,
+body.pdx-cinematic-page .wall-card,
+body.pdx-cinematic-page .driver-card,
+body.pdx-cinematic-page .calendar-card,
+body.pdx-cinematic-page .quote-card,
+body.pdx-cinematic-page .community-card,
+body.pdx-cinematic-page .pit-panel,
+body.pdx-cinematic-page .stat-card,
+body.pdx-cinematic-page .collectible-card,
+body.pdx-cinematic-page .achievement-card,
+body.pdx-cinematic-page .security-card,
+body.pdx-cinematic-page .auth-card,
+body.pdx-cinematic-page .panel,
+body.pdx-cinematic-page .catalogue-card{
+  --mx:50%;
+  --my:30%;
+  position:relative;
+  overflow:hidden;
+  border-radius:8px !important;
+  border-color:rgba(255,255,255,.13) !important;
+  background:
+    radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.10), transparent 28%),
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.020)),
+    #090c13 !important;
+  box-shadow:0 24px 70px rgba(0,0,0,.38) !important;
+}
+
+body.pdx-cinematic-page .pcard:hover,
+body.pdx-cinematic-page .wall-card:hover,
+body.pdx-cinematic-page .driver-card:hover,
+body.pdx-cinematic-page .calendar-card:hover,
+body.pdx-cinematic-page .community-card:hover,
+body.pdx-cinematic-page .pit-panel:hover,
+body.pdx-cinematic-page .stat-card:hover,
+body.pdx-cinematic-page .collectible-card:hover,
+body.pdx-cinematic-page .achievement-card:hover,
+body.pdx-cinematic-page .security-card:hover,
+body.pdx-cinematic-page .auth-card:hover,
+body.pdx-cinematic-page .catalogue-card:hover{
+  border-color:rgba(232,0,45,.34) !important;
+  box-shadow:0 32px 86px rgba(0,0,0,.50), 0 0 0 1px rgba(232,0,45,.12) !important;
+}
+
+body.pdx-cinematic-page .pcard::before,
+body.pdx-cinematic-page .pit-panel::before,
+body.pdx-cinematic-page .security-card::before,
+body.pdx-cinematic-page .collectible-card::before,
+body.pdx-cinematic-page .achievement-card::before,
+body.pdx-cinematic-page .stat-card::before{
+  content:'';
+  position:absolute;
+  inset:0 0 auto 0;
+  height:3px;
+  z-index:4;
+  pointer-events:none;
+  background:linear-gradient(90deg, var(--pdx-red), var(--pdx-cyan), transparent 78%);
+}
+
+body.pdx-cinematic-page .pcard-img-wrap,
+body.pdx-cinematic-page .wallpaper-thumb,
+body.pdx-cinematic-page .collectible-image,
+body.pdx-cinematic-page .achievement-image{
+  border-radius:8px !important;
+  background:
+    linear-gradient(135deg, rgba(232,0,45,.13), rgba(50,214,207,.07)),
+    #10141d !important;
+}
+
+body.pdx-cinematic-page .pcard-img{
+  filter:brightness(.96) contrast(1.08) saturate(1.04) !important;
+}
+
+body.pdx-cinematic-page .panel-head,
+body.pdx-cinematic-page .sec-header,
+body.pdx-cinematic-page .panel__header,
+body.pdx-cinematic-page .security-card-head{
+  border-color:rgba(255,255,255,.12) !important;
+}
+
+body.pdx-cinematic-page h1,
+body.pdx-cinematic-page h2,
+body.pdx-cinematic-page h3,
+body.pdx-cinematic-page .pcard-name,
+body.pdx-cinematic-page .section-title,
+body.pdx-cinematic-page .panel-title,
+body.pdx-cinematic-page .sec-title{
+  letter-spacing:0 !important;
+}
+
+body.pdx-cinematic-page a:focus-visible,
+body.pdx-cinematic-page button:focus-visible,
+body.pdx-cinematic-page input:focus-visible,
+body.pdx-cinematic-page select:focus-visible,
+body.pdx-cinematic-page textarea:focus-visible,
+body.pdx-cinematic-page [role="button"]:focus-visible{
+  outline:2px solid var(--pdx-cyan) !important;
+  outline-offset:3px !important;
+}
+
+@media(max-width:920px){
+  body.pdx-cinematic-page .shop-hero,
+  body.pdx-cinematic-page .hub-hero,
+  body.pdx-cinematic-page .pit-hero,
+  body.pdx-cinematic-page .hero{
+    min-height:unset !important;
+  }
+  .pdx-page-command-deck{
+    grid-template-columns:1fr;
+    max-width:520px;
+  }
+}
+
+@media(max-width:560px){
+  body.pdx-cinematic-page .shop-hero-content,
+  body.pdx-cinematic-page .hub-hero-content,
+  body.pdx-cinematic-page .pit-hero-content,
+  body.pdx-cinematic-page .hero__content{
+    padding-inline:20px !important;
+  }
+  .pdx-page-command-card{
+    min-height:96px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.pdx-cinematic-page *,
+  body.pdx-cinematic-page *::before,
+  body.pdx-cinematic-page *::after{
+    transition:none !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+  }
+}

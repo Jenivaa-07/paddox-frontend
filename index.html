@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PADDOX — F1 Fan Universe</title>
-  <link rel="stylesheet" href="home.css?v=H4_0_28" />
+  <link rel="stylesheet" href="home.css?v=H4_1_22" />
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=Titillium+Web:wght@400;600;700;900&display=swap"
     rel="stylesheet"
@@ -166,6 +166,17 @@
         <div class="hero-live-card skeleton-live"><span>Drop</span><strong>Loading</strong><small>Featured merch</small></div>
       </div>
     </div>
+
+    <aside class="pdx-hero-showcase animate-fade-up delay-5" aria-label="PADDOX visual garage">
+      <div class="pdx-showcase-topline">
+        <span>APX GP GLTF</span>
+        <strong>Interactive 3D Car</strong>
+      </div>
+      <div class="pdx-car-stage" id="pdx-car-stage" data-model-src="assets/3d/F1_Movie_APX_GP_07_www.vecarz.com.gltf">
+        <div class="pdx-3d-mount" id="pdx-car-3d" aria-label="Interactive APX GP Formula 1 car model"></div>
+        <div class="pdx-car-floor" aria-hidden="true"></div>
+      </div>
+    </aside>
 
     <!-- Stats -->
     <div class="hero-stats animate-fade-up delay-6">
@@ -469,6 +480,20 @@
     </div>
   </section>
 
+  <section class="pdx-trophy-section" id="pdx-trophy-section" aria-labelledby="pdx-trophy-title">
+    <div class="pdx-trophy-copy">
+      <span class="pdx-trophy-kicker">Final Lap</span>
+      <h2 id="pdx-trophy-title">Built For The Podium</h2>
+      <p>PADDOX turns the race weekend into a collectible, shop-ready, fan-powered motorsport universe.</p>
+    </div>
+    <div class="pdx-trophy-stage" id="pdx-trophy-stage" data-model-src="assets/3d/F1_Trophy_-_Abu_Dhabi_Formula_1_GP.gltf" aria-label="Interactive Formula 1 trophy model">
+      <div class="pdx-3d-mount" id="pdx-trophy-3d"></div>
+      <div class="pdx-trophy-fallback" aria-hidden="true">
+        <span>PADDOX</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ░░ FOOTER ░░ -->
   <footer class="site-footer h33e-polish" id="site-footer">
     <div class="footer-grid">
@@ -576,7 +601,7 @@
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 <script src="data/paddoxTracks.generated.js?v=H3_4C_4"></script>
-<script src="home.js?v=H4_0_24"></script>
+<script src="home.js?v=H4_1_22"></script>
 <script src="assets/js/voice-assistant.js"></script>
 <script src="chatbot.js"></script>
 </body>
