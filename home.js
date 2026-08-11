@@ -3791,6 +3791,39 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
 /* Phase H3.3D.2 — Quote Timer Direction Fix
    Keeps quote progress one-way left-to-right and prevents older timer loops from fighting it. */
 (function initH33D2QuoteTimerGuard(){
+  function getStampFilename(raceName) {
+    const r = (raceName || '').toLowerCase();
+    let round = HOME_F1.nextRace ? parseInt(HOME_F1.nextRace.round, 10) : NaN;
+    if (!isNaN(round) && round >= 1 && round <= 24) {
+      const files = ['01-melbourne.png','02-shanghai.png','03-suzuka.png','04-sakhir.png','05-jeddah.png','06-miami.png','07-montreal.png','08-monaco.png','09-barcelona.png','10-spielberg.png','11-silverstone.png','12-spa.png','13-budapest.png','14-zandvoort.png','15-monza.png','16-madrid.png','17-baku.png','18-singapore.png','19-austin.png','20-mexico-city.png','21-sao-paulo.png','22-las-vegas.png','23-lusail.png','24-abu-dhabi.png'];
+      return files[round - 1];
+    }
+    if (r.includes('australi')) return '01-melbourne.png';
+    if (r.includes('chin')) return '02-shanghai.png';
+    if (r.includes('japan')) return '03-suzuka.png';
+    if (r.includes('bahrain')) return '04-sakhir.png';
+    if (r.includes('saudi')) return '05-jeddah.png';
+    if (r.includes('miami')) return '06-miami.png';
+    if (r.includes('canad')) return '07-montreal.png';
+    if (r.includes('monaco')) return '08-monaco.png';
+    if (r.includes('spain') && !r.includes('madrid')) return '09-barcelona.png';
+    if (r.includes('austria')) return '10-spielberg.png';
+    if (r.includes('brit')) return '11-silverstone.png';
+    if (r.includes('belgi')) return '12-spa.png';
+    if (r.includes('hungar')) return '13-budapest.png';
+    if (r.includes('dutch') || r.includes('netherland')) return '14-zandvoort.png';
+    if (r.includes('ital')) return '15-monza.png';
+    if (r.includes('madrid')) return '16-madrid.png';
+    if (r.includes('azerbaijan')) return '17-baku.png';
+    if (r.includes('singapore')) return '18-singapore.png';
+    if (r.includes('united states') || r.includes('austin')) return '19-austin.png';
+    if (r.includes('mexic')) return '20-mexico-city.png';
+    if (r.includes('brazil') || r.includes('sao paulo')) return '21-sao-paulo.png';
+    if (r.includes('vegas')) return '22-las-vegas.png';
+    if (r.includes('qatar')) return '23-lusail.png';
+    if (r.includes('abu dhabi')) return '24-abu-dhabi.png';
+    return '14-zandvoort.png';
+  }
   window.PADDOX_QUOTE_TIMER_OWNER = 'renderHomeQuotes';
 })();
 
