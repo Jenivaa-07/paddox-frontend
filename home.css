@@ -8702,10 +8702,7 @@ body .nl-trust {
 .h33e4-passport-panel::before,.h33e4-feature-panel::before{
   content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--red),transparent 65%);opacity:.9;
 }
-.h33e4-stamp-img{
-    position:absolute !important;
-    right:34px;
-    bottom:34px;
+
 .h33e4-stamp-img {
     position: absolute !important;
     right: -20px;
