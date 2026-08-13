@@ -3857,44 +3857,150 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     const words = String(name || 'GP').replace(/grand prix|gp/ig,'').trim().split(/\s+/).filter(Boolean);
     return (words[0] || 'GP').slice(0,3).toUpperCase();
   }
+  const STAMP_ASSETS = [
+    { key: 'australian', file: '01-melbourne.png', city: 'Melbourne' },
+    { key: 'chinese', file: '02-shanghai.png', city: 'Shanghai' },
+    { key: 'japanese', file: '03-suzuka.png', city: 'Suzuka' },
+    { key: 'bahrain', file: '04-sakhir.png', city: 'Sakhir' },
+    { key: 'saudi', file: '05-jeddah.png', city: 'Jeddah' },
+    { key: 'miami', file: '06-miami.png', city: 'Miami' },
+    { key: 'canadian', file: '07-montreal.png', city: 'Montreal' },
+    { key: 'monaco', file: '08-monaco.png', city: 'Monaco' },
+    { key: 'spanish', file: '09-barcelona.png', city: 'Barcelona' },
+    { key: 'austrian', file: '10-spielberg.png', city: 'Spielberg' },
+    { key: 'british', file: '11-silverstone.png', city: 'Silverstone' },
+    { key: 'belgian', file: '12-spa.png', city: 'Spa' },
+    { key: 'hungarian', file: '13-budapest.png', city: 'Budapest' },
+    { key: 'dutch', file: '14-zandvoort.png', city: 'Zandvoort' },
+    { key: 'italian', file: '15-monza.png', city: 'Monza' },
+    { key: 'madrid', file: '16-madrid.png', city: 'Madrid' },
+    { key: 'azerbaijan', file: '17-baku.png', city: 'Baku' },
+    { key: 'singapore', file: '18-singapore.png', city: 'Singapore' },
+    { key: 'united states', file: '19-austin.png', city: 'Austin' },
+    { key: 'mexico', file: '20-mexico-city.png', city: 'Mexico City' },
+    { key: 'sao paulo', file: '21-sao-paulo.png', city: 'Sao Paulo' },
+    { key: 'las vegas', file: '22-las-vegas.png', city: 'Las Vegas' },
+    { key: 'qatar', file: '23-lusail.png', city: 'Lusail' },
+    { key: 'abu dhabi', file: '24-abu-dhabi.png', city: 'Abu Dhabi' }
+  ];
+  const BADGE_ASSETS = [
+    { key: 'rookie', file: 'paddox_badge_race_week_rookie.png', label: 'Race Week Rookie', unlock: s => s.stamps >= 1 },
+    { key: 'predictor', file: 'paddox_badge_race_predictor.png', label: 'Race Predictor', unlock: s => s.prediction },
+    { key: 'pole', file: 'paddox_badge_pole_position.png', label: 'Pole Position', unlock: s => s.prediction === 'Pole Sitter' },
+    { key: 'strategist', file: 'paddox_badge_pit_wall_strategist.png', label: 'Pit Wall Strategist', unlock: s => s.prediction && s.stamps >= 3 },
+    { key: 'collector', file: 'paddox_badge_circuit_collector.png', label: 'Circuit Collector', unlock: s => s.stamps >= 5 },
+    { key: 'weekend', file: 'paddox_badge_weekend_warrior.png', label: 'Weekend Warrior', unlock: s => s.stamps >= 3 },
+    { key: 'veteran', file: 'paddox_badge_grand_prix_veteran.png', label: 'Grand Prix Veteran', unlock: s => s.stamps >= 10 },
+    { key: 'sprint', file: 'paddox_badge_sprint_specialist.png', label: 'Sprint Specialist', unlock: s => s.stamps >= 6 },
+    { key: 'night', file: 'paddox_badge_night_race_elite.png', label: 'Night Race Elite', unlock: s => s.stamps >= 8 },
+    { key: 'qualifying', file: 'paddox_badge_qualifying_master.png', label: 'Qualifying Master', unlock: s => s.prediction === 'Pole Sitter' && s.stamps >= 5 },
+    { key: 'tyre', file: 'paddox_badge_tyre_genius.png', label: 'Tyre Genius', unlock: s => s.prediction === 'Fastest Lap' && s.stamps >= 5 },
+    { key: 'drs', file: 'paddox_badge_drs_hunter.png', label: 'DRS Hunter', unlock: s => s.stamps >= 7 },
+    { key: 'overtake', file: 'paddox_badge_overtake_artist.png', label: 'Overtake Artist', unlock: s => s.prediction === 'Race Winner' && s.stamps >= 5 },
+    { key: 'pitstop', file: 'paddox_badge_pit_stop_pro.png', label: 'Pit Stop Pro', unlock: s => s.stamps >= 9 },
+    { key: 'constructor', file: 'paddox_badge_constructor_loyalist.png', label: 'Constructor Loyalist', unlock: s => s.stamps >= 12 },
+    { key: 'trivia', file: 'paddox_badge_trivia_champion.png', label: 'Trivia Champion', unlock: s => s.stamps >= 14 },
+    { key: 'mindset', file: 'paddox_badge_championship_mindset.png', label: 'Championship Mindset', unlock: s => s.stamps >= 16 },
+    { key: 'commander', file: 'paddox_badge_fan_commander.png', label: 'Fan Commander', unlock: s => s.stamps >= 18 },
+    { key: 'journey', file: 'paddox_badge_journey_completed.png', label: 'Journey Completed', unlock: s => s.stamps >= 24 },
+    { key: 'legend', file: 'paddox_badge_paddox_legend.png', label: 'PADDOX Legend', unlock: s => s.stamps >= 24 && s.prediction }
+  ];
+  function stampAssetForRace(name){
+    const race = String(name || '').toLowerCase();
+    const match = STAMP_ASSETS.find(item => race.includes(item.key));
+    return `assets/stamps/${match?.file || '01-melbourne.png'}`;
+  }
+  function stampForRace(name){
+    const race = String(name || '').toLowerCase();
+    return STAMP_ASSETS.find(item => race.includes(item.key)) || STAMP_ASSETS[0];
+  }
+  function buildCollectionDisplays(){
+    const wall = document.getElementById('lab-stamp-wall');
+    if (wall && !wall.children.length) {
+      STAMP_ASSETS.forEach((stamp, index) => {
+        const item = document.createElement('figure');
+        item.className = 'lab-stamp-slot';
+        item.dataset.stampKey = stamp.key;
+        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/stamps/${stamp.file}" alt="${stamp.city} Grand Prix stamp" width="180" height="240"><figcaption>${stamp.city}</figcaption>`;
+        wall.appendChild(item);
+      });
+    }
+    const cabinet = document.getElementById('badge-vault-mini');
+    if (cabinet && !cabinet.children.length) {
+      BADGE_ASSETS.forEach((badge, index) => {
+        const item = document.createElement('figure');
+        item.className = 'vault-badge';
+        item.dataset.badge = badge.key;
+        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/badges/${badge.file}" alt="${badge.label} badge" width="112" height="112"><figcaption>${badge.label}</figcaption>`;
+        cabinet.appendChild(item);
+      });
+    }
+  }
   function setActiveButtons(container, value, attr){
-    container?.querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset[attr] === value));
+    container?.querySelectorAll('button').forEach(btn => {
+      const active = btn.dataset[attr] === value;
+      btn.classList.toggle('on', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
   }
   function updateBadges(state){
     const stamps = Array.isArray(state.stamps) ? state.stamps : [];
-    const flags = {
-      prediction: !!state.prediction,
-      passport: stamps.length > 0,
-      season: stamps.length >= 24
-    };
+    const progress = { prediction: state.prediction || '', stamps: stamps.length };
     let count = 0;
     document.querySelectorAll('.vault-badge').forEach(badge => {
-      const on = !!flags[badge.dataset.badge];
+      const definition = BADGE_ASSETS.find(item => item.key === badge.dataset.badge);
+      const on = !!definition?.unlock(progress);
       badge.classList.toggle('unlocked', on);
+      badge.dataset.state = on ? 'Earned' : 'Locked';
       if (on) count += 1;
     });
     const status = document.getElementById('badge-status');
+    const countEl = document.getElementById('lab-vault-count');
+    if (countEl) countEl.textContent = String(count).padStart(2, '0');
     if (status) {
-      const suffix = stamps.length >= 24 ? 'Season complete' : stamps.length > 0 ? `${stamps.length} race stamp${stamps.length === 1 ? '' : 's'} saved` : 'Start with a prediction or race stamp';
-      status.textContent = `${count} / 3 badges active · ${suffix}`;
+      const suffix = stamps.length >= 24 ? 'Season complete' : stamps.length > 0 ? `${stamps.length} race stamp${stamps.length === 1 ? '' : 's'} secured` : 'Start with a prediction or race stamp';
+      status.textContent = `${count} / ${BADGE_ASSETS.length} badges earned · ${suffix}`;
     }
   }
   function updatePassport(state){
     const race = nextRaceName();
+    const currentStamp = stampForRace(race);
     const code = raceCode(race);
     const codeEl = document.getElementById('passport-stamp-code');
     const nameEl = document.getElementById('passport-stamp-name');
     const nextEl = document.getElementById('lab-next-race');
+    const stampImage = document.getElementById('passport-stamp-img');
     const fill = document.getElementById('passport-progress-fill');
     if (codeEl) codeEl.textContent = code;
     if (nameEl) nameEl.textContent = `${race} stamp`;
     if (nextEl) nextEl.textContent = race;
+    if (stampImage) {
+      stampImage.src = stampAssetForRace(race);
+      stampImage.alt = `${race} passport stamp`;
+    }
     const stamps = Array.isArray(state.stamps) ? state.stamps : [];
+    document.querySelectorAll('.lab-stamp-slot').forEach(slot => {
+      const isCurrent = slot.dataset.stampKey === currentStamp.key;
+      const isClaimed = stamps.some(name => String(name).toLowerCase().includes(slot.dataset.stampKey));
+      slot.classList.toggle('is-current', isCurrent);
+      slot.classList.toggle('is-claimed', isClaimed);
+      slot.dataset.state = isClaimed ? 'Secured' : isCurrent ? 'Current round' : 'Available';
+      slot.tabIndex = isCurrent ? 0 : -1;
+      slot.setAttribute('role', isCurrent ? 'button' : 'img');
+      slot.setAttribute('aria-label', isCurrent ? `Preview ${race} stamp` : `${slot.querySelector('figcaption')?.textContent || 'Grand Prix'} stamp, ${slot.dataset.state}`);
+    });
+    const stampCount = document.getElementById('lab-stamp-count');
+    if (stampCount) stampCount.textContent = String(Math.min(24, stamps.length)).padStart(2, '0');
     if (fill) fill.style.width = `${Math.min(100, Math.round((stamps.length / 24) * 100))}%`;
     const label = document.getElementById('passport-progress-label');
     if (label) label.textContent = `${Math.min(24, stamps.length)} / 24`;
     const claim = document.getElementById('passport-claim-btn');
-    if (claim) claim.textContent = stamps.includes(race) ? 'Stamp Claimed' : 'Claim Stamp';
+    if (claim) {
+      const claimed = stamps.includes(race);
+      claim.textContent = claimed ? 'Stamp Secured' : 'Claim This Circuit';
+      claim.classList.toggle('is-claimed', claimed);
+      claim.setAttribute('aria-pressed', String(claimed));
+    }
   }
   function render(){
     const state = readState();
@@ -3910,8 +4016,53 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
   }
   function boot(){
     const root = document.getElementById('paddox-race-lab');
+    buildCollectionDisplays();
     if (!root || root.dataset.ready === '1') { render(); return; }
     root.dataset.ready = '1';
+
+    const stampPreview = document.getElementById('lab-stamp-preview');
+    const previewClose = document.getElementById('lab-stamp-preview-close');
+    let previewTrigger = null;
+    const openStampPreview = trigger => {
+      if (!stampPreview) return;
+      const race = nextRaceName();
+      const state = readState();
+      const stamps = Array.isArray(state.stamps) ? state.stamps : [];
+      const asset = stampForRace(race);
+      const claimed = stamps.includes(race);
+      const displayRace = /next grand prix/i.test(race) ? `${asset.city} Grand Prix` : race;
+      previewTrigger = trigger || document.activeElement;
+      document.getElementById('lab-stamp-preview-image').src = `assets/stamps/${asset.file}`;
+      document.getElementById('lab-stamp-preview-image').alt = `${displayRace} stamp preview`;
+      document.getElementById('lab-stamp-preview-title').textContent = displayRace;
+      document.getElementById('lab-stamp-preview-location').textContent = `${asset.city} · Current circuit`;
+      document.getElementById('lab-stamp-preview-round').textContent = `Round ${String(STAMP_ASSETS.indexOf(asset) + 1).padStart(2, '0')}`;
+      document.getElementById('lab-stamp-preview-state').textContent = claimed ? 'Stamp secured in your passport' : 'Available to claim';
+      stampPreview.classList.toggle('is-secured', claimed);
+      stampPreview.showModal();
+      previewClose?.focus();
+    };
+    const closeStampPreview = () => {
+      if (!stampPreview?.open) return;
+      stampPreview.close();
+      previewTrigger?.focus?.();
+    };
+    document.getElementById('passport-stamp-container')?.addEventListener('click', e => openStampPreview(e.currentTarget));
+    document.getElementById('lab-stamp-wall')?.addEventListener('click', e => {
+      const current = e.target.closest('.lab-stamp-slot.is-current');
+      if (current) openStampPreview(current);
+    });
+    document.getElementById('lab-stamp-wall')?.addEventListener('keydown', e => {
+      const current = e.target.closest('.lab-stamp-slot.is-current');
+      if (current && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        openStampPreview(current);
+      }
+    });
+    previewClose?.addEventListener('click', closeStampPreview);
+    stampPreview?.addEventListener('click', e => {
+      if (e.target === stampPreview) closeStampPreview();
+    });
 
     document.getElementById('prediction-picks')?.addEventListener('click', e => {
       const btn = e.target.closest('button[data-pick]');

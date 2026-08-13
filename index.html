@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PADDOX — F1 Fan Universe</title>
-  <link rel="stylesheet" href="home.css?v=H4_1_26" />
+  <link rel="stylesheet" href="home.css?v=H4_3_1" />
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=Titillium+Web:wght@400;600;700;900&display=swap"
     rel="stylesheet"
@@ -402,79 +402,112 @@
             <div class="section-label h33e4-kicker">PADDOX Collectible System</div>
             <h2 class="h33e4-title">RACE <span>LAB</span></h2>
             <p>
-              Predict the next race, collect digital trophies, and stamp your PADDOX Race Passport through every Grand Prix weekend.
+              Make your call. Claim the circuit. Build a season that is unmistakably yours.
             </p>
           </div>
           <div class="h33e4-live-chip">
             <span></span>
             <div>
-              <small>Next Stamp Window</small>
+              <small>Race Weekend Live</small>
               <strong id="lab-next-race">Syncing race source...</strong>
             </div>
           </div>
         </div>
 
-        <div class="h33e4-command-grid">
-          <article class="h33e4-passport-panel lab-card lab-passport-card" data-lab-card="passport">
-            <div class="h33e4-panel-tag">Feature 03 · Season Passport</div>
-            <div class="h33e4-passport-visual" aria-hidden="true">
-              <div class="h33e4-passport-book">
-                <div class="h33e4-passport-spine"></div>
-                <div class="h33e4-passport-logo">PADDO<span>X</span></div>
-                <div class="h33e4-passport-title">Race Passport</div>
-                <div class="h33e4-passport-lines"></div>
-              </div>
-              <div class="passport-stamp h33e4-stamp" id="passport-stamp-container">
-                <img id="passport-stamp-img" class="h33e4-stamp-img" src="assets/stamps/14-zandvoort.png" alt="Next race stamp">
-              </div>
-            </div>
-            <div class="h33e4-passport-copy">
-              <h3>My Race Passport</h3>
-              <p>Claim one stamp per Grand Prix weekend and build a season-long PADDOX journey.</p>
-              <div class="h33e4-progress-row">
-                <small>Season progress</small>
-                <b id="passport-progress-label">0 / 24</b>
-              </div>
-              <div class="passport-progress h33e4-passport-progress"><span id="passport-progress-fill"></span></div>
-              <div class="passport-actions h33e4-actions">
-                <button type="button" class="passport-claim-btn" id="passport-claim-btn">Claim Stamp</button>
-                <a href="fanhub.html" class="passport-link">Open Calendar →</a>
-              </div>
-            </div>
-          </article>
-
-          <div class="h33e4-side-stack">
-            <article class="h33e4-feature-panel h33e4-prediction-panel lab-card lab-prediction-card" data-lab-card="prediction">
-              <div class="h33e4-feature-icon" aria-hidden="true"><span></span><i></i></div>
-              <div class="h33e4-panel-tag">Feature 01 · Race Strategy</div>
-              <h3>Fantasy Race Prediction</h3>
-              <p>Lock your race-week call before lights out. Later this becomes a scored fan-points system.</p>
-              <div class="prediction-picks h33e4-picks" id="prediction-picks">
-                <button type="button" data-pick="Pole Sitter"><span>P1</span> Pole</button>
-                <button type="button" data-pick="Race Winner"><span>WIN</span> Winner</button>
-                <button type="button" data-pick="Fastest Lap"><span>FL</span> Fastest Lap</button>
-              </div>
-              <div class="lab-card-status h33e4-status" id="prediction-status">No prediction saved yet.</div>
-            </article>
-
-            <article class="h33e4-feature-panel h33e4-vault-panel lab-card lab-badge-card" data-lab-card="badge">
-              <div class="h33e4-vault-head">
-                <div>
-                  <div class="h33e4-panel-tag">Feature 02 · Trophy Cabinet</div>
-                  <h3>PADDOX Badge Vault</h3>
-                </div>
-                <div class="h33e4-vault-count">3 Slots</div>
-              </div>
-              <p>Your digital trophy cabinet for predictions, race passport stamps, and season milestones.</p>
-              <div class="badge-vault-mini h33e4-vault-mini" id="badge-vault-mini">
-                <span class="vault-badge" data-badge="prediction"><img src="assets/badges/paddox_badge_race_predictor.png" alt="Predictor Badge"></span>
-                <span class="vault-badge" data-badge="passport"><img src="assets/badges/paddox_badge_circuit_collector.png" alt="Stamp Badge"></span>
-                <span class="vault-badge" data-badge="season"><img src="assets/badges/paddox_badge_journey_completed.png" alt="Season Badge"></span>
-              </div>
-              <div class="lab-card-status h33e4-status" id="badge-status">0 / 3 badges active</div>
-            </article>
+        <div class="race-lab-telemetry" aria-label="Race Lab season status">
+          <div class="race-lab-telemetry-item">
+            <small>Current round</small>
+            <strong id="passport-stamp-code">GP</strong>
+            <span id="passport-stamp-name">Next Grand Prix stamp</span>
+          </div>
+          <div class="race-lab-telemetry-item">
+            <small>Passport</small>
+            <strong id="lab-stamp-count">00</strong>
+            <span>stamps secured</span>
+          </div>
+          <div class="race-lab-telemetry-item">
+            <small>Vault</small>
+            <strong id="lab-vault-count">00</strong>
+            <span>badges unlocked</span>
           </div>
         </div>
+
+        <div class="lab-garage">
+          <section class="lab-console-bay" aria-labelledby="lab-console-title">
+            <div class="lab-bay-heading">
+              <div>
+                <div class="h33e4-panel-tag">Bay 01 · Race Strategy</div>
+                <h3 id="lab-console-title">Race Weekend Console</h3>
+              </div>
+              <span class="lab-bay-index">01 / 03</span>
+            </div>
+            <div class="lab-console-grid">
+              <div class="lab-prediction-console">
+                <p>Lock your race-week call before lights out.</p>
+                <div class="prediction-picks lab-console-picks" id="prediction-picks" role="group" aria-label="Choose a race prediction">
+                  <button type="button" data-pick="Pole Sitter" aria-pressed="false"><span>P1</span><b>Pole sitter</b><small>Qualifying</small></button>
+                  <button type="button" data-pick="Race Winner" aria-pressed="false"><span>WIN</span><b>Race winner</b><small>Grand Prix</small></button>
+                  <button type="button" data-pick="Fastest Lap" aria-pressed="false"><span>FL</span><b>Fastest lap</b><small>Race pace</small></button>
+                </div>
+                <div class="lab-console-status" id="prediction-status" aria-live="polite">No prediction locked yet.</div>
+              </div>
+              <div class="lab-current-drop">
+                <button type="button" class="lab-current-stamp" id="passport-stamp-container" aria-label="Preview current circuit stamp">
+                  <span>Current drop</span>
+                  <img id="passport-stamp-img" src="assets/stamps/14-zandvoort.png" alt="Next race stamp">
+                  <i aria-hidden="true">View</i>
+                </button>
+                <div class="lab-claim-console">
+                  <small>Season passport</small>
+                  <h4>Claim the current circuit</h4>
+                  <div class="lab-progress-line"><span>Season journey</span><b id="passport-progress-label">0 / 24</b></div>
+                  <div class="passport-progress"><span id="passport-progress-fill"></span></div>
+                  <button type="button" class="passport-claim-btn" id="passport-claim-btn" aria-pressed="false">Claim This Circuit</button>
+                  <a href="fanhub.html#sec-calendar" class="passport-link">View Race Calendar</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="lab-collection-bay lab-stamp-bay" aria-labelledby="lab-stamp-wall-title">
+            <div class="lab-bay-heading">
+              <div>
+                <div class="h33e4-panel-tag">Bay 02 · Season Passport</div>
+                <h3 id="lab-stamp-wall-title">Grand Prix Stamp Wall</h3>
+                <p>Every round of the 2026 world tour, displayed in circuit order.</p>
+              </div>
+              <span class="lab-bay-index">24 Circuits</span>
+            </div>
+            <div class="lab-stamp-wall" id="lab-stamp-wall" aria-label="All 24 Grand Prix passport stamps"></div>
+          </section>
+
+          <section class="lab-collection-bay lab-badge-bay" aria-labelledby="lab-badge-cabinet-title">
+            <div class="lab-bay-heading">
+              <div>
+                <div class="h33e4-panel-tag">Bay 03 · Achievement Cabinet</div>
+                <h3 id="lab-badge-cabinet-title">PADDOX Badge Cabinet</h3>
+                <p>Twenty motorsport milestones. Earned badges light up inside the cabinet.</p>
+              </div>
+              <span class="lab-bay-index">20 Badges</span>
+            </div>
+            <div class="badge-vault-mini lab-badge-cabinet" id="badge-vault-mini" aria-label="All 20 PADDOX badges"></div>
+            <div class="lab-cabinet-status" id="badge-status" aria-live="polite">0 / 20 badges active</div>
+          </section>
+        </div>
+
+        <dialog class="lab-stamp-preview" id="lab-stamp-preview" aria-labelledby="lab-stamp-preview-title">
+          <button type="button" class="lab-stamp-preview-close" id="lab-stamp-preview-close" aria-label="Close stamp preview">×</button>
+          <div class="lab-stamp-preview-stage">
+            <span id="lab-stamp-preview-round">Round 14</span>
+            <img id="lab-stamp-preview-image" src="assets/stamps/14-zandvoort.png" alt="Dutch Grand Prix stamp preview">
+          </div>
+          <div class="lab-stamp-preview-copy">
+            <small>2026 Race Passport</small>
+            <h3 id="lab-stamp-preview-title">Dutch Grand Prix</h3>
+            <p id="lab-stamp-preview-location">Zandvoort · Current circuit</p>
+            <div class="lab-stamp-preview-state" id="lab-stamp-preview-state">Available to claim</div>
+          </div>
+        </dialog>
       </div>
     </div>
   </section>
@@ -600,7 +633,7 @@
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 <script src="data/paddoxTracks.generated.js?v=H3_4C_4"></script>
-<script src="home.js?v=H4_1_26"></script>
+<script src="home.js?v=H4_3_1"></script>
 <script src="assets/js/voice-assistant.js"></script>
 <script src="chatbot.js"></script>
 </body>

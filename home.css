@@ -3150,6 +3150,772 @@ body.page-transition-init { opacity: 0; animation: bodyReveal .4s .3s forwards; 
   }
 }
 
+/* PADDOX H4.3.1 - current circuit stamp inspection */
+body #paddox-race-lab button.lab-current-stamp {
+  appearance: none;
+  color: inherit;
+  font: inherit;
+  text-align: initial;
+  cursor: zoom-in;
+}
+body #paddox-race-lab .lab-current-stamp > i {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  min-width: 42px;
+  min-height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(5,6,8,.84);
+  color: rgba(255,255,255,.78);
+  font-family: var(--font-condensed);
+  font-size: .58rem;
+  font-style: normal;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+body #paddox-race-lab .lab-current-stamp:hover > i,
+body #paddox-race-lab .lab-current-stamp:focus-visible > i {
+  opacity: 1;
+  transform: none;
+}
+body #paddox-race-lab .lab-current-stamp:hover img,
+body #paddox-race-lab .lab-current-stamp:focus-visible img {
+  transform: scale(1.035);
+}
+body #paddox-race-lab .lab-current-stamp:focus-visible,
+body #paddox-race-lab .lab-stamp-slot.is-current:focus-visible {
+  outline: 2px solid #fff !important;
+  outline-offset: 4px !important;
+}
+body #paddox-race-lab .lab-stamp-slot.is-current {
+  cursor: zoom-in;
+}
+body #paddox-race-lab .lab-stamp-preview {
+  width: min(920px, calc(100vw - 40px));
+  max-width: 920px;
+  max-height: min(760px, calc(100dvh - 40px));
+  grid-template-columns: minmax(340px, .92fr) minmax(300px, .7fr);
+  gap: 0;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 6px;
+  background: #090a0d;
+  color: #fff;
+  box-shadow: 0 42px 100px rgba(0,0,0,.78), 0 0 0 1px rgba(240,0,54,.12);
+}
+body #paddox-race-lab .lab-stamp-preview[open] {
+  display: grid;
+  animation: labStampPreviewIn .24s ease-out both;
+}
+body #paddox-race-lab .lab-stamp-preview::backdrop {
+  background: rgba(0,0,0,.84);
+  backdrop-filter: blur(9px);
+}
+body #paddox-race-lab .lab-stamp-preview-close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  z-index: 5;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 50%;
+  background: rgba(7,8,10,.86);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+body #paddox-race-lab .lab-stamp-preview-close:hover,
+body #paddox-race-lab .lab-stamp-preview-close:focus-visible {
+  border-color: var(--lab-red-bright);
+  background: var(--lab-red);
+  outline: 0;
+}
+body #paddox-race-lab .lab-stamp-preview-stage {
+  position: relative;
+  min-height: 600px;
+  display: grid;
+  place-items: center;
+  padding: 58px 48px;
+  overflow: hidden;
+  border-right: 1px solid rgba(255,255,255,.12);
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+    radial-gradient(circle at 50% 45%, rgba(240,0,54,.18), transparent 46%),
+    #0d0f12;
+  background-size: 40px 40px, 40px 40px, auto, auto;
+}
+body #paddox-race-lab .lab-stamp-preview-stage > span {
+  position: absolute;
+  left: 22px;
+  top: 22px;
+  padding: 7px 9px;
+  border: 1px solid rgba(240,0,54,.42);
+  color: #ff6683;
+  font-family: var(--font-condensed);
+  font-size: .66rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-stamp-preview-stage img {
+  width: min(100%, 360px);
+  max-height: 490px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 30px 36px rgba(0,0,0,.68)) drop-shadow(0 0 24px rgba(240,0,54,.12));
+  transform: rotate(-1.2deg);
+}
+body #paddox-race-lab .lab-stamp-preview-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 74px 42px 42px;
+  background:
+    radial-gradient(circle at 100% 100%, rgba(240,0,54,.15), transparent 48%),
+    linear-gradient(160deg, #14161a, #08090b);
+}
+body #paddox-race-lab .lab-stamp-preview-copy small {
+  color: var(--lab-red-bright);
+  font-family: var(--font-condensed);
+  font-size: .66rem;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-stamp-preview-copy h3 {
+  margin: 14px 0 18px;
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4.7rem);
+  line-height: .85;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-stamp-preview-copy p {
+  margin: 0 0 30px;
+  color: rgba(255,255,255,.62);
+  font-size: .96rem;
+}
+body #paddox-race-lab .lab-stamp-preview-state {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-left: 3px solid var(--lab-red);
+  background: rgba(240,0,54,.09);
+  color: #fff;
+  font-family: var(--font-condensed);
+  font-size: .74rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-stamp-preview.is-secured .lab-stamp-preview-state {
+  border-left-color: var(--lab-gold);
+  background: rgba(216,181,108,.1);
+  color: #f1d79c;
+}
+@keyframes labStampPreviewIn {
+  from { opacity: 0; transform: translateY(18px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 720px) {
+  body #paddox-race-lab .lab-stamp-preview {
+    width: min(92vw, 520px);
+    max-height: calc(100dvh - 24px);
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  body #paddox-race-lab .lab-stamp-preview-stage {
+    min-height: 54vh;
+    padding: 48px 34px 30px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+  }
+  body #paddox-race-lab .lab-stamp-preview-stage img {
+    width: min(76%, 280px);
+    max-height: 46vh;
+  }
+  body #paddox-race-lab .lab-stamp-preview-copy {
+    padding: 28px 24px 24px;
+  }
+  body #paddox-race-lab .lab-stamp-preview-copy h3 {
+    margin: 10px 0 12px;
+    font-size: 2.45rem;
+  }
+  body #paddox-race-lab .lab-stamp-preview-copy p {
+    margin-bottom: 18px;
+  }
+}
+
+/* ============================================================
+   PADDOX H4.3 - RACE LAB COLLECTOR GARAGE
+   ============================================================ */
+body #paddox-race-lab .lab-garage {
+  display: grid;
+  gap: 64px;
+}
+body #paddox-race-lab.reveal-section,
+body #paddox-race-lab .h33e4-lab-shell.reveal-up {
+  opacity: 1 !important;
+  transform: none !important;
+}
+body #paddox-race-lab .lab-console-bay,
+body #paddox-race-lab .lab-collection-bay {
+  position: relative;
+  min-width: 0;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255,255,255,.14);
+}
+body #paddox-race-lab .lab-console-bay::before,
+body #paddox-race-lab .lab-collection-bay::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 148px;
+  height: 2px;
+  background: var(--lab-red);
+  box-shadow: 0 0 24px rgba(240,0,54,.34);
+}
+body #paddox-race-lab .lab-bay-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+body #paddox-race-lab .lab-bay-heading h3 {
+  max-width: none !important;
+  margin: 0;
+  color: #f6f6f7;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 4rem);
+  line-height: .88;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-bay-heading p {
+  margin: 12px 0 0;
+  color: rgba(255,255,255,.58);
+  font-size: .9rem;
+  line-height: 1.55;
+}
+body #paddox-race-lab .lab-bay-index {
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.58);
+  font-family: var(--font-condensed);
+  font-size: .7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-console-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(420px, .85fr);
+  background: linear-gradient(145deg, rgba(18,20,24,.96), rgba(7,8,10,.98));
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 28px 60px rgba(0,0,0,.36);
+}
+body #paddox-race-lab .lab-prediction-console {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 320px;
+  padding: 34px;
+  border-right: 1px solid rgba(255,255,255,.1);
+  background:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+body #paddox-race-lab .lab-prediction-console > p {
+  margin: 0 0 20px;
+  color: rgba(255,255,255,.65);
+  font-size: 1rem;
+}
+body #paddox-race-lab .lab-console-picks {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+body #paddox-race-lab .lab-console-picks button {
+  min-width: 0 !important;
+  min-height: 92px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  gap: 0 10px !important;
+  padding: 14px !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+  border-radius: 4px !important;
+  background: rgba(255,255,255,.035) !important;
+  color: #fff !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transform: none !important;
+}
+body #paddox-race-lab .lab-console-picks button > span {
+  grid-row: 1 / 3;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(240,0,54,.15);
+  color: #ff829b;
+  font-family: var(--font-condensed);
+  font-size: .62rem;
+}
+body #paddox-race-lab .lab-console-picks button b {
+  align-self: end;
+  font-family: var(--font-condensed);
+  font-size: .8rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-console-picks button small {
+  align-self: start;
+  color: rgba(255,255,255,.42);
+  font-family: var(--font-condensed);
+  font-size: .58rem;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-console-picks button:hover,
+body #paddox-race-lab .lab-console-picks button.on {
+  border-color: rgba(240,0,54,.8) !important;
+  background: rgba(240,0,54,.13) !important;
+  box-shadow: inset 0 -3px 0 var(--lab-red) !important;
+}
+body #paddox-race-lab .lab-console-picks button.on > span {
+  background: var(--lab-red);
+  color: #fff;
+}
+body #paddox-race-lab .lab-console-status,
+body #paddox-race-lab .lab-cabinet-status {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 3px;
+  background: rgba(0,0,0,.28);
+  color: rgba(255,255,255,.7);
+  font-size: .76rem;
+}
+body #paddox-race-lab .lab-current-drop {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 18% 50%, rgba(240,0,54,.13), transparent 42%),
+    linear-gradient(145deg, rgba(29,12,18,.72), rgba(10,11,14,.96));
+}
+body #paddox-race-lab .lab-current-stamp {
+  position: relative !important;
+  inset: auto !important;
+  width: 180px !important;
+  aspect-ratio: .76;
+  margin: 0 !important;
+  padding: 14px !important;
+  border: 1px dashed rgba(240,0,54,.6) !important;
+  border-radius: 4px !important;
+  background: rgba(0,0,0,.24) !important;
+  transform: rotate(-2deg) !important;
+  box-shadow: 0 22px 34px rgba(0,0,0,.42), 0 0 24px rgba(240,0,54,.12) !important;
+}
+body #paddox-race-lab .lab-current-stamp > span {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  z-index: 2;
+  padding: 5px 7px;
+  background: #08090b;
+  color: #ff5a79;
+  font-family: var(--font-condensed);
+  font-size: .58rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-current-stamp img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  object-fit: contain !important;
+  filter: drop-shadow(0 14px 18px rgba(0,0,0,.5));
+}
+body #paddox-race-lab .lab-claim-console small,
+body #paddox-race-lab .lab-progress-line span {
+  color: rgba(255,255,255,.42);
+  font-family: var(--font-condensed);
+  font-size: .62rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-claim-console h4 {
+  margin: 8px 0 22px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: .95;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-progress-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+body #paddox-race-lab .lab-claim-console .passport-progress {
+  height: 5px;
+  margin: 9px 0 18px;
+  border-radius: 0;
+}
+body #paddox-race-lab .lab-claim-console .passport-claim-btn {
+  width: 100%;
+  min-height: 48px !important;
+  border-radius: 3px !important;
+}
+body #paddox-race-lab .lab-claim-console .passport-link {
+  min-height: 36px !important;
+  padding-top: 8px;
+}
+body #paddox-race-lab .lab-stamp-wall {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0;
+  padding: 20px 18px 28px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 14%),
+    #0b0d10;
+  box-shadow: inset 0 18px 40px rgba(255,255,255,.018), 0 28px 60px rgba(0,0,0,.35);
+}
+body #paddox-race-lab .lab-stamp-slot {
+  position: relative;
+  min-width: 0;
+  min-height: 232px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: end center;
+  margin: 0;
+  padding: 22px 10px 16px;
+  border-right: 1px solid rgba(255,255,255,.075);
+  border-bottom: 9px solid #17191d;
+  background: linear-gradient(180deg, rgba(255,255,255,.018), rgba(0,0,0,.12));
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.1), 0 10px 14px rgba(0,0,0,.26);
+}
+body #paddox-race-lab .lab-stamp-slot:nth-child(8n) {
+  border-right: 0;
+}
+body #paddox-race-lab .lab-stamp-slot > span,
+body #paddox-race-lab .lab-badge-cabinet .vault-badge > span {
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  color: rgba(255,255,255,.28);
+  font-family: var(--font-condensed);
+  font-size: .58rem;
+  letter-spacing: 1px;
+}
+body #paddox-race-lab .lab-stamp-slot img {
+  width: min(100%, 112px);
+  height: 154px;
+  object-fit: contain;
+  opacity: .64;
+  filter: saturate(.55) brightness(.72) drop-shadow(0 10px 12px rgba(0,0,0,.52));
+  transition: transform .22s ease, opacity .22s ease, filter .22s ease;
+}
+body #paddox-race-lab .lab-stamp-slot figcaption {
+  width: 100%;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+  color: rgba(255,255,255,.56);
+  font-family: var(--font-condensed);
+  font-size: .62rem;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-stamp-slot:hover img,
+body #paddox-race-lab .lab-stamp-slot.is-current img,
+body #paddox-race-lab .lab-stamp-slot.is-claimed img {
+  opacity: 1;
+  filter: saturate(1) brightness(1) drop-shadow(0 12px 16px rgba(0,0,0,.5));
+  transform: translateY(-4px);
+}
+body #paddox-race-lab .lab-stamp-slot.is-current {
+  background: linear-gradient(180deg, rgba(240,0,54,.11), rgba(240,0,54,.02));
+  border-bottom-color: var(--lab-red);
+}
+body #paddox-race-lab .lab-stamp-slot.is-current::after,
+body #paddox-race-lab .lab-stamp-slot.is-claimed::after {
+  content: attr(data-state);
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  color: #ff728e;
+  font-family: var(--font-condensed);
+  font-size: .52rem;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-stamp-slot.is-claimed {
+  border-bottom-color: var(--lab-gold);
+}
+body #paddox-race-lab .lab-stamp-slot.is-claimed::after {
+  color: #e8c77e;
+}
+body #paddox-race-lab .lab-badge-cabinet {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 18px !important;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 12%),
+    #0b0d10 !important;
+  box-shadow: inset 0 18px 40px rgba(255,255,255,.018), 0 28px 60px rgba(0,0,0,.35);
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge {
+  position: relative;
+  width: 100% !important;
+  max-width: none !important;
+  height: 190px !important;
+  aspect-ratio: auto !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: 1fr auto !important;
+  place-items: center !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  padding: 20px 12px 14px !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(255,255,255,.075) !important;
+  border-bottom: 9px solid #17191d !important;
+  border-radius: 0 !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.018), rgba(0,0,0,.12)) !important;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.1), 0 10px 14px rgba(0,0,0,.26) !important;
+  transform: none !important;
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(5n) {
+  border-right: 0 !important;
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge img {
+  width: 105px !important;
+  height: 105px !important;
+  object-fit: contain !important;
+  opacity: .76 !important;
+  filter: grayscale(.38) brightness(.9) drop-shadow(0 10px 12px rgba(0,0,0,.5)) !important;
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge figcaption {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: rgba(255,255,255,.72);
+  font-family: var(--font-condensed);
+  font-size: .68rem;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge::after {
+  content: attr(data-state);
+  position: absolute;
+  right: 9px;
+  top: 8px;
+  color: rgba(255,255,255,.26);
+  font-family: var(--font-condensed);
+  font-size: .52rem;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge.unlocked {
+  border-bottom-color: var(--lab-gold) !important;
+  background: radial-gradient(circle at 50% 42%, rgba(216,181,108,.14), transparent 62%) !important;
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge.unlocked img {
+  opacity: 1 !important;
+  filter: drop-shadow(0 9px 16px rgba(216,181,108,.25)) !important;
+}
+body #paddox-race-lab .lab-badge-cabinet .vault-badge.unlocked figcaption,
+body #paddox-race-lab .lab-badge-cabinet .vault-badge.unlocked::after {
+  color: #e8cb8b;
+}
+body #paddox-race-lab .lab-cabinet-status {
+  margin-top: 12px;
+}
+
+@media (max-width: 1180px) {
+  body #paddox-race-lab .lab-console-grid {
+    grid-template-columns: 1fr;
+  }
+  body #paddox-race-lab .lab-prediction-console {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  body #paddox-race-lab .lab-stamp-wall {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  body #paddox-race-lab .lab-stamp-slot:nth-child(8n) {
+    border-right: 1px solid rgba(255,255,255,.075);
+  }
+  body #paddox-race-lab .lab-stamp-slot:nth-child(6n) {
+    border-right: 0;
+  }
+  body #paddox-race-lab .lab-badge-cabinet {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(5n) {
+    border-right: 1px solid rgba(255,255,255,.075) !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(4n) {
+    border-right: 0 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body #paddox-race-lab .lab-garage {
+    gap: 48px;
+  }
+  body #paddox-race-lab .lab-bay-heading {
+    align-items: start;
+  }
+  body #paddox-race-lab .lab-bay-heading h3 {
+    font-size: 2.5rem;
+  }
+  body #paddox-race-lab .lab-prediction-console,
+  body #paddox-race-lab .lab-current-drop {
+    padding: 20px;
+  }
+  body #paddox-race-lab .lab-current-drop {
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 18px;
+  }
+  body #paddox-race-lab .lab-current-stamp {
+    width: 132px !important;
+    padding: 9px !important;
+  }
+  body #paddox-race-lab .lab-claim-console h4 {
+    font-size: 1.35rem;
+  }
+  body #paddox-race-lab .lab-stamp-wall {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 10px;
+  }
+  body #paddox-race-lab .lab-stamp-slot,
+  body #paddox-race-lab .lab-stamp-slot:nth-child(6n),
+  body #paddox-race-lab .lab-stamp-slot:nth-child(8n) {
+    border-right: 1px solid rgba(255,255,255,.075);
+  }
+  body #paddox-race-lab .lab-stamp-slot:nth-child(3n) {
+    border-right: 0;
+  }
+  body #paddox-race-lab .lab-badge-cabinet {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    padding: 10px !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge,
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(4n),
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(5n) {
+    border-right: 1px solid rgba(255,255,255,.075) !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(3n) {
+    border-right: 0 !important;
+  }
+}
+
+@media (max-width: 520px) {
+  body #paddox-race-lab .lab-bay-heading {
+    display: grid;
+    gap: 14px;
+  }
+  body #paddox-race-lab .lab-bay-heading h3 {
+    font-size: 2rem;
+  }
+  body #paddox-race-lab .lab-bay-index {
+    justify-self: start;
+  }
+  body #paddox-race-lab .lab-console-picks {
+    grid-template-columns: 1fr !important;
+  }
+  body #paddox-race-lab .lab-console-picks button {
+    min-height: 66px !important;
+  }
+  body #paddox-race-lab .lab-current-drop {
+    grid-template-columns: 1fr;
+  }
+  body #paddox-race-lab .lab-current-stamp {
+    width: min(72%, 190px) !important;
+    justify-self: center;
+  }
+  body #paddox-race-lab .lab-stamp-wall {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  body #paddox-race-lab .lab-stamp-slot,
+  body #paddox-race-lab .lab-stamp-slot:nth-child(3n) {
+    min-height: 166px;
+    border-right: 1px solid rgba(255,255,255,.075);
+  }
+  body #paddox-race-lab .lab-stamp-slot {
+    padding: 18px 5px 10px;
+  }
+  body #paddox-race-lab .lab-stamp-slot img {
+    width: min(100%, 82px);
+    height: 112px;
+  }
+  body #paddox-race-lab .lab-stamp-slot figcaption {
+    font-size: .54rem;
+  }
+  body #paddox-race-lab .lab-stamp-slot:nth-child(3n) {
+    border-right: 0;
+  }
+  body #paddox-race-lab .lab-badge-cabinet {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge,
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(3n) {
+    height: 142px !important;
+    border-right: 1px solid rgba(255,255,255,.075) !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge {
+    padding: 16px 5px 10px !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge img {
+    width: 72px !important;
+    height: 72px !important;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge figcaption {
+    font-size: .55rem;
+  }
+  body #paddox-race-lab .lab-badge-cabinet .vault-badge:nth-child(3n) {
+    border-right: 0 !important;
+  }
+}
+
 
 /* ============================================================
    H1.4 — Formula 1 Font System + UI Density Polish
@@ -17296,4 +18062,655 @@ body #paddox-race-lab .vault-badge img {
 @media (max-width: 900px) {
   body #race-control-section .h34d2-panel { flex-direction: column !important; }
   body #race-control-section .h34d2-info { padding: 30px 20px !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.05) !important; }
+}
+
+/* ============================================================
+   PADDOX H4.2 - RACE LAB COMMAND CENTRE
+   Final ownership layer for the home Race Lab.
+   ============================================================ */
+body #paddox-race-lab.h33e4-race-lab {
+  --lab-red: #f00036;
+  --lab-red-bright: #ff3159;
+  --lab-gold: #d8b56c;
+  --lab-ink: #07080a;
+  --lab-panel: #101216;
+  --lab-line: rgba(255,255,255,.11);
+  background:
+    linear-gradient(180deg, #040507 0%, #08080b 46%, #050506 100%) !important;
+  padding: 104px 0 112px !important;
+  overflow: hidden !important;
+}
+body #paddox-race-lab .h33e4-lab-bg {
+  background:
+    radial-gradient(ellipse at 84% 12%, rgba(240,0,54,.13), transparent 39%),
+    radial-gradient(ellipse at 12% 84%, rgba(216,181,108,.055), transparent 34%) !important;
+}
+body #paddox-race-lab .h33e4-lab-grid {
+  opacity: .2 !important;
+  background-size: 64px 64px !important;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 25%, #000 82%, transparent 100%);
+}
+body #paddox-race-lab .container {
+  width: min(100% - 48px, 1320px) !important;
+  max-width: 1320px !important;
+}
+body #paddox-race-lab .h33e4-lab-shell {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+body #paddox-race-lab .h33e4-lab-shell::before,
+body #paddox-race-lab .h33e4-lab-shell::after {
+  display: none !important;
+}
+body #paddox-race-lab .h33e4-lab-head {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: end !important;
+  gap: 48px !important;
+  margin: 0 0 32px !important;
+  padding: 0 0 30px !important;
+  border-bottom: 1px solid var(--lab-line) !important;
+}
+body #paddox-race-lab .h33e4-kicker {
+  color: var(--lab-red-bright) !important;
+  font-size: .68rem !important;
+  letter-spacing: 3px !important;
+  margin: 0 0 14px !important;
+}
+body #paddox-race-lab .h33e4-title {
+  color: #f7f7f8 !important;
+  font-size: clamp(4.5rem, 8vw, 7.6rem) !important;
+  line-height: .82 !important;
+  letter-spacing: 0 !important;
+  margin: 0 !important;
+}
+body #paddox-race-lab .h33e4-title span {
+  color: var(--lab-red) !important;
+  text-shadow: 0 0 46px rgba(240,0,54,.24) !important;
+}
+body #paddox-race-lab .h33e4-title-block p {
+  max-width: 610px !important;
+  color: rgba(255,255,255,.68) !important;
+  font-size: 1rem !important;
+  line-height: 1.65 !important;
+  margin: 22px 0 0 !important;
+}
+body #paddox-race-lab .h33e4-live-chip {
+  min-width: 270px !important;
+  min-height: 72px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 16px 20px !important;
+  background: rgba(17,18,22,.72) !important;
+  border: 1px solid rgba(240,0,54,.42) !important;
+  border-radius: 8px !important;
+  box-shadow: inset 3px 0 0 var(--lab-red) !important;
+}
+body #paddox-race-lab .h33e4-live-chip > span {
+  width: 11px !important;
+  height: 11px !important;
+  background: var(--lab-red) !important;
+}
+body #paddox-race-lab .h33e4-live-chip small {
+  color: rgba(255,255,255,.5) !important;
+  font-size: .62rem !important;
+  letter-spacing: 2px !important;
+}
+body #paddox-race-lab .h33e4-live-chip strong {
+  font-size: .9rem !important;
+  letter-spacing: 1.4px !important;
+  white-space: normal !important;
+}
+body #paddox-race-lab .race-lab-telemetry {
+  display: grid !important;
+  grid-template-columns: 1.5fr .75fr .75fr !important;
+  margin: 0 0 22px !important;
+  border-top: 1px solid var(--lab-line) !important;
+  border-bottom: 1px solid var(--lab-line) !important;
+  background: rgba(255,255,255,.015) !important;
+}
+body #paddox-race-lab .race-lab-telemetry-item {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  column-gap: 16px !important;
+  min-width: 0 !important;
+  padding: 16px 22px !important;
+  border-right: 1px solid var(--lab-line) !important;
+}
+body #paddox-race-lab .race-lab-telemetry-item:last-child {
+  border-right: 0 !important;
+}
+body #paddox-race-lab .race-lab-telemetry-item small {
+  grid-column: 1 / -1 !important;
+  color: rgba(255,255,255,.42) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .62rem !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+body #paddox-race-lab .race-lab-telemetry-item strong {
+  color: #fff !important;
+  font-family: var(--font-display) !important;
+  font-size: 1.75rem !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+body #paddox-race-lab .race-lab-telemetry-item:first-child strong {
+  color: var(--lab-red-bright) !important;
+}
+body #paddox-race-lab .race-lab-telemetry-item span {
+  min-width: 0 !important;
+  color: rgba(255,255,255,.7) !important;
+  font-size: .8rem !important;
+  line-height: 1.25 !important;
+  text-transform: uppercase !important;
+}
+body #paddox-race-lab .h33e4-command-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.22fr) minmax(390px, .78fr) !important;
+  gap: 22px !important;
+}
+body #paddox-race-lab .lab-card {
+  background:
+    linear-gradient(145deg, rgba(19,21,25,.96), rgba(9,10,13,.98)) !important;
+  border: 1px solid var(--lab-line) !important;
+  border-radius: 8px !important;
+  padding: 28px !important;
+  box-shadow: 0 24px 56px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+body #paddox-race-lab .lab-card::before {
+  height: 2px !important;
+  background: linear-gradient(90deg, var(--lab-red), rgba(240,0,54,.12) 52%, transparent) !important;
+}
+body #paddox-race-lab .h33e4-panel-tag {
+  color: var(--lab-red-bright) !important;
+  font-size: .6rem !important;
+  letter-spacing: 2.5px !important;
+  margin: 0 0 14px !important;
+}
+body #paddox-race-lab .h33e4-passport-panel {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, .72fr) !important;
+  grid-template-rows: auto 1fr !important;
+  gap: 0 30px !important;
+  min-height: 570px !important;
+  align-items: stretch !important;
+}
+body #paddox-race-lab .h33e4-passport-panel > .h33e4-panel-tag {
+  grid-column: 1 / -1 !important;
+}
+body #paddox-race-lab .h33e4-passport-visual {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  min-height: 450px !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  background:
+    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px),
+    radial-gradient(circle at 50% 48%, rgba(240,0,54,.13), transparent 48%) !important;
+  background-size: 42px 42px, 42px 42px, auto !important;
+  border: 1px solid rgba(255,255,255,.065) !important;
+  border-radius: 6px !important;
+  overflow: visible !important;
+}
+body #paddox-race-lab .h33e4-passport-visual::before {
+  display: none !important;
+}
+body #paddox-race-lab .h33e4-passport-book {
+  width: 360px !important;
+  max-width: calc(100% - 44px) !important;
+  aspect-ratio: 1.42 / 1 !important;
+  display: block !important;
+  position: relative !important;
+  inset: auto !important;
+  border-radius: 18px 8px 8px 18px !important;
+  transform: perspective(900px) rotateY(-7deg) rotateZ(-2deg) !important;
+  background:
+    linear-gradient(125deg, rgba(255,255,255,.08), transparent 32%),
+    linear-gradient(145deg, #251019, #120b10 46%, #08090b) !important;
+  border: 1px solid rgba(240,0,54,.34) !important;
+  box-shadow: 0 30px 54px rgba(0,0,0,.68), inset 12px 0 22px rgba(255,255,255,.045) !important;
+}
+body #paddox-race-lab .h33e4-passport-spine {
+  width: 30px !important;
+  border-radius: 17px 0 0 17px !important;
+  background: linear-gradient(90deg, #370916, rgba(255,255,255,.045), transparent) !important;
+  border-right-color: rgba(240,0,54,.22) !important;
+}
+body #paddox-race-lab .h33e4-passport-logo {
+  left: 50px !important;
+  top: 38px !important;
+  font-size: 1.65rem !important;
+  letter-spacing: 3px !important;
+}
+body #paddox-race-lab .h33e4-passport-season {
+  position: absolute !important;
+  left: 52px !important;
+  top: 80px !important;
+  color: rgba(255,255,255,.45) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .62rem !important;
+  letter-spacing: 2.4px !important;
+  text-transform: uppercase !important;
+}
+body #paddox-race-lab .h33e4-passport-title {
+  left: 50px !important;
+  bottom: 42px !important;
+  max-width: none !important;
+  font-size: 2.6rem !important;
+  line-height: .82 !important;
+  letter-spacing: 0 !important;
+}
+body #paddox-race-lab .h33e4-passport-mark {
+  position: absolute !important;
+  right: 34px !important;
+  top: 34px !important;
+  width: 70px !important;
+  height: 70px !important;
+  border: 1px solid rgba(216,181,108,.55) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 8px rgba(216,181,108,.045), inset 0 0 20px rgba(216,181,108,.08) !important;
+}
+body #paddox-race-lab .h33e4-passport-mark::before,
+body #paddox-race-lab .h33e4-passport-mark::after {
+  content: '' !important;
+  position: absolute !important;
+  background: var(--lab-gold) !important;
+  opacity: .66 !important;
+}
+body #paddox-race-lab .h33e4-passport-mark::before {
+  width: 34px !important;
+  height: 1px !important;
+  left: 17px !important;
+  top: 34px !important;
+}
+body #paddox-race-lab .h33e4-passport-mark::after {
+  width: 1px !important;
+  height: 34px !important;
+  left: 34px !important;
+  top: 17px !important;
+}
+body #paddox-race-lab .h33e4-stamp {
+  left: auto !important;
+  top: auto !important;
+  right: -8px !important;
+  bottom: 12px !important;
+  width: min(45%, 230px) !important;
+  aspect-ratio: 1 !important;
+  transform: rotate(7deg) !important;
+  display: block !important;
+}
+body #paddox-race-lab .h33e4-stamp-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 18px 26px rgba(0,0,0,.72)) drop-shadow(0 0 17px rgba(240,0,54,.2)) !important;
+}
+body #paddox-race-lab .h33e4-passport-copy {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  flex: none !important;
+  min-width: 0 !important;
+  justify-content: flex-end !important;
+  padding: 24px 0 8px !important;
+}
+body #paddox-race-lab .h33e4-passport-copy h3 {
+  font-size: clamp(2.2rem, 3vw, 3.5rem) !important;
+  line-height: .9 !important;
+  letter-spacing: 0 !important;
+  margin: 0 0 16px !important;
+}
+body #paddox-race-lab .h33e4-passport-copy p {
+  color: rgba(255,255,255,.62) !important;
+  font-size: .92rem !important;
+  line-height: 1.6 !important;
+  margin: 0 0 28px !important;
+}
+body #paddox-race-lab .h33e4-progress-row {
+  margin: 0 0 9px !important;
+}
+body #paddox-race-lab .h33e4-passport-progress {
+  height: 5px !important;
+  border-radius: 0 !important;
+  margin: 0 0 22px !important;
+}
+body #paddox-race-lab .h33e4-actions {
+  display: grid !important;
+  gap: 12px !important;
+}
+body #paddox-race-lab .passport-claim-btn {
+  min-height: 50px !important;
+  padding: 13px 18px !important;
+  border-radius: 4px !important;
+  background: var(--lab-red) !important;
+  border: 1px solid var(--lab-red-bright) !important;
+  color: #fff !important;
+  font-size: .72rem !important;
+  letter-spacing: 1.6px !important;
+  cursor: pointer !important;
+}
+body #paddox-race-lab .passport-claim-btn.is-claimed {
+  background: rgba(216,181,108,.12) !important;
+  border-color: rgba(216,181,108,.52) !important;
+  color: #f2d89d !important;
+  box-shadow: none !important;
+}
+body #paddox-race-lab .passport-link {
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  color: rgba(255,255,255,.7) !important;
+  border: 0 !important;
+  font-size: .67rem !important;
+  letter-spacing: 1.6px !important;
+}
+body #paddox-race-lab .passport-link::after {
+  content: '  /  24 rounds' !important;
+  margin-left: 8px !important;
+  color: rgba(255,255,255,.3) !important;
+}
+body #paddox-race-lab .h33e4-side-stack {
+  display: grid !important;
+  grid-template-rows: 1fr 1fr !important;
+  gap: 22px !important;
+}
+body #paddox-race-lab .h33e4-feature-panel {
+  min-height: 0 !important;
+  padding: 26px !important;
+  justify-content: flex-start !important;
+}
+body #paddox-race-lab .h33e4-feature-panel h3 {
+  max-width: 340px !important;
+  color: #fff !important;
+  font-size: clamp(2rem, 3.2vw, 3.1rem) !important;
+  line-height: .86 !important;
+  letter-spacing: 0 !important;
+  margin: 0 0 14px !important;
+}
+body #paddox-race-lab .h33e4-feature-panel > p {
+  max-width: 460px !important;
+  color: rgba(255,255,255,.58) !important;
+  font-size: .86rem !important;
+  line-height: 1.55 !important;
+  margin: 0 !important;
+}
+body #paddox-race-lab .h33e4-feature-icon {
+  right: 24px !important;
+  top: 24px !important;
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 50% !important;
+}
+body #paddox-race-lab .h33e4-picks {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: auto 0 0 !important;
+  padding-top: 18px !important;
+}
+body #paddox-race-lab .h33e4-picks button {
+  min-width: 0 !important;
+  min-height: 76px !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  grid-template-rows: 1fr 1fr !important;
+  align-items: center !important;
+  gap: 0 8px !important;
+  padding: 11px !important;
+  border-radius: 5px !important;
+  background: rgba(255,255,255,.035) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  color: #fff !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+body #paddox-race-lab .h33e4-picks button span {
+  grid-row: 1 / 3 !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(240,0,54,.14) !important;
+  color: #ff9aae !important;
+  font-size: .58rem !important;
+}
+body #paddox-race-lab .h33e4-picks button b {
+  align-self: end !important;
+  min-width: 0 !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .72rem !important;
+  letter-spacing: .6px !important;
+  line-height: 1.05 !important;
+  text-transform: uppercase !important;
+}
+body #paddox-race-lab .h33e4-picks button small {
+  align-self: start !important;
+  color: rgba(255,255,255,.4) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .56rem !important;
+  letter-spacing: .6px !important;
+  text-transform: uppercase !important;
+}
+body #paddox-race-lab .h33e4-picks button:hover,
+body #paddox-race-lab .h33e4-picks button.on {
+  background: rgba(240,0,54,.14) !important;
+  border-color: rgba(240,0,54,.7) !important;
+  box-shadow: inset 0 -2px 0 var(--lab-red) !important;
+  transform: none !important;
+}
+body #paddox-race-lab .h33e4-picks button.on span {
+  background: var(--lab-red) !important;
+  color: #fff !important;
+}
+body #paddox-race-lab .h33e4-status {
+  min-height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 12px 0 0 !important;
+  padding: 9px 12px !important;
+  border-radius: 4px !important;
+  background: rgba(0,0,0,.28) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  color: rgba(255,255,255,.72) !important;
+  font-size: .7rem !important;
+  line-height: 1.3 !important;
+}
+body #paddox-race-lab .h33e4-vault-head {
+  margin-bottom: 0 !important;
+}
+body #paddox-race-lab .h33e4-vault-count {
+  border-radius: 4px !important;
+}
+body #paddox-race-lab .h33e4-vault-mini {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin: auto 0 0 !important;
+  padding-top: 12px !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge {
+  min-width: 0 !important;
+  height: 90px !important;
+  aspect-ratio: auto !important;
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 9px !important;
+  border: 0 !important;
+  border-left: 1px solid rgba(255,255,255,.11) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge img {
+  width: 52px !important;
+  height: 52px !important;
+  object-fit: contain !important;
+  opacity: .28 !important;
+  filter: grayscale(1) drop-shadow(0 8px 10px rgba(0,0,0,.45)) !important;
+  transition: opacity .24s ease, filter .24s ease, transform .24s ease !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge b {
+  min-width: 0 !important;
+  color: rgba(255,255,255,.38) !important;
+  font-family: var(--font-condensed) !important;
+  font-size: .68rem !important;
+  letter-spacing: .5px !important;
+  line-height: 1.1 !important;
+  text-transform: uppercase !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge:hover {
+  transform: none !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge:hover img {
+  transform: scale(1.05) !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge.unlocked {
+  border-left-color: var(--lab-gold) !important;
+  background: linear-gradient(90deg, rgba(216,181,108,.08), transparent) !important;
+  box-shadow: none !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge.unlocked img {
+  opacity: 1 !important;
+  filter: drop-shadow(0 8px 14px rgba(216,181,108,.2)) !important;
+}
+body #paddox-race-lab .h33e4-vault-mini .vault-badge.unlocked b {
+  color: #f1d89f !important;
+}
+body #paddox-race-lab button:focus-visible,
+body #paddox-race-lab a:focus-visible {
+  outline: 2px solid #fff !important;
+  outline-offset: 3px !important;
+}
+
+@media (max-width: 1120px) {
+  body #paddox-race-lab .h33e4-command-grid {
+    grid-template-columns: 1fr !important;
+  }
+  body #paddox-race-lab .h33e4-passport-panel {
+    min-height: 520px !important;
+  }
+  body #paddox-race-lab .h33e4-side-stack {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto !important;
+  }
+}
+
+@media (max-width: 780px) {
+  body #paddox-race-lab.h33e4-race-lab {
+    padding: 72px 0 80px !important;
+  }
+  body #paddox-race-lab .container {
+    width: min(100% - 28px, 1320px) !important;
+  }
+  body #paddox-race-lab .h33e4-lab-head {
+    grid-template-columns: 1fr !important;
+    gap: 26px !important;
+  }
+  body #paddox-race-lab .h33e4-title {
+    font-size: clamp(3.7rem, 18vw, 5.6rem) !important;
+  }
+  body #paddox-race-lab .h33e4-live-chip {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  body #paddox-race-lab .race-lab-telemetry {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  body #paddox-race-lab .race-lab-telemetry-item:first-child {
+    grid-column: 1 / -1 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--lab-line) !important;
+  }
+  body #paddox-race-lab .h33e4-passport-panel {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    gap: 18px !important;
+    min-height: 0 !important;
+    padding: 20px !important;
+  }
+  body #paddox-race-lab .h33e4-passport-visual {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    min-height: 360px !important;
+  }
+  body #paddox-race-lab .h33e4-passport-copy {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    padding: 0 !important;
+  }
+  body #paddox-race-lab .h33e4-side-stack {
+    grid-template-columns: 1fr !important;
+  }
+  body #paddox-race-lab .h33e4-feature-panel {
+    min-height: 350px !important;
+  }
+  body #paddox-race-lab .h33e4-feature-panel h3 {
+    max-width: calc(100% - 64px) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  body #paddox-race-lab .race-lab-telemetry-item {
+    padding: 13px !important;
+  }
+  body #paddox-race-lab .lab-card {
+    padding: 20px !important;
+  }
+  body #paddox-race-lab .h33e4-passport-visual {
+    min-height: 300px !important;
+  }
+  body #paddox-race-lab .h33e4-passport-book {
+    width: 260px !important;
+    max-width: calc(100% - 30px) !important;
+    transform: perspective(900px) rotateY(-4deg) rotateZ(-1deg) !important;
+  }
+  body #paddox-race-lab .h33e4-stamp {
+    right: -4px !important;
+    width: 48% !important;
+  }
+  body #paddox-race-lab .h33e4-picks {
+    grid-template-columns: 1fr !important;
+  }
+  body #paddox-race-lab .h33e4-picks button {
+    min-height: 64px !important;
+  }
+  body #paddox-race-lab .h33e4-feature-panel {
+    min-height: 0 !important;
+  }
+  body #paddox-race-lab .h33e4-feature-panel h3 {
+    overflow-wrap: anywhere !important;
+  }
+  body #paddox-race-lab .h33e4-vault-panel h3 {
+    max-width: 100% !important;
+  }
+  body #paddox-race-lab .h33e4-vault-mini {
+    grid-template-columns: 1fr !important;
+  }
+  body #paddox-race-lab .h33e4-vault-mini .vault-badge {
+    width: 100% !important;
+    max-width: none !important;
+    height: 70px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body #paddox-race-lab *,
+  body #paddox-race-lab *::before,
+  body #paddox-race-lab *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
