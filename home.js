@@ -3196,7 +3196,7 @@ setInterval(() => {
     /* AI Studio permanently removed */
     const h1 = document.querySelector('.hero-h1');
     if (h1 && h1.dataset.h32a3 !== '1') {
-      h1.innerHTML = '<span class="h1-line animate-fade-up delay-2">LIVE</span><span class="h1-line animate-fade-up delay-3">THE</span><span class="h1-line h1-race-line animate-fade-up delay-4"><span class="h1-accent">RACE</span></span>';
+      h1.innerHTML = '<span class="h1-line animate-fade-up delay-2">BEYOND</span><span class="h1-line animate-fade-up delay-3">THE</span><span class="h1-line h1-race-line animate-fade-up delay-4"><span class="h1-accent">APEX</span></span>';
       h1.dataset.h32a3 = '1';
     }
     const title = document.querySelector('.nl-title');
