@@ -16713,3 +16713,293 @@ body.pdx-hero-redesign .pdx-car-stage canvas,
     padding:0 !important;
   }
 }
+
+/* ========================================================
+   USER REQUESTED REDESIGN: TRACK MODE & RACE LAB
+   ======================================================== */
+
+/* --- TRACK MODE POLISH --- */
+body .h34d2-panel {
+  display: flex !important;
+  background: linear-gradient(145deg, #0f0f13 0%, #050505 100%) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  overflow: hidden !important;
+  gap: 0 !important;
+}
+body .h34d2-stage {
+  flex: 1.2 !important;
+  background: radial-gradient(circle at center, rgba(232,0,45,0.08) 0%, transparent 70%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body .h34d2-info {
+  flex: 0.8 !important;
+  padding: 50px 40px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  background: rgba(0,0,0,0.4) !important;
+  border-left: 1px solid rgba(255,255,255,0.05) !important;
+}
+body .h34d2-kicker {
+  font-family: var(--font-condensed) !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 4px !important;
+  color: var(--red) !important;
+  margin-bottom: 12px !important;
+}
+body .h34d2-info h3 {
+  font-family: var(--font-display) !important;
+  font-size: clamp(3rem, 4vw, 4rem) !important;
+  line-height: 0.9 !important;
+  margin-bottom: 8px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  color: #fff !important;
+}
+body .h34d2-info p#rc-race-meta {
+  font-family: var(--font-sans) !important;
+  font-size: 1.1rem !important;
+  color: rgba(255,255,255,0.6) !important;
+  margin-bottom: 30px !important;
+}
+body .h34d2-countdown-card {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 24px !important;
+}
+body .h34d2-countdown-card span {
+  font-size: 0.85rem !important;
+  color: rgba(255,255,255,0.5) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+}
+body .h34d2-countdown-card strong {
+  font-family: var(--font-mono) !important;
+  font-size: 1.2rem !important;
+  color: #fff !important;
+  letter-spacing: 1px !important;
+}
+body .h34d2-chip-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin-bottom: 30px !important;
+}
+body .h34d2-chip-row .h34c-chip {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  color: #ccc !important;
+}
+body .h34d2-data-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-bottom: 36px !important;
+}
+body .h33b-data-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+body .h33b-data-row span {
+  font-size: 0.8rem !important;
+  color: rgba(255,255,255,0.4) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+}
+body .h33b-data-row strong {
+  font-size: 0.95rem !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+}
+body .h34d2-track-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--red) !important;
+  color: #fff !important;
+  font-family: var(--font-sans) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  padding: 18px 32px !important;
+  border-radius: 12px !important;
+  text-decoration: none !important;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%) !important;
+  transition: transform 0.3s ease, background 0.3s ease !important;
+  border: none !important;
+}
+body .h34d2-track-cta:hover {
+  background: #ff1a35 !important;
+  transform: translateY(-2px) !important;
+}
+@media (max-width: 900px) {
+  body .h34d2-panel { flex-direction: column !important; }
+  body .h34d2-info { padding: 30px 20px !important; border-left: none !important; border-top: 1px solid rgba(255,255,255,0.05) !important; }
+}
+
+/* --- RACE LAB FULL REDO --- */
+body .h33e4-race-lab {
+  background: #000 !important;
+  padding: 100px 0 !important;
+  position: relative !important;
+}
+body .h33e4-lab-shell {
+  background: radial-gradient(ellipse at top right, rgba(232,0,45,0.05), transparent 60%), #070707 !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 32px !important;
+  padding: 50px !important;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+body .h33e4-lab-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  margin-bottom: 50px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  padding-bottom: 30px !important;
+}
+body .h33e4-title-block p {
+  font-size: 1.1rem !important;
+  color: rgba(255,255,255,0.6) !important;
+  max-width: 500px !important;
+  margin-top: 14px !important;
+}
+body .h33e4-command-grid {
+  display: grid !important;
+  grid-template-columns: 1.3fr 1fr !important;
+  gap: 30px !important;
+}
+body .lab-card {
+  background: linear-gradient(160deg, rgba(20,20,22,0.9), rgba(10,10,12,0.95)) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 24px !important;
+  padding: 40px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 40px rgba(0,0,0,0.4) !important;
+}
+body .lab-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, var(--red), transparent) !important;
+  opacity: 0.8 !important;
+}
+body .h33e4-passport-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  min-height: 520px !important;
+}
+body .h33e4-passport-visual {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 20px !important;
+  margin-bottom: 30px !important;
+  background: radial-gradient(circle at center, rgba(232,0,45,0.1), transparent 60%) !important;
+  border-radius: 16px !important;
+  position: relative !important;
+}
+body .h33e4-passport-book {
+  width: min(80%, 360px) !important;
+  aspect-ratio: 1.42/1 !important;
+  border-radius: 20px 14px 14px 20px !important;
+  background: linear-gradient(135deg,#1c1c1c,#0a0a0a) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 12px 0 20px rgba(255,255,255,0.05) !important;
+  position: relative !important;
+  z-index: 1 !important;
+  transform: rotate(-3deg) !important;
+}
+body .h33e4-stamp {
+  position: absolute !important;
+  right: 10% !important;
+  bottom: -10px !important;
+  width: 180px !important;
+  aspect-ratio: 0.75 !important;
+  transform: rotate(4deg) !important;
+  z-index: 5 !important;
+}
+body .h33e4-stamp-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(232,0,45,0.3)) !important;
+}
+body .h33e4-passport-copy h3, body .h33e4-feature-panel h3 {
+  font-family: var(--font-display) !important;
+  font-size: clamp(2rem, 3vw, 2.8rem) !important;
+  margin: 10px 0 16px !important;
+  text-transform: uppercase !important;
+  color: #fff !important;
+}
+body .h33e4-passport-copy p, body .h33e4-feature-panel p {
+  font-size: 1rem !important;
+  color: rgba(255,255,255,0.6) !important;
+  line-height: 1.5 !important;
+  margin-bottom: 24px !important;
+}
+body .h33e4-side-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 30px !important;
+}
+body .lab-prediction-card, body .lab-badge-card {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+body .h33e4-vault-mini {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 16px !important;
+  margin-top: auto !important;
+}
+body .vault-badge {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  aspect-ratio: 1 !important;
+  transition: transform 0.3s ease, border-color 0.3s ease !important;
+}
+body .vault-badge:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(232,0,45,0.5) !important;
+  background: rgba(232,0,45,0.05) !important;
+}
+body .vault-badge img {
+  width: 90% !important;
+  height: 90% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)) !important;
+}
+
+@media (max-width: 1024px) {
+  body .h33e4-command-grid { grid-template-columns: 1fr !important; }
+}
