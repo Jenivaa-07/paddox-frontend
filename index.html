@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PADDOX — F1 Fan Universe</title>
-  <link rel="stylesheet" href="home.css?v=H4_4_0" />
+  <link rel="stylesheet" href="home.css?v=H4_5_0" />
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=Titillium+Web:wght@400;600;700;900&display=swap"
     rel="stylesheet"
@@ -306,12 +306,13 @@
     <div class="container">
       <div class="section-head">
         <div class="reveal-up">
-          <div class="section-label">AI Curated</div>
+          <div class="section-label" id="highlights-context">Curated for the grid</div>
           <h2 class="section-title">YOUR <span class="accent">HIGHLIGHTS</span></h2>
+          <p class="highlights-personalization-copy" id="highlights-personalization-copy">Official F1 videos selected around your favourite team and driver.</p>
         </div>
       </div>
-      <div class="highlights-carousel" id="highlights-carousel" style="display: flex; gap: 15px; overflow-x: auto; padding: 20px 0;">
-        <div style="color:var(--muted)">Loading personalised video highlights...</div>
+      <div class="highlights-carousel" id="highlights-carousel" aria-live="polite">
+        <div class="highlights-loading">Preparing your grid…</div>
       </div>
     </div>
   </section>
@@ -663,10 +664,10 @@
   <!-- ░░ TOAST ░░ -->
   <div class="toast" id="toast"></div>
 
-<script src="js/api.js?v=20260814_1"></script>
+<script src="js/api.js?v=20260814_2"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 <script src="data/paddoxTracks.generated.js?v=H3_4C_4"></script>
-<script src="home.js?v=H4_4_0"></script>
+<script src="home.js?v=H4_5_0"></script>
 <script src="assets/js/voice-assistant.js?v=20260814_1"></script>
 <script src="chatbot.js"></script>
 </body>

@@ -4266,30 +4266,144 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
   }
 })();
 
-/* ══ PERSONALISED HIGHLIGHTS (CLIP/RAG) ══ */
+/* ══ PERSONALISED OFFICIAL F1 HIGHLIGHTS ══ */
+const PADDOX_HIGHLIGHT_HISTORY_KEY = 'paddox_highlight_history_v1';
+const PADDOX_HIGHLIGHT_DEFAULTS = [
+  { youtubeId:'Ec2SJgw5sK4', title:'Top 10 Onboards: 2026 British Grand Prix', channel:'FORMULA 1', type:'onboard', reason:'Latest official F1 action' },
+  { youtubeId:'IiaVcT3SZv0', title:'Every Grand Prix Highlight of the 2025 Season', channel:'FORMULA 1', type:'season-review', reason:'The complete season story' },
+  { youtubeId:'zC5PkzntzVU', title:'Max Verstappen: The Ultimate Onboard Collection', channel:'FORMULA 1', type:'onboard', reason:'A fan-favourite onboard collection' },
+  { youtubeId:'IFzZB2M5wYw', title:"Lando Norris' F1 Journey To The Top", channel:'FORMULA 1', type:'onboard', reason:'A fan-favourite onboard collection' },
+  { youtubeId:'ygxT9Vs8Vr0', title:'Charles Leclerc: The Ultimate Onboard Collection', channel:'FORMULA 1', type:'onboard', reason:'A fan-favourite onboard collection' },
+  { youtubeId:'gIIjGtz-SdA', title:'Lewis Hamilton: The Ultimate Onboard Collection', channel:'FORMULA 1', type:'onboard', reason:'A fan-favourite onboard collection' }
+].map(video => ({
+  ...video,
+  thumbnail:`https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`,
+  watchUrl:`https://www.youtube.com/watch?v=${video.youtubeId}`
+}));
+
+function readHighlightHistory() {
+  try {
+    const value = JSON.parse(localStorage.getItem(PADDOX_HIGHLIGHT_HISTORY_KEY) || '{}');
+    return value && typeof value === 'object' ? value : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function saveHighlightEventLocally(videoId, event) {
+  const history = readHighlightHistory();
+  history[videoId] = { event, lastAt:Date.now() };
+  const trimmed = Object.fromEntries(
+    Object.entries(history).sort((a, b) => b[1].lastAt - a[1].lastAt).slice(0, 50)
+  );
+  try { localStorage.setItem(PADDOX_HIGHLIGHT_HISTORY_KEY, JSON.stringify(trimmed)); } catch (_) {}
+}
+
+function trackHighlightEvent(videoId, event) {
+  saveHighlightEventLocally(videoId, event);
+  if (window.PaddoxAPI?.highlights?.event) {
+    window.PaddoxAPI.highlights.event(videoId, event).catch(() => {});
+  }
+}
+
+function highlightTypeLabel(type = '') {
+  return ({
+    onboard:'Onboard',
+    'race-highlight':'Race highlights',
+    qualifying:'Qualifying',
+    'inside-story':'Inside story',
+    'season-review':'Season review'
+  })[type] || 'F1 video';
+}
+
+function mountHighlightPlayer(card, video) {
+  const media = card.querySelector('.highlight-card-media');
+  if (!media || media.dataset.playing === '1') return;
+  media.dataset.playing = '1';
+  media.innerHTML = `
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.youtubeId)}?autoplay=1&rel=0"
+      title="${escapeHTML(video.title)}"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen></iframe>`;
+  trackHighlightEvent(video.youtubeId, 'play');
+}
+
+function renderHighlightMedia(highlights, { personalized = false, preferenceSummary = null } = {}) {
+  const container = document.getElementById('highlights-carousel');
+  if (!container) return;
+
+  const history = readHighlightHistory();
+  const visible = highlights.filter(video => history[video.youtubeId]?.event !== 'dismiss');
+  const rendered = (visible.length ? visible : PADDOX_HIGHLIGHT_DEFAULTS).slice(0, 6);
+
+  container.innerHTML = rendered.map(video => `
+    <article class="highlight-card" data-video-id="${escapeHTML(video.youtubeId)}">
+      <div class="highlight-card-media">
+        <img src="${escapeHTML(video.thumbnail)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+        <button class="highlight-play" type="button" aria-label="Play ${escapeHTML(video.title)}">
+          <span class="highlight-play-icon" aria-hidden="true"></span>
+          <span>Play</span>
+        </button>
+        <span class="highlight-source">Official F1</span>
+      </div>
+      <div class="highlight-card-body">
+        <div class="highlight-card-meta">
+          <span>${escapeHTML(highlightTypeLabel(video.type))}</span>
+          <button class="highlight-dismiss" type="button" aria-label="Show fewer videos like ${escapeHTML(video.title)}" title="Not for me">×</button>
+        </div>
+        <h3>${escapeHTML(video.title)}</h3>
+        <div class="highlight-card-footer">
+          <span>${escapeHTML(video.reason || 'From the official F1 channel')}</span>
+          <a href="${escapeHTML(video.watchUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Watch ${escapeHTML(video.title)} on YouTube">YouTube ↗</a>
+        </div>
+      </div>
+    </article>`).join('');
+
+  const byId = new Map(rendered.map(video => [video.youtubeId, video]));
+  container.querySelectorAll('.highlight-card').forEach(card => {
+    const video = byId.get(card.dataset.videoId);
+    card.querySelector('.highlight-play')?.addEventListener('click', () => mountHighlightPlayer(card, video));
+    card.querySelector('.highlight-dismiss')?.addEventListener('click', () => {
+      trackHighlightEvent(video.youtubeId, 'dismiss');
+      card.classList.add('is-dismissed');
+      setTimeout(() => card.remove(), 220);
+    });
+    card.querySelector('a')?.addEventListener('click', () => trackHighlightEvent(video.youtubeId, 'play'));
+  });
+
+  const context = document.getElementById('highlights-context');
+  const copy = document.getElementById('highlights-personalization-copy');
+  if (context) context.textContent = personalized ? 'Personalised for you' : 'Curated for the grid';
+  if (copy) {
+    const driver = preferenceSummary?.favouriteDriver;
+    const team = preferenceSummary?.favouriteTeam;
+    copy.textContent = personalized
+      ? `Official F1 videos tuned to ${[driver, team].filter(Boolean).join(' and ')} plus a little discovery.`
+      : 'Choose your favourite team and driver in Account to tune this grid.';
+  }
+}
+
 async function fetchHighlightMedia() {
   const container = document.getElementById('highlights-carousel');
   if (!container) return;
-  
-  // Simulated ML response for personalised highlights
-  setTimeout(() => {
-    const highlights = [
-      { id: 1, title: 'Epic Overtake at Turn 1', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1247265985.jpg', tag: 'Action' },
-      { id: 2, title: 'Pit Stop Mastery', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1471321773.jpg', tag: 'Strategy' },
-      { id: 3, title: 'Post-Race Celebrations', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1471442186.jpg', tag: 'Emotion' },
-      { id: 4, title: 'Qualifying Hot Lap', img: 'https://media.formula1.com/image/upload/f_auto/q_auto/v1677244985/content/dam/fom-website/2023/Bahrain/GettyImages-1471439775.jpg', tag: 'Speed' }
-    ];
-    
-    container.innerHTML = highlights.map(h => `
-      <div style="flex: 0 0 280px; height: 160px; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">
-        <img src="${h.img}" alt="${h.title}" style="width: 100%; height: 100%; object-fit: cover;" />
-        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 15px; display: flex; flex-direction: column; justify-content: flex-end;">
-          <span style="background: var(--red); color: #fff; padding: 2px 6px; font-size: 0.6rem; border-radius: 4px; align-self: flex-start; margin-bottom: 5px; text-transform: uppercase; font-family: var(--font-c);">${h.tag}</span>
-          <h4 style="margin: 0; color: #fff; font-size: 1rem; font-family: var(--font-c); letter-spacing: 1px;">${h.title}</h4>
-        </div>
-      </div>
-    `).join('');
-  }, 1500);
+
+  // Paint useful content instantly; a slow/cold backend never leaves this section blocked.
+  renderHighlightMedia(PADDOX_HIGHLIGHT_DEFAULTS);
+
+  try {
+    const seen = Object.keys(readHighlightHistory());
+    const data = window.PaddoxAPI?.highlights
+      ? await window.PaddoxAPI.highlights.personalized({ limit:6, seen })
+      : null;
+    const highlights = data?.data?.highlights;
+    if (data?.success && Array.isArray(highlights) && highlights.length) {
+      renderHighlightMedia(highlights, data.data);
+    }
+  } catch (err) {
+    console.warn('PADDOX personalised highlights unavailable:', err.message);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', fetchHighlightMedia);

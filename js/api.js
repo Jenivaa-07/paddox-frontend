@@ -172,6 +172,18 @@ const UserAPI = {
   getDownloads      : ()     => apiRequest('/users/downloads'),
 };
 
+/* ── Personalised Highlights API ── */
+const HighlightAPI = {
+  personalized: ({ limit = 6, seen = [] } = {}) => {
+    const params = new URLSearchParams({ limit:String(limit) });
+    if (seen.length) params.set('seen', seen.slice(0, 30).join(','));
+    return apiRequest(`/highlights/personalized?${params}`);
+  },
+  event: (videoId, event) => apiRequest(`/highlights/${encodeURIComponent(videoId)}/events`, {
+    method:'POST', body:{ event }
+  }),
+};
+
 /* ── Collectibles API ── */
 const CollectibleAPI = {
   getCatalogue  : ()     => apiRequest('/collectibles'),
@@ -249,6 +261,7 @@ window.PaddoxAPI = {
   auth: AuthAPI, product: ProductAPI, order: OrderAPI,
   cart: CartAPI, wishlist: WishlistAPI, payment: PaymentAPI,
   f1: F1API, asset: AssetAPI, fan: FanAPI, user: UserAPI,
+  highlights: HighlightAPI,
   collectible: CollectibleAPI,
   connectSocket,
 };
