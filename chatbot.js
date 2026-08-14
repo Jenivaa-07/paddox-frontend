@@ -1,108 +1,253 @@
-/* PADDOX RAG Chatbot & Voice Assistant Logic */
+/* PADDOX grounded AI Pit Wall */
 document.addEventListener('DOMContentLoaded', () => {
-  // Inject widget HTML into body
+  const pitWallIcon = `
+    <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <path class="pitwall-icon-shell" d="M8 10.5h23.5L40 19v18.5H16L8 30z"/>
+      <path class="pitwall-icon-trace" d="M12.5 26h5l3.2-8.5 5.2 16 4.2-11 2.1 3.5h4.3"/>
+      <path class="pitwall-icon-flag" d="M31.5 10.5V17H38"/>
+      <circle class="pitwall-icon-node" cx="12.5" cy="26" r="1.7"/>
+    </svg>`;
+
   const widgetHTML = `
-    <div id="paddox-chatbot">
-      <div id="paddox-chatbot-window">
-        <div id="paddox-chatbot-header">
-          <span>AI Pit Wall Support</span>
-          <button id="paddox-chatbot-close">✕</button>
+    <div id="paddox-chatbot" data-state="closed">
+      <section id="paddox-chatbot-window" role="dialog" aria-label="PADDOX AI Pit Wall" aria-hidden="true">
+        <header id="paddox-chatbot-header">
+          <div class="paddox-chatbot-brand">
+            <span class="paddox-chatbot-brand-mark">${pitWallIcon}</span>
+            <span class="paddox-chatbot-brand-copy">
+              <span class="paddox-chatbot-kicker">PADDOX RAG</span>
+              <strong>AI PIT WALL</strong>
+            </span>
+          </div>
+          <div class="paddox-chatbot-header-actions">
+            <span class="paddox-chatbot-status" id="paddox-chatbot-status">
+              <i aria-hidden="true"></i> Grounding ready
+            </span>
+            <button id="paddox-chatbot-close" type="button" aria-label="Close AI Pit Wall">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="paddox-chatbot-context-strip">
+          <span>VERIFIED PADDOX + F1 KNOWLEDGE</span>
+          <span>RETRIEVAL ON</span>
         </div>
-        <div id="paddox-chatbot-messages">
-          <div class="chat-message bot">Hello! I'm the PADDOX AI Support bot. Ask me about race telemetry, our products, or fan hub!</div>
+
+        <div id="paddox-chatbot-messages" role="log" aria-live="polite" aria-relevant="additions">
+          <article class="chat-message bot">
+            <span class="chat-message-avatar">${pitWallIcon}</span>
+            <div class="chat-message-stack">
+              <div class="chat-message-meta"><strong>AI PIT WALL</strong><span>NOW</span></div>
+              <div class="chat-message-bubble">
+                I answer from verified PADDOX and F1 sources. Ask about platform features, F1 terms, historical data coverage, merch, or policies.
+              </div>
+              <div class="chat-grounding-note"><span></span> Answers are grounded when evidence is found.</div>
+            </div>
+          </article>
         </div>
-        <div id="paddox-chatbot-input-area">
-          <input type="text" id="paddox-chatbot-input" placeholder="Ask AI..." />
-          <button class="chatbot-btn" id="paddox-chatbot-mic" title="Voice Input">🎤</button>
-          <button class="chatbot-btn" id="paddox-chatbot-send" title="Send">➤</button>
+
+        <div class="paddox-chatbot-prompts" id="paddox-chatbot-prompts" aria-label="Suggested questions">
+          <button type="button" data-prompt="What can I do on PADDOX?">Explore PADDOX</button>
+          <button type="button" data-prompt="What is an undercut in Formula 1?">Explain undercut</button>
+          <button type="button" data-prompt="What is the PADDOX returns policy?">Returns policy</button>
         </div>
-      </div>
-      <button id="paddox-chatbot-btn" title="Open AI Chat">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ai-sparkle-icon">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          <path d="m9.5 9.5 1.5-3 1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5z"></path>
-        </svg>
+
+        <form id="paddox-chatbot-input-area">
+          <label class="sr-only" for="paddox-chatbot-input">Ask the PADDOX AI Pit Wall</label>
+          <textarea id="paddox-chatbot-input" rows="1" maxlength="600" placeholder="Ask the pit wall..."></textarea>
+          <div class="paddox-chatbot-compose-meta">
+            <span><b id="paddox-chatbot-count">0</b>/600</span>
+            <span>Verified retrieval</span>
+          </div>
+          <button class="chatbot-send" id="paddox-chatbot-send" type="submit" aria-label="Send question">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4.5 14-2.7-5.2z"/><path d="m11.8 13.8 3.8-3.8"/></svg>
+          </button>
+        </form>
+      </section>
+
+      <button id="paddox-chatbot-btn" type="button" aria-label="Open PADDOX AI Pit Wall" aria-expanded="false">
+        <span class="paddox-chatbot-launch-icon">${pitWallIcon}</span>
+        <span class="paddox-chatbot-launch-copy">
+          <small>PADDOX AI</small>
+          <strong>ASK THE PIT WALL</strong>
+        </span>
+        <span class="paddox-chatbot-launch-live" aria-hidden="true"></span>
       </button>
-    </div>
-  `;
+    </div>`;
+
   document.body.insertAdjacentHTML('beforeend', widgetHTML);
 
-  const btn = document.getElementById('paddox-chatbot-btn');
-  const chatWindow = document.getElementById('paddox-chatbot-window');
-  const closeBtn = document.getElementById('paddox-chatbot-close');
-  const sendBtn = document.getElementById('paddox-chatbot-send');
-  const micBtn = document.getElementById('paddox-chatbot-mic');
-  const inputEl = document.getElementById('paddox-chatbot-input');
-  const messagesEl = document.getElementById('paddox-chatbot-messages');
+  const root = document.getElementById('paddox-chatbot');
+  const launcher = document.getElementById('paddox-chatbot-btn');
+  const panel = document.getElementById('paddox-chatbot-window');
+  const closeButton = document.getElementById('paddox-chatbot-close');
+  const form = document.getElementById('paddox-chatbot-input-area');
+  const input = document.getElementById('paddox-chatbot-input');
+  const sendButton = document.getElementById('paddox-chatbot-send');
+  const messages = document.getElementById('paddox-chatbot-messages');
+  const prompts = document.getElementById('paddox-chatbot-prompts');
+  const count = document.getElementById('paddox-chatbot-count');
+  const status = document.getElementById('paddox-chatbot-status');
+  let pending = false;
 
-  let isRecording = false;
+  const sourceLabel = (source = {}) => source.title || source.label || source.source || 'Verified PADDOX source';
 
-  btn.addEventListener('click', () => {
-    chatWindow.classList.toggle('open');
-    if (chatWindow.classList.contains('open')) {
-      inputEl.focus();
+  const setOpen = (open) => {
+    root.dataset.state = open ? 'open' : 'closed';
+    panel.setAttribute('aria-hidden', String(!open));
+    launcher.setAttribute('aria-expanded', String(open));
+    launcher.setAttribute('aria-label', open ? 'Close PADDOX AI Pit Wall' : 'Open PADDOX AI Pit Wall');
+    if (open) window.setTimeout(() => input.focus(), 180);
+  };
+
+  const setServiceState = (state, label) => {
+    status.dataset.state = state;
+    status.lastChild.textContent = ` ${label}`;
+  };
+
+  const scrollToLatest = () => {
+    messages.scrollTop = messages.scrollHeight;
+  };
+
+  const addMessage = ({ text, sender, sources = [], grounded = false, error = false }) => {
+    const article = document.createElement('article');
+    article.className = `chat-message ${sender}${error ? ' error' : ''}`;
+
+    if (sender === 'bot') {
+      const avatar = document.createElement('span');
+      avatar.className = 'chat-message-avatar';
+      avatar.innerHTML = pitWallIcon;
+      article.appendChild(avatar);
     }
-  });
 
-  closeBtn.addEventListener('click', () => {
-    chatWindow.classList.remove('open');
-  });
+    const stack = document.createElement('div');
+    stack.className = 'chat-message-stack';
 
-  function addMessage(text, sender) {
-    const msg = document.createElement('div');
-    msg.className = `chat-message ${sender}`;
-    msg.textContent = text;
-    messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
+    const meta = document.createElement('div');
+    meta.className = 'chat-message-meta';
+    const author = document.createElement('strong');
+    author.textContent = sender === 'bot' ? 'AI PIT WALL' : 'YOU';
+    const time = document.createElement('span');
+    time.textContent = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit' }).format(new Date());
+    meta.append(author, time);
 
-  async function handleSend() {
-    const text = inputEl.value.trim();
-    if (!text) return;
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-message-bubble';
+    bubble.textContent = text;
+    stack.append(meta, bubble);
 
-    addMessage(text, 'user');
-    inputEl.value = '';
+    if (sender === 'bot') {
+      const grounding = document.createElement('div');
+      grounding.className = `chat-grounding-note ${grounded ? 'is-grounded' : 'is-unverified'}`;
+      const dot = document.createElement('span');
+      grounding.append(dot, document.createTextNode(grounded ? ' Grounded in retrieved evidence' : ' No supporting evidence found'));
+      stack.appendChild(grounding);
+    }
 
-    // Mock AI delay & response
-    setTimeout(() => {
-      // Very simple mock logic based on keywords
-      let response = "I'm not sure about that. Try asking about 'telemetry', 'shop', or 'fan points'!";
-      const lower = text.toLowerCase();
-      
-      if (lower.includes('telemetry') || lower.includes('lap')) {
-        response = "The live telemetry data predicts a 65% chance of a safety car based on current tyre degradation rates.";
-      } else if (lower.includes('shop') || lower.includes('merch') || lower.includes('product')) {
-        response = "We recommend the new aerodynamic windbreaker! It's currently trending in our AI 'For You' section.";
-      } else if (lower.includes('fan') || lower.includes('point')) {
-        response = "You can earn Fan Points by voting in polls, answering trivia, and posting in the Fan Hub!";
-      } else if (lower.includes('hello') || lower.includes('hi')) {
-        response = "Hi there! How can I assist you with PADDOX today?";
+    if (grounded && sources.length) {
+      const sourceWrap = document.createElement('div');
+      sourceWrap.className = 'chat-sources';
+      const sourceTitle = document.createElement('span');
+      sourceTitle.textContent = 'SOURCES';
+      sourceWrap.appendChild(sourceTitle);
+      sources.slice(0, 3).forEach((source) => {
+        const chip = document.createElement('span');
+        chip.className = 'chat-source-chip';
+        chip.textContent = sourceLabel(source);
+        sourceWrap.appendChild(chip);
+      });
+      stack.appendChild(sourceWrap);
+    }
+
+    article.appendChild(stack);
+    messages.appendChild(article);
+    scrollToLatest();
+    return article;
+  };
+
+  const addTyping = () => {
+    const row = document.createElement('article');
+    row.className = 'chat-message bot chat-typing-row';
+    row.innerHTML = `<span class="chat-message-avatar">${pitWallIcon}</span><div class="chat-message-stack"><div class="chat-message-meta"><strong>AI PIT WALL</strong><span>RETRIEVING</span></div><div class="chat-message-bubble chat-typing" aria-label="Searching verified sources"><i></i><i></i><i></i></div></div>`;
+    messages.appendChild(row);
+    scrollToLatest();
+    return row;
+  };
+
+  const resizeInput = () => {
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 112)}px`;
+    count.textContent = String(input.value.length);
+  };
+
+  const ask = async (rawQuestion) => {
+    const question = String(rawQuestion || '').trim();
+    if (!question || pending) return;
+
+    pending = true;
+    sendButton.disabled = true;
+    input.disabled = true;
+    prompts.hidden = true;
+    addMessage({ text: question, sender: 'user' });
+    input.value = '';
+    resizeInput();
+    setServiceState('working', 'Retrieving sources');
+    const typing = addTyping();
+
+    try {
+      if (!window.ChatAPI || typeof window.ChatAPI.ask !== 'function') {
+        throw new Error('Chat service is not available on this page.');
+      }
+      const payload = await window.ChatAPI.ask(question);
+      typing.remove();
+
+      if (!payload?.success) {
+        throw new Error(payload?.message || 'The AI Pit Wall could not answer right now.');
       }
 
-      addMessage(response, 'bot');
-    }, 800);
-  }
-
-  sendBtn.addEventListener('click', handleSend);
-  inputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') handleSend();
-  });
-
-  micBtn.addEventListener('click', () => {
-    if (isRecording) {
-      // Stop recording simulation
-      isRecording = false;
-      micBtn.classList.remove('recording');
-      inputEl.placeholder = "Ask AI...";
-      // Simulate recognized text
-      inputEl.value = "What is the latest race telemetry?";
-      setTimeout(handleSend, 500);
-    } else {
-      // Start recording simulation
-      isRecording = true;
-      micBtn.classList.add('recording');
-      inputEl.placeholder = "Listening...";
-      inputEl.value = "";
+      const result = payload.data || {};
+      addMessage({
+        text: result.answer || 'No answer was returned.',
+        sender: 'bot',
+        grounded: Boolean(result.grounded),
+        sources: Array.isArray(result.sources) ? result.sources : [],
+      });
+      setServiceState(result.grounded ? 'ready' : 'caution', result.grounded ? 'Evidence verified' : 'No evidence found');
+    } catch (error) {
+      typing.remove();
+      addMessage({
+        text: error?.message || 'The AI Pit Wall is temporarily unavailable. Please try again.',
+        sender: 'bot',
+        error: true,
+      });
+      setServiceState('error', 'Service unavailable');
+    } finally {
+      pending = false;
+      sendButton.disabled = false;
+      input.disabled = false;
+      input.focus();
     }
+  };
+
+  launcher.addEventListener('click', () => setOpen(root.dataset.state !== 'open'));
+  closeButton.addEventListener('click', () => setOpen(false));
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    ask(input.value);
+  });
+  input.addEventListener('input', resizeInput);
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      ask(input.value);
+    }
+  });
+  prompts.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-prompt]');
+    if (button) ask(button.dataset.prompt);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && root.dataset.state === 'open') setOpen(false);
   });
 });

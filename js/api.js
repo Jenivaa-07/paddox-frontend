@@ -184,6 +184,16 @@ const HighlightAPI = {
   }),
 };
 
+/* ── Grounded AI Pit Wall ── */
+const ChatAPI = {
+  ask: (query) => apiRequest('/chat', {
+    method: 'POST',
+    body: { query },
+  }),
+};
+
+window.ChatAPI = ChatAPI;
+
 /* ── Collectibles API ── */
 const CollectibleAPI = {
   getCatalogue  : ()     => apiRequest('/collectibles'),
