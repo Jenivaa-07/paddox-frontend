@@ -5,7 +5,7 @@
 'use strict';
 console.log('PADDOX Phase 19 Pit Wall premium polish loaded');
 
-const API_BASE = 'https://paddox-backend.onrender.com/api';
+const API_BASE = '/api';
 let currentYear = new Date().getFullYear();
 let currentRound = null;
 let currentSession = 'Race';

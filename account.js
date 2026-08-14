@@ -143,6 +143,7 @@ function handleAuthSuccess(data) {
     showToast('📩 Verification code sent');
     return;
   }
+  window.TokenManager?.setAccess(data.data?.accessToken || data.accessToken || '');
   if (data.data?.sessionId) localStorage.setItem('paddox_session_id', data.data.sessionId);
   /* Cookie is set by the backend response */
   loginUser(data.data.user);
@@ -224,7 +225,7 @@ async function verifyTwoFactorLoginCode() {
 let currentUser = null;
 let pendingTwoFactorToken = '';
 let pendingTwoFactorAction = 'enable';
-const PADDOX_API_BASE = 'https://paddox-backend.onrender.com/api';
+const PADDOX_API_BASE = '/api';
 
 /* Phase 20.12B.3 — Auth helper non-conflict safety
    js/api.js already defines TokenManager/AuthAPI on some builds. Do NOT redeclare
@@ -480,9 +481,7 @@ async function doRegister() {
         lastName,
         email,
         password,
-        preferences: {
-          favouriteTeam: document.getElementById('ri-team')?.value || ''
-        }
+        favouriteTeam: document.getElementById('ri-team')?.value || ''
       });
 
     if (!data || !data.success) {
@@ -509,6 +508,11 @@ async function doRegister() {
 
 /* LOGIN USER */
 function loginUser(user) {
+
+  user = user?.user || user;
+  if (!user?.email) {
+    throw new Error('Invalid account profile returned by the server');
+  }
 
   currentUser = user;
 
@@ -592,8 +596,16 @@ document
   /* Cookie-based session restoration — no token check needed */
   try {
     const data = await AuthAPI.getMe();
-    if (data.success && data.data) {
-      loginUser(data.data);
+    const user = data?.data?.user || data?.data || data?.user;
+    if (data?.success && user) {
+      loginUser(user);
+      if (!window.TokenManager?.getAccess?.()) {
+        AuthAPI.refresh()
+          .then(result => {
+            if (result?.success) initOrderNotificationSocket();
+          })
+          .catch(() => {});
+      }
     }
   } catch (err) {
     console.error(err);
@@ -635,11 +647,11 @@ function showTracking(id,step){
 
 /* ══ WISHLIST ══ */
 const ACCOUNT_WISHLIST_API =
-  'https://paddox-backend.onrender.com/api/wishlist';
+  '/api/wishlist';
 const ACCOUNT_DOWNLOADS_API =
-  'https://paddox-backend.onrender.com/api/users/downloads';
+  '/api/users/downloads';
 const ACCOUNT_ASSETS_API =
-  'https://paddox-backend.onrender.com/api/assets';
+  '/api/assets';
 
 let REAL_WISHLIST = [];
 
@@ -733,6 +745,7 @@ async function removeWishlistProduct(productId) {
       `${ACCOUNT_WISHLIST_API}/remove/${productId}`,
       {
         method: 'DELETE',
+        credentials: 'include',
         headers: {
           }
       }
@@ -1880,8 +1893,8 @@ function reconcileFanPointsNotification(user = currentUser) {
 function initOrderNotificationSocket() {
   const token = profileToken();
 
-  if (!token || typeof window.io !== 'function') {
-    if (!token) return;
+  if (!currentUser || !token || typeof window.io !== 'function') {
+    if (!currentUser || !token) return;
 
     setTimeout(initOrderNotificationSocket, 500);
     return;
@@ -2192,18 +2205,16 @@ function updateFanPreferenceSummary() {
 ══════════════════════════════════════ */
 
 const USER_PROFILE_API =
-  'https://paddox-backend.onrender.com/api/users/profile';
+  '/api/users/profile';
 const USER_PREF_API =
-  'https://paddox-backend.onrender.com/api/users/preferences';
+  '/api/users/preferences';
 const USER_NOTIFICATION_API =
-  'https://paddox-backend.onrender.com/api/users/notifications';
+  '/api/users/notifications';
 const USER_AVATAR_API =
-  'https://paddox-backend.onrender.com/api/users/avatar';
+  '/api/users/avatar';
 
 function profileToken() {
-  return (
-    ''
-  );
+  return window.TokenManager?.getAccess?.() || '';
 }
 
 
@@ -2604,12 +2615,10 @@ function showToast(msg){
 ══════════════════════════════════════ */
 
 const ACCOUNT_ORDERS_API =
-  'https://paddox-backend.onrender.com/api/orders';
+  '/api/orders';
 
 function getUserToken() {
-  return (
-    ''
-  );
+  return window.TokenManager?.getAccess?.() || '';
 }
 
 function formatMoney(n) {
@@ -2641,9 +2650,7 @@ function statusClass(status = '') {
 
 async function loadMyOrders() {
   try {
-    const token = getUserToken();
-
-    if (!token) return;
+    if (!currentUser) return;
 
     const res = await fetch(ACCOUNT_ORDERS_API, { credentials: 'include',
       headers: {
@@ -2970,12 +2977,6 @@ function openOrderReceipt(orderId) {
 
 window.addEventListener('DOMContentLoaded', () => {
   bindAvatarUpload();
-  loadMyOrders();
-  loadWishlist();
-  loadDownloads();
-  initOrderNotificationInbox(currentUser);
-  initOrderNotificationSocket();
-  scheduleSecuritySessionsRefresh(900);
 });
 console.log('%c👤 PADDOX — Account Page Loaded','color:#e8002d;font-size:14px;font-weight:bold;');
 
@@ -4289,7 +4290,7 @@ window.scheduleSecuritySessionsRefresh = scheduleSecuritySessionsRefresh;
 document.addEventListener('DOMContentLoaded', () => {
   updateSecurityStrength();
   hydrateSecurityState(JSON.parse(localStorage.getItem('paddox_user') || 'null') || currentUser || {});
-  scheduleSecuritySessionsRefresh(900);
+  if (currentUser) scheduleSecuritySessionsRefresh(900);
 });
 
 /* ══ FANTASY PREDICTIONS ══ */

@@ -218,7 +218,7 @@ class VoiceAssistant {
       // Fetch CSRF token for the POST request
       let csrfToken = '';
       try {
-        const csrfRes = await fetch(`${window.API_BASE || 'https://paddox-backend.onrender.com/api'}/auth/csrf-token`, { credentials: 'include' });
+        const csrfRes = await fetch(`${window.API_BASE || '/api'}/auth/csrf-token`, { credentials: 'include' });
         const csrfData = await csrfRes.json();
         csrfToken = csrfData.csrfToken || '';
       } catch (e) {

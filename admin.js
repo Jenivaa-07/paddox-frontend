@@ -5,8 +5,8 @@
 console.log('PADDOX A4.9A Admin Analytics Premium loaded');
 
 /* Phase A4.7A.2 — Safe shared state declared before any page initialiser. */
-var PRODUCT_API_BASE = window.PRODUCT_API_BASE || 'https://paddox-backend.onrender.com/api/products';
-var ASSET_API_BASE = window.ASSET_API_BASE || 'https://paddox-backend.onrender.com/api/assets';
+var PRODUCT_API_BASE = window.PRODUCT_API_BASE || '/api/products';
+var ASSET_API_BASE = window.ASSET_API_BASE || '/api/assets';
 
 /* A4.7A.3 safety helpers: keep Products page alive after cache/version changes. */
 function safeProductTeams() {
@@ -55,7 +55,7 @@ function redirectToLogin(message = 'Please login as admin') {
 
 async function checkAdminAccess() {
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/auth/me', { credentials: 'include' });
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
     const data = await res.json();
     if (res.ok && data.user && data.user.role === 'admin') {
       return true;
@@ -73,7 +73,7 @@ async function loadOrders() {
       return;
     }
 
-    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', { credentials: 'include',
+    const res = await fetch('/api/orders/admin/all', { credentials: 'include',
       headers: {
         }
     });
@@ -362,7 +362,7 @@ async function updateOrderStatus(orderId, status) {
     showToast('⏳ Updating order status...');
 
     const res = await fetch(
-      `https://paddox-backend.onrender.com/api/orders/admin/${orderId}/status`,
+      `/api/orders/admin/${orderId}/status`,
       {
         method: 'PUT',
         headers: {
@@ -568,7 +568,7 @@ async function updateOrderStatus(orderId) {
   try {
     showToast('⏳ Updating order status...');
 
-    const res = await fetch(`${'https://paddox-backend.onrender.com/api/orders/admin'}/${orderId}/status`, { credentials: 'include',
+    const res = await fetch(`${'/api/orders/admin'}/${orderId}/status`, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1893,9 +1893,9 @@ loadAssets();
 ══════════════════════════════════════ */
 
 const ADMIN_USERS_API =
-  'https://paddox-backend.onrender.com/api/admin/users';
+  '/api/admin/users';
 const ADMIN_USER_POINTS_API =
-  'https://paddox-backend.onrender.com/api/users';
+  '/api/users';
 
 let REAL_USERS = [];
 let usersControlsBound = false;
@@ -2938,20 +2938,20 @@ window.downloadAnalyticsReport = downloadAnalyticsReport;
    MODERATION — Phase A4.9B Premium Community Safety
    Reads admin moderation endpoint when available, then Fan Hub feed fallback.
 ══════════════════════════════════════ */
-const MODERATION_ADMIN_API = 'https://paddox-backend.onrender.com/api/fan/admin/moderation';
-const MODERATION_FAN_FEED_API = 'https://paddox-backend.onrender.com/api/fan/feed';
+const MODERATION_ADMIN_API = '/api/fan/admin/moderation';
+const MODERATION_FAN_FEED_API = '/api/fan/feed';
 
 /* A4.9B.1 — The Fan Hub post endpoint changed across phases.
    Moderation now probes the real likely routes instead of relying on one old path. */
 const MODERATION_FEED_ENDPOINTS = [
-  'https://paddox-backend.onrender.com/api/fan/admin/moderation',
-  'https://paddox-backend.onrender.com/api/fan/feed',
-  'https://paddox-backend.onrender.com/api/fan/posts',
-  'https://paddox-backend.onrender.com/api/fan/community',
-  'https://paddox-backend.onrender.com/api/fan/community/posts',
-  'https://paddox-backend.onrender.com/api/fan/fan-feed',
-  'https://paddox-backend.onrender.com/api/fan/admin/feed',
-  'https://paddox-backend.onrender.com/api/fan/admin/posts'
+  '/api/fan/admin/moderation',
+  '/api/fan/feed',
+  '/api/fan/posts',
+  '/api/fan/community',
+  '/api/fan/community/posts',
+  '/api/fan/fan-feed',
+  '/api/fan/admin/feed',
+  '/api/fan/admin/posts'
 ];
 let MODERATION_ACTIVE_FEED_API = MODERATION_FAN_FEED_API;
 let ADM_MODERATION_QUEUE = window.ADM_MODERATION_QUEUE || [];
@@ -4438,7 +4438,7 @@ function setAdminIdentityUI(identity = {}, loaded = false) {
 
 async function fetchAdminIdentity() {
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/auth/me', { credentials: 'include' });
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
     const data = await res.json();
     if (res.ok && data.user) return data.user;
   } catch(e) {}
@@ -4461,9 +4461,9 @@ async function updateAdminIdentity() {
    ADMIN FAN QUOTES
 ══════════════════════════════════════ */
 const ADMIN_QUOTES_API =
-  'https://paddox-backend.onrender.com/api/fan/admin/quotes';
+  '/api/fan/admin/quotes';
 const PUBLIC_QUOTES_API =
-  'https://paddox-backend.onrender.com/api/fan/quotes';
+  '/api/fan/quotes';
 
 let REAL_QUOTES_ADMIN = [];
 let EDIT_QUOTE_ID = null;
@@ -5292,7 +5292,7 @@ async function deleteQuote(id) {
    ADMIN FAN DRIVERS — CLOUDINARY DRAG UPLOAD + PREMIUM UI
 ══════════════════════════════════════ */
 const ADMIN_DRIVER_PROFILES_API =
-  'https://paddox-backend.onrender.com/api/fan/admin/driver-profiles';
+  '/api/fan/admin/driver-profiles';
 
 let REAL_DRIVER_PROFILES_ADMIN = [];
 let EDIT_DRIVER_PROFILE_ID = null;
@@ -6124,7 +6124,7 @@ async function deleteAdminOrder(orderId, orderLabel = '') {
   try {
     showToast('⏳ Deleting order...');
 
-    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}`, { credentials: 'include',
+    const res = await fetch(`/api/orders/admin/${orderId}`, { credentials: 'include',
       method: 'DELETE',
       headers: {
         }
@@ -6169,7 +6169,7 @@ async function updateOrderStatus(orderId, selectedStatus = null, reopenModal = t
   try {
     showToast('⏳ Updating order status...');
 
-    const res = await fetch(`https://paddox-backend.onrender.com/api/orders/admin/${orderId}/status`, { credentials: 'include',
+    const res = await fetch(`/api/orders/admin/${orderId}/status`, { credentials: 'include',
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -6387,7 +6387,7 @@ document.addEventListener('DOMContentLoaded', () => {
    HOME BRANDING — MARQUEE LOGO MANAGER
    Easy freestyle visual cropper
 ══════════════════════════════════════ */
-const HOME_MARQUEE_API = 'https://paddox-backend.onrender.com/api/fan/admin/home-marquee-logos';
+const HOME_MARQUEE_API = '/api/fan/admin/home-marquee-logos';
 let ADMIN_HOME_LOGOS = [];
 let HOME_LOGO_EDIT_ID = null;
 let HOME_LOGO_SOURCE = '';
@@ -6925,7 +6925,7 @@ document.addEventListener('change', e => {
    FAN POLLS ADMIN MANAGER — Phase 17.6
    Realtime MongoDB polls + Home Branding logo dropdown
 ══════════════════════════════════════ */
-const FAN_POLLS_ADMIN_API = 'https://paddox-backend.onrender.com/api/fan/admin/polls';
+const FAN_POLLS_ADMIN_API = '/api/fan/admin/polls';
 let ADMIN_FAN_POLLS = [];
 let ADMIN_POLL_LOGOS = [];
 let ADMIN_POLL_LOGOS_LOADED = false;
@@ -7111,10 +7111,10 @@ async function loadFanPollLogoOptions(force = false) {
   const officialTeams = ADMIN_POLL_FALLBACK_LOGOS.map(normalizeAdminPollLogo);
 
   try {
-    const publicApi = 'https://paddox-backend.onrender.com/api/fan/home-marquee-logos';
+    const publicApi = '/api/fan/home-marquee-logos';
     const adminApi = typeof HOME_MARQUEE_API !== 'undefined'
       ? HOME_MARQUEE_API
-      : 'https://paddox-backend.onrender.com/api/fan/admin/home-marquee-logos';
+      : '/api/fan/admin/home-marquee-logos';
 
     let logos = [];
 
@@ -7492,7 +7492,7 @@ document.addEventListener('input', e => {
    FAN TRIVIA ADMIN MANAGER — Phase 17.8
    Admin-controlled MongoDB trivia questions
 ══════════════════════════════════════ */
-const FAN_TRIVIA_ADMIN_API = 'https://paddox-backend.onrender.com/api/fan/admin/trivia';
+const FAN_TRIVIA_ADMIN_API = '/api/fan/admin/trivia';
 let ADMIN_FAN_TRIVIA = [];
 
 function triviaAdminHeaders(json = false) {
@@ -8210,7 +8210,7 @@ function adminNotifPrimeFromExistingOrders() {
 async function adminNotifPollOrders() {
 
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/orders/admin/all', { credentials: 'include',
+    const res = await fetch('/api/orders/admin/all', { credentials: 'include',
       headers: { }
     });
     const data = await res.json().catch(() => ({}));
@@ -8709,7 +8709,7 @@ window.addEventListener('load', syncProductTeamSelects);
 /* ══════════════════════════════════════
    COUPON CODE ADMIN SYSTEM — PHASE A4.3
 ══════════════════════════════════════ */
-const COUPON_API_BASE = 'https://paddox-backend.onrender.com/api/coupons';
+const COUPON_API_BASE = '/api/coupons';
 let REAL_COUPONS = [];
 let EDIT_COUPON_ID = null;
 let couponControlsBound = false;
@@ -9722,7 +9722,7 @@ async function deleteCoupon(id) {
   });
 })();
 // --- COLLECTIBLES ADMIN LOGIC ---
-const COLLECTIBLES_API = `${API_BASE}/collectibles`;
+const COLLECTIBLES_API = '/api/collectibles';
 
 async function loadCollectibles() {
   try {

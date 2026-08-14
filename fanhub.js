@@ -141,7 +141,7 @@ async function loadRealCalendar() {
 
 /* ── Load real driver standings ── */
 const FAN_DRIVER_PROFILE_API =
-  'https://paddox-backend.onrender.com/api/fan/driver-profiles';
+  '/api/fan/driver-profiles';
 
 function teamEmojiFromName(name = '') {
   return '';
@@ -525,7 +525,7 @@ async function loadFanHomeStripLogos() {
   if (FAN_HOME_STRIP_LOGOS_READY) return FAN_HOME_STRIP_LOGOS;
   FAN_HOME_STRIP_LOGOS_READY = true;
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/fan/home-marquee-logos');
+    const res = await fetch('/api/fan/home-marquee-logos');
     const data = await res.json().catch(() => ({}));
     const list = data?.data?.logos || data?.logos || data?.data || [];
     FAN_HOME_STRIP_LOGOS = (Array.isArray(list) ? list : [])
@@ -1092,7 +1092,7 @@ async function renderWallpapers() {
   `;
 
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/assets?limit=60');
+    const res = await fetch('/api/assets?limit=60');
     const data = await res.json().catch(() => ({}));
     const assets = data.data?.assets || data.data || data.assets || [];
 
@@ -1214,7 +1214,7 @@ async function handleWpDownload(assetId, format = 'desktop') {
 
     showToast(`⏳ Preparing ${format} wallpaper...`);
 
-    const res = await fetch(`https://paddox-backend.onrender.com/api/assets/${assetId}/download?format=${encodeURIComponent(format)}`, { credentials: 'include',
+    const res = await fetch(`/api/assets/${assetId}/download?format=${encodeURIComponent(format)}`, { credentials: 'include',
       headers: { }
     });
     const data = await res.json().catch(() => ({}));
@@ -1266,7 +1266,7 @@ async function startPremiumWallpaperCheckout(assetId, format = 'desktop', token 
   try {
     showToast(`🏁 Unlocking ${format} wallpaper...`);
 
-    const res = await fetch(`https://paddox-backend.onrender.com/api/assets/${assetId}/purchase`, { credentials: 'include',
+    const res = await fetch(`/api/assets/${assetId}/purchase`, { credentials: 'include',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1568,7 +1568,7 @@ loadRealCalendar();
 
 /* ══ QUOTES — REALTIME LIBRARY ══ */
 const QUOTES_API_BASE =
-  'https://paddox-backend.onrender.com/api/fan/quotes';
+  '/api/fan/quotes';
 
 let REAL_QUOTES = [];
 let quoteIdx = 0;
@@ -2721,7 +2721,7 @@ window.closeDriverDetailModal = closeDriverDetailModal;
 
 /* ══ COMMUNITY — REALTIME ══ */
 const FAN_API_BASE =
-  'https://paddox-backend.onrender.com/api/fan';
+  '/api/fan';
 
 /* Phase 17.5 — API alias safety
    Current js/api.js exposes getFeed/postFeed, while older Fan Hub code calls

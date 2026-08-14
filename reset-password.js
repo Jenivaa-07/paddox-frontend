@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const API_BASE = 'https://paddox-backend.onrender.com/api/auth';
+  const API_BASE = '/api/auth';
   const form = document.getElementById('reset-password-form');
   const pass = document.getElementById('new-password');
   const confirm = document.getElementById('confirm-password');

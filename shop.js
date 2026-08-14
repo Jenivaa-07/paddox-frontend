@@ -11,19 +11,19 @@
 let PRODUCTS = [];
 
 const PRODUCT_API_BASE =
-  'https://paddox-backend.onrender.com/api/products';
+  '/api/products';
 
 const WISHLIST_API_BASE =
-  'https://paddox-backend.onrender.com/api/wishlist';
+  '/api/wishlist';
 
 const ORDER_API_BASE =
-  'https://paddox-backend.onrender.com/api/orders';
+  '/api/orders';
 
 const COUPON_API_BASE =
-  'https://paddox-backend.onrender.com/api/coupons';
+  '/api/coupons';
 
 const SHOP_USER_PROFILE_API =
-  'https://paddox-backend.onrender.com/api/users/profile';
+  '/api/users/profile';
 
 let USER_WISHLIST_IDS = new Set();
 
@@ -302,7 +302,7 @@ async function loadAIRecommendations() {
   if (!wrap || !grid || PRODUCTS.length === 0) return;
   
   try {
-    const res = await fetch(`https://paddox-backend.onrender.com/api/ai/recommendations`, {
+    const res = await fetch(`/api/ai/recommendations`, {
       headers: { 'Accept': 'application/json' }
     });
     

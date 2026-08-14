@@ -4,49 +4,43 @@
    Access and refresh tokens are never stored in localStorage
    or sessionStorage. All requests use credentials:'include'.
    ============================================================ */
-const API_BASE = 'https://paddox-backend.onrender.com/api';
+const API_BASE = '/api';
 const SOCKET_URL = 'https://paddox-backend.onrender.com';
 
 /*
- * SECURITY NOTE (Vercel + Render cross-site arrangement):
- * The frontend (paddox.vercel.app) and backend (paddox-backend.onrender.com)
- * are on different origins. The backend sets cookies with SameSite=None;Secure
- * in production. This requires the browser to allow third-party cookies.
- * Modern browsers may block these in Incognito or with strict privacy settings.
- * A same-site arrangement (custom domain proxied to the same apex domain) is
- * the recommended long-term solution. This limitation is documented in OPERATIONS.md.
+ * Production requests use Vercel's same-origin /api rewrite. This keeps the
+ * HttpOnly session cookies first-party while Render remains the API host.
  */
 
-let cachedCsrfToken = null;
+let memoryAccessToken = '';
 
-const fetchCsrfToken = async () => {
-  if (cachedCsrfToken) return cachedCsrfToken;
-  try {
-    const res = await fetch(`${API_BASE}/auth/csrf-token`, { credentials: 'include' });
-    const data = await res.json();
-    if (data.csrfToken) {
-      cachedCsrfToken = data.csrfToken;
-    }
-  } catch (err) {
-    console.warn('Failed to fetch CSRF token', err);
-  }
-  return cachedCsrfToken;
+const TokenManager = {
+  getAccess: () => memoryAccessToken,
+  setAccess: (token = '') => { memoryAccessToken = String(token || ''); },
+  clearAccess: () => { memoryAccessToken = ''; },
+};
+
+window.TokenManager = TokenManager;
+
+const responseJson = async (res) => res.json().catch(() => ({
+  success: false,
+  message: `Request failed with status ${res.status}`,
+}));
+
+const captureAccessToken = (payload = {}) => {
+  const token = payload?.data?.accessToken || payload?.accessToken || '';
+  if (token) TokenManager.setAccess(token);
+  return payload;
 };
 
 /* 🏆 Base API Request 🏆 */
 const apiRequest = async (endpoint, options = {}) => {
-  const method = (options.method || 'GET').toUpperCase();
-  
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    await fetchCsrfToken();
-  }
-
   const config = {
     ...options,
     credentials: 'include',   // Always include cookies - no localStorage token
     headers: {
       'Content-Type': 'application/json',
-      ...(cachedCsrfToken ? { 'x-csrf-token': cachedCsrfToken } : {}),
+      ...(TokenManager.getAccess() ? { Authorization: `Bearer ${TokenManager.getAccess()}` } : {}),
       ...options.headers,
     },
   };
@@ -55,22 +49,36 @@ const apiRequest = async (endpoint, options = {}) => {
   }
   const res = await fetch(`${API_BASE}${endpoint}`, config);
 
+  if (res.status !== 401) {
+    return captureAccessToken(await responseJson(res));
+  }
+
   /* Auto-refresh on 401 — backend sets new accessToken cookie via /auth/refresh */
-  if (res.status === 401 && !endpoint.includes('/auth/refresh')) {
+  if (!endpoint.includes('/auth/refresh')) {
     const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST', credentials: 'include',
     });
     if (refreshRes.ok) {
-      /* Backend has already rotated and set the new accessToken cookie.
-       * No token value is read or stored here. */
-      return fetch(`${API_BASE}${endpoint}`, config).then(r => r.json());
-    } else {
-      /* Session expired — redirect to account page */
-      window.location.href = '/account.html';
-      return;
+      const refreshed = captureAccessToken(await responseJson(refreshRes));
+      const retryConfig = {
+        ...config,
+        headers: {
+          ...config.headers,
+          ...(TokenManager.getAccess() ? { Authorization: `Bearer ${TokenManager.getAccess()}` } : {}),
+        },
+      };
+      const retryRes = await fetch(`${API_BASE}${endpoint}`, retryConfig);
+      return captureAccessToken(await responseJson(retryRes));
     }
+
+    TokenManager.clearAccess();
+    const expired = await responseJson(res);
+    const onAccountPage = /\/account(?:\.html)?$/.test(window.location.pathname);
+    if (!onAccountPage) window.location.assign('/account.html');
+    return expired;
   }
-  return res.json();
+
+  return responseJson(res);
 };
 
 /* ── Auth API ── */

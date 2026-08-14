@@ -412,7 +412,7 @@ async function loadHomeProducts() {
 
 async function loadHomeQuotes() {
   try {
-    const res = await fetch('https://paddox-backend.onrender.com/api/fan/quotes');
+    const res = await fetch('/api/fan/quotes');
     const data = await res.json();
     const list = data?.data?.quotes || data?.quotes || data?.data || [];
     QUOTES = list
@@ -437,7 +437,7 @@ async function loadHomeMarqueeLogos() {
   try {
     const data = window.PaddoxAPI?.fan?.marqueeLogos
       ? await PaddoxAPI.fan.marqueeLogos()
-      : await fetch('https://paddox-backend.onrender.com/api/fan/home-marquee-logos').then(r => r.json());
+      : await fetch('/api/fan/home-marquee-logos').then(r => r.json());
 
     const list = data?.data?.logos || data?.logos || data?.data || [];
     HOME_MARQUEE_LOGOS = list
@@ -4674,6 +4674,54 @@ document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
     }
   }
 
+  function canRenderWebGL() {
+    try {
+      const canvas = document.createElement('canvas');
+      return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+    } catch {
+      return false;
+    }
+  }
+
+  function runWhenIdle(callback, timeout = 2000) {
+    const schedule = () => {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(callback, { timeout });
+      } else {
+        window.setTimeout(callback, 250);
+      }
+    };
+
+    if (document.readyState === 'complete') schedule();
+    else window.addEventListener('load', schedule, { once: true });
+  }
+
+  function initDeferred3DModels() {
+    if (!canRenderWebGL()) {
+      document.getElementById('pdx-car-stage')?.classList.add('is-image-fallback');
+      document.getElementById('pdx-trophy-stage')?.classList.add('is-model-missing');
+      return;
+    }
+
+    // The hero model is a 10 MB binary plus textures. Start it only after the
+    // initial document, API data, and critical imagery have had first access
+    // to the network and main thread.
+    runWhenIdle(initHeroGarage, 2500);
+
+    const trophy = document.getElementById('pdx-trophy-stage');
+    if (!trophy || !('IntersectionObserver' in window)) {
+      runWhenIdle(initTrophyStage, 3500);
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      observer.disconnect();
+      initTrophyStage();
+    }, { rootMargin: '500px 0px' });
+    observer.observe(trophy);
+  }
+
   function bindPointerGlow() {
     const selector = '.pcard, .exp-card, .testi-card, .fan-voice-card, .lab-card, .pdx-deck-card';
     const bind = (card) => {
@@ -4710,8 +4758,7 @@ document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
 
   onReady(() => {
     initHeroRaceDeck();
-    initHeroGarage();
-    initTrophyStage();
+    initDeferred3DModels();
     bindPointerGlow();
   });
 })();
