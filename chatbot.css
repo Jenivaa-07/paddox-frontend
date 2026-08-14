@@ -182,6 +182,7 @@
 .paddox-chatbot-status[data-state="caution"] i { background: #ffd166; }
 .paddox-chatbot-status[data-state="error"] i { background: var(--chat-red-hot); }
 
+#paddox-chatbot-clear,
 #paddox-chatbot-close {
   width: 32px;
   height: 32px;
@@ -193,7 +194,10 @@
   background: rgba(255, 255, 255, .035);
   cursor: pointer;
 }
-#paddox-chatbot-close svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+#paddox-chatbot-clear svg,
+#paddox-chatbot-close svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#paddox-chatbot-clear:hover,
+#paddox-chatbot-clear:focus-visible,
 #paddox-chatbot-close:hover,
 #paddox-chatbot-close:focus-visible { color: #fff; border-color: rgba(232,0,45,.55); outline: none; }
 

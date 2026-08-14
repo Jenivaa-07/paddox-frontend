@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="paddox-chatbot-status" id="paddox-chatbot-status">
               <i aria-hidden="true"></i> Grounding ready
             </span>
+            <button id="paddox-chatbot-clear" type="button" aria-label="Start a new conversation" title="New conversation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5"/></svg>
+            </button>
             <button id="paddox-chatbot-close" type="button" aria-label="Close AI Pit Wall">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
             </button>
@@ -40,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="chat-message-stack">
               <div class="chat-message-meta"><strong>AI PIT WALL</strong><span>NOW</span></div>
               <div class="chat-message-bubble">
-                I answer from verified PADDOX and F1 sources. Ask about platform features, F1 terms, historical data coverage, merch, or policies.
+                I remember this conversation and answer from verified PADDOX knowledge, live F1 data, and your fan profile when you are signed in.
               </div>
               <div class="chat-grounding-note"><span></span> Answers are grounded when evidence is found.</div>
             </div>
@@ -48,9 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="paddox-chatbot-prompts" id="paddox-chatbot-prompts" aria-label="Suggested questions">
+          <button type="button" data-prompt="When is the next Formula 1 race?">Next race</button>
+          <button type="button" data-prompt="Who leads the driver standings?">Driver standings</button>
           <button type="button" data-prompt="What can I do on PADDOX?">Explore PADDOX</button>
-          <button type="button" data-prompt="What is an undercut in Formula 1?">Explain undercut</button>
-          <button type="button" data-prompt="What is the PADDOX returns policy?">Returns policy</button>
         </div>
 
         <form id="paddox-chatbot-input-area">
@@ -82,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const launcher = document.getElementById('paddox-chatbot-btn');
   const panel = document.getElementById('paddox-chatbot-window');
   const closeButton = document.getElementById('paddox-chatbot-close');
+  const clearButton = document.getElementById('paddox-chatbot-clear');
   const form = document.getElementById('paddox-chatbot-input-area');
   const input = document.getElementById('paddox-chatbot-input');
   const sendButton = document.getElementById('paddox-chatbot-send');
@@ -89,7 +93,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const prompts = document.getElementById('paddox-chatbot-prompts');
   const count = document.getElementById('paddox-chatbot-count');
   const status = document.getElementById('paddox-chatbot-status');
+  const storageKey = 'paddox.aiPitWall.history.v2';
+  const defaultSuggestions = [
+    'When is the next Formula 1 race?',
+    'Who leads the driver standings?',
+    'What can I do on PADDOX?',
+  ];
   let pending = false;
+
+  const loadConversation = () => {
+    try {
+      const stored = JSON.parse(window.sessionStorage.getItem(storageKey) || '[]');
+      return Array.isArray(stored) ? stored.slice(-8) : [];
+    } catch (_) {
+      return [];
+    }
+  };
+  let conversation = loadConversation();
+
+  const persistConversation = () => {
+    try {
+      window.sessionStorage.setItem(storageKey, JSON.stringify(conversation.slice(-8)));
+    } catch (_) {}
+  };
+
+  const remember = ({ role, content, grounded = false, sources = [] }) => {
+    conversation.push({
+      role,
+      content: String(content || '').slice(0, 1000),
+      grounded: Boolean(grounded),
+      sources: Array.isArray(sources) ? sources.slice(0, 3) : [],
+    });
+    conversation = conversation.slice(-8);
+    persistConversation();
+  };
 
   const sourceLabel = (source = {}) => source.title || source.label || source.source || 'Verified PADDOX source';
 
@@ -108,6 +145,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const scrollToLatest = () => {
     messages.scrollTop = messages.scrollHeight;
+  };
+
+  const renderSuggestions = (items = defaultSuggestions) => {
+    const suggestions = (Array.isArray(items) ? items : defaultSuggestions)
+      .map((item) => String(item || '').trim())
+      .filter(Boolean)
+      .slice(0, 3);
+    prompts.replaceChildren();
+    suggestions.forEach((suggestion) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.prompt = suggestion;
+      button.textContent = suggestion;
+      prompts.appendChild(button);
+    });
+    prompts.hidden = suggestions.length === 0;
   };
 
   const addMessage = ({ text, sender, sources = [], grounded = false, error = false }) => {
@@ -186,10 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!question || pending) return;
 
     pending = true;
+    const requestHistory = conversation.map(({ role, content }) => ({ role, content }));
     sendButton.disabled = true;
     input.disabled = true;
     prompts.hidden = true;
     addMessage({ text: question, sender: 'user' });
+    remember({ role: 'user', content: question });
     input.value = '';
     resizeInput();
     setServiceState('working', 'Retrieving sources');
@@ -199,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!window.ChatAPI || typeof window.ChatAPI.ask !== 'function') {
         throw new Error('Chat service is not available on this page.');
       }
-      const payload = await window.ChatAPI.ask(question);
+      const payload = await window.ChatAPI.ask(question, requestHistory);
       typing.remove();
 
       if (!payload?.success) {
@@ -213,6 +268,13 @@ document.addEventListener('DOMContentLoaded', () => {
         grounded: Boolean(result.grounded),
         sources: Array.isArray(result.sources) ? result.sources : [],
       });
+      remember({
+        role: 'assistant',
+        content: result.answer || 'No answer was returned.',
+        grounded: Boolean(result.grounded),
+        sources: Array.isArray(result.sources) ? result.sources : [],
+      });
+      renderSuggestions(result.suggestions);
       setServiceState(result.grounded ? 'ready' : 'caution', result.grounded ? 'Evidence verified' : 'No evidence found');
     } catch (error) {
       typing.remove();
@@ -230,8 +292,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  conversation.forEach((turn) => {
+    addMessage({
+      text: turn.content,
+      sender: turn.role === 'assistant' ? 'bot' : 'user',
+      grounded: Boolean(turn.grounded),
+      sources: Array.isArray(turn.sources) ? turn.sources : [],
+    });
+  });
+  renderSuggestions();
+
   launcher.addEventListener('click', () => setOpen(root.dataset.state !== 'open'));
   closeButton.addEventListener('click', () => setOpen(false));
+  clearButton.addEventListener('click', () => {
+    if (pending) return;
+    conversation = [];
+    persistConversation();
+    messages.querySelectorAll('.chat-message:not(:first-child)').forEach((message) => message.remove());
+    renderSuggestions();
+    setServiceState('ready', 'Grounding ready');
+    input.focus();
+  });
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     ask(input.value);

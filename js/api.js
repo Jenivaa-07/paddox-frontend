@@ -186,9 +186,9 @@ const HighlightAPI = {
 
 /* ── Grounded AI Pit Wall ── */
 const ChatAPI = {
-  ask: (query) => apiRequest('/chat', {
+  ask: (query, history = []) => apiRequest('/chat', {
     method: 'POST',
-    body: { query },
+    body: { query, history: Array.isArray(history) ? history.slice(-8) : [] },
   }),
 };
 
