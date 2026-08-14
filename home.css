@@ -18714,3 +18714,306 @@ body #paddox-race-lab a:focus-visible {
     transition-duration: .01ms !important;
   }
 }
+
+/* ============================================================
+   H4.4 — PADDOX HOME DOCK
+   React Bits-inspired proximity magnification, adapted to the
+   existing static HTML/CSS/JS stack and PADDOX visual system.
+   ============================================================ */
+body.paddox-dock-home {
+  padding-bottom: 104px;
+}
+
+/* The top shell remains a compact brand + utility bar. */
+body.paddox-dock-home #navbar .nav-inner {
+  justify-content: space-between !important;
+}
+body.paddox-dock-home #navbar .nav-links,
+body.paddox-dock-home #navbar .hamburger,
+body.paddox-dock-home #navbar .mobile-menu {
+  display: none !important;
+}
+body.paddox-dock-home #navbar .nav-logo.paddox-brand-lockup {
+  margin-right: auto !important;
+}
+
+.pdx-dock-outer {
+  position: fixed;
+  z-index: 1450;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(92vw, 520px);
+  height: 102px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.pdx-dock-panel {
+  position: relative;
+  width: fit-content;
+  min-height: 68px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.045), transparent 42%),
+    rgba(8,8,10,.88);
+  box-shadow:
+    0 22px 48px rgba(0,0,0,.58),
+    0 0 0 1px rgba(0,0,0,.45) inset,
+    0 1px 0 rgba(255,255,255,.07) inset;
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  pointer-events: auto;
+}
+.pdx-dock-panel::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,0,45,.78), transparent);
+  filter: drop-shadow(0 0 8px rgba(232,0,45,.55));
+  pointer-events: none;
+}
+.pdx-dock-panel::after {
+  content: 'PADDOX / RACE CONTROL';
+  position: absolute;
+  left: 50%;
+  bottom: -17px;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,.32);
+  font-family: var(--font-condensed);
+  font-size: .5rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pdx-dock-item {
+  --pdx-dock-size: 50px;
+  position: relative;
+  width: var(--pdx-dock-size);
+  height: var(--pdx-dock-size);
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.045), transparent 45%),
+    #101014;
+  color: rgba(255,255,255,.63);
+  box-shadow: 0 8px 18px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.035);
+  outline: none;
+  transform-origin: 50% 100%;
+  will-change: width, height;
+  transition:
+    color .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+.pdx-dock-item::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+  transform: translateX(-50%);
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.pdx-dock-item:hover,
+.pdx-dock-item:focus-visible {
+  color: #fff;
+  border-color: rgba(232,0,45,.62);
+  background:
+    linear-gradient(145deg, rgba(232,0,45,.18), transparent 58%),
+    #131317;
+  box-shadow: 0 14px 26px rgba(0,0,0,.45), 0 0 22px rgba(232,0,45,.13);
+}
+.pdx-dock-item:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.pdx-dock-item.active {
+  color: #fff;
+  border-color: rgba(232,0,45,.76);
+  background:
+    linear-gradient(150deg, rgba(232,0,45,.29), rgba(232,0,45,.035) 58%),
+    #121216;
+  box-shadow: 0 12px 24px rgba(0,0,0,.45), 0 0 24px rgba(232,0,45,.17);
+}
+.pdx-dock-item.active::after {
+  background: var(--red);
+  box-shadow: 0 0 9px rgba(232,0,45,.9);
+}
+
+.pdx-dock-icon {
+  width: clamp(20px, calc(var(--pdx-dock-size) * .42), 27px);
+  height: clamp(20px, calc(var(--pdx-dock-size) * .42), 27px);
+  display: grid;
+  place-items: center;
+  transform: translateY(-1px);
+  transition: transform .22s ease;
+}
+.pdx-dock-item:hover .pdx-dock-icon,
+.pdx-dock-item:focus-visible .pdx-dock-icon {
+  transform: translateY(-3px) rotate(-2deg);
+}
+.pdx-dock-icon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pdx-dock-label {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: -38px;
+  width: max-content;
+  padding: 6px 9px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 7px;
+  background: rgba(8,8,10,.96);
+  color: #fff;
+  font-family: var(--font-condensed);
+  font-size: .64rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 7px);
+  transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+  pointer-events: none;
+}
+.pdx-dock-label::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid rgba(255,255,255,.14);
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  background: rgba(8,8,10,.96);
+  transform: translateX(-50%) rotate(45deg);
+}
+.pdx-dock-item:hover .pdx-dock-label,
+.pdx-dock-item:focus-visible .pdx-dock-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 720px), (hover: none), (pointer: coarse) {
+  body.paddox-dock-home {
+    padding-bottom: 88px;
+  }
+  .pdx-dock-outer {
+    bottom: max(7px, env(safe-area-inset-bottom));
+    width: calc(100% - 14px);
+    height: 76px;
+  }
+  .pdx-dock-panel {
+    width: 100%;
+    min-height: 64px;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 17px;
+  }
+  .pdx-dock-panel::after {
+    display: none;
+  }
+  .pdx-dock-item {
+    --pdx-dock-size: 52px !important;
+    width: min(17vw, var(--pdx-dock-size));
+    height: 52px;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 3px;
+    border-radius: 12px;
+    will-change: auto;
+  }
+  .pdx-dock-icon {
+    width: 20px;
+    height: 20px;
+    transform: none;
+  }
+  .pdx-dock-item:hover .pdx-dock-icon,
+  .pdx-dock-item:focus-visible .pdx-dock-icon {
+    transform: none;
+  }
+  .pdx-dock-label,
+  .pdx-dock-item:hover .pdx-dock-label,
+  .pdx-dock-item:focus-visible .pdx-dock-label {
+    position: static;
+    width: auto;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: currentColor;
+    font-size: clamp(.42rem, 2vw, .54rem);
+    letter-spacing: .7px;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pdx-dock-label::after {
+    display: none;
+  }
+  .pdx-dock-item::after {
+    bottom: 2px;
+    width: 3px;
+    height: 3px;
+  }
+}
+
+@media (max-width: 460px) {
+  body.paddox-dock-home #navbar .nav-search-btn {
+    display: none !important;
+  }
+  body.paddox-dock-home #navbar .nav-inner {
+    width: calc(100% - 20px) !important;
+  }
+  .pdx-dock-panel {
+    gap: 2px;
+    padding-inline: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdx-dock-item,
+  .pdx-dock-icon,
+  .pdx-dock-label {
+    transition-duration: .01ms !important;
+  }
+}

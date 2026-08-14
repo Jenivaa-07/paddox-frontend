@@ -831,6 +831,85 @@ function animateSingleCounter(el) {
   }
 })();
 
+/* ══════════════════════════════════════
+   PADDOX HOME DOCK — React Bits-inspired vanilla implementation
+══════════════════════════════════════ */
+(function initPaddoxHomeDock() {
+  const dock = document.getElementById('pdx-dock');
+  const panel = document.getElementById('pdx-dock-panel');
+  if (!dock || !panel) return;
+
+  const items = [...panel.querySelectorAll('.pdx-dock-item')];
+  if (!items.length) return;
+
+  const BASE_SIZE = 50;
+  const MAGNIFIED_SIZE = 70;
+  const DISTANCE = 180;
+  const currentSizes = items.map(() => BASE_SIZE);
+  const targetSizes = items.map(() => BASE_SIZE);
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let animationFrame = 0;
+
+  function renderSizes() {
+    let keepAnimating = false;
+
+    items.forEach((item, index) => {
+      const difference = targetSizes[index] - currentSizes[index];
+      const response = reduceMotion.matches ? 1 : 0.24;
+      currentSizes[index] += difference * response;
+
+      if (Math.abs(difference) > 0.08) keepAnimating = true;
+      else currentSizes[index] = targetSizes[index];
+
+      item.style.setProperty('--pdx-dock-size', `${currentSizes[index].toFixed(2)}px`);
+    });
+
+    animationFrame = keepAnimating ? requestAnimationFrame(renderSizes) : 0;
+  }
+
+  function requestRender() {
+    if (!animationFrame) animationFrame = requestAnimationFrame(renderSizes);
+  }
+
+  function resetSizes() {
+    targetSizes.fill(BASE_SIZE);
+    requestRender();
+  }
+
+  function magnifyAround(clientX) {
+    if (!finePointer.matches) return;
+
+    items.forEach((item, index) => {
+      const rect = item.getBoundingClientRect();
+      const center = rect.left + rect.width / 2;
+      const proximity = Math.max(0, 1 - Math.abs(clientX - center) / DISTANCE);
+      const easedProximity = 1 - Math.pow(1 - proximity, 3);
+      targetSizes[index] = BASE_SIZE + (MAGNIFIED_SIZE - BASE_SIZE) * easedProximity;
+    });
+
+    requestRender();
+  }
+
+  panel.addEventListener('pointermove', event => magnifyAround(event.clientX), { passive: true });
+  panel.addEventListener('pointerleave', resetSizes, { passive: true });
+
+  items.forEach((item, activeIndex) => {
+    item.addEventListener('focus', () => {
+      if (!finePointer.matches) return;
+      targetSizes.forEach((_, index) => {
+        const offset = Math.abs(activeIndex - index);
+        targetSizes[index] = offset === 0 ? MAGNIFIED_SIZE : offset === 1 ? 58 : BASE_SIZE;
+      });
+      requestRender();
+    });
+    item.addEventListener('blur', resetSizes);
+  });
+
+  finePointer.addEventListener?.('change', resetSizes);
+  reduceMotion.addEventListener?.('change', resetSizes);
+})();
+
 /* Real F1 countdown — auto-detects next race */
 function normalizeHomeRaceDate(race = {}) {
   const raw = race.raceDate || race.date || race.startDate || race.sessionDate || '';
