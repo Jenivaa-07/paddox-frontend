@@ -33,8 +33,10 @@
     'account.html': [
       'account.css?v=A4_7C_10',
       'account-premium.css?v=ACC2_2',
+      'account-premium-runtime.css?v=ACC2R_1',
       'account.js?v=A4_7C_11',
       'account-premium.js?v=ACC2_2',
+      'account-premium-runtime.js?v=ACC2R_1',
       'cinematic-pages.css?v=C1_0'
     ]
   };
@@ -73,8 +75,15 @@
   function loadAccountEnhancements({ promote = false } = {}){
     if (!/\/account(?:\.html)?\/?$/i.test(window.location.pathname)) return;
 
+    if (document.body) {
+      document.body.classList.add('pdx-account-v2','pdx-cinematic-page','paddox-dock-account');
+      document.body.dataset.pdxPage = 'account';
+    }
+
     appendStylesheet('pdx-account-premium-style', 'account-premium.css?v=ACC2_2', { promote });
+    appendStylesheet('pdx-account-premium-runtime-style', 'account-premium-runtime.css?v=ACC2R_1', { promote });
     appendScript('script[data-pdx-account-premium]', 'account-premium.js?v=ACC2_2', 'pdxAccountPremium');
+    appendScript('script[data-pdx-account-runtime]', 'account-premium-runtime.js?v=ACC2R_1', 'pdxAccountRuntime');
   }
 
   function loadFanHubEnhancements(){
@@ -199,9 +208,7 @@
   }, true);
 
   /* Kill the old 480ms/500ms page-transition click handlers WITHOUT
-     cancelling the browser's default anchor action. stopImmediatePropagation()
-     blocks later JS click handlers; because preventDefault() is not called,
-     the link still navigates immediately using the browser's native path. */
+     cancelling the browser's default anchor action. */
   document.addEventListener('click', event => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
@@ -214,7 +221,6 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       neutralizeTransition();
-      /* Promote Account CSS after legacy account.css so Account 2.0 wins. */
       loadAccountEnhancements({ promote:true });
       loadFanHubEnhancements();
       scheduleIdleWarmup();
