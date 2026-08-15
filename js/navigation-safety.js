@@ -20,16 +20,16 @@
   ];
 
   const ROUTE_ASSETS = {
-    'index.html': ['home.css?v=H4_6_2', 'home.js'],
-    'shop.html': ['shop.css?v=S3_4', 'shop.js', 'cinematic-pages.css?v=C1_0'],
+    'index.html': ['home.css?v=H4_6_2', 'home.js?v=H4_6_2'],
+    'shop.html': ['shop.css?v=S3_4', 'shop.js?v=S3_1', 'cinematic-pages.css?v=C1_0'],
     'fanhub.html': [
       'fanhub.css?v=F1_8_quote_canvas_premium_code',
       'fanhub-premium.css?v=FH2_0',
-      'fanhub.js',
+      'fanhub.js?v=F1_8_quote_canvas_premium_code_api1',
       'fanhub-chat.css?v=CHAT1_0',
-      'fanhub-chat.js'
+      'fanhub-chat.js?v=CHAT1_0'
     ],
-    'pitwall.html': ['pitwall.css?v=19_3', 'pitwall.js', 'cinematic-pages.css?v=C1_0'],
+    'pitwall.html': ['pitwall.css?v=19_3', 'pitwall.js?v=19_4', 'cinematic-pages.css?v=C1_0'],
     'account.html': [
       'account.css?v=A4_7C_10',
       'account-premium.css?v=ACC2_2',
@@ -181,9 +181,6 @@
   loadAccountEnhancements();
   installSpeculationRules();
 
-  /* Preserve native anchor navigation. The previous version cancelled every
-     internal click and called window.location.assign(), forcing a fresh
-     document navigation and bypassing some browser optimisations. */
   document.addEventListener('pointerdown', event => {
     const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
     if (!isNavigableAnchor(anchor)) return;
@@ -199,6 +196,19 @@
   document.addEventListener('focusin', event => {
     const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
     warmAnchor(anchor, true);
+  }, true);
+
+  /* Kill the old 480ms/500ms page-transition click handlers WITHOUT
+     cancelling the browser's default anchor action. stopImmediatePropagation()
+     blocks later JS click handlers; because preventDefault() is not called,
+     the link still navigates immediately using the browser's native path. */
+  document.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
+    if (!isNavigableAnchor(anchor)) return;
+    neutralizeTransition();
+    warmAnchor(anchor, true);
+    event.stopImmediatePropagation();
   }, true);
 
   if (document.readyState === 'loading') {
