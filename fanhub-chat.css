@@ -1,0 +1,209 @@
+/* ============================================================
+   PADDOX Fan Hub — LIVE GRID CHAT
+   Premium realtime community room.
+   ============================================================ */
+body.pdx-fanhub-v2 #sec-chat{
+  width:min(1600px,100%) !important;
+  max-width:1600px !important;
+  margin:0 auto !important;
+  padding:82px clamp(28px,4vw,70px) 110px !important;
+  scroll-margin-top:160px !important;
+}
+body.pdx-fanhub-v2 #sec-chat .sec-header::before{content:'06'}
+body.pdx-fanhub-v2 #sec-chat .section-mark{background:linear-gradient(90deg,#ed0038,rgba(237,0,56,.05)) !important}
+body.pdx-fanhub-v2 .fh-ico-chat{position:relative;display:inline-flex;align-items:center;justify-content:center}
+body.pdx-fanhub-v2 .fh-ico-chat::before{
+  content:'';width:15px;height:11px;border:1.5px solid currentColor;border-radius:4px;box-sizing:border-box
+}
+body.pdx-fanhub-v2 .fh-ico-chat::after{
+  content:'';position:absolute;width:5px;height:5px;left:7px;bottom:5px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:skewY(-35deg) rotate(-18deg)
+}
+
+/* shell */
+body.pdx-fanhub-v2 .pdx-chat-layout{
+  display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:stretch
+}
+body.pdx-fanhub-v2 .pdx-chat-room,
+body.pdx-fanhub-v2 .pdx-chat-side-card{
+  position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.095);border-radius:20px;
+  background:
+    radial-gradient(circle at 8% 0,rgba(237,0,56,.10),transparent 27%),
+    radial-gradient(circle at 95% 84%,rgba(54,217,210,.04),transparent 28%),
+    linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),#080a0f;
+  box-shadow:0 32px 90px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.04)
+}
+body.pdx-fanhub-v2 .pdx-chat-room::before,
+body.pdx-fanhub-v2 .pdx-chat-side-card::before{
+  content:'';position:absolute;inset:0 0 auto;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,#ed0038,#ff1748,rgba(54,217,210,.46),transparent 82%)
+}
+body.pdx-fanhub-v2 .pdx-chat-room{min-height:720px;display:grid;grid-template-rows:auto 1fr auto}
+
+/* room header */
+body.pdx-fanhub-v2 .pdx-chat-topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;
+  border-bottom:1px solid rgba(255,255,255,.075);background:rgba(4,6,10,.72);backdrop-filter:blur(18px)
+}
+body.pdx-fanhub-v2 .pdx-chat-room-title{display:flex;align-items:center;gap:13px;min-width:0}
+body.pdx-fanhub-v2 .pdx-chat-room-mark{
+  width:46px;height:46px;display:grid;place-items:center;flex:0 0 auto;border:1px solid rgba(237,0,56,.42);border-radius:12px;
+  color:#fff;background:linear-gradient(145deg,rgba(237,0,56,.22),rgba(237,0,56,.045));box-shadow:0 0 28px rgba(237,0,56,.10)
+}
+body.pdx-fanhub-v2 .pdx-chat-room-mark .fh-ico-chat{width:24px;height:24px}
+body.pdx-fanhub-v2 .pdx-chat-kicker{
+  color:#ed0038;font:800 .62rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.22em;text-transform:uppercase
+}
+body.pdx-fanhub-v2 .pdx-chat-name{
+  margin-top:6px;color:#fff;font:800 1.45rem/.95 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.03em;text-transform:uppercase
+}
+body.pdx-fanhub-v2 .pdx-chat-presence{display:flex;align-items:center;gap:9px;white-space:nowrap;color:rgba(255,255,255,.64);font-size:.78rem}
+body.pdx-fanhub-v2 .pdx-chat-presence-dot{
+  width:8px;height:8px;border-radius:50%;background:#2de5a7;box-shadow:0 0 14px rgba(45,229,167,.72);animation:pdxChatPulse 1.7s ease-in-out infinite
+}
+body.pdx-fanhub-v2 .pdx-chat-socket-state{
+  min-height:28px;padding:0 10px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.075);border-radius:8px;
+  color:rgba(255,255,255,.42);background:rgba(255,255,255,.025);font:700 .58rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.12em;text-transform:uppercase
+}
+body.pdx-fanhub-v2 .pdx-chat-socket-state.live{color:#52edbd;border-color:rgba(45,229,167,.26);background:rgba(45,229,167,.06)}
+
+/* message viewport */
+body.pdx-fanhub-v2 .pdx-chat-history-wrap{position:relative;min-height:0;overflow:hidden}
+body.pdx-fanhub-v2 .pdx-chat-messages{
+  height:100%;max-height:570px;min-height:520px;overflow-y:auto;padding:18px 20px 26px;scroll-behavior:smooth
+}
+body.pdx-fanhub-v2 .pdx-chat-messages::-webkit-scrollbar{width:5px}
+body.pdx-fanhub-v2 .pdx-chat-messages::-webkit-scrollbar-thumb{background:rgba(237,0,56,.48);border-radius:99px}
+body.pdx-fanhub-v2 .pdx-chat-load-more{
+  display:flex;margin:0 auto 16px;min-height:34px;padding:0 13px;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.09);border-radius:8px;
+  color:rgba(255,255,255,.58);background:rgba(255,255,255,.025);font:700 .65rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.12em;text-transform:uppercase;cursor:pointer
+}
+body.pdx-fanhub-v2 .pdx-chat-load-more:hover{color:#fff;border-color:rgba(237,0,56,.34);background:rgba(237,0,56,.06)}
+body.pdx-fanhub-v2 .pdx-chat-empty{
+  min-height:420px;display:grid;place-items:center;text-align:center;color:rgba(255,255,255,.44)
+}
+body.pdx-fanhub-v2 .pdx-chat-empty-inner{max-width:370px}
+body.pdx-fanhub-v2 .pdx-chat-empty-mark{
+  width:62px;height:62px;margin:0 auto 18px;display:grid;place-items:center;border:1px solid rgba(237,0,56,.30);border-radius:17px;color:#ed0038;background:rgba(237,0,56,.07)
+}
+body.pdx-fanhub-v2 .pdx-chat-empty h3{margin:0 0 8px;color:#fff;font:800 1.65rem/1 var(--font-d,'Barlow Condensed',sans-serif);text-transform:uppercase}
+body.pdx-fanhub-v2 .pdx-chat-empty p{margin:0;line-height:1.6;font-size:.83rem}
+
+/* message */
+body.pdx-fanhub-v2 .pdx-chat-message{--chat-accent:#ed0038;display:grid;grid-template-columns:42px minmax(0,1fr);gap:11px;margin:0 0 15px;animation:pdxChatIn .28s cubic-bezier(.16,1,.3,1)}
+body.pdx-fanhub-v2 .pdx-chat-message.is-own{grid-template-columns:minmax(0,1fr) 42px}
+body.pdx-fanhub-v2 .pdx-chat-message.is-own .pdx-chat-avatar{grid-column:2}
+body.pdx-fanhub-v2 .pdx-chat-message.is-own .pdx-chat-bubble{grid-column:1;grid-row:1;justify-self:end;border-color:rgba(237,0,56,.20);background:linear-gradient(145deg,rgba(237,0,56,.105),rgba(255,255,255,.018)),#0b0b10}
+body.pdx-fanhub-v2 .pdx-chat-avatar{
+  width:42px;height:42px;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:12px;color:#fff;
+  background:linear-gradient(145deg,rgba(237,0,56,.18),rgba(255,255,255,.035));font:800 .8rem/1 Inter,sans-serif;box-shadow:0 12px 30px rgba(0,0,0,.24)
+}
+body.pdx-fanhub-v2 .pdx-chat-avatar img{width:100%;height:100%;object-fit:cover}
+body.pdx-fanhub-v2 .pdx-chat-bubble{
+  width:min(760px,92%);padding:12px 14px 10px;border:1px solid rgba(255,255,255,.075);border-radius:13px;
+  background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.012)),rgba(7,9,13,.88);box-shadow:0 12px 30px rgba(0,0,0,.20)
+}
+body.pdx-fanhub-v2 .pdx-chat-message:hover .pdx-chat-bubble{border-color:rgba(255,255,255,.13)}
+body.pdx-fanhub-v2 .pdx-chat-meta{display:flex;align-items:center;gap:8px;min-width:0}
+body.pdx-fanhub-v2 .pdx-chat-user{color:#fff;font-size:.78rem;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.pdx-fanhub-v2 .pdx-chat-tier{
+  padding:3px 6px;border:1px solid rgba(237,0,56,.24);border-radius:5px;color:#ff547a;background:rgba(237,0,56,.055);
+  font:700 .52rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.09em;text-transform:uppercase
+}
+body.pdx-fanhub-v2 .pdx-chat-time{margin-left:auto;color:rgba(255,255,255,.30);font-size:.65rem;white-space:nowrap}
+body.pdx-fanhub-v2 .pdx-chat-text{margin-top:8px;color:rgba(255,255,255,.86);font-size:.88rem;line-height:1.58;white-space:pre-wrap;word-break:break-word}
+body.pdx-fanhub-v2 .pdx-chat-reply-block{
+  margin:0 0 8px;padding:8px 10px;border-left:2px solid #ed0038;border-radius:0 7px 7px 0;color:rgba(255,255,255,.48);background:rgba(237,0,56,.045);font-size:.72rem;line-height:1.4
+}
+body.pdx-fanhub-v2 .pdx-chat-reply-block strong{display:block;margin-bottom:2px;color:rgba(255,255,255,.72)}
+body.pdx-fanhub-v2 .pdx-chat-actions{display:flex;align-items:center;gap:5px;margin-top:9px;flex-wrap:wrap}
+body.pdx-fanhub-v2 .pdx-chat-reaction,
+body.pdx-fanhub-v2 .pdx-chat-action{
+  min-height:27px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid rgba(255,255,255,.065);border-radius:7px;
+  color:rgba(255,255,255,.43);background:rgba(255,255,255,.018);font-size:.65rem;cursor:pointer;transition:.2s ease
+}
+body.pdx-fanhub-v2 .pdx-chat-reaction:hover,
+body.pdx-fanhub-v2 .pdx-chat-action:hover{color:#fff;border-color:rgba(237,0,56,.28);background:rgba(237,0,56,.055)}
+body.pdx-fanhub-v2 .pdx-chat-reaction.on{color:#fff;border-color:rgba(237,0,56,.35);background:rgba(237,0,56,.09)}
+body.pdx-fanhub-v2 .pdx-chat-message.deleted .pdx-chat-text{color:rgba(255,255,255,.28);font-style:italic}
+
+/* typing / unread */
+body.pdx-fanhub-v2 .pdx-chat-typing{position:absolute;left:20px;bottom:8px;min-height:25px;display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.42);font-size:.69rem;pointer-events:none}
+body.pdx-fanhub-v2 .pdx-chat-typing-dots{display:inline-flex;gap:3px}
+body.pdx-fanhub-v2 .pdx-chat-typing-dots i{width:4px;height:4px;border-radius:50%;background:#ed0038;animation:pdxTyping 1s ease-in-out infinite}
+body.pdx-fanhub-v2 .pdx-chat-typing-dots i:nth-child(2){animation-delay:.13s}body.pdx-fanhub-v2 .pdx-chat-typing-dots i:nth-child(3){animation-delay:.26s}
+body.pdx-fanhub-v2 .pdx-chat-new-pill{
+  position:absolute;right:18px;bottom:15px;z-index:4;min-height:36px;padding:0 13px;display:none;align-items:center;border:1px solid rgba(237,0,56,.40);border-radius:9px;
+  color:#fff;background:linear-gradient(110deg,#c80031,#ed0038);box-shadow:0 14px 36px rgba(237,0,56,.20);font:800 .64rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.1em;text-transform:uppercase;cursor:pointer
+}
+body.pdx-fanhub-v2 .pdx-chat-new-pill.show{display:flex}
+
+/* composer */
+body.pdx-fanhub-v2 .pdx-chat-composer{
+  padding:12px 14px 14px;border-top:1px solid rgba(255,255,255,.075);background:rgba(4,6,10,.82);backdrop-filter:blur(18px)
+}
+body.pdx-fanhub-v2 .pdx-chat-reply-preview{
+  display:none;align-items:center;gap:10px;margin:0 0 9px;padding:8px 10px;border:1px solid rgba(237,0,56,.18);border-left:2px solid #ed0038;border-radius:8px;color:rgba(255,255,255,.55);background:rgba(237,0,56,.04);font-size:.7rem
+}
+body.pdx-fanhub-v2 .pdx-chat-reply-preview.show{display:flex}
+body.pdx-fanhub-v2 .pdx-chat-reply-preview b{color:#fff}.pdx-chat-reply-preview button{margin-left:auto;border:0;color:#fff;background:transparent;cursor:pointer}
+body.pdx-fanhub-v2 .pdx-chat-compose-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:end}
+body.pdx-fanhub-v2 .pdx-chat-emoji-toggle{
+  width:44px;height:44px;border:1px solid rgba(255,255,255,.085);border-radius:10px;color:rgba(255,255,255,.62);background:rgba(255,255,255,.025);font-size:1rem;cursor:pointer
+}
+body.pdx-fanhub-v2 .pdx-chat-input-wrap{position:relative}
+body.pdx-fanhub-v2 #pdx-chat-input{
+  width:100%;min-height:44px;max-height:126px;resize:none;padding:12px 54px 10px 13px;border:1px solid rgba(255,255,255,.085);border-radius:10px;outline:0;
+  color:#fff;background:rgba(0,0,0,.30);font:500 .84rem/1.5 Inter,sans-serif;transition:border-color .2s ease,box-shadow .2s ease
+}
+body.pdx-fanhub-v2 #pdx-chat-input:focus{border-color:rgba(237,0,56,.42);box-shadow:0 0 0 3px rgba(237,0,56,.055)}
+body.pdx-fanhub-v2 #pdx-chat-input::placeholder{color:rgba(255,255,255,.28)}
+body.pdx-fanhub-v2 .pdx-chat-count{position:absolute;right:10px;bottom:9px;color:rgba(255,255,255,.25);font-size:.58rem}
+body.pdx-fanhub-v2 .pdx-chat-send{
+  min-width:104px;height:44px;padding:0 17px;border:1px solid rgba(255,255,255,.10);border-radius:9px;color:#fff;
+  background:linear-gradient(110deg,#c90031,#ed0038 62%,#ff1748);box-shadow:0 12px 28px rgba(237,0,56,.16);font:800 .67rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.13em;text-transform:uppercase;cursor:pointer
+}
+body.pdx-fanhub-v2 .pdx-chat-send:disabled{opacity:.36;cursor:not-allowed;box-shadow:none}
+body.pdx-fanhub-v2 .pdx-chat-emoji-row{display:none;gap:6px;margin:9px 0 0 53px}.pdx-chat-emoji-row.show{display:flex !important}
+body.pdx-fanhub-v2 .pdx-chat-emoji-row button{width:34px;height:30px;border:1px solid rgba(255,255,255,.075);border-radius:8px;background:rgba(255,255,255,.025);cursor:pointer}
+body.pdx-fanhub-v2 .pdx-chat-login-note{margin-top:8px;color:rgba(255,255,255,.36);font-size:.68rem}.pdx-chat-login-note a{color:#ff486e}
+
+/* side rail */
+body.pdx-fanhub-v2 .pdx-chat-side{display:flex;flex-direction:column;gap:14px}
+body.pdx-fanhub-v2 .pdx-chat-side-card{padding:18px}
+body.pdx-fanhub-v2 .pdx-chat-side-label{margin-bottom:14px;color:rgba(255,255,255,.38);font:800 .59rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.2em;text-transform:uppercase}
+body.pdx-fanhub-v2 .pdx-chat-identity{display:flex;align-items:center;gap:11px}
+body.pdx-fanhub-v2 .pdx-chat-identity-av{width:48px;height:48px;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(237,0,56,.28);border-radius:13px;color:#fff;background:rgba(237,0,56,.08);font-weight:800}
+body.pdx-fanhub-v2 .pdx-chat-identity-av img{width:100%;height:100%;object-fit:cover}
+body.pdx-fanhub-v2 .pdx-chat-identity-name{color:#fff;font-weight:750;font-size:.82rem}.pdx-chat-identity-tier{margin-top:4px;color:#ff5378;font:700 .59rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.11em;text-transform:uppercase}
+body.pdx-fanhub-v2 .pdx-chat-brand{width:152px;max-width:100%;margin:3px 0 18px;opacity:.92}
+body.pdx-fanhub-v2 .pdx-chat-room-code{display:flex;align-items:center;justify-content:space-between;padding:10px 11px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.022)}
+body.pdx-fanhub-v2 .pdx-chat-room-code span:first-child{color:rgba(255,255,255,.38);font-size:.68rem}.pdx-chat-room-code b{color:#fff;font:800 .72rem/1 var(--font-d,'Barlow Condensed',sans-serif);letter-spacing:.08em}
+body.pdx-fanhub-v2 .pdx-chat-feature-list{display:grid;gap:9px;margin-top:13px}
+body.pdx-fanhub-v2 .pdx-chat-feature{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,.57);font-size:.72rem}.pdx-chat-feature i{width:7px;height:7px;border-radius:50%;background:#2de5a7;box-shadow:0 0 10px rgba(45,229,167,.36)}
+body.pdx-fanhub-v2 .pdx-chat-rules{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+body.pdx-fanhub-v2 .pdx-chat-rules li{position:relative;padding-left:17px;color:rgba(255,255,255,.48);font-size:.71rem;line-height:1.5}.pdx-chat-rules li::before{content:'';position:absolute;left:0;top:.54em;width:7px;height:2px;background:#ed0038}
+
+@keyframes pdxChatPulse{50%{opacity:.45;transform:scale(.82)}}
+@keyframes pdxTyping{0%,70%,100%{transform:translateY(0);opacity:.35}35%{transform:translateY(-3px);opacity:1}}
+@keyframes pdxChatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media(max-width:1100px){
+  body.pdx-fanhub-v2 .pdx-chat-layout{grid-template-columns:1fr}
+  body.pdx-fanhub-v2 .pdx-chat-side{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  body.pdx-fanhub-v2 #sec-chat{padding:62px 18px 98px !important}
+  body.pdx-fanhub-v2 .pdx-chat-room{min-height:650px;border-radius:15px}
+  body.pdx-fanhub-v2 .pdx-chat-topbar{align-items:flex-start;padding:14px;flex-direction:column}
+  body.pdx-fanhub-v2 .pdx-chat-presence{width:100%;justify-content:space-between}
+  body.pdx-fanhub-v2 .pdx-chat-messages{min-height:440px;max-height:520px;padding:14px 12px 24px}
+  body.pdx-fanhub-v2 .pdx-chat-message{grid-template-columns:36px minmax(0,1fr);gap:8px}
+  body.pdx-fanhub-v2 .pdx-chat-message.is-own{grid-template-columns:minmax(0,1fr) 36px}
+  body.pdx-fanhub-v2 .pdx-chat-avatar{width:36px;height:36px;border-radius:10px}
+  body.pdx-fanhub-v2 .pdx-chat-bubble{width:96%;padding:10px 11px}
+  body.pdx-fanhub-v2 .pdx-chat-compose-row{grid-template-columns:minmax(0,1fr) auto}
+  body.pdx-fanhub-v2 .pdx-chat-emoji-toggle{display:none}
+  body.pdx-fanhub-v2 .pdx-chat-send{min-width:82px;padding:0 12px}
+  body.pdx-fanhub-v2 .pdx-chat-emoji-row{margin-left:0}
+  body.pdx-fanhub-v2 .pdx-chat-side{grid-template-columns:1fr}
+}
