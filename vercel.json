@@ -4,5 +4,25 @@
       "source": "/api/(.*)",
       "destination": "https://paddox-backend.onrender.com/api/$1"
     }
+  ],
+  "headers": [
+    {
+      "source": "/js/navigation-safety.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/paddox-lottie-icons-v3.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/paddox-lottie-icons-v3.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    }
   ]
 }
