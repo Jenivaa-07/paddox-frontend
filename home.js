@@ -1850,11 +1850,27 @@ document.querySelectorAll('.size-btn').forEach(btn => {
     renderHomeMarquee();
     return;
   }
+  const loadWhenNear = (targetId, task, rootMargin = '900px 0px') => {
+    const target = document.getElementById(targetId);
+    if (!target || !('IntersectionObserver' in window)) {
+      task();
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      observer.disconnect();
+      task();
+    }, { rootMargin });
+    observer.observe(target);
+  };
+
+  // Hero data stays eager; lower-page feeds wait until the visitor is close
+  // enough to need them so a cold backend is not hit by every endpoint at once.
   loadHomeProducts().then(updateTickerFromAPI);
-  loadHomeQuotes();
-  loadHomeMarqueeLogos();
   loadHomeF1Data();
-  loadHomeFanStories();
+  loadWhenNear('home-grid-strip', loadHomeMarqueeLogos);
+  loadWhenNear('quote-section', loadHomeQuotes);
+  loadWhenNear('testi-section', loadHomeFanStories);
   const yearEl = document.getElementById('footer-year');
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 })();
@@ -4000,7 +4016,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
         const item = document.createElement('figure');
         item.className = 'lab-stamp-slot';
         item.dataset.stampKey = stamp.key;
-        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/stamps/${stamp.file}" alt="${stamp.city} Grand Prix stamp" width="180" height="240"><figcaption>${stamp.city}</figcaption>`;
+        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/stamps/${stamp.file}" alt="${stamp.city} Grand Prix stamp" width="180" height="240" loading="lazy" decoding="async"><figcaption>${stamp.city}</figcaption>`;
         wall.appendChild(item);
       });
     }
@@ -4010,7 +4026,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
         const item = document.createElement('figure');
         item.className = 'vault-badge';
         item.dataset.badge = badge.key;
-        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/badges/${badge.file}" alt="${badge.label} badge" width="112" height="112"><figcaption>${badge.label}</figcaption>`;
+        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/badges/${badge.file}" alt="${badge.label} badge" width="112" height="112" loading="lazy" decoding="async"><figcaption>${badge.label}</figcaption>`;
         cabinet.appendChild(item);
       });
     }
@@ -4406,7 +4422,24 @@ async function fetchHighlightMedia() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
+function initDeferredHighlightMedia() {
+  const section = document.getElementById('highlights');
+  // Useful cards paint immediately from the local fallback list. Only the
+  // personalised network refresh is deferred until the section is nearby.
+  renderHighlightMedia(PADDOX_HIGHLIGHT_DEFAULTS);
+  if (!section || !('IntersectionObserver' in window)) {
+    fetchHighlightMedia();
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    observer.disconnect();
+    fetchHighlightMedia();
+  }, { rootMargin: '900px 0px' });
+  observer.observe(section);
+}
+
+document.addEventListener('DOMContentLoaded', initDeferredHighlightMedia);
 
 /* ============================================================
    PADDOX H4.1.0 - Cinematic Reality Pass
@@ -4811,18 +4844,46 @@ document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
     resize();
 
     let raf = 0;
+    let mountVisible = true;
     const tick = () => {
+      raf = 0;
+      if (!mountVisible || document.hidden) return;
       controls.update();
       mount.dataset.viewerDistance = camera.position.distanceTo(controls.target).toFixed(2);
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
     };
-    tick();
+    const startRendering = () => {
+      if (!raf && mountVisible && !document.hidden) raf = requestAnimationFrame(tick);
+    };
+    const visibilityObserver = 'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+          mountVisible = entries.some(entry => entry.isIntersecting);
+          if (mountVisible) startRendering();
+          else if (raf) {
+            cancelAnimationFrame(raf);
+            raf = 0;
+          }
+        }, { rootMargin: '200px 0px' })
+      : null;
+    const onVisibilityChange = () => {
+      if (document.hidden && raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        startRendering();
+      }
+    };
+    visibilityObserver?.observe(mount);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    startRendering();
 
     return {
       dispose() {
         cancelAnimationFrame(raf);
         observer.disconnect();
+        visibilityObserver?.disconnect();
+        document.removeEventListener('visibilitychange', onVisibilityChange);
         renderer.domElement.removeEventListener('contextmenu', onContextMenu);
         renderer.domElement.removeEventListener('pointerdown', onCtrlZoomPointerDown, { capture: true });
         renderer.domElement.removeEventListener('pointermove', onCtrlZoomPointerMove);
@@ -4843,6 +4904,9 @@ document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
     const mount = document.getElementById('pdx-car-3d');
     if (!stage || !mount) return;
 
+    if (stage.dataset.modelStarted === '1') return;
+    stage.dataset.modelStarted = '1';
+    stage.setAttribute('aria-busy', 'true');
     const modelSrc = stage.dataset.modelSrc || '';
     try {
       await createPaddoxThreeModelScene({ mount, src: modelSrc, mode: 'car' });
@@ -4850,6 +4914,8 @@ document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
     } catch (err) {
       stage.classList.add('is-image-fallback');
       console.warn('PADDOX car GLTF unavailable; using image fallback', err);
+    } finally {
+      stage.removeAttribute('aria-busy');
     }
   }
 
@@ -4896,10 +4962,11 @@ document.addEventListener('DOMContentLoaded', fetchHighlightMedia);
       return;
     }
 
-    // The hero model is a 10 MB binary plus textures. Start it only after the
-    // initial document, API data, and critical imagery have had first access
-    // to the network and main thread.
-    runWhenIdle(initHeroGarage, 2500);
+    // The hero model is a 10 MB binary plus textures. Give the initial page and
+    // API calls a real head start; requestIdleCallback alone may run immediately.
+    const scheduleHero = () => window.setTimeout(() => runWhenIdle(initHeroGarage, 2500), 6000);
+    if (document.readyState === 'complete') scheduleHero();
+    else window.addEventListener('load', scheduleHero, { once: true });
 
     const trophy = document.getElementById('pdx-trophy-stage');
     if (!trophy || !('IntersectionObserver' in window)) {
