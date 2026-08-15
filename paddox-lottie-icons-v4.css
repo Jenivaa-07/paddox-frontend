@@ -1,0 +1,315 @@
+/* ============================================================
+   PADDOX L4.0 — MONOCHROME MOTION ICONS
+   Premium black / chrome / red treatment for LottieFiles animations.
+   ============================================================ */
+:root{
+  --pdx-motion-red:#ed0038;
+  --pdx-motion-white:#f4f6f8;
+  --pdx-motion-muted:rgba(244,246,248,.72);
+}
+
+.pdx-lottie-v4-icon{
+  position:relative !important;
+  display:inline-grid !important;
+  place-items:center !important;
+  flex:0 0 auto !important;
+  isolation:isolate;
+  overflow:visible !important;
+  color:var(--pdx-motion-muted) !important;
+  background:transparent !important;
+  background-image:none !important;
+  border:0 !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+}
+
+.pdx-lottie-v4-player{
+  position:absolute;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  opacity:0;
+  pointer-events:none;
+  overflow:visible;
+  filter:brightness(0) invert(1);
+  transform:translateZ(0) scale(.94);
+  transform-origin:center;
+  transition:opacity .18s ease,filter .2s ease,transform .2s ease;
+}
+.pdx-lottie-v4-player svg{
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  overflow:visible !important;
+}
+
+.pdx-lottie-v4-loaded > .pdx-lottie-v4-player{
+  opacity:.74;
+}
+
+/* Hide legacy icon art only when the real Lottie SVG is ready. */
+.pdx-lottie-v4-loaded::before,
+.pdx-lottie-v4-loaded::after{
+  content:none !important;
+  display:none !important;
+  background:none !important;
+  box-shadow:none !important;
+}
+.pdx-lottie-v4-loaded > svg,
+.pdx-lottie-v4-loaded > img{
+  opacity:0 !important;
+  visibility:hidden !important;
+}
+
+/* Keep every icon wrapper clean — no emoji/app-icon tiles inside controls. */
+.fh-chip-icon.pdx-lottie-v4-icon,
+.fh-tab-icon.pdx-lottie-v4-icon,
+.comm-title-icon.pdx-lottie-v4-icon,
+.search-mini-icon.pdx-lottie-v4-icon,
+.nl-icon.pdx-lottie-v4-icon,
+.search-icon-anim.pdx-lottie-v4-icon,
+.cart-icon-anim.pdx-lottie-v4-icon,
+.pit-btn-icon.pdx-lottie-v4-icon{
+  background:transparent !important;
+  border:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+}
+
+/* Navbar: smallest / quietest motion. */
+.nl-icon.pdx-lottie-v4-icon{
+  width:17px !important;
+  height:17px !important;
+  min-width:17px !important;
+}
+.search-icon-anim.pdx-lottie-v4-icon,
+.cart-icon-anim.pdx-lottie-v4-icon,
+.search-mini-icon.pdx-lottie-v4-icon{
+  width:19px !important;
+  height:19px !important;
+  min-width:19px !important;
+}
+
+/* Fan Hub hero chips. */
+.fh-chip-icon.pdx-lottie-v4-icon{
+  width:18px !important;
+  height:18px !important;
+  min-width:18px !important;
+  margin-right:8px !important;
+}
+.hero-chip .pdx-lottie-v4-player{
+  opacity:.68;
+}
+.hero-chip:hover .pdx-lottie-v4-player{
+  opacity:1;
+  filter:brightness(0) saturate(100%) invert(16%) sepia(97%) saturate(6550%) hue-rotate(343deg) brightness(97%) contrast(110%);
+  transform:scale(1.03);
+}
+
+/* Fan Hub sticky tabs — compact and editorial, not app-like. */
+.fh-tab-icon.pdx-lottie-v4-icon{
+  width:19px !important;
+  height:19px !important;
+  min-width:19px !important;
+  margin-right:8px !important;
+}
+.hub-tab .pdx-lottie-v4-player{
+  opacity:.62;
+}
+.hub-tab:hover .pdx-lottie-v4-player,
+.hub-tab.on .pdx-lottie-v4-player{
+  opacity:1;
+  filter:brightness(0) saturate(100%) invert(16%) sepia(97%) saturate(6550%) hue-rotate(343deg) brightness(97%) contrast(110%);
+  transform:scale(1.02);
+}
+
+/* Remove legacy icon tile treatment visible in the screenshot. */
+body .hero-chip .fh-chip-icon,
+body .hub-tab .fh-tab-icon,
+body .comm-card-title .comm-title-icon{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+}
+
+/* Community / chat cards. */
+.comm-title-icon.pdx-lottie-v4-icon{
+  width:20px !important;
+  height:20px !important;
+  min-width:20px !important;
+  margin-right:9px !important;
+}
+.comm-card-title:hover .pdx-lottie-v4-player,
+.pdx-chat-room-mark:hover .pdx-lottie-v4-player,
+.pdx-chat-empty-mark:hover .pdx-lottie-v4-player{
+  opacity:1;
+  filter:brightness(0) saturate(100%) invert(16%) sepia(97%) saturate(6550%) hue-rotate(343deg) brightness(97%) contrast(110%);
+}
+.pdx-chat-room-mark .pdx-lottie-v4-icon,
+.pdx-chat-empty-mark .pdx-lottie-v4-icon{
+  width:25px !important;
+  height:25px !important;
+}
+
+/* Pit Wall action buttons. */
+.pit-btn-icon.pdx-lottie-v4-icon{
+  width:19px !important;
+  height:19px !important;
+  min-width:19px !important;
+}
+.pit-primary:hover .pdx-lottie-v4-player,
+.pit-secondary:hover .pdx-lottie-v4-player{
+  opacity:1;
+  filter:brightness(0) saturate(100%) invert(16%) sepia(97%) saturate(6550%) hue-rotate(343deg) brightness(97%) contrast(110%);
+}
+
+/* ============================================================
+   GLOBAL DOCK — same language across Home / Shop / Fan Hub / Pit Wall / Account
+   ============================================================ */
+body.paddox-dock-global{
+  padding-bottom:max(92px,env(safe-area-inset-bottom));
+}
+.pdx-dock-outer{
+  position:fixed !important;
+  left:50% !important;
+  bottom:18px !important;
+  z-index:5000 !important;
+  width:max-content !important;
+  max-width:calc(100vw - 24px) !important;
+  transform:translateX(-50%) !important;
+  pointer-events:none;
+}
+.pdx-dock-panel{
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:center !important;
+  gap:6px !important;
+  padding:7px 8px !important;
+  border:1px solid rgba(255,255,255,.11) !important;
+  border-radius:17px !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.012)),rgba(6,8,11,.91) !important;
+  box-shadow:0 22px 58px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.055),0 0 0 1px rgba(237,0,56,.025) !important;
+  backdrop-filter:blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.2) !important;
+  pointer-events:auto;
+}
+.pdx-dock-item{
+  --pdx-dock-size:46px;
+  position:relative !important;
+  display:grid !important;
+  place-items:center !important;
+  width:var(--pdx-dock-size) !important;
+  height:var(--pdx-dock-size) !important;
+  flex:0 0 var(--pdx-dock-size) !important;
+  border:1px solid rgba(255,255,255,.065) !important;
+  border-radius:12px !important;
+  background:rgba(255,255,255,.018) !important;
+  color:rgba(255,255,255,.72) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025) !important;
+  text-decoration:none !important;
+  transition:border-color .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease !important;
+  will-change:width,height;
+}
+.pdx-dock-item:hover{
+  color:#fff !important;
+  border-color:rgba(237,0,56,.30) !important;
+  background:rgba(237,0,56,.055) !important;
+  box-shadow:0 0 20px rgba(237,0,56,.08),inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+.pdx-dock-item.active{
+  color:#fff !important;
+  border-color:rgba(237,0,56,.46) !important;
+  background:radial-gradient(circle at 50% 0,rgba(237,0,56,.15),transparent 72%),rgba(237,0,56,.055) !important;
+  box-shadow:0 0 20px rgba(237,0,56,.12),inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+.pdx-dock-item.active::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  bottom:-5px;
+  width:14px;
+  height:2px;
+  border-radius:99px;
+  background:var(--pdx-motion-red);
+  transform:translateX(-50%);
+  box-shadow:0 0 7px rgba(237,0,56,.65);
+}
+.pdx-dock-icon{
+  position:relative !important;
+  display:grid !important;
+  place-items:center !important;
+  width:22px !important;
+  height:22px !important;
+  min-width:22px !important;
+  color:currentColor;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+.pdx-dock-icon > svg{
+  width:21px;
+  height:21px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.pdx-dock-icon.pdx-lottie-v4-loaded > .pdx-lottie-v4-player{
+  opacity:.78;
+  transform:scale(.98);
+}
+.pdx-dock-item:hover .pdx-lottie-v4-player,
+.pdx-dock-item.active .pdx-lottie-v4-player{
+  opacity:1;
+  filter:brightness(0) saturate(100%) invert(16%) sepia(97%) saturate(6550%) hue-rotate(343deg) brightness(97%) contrast(110%);
+  transform:scale(1.025);
+}
+.pdx-dock-label{
+  position:absolute !important;
+  left:50% !important;
+  bottom:calc(100% + 10px) !important;
+  z-index:4;
+  padding:5px 8px !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  border-radius:6px !important;
+  background:rgba(7,8,11,.95) !important;
+  color:#fff !important;
+  font:700 9px/1 Inter,system-ui,sans-serif !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transform:translate(-50%,5px) scale(.97);
+  transition:opacity .15s ease,transform .15s ease !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.38);
+}
+.pdx-dock-item:hover .pdx-dock-label,
+.pdx-dock-item:focus-visible .pdx-dock-label{
+  opacity:1;
+  transform:translate(-50%,0) scale(1);
+}
+
+@media(max-width:640px){
+  .pdx-dock-outer{bottom:12px !important}
+  .pdx-dock-panel{gap:4px !important;padding:6px !important}
+  .pdx-dock-item{
+    --pdx-dock-size:43px;
+    width:43px !important;
+    height:43px !important;
+    flex-basis:43px !important;
+  }
+  .pdx-dock-icon{width:21px !important;height:21px !important;min-width:21px !important}
+  .pdx-dock-label{display:none !important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .pdx-lottie-v4-player,
+  .pdx-dock-item,
+  .pdx-dock-label{
+    transition:none !important;
+  }
+}
