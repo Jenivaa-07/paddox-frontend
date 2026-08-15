@@ -24,6 +24,26 @@
     }
   }
 
+  function loadAccountEnhancements(){
+    if (!/account(?:\.html)?$/i.test(window.location.pathname)) return;
+
+    if (!document.getElementById('pdx-account-premium-style')) {
+      const style = document.createElement('link');
+      style.id = 'pdx-account-premium-style';
+      style.rel = 'stylesheet';
+      style.href = 'account-premium.css?v=ACC2_0';
+      document.head.appendChild(style);
+    }
+
+    if (!document.querySelector('script[data-pdx-account-premium]')) {
+      const script = document.createElement('script');
+      script.src = 'account-premium.js?v=ACC2_0';
+      script.defer = true;
+      script.dataset.pdxAccountPremium = '1';
+      document.head.appendChild(script);
+    }
+  }
+
   function loadFanHubEnhancements(){
     if (!/fanhub\.html$/i.test(window.location.pathname)) return;
 
@@ -83,6 +103,7 @@
   }
 
   loadGlobalNavAuth();
+  loadAccountEnhancements();
 
   document.addEventListener('click', event => {
     const target = event.target;
