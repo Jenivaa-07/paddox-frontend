@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="fanhub.css?v=F1_8_quote_canvas_premium_code"/>
   <link rel="stylesheet" href="cinematic-pages.css?v=C1_0"/>
   <link rel="stylesheet" href="fanhub-driver-refresh.css?v=FH2_1"/>
+  <link rel="stylesheet" href="fanhub-chat.css?v=CHAT1_0"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body class="page-transition-init">
@@ -82,6 +83,7 @@
       <button class="hub-tab" data-tab="calendar"><span class="fh-tab-icon fh-ico-calendar" aria-hidden="true"></span> Race Calendar</button>
       <button class="hub-tab" data-tab="quotes"><span class="fh-tab-icon fh-ico-quotes" aria-hidden="true"></span> Quotes</button>
       <button class="hub-tab" data-tab="community"><span class="fh-tab-icon fh-ico-community" aria-hidden="true"></span> Community</button>
+      <button class="hub-tab" data-tab="chat"><span class="fh-tab-icon fh-ico-chat" aria-hidden="true"></span> Chat</button>
     </div>
   </div>
 
@@ -185,9 +187,6 @@
       </div>
     </section>
 
-
-    <!-- AI Studio removed from PADDOX brand roadmap in H3.3A.12 -->
-
     <!-- COMMUNITY -->
     <section class="hub-section" id="sec-community">
       <div class="sec-header reveal-up">
@@ -217,19 +216,16 @@
       </div>
 
       <div class="comm-grid">
-        <!-- Poll -->
         <div class="comm-card reveal-up delay-1">
           <div class="comm-card-title"><span class="comm-title-icon fh-ico-poll" aria-hidden="true"></span>Fan Poll</div>
           <div class="poll-q" id="poll-q"></div>
           <div class="poll-opts" id="poll-opts"></div>
           <div class="poll-meta" id="poll-meta"></div>
         </div>
-        <!-- Leaderboard -->
         <div class="comm-card reveal-up delay-2">
           <div class="comm-card-title"><span class="comm-title-icon fh-ico-leaderboard" aria-hidden="true"></span>Fan Leaderboard</div>
           <div class="lb-list" id="lb-list"></div>
         </div>
-        <!-- Trivia -->
         <div class="comm-card reveal-up delay-3">
           <div class="comm-card-title"><span class="comm-title-icon fh-ico-trivia" aria-hidden="true"></span>F1 Trivia</div>
           <div class="triv-q" id="triv-q"></div>
@@ -237,10 +233,8 @@
           <div class="triv-res" id="triv-res"></div>
           <button class="triv-next" id="triv-next">Next Question →</button>
         </div>
-        <!-- Live Feed -->
         <div class="comm-card reveal-up delay-4">
           <div class="comm-card-title"><span class="comm-title-icon fh-ico-feed" aria-hidden="true"></span>Fan Live Feed</div>
-          
           <div class="sentiment-filter" id="sentiment-filter" style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
             <button class="sent-filter on" data-sent="all" style="background: rgba(255,255,255,0.2); border:none; color:#fff; padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer;">All</button>
             <button class="sent-filter" data-sent="positive" style="background: rgba(0,255,0,0.1); color:#00ff88; border:1px solid rgba(0,255,0,0.3); padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer;">Positive 😊</button>
@@ -256,6 +250,90 @@
           </div>
           <div class="live-feed" id="live-feed"></div>
         </div>
+      </div>
+    </section>
+
+    <!-- LIVE GRID CHAT -->
+    <section class="hub-section" id="sec-chat">
+      <div class="sec-header reveal-up">
+        <div class="section-label"><span class="section-mark"></span> Live Community Radio</div>
+        <h2 class="section-title">LIVE <span class="accent">GRID CHAT</span></h2>
+      </div>
+
+      <div class="pdx-chat-layout">
+        <div class="pdx-chat-room reveal-left">
+          <div class="pdx-chat-topbar">
+            <div class="pdx-chat-room-title">
+              <div class="pdx-chat-room-mark"><span class="fh-ico-chat" aria-hidden="true"></span></div>
+              <div>
+                <div class="pdx-chat-kicker">PADDOX // GLOBAL PADDOCK</div>
+                <div class="pdx-chat-name">Race Radio Community</div>
+              </div>
+            </div>
+            <div class="pdx-chat-presence">
+              <span class="pdx-chat-presence-dot"></span>
+              <span id="pdx-chat-online">Connecting fans…</span>
+              <span class="pdx-chat-socket-state" id="pdx-chat-socket-state">Connecting</span>
+            </div>
+          </div>
+
+          <div class="pdx-chat-history-wrap">
+            <div class="pdx-chat-messages" id="pdx-chat-messages">
+              <div class="pdx-chat-empty"><div class="pdx-chat-empty-inner"><h3>Opening the radio…</h3><p>Loading the latest PADDOX grid transmissions.</p></div></div>
+            </div>
+            <div class="pdx-chat-typing" id="pdx-chat-typing"></div>
+            <button class="pdx-chat-new-pill" id="pdx-chat-new-pill" type="button">New messages ↓</button>
+          </div>
+
+          <div class="pdx-chat-composer">
+            <div class="pdx-chat-reply-preview" id="pdx-chat-reply-preview"></div>
+            <div class="pdx-chat-compose-row">
+              <button class="pdx-chat-emoji-toggle" id="pdx-chat-emoji-toggle" type="button" aria-label="Open quick emoji">☺</button>
+              <div class="pdx-chat-input-wrap">
+                <textarea id="pdx-chat-input" maxlength="500" rows="1" placeholder="Message the PADDOX grid…"></textarea>
+                <span class="pdx-chat-count" id="pdx-chat-count">0/500</span>
+              </div>
+              <button class="pdx-chat-send" id="pdx-chat-send" type="button">Send ↗</button>
+            </div>
+            <div class="pdx-chat-emoji-row" id="pdx-chat-emoji-row">
+              <button type="button" data-emoji="❤️">❤️</button>
+              <button type="button" data-emoji="🔥">🔥</button>
+              <button type="button" data-emoji="😂">😂</button>
+              <button type="button" data-emoji="🏁">🏁</button>
+              <button type="button" data-emoji="👍">👍</button>
+            </div>
+            <div class="pdx-chat-login-note" id="pdx-chat-login-note"></div>
+          </div>
+        </div>
+
+        <aside class="pdx-chat-side reveal-right">
+          <div class="pdx-chat-side-card">
+            <div class="pdx-chat-side-label">Your Radio ID</div>
+            <div class="pdx-chat-identity" id="pdx-chat-identity"></div>
+          </div>
+
+          <div class="pdx-chat-side-card">
+            <img class="pdx-chat-brand" src="assets/paddox-logo-horizontal-white.png?v=CHAT1" alt="PADDOX Motorsport Lifestyle"/>
+            <div class="pdx-chat-side-label">Room Status</div>
+            <div class="pdx-chat-room-code"><span>Channel</span><b># GLOBAL GRID</b></div>
+            <div class="pdx-chat-feature-list">
+              <div class="pdx-chat-feature"><i></i><span>Realtime Socket.IO link</span></div>
+              <div class="pdx-chat-feature"><i></i><span>Persistent message history</span></div>
+              <div class="pdx-chat-feature"><i></i><span>Replies + race reactions</span></div>
+              <div class="pdx-chat-feature"><i></i><span>PADDOX moderation enabled</span></div>
+            </div>
+          </div>
+
+          <div class="pdx-chat-side-card">
+            <div class="pdx-chat-side-label">Paddock Rules</div>
+            <ul class="pdx-chat-rules">
+              <li>Keep race debate competitive, not abusive.</li>
+              <li>No spam, hate, threats or personal information.</li>
+              <li>Use Report when a message crosses the line.</li>
+              <li>Your own messages can be deleted at any time.</li>
+            </ul>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -297,5 +375,6 @@
 <script src="fanhub.js?v=F1_8_quote_canvas_premium_code_api1"></script>
 <script src="cinematic-pages.js?v=C1_1"></script>
 <script src="fanhub-driver-refresh.js?v=FH2_1"></script>
+<script src="fanhub-chat.js?v=CHAT1_0"></script>
 </body>
 </html>
