@@ -5859,7 +5859,7 @@ body.pdx-shop-v2 .shop-merch-backdrop{
   right:24px;
   grid-template-columns:repeat(4,minmax(0,1fr));
   gap:9px;
-  width:min(56vw,820px);
+  width:min(54vw,800px);
   height:calc(100% - 118px);
   opacity:.88;
   transform:none;
@@ -5889,7 +5889,7 @@ body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(3) img{object-position:55
 body.pdx-shop-v2 .shop-raceweek-panel{
   min-height:520px;
   display:grid;
-  grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+  grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);
   align-items:stretch;
   padding:0;
   overflow:hidden;
@@ -5911,7 +5911,7 @@ body.pdx-shop-v2 .raceweek-copy{
   flex-direction:column;
   justify-content:center;
   max-width:none;
-  padding:64px clamp(38px,5vw,78px);
+  padding:60px clamp(34px,3.6vw,54px);
   text-shadow:none;
 }
 body.pdx-shop-v2 .raceweek-copy h2{
@@ -5919,7 +5919,7 @@ body.pdx-shop-v2 .raceweek-copy h2{
   flex-direction:column;
   gap:4px;
   margin:22px 0 0;
-  font-size:clamp(3.75rem,4.45vw,4.9rem);
+  font-size:clamp(3.2rem,3.65vw,4.15rem);
   line-height:.88;
   letter-spacing:-.04em;
 }
@@ -5987,8 +5987,8 @@ body.pdx-shop-v2 .raceweek-visual>span{
   body.pdx-shop-v2 .shop-hero-title{max-width:510px !important;font-size:clamp(4.4rem,7.2vw,6.2rem) !important;}
   body.pdx-shop-v2 .shop-merch-backdrop{right:-40px;width:55vw;}
   body.pdx-shop-v2 .shop-raceweek-panel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
-  body.pdx-shop-v2 .raceweek-copy{padding:56px 42px;}
-  body.pdx-shop-v2 .raceweek-copy h2{font-size:clamp(3.25rem,5vw,4.2rem);}
+  body.pdx-shop-v2 .raceweek-copy{padding:50px 34px;}
+  body.pdx-shop-v2 .raceweek-copy h2{font-size:clamp(3rem,4.3vw,3.6rem);}
 }
 @media(max-width:900px){
   body.pdx-shop-v2 .shop-hero-title{max-width:500px !important;}
