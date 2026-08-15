@@ -3,7 +3,7 @@
    - keeps decorative transition overlays from blocking links
    - preserves native browser navigation / bfcache behaviour
    - prefetches the core PADDOX destinations before the click
-   - mounts shared auth / Account / Fan Hub enhancement layers
+   - mounts shared auth / Fan Hub enhancement layers
    ============================================================ */
 (function initPaddoxNativeNavigation(){
   'use strict';
@@ -32,11 +32,7 @@
     'pitwall.html': ['pitwall.css?v=19_3', 'pitwall.js?v=19_4', 'cinematic-pages.css?v=C1_0'],
     'account.html': [
       'account.css?v=A4_7C_10',
-      'account-premium.css?v=ACC2_2',
-      'account-premium-runtime.css?v=ACC2R_1',
       'account.js?v=A4_7C_11',
-      'account-premium.js?v=ACC2_2',
-      'account-premium-runtime.js?v=ACC2R_1',
       'cinematic-pages.css?v=C1_0'
     ]
   };
@@ -44,7 +40,7 @@
   const prefetched = new Set();
   const warmedAssets = new Set();
 
-  function appendStylesheet(id, href, { promote = false } = {}){
+  function appendStylesheet(id, href){
     let link = document.getElementById(id);
     if (!link) {
       link = document.createElement('link');
@@ -52,7 +48,7 @@
       link.rel = 'stylesheet';
     }
     if (link.getAttribute('href') !== href) link.href = href;
-    if (!link.isConnected || promote) document.head.appendChild(link);
+    if (!link.isConnected) document.head.appendChild(link);
     return link;
   }
 
@@ -70,20 +66,6 @@
   function loadGlobalNavAuth(){
     appendStylesheet('pdx-nav-auth-style', 'paddox-nav-auth.css?v=NAV_AUTH_3');
     appendScript('script[data-pdx-nav-auth]', 'paddox-nav-auth.js?v=NAV_AUTH_4', 'pdxNavAuth');
-  }
-
-  function loadAccountEnhancements({ promote = false } = {}){
-    if (!/\/account(?:\.html)?\/?$/i.test(window.location.pathname)) return;
-
-    if (document.body) {
-      document.body.classList.add('pdx-account-v2','pdx-cinematic-page','paddox-dock-account');
-      document.body.dataset.pdxPage = 'account';
-    }
-
-    appendStylesheet('pdx-account-premium-style', 'account-premium.css?v=ACC2_2', { promote });
-    appendStylesheet('pdx-account-premium-runtime-style', 'account-premium-runtime.css?v=ACC2R_1', { promote });
-    appendScript('script[data-pdx-account-premium]', 'account-premium.js?v=ACC2_2', 'pdxAccountPremium');
-    appendScript('script[data-pdx-account-runtime]', 'account-premium-runtime.js?v=ACC2R_1', 'pdxAccountRuntime');
   }
 
   function loadFanHubEnhancements(){
@@ -187,7 +169,6 @@
   }
 
   loadGlobalNavAuth();
-  loadAccountEnhancements();
   installSpeculationRules();
 
   document.addEventListener('pointerdown', event => {
@@ -207,8 +188,8 @@
     warmAnchor(anchor, true);
   }, true);
 
-  /* Kill the old 480ms/500ms page-transition click handlers WITHOUT
-     cancelling the browser's default anchor action. */
+  /* Kill the old delayed page-transition handlers without cancelling the
+     browser's native anchor action. */
   document.addEventListener('click', event => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
@@ -221,19 +202,14 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       neutralizeTransition();
-      loadAccountEnhancements({ promote:true });
       loadFanHubEnhancements();
       scheduleIdleWarmup();
     }, { once:true });
   } else {
     neutralizeTransition();
-    loadAccountEnhancements({ promote:true });
     loadFanHubEnhancements();
     scheduleIdleWarmup();
   }
 
-  window.addEventListener('pageshow', () => {
-    neutralizeTransition();
-    loadAccountEnhancements({ promote:true });
-  });
+  window.addEventListener('pageshow', neutralizeTransition);
 })();
