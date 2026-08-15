@@ -1,0 +1,171 @@
+/* ============================================================
+   PADDOX — Shared signed-in navbar account state
+   Replaces the static SIGN UP CTA with the current user's avatar
+   after the HttpOnly-cookie session is verified.
+   ============================================================ */
+
+.nav-cta-btn.pdx-nav-account-chip{
+  min-width:0 !important;
+  min-height:44px !important;
+  height:44px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:10px !important;
+  padding:5px 12px 5px 6px !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:12px !important;
+  clip-path:none !important;
+  color:#fff !important;
+  background:
+    radial-gradient(circle at 14% 24%,rgba(232,0,45,.16),transparent 42%),
+    linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018)),
+    rgba(7,9,13,.90) !important;
+  box-shadow:0 12px 34px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.06) !important;
+  text-decoration:none !important;
+  overflow:visible !important;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease !important;
+}
+.nav-cta-btn.pdx-nav-account-chip::before,
+.nav-cta-btn.pdx-nav-account-chip::after{
+  content:none !important;
+  display:none !important;
+}
+.nav-cta-btn.pdx-nav-account-chip:hover,
+.nav-cta-btn.pdx-nav-account-chip:focus-visible{
+  transform:translateY(-1px) !important;
+  border-color:rgba(232,0,45,.46) !important;
+  background:
+    radial-gradient(circle at 14% 24%,rgba(232,0,45,.24),transparent 44%),
+    linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025)),
+    rgba(7,9,13,.95) !important;
+  box-shadow:0 16px 38px rgba(0,0,0,.38),0 0 0 1px rgba(232,0,45,.08),0 0 24px rgba(232,0,45,.09) !important;
+}
+
+.pdx-nav-user-avatar{
+  position:relative;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  color:#fff;
+  background:linear-gradient(145deg,rgba(232,0,45,.62),rgba(105,0,25,.86));
+  box-shadow:0 8px 22px rgba(0,0,0,.32),0 0 0 2px rgba(232,0,45,.06);
+  font:800 11px/1 Inter,Arial,sans-serif;
+  letter-spacing:.04em;
+}
+.pdx-nav-user-avatar::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
+  pointer-events:none;
+}
+.pdx-nav-user-avatar img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+
+.pdx-nav-user-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:2px;
+  text-align:left;
+}
+.pdx-nav-user-name{
+  max-width:108px;
+  overflow:hidden;
+  color:#fff;
+  font-family:Inter,Arial,sans-serif;
+  font-size:.72rem;
+  font-weight:800;
+  line-height:1.05;
+  letter-spacing:.01em;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  text-transform:none;
+}
+.pdx-nav-user-meta{
+  color:rgba(255,255,255,.42);
+  font-family:'Barlow Condensed',Inter,Arial,sans-serif;
+  font-size:.53rem;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.pdx-nav-user-chevron{
+  width:8px;
+  height:8px;
+  margin-left:1px;
+  flex:0 0 8px;
+  border-right:1.5px solid rgba(255,255,255,.44);
+  border-bottom:1.5px solid rgba(255,255,255,.44);
+  transform:rotate(-45deg);
+  transition:transform .18s ease,border-color .18s ease;
+}
+.nav-cta-btn.pdx-nav-account-chip:hover .pdx-nav-user-chevron{
+  border-color:#fff;
+  transform:translateX(2px) rotate(-45deg);
+}
+
+/* Signed-in mobile menu cue. */
+.mobile-menu .mob-link.pdx-mobile-account-user{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.pdx-mobile-account-avatar{
+  width:27px;
+  height:27px;
+  flex:0 0 27px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:8px;
+  color:#fff;
+  background:rgba(232,0,45,.22);
+  font:800 9px/1 Inter,Arial,sans-serif;
+}
+.pdx-mobile-account-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.pdx-mobile-account-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pdx-mobile-account-copy strong{font:800 .76rem/1 Inter,Arial,sans-serif;color:#fff;text-transform:none;letter-spacing:0}
+.pdx-mobile-account-copy span{font-size:.54rem;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase}
+
+@media(max-width:1120px){
+  .pdx-nav-user-copy{display:none}
+  .nav-cta-btn.pdx-nav-account-chip{
+    width:44px !important;
+    min-width:44px !important;
+    padding:5px !important;
+    justify-content:center !important;
+  }
+  .pdx-nav-user-chevron{display:none}
+}
+
+@media(max-width:760px){
+  .nav-cta-btn.pdx-nav-account-chip{
+    width:40px !important;
+    height:40px !important;
+    min-width:40px !important;
+    min-height:40px !important;
+    border-radius:11px !important;
+  }
+  .pdx-nav-user-avatar{width:30px;height:30px;flex-basis:30px;border-radius:9px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nav-cta-btn.pdx-nav-account-chip,
+  .pdx-nav-user-chevron{transition:none !important}
+}
