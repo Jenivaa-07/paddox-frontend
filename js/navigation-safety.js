@@ -12,18 +12,16 @@
       const style = document.createElement('link');
       style.id = 'pdx-lottie-icons-css';
       style.rel = 'stylesheet';
-      style.href = 'paddox-lottie-icons-v2.css?v=L2_0';
+      style.href = 'paddox-lottie-icons-v3.css?v=L3_1';
       document.head.appendChild(style);
     }
 
-    /* Critical fallback rules are inline so a newly mounted dock stays visible
-       even while the external Lottie runtime or shared stylesheet is loading. */
     if (!document.getElementById('pdx-lottie-critical-style')) {
       const critical = document.createElement('style');
       critical.id = 'pdx-lottie-critical-style';
       critical.textContent = `
         .pdx-dock-panel{position:relative!important}
-        .pdx-dock-icon svg{width:26px;height:26px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .pdx-dock-icon svg{width:28px;height:28px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
         .pdx-dock-icon svg circle{fill:none;stroke:currentColor}
       `;
       document.head.appendChild(critical);
@@ -31,18 +29,10 @@
 
     if (!document.querySelector('script[data-pdx-lottie-icons]')) {
       const script = document.createElement('script');
-      script.src = 'paddox-lottie-icons-v2.js?v=L2_0';
+      script.src = 'paddox-lottie-icons-v3.js?v=L3_1';
       script.defer = true;
-      script.dataset.pdxLottieIcons = '2';
+      script.dataset.pdxLottieIcons = '3';
       script.onerror = () => console.warn('PADDOX Lottie icon system could not be loaded.');
-      script.addEventListener('load', () => {
-        if (document.querySelector('script[data-pdx-lottie-shop-fix]')) return;
-        const fix = document.createElement('script');
-        fix.src = 'paddox-lottie-icons-v2-hotfix.js?v=L2_0_1';
-        fix.defer = true;
-        fix.dataset.pdxLottieShopFix = '1';
-        document.head.appendChild(fix);
-      }, { once:true });
       document.head.appendChild(script);
     }
   }
