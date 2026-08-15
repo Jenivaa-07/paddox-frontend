@@ -364,8 +364,6 @@
   function verifyQuotePreviewRuntime() {
     installCanvasIconHelpers();
 
-    // Keep the existing premium generator. The missing helper functions above
-    // were the ReferenceError that stopped buildQuoteShareCanvas at the footer.
     if (typeof window.shareQuoteImage !== 'function') {
       console.warn('PADDOX quote image share handler is not available yet.');
     }
@@ -377,8 +375,6 @@
     repairTabNavigation();
     verifyQuotePreviewRuntime();
 
-    // The cinematic stylesheet is injected at DOM-ready. Re-appending our
-    // runtime style keeps these narrowly-scoped repair rules last in cascade.
     const repairStyle = document.getElementById('pdx-quote-repair-style');
     if (repairStyle?.parentNode === document.head) document.head.appendChild(repairStyle);
   }
@@ -388,4 +384,16 @@
   } else {
     bind();
   }
+})();
+
+/* Load the premium quote-canvas renderer after fanhub.js has defined the
+   original global builder. This keeps the large existing Fan Hub file intact. */
+(function loadPaddoxQuoteCanvasV2(){
+  if (document.querySelector('script[data-pdx-quote-canvas-v2]')) return;
+  const script = document.createElement('script');
+  script.src = 'fanhub-quote-canvas-v2.js?v=QCV2_1';
+  script.async = false;
+  script.dataset.pdxQuoteCanvasV2 = '1';
+  script.onerror = () => console.error('PADDOX Quote Canvas V2 failed to load');
+  document.head.appendChild(script);
 })();
