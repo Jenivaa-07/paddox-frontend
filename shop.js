@@ -343,7 +343,13 @@ function recommendationHash(value = '') {
 function getRecommendationSignals() {
   const savedUser = readJsonStorage('paddox_user') || {};
   const preferredTeam = canonicalShopTeam(
-    savedUser.favoriteTeam || savedUser.preferredTeam || savedUser.team || ''
+    savedUser.preferences?.favouriteTeam ||
+    savedUser.preferences?.favoriteTeam ||
+    savedUser.favouriteTeam ||
+    savedUser.favoriteTeam ||
+    savedUser.preferredTeam ||
+    savedUser.team ||
+    ''
   );
   const teams = new Set([
     ...state.teams,
@@ -360,11 +366,16 @@ function getRecommendationSignals() {
 function getSmartFallbackRecommendations(limit = 3) {
   const signals = getRecommendationSignals();
   const selectedCategory = state.category !== 'all' ? state.category : '';
+  const likedTeamProducts = signals.preferredTeam !== 'PADDOX Original'
+    ? PRODUCTS.filter(product => product.teamKey === signals.preferredTeam)
+    : [];
+  const recommendationPool = likedTeamProducts.length >= limit ? likedTeamProducts : PRODUCTS;
 
-  return [...PRODUCTS]
+  return [...recommendationPool]
     .map(product => {
       let score = Number(product.rating || 0) * 8;
-      if (signals.teams.has(product.teamKey)) score += 24;
+      if (product.teamKey === signals.preferredTeam && signals.preferredTeam !== 'PADDOX Original') score += 100;
+      else if (signals.teams.has(product.teamKey)) score += 24;
       if (signals.cartCategories.has(product.cat)) score += 10;
       if (selectedCategory && product.cat === selectedCategory) score += 16;
       if (product.isNew) score += 6;
@@ -384,7 +395,8 @@ function renderRecommendationSignals(mode = 'smart') {
   const signals = getRecommendationSignals();
   const labels = [];
 
-  if (signals.teams.size) labels.push(`Team signal · ${[...signals.teams][0]}`);
+  if (signals.preferredTeam !== 'PADDOX Original') labels.push(`Favourite team · ${signals.preferredTeam}`);
+  else if (signals.teams.size) labels.push(`Team signal · ${[...signals.teams][0]}`);
   if (cart.length) labels.push(`Cart signal · ${getCartQuantity()} item${getCartQuantity() === 1 ? '' : 's'}`);
   if (state.category !== 'all') labels.push(`Category · ${state.category}`);
   labels.push(mode === 'live' ? 'Live AI match' : 'Ratings + session taste');
@@ -404,9 +416,13 @@ function renderRecommendationCards(products, mode = 'smart') {
   wrap.style.display = 'block';
   wrap.dataset.recommendationMode = mode;
   if (modeEl) modeEl.textContent = mode === 'live' ? 'Live AI' : 'Smart fallback';
-  if (copyEl) copyEl.textContent = mode === 'live'
-    ? 'Personalized by PADDOX AI from your latest fan signals.'
-    : 'The AI service is warming up, so Race Control is using your live session signals.';
+  const signals = getRecommendationSignals();
+  const hasFavouriteTeam = signals.preferredTeam !== 'PADDOX Original';
+  if (copyEl) copyEl.textContent = hasFavouriteTeam
+    ? `Built around your ${signals.preferredTeam} preference, then tuned by your cart and browsing signals.`
+    : mode === 'live'
+      ? 'Personalized by PADDOX AI from your latest fan signals.'
+      : 'Choose a favourite team in Account to make these picks team-specific.';
   renderRecommendationSignals(mode);
 }
 
@@ -436,7 +452,15 @@ async function loadAIRecommendations({ refresh = false } = {}) {
     const recommendationIds = new Set(rawRecommendations.map(item => String(
       typeof item === 'object' ? (item._id || item.id || item.productId || item.product?._id || '') : item
     )).filter(Boolean));
-    const aiProducts = PRODUCTS.filter(product => recommendationIds.has(String(product.id))).slice(0, 3);
+    const matchedProducts = PRODUCTS.filter(product => recommendationIds.has(String(product.id)));
+    const signals = getRecommendationSignals();
+    const favouriteMatches = signals.preferredTeam !== 'PADDOX Original'
+      ? matchedProducts.filter(product => product.teamKey === signals.preferredTeam)
+      : [];
+    const smartMatches = getSmartFallbackRecommendations(3);
+    const aiProducts = [...favouriteMatches, ...smartMatches, ...matchedProducts]
+      .filter((product, index, list) => list.findIndex(item => String(item.id) === String(product.id)) === index)
+      .slice(0, 3);
     if (!aiProducts.length) throw new Error('No matching AI products');
 
     renderRecommendationCards(aiProducts, 'live');
