@@ -131,14 +131,39 @@ const PaymentAPI = {
   history     : ()        => apiRequest('/payments/history'),
 };
 
+/* ── Public GET cache ──
+ * Dedupe simultaneous homepage reads and keep stable F1 data in memory for a
+ * short period. This avoids repeated Render round trips during one visit.
+ */
+const publicGetCache = new Map();
+const cachedPublicGet = (key, ttl, request) => {
+  const now = Date.now();
+  const cached = publicGetCache.get(key);
+  if (cached?.value && cached.expiresAt > now) return Promise.resolve(cached.value);
+  if (cached?.promise) return cached.promise;
+
+  const promise = request()
+    .then(value => {
+      publicGetCache.set(key, { value, expiresAt: Date.now() + ttl });
+      return value;
+    })
+    .catch(error => {
+      publicGetCache.delete(key);
+      throw error;
+    });
+  publicGetCache.set(key, { promise, expiresAt: now + ttl });
+  return promise;
+};
+
 /* ── F1 API ── */
+const F1_CACHE_TTL = 5 * 60 * 1000;
 const F1API = {
-  nextRace     : ()       => apiRequest('/f1/next-race'),
-  schedule     : ()       => apiRequest('/f1/schedule'),
-  driverStands : ()       => apiRequest('/f1/standings/drivers'),
-  consStands   : ()       => apiRequest('/f1/standings/constructors'),
-  drivers      : ()       => apiRequest('/f1/drivers/all'),
-  lastResult   : ()       => apiRequest('/f1/last-result'),
+  nextRace     : ()       => cachedPublicGet('f1:next-race', F1_CACHE_TTL, () => apiRequest('/f1/next-race')),
+  schedule     : ()       => cachedPublicGet('f1:schedule', F1_CACHE_TTL, () => apiRequest('/f1/schedule')),
+  driverStands : ()       => cachedPublicGet('f1:driver-standings', F1_CACHE_TTL, () => apiRequest('/f1/standings/drivers')),
+  consStands   : ()       => cachedPublicGet('f1:constructor-standings', F1_CACHE_TTL, () => apiRequest('/f1/standings/constructors')),
+  drivers      : ()       => cachedPublicGet('f1:drivers', F1_CACHE_TTL, () => apiRequest('/f1/drivers/all')),
+  lastResult   : ()       => cachedPublicGet('f1:last-result', F1_CACHE_TTL, () => apiRequest('/f1/last-result')),
   liveSession  : ()       => apiRequest('/f1/live'),
 };
 
