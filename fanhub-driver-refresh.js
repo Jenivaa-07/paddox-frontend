@@ -9,6 +9,11 @@
   let refreshTimer = 0;
   let lastIdentifier = '';
 
+  function promoteRefreshStylesheet() {
+    const link = document.querySelector('link[href*="fanhub-driver-refresh.css"]');
+    if (link && link.parentNode === document.head) document.head.appendChild(link);
+  }
+
   function selectedDriverIdentifier() {
     const code = document.querySelector('#drv-selector .drv-pill.on .dp-name')?.textContent?.trim();
     const name = document.querySelector('#drv-card .drv-name')?.textContent?.trim();
@@ -134,6 +139,8 @@
   }
 
   function bind() {
+    promoteRefreshStylesheet();
+
     const driverSection = document.getElementById('sec-drivers');
     if (!driverSection) return;
 
