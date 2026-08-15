@@ -1,75 +1,88 @@
 /* ============================================================
-   PADDOX — Native navigation safety
-   Keeps internal links reliable even if a decorative page-transition
-   animation is restored from cache or another page script stalls.
+   PADDOX — Native navigation + route warm-up
+   - keeps decorative transition overlays from blocking links
+   - preserves native browser navigation / bfcache behaviour
+   - prefetches the core PADDOX destinations before the click
+   - mounts shared auth / Account / Fan Hub enhancement layers
    ============================================================ */
 (function initPaddoxNativeNavigation(){
   'use strict';
 
-  function loadGlobalNavAuth(){
-    if (!document.getElementById('pdx-nav-auth-style')) {
-      const style = document.createElement('link');
-      style.id = 'pdx-nav-auth-style';
-      style.rel = 'stylesheet';
-      style.href = 'paddox-nav-auth.css?v=NAV_AUTH_3';
-      document.head.appendChild(style);
-    }
+  if (window.__PADDOX_NAV_SAFETY_V2__) return;
+  window.__PADDOX_NAV_SAFETY_V2__ = true;
 
-    if (!document.querySelector('script[data-pdx-nav-auth]')) {
-      const script = document.createElement('script');
-      script.src = 'paddox-nav-auth.js?v=NAV_AUTH_2';
-      script.defer = true;
-      script.dataset.pdxNavAuth = '1';
-      document.head.appendChild(script);
+  const CORE_ROUTES = [
+    'index.html',
+    'shop.html',
+    'fanhub.html',
+    'pitwall.html',
+    'account.html'
+  ];
+
+  const ROUTE_ASSETS = {
+    'index.html': ['home.css?v=H4_6_2', 'home.js'],
+    'shop.html': ['shop.css?v=S3_4', 'shop.js', 'cinematic-pages.css?v=C1_0'],
+    'fanhub.html': [
+      'fanhub.css?v=F1_8_quote_canvas_premium_code',
+      'fanhub-premium.css?v=FH2_0',
+      'fanhub.js',
+      'fanhub-chat.css?v=CHAT1_0',
+      'fanhub-chat.js'
+    ],
+    'pitwall.html': ['pitwall.css?v=19_3', 'pitwall.js', 'cinematic-pages.css?v=C1_0'],
+    'account.html': [
+      'account.css?v=A4_7C_10',
+      'account-premium.css?v=ACC2_2',
+      'account.js?v=A4_7C_11',
+      'account-premium.js?v=ACC2_2',
+      'cinematic-pages.css?v=C1_0'
+    ]
+  };
+
+  const prefetched = new Set();
+  const warmedAssets = new Set();
+
+  function appendStylesheet(id, href, { promote = false } = {}){
+    let link = document.getElementById(id);
+    if (!link) {
+      link = document.createElement('link');
+      link.id = id;
+      link.rel = 'stylesheet';
     }
+    if (link.getAttribute('href') !== href) link.href = href;
+    if (!link.isConnected || promote) document.head.appendChild(link);
+    return link;
   }
 
-  function loadAccountEnhancements(){
-    if (!/account(?:\.html)?$/i.test(window.location.pathname)) return;
+  function appendScript(selector, src, dataKey){
+    let script = document.querySelector(selector);
+    if (script) return script;
+    script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    script.dataset[dataKey] = '1';
+    document.head.appendChild(script);
+    return script;
+  }
 
-    if (!document.getElementById('pdx-account-premium-style')) {
-      const style = document.createElement('link');
-      style.id = 'pdx-account-premium-style';
-      style.rel = 'stylesheet';
-      style.href = 'account-premium.css?v=ACC2_1';
-      document.head.appendChild(style);
-    }
+  function loadGlobalNavAuth(){
+    appendStylesheet('pdx-nav-auth-style', 'paddox-nav-auth.css?v=NAV_AUTH_3');
+    appendScript('script[data-pdx-nav-auth]', 'paddox-nav-auth.js?v=NAV_AUTH_2', 'pdxNavAuth');
+  }
 
-    if (!document.querySelector('script[data-pdx-account-premium]')) {
-      const script = document.createElement('script');
-      script.src = 'account-premium.js?v=ACC2_1';
-      script.defer = true;
-      script.dataset.pdxAccountPremium = '1';
-      document.head.appendChild(script);
-    }
+  function loadAccountEnhancements({ promote = false } = {}){
+    if (!/\/account(?:\.html)?\/?$/i.test(window.location.pathname)) return;
+
+    appendStylesheet('pdx-account-premium-style', 'account-premium.css?v=ACC2_2', { promote });
+    appendScript('script[data-pdx-account-premium]', 'account-premium.js?v=ACC2_2', 'pdxAccountPremium');
   }
 
   function loadFanHubEnhancements(){
-    if (!/fanhub\.html$/i.test(window.location.pathname)) return;
+    if (!/\/fanhub(?:\.html)?\/?$/i.test(window.location.pathname)) return;
 
-    if (!document.getElementById('pdx-fanhub-chat-icon-fix')) {
-      const iconStyle = document.createElement('link');
-      iconStyle.id = 'pdx-fanhub-chat-icon-fix';
-      iconStyle.rel = 'stylesheet';
-      iconStyle.href = 'fanhub-chat-icon-fix.css?v=CHAT_ICON_1';
-      document.head.appendChild(iconStyle);
-    }
-
-    if (!document.getElementById('pdx-fanhub-chat-reactions-style')) {
-      const reactionStyle = document.createElement('link');
-      reactionStyle.id = 'pdx-fanhub-chat-reactions-style';
-      reactionStyle.rel = 'stylesheet';
-      reactionStyle.href = 'fanhub-chat-reactions.css?v=REACTIONS_1';
-      document.head.appendChild(reactionStyle);
-    }
-
-    if (!document.querySelector('script[data-pdx-chat-reactions]')) {
-      const reactionScript = document.createElement('script');
-      reactionScript.src = 'fanhub-chat-reactions.js?v=REACTIONS_1';
-      reactionScript.defer = true;
-      reactionScript.dataset.pdxChatReactions = '1';
-      document.head.appendChild(reactionScript);
-    }
+    appendStylesheet('pdx-fanhub-chat-icon-fix', 'fanhub-chat-icon-fix.css?v=CHAT_ICON_1');
+    appendStylesheet('pdx-fanhub-chat-reactions-style', 'fanhub-chat-reactions.css?v=REACTIONS_1');
+    appendScript('script[data-pdx-chat-reactions]', 'fanhub-chat-reactions.js?v=REACTIONS_1', 'pdxChatReactions');
   }
 
   function neutralizeTransition(){
@@ -87,45 +100,124 @@
     }
   }
 
-  function isDirectInternalNavigation(link, event){
-    if (!link || link.hasAttribute('download') || link.target === '_blank') return false;
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
-
-    const raw = link.getAttribute('href') || '';
-    if (!raw || raw.startsWith('#') || raw.startsWith('mailto:') || raw.startsWith('tel:') || raw.startsWith('javascript:')) return false;
-
+  function normalizeInternalRoute(raw){
+    if (!raw || raw.startsWith('#') || raw.startsWith('mailto:') || raw.startsWith('tel:') || raw.startsWith('javascript:')) return '';
     try {
-      const destination = new URL(raw, window.location.href);
-      return destination.origin === window.location.origin;
+      const url = new URL(raw, window.location.href);
+      if (url.origin !== window.location.origin) return '';
+      const name = url.pathname.split('/').filter(Boolean).pop() || 'index.html';
+      if (!name.includes('.')) return `${name}.html`;
+      return name;
     } catch (_) {
-      return false;
+      return '';
     }
+  }
+
+  function isNavigableAnchor(link){
+    if (!(link instanceof HTMLAnchorElement)) return false;
+    if (link.hasAttribute('download') || link.target === '_blank') return false;
+    return !!normalizeInternalRoute(link.getAttribute('href') || '');
+  }
+
+  function prefetchResource(href, as = ''){
+    if (!href || warmedAssets.has(href)) return;
+    warmedAssets.add(href);
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = href;
+    if (as) link.as = as;
+    link.fetchPriority = 'low';
+    document.head.appendChild(link);
+  }
+
+  function warmRoute(route, includeAssets = false){
+    if (!route || !CORE_ROUTES.includes(route)) return;
+
+    const current = normalizeInternalRoute(window.location.pathname) || 'index.html';
+    if (route !== current && !prefetched.has(route)) {
+      prefetched.add(route);
+      prefetchResource(route, 'document');
+    }
+
+    if (!includeAssets) return;
+    (ROUTE_ASSETS[route] || []).forEach(asset => {
+      const clean = asset.split('?')[0].toLowerCase();
+      const as = clean.endsWith('.css') ? 'style' : clean.endsWith('.js') ? 'script' : '';
+      prefetchResource(asset, as);
+    });
+  }
+
+  function warmAnchor(anchor, includeAssets = true){
+    if (!isNavigableAnchor(anchor)) return;
+    warmRoute(normalizeInternalRoute(anchor.getAttribute('href') || ''), includeAssets);
+  }
+
+  function installSpeculationRules(){
+    if (document.getElementById('pdx-route-speculation')) return;
+    try {
+      const current = normalizeInternalRoute(window.location.pathname) || 'index.html';
+      const urls = CORE_ROUTES.filter(route => route !== current).map(route => `/${route}`);
+      if (!urls.length) return;
+      const script = document.createElement('script');
+      script.id = 'pdx-route-speculation';
+      script.type = 'speculationrules';
+      script.textContent = JSON.stringify({
+        prefetch: [{ source:'list', urls, eagerness:'moderate' }]
+      });
+      document.head.appendChild(script);
+    } catch (_) {}
+  }
+
+  function scheduleIdleWarmup(){
+    const run = () => {
+      const current = normalizeInternalRoute(window.location.pathname) || 'index.html';
+      CORE_ROUTES.filter(route => route !== current).forEach(route => warmRoute(route, false));
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout:1800 });
+    else window.setTimeout(run, 900);
   }
 
   loadGlobalNavAuth();
   loadAccountEnhancements();
+  installSpeculationRules();
 
-  document.addEventListener('click', event => {
-    const target = event.target;
-    const link = target instanceof Element ? target.closest('a[href]') : null;
-    if (!isDirectInternalNavigation(link, event)) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
+  /* Preserve native anchor navigation. The previous version cancelled every
+     internal click and called window.location.assign(), forcing a fresh
+     document navigation and bypassing some browser optimisations. */
+  document.addEventListener('pointerdown', event => {
+    const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
+    if (!isNavigableAnchor(anchor)) return;
     neutralizeTransition();
-    window.location.assign(link.href);
+    warmAnchor(anchor, true);
+  }, { capture:true, passive:true });
+
+  document.addEventListener('pointerover', event => {
+    const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
+    warmAnchor(anchor, true);
+  }, { capture:true, passive:true });
+
+  document.addEventListener('focusin', event => {
+    const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
+    warmAnchor(anchor, true);
   }, true);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       neutralizeTransition();
+      /* Promote Account CSS after legacy account.css so Account 2.0 wins. */
+      loadAccountEnhancements({ promote:true });
       loadFanHubEnhancements();
-    }, { once: true });
+      scheduleIdleWarmup();
+    }, { once:true });
   } else {
     neutralizeTransition();
+    loadAccountEnhancements({ promote:true });
     loadFanHubEnhancements();
+    scheduleIdleWarmup();
   }
 
-  window.addEventListener('pageshow', neutralizeTransition);
-  window.addEventListener('load', neutralizeTransition, { once: true });
+  window.addEventListener('pageshow', () => {
+    neutralizeTransition();
+    loadAccountEnhancements({ promote:true });
+  });
 })();
