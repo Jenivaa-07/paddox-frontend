@@ -34,10 +34,11 @@
       'account.css?v=A4_7C_10',
       'account-v2-safe.css?v=ACC_SAFE_1',
       'account-v2-brand-fix.css?v=ACC_SAFE_BRAND_1',
-      'account-v2-cleanup.css?v=ACC_SAFE_CLEANUP_1',
+      'account-v2-cleanup.css?v=ACC_SAFE_CLEANUP_2',
       'account.js?v=A4_7C_11',
       'account-v2-safe.js?v=ACC_SAFE_1',
       'account-v2-brand-fix.js?v=ACC_SAFE_BRAND_1',
+      'account-v2-cleanup.js?v=ACC_SAFE_CLEANUP_2',
       'cinematic-pages.css?v=C1_0'
     ]
   };
@@ -85,13 +86,12 @@
 
       const boot = () => {
         if (!document.body) return;
-        /* Applying the class only after the stylesheet has loaded means the
-           Account 2.0 script can verify its CSS sentinel before inserting the dock. */
         document.body.classList.add('pdx-account2-safe');
         appendStylesheet('pdx-account2-brand-style', 'account-v2-brand-fix.css?v=ACC_SAFE_BRAND_1');
-        appendStylesheet('pdx-account2-cleanup-style', 'account-v2-cleanup.css?v=ACC_SAFE_CLEANUP_1');
+        appendStylesheet('pdx-account2-cleanup-style', 'account-v2-cleanup.css?v=ACC_SAFE_CLEANUP_2');
         appendScript('script[data-pdx-account2-safe]', 'account-v2-safe.js?v=ACC_SAFE_1', 'pdxAccount2Safe');
         appendScript('script[data-pdx-account2-brand]', 'account-v2-brand-fix.js?v=ACC_SAFE_BRAND_1', 'pdxAccount2Brand');
+        appendScript('script[data-pdx-account2-cleanup]', 'account-v2-cleanup.js?v=ACC_SAFE_CLEANUP_2', 'pdxAccount2Cleanup');
       };
 
       if (document.body) boot();
@@ -228,8 +228,6 @@
     warmAnchor(anchor, true);
   }, true);
 
-  /* Kill the old delayed page-transition handlers without cancelling the
-     browser's native anchor action. */
   document.addEventListener('click', event => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
