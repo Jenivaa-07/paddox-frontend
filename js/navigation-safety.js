@@ -2,9 +2,29 @@
    PADDOX — Native navigation safety
    Keeps internal links reliable even if a decorative page-transition
    animation is restored from cache or another page script stalls.
+   Also boots the shared LottieFiles icon system used across PADDOX.
    ============================================================ */
 (function initPaddoxNativeNavigation(){
   'use strict';
+
+  function loadPaddoxLottieSystem(){
+    if (!document.getElementById('pdx-lottie-icons-css')) {
+      const style = document.createElement('link');
+      style.id = 'pdx-lottie-icons-css';
+      style.rel = 'stylesheet';
+      style.href = 'paddox-lottie-icons.css?v=L1_0';
+      document.head.appendChild(style);
+    }
+
+    if (!document.querySelector('script[data-pdx-lottie-icons]')) {
+      const script = document.createElement('script');
+      script.src = 'paddox-lottie-icons.js?v=L1_0';
+      script.defer = true;
+      script.dataset.pdxLottieIcons = '1';
+      script.onerror = () => console.warn('PADDOX Lottie icon system could not be loaded.');
+      document.head.appendChild(script);
+    }
+  }
 
   function neutralizeTransition(){
     const overlay = document.getElementById('page-overlay');
@@ -35,6 +55,8 @@
       return false;
     }
   }
+
+  loadPaddoxLottieSystem();
 
   document.addEventListener('click', event => {
     const target = event.target;
