@@ -69,7 +69,7 @@
 
   function loadGlobalNavAuth(){
     appendStylesheet('pdx-nav-auth-style', 'paddox-nav-auth.css?v=NAV_AUTH_3');
-    appendScript('script[data-pdx-nav-auth]', 'paddox-nav-auth.js?v=NAV_AUTH_2', 'pdxNavAuth');
+    appendScript('script[data-pdx-nav-auth]', 'paddox-nav-auth.js?v=NAV_AUTH_4', 'pdxNavAuth');
   }
 
   function loadAccountEnhancements({ promote = false } = {}){
