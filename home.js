@@ -4367,10 +4367,8 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
   let pointerId = null;
   let dragStartX = 0;
   let dragStartScroll = 0;
-  let hovering = false;
-  let focused = false;
+  let resumeAt = 0;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const canHover = window.matchMedia('(hover: hover)');
 
   function measureLoop(){
     if (!track || track.children.length < 2) return 0;
@@ -4397,8 +4395,8 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     if (!lastFrame) lastFrame = now;
     const elapsed = Math.min(64, now - lastFrame) / 1000;
     lastFrame = now;
-    const paused = dragging || hovering || focused || document.hidden || reducedMotion.matches;
-    if (!paused && loopWidth) strip.scrollLeft = wrap(strip.scrollLeft + (30 * elapsed));
+    const paused = dragging || now < resumeAt || document.hidden || reducedMotion.matches;
+    if (!paused && loopWidth) strip.scrollLeft = wrap(strip.scrollLeft + (38 * elapsed));
     raf = requestAnimationFrame(autoScroll);
   }
 
@@ -4409,6 +4407,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     pointerId = event.pointerId;
     dragStartX = event.clientX;
     dragStartScroll = strip.scrollLeft;
+    resumeAt = Number.POSITIVE_INFINITY;
     strip.classList.add('is-dragging');
     strip.setPointerCapture?.(pointerId);
   }
@@ -4426,12 +4425,14 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     strip.classList.remove('is-dragging');
     if (pointerId !== null && strip.hasPointerCapture?.(pointerId)) strip.releasePointerCapture(pointerId);
     pointerId = null;
+    resumeAt = performance.now() + 1100;
   }
 
   function onKeydown(event){
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     event.preventDefault();
     const direction = event.key === 'ArrowRight' ? 1 : -1;
+    resumeAt = performance.now() + 1100;
     strip.scrollTo({ left: wrap(strip.scrollLeft + direction * Math.min(320, strip.clientWidth * .72)), behavior: 'smooth' });
   }
 
@@ -4452,10 +4453,8 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     strip.addEventListener('pointerup', onPointerEnd);
     strip.addEventListener('pointercancel', onPointerEnd);
     strip.addEventListener('keydown', onKeydown);
-    strip.addEventListener('pointerenter', () => { if (canHover.matches) hovering = true; });
-    strip.addEventListener('pointerleave', event => { hovering = false; onPointerEnd(event); });
-    strip.addEventListener('focusin', () => { focused = true; });
-    strip.addEventListener('focusout', () => { focused = false; });
+    strip.addEventListener('pointerleave', onPointerEnd);
+    strip.addEventListener('wheel', () => { resumeAt = performance.now() + 1100; }, { passive: true });
     strip.addEventListener('click', event => {
       if (!moved) return;
       event.preventDefault();
