@@ -334,40 +334,118 @@ function renderShopSkeletons() {
   `).join('');
 }
 
-async function loadAIRecommendations() {
+let AI_RECOMMENDATION_SEED = 0;
+
+function recommendationHash(value = '') {
+  return String(value).split('').reduce((total, char) => ((total * 31) + char.charCodeAt(0)) >>> 0, 7);
+}
+
+function getRecommendationSignals() {
+  const savedUser = readJsonStorage('paddox_user') || {};
+  const preferredTeam = canonicalShopTeam(
+    savedUser.favoriteTeam || savedUser.preferredTeam || savedUser.team || ''
+  );
+  const teams = new Set([
+    ...state.teams,
+    ...cart.map(item => canonicalShopTeam(item.team)),
+    ...(preferredTeam !== 'PADDOX Original' ? [preferredTeam] : [])
+  ].filter(Boolean));
+  const cartCategories = new Set(
+    cart.map(item => PRODUCTS.find(product => String(product.id) === String(item.id))?.cat).filter(Boolean)
+  );
+
+  return { preferredTeam, teams, cartCategories };
+}
+
+function getSmartFallbackRecommendations(limit = 3) {
+  const signals = getRecommendationSignals();
+  const selectedCategory = state.category !== 'all' ? state.category : '';
+
+  return [...PRODUCTS]
+    .map(product => {
+      let score = Number(product.rating || 0) * 8;
+      if (signals.teams.has(product.teamKey)) score += 24;
+      if (signals.cartCategories.has(product.cat)) score += 10;
+      if (selectedCategory && product.cat === selectedCategory) score += 16;
+      if (product.isNew) score += 6;
+      if (product.sale) score += 5;
+      if (product.limited) score += 4;
+      score += (recommendationHash(`${product.id}-${AI_RECOMMENDATION_SEED}`) % 100) / 100;
+      return { product, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, Math.min(limit, PRODUCTS.length))
+    .map(entry => entry.product);
+}
+
+function renderRecommendationSignals(mode = 'smart') {
+  const signalsEl = document.getElementById('recommendation-signals');
+  if (!signalsEl) return;
+  const signals = getRecommendationSignals();
+  const labels = [];
+
+  if (signals.teams.size) labels.push(`Team signal · ${[...signals.teams][0]}`);
+  if (cart.length) labels.push(`Cart signal · ${getCartQuantity()} item${getCartQuantity() === 1 ? '' : 's'}`);
+  if (state.category !== 'all') labels.push(`Category · ${state.category}`);
+  labels.push(mode === 'live' ? 'Live AI match' : 'Ratings + session taste');
+
+  signalsEl.innerHTML = labels.slice(0, 3).map(label => `<span>${label}</span>`).join('');
+}
+
+function renderRecommendationCards(products, mode = 'smart') {
   const wrap = document.getElementById('ai-recommendations-wrap');
   const grid = document.getElementById('ai-products-grid');
-  
+  const modeEl = document.getElementById('recommendations-mode');
+  const copyEl = document.getElementById('recommendations-copy');
+  if (!wrap || !grid || !products.length) return;
+
+  grid.innerHTML = products.map((product, index) => cardHTML(product, index)).join('');
+  bindCardEvents(grid);
+  wrap.style.display = 'block';
+  wrap.dataset.recommendationMode = mode;
+  if (modeEl) modeEl.textContent = mode === 'live' ? 'Live AI' : 'Smart fallback';
+  if (copyEl) copyEl.textContent = mode === 'live'
+    ? 'Personalized by PADDOX AI from your latest fan signals.'
+    : 'The AI service is warming up, so Race Control is using your live session signals.';
+  renderRecommendationSignals(mode);
+}
+
+async function loadAIRecommendations({ refresh = false } = {}) {
+  const wrap = document.getElementById('ai-recommendations-wrap');
+  const grid = document.getElementById('ai-products-grid');
+  const modeEl = document.getElementById('recommendations-mode');
+  const refreshBtn = document.getElementById('refresh-ai-picks');
+
   if (!wrap || !grid || PRODUCTS.length === 0) return;
-  
+  if (refresh) AI_RECOMMENDATION_SEED += 1;
+  wrap.style.display = 'block';
+  wrap.classList.add('is-thinking');
+  if (modeEl) modeEl.textContent = 'Calculating';
+  if (refreshBtn) refreshBtn.disabled = true;
+
   try {
     const res = await fetch(`/api/ai/recommendations`, {
+      credentials: 'include',
       headers: { 'Accept': 'application/json' }
     });
-    
+
     if (!res.ok) throw new Error('AI backend not available');
     const data = await res.json();
-    let aiProducts = [];
-    if (data.products && data.products.length > 0) {
-       aiProducts = PRODUCTS.filter(p => data.products.includes(p.id)).slice(0, 4);
-    }
-    
-    if (aiProducts.length > 0) {
-      grid.innerHTML = aiProducts.map((p, i) => cardHTML(p, i)).join('');
-      bindCardEvents(grid);
-      const title = document.getElementById('recommendations-title');
-      const mode = document.getElementById('recommendations-mode');
-      if (title) title.textContent = 'Picked for you';
-      if (mode) mode.textContent = 'AI picks';
-      wrap.style.display = 'block';
-    } else {
-      throw new Error('No AI match');
-    }
+
+    const rawRecommendations = data.products || data.data?.products || data.recommendations || data.data?.recommendations || [];
+    const recommendationIds = new Set(rawRecommendations.map(item => String(
+      typeof item === 'object' ? (item._id || item.id || item.productId || item.product?._id || '') : item
+    )).filter(Boolean));
+    const aiProducts = PRODUCTS.filter(product => recommendationIds.has(String(product.id))).slice(0, 3);
+    if (!aiProducts.length) throw new Error('No matching AI products');
+
+    renderRecommendationCards(aiProducts, 'live');
   } catch (e) {
     console.warn("AI Recommendations Fallback:", e);
-    /* Do not label duplicated catalogue items as personalized AI results. */
-    grid.innerHTML = '';
-    wrap.style.display = 'none';
+    renderRecommendationCards(getSmartFallbackRecommendations(3), 'smart');
+  } finally {
+    wrap.classList.remove('is-thinking');
+    if (refreshBtn) refreshBtn.disabled = false;
   }
 }
 
@@ -648,6 +726,70 @@ function syncWishlistButtons(productId = null) {
   /* Cart btn */
   const cartBtn = document.getElementById('nav-cart-btn');
   if (cartBtn) cartBtn.addEventListener('click', () => toggleCart(true));
+})();
+
+/* ══════════════════════════════════════
+   PADDOX DOCK — shared Home interaction
+══════════════════════════════════════ */
+(function initPaddoxShopDock() {
+  const panel = document.getElementById('pdx-dock-panel');
+  if (!panel) return;
+
+  const items = [...panel.querySelectorAll('.pdx-dock-item')];
+  if (!items.length) return;
+
+  const BASE_SIZE = 50;
+  const MAGNIFIED_SIZE = 70;
+  const DISTANCE = 180;
+  const currentSizes = items.map(() => BASE_SIZE);
+  const targetSizes = items.map(() => BASE_SIZE);
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let animationFrame = 0;
+
+  function renderSizes() {
+    let keepAnimating = false;
+    items.forEach((item, index) => {
+      const difference = targetSizes[index] - currentSizes[index];
+      currentSizes[index] += difference * (reduceMotion.matches ? 1 : 0.24);
+      if (Math.abs(difference) > 0.08) keepAnimating = true;
+      else currentSizes[index] = targetSizes[index];
+      item.style.setProperty('--pdx-dock-size', `${currentSizes[index].toFixed(2)}px`);
+    });
+    animationFrame = keepAnimating ? requestAnimationFrame(renderSizes) : 0;
+  }
+
+  function requestRender() {
+    if (!animationFrame) animationFrame = requestAnimationFrame(renderSizes);
+  }
+
+  function resetSizes() {
+    targetSizes.fill(BASE_SIZE);
+    requestRender();
+  }
+
+  panel.addEventListener('pointermove', event => {
+    if (!finePointer.matches) return;
+    items.forEach((item, index) => {
+      const rect = item.getBoundingClientRect();
+      const proximity = Math.max(0, 1 - Math.abs(event.clientX - (rect.left + rect.width / 2)) / DISTANCE);
+      targetSizes[index] = BASE_SIZE + (MAGNIFIED_SIZE - BASE_SIZE) * (1 - Math.pow(1 - proximity, 3));
+    });
+    requestRender();
+  }, { passive: true });
+
+  panel.addEventListener('pointerleave', resetSizes, { passive: true });
+  items.forEach((item, activeIndex) => {
+    item.addEventListener('focus', () => {
+      if (!finePointer.matches) return;
+      targetSizes.forEach((_, index) => {
+        const offset = Math.abs(activeIndex - index);
+        targetSizes[index] = offset === 0 ? MAGNIFIED_SIZE : offset === 1 ? 58 : BASE_SIZE;
+      });
+      requestRender();
+    });
+    item.addEventListener('blur', resetSizes);
+  });
 })();
 
 /* ══════════════════════════════════════
@@ -1636,6 +1778,7 @@ document.querySelectorAll('[data-shop-category]').forEach(button => {
 });
 
 document.getElementById('footer-cart-btn')?.addEventListener('click', () => toggleCart(true));
+document.getElementById('refresh-ai-picks')?.addEventListener('click', () => loadAIRecommendations({ refresh: true }));
 
 
 /* ══════════════════════════════════════
