@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Paddox — Shop</title>
   <script src="js/navigation-safety.js?v=N1_0"></script>
-  <link rel="stylesheet" href="shop.css?v=S1_2"/>
+  <link rel="stylesheet" href="shop.css?v=S2_0"/>
   <link rel="stylesheet" href="cinematic-pages.css?v=C1_0"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
-<body class="page-transition-init">
+<body class="page-transition-init pdx-shop-v2">
 
   <!-- PARTICLES -->
   <canvas id="particles-canvas"></canvas>
@@ -75,6 +75,14 @@
       <p class="shop-hero-sub animate-fade-up delay-3">
         Official F1-inspired merchandise, collectibles, apparel &amp; accessories — built for real fans.
       </p>
+      <div class="shop-hero-actions animate-fade-up delay-4">
+        <button class="shop-primary-cta" type="button" data-shop-scroll="catalogue">
+          Shop the collection <span aria-hidden="true">↗</span>
+        </button>
+        <button class="shop-secondary-cta" type="button" data-shop-category="collectibles">
+          Explore collectibles <span aria-hidden="true">→</span>
+        </button>
+      </div>
       <div class="shop-hero-stats animate-fade-up delay-4">
         <div class="sh-stat"><span class="sh-num" id="shop-drop-mode">Live</span><span class="sh-lbl">Store Drops</span></div>
         <div class="sh-divider"></div>
@@ -83,6 +91,15 @@
         <div class="sh-stat"><span class="sh-num">Free</span><span class="sh-lbl">Shipping ₹999+</span></div>
       </div>
     </div>
+    <aside class="shop-drop-card animate-fade-up delay-4" aria-label="Current store drop">
+      <div class="shop-drop-topline"><span>Drop 01</span><span class="shop-live-dot">Live now</span></div>
+      <strong>RACE-WEEK<br/>ESSENTIALS</strong>
+      <p>Track-built graphics, paddock layers and collector pieces selected for the next lights-out.</p>
+      <div class="shop-drop-meta">
+        <span><b id="shop-product-count">0</b> pieces</span>
+        <span>India delivery</span>
+      </div>
+    </aside>
   </section>
 
   <!-- ░░ CATEGORY TABS ░░ -->
@@ -108,6 +125,19 @@
       </button>
     </div>
   </div>
+
+  <section class="shop-intro" id="shop-catalogue" aria-labelledby="shop-catalogue-heading">
+    <div class="shop-intro-copy">
+      <div class="shop-section-kicker"><span>01</span> The official collection</div>
+      <h2 id="shop-catalogue-heading">WEAR THE <em>RACE.</em><br/>OWN THE MOMENT.</h2>
+      <p>Curated gear for grandstand weekends, sim-racing nights and every lap in between.</p>
+    </div>
+    <div class="shop-promise-grid" aria-label="Store benefits">
+      <article><span class="promise-index">01</span><strong>Official quality</strong><p>Race-inspired materials and finish.</p></article>
+      <article><span class="promise-index">02</span><strong>Fast dispatch</strong><p>Tracked delivery across India.</p></article>
+      <article><span class="promise-index">03</span><strong>Easy returns</strong><p>30-day return support.</p></article>
+    </div>
+  </section>
 
   <!-- ░░ SHOP MAIN LAYOUT ░░ -->
   <div class="shop-layout">
@@ -192,6 +222,14 @@
     <!-- PRODUCTS AREA -->
     <div class="products-area">
 
+      <header class="catalogue-heading-row">
+        <div>
+          <span class="catalogue-eyebrow">PADDOX GARAGE / CURRENT DROP</span>
+          <h2>THE STARTING GRID</h2>
+        </div>
+        <p><strong id="catalogue-total">0</strong> pieces selected for race week.</p>
+      </header>
+
       <!-- Toolbar -->
       <div class="shop-toolbar">
         <div class="toolbar-left">
@@ -221,15 +259,15 @@
       <div class="active-filters" id="active-filters"></div>
 
       <!-- AI Personalized Picks -->
-      <div id="ai-recommendations-wrap" style="display: none; margin-bottom: 2rem;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-          <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: #fff; text-transform: uppercase; margin: 0;">
-            <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background: #a300ff; margin-right: 0.5rem; box-shadow: 0 0 10px #a300ff;"></span>
-            For You <span style="font-size: 0.9rem; color: #a300ff; border: 1px solid #a300ff; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 0.5rem;">AI Picks</span>
-          </h2>
+      <div class="recommendations-wrap" id="ai-recommendations-wrap" style="display: none;">
+        <div class="recommendations-head">
+          <div>
+            <span class="recommendations-kicker" id="recommendations-kicker">Race Control</span>
+            <h2 id="recommendations-title">Picked for the grid</h2>
+          </div>
+          <span class="recommendations-mode" id="recommendations-mode">AI picks</span>
         </div>
         <div class="products-grid" id="ai-products-grid"></div>
-        <hr style="border-color: rgba(255,255,255,0.1); margin-top: 2rem; margin-bottom: 0;"/>
       </div>
 
       <!-- Grid -->
@@ -246,6 +284,43 @@
       <div class="pagination" id="pagination"></div>
     </div>
   </div>
+
+  <section class="shop-raceweek" aria-labelledby="raceweek-title">
+    <div class="shop-raceweek-panel">
+      <div class="raceweek-number" aria-hidden="true">44</div>
+      <div class="raceweek-copy">
+        <span class="shop-section-kicker"><span>02</span> Made for the grandstand</span>
+        <h2 id="raceweek-title">YOUR RACE-WEEK<br/><em>UNIFORM.</em></h2>
+        <p>From Friday practice to the final podium, build a collection that carries the energy beyond the circuit.</p>
+        <button type="button" class="shop-primary-cta" data-shop-category="apparel">Shop apparel <span aria-hidden="true">↗</span></button>
+      </div>
+      <div class="raceweek-circuit" aria-hidden="true">
+        <img src="assets/circuits/detailed/white-outline/monza-7.svg" alt=""/>
+        <span>MONZA / ITA</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="shop-service-strip" aria-label="Shopping services">
+    <div><span>01</span><strong>Secure checkout</strong><small>Protected order flow</small></div>
+    <div><span>02</span><strong>Free shipping</strong><small>On orders above ₹999</small></div>
+    <div><span>03</span><strong>30-day returns</strong><small>Simple fan-first support</small></div>
+    <div><span>04</span><strong>Live inventory</strong><small>Stock synced in real time</small></div>
+  </section>
+
+  <footer class="shop-footer">
+    <div class="shop-footer-main">
+      <div class="shop-footer-brand">
+        <img src="assets/paddox-logo-horizontal-white.png?v=S2_0" alt="PADDOX Motorsport Lifestyle"/>
+        <p>More than a fan. Part of the grid.</p>
+      </div>
+      <div class="shop-footer-links">
+        <div><strong>Explore</strong><a href="index.html">Home</a><a href="fanhub.html">Fan Hub</a><a href="pitwall.html">Pit Wall</a></div>
+        <div><strong>Your paddock</strong><a href="account.html">Account</a><button type="button" data-shop-scroll="catalogue">Shop collection</button><button type="button" id="footer-cart-btn">Your cart</button></div>
+      </div>
+    </div>
+    <div class="shop-footer-bottom"><span>© 2026 PADDOX</span><span>Motorsport culture, re-engineered.</span></div>
+  </footer>
 
   <!-- ░░ CART DRAWER ░░ -->
   <div class="cart-overlay" id="cart-overlay"></div>
@@ -347,7 +422,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="js/api.js?v=20260814_1"></script>
-  <script src="shop.js?v=S1_1"></script>
+  <script src="shop.js?v=S2_0"></script>
   <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.8.3/dist/socket.io.min.js"></script>
   <script src="cinematic-pages.js?v=C1_0"></script>
 </body>
