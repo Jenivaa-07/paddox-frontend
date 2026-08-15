@@ -13,13 +13,13 @@
       ]
     },
     {
-      "source": "/paddox-lottie-icons-v3.js",
+      "source": "/paddox-lottie-icons-v4.js",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
       ]
     },
     {
-      "source": "/paddox-lottie-icons-v3.css",
+      "source": "/paddox-lottie-icons-v4.css",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
       ]
