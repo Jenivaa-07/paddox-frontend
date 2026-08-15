@@ -6,7 +6,7 @@
   <title>PADDOX — F1 Fan Universe</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="home.css?v=H4_5_0" />
+  <link rel="stylesheet" href="home.css?v=H4_6_0" />
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap"
     rel="stylesheet"
@@ -326,10 +326,11 @@
         <div class="reveal-up">
           <div class="section-label">Formula 1 Constructors</div>
           <h2 class="section-title grid-strip-title">TEAMS ON THE <span class="accent">GRID</span></h2>
+          <p class="grid-strip-hint">Drag or swipe to explore every constructor.</p>
         </div>
       </div>
     </div>
-    <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-strip" role="region" aria-label="Formula 1 constructors. Drag horizontally to explore." tabindex="0">
       <div class="marquee-track" id="marquee-track">
         <span>Team list loading...</span>
       </div>
@@ -482,11 +483,19 @@
             </div>
             <div class="lab-console-grid">
               <div class="lab-prediction-console">
-                <p>Lock your race-week call before lights out.</p>
-                <div class="prediction-picks lab-console-picks" id="prediction-picks" role="group" aria-label="Choose a race prediction">
+                <p class="lab-prediction-intro">Choose the result, pick a driver, then lock one clear race-week prediction.</p>
+                <div class="prediction-picks lab-console-picks" id="prediction-picks" role="group" aria-label="Choose a prediction type">
                   <button type="button" data-pick="Pole Sitter" aria-pressed="false"><span>P1</span><b>Pole sitter</b><small>Qualifying</small></button>
                   <button type="button" data-pick="Race Winner" aria-pressed="false"><span>WIN</span><b>Race winner</b><small>Grand Prix</small></button>
                   <button type="button" data-pick="Fastest Lap" aria-pressed="false"><span>FL</span><b>Fastest lap</b><small>Race pace</small></button>
+                </div>
+                <div class="lab-prediction-entry">
+                  <label for="prediction-driver" id="prediction-question">Who will win the next Grand Prix?</label>
+                  <div class="lab-prediction-controls">
+                    <input id="prediction-driver" type="text" list="prediction-driver-options" maxlength="80" autocomplete="off" placeholder="Choose or type a driver" aria-describedby="prediction-question">
+                    <datalist id="prediction-driver-options"></datalist>
+                    <button type="button" id="prediction-lock">Lock prediction</button>
+                  </div>
                 </div>
                 <div class="lab-console-status" id="prediction-status" aria-live="polite">No prediction locked yet.</div>
               </div>
@@ -545,6 +554,7 @@
             <h3 id="lab-stamp-preview-title">Dutch Grand Prix</h3>
             <p id="lab-stamp-preview-location">Zandvoort · Current circuit</p>
             <div class="lab-stamp-preview-state" id="lab-stamp-preview-state">Available to claim</div>
+            <a class="lab-stamp-download" id="lab-stamp-download" href="assets/stamps/14-zandvoort.png" download="paddox-2026-round-14-zandvoort-stamp.png">Download stamp <span aria-hidden="true">↓</span></a>
           </div>
         </dialog>
       </div>
@@ -669,7 +679,7 @@
 <script src="js/api.js?v=RAG_2_0"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 <script src="data/paddoxTracks.generated.js?v=H3_4C_4"></script>
-<script src="home.js?v=H4_5_0"></script>
+<script src="home.js?v=H4_6_0"></script>
 <script src="assets/js/voice-assistant.js?v=20260814_1"></script>
 <script src="chatbot.js?v=RAG_2_0"></script>
 </body>
