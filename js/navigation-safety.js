@@ -12,7 +12,7 @@
       const style = document.createElement('link');
       style.id = 'pdx-lottie-icons-css';
       style.rel = 'stylesheet';
-      style.href = 'paddox-lottie-icons.css?v=L1_0';
+      style.href = 'paddox-lottie-icons-v2.css?v=L2_0';
       document.head.appendChild(style);
     }
 
@@ -31,9 +31,9 @@
 
     if (!document.querySelector('script[data-pdx-lottie-icons]')) {
       const script = document.createElement('script');
-      script.src = 'paddox-lottie-icons.js?v=L1_0';
+      script.src = 'paddox-lottie-icons-v2.js?v=L2_0';
       script.defer = true;
-      script.dataset.pdxLottieIcons = '1';
+      script.dataset.pdxLottieIcons = '2';
       script.onerror = () => console.warn('PADDOX Lottie icon system could not be loaded.');
       document.head.appendChild(script);
     }
