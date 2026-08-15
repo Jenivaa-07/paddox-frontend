@@ -1,0 +1,255 @@
+/* ============================================================
+   PADDOX L3.0 — Visible Looping LottieFiles Motion System
+   ============================================================ */
+:root{
+  --pdx-motion-red:#ed0038;
+  --pdx-motion-panel:rgba(8,10,14,.90);
+}
+
+.pdx-lottie-v3-icon{
+  position:relative !important;
+  display:inline-grid !important;
+  place-items:center !important;
+  flex:0 0 auto;
+  overflow:visible !important;
+  isolation:isolate;
+}
+
+.pdx-lottie-v3-player{
+  position:absolute;
+  inset:-12%;
+  display:block;
+  width:124% !important;
+  height:124% !important;
+  opacity:0;
+  pointer-events:none !important;
+  overflow:visible !important;
+  transform:scale(.96);
+  filter:brightness(1.08) contrast(1.06) drop-shadow(0 0 5px rgba(255,255,255,.05));
+  transition:opacity .18s ease,filter .22s ease,transform .22s ease;
+}
+
+.pdx-lottie-v3-loaded > .pdx-lottie-v3-player{
+  opacity:1 !important;
+  transform:scale(1);
+}
+
+/* Keep static fallbacks until the first real Lottie frame is available. */
+.pdx-lottie-v3-loaded::before,
+.pdx-lottie-v3-loaded::after{
+  content:none !important;
+  display:none !important;
+  background:none !important;
+  box-shadow:none !important;
+}
+.pdx-lottie-v3-loaded > svg,
+.pdx-lottie-v3-loaded > img{
+  opacity:0 !important;
+  visibility:hidden !important;
+}
+
+/* Navbar */
+.nl-icon.pdx-lottie-v3-icon,
+.mob-icon.pdx-lottie-v3-icon{
+  width:23px !important;
+  height:23px !important;
+  min-width:23px;
+}
+.search-icon-anim.pdx-lottie-v3-icon,
+.cart-icon-anim.pdx-lottie-v3-icon,
+.search-mini-icon.pdx-lottie-v3-icon{
+  width:24px !important;
+  height:24px !important;
+  min-width:24px;
+}
+
+.nav-link:hover .pdx-lottie-v3-player,
+.nav-link.active .pdx-lottie-v3-player,
+.nav-search-btn:hover .pdx-lottie-v3-player,
+.nav-cart-btn:hover .pdx-lottie-v3-player{
+  filter:brightness(1.18) saturate(1.2) drop-shadow(0 0 9px rgba(237,0,56,.48));
+  transform:scale(1.08);
+}
+
+/* Fan Hub */
+.fh-chip-icon.pdx-lottie-v3-icon,
+.fh-tab-icon.pdx-lottie-v3-icon,
+.comm-title-icon.pdx-lottie-v3-icon{
+  width:31px !important;
+  height:31px !important;
+  min-width:31px;
+}
+.fh-chip-icon.pdx-lottie-v3-icon{margin-right:8px}
+.fh-tab-icon.pdx-lottie-v3-icon{margin-right:8px}
+.comm-title-icon.pdx-lottie-v3-icon{margin-right:10px}
+
+.hero-chip:hover .pdx-lottie-v3-player,
+.hub-tab:hover .pdx-lottie-v3-player,
+.hub-tab.on .pdx-lottie-v3-player,
+.comm-card-title:hover .pdx-lottie-v3-player{
+  filter:brightness(1.15) saturate(1.18) drop-shadow(0 0 10px rgba(237,0,56,.50));
+  transform:scale(1.10);
+}
+
+.pdx-chat-room-mark .pdx-lottie-v3-icon,
+.pdx-chat-empty-mark .pdx-lottie-v3-icon{
+  width:38px !important;
+  height:38px !important;
+}
+
+.pit-btn-icon.pdx-lottie-v3-icon{
+  width:25px !important;
+  height:25px !important;
+  min-width:25px;
+}
+
+/* ============================================================
+   SHARED PADDOX DOCK
+   ============================================================ */
+body.paddox-dock-global{
+  padding-bottom:max(104px,env(safe-area-inset-bottom));
+}
+
+.pdx-dock-outer{
+  position:fixed !important;
+  left:50% !important;
+  bottom:22px !important;
+  z-index:5000 !important;
+  width:max-content !important;
+  max-width:calc(100vw - 24px) !important;
+  transform:translateX(-50%) !important;
+  pointer-events:none;
+}
+
+.pdx-dock-panel{
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:center !important;
+  gap:7px !important;
+  padding:8px 10px !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  border-radius:19px !important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02)),
+    rgba(7,9,13,.90) !important;
+  box-shadow:0 24px 64px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.07),0 0 0 1px rgba(237,0,56,.04) !important;
+  backdrop-filter:blur(22px) saturate(1.4) !important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.4) !important;
+  pointer-events:auto;
+}
+
+.pdx-dock-item{
+  --pdx-dock-size:50px;
+  position:relative !important;
+  display:grid !important;
+  place-items:center !important;
+  width:var(--pdx-dock-size) !important;
+  height:var(--pdx-dock-size) !important;
+  flex:0 0 var(--pdx-dock-size) !important;
+  border:1px solid rgba(255,255,255,.09) !important;
+  border-radius:13px !important;
+  background:rgba(255,255,255,.028) !important;
+  color:rgba(255,255,255,.82) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04) !important;
+  text-decoration:none !important;
+  transition:border-color .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease !important;
+  will-change:width,height;
+}
+.pdx-dock-item:hover{
+  color:#fff !important;
+  border-color:rgba(237,0,56,.46) !important;
+  background:rgba(237,0,56,.10) !important;
+  box-shadow:0 0 24px rgba(237,0,56,.15),inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+.pdx-dock-item.active{
+  color:#fff !important;
+  border-color:rgba(237,0,56,.62) !important;
+  background:radial-gradient(circle at 50% 15%,rgba(237,0,56,.25),transparent 70%),rgba(237,0,56,.09) !important;
+  box-shadow:0 0 28px rgba(237,0,56,.21),inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.pdx-dock-item.active::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  bottom:-6px;
+  width:19px;
+  height:2px;
+  border-radius:99px;
+  background:var(--pdx-motion-red);
+  transform:translateX(-50%);
+  box-shadow:0 0 10px rgba(237,0,56,.8);
+}
+
+.pdx-dock-icon{
+  position:relative !important;
+  display:grid !important;
+  place-items:center !important;
+  width:31px !important;
+  height:31px !important;
+  min-width:31px;
+  color:currentColor;
+}
+.pdx-dock-icon > svg{
+  width:28px;
+  height:28px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.pdx-dock-icon.pdx-lottie-v3-loaded > .pdx-lottie-v3-player{
+  inset:-18%;
+  width:136% !important;
+  height:136% !important;
+}
+.pdx-dock-item:hover .pdx-lottie-v3-player,
+.pdx-dock-item.active .pdx-lottie-v3-player{
+  filter:brightness(1.18) saturate(1.22) drop-shadow(0 0 10px rgba(237,0,56,.58));
+  transform:scale(1.09);
+}
+
+.pdx-dock-label{
+  position:absolute !important;
+  left:50% !important;
+  bottom:calc(100% + 11px) !important;
+  z-index:4;
+  padding:6px 9px !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:7px !important;
+  background:rgba(8,9,12,.96) !important;
+  color:#fff !important;
+  font:700 10px/1 Inter,system-ui,sans-serif !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transform:translate(-50%,6px) scale(.96);
+  transition:opacity .16s ease,transform .16s ease !important;
+  box-shadow:0 10px 28px rgba(0,0,0,.42);
+}
+.pdx-dock-item:hover .pdx-dock-label,
+.pdx-dock-item:focus-visible .pdx-dock-label{
+  opacity:1;
+  transform:translate(-50%,0) scale(1);
+}
+
+@media(max-width:640px){
+  .pdx-dock-outer{bottom:14px !important}
+  .pdx-dock-panel{gap:5px !important;padding:7px !important}
+  .pdx-dock-item{
+    --pdx-dock-size:46px;
+    width:46px !important;
+    height:46px !important;
+    flex-basis:46px !important;
+  }
+  .pdx-dock-icon{width:29px !important;height:29px !important}
+  .pdx-dock-label{display:none !important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .pdx-lottie-v3-player,
+  .pdx-dock-item,
+  .pdx-dock-label{transition:none !important}
+}
