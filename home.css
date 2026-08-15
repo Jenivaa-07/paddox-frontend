@@ -19237,3 +19237,233 @@ body.paddox-dock-home #navbar .nav-logo.paddox-brand-lockup {
   .highlight-card-media img,
   .highlight-play { transition: none; }
 }
+
+/* ============================================================
+   PADDOX H4.6 — Constructor drag + complete Race Lab actions
+   Final-layer rules intentionally override legacy marquee locks.
+   ============================================================ */
+.grid-strip-hint {
+  margin: 12px 0 0;
+  color: rgba(255,255,255,.56);
+  font-family: var(--font-c);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+body .marquee-strip.is-user-draggable {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  cursor: grab !important;
+  touch-action: pan-y pinch-zoom !important;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+body .marquee-strip.is-user-draggable::-webkit-scrollbar {
+  display: none !important;
+}
+
+body .marquee-strip.is-user-draggable.is-dragging {
+  cursor: grabbing !important;
+  scroll-behavior: auto !important;
+}
+
+body .marquee-strip.is-user-draggable::before,
+body .marquee-strip.is-user-draggable::after {
+  pointer-events: none;
+}
+
+body .marquee-strip.is-user-draggable .marquee-track,
+body .marquee-strip.is-user-draggable:hover .marquee-track,
+body .marquee-strip.is-user-draggable:active .marquee-track {
+  display: inline-flex !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  flex-wrap: nowrap !important;
+  animation: none !important;
+  animation-play-state: paused !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+body .marquee-strip.is-user-draggable img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+body .marquee-strip.is-user-draggable:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: -3px;
+}
+
+body #paddox-race-lab .lab-prediction-entry {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-left: 3px solid var(--lab-red);
+  border-radius: 4px;
+  background: rgba(0,0,0,.28);
+}
+
+body #paddox-race-lab .lab-prediction-entry > label {
+  display: block;
+  margin-bottom: 12px;
+  color: #fff;
+  font-family: var(--font-condensed);
+  font-size: clamp(.9rem, 1.5vw, 1.05rem);
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+body #paddox-race-lab .lab-prediction-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+body #paddox-race-lab #prediction-driver {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 3px;
+  outline: none;
+  background: rgba(255,255,255,.055);
+  color: #fff;
+  font: 700 .82rem/1 var(--font-c);
+}
+
+body #paddox-race-lab #prediction-driver::placeholder {
+  color: rgba(255,255,255,.42);
+}
+
+body #paddox-race-lab #prediction-driver:focus {
+  border-color: rgba(240,0,54,.85);
+  box-shadow: 0 0 0 3px rgba(240,0,54,.14);
+}
+
+body #paddox-race-lab #prediction-lock {
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--lab-red);
+  border-radius: 3px;
+  background: var(--lab-red);
+  color: #fff;
+  font: 800 .68rem/1 var(--font-condensed);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+}
+
+body #paddox-race-lab #prediction-lock:hover,
+body #paddox-race-lab #prediction-lock:focus-visible {
+  background: #ff244e;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+body #paddox-race-lab .lab-stamp-slot {
+  cursor: zoom-in;
+}
+
+body #paddox-race-lab .lab-stamp-slot:focus-visible {
+  z-index: 3;
+  outline: 2px solid var(--lab-red);
+  outline-offset: -3px;
+}
+
+body #paddox-race-lab .lab-stamp-action {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 34px;
+  z-index: 2;
+  padding: 6px 4px;
+  border-radius: 2px;
+  background: rgba(4,5,7,.9);
+  color: #fff;
+  font-family: var(--font-condensed);
+  font-size: .52rem;
+  font-style: normal;
+  letter-spacing: .08em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+}
+
+body #paddox-race-lab .lab-stamp-slot:hover .lab-stamp-action,
+body #paddox-race-lab .lab-stamp-slot:focus-visible .lab-stamp-action {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body #paddox-race-lab .lab-stamp-download {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 4px;
+  padding: 0 16px;
+  border: 1px solid var(--lab-red);
+  border-radius: 3px;
+  background: var(--lab-red);
+  color: #fff;
+  font-family: var(--font-condensed);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+body #paddox-race-lab .lab-stamp-download:hover,
+body #paddox-race-lab .lab-stamp-download:focus-visible {
+  background: #ff244e;
+  outline: 2px solid rgba(255,255,255,.72);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .grid-strip-hint {
+    font-size: .62rem;
+    line-height: 1.45;
+  }
+
+  body #paddox-race-lab .lab-prediction-entry {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 520px) {
+  body #paddox-race-lab .lab-prediction-controls {
+    grid-template-columns: 1fr;
+  }
+
+  body #paddox-race-lab #prediction-lock {
+    width: 100%;
+  }
+
+  body #paddox-race-lab .lab-stamp-action {
+    bottom: 27px;
+    padding: 5px 2px;
+    font-size: .44rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body #paddox-race-lab .lab-stamp-action,
+  body #paddox-race-lab #prediction-lock {
+    transition: none;
+  }
+}

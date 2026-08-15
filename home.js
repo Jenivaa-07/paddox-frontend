@@ -3953,30 +3953,30 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     return (words[0] || 'GP').slice(0,3).toUpperCase();
   }
   const STAMP_ASSETS = [
-    { key: 'australian', file: '01-melbourne.png', city: 'Melbourne' },
-    { key: 'chinese', file: '02-shanghai.png', city: 'Shanghai' },
-    { key: 'japanese', file: '03-suzuka.png', city: 'Suzuka' },
-    { key: 'bahrain', file: '04-sakhir.png', city: 'Sakhir' },
-    { key: 'saudi', file: '05-jeddah.png', city: 'Jeddah' },
-    { key: 'miami', file: '06-miami.png', city: 'Miami' },
-    { key: 'canadian', file: '07-montreal.png', city: 'Montreal' },
-    { key: 'monaco', file: '08-monaco.png', city: 'Monaco' },
-    { key: 'spanish', file: '09-barcelona.png', city: 'Barcelona' },
-    { key: 'austrian', file: '10-spielberg.png', city: 'Spielberg' },
-    { key: 'british', file: '11-silverstone.png', city: 'Silverstone' },
-    { key: 'belgian', file: '12-spa.png', city: 'Spa' },
-    { key: 'hungarian', file: '13-budapest.png', city: 'Budapest' },
-    { key: 'dutch', file: '14-zandvoort.png', city: 'Zandvoort' },
-    { key: 'italian', file: '15-monza.png', city: 'Monza' },
-    { key: 'madrid', file: '16-madrid.png', city: 'Madrid' },
-    { key: 'azerbaijan', file: '17-baku.png', city: 'Baku' },
-    { key: 'singapore', file: '18-singapore.png', city: 'Singapore' },
-    { key: 'united states', file: '19-austin.png', city: 'Austin' },
-    { key: 'mexico', file: '20-mexico-city.png', city: 'Mexico City' },
-    { key: 'sao paulo', file: '21-sao-paulo.png', city: 'Sao Paulo' },
-    { key: 'las vegas', file: '22-las-vegas.png', city: 'Las Vegas' },
-    { key: 'qatar', file: '23-lusail.png', city: 'Lusail' },
-    { key: 'abu dhabi', file: '24-abu-dhabi.png', city: 'Abu Dhabi' }
+    { key: 'australian', file: '01-melbourne.png', city: 'Melbourne', name: 'Australian Grand Prix' },
+    { key: 'chinese', file: '02-shanghai.png', city: 'Shanghai', name: 'Chinese Grand Prix' },
+    { key: 'japanese', file: '03-suzuka.png', city: 'Suzuka', name: 'Japanese Grand Prix' },
+    { key: 'bahrain', file: '04-sakhir.png', city: 'Sakhir', name: 'Bahrain Grand Prix' },
+    { key: 'saudi', file: '05-jeddah.png', city: 'Jeddah', name: 'Saudi Arabian Grand Prix' },
+    { key: 'miami', file: '06-miami.png', city: 'Miami', name: 'Miami Grand Prix' },
+    { key: 'canadian', file: '07-montreal.png', city: 'Montreal', name: 'Canadian Grand Prix' },
+    { key: 'monaco', file: '08-monaco.png', city: 'Monaco', name: 'Monaco Grand Prix' },
+    { key: 'barcelona', file: '09-barcelona.png', city: 'Barcelona', name: 'Barcelona-Catalunya Grand Prix' },
+    { key: 'austrian', file: '10-spielberg.png', city: 'Spielberg', name: 'Austrian Grand Prix' },
+    { key: 'british', file: '11-silverstone.png', city: 'Silverstone', name: 'British Grand Prix' },
+    { key: 'belgian', file: '12-spa.png', city: 'Spa', name: 'Belgian Grand Prix' },
+    { key: 'hungarian', file: '13-budapest.png', city: 'Budapest', name: 'Hungarian Grand Prix' },
+    { key: 'dutch', file: '14-zandvoort.png', city: 'Zandvoort', name: 'Dutch Grand Prix' },
+    { key: 'italian', file: '15-monza.png', city: 'Monza', name: 'Italian Grand Prix' },
+    { key: 'spanish', file: '16-madrid.png', city: 'Madrid', name: 'Spanish Grand Prix' },
+    { key: 'azerbaijan', file: '17-baku.png', city: 'Baku', name: 'Azerbaijan Grand Prix' },
+    { key: 'singapore', file: '18-singapore.png', city: 'Singapore', name: 'Singapore Grand Prix' },
+    { key: 'united states', file: '19-austin.png', city: 'Austin', name: 'United States Grand Prix' },
+    { key: 'mexico', file: '20-mexico-city.png', city: 'Mexico City', name: 'Mexico City Grand Prix' },
+    { key: 'sao paulo', file: '21-sao-paulo.png', city: 'Sao Paulo', name: 'São Paulo Grand Prix' },
+    { key: 'las vegas', file: '22-las-vegas.png', city: 'Las Vegas', name: 'Las Vegas Grand Prix' },
+    { key: 'qatar', file: '23-lusail.png', city: 'Lusail', name: 'Qatar Grand Prix' },
+    { key: 'abu dhabi', file: '24-abu-dhabi.png', city: 'Abu Dhabi', name: 'Abu Dhabi Grand Prix' }
   ];
   const BADGE_ASSETS = [
     { key: 'rookie', file: 'paddox_badge_race_week_rookie.png', label: 'Race Week Rookie', unlock: s => s.stamps >= 1 },
@@ -4009,6 +4009,12 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     const race = String(name || '').toLowerCase();
     return STAMP_ASSETS.find(item => race.includes(item.key)) || STAMP_ASSETS[0];
   }
+  function hasStamp(stamps, asset){
+    return stamps.some(value => {
+      const saved = String(value || '').toLowerCase();
+      return saved === asset.key || saved.includes(asset.key) || saved === String(asset.name || '').toLowerCase();
+    });
+  }
   function buildCollectionDisplays(){
     const wall = document.getElementById('lab-stamp-wall');
     if (wall && !wall.children.length) {
@@ -4016,7 +4022,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
         const item = document.createElement('figure');
         item.className = 'lab-stamp-slot';
         item.dataset.stampKey = stamp.key;
-        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/stamps/${stamp.file}" alt="${stamp.city} Grand Prix stamp" width="180" height="240" loading="lazy" decoding="async"><figcaption>${stamp.city}</figcaption>`;
+        item.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><img src="assets/stamps/${stamp.file}" alt="${stamp.name} stamp" width="180" height="240" loading="lazy" decoding="async"><figcaption>${stamp.city}</figcaption><small class="lab-stamp-action">Preview · Download</small>`;
         wall.appendChild(item);
       });
     }
@@ -4037,6 +4043,36 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
       btn.classList.toggle('on', active);
       btn.setAttribute('aria-pressed', String(active));
     });
+  }
+  let selectedPredictionType = '';
+  function predictionQuestion(type, race){
+    if (type === 'Pole Sitter') return `Who will take pole at the ${race}?`;
+    if (type === 'Fastest Lap') return `Who will set the fastest lap at the ${race}?`;
+    return `Who will win the ${race}?`;
+  }
+  function predictionDriverNames(){
+    const entries = [
+      ...(Array.isArray(HOME_F1.drivers) ? HOME_F1.drivers : []),
+      ...(Array.isArray(HOME_F1.standings) ? HOME_F1.standings : [])
+    ];
+    return uniqueCleanNames(entries
+      .map(entry => typeof entry === 'string' ? entry : normalizeDriverFromAny(entry).name)
+      .filter(name => name && name !== 'F1 Driver'));
+  }
+  function syncPredictionForm(state){
+    if (!selectedPredictionType) selectedPredictionType = state.prediction || 'Race Winner';
+    const race = nextRaceName();
+    const question = document.getElementById('prediction-question');
+    const input = document.getElementById('prediction-driver');
+    const options = document.getElementById('prediction-driver-options');
+    if (question) question.textContent = predictionQuestion(selectedPredictionType, race);
+    if (options) {
+      options.innerHTML = predictionDriverNames()
+        .map(name => `<option value="${escapeHTML(name)}"></option>`)
+        .join('');
+    }
+    if (input && state.predictionDriver && !input.value) input.value = state.predictionDriver;
+    setActiveButtons(document.getElementById('prediction-picks'), selectedPredictionType, 'pick');
   }
   function updateBadges(state){
     const stamps = Array.isArray(state.stamps) ? state.stamps : [];
@@ -4075,14 +4111,15 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     }
     const stamps = Array.isArray(state.stamps) ? state.stamps : [];
     document.querySelectorAll('.lab-stamp-slot').forEach(slot => {
+      const asset = STAMP_ASSETS.find(item => item.key === slot.dataset.stampKey);
       const isCurrent = slot.dataset.stampKey === currentStamp.key;
-      const isClaimed = stamps.some(name => String(name).toLowerCase().includes(slot.dataset.stampKey));
+      const isClaimed = asset ? hasStamp(stamps, asset) : false;
       slot.classList.toggle('is-current', isCurrent);
       slot.classList.toggle('is-claimed', isClaimed);
       slot.dataset.state = isClaimed ? 'Secured' : isCurrent ? 'Current round' : 'Available';
-      slot.tabIndex = isCurrent ? 0 : -1;
-      slot.setAttribute('role', isCurrent ? 'button' : 'img');
-      slot.setAttribute('aria-label', isCurrent ? `Preview ${race} stamp` : `${slot.querySelector('figcaption')?.textContent || 'Grand Prix'} stamp, ${slot.dataset.state}`);
+      slot.tabIndex = 0;
+      slot.setAttribute('role', 'button');
+      slot.setAttribute('aria-label', `Preview and download ${asset?.name || 'Grand Prix'} stamp, ${slot.dataset.state}`);
     });
     const stampCount = document.getElementById('lab-stamp-count');
     if (stampCount) stampCount.textContent = String(Math.min(24, stamps.length)).padStart(2, '0');
@@ -4091,7 +4128,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     if (label) label.textContent = `${Math.min(24, stamps.length)} / 24`;
     const claim = document.getElementById('passport-claim-btn');
     if (claim) {
-      const claimed = stamps.includes(race);
+      const claimed = hasStamp(stamps, currentStamp);
       claim.textContent = claimed ? 'Stamp Secured' : 'Claim This Circuit';
       claim.classList.toggle('is-claimed', claimed);
       claim.setAttribute('aria-pressed', String(claimed));
@@ -4101,11 +4138,11 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     const state = readState();
     const predictionStatus = document.getElementById('prediction-status');
     if (predictionStatus) {
-      predictionStatus.textContent = state.prediction
-        ? `${state.prediction} saved for ${state.predictionRace || nextRaceName()}.`
+      predictionStatus.textContent = state.prediction && state.predictionDriver
+        ? `${state.prediction}: ${state.predictionDriver} · ${state.predictionRace || nextRaceName()}.`
         : 'No prediction locked yet.';
     }
-    setActiveButtons(document.getElementById('prediction-picks'), state.prediction || '', 'pick');
+    syncPredictionForm(state);
     updatePassport(state);
     updateBadges(state);
   }
@@ -4123,16 +4160,27 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
       const race = nextRaceName();
       const state = readState();
       const stamps = Array.isArray(state.stamps) ? state.stamps : [];
-      const asset = stampForRace(race);
-      const claimed = stamps.includes(race);
-      const displayRace = /next grand prix/i.test(race) ? `${asset.city} Grand Prix` : race;
+      const requestedKey = trigger?.dataset?.stampKey || '';
+      const asset = STAMP_ASSETS.find(item => item.key === requestedKey) || stampForRace(race);
+      const assetIndex = STAMP_ASSETS.indexOf(asset);
+      const isCurrent = asset.key === stampForRace(race).key;
+      const claimed = hasStamp(stamps, asset);
+      const displayRace = asset.name || `${asset.city} Grand Prix`;
       previewTrigger = trigger || document.activeElement;
       document.getElementById('lab-stamp-preview-image').src = `assets/stamps/${asset.file}`;
       document.getElementById('lab-stamp-preview-image').alt = `${displayRace} stamp preview`;
       document.getElementById('lab-stamp-preview-title').textContent = displayRace;
-      document.getElementById('lab-stamp-preview-location').textContent = `${asset.city} · Current circuit`;
-      document.getElementById('lab-stamp-preview-round').textContent = `Round ${String(STAMP_ASSETS.indexOf(asset) + 1).padStart(2, '0')}`;
-      document.getElementById('lab-stamp-preview-state').textContent = claimed ? 'Stamp secured in your passport' : 'Available to claim';
+      document.getElementById('lab-stamp-preview-location').textContent = `${asset.city} · ${isCurrent ? 'Current circuit' : '2026 World Tour'}`;
+      document.getElementById('lab-stamp-preview-round').textContent = `Round ${String(assetIndex + 1).padStart(2, '0')}`;
+      document.getElementById('lab-stamp-preview-state').textContent = claimed
+        ? 'Stamp secured in your passport'
+        : isCurrent ? 'Available to claim this race week' : 'Preview available · Download your copy';
+      const download = document.getElementById('lab-stamp-download');
+      if (download) {
+        download.href = `assets/stamps/${asset.file}`;
+        download.download = `paddox-2026-round-${String(assetIndex + 1).padStart(2, '0')}-${asset.file}`;
+        download.setAttribute('aria-label', `Download ${displayRace} stamp`);
+      }
       stampPreview.classList.toggle('is-secured', claimed);
       stampPreview.showModal();
       previewClose?.focus();
@@ -4144,14 +4192,14 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     };
     document.getElementById('passport-stamp-container')?.addEventListener('click', e => openStampPreview(e.currentTarget));
     document.getElementById('lab-stamp-wall')?.addEventListener('click', e => {
-      const current = e.target.closest('.lab-stamp-slot.is-current');
-      if (current) openStampPreview(current);
+      const stamp = e.target.closest('.lab-stamp-slot');
+      if (stamp) openStampPreview(stamp);
     });
     document.getElementById('lab-stamp-wall')?.addEventListener('keydown', e => {
-      const current = e.target.closest('.lab-stamp-slot.is-current');
-      if (current && (e.key === 'Enter' || e.key === ' ')) {
+      const stamp = e.target.closest('.lab-stamp-slot');
+      if (stamp && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
-        openStampPreview(current);
+        openStampPreview(stamp);
       }
     });
     previewClose?.addEventListener('click', closeStampPreview);
@@ -4162,19 +4210,39 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
     document.getElementById('prediction-picks')?.addEventListener('click', e => {
       const btn = e.target.closest('button[data-pick]');
       if (!btn) return;
+      selectedPredictionType = btn.dataset.pick;
+      setActiveButtons(document.getElementById('prediction-picks'), selectedPredictionType, 'pick');
+      const question = document.getElementById('prediction-question');
+      if (question) question.textContent = predictionQuestion(selectedPredictionType, nextRaceName());
+      document.getElementById('prediction-driver')?.focus();
+    });
+
+    document.getElementById('prediction-lock')?.addEventListener('click', () => {
+      const input = document.getElementById('prediction-driver');
+      const driver = input?.value?.trim() || '';
+      if (!driver) {
+        input?.focus();
+        if (typeof showToast === 'function') showToast('Choose or type a driver first');
+        return;
+      }
       const state = readState();
-      state.prediction = btn.dataset.pick;
+      state.prediction = selectedPredictionType || 'Race Winner';
+      state.predictionDriver = driver;
       state.predictionRace = nextRaceName();
       writeState(state);
       render();
-      if (typeof showToast === 'function') showToast('Race prediction saved');
+      if (typeof showToast === 'function') showToast(`${state.prediction} locked for ${driver}`);
+    });
+    document.getElementById('prediction-driver')?.addEventListener('keydown', event => {
+      if (event.key === 'Enter') document.getElementById('prediction-lock')?.click();
     });
 
     document.getElementById('passport-claim-btn')?.addEventListener('click', () => {
       const state = readState();
       const race = nextRaceName();
+      const asset = stampForRace(race);
       state.stamps = Array.isArray(state.stamps) ? state.stamps : [];
-      if (!state.stamps.includes(race)) state.stamps.push(race);
+      if (!hasStamp(state.stamps, asset)) state.stamps.push(asset.key);
       writeState(state);
       render();
       if (typeof showToast === 'function') showToast('Race passport stamp claimed');
@@ -4226,7 +4294,8 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
 
   function start() {
     const track = document.getElementById('marquee-track');
-    if (!track || window.innerWidth > 768) {
+    const strip = document.querySelector('.marquee-strip');
+    if (!track || window.innerWidth > 768 || strip?.classList.contains('is-user-draggable')) {
       stop();
       return;
     }
@@ -4279,6 +4348,144 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
       const track = document.getElementById('marquee-track');
       if (track && track !== trackRef) boot();
     }, 1200);
+  }
+})();
+
+/* ============================================================
+   PADDOX H4.6 — Draggable constructor grid
+   Keeps the duplicated constructor set looping while making the strip
+   directly draggable with mouse, touch, trackpad and keyboard.
+   ============================================================ */
+(function initDraggableConstructorGrid(){
+  let strip = null;
+  let track = null;
+  let loopWidth = 0;
+  let raf = 0;
+  let lastFrame = 0;
+  let dragging = false;
+  let moved = false;
+  let pointerId = null;
+  let dragStartX = 0;
+  let dragStartScroll = 0;
+  let hovering = false;
+  let focused = false;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const canHover = window.matchMedia('(hover: hover)');
+
+  function measureLoop(){
+    if (!track || track.children.length < 2) return 0;
+    const children = Array.from(track.children);
+    const halfway = Math.floor(children.length / 2);
+    const first = children[0];
+    const repeat = children[halfway];
+    loopWidth = repeat && first
+      ? repeat.offsetLeft - first.offsetLeft
+      : track.scrollWidth / 2;
+    return loopWidth;
+  }
+
+  function wrap(value){
+    if (!loopWidth) measureLoop();
+    if (!loopWidth) return Math.max(0, value);
+    while (value < 0) value += loopWidth;
+    while (value >= loopWidth) value -= loopWidth;
+    return value;
+  }
+
+  function autoScroll(now){
+    if (!strip || !track) return;
+    if (!lastFrame) lastFrame = now;
+    const elapsed = Math.min(64, now - lastFrame) / 1000;
+    lastFrame = now;
+    const paused = dragging || hovering || focused || document.hidden || reducedMotion.matches;
+    if (!paused && loopWidth) strip.scrollLeft = wrap(strip.scrollLeft + (30 * elapsed));
+    raf = requestAnimationFrame(autoScroll);
+  }
+
+  function onPointerDown(event){
+    if (event.button !== undefined && event.button !== 0) return;
+    dragging = true;
+    moved = false;
+    pointerId = event.pointerId;
+    dragStartX = event.clientX;
+    dragStartScroll = strip.scrollLeft;
+    strip.classList.add('is-dragging');
+    strip.setPointerCapture?.(pointerId);
+  }
+
+  function onPointerMove(event){
+    if (!dragging || event.pointerId !== pointerId) return;
+    const delta = event.clientX - dragStartX;
+    if (Math.abs(delta) > 4) moved = true;
+    strip.scrollLeft = wrap(dragStartScroll - delta);
+  }
+
+  function onPointerEnd(event){
+    if (!dragging || (event.pointerId !== undefined && event.pointerId !== pointerId)) return;
+    dragging = false;
+    strip.classList.remove('is-dragging');
+    if (pointerId !== null && strip.hasPointerCapture?.(pointerId)) strip.releasePointerCapture(pointerId);
+    pointerId = null;
+  }
+
+  function onKeydown(event){
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const direction = event.key === 'ArrowRight' ? 1 : -1;
+    strip.scrollTo({ left: wrap(strip.scrollLeft + direction * Math.min(320, strip.clientWidth * .72)), behavior: 'smooth' });
+  }
+
+  function bind(nextStrip, nextTrack){
+    if (strip === nextStrip && track === nextTrack) {
+      measureLoop();
+      return;
+    }
+    strip = nextStrip;
+    track = nextTrack;
+    strip.classList.add('is-user-draggable');
+    strip.setAttribute('aria-description', 'Drag, swipe, use a trackpad, or press the left and right arrow keys.');
+    track.querySelectorAll('img').forEach(image => image.setAttribute('draggable', 'false'));
+    measureLoop();
+    strip.scrollLeft = wrap(strip.scrollLeft);
+    strip.addEventListener('pointerdown', onPointerDown);
+    strip.addEventListener('pointermove', onPointerMove);
+    strip.addEventListener('pointerup', onPointerEnd);
+    strip.addEventListener('pointercancel', onPointerEnd);
+    strip.addEventListener('keydown', onKeydown);
+    strip.addEventListener('pointerenter', () => { if (canHover.matches) hovering = true; });
+    strip.addEventListener('pointerleave', event => { hovering = false; onPointerEnd(event); });
+    strip.addEventListener('focusin', () => { focused = true; });
+    strip.addEventListener('focusout', () => { focused = false; });
+    strip.addEventListener('click', event => {
+      if (!moved) return;
+      event.preventDefault();
+      event.stopPropagation();
+      moved = false;
+    }, true);
+  }
+
+  function boot(){
+    const nextStrip = document.querySelector('.marquee-strip');
+    const nextTrack = document.getElementById('marquee-track');
+    if (!nextStrip || !nextTrack || nextTrack.children.length < 2) return;
+    bind(nextStrip, nextTrack);
+    requestAnimationFrame(measureLoop);
+    if (!raf) raf = requestAnimationFrame(autoScroll);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+  window.addEventListener('resize', () => requestAnimationFrame(measureLoop), { passive: true });
+  [120, 700, 1800].forEach(ms => setTimeout(boot, ms));
+
+  const originalRender = window.renderHomeMarquee;
+  if (typeof originalRender === 'function') {
+    window.renderHomeMarquee = function draggableRenderHomeMarquee(){
+      const result = originalRender.apply(this, arguments);
+      requestAnimationFrame(boot);
+      return result;
+    };
   }
 })();
 
