@@ -33,8 +33,10 @@
     'account.html': [
       'account.css?v=A4_7C_10',
       'account-v2-safe.css?v=ACC_SAFE_1',
+      'account-v2-brand-fix.css?v=ACC_SAFE_BRAND_1',
       'account.js?v=A4_7C_11',
       'account-v2-safe.js?v=ACC_SAFE_1',
+      'account-v2-brand-fix.js?v=ACC_SAFE_BRAND_1',
       'cinematic-pages.css?v=C1_0'
     ]
   };
@@ -85,7 +87,9 @@
         /* Applying the class only after the stylesheet has loaded means the
            Account 2.0 script can verify its CSS sentinel before inserting the dock. */
         document.body.classList.add('pdx-account2-safe');
+        appendStylesheet('pdx-account2-brand-style', 'account-v2-brand-fix.css?v=ACC_SAFE_BRAND_1');
         appendScript('script[data-pdx-account2-safe]', 'account-v2-safe.js?v=ACC_SAFE_1', 'pdxAccount2Safe');
+        appendScript('script[data-pdx-account2-brand]', 'account-v2-brand-fix.js?v=ACC_SAFE_BRAND_1', 'pdxAccount2Brand');
       };
 
       if (document.body) boot();
