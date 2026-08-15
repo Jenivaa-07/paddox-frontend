@@ -26,6 +26,8 @@ const SHOP_USER_PROFILE_API =
   '/api/users/profile';
 
 let USER_WISHLIST_IDS = new Set();
+let SHOP_AUTHENTICATED = false;
+let SHOP_SESSION_CHECK = null;
 
 const SHOP_F1_TEAMS = [
   { name: 'Ferrari', aliases: ['ferrari', 'scuderia ferrari'] },
@@ -55,10 +57,34 @@ function canonicalShopTeam(value = '') {
 }
 
 
-function shopToken() {
-  return (
-    ''
-  );
+async function detectShopSession(force = false) {
+  if (SHOP_AUTHENTICATED && !force) return true;
+  if (SHOP_SESSION_CHECK && !force) return SHOP_SESSION_CHECK;
+
+  SHOP_SESSION_CHECK = fetch('/api/auth/me', {
+    credentials: 'include',
+    headers: { Accept: 'application/json' }
+  })
+    .then(async res => {
+      const data = await res.json().catch(() => ({}));
+      const user = data.data?.user || data.data || data.user || null;
+      SHOP_AUTHENTICATED = Boolean(
+        res.ok &&
+        data.success !== false &&
+        user &&
+        (user._id || user.id || user.email)
+      );
+      return SHOP_AUTHENTICATED;
+    })
+    .catch(() => {
+      SHOP_AUTHENTICATED = false;
+      return false;
+    })
+    .finally(() => {
+      SHOP_SESSION_CHECK = null;
+    });
+
+  return SHOP_SESSION_CHECK;
 }
 
 /* ══════════════════════════════════════
@@ -316,19 +342,19 @@ async function loadAIRecommendations() {
     if (aiProducts.length > 0) {
       grid.innerHTML = aiProducts.map((p, i) => cardHTML(p, i)).join('');
       bindCardEvents(grid);
+      const title = document.getElementById('recommendations-title');
+      const mode = document.getElementById('recommendations-mode');
+      if (title) title.textContent = 'Picked for you';
+      if (mode) mode.textContent = 'AI picks';
       wrap.style.display = 'block';
     } else {
       throw new Error('No AI match');
     }
   } catch (e) {
     console.warn("AI Recommendations Fallback:", e);
-    // Fallback: Take 4 top rated products as "AI Picks" for demonstration
-    const fallbackProducts = [...PRODUCTS].sort((a,b) => b.rating - a.rating).slice(0, 4);
-    if (fallbackProducts.length > 0) {
-      grid.innerHTML = fallbackProducts.map((p, i) => cardHTML(p, i)).join('');
-      bindCardEvents(grid);
-      wrap.style.display = 'block';
-    }
+    /* Do not label duplicated catalogue items as personalized AI results. */
+    grid.innerHTML = '';
+    wrap.style.display = 'none';
   }
 }
 
@@ -336,8 +362,12 @@ async function loadAIRecommendations() {
 function updateShopHeroStats() {
   const dropEl = document.getElementById('shop-drop-mode');
   const teamEl = document.getElementById('shop-team-count');
+  const productEl = document.getElementById('shop-product-count');
+  const catalogueEl = document.getElementById('catalogue-total');
   if (dropEl) dropEl.textContent = PRODUCTS.length ? 'Live' : 'Soon';
   if (teamEl) teamEl.textContent = String(SHOP_F1_TEAMS.length);
+  if (productEl) productEl.textContent = String(PRODUCTS.length);
+  if (catalogueEl) catalogueEl.textContent = String(PRODUCTS.length);
 }
 
 
@@ -372,9 +402,7 @@ function getCartTotal() {
 
 async function loadShopWishlist() {
   try {
-    const token = shopToken();
-
-    if (!token) {
+    if (!await detectShopSession()) {
       USER_WISHLIST_IDS = new Set();
       return;
     }
@@ -407,9 +435,7 @@ async function loadShopWishlist() {
 
 async function toggleWishlist(productId) {
   try {
-    const token = shopToken();
-
-    if (!token) {
+    if (!await detectShopSession()) {
       showToast('Please login to use wishlist');
       setTimeout(() => {
         window.location.href = 'account.html';
@@ -830,6 +856,8 @@ function renderProducts() {
   const paged     = filtered.slice(start, start + state.perPage);
 
   if (countEl) countEl.textContent = total;
+  const catalogueEl = document.getElementById('catalogue-total');
+  if (catalogueEl) catalogueEl.textContent = total;
 
   /* Empty state */
   if (!total) {
@@ -1183,12 +1211,6 @@ document.getElementById('continue-btn')?.addEventListener('click', () => toggleC
 
 
 
-function getCheckoutToken() {
-  return (
-    ''
-  );
-}
-
 function escapeCheckoutText(value = '') {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -1261,8 +1283,7 @@ async function getSavedCheckoutAddress() {
   if (checkoutAddressComplete(savedAddress)) return savedAddress;
   if (checkoutAddressComplete(savedUser)) return savedUser;
 
-  const token = getCheckoutToken();
-  if (!token) return savedAddress;
+  if (!await detectShopSession()) return savedAddress;
 
   try {
     const res = await fetch(SHOP_USER_PROFILE_API, { credentials: 'include',
@@ -1437,15 +1458,13 @@ function ensureCheckoutModal() {
   return modal;
 }
 
-function openCheckoutModal() {
+async function openCheckoutModal() {
   if (!cart.length) {
     showToast('❌ Cart is empty');
     return;
   }
 
-  const token = getCheckoutToken();
-
-  if (!token) {
+  if (!await detectShopSession()) {
     showToast('Please login first');
     setTimeout(() => {
       window.location.href = 'account.html';
@@ -1511,8 +1530,7 @@ function getCheckoutFormData() {
 async function submitCheckoutForm(e) {
   e.preventDefault();
 
-  const token = getCheckoutToken();
-  if (!token) {
+  if (!await detectShopSession()) {
     showToast('Please login first');
     return;
   }
@@ -1581,6 +1599,30 @@ async function submitCheckoutForm(e) {
 
 document.getElementById('checkout-btn')?.addEventListener('click', openCheckoutModal);
 updateCartUI();
+
+/* ══════════════════════════════════════
+   SHOP EXPERIENCE CONTROLS
+══════════════════════════════════════ */
+function scrollToShopCatalogue() {
+  document.getElementById('shop-catalogue')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function selectShopCategory(category) {
+  const tab = [...document.querySelectorAll('.cat-tab')]
+    .find(item => item.dataset.cat === category);
+  if (tab) tab.click();
+  setTimeout(scrollToShopCatalogue, 80);
+}
+
+document.querySelectorAll('[data-shop-scroll="catalogue"]').forEach(button => {
+  button.addEventListener('click', scrollToShopCatalogue);
+});
+
+document.querySelectorAll('[data-shop-category]').forEach(button => {
+  button.addEventListener('click', () => selectShopCategory(button.dataset.shopCategory));
+});
+
+document.getElementById('footer-cart-btn')?.addEventListener('click', () => toggleCart(true));
 
 
 /* ══════════════════════════════════════
