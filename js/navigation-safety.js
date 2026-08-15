@@ -12,7 +12,7 @@
       const style = document.createElement('link');
       style.id = 'pdx-lottie-icons-css';
       style.rel = 'stylesheet';
-      style.href = 'paddox-lottie-icons-v3.css?v=L3_1';
+      style.href = 'paddox-lottie-icons-v4.css?v=L4_0';
       document.head.appendChild(style);
     }
 
@@ -21,7 +21,7 @@
       critical.id = 'pdx-lottie-critical-style';
       critical.textContent = `
         .pdx-dock-panel{position:relative!important}
-        .pdx-dock-icon svg{width:28px;height:28px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .pdx-dock-icon svg{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
         .pdx-dock-icon svg circle{fill:none;stroke:currentColor}
       `;
       document.head.appendChild(critical);
@@ -29,9 +29,9 @@
 
     if (!document.querySelector('script[data-pdx-lottie-icons]')) {
       const script = document.createElement('script');
-      script.src = 'paddox-lottie-icons-v3.js?v=L3_1';
+      script.src = 'paddox-lottie-icons-v4.js?v=L4_0';
       script.defer = true;
-      script.dataset.pdxLottieIcons = '3';
+      script.dataset.pdxLottieIcons = '4';
       script.onerror = () => console.warn('PADDOX Lottie icon system could not be loaded.');
       document.head.appendChild(script);
     }
