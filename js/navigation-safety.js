@@ -3,7 +3,7 @@
    - keeps decorative transition overlays from blocking links
    - preserves native browser navigation / bfcache behaviour
    - prefetches the core PADDOX destinations before the click
-   - mounts shared auth / Fan Hub enhancement layers
+   - mounts shared auth / Fan Hub / safe Account 2.0 layers
    ============================================================ */
 (function initPaddoxNativeNavigation(){
   'use strict';
@@ -32,7 +32,9 @@
     'pitwall.html': ['pitwall.css?v=19_3', 'pitwall.js?v=19_4', 'cinematic-pages.css?v=C1_0'],
     'account.html': [
       'account.css?v=A4_7C_10',
+      'account-v2-safe.css?v=ACC_SAFE_1',
       'account.js?v=A4_7C_11',
+      'account-v2-safe.js?v=ACC_SAFE_1',
       'cinematic-pages.css?v=C1_0'
     ]
   };
@@ -66,6 +68,37 @@
   function loadGlobalNavAuth(){
     appendStylesheet('pdx-nav-auth-style', 'paddox-nav-auth.css?v=NAV_AUTH_3');
     appendScript('script[data-pdx-nav-auth]', 'paddox-nav-auth.js?v=NAV_AUTH_4', 'pdxNavAuth');
+  }
+
+  function loadAccount2Safe(){
+    if (!/\/account(?:\.html)?\/?$/i.test(window.location.pathname)) return;
+
+    const style = appendStylesheet('pdx-account2-safe-style', 'account-v2-safe.css?v=ACC_SAFE_1');
+    let started = false;
+
+    const start = () => {
+      if (started) return;
+      started = true;
+
+      const boot = () => {
+        if (!document.body) return;
+        /* Applying the class only after the stylesheet has loaded means the
+           Account 2.0 script can verify its CSS sentinel before inserting the dock. */
+        document.body.classList.add('pdx-account2-safe');
+        appendScript('script[data-pdx-account2-safe]', 'account-v2-safe.js?v=ACC_SAFE_1', 'pdxAccount2Safe');
+      };
+
+      if (document.body) boot();
+      else document.addEventListener('DOMContentLoaded', boot, { once:true });
+    };
+
+    if (style.sheet) start();
+    else {
+      style.addEventListener('load', start, { once:true });
+      style.addEventListener('error', () => {
+        document.body?.classList.remove('pdx-account2-safe');
+      }, { once:true });
+    }
   }
 
   function loadFanHubEnhancements(){
@@ -169,6 +202,7 @@
   }
 
   loadGlobalNavAuth();
+  loadAccount2Safe();
   installSpeculationRules();
 
   document.addEventListener('pointerdown', event => {
@@ -202,14 +236,19 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       neutralizeTransition();
+      loadAccount2Safe();
       loadFanHubEnhancements();
       scheduleIdleWarmup();
     }, { once:true });
   } else {
     neutralizeTransition();
+    loadAccount2Safe();
     loadFanHubEnhancements();
     scheduleIdleWarmup();
   }
 
-  window.addEventListener('pageshow', neutralizeTransition);
+  window.addEventListener('pageshow', () => {
+    neutralizeTransition();
+    loadAccount2Safe();
+  });
 })();
