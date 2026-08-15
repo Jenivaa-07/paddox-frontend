@@ -247,7 +247,11 @@
   function bindSocket(){
     if (typeof window.io !== 'function') return;
     try {
-      socket = window.io({ withCredentials:true, transports:['websocket','polling'] });
+      socket = window.io('https://paddox-backend.onrender.com', {
+        withCredentials:true,
+        transports:['websocket','polling'],
+        reconnection:true
+      });
       socket.on('collection:unlocked',item => {
         showLiveToast(`🏆 Unlocked: ${item?.title || 'new collectible'}`);
         if (document.getElementById('page-collection')?.classList.contains('on')) loadCollection();
