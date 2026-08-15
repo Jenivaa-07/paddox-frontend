@@ -39,6 +39,44 @@
     return user;
   }
 
+  /* Keep the auth styling at the very end of the cascade. The page-specific
+     Home/Shop/Fan Hub/Pit Wall/Account styles are loaded after the shared
+     bootstrap, so re-appending this link here prevents their legacy SIGN UP
+     CTA rules from repainting the signed-in profile as a red rectangle. */
+  function promoteAuthStyles(){
+    let style = document.getElementById('pdx-nav-auth-style');
+    if (!style) {
+      style = document.createElement('link');
+      style.id = 'pdx-nav-auth-style';
+      style.rel = 'stylesheet';
+    }
+    style.href = 'paddox-nav-auth.css?v=NAV_AUTH_3';
+    document.head.appendChild(style);
+  }
+
+  function forceMinimalAccountChip(link){
+    if (!link) return;
+    const critical = {
+      'min-width':'0',
+      'min-height':'42px',
+      'height':'42px',
+      'display':'inline-flex',
+      'align-items':'center',
+      'justify-content':'flex-start',
+      'gap':'10px',
+      'padding':'2px 8px 2px 2px',
+      'border':'0',
+      'border-radius':'999px',
+      'clip-path':'none',
+      'background':'transparent',
+      'box-shadow':'none',
+      'overflow':'visible'
+    };
+    Object.entries(critical).forEach(([property, value]) => {
+      link.style.setProperty(property, value, 'important');
+    });
+  }
+
   async function fetchProfileOnce(){
     const res = await fetch('/api/users/profile', {
       credentials:'include',
@@ -54,8 +92,6 @@
     let user = await fetchProfileOnce().catch(() => null);
     if (user) return user;
 
-    /* A valid refresh cookie may still exist even if the access session needs
-       renewal. Refresh silently, then retry the profile once. */
     try {
       const refresh = await fetch('/api/auth/refresh', {
         method:'POST',
@@ -102,6 +138,7 @@
       link.classList.add('pdx-nav-account-chip');
       link.setAttribute('aria-label', `Open account for ${displayName(user)}`);
       link.setAttribute('title', displayName(user));
+      forceMinimalAccountChip(link);
       link.replaceChildren();
 
       link.appendChild(makeAvatar(user, 'pdx-nav-user-avatar'));
@@ -153,6 +190,7 @@
     currentProfile = user;
     window.__PADDOX_NAV_USER__ = user;
     document.documentElement.classList.add('pdx-user-signed-in');
+    promoteAuthStyles();
     renderDesktop(user);
     renderMobile(user);
     window.dispatchEvent(new CustomEvent('paddox:nav-auth-ready', { detail:{ user } }));
@@ -198,6 +236,7 @@
 
   function boot(){
     if (!document.getElementById('navbar')) return;
+    promoteAuthStyles();
     observeAccountLogin();
     syncAuth();
   }
