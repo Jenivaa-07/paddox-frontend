@@ -8,12 +8,24 @@
   'use strict';
 
   function loadPaddoxLottieSystem(){
-    if (!document.getElementById('pdx-lottie-icons-css')) {
-      const style = document.createElement('link');
+    let style = document.getElementById('pdx-lottie-icons-css');
+    if (!style) {
+      style = document.createElement('link');
       style.id = 'pdx-lottie-icons-css';
       style.rel = 'stylesheet';
-      style.href = 'paddox-lottie-icons-v4.css?v=L4_0';
       document.head.appendChild(style);
+    }
+    style.href = 'paddox-lottie-icons-v4.css?v=L4_1';
+
+    /* Move the motion layer to the end of <head> after page styles have parsed,
+       so Fan Hub/Home/Shop legacy icon rules cannot visually override V4. */
+    const promoteMotionStyles = () => {
+      if (style.isConnected) document.head.appendChild(style);
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', promoteMotionStyles, { once:true });
+    } else {
+      setTimeout(promoteMotionStyles,0);
     }
 
     if (!document.getElementById('pdx-lottie-critical-style')) {
@@ -27,9 +39,9 @@
       document.head.appendChild(critical);
     }
 
-    if (!document.querySelector('script[data-pdx-lottie-icons]')) {
+    if (!document.querySelector('script[data-pdx-lottie-icons="4"]')) {
       const script = document.createElement('script');
-      script.src = 'paddox-lottie-icons-v4.js?v=L4_0';
+      script.src = 'paddox-lottie-icons-v4.js?v=L4_1';
       script.defer = true;
       script.dataset.pdxLottieIcons = '4';
       script.onerror = () => console.warn('PADDOX Lottie icon system could not be loaded.');
