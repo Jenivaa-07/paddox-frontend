@@ -6,6 +6,17 @@
 (function initPaddoxNativeNavigation(){
   'use strict';
 
+  function loadStaticFanHubIconFix(){
+    if (!/fanhub\.html$/i.test(window.location.pathname)) return;
+    if (document.getElementById('pdx-fanhub-chat-icon-fix')) return;
+
+    const link = document.createElement('link');
+    link.id = 'pdx-fanhub-chat-icon-fix';
+    link.rel = 'stylesheet';
+    link.href = 'fanhub-chat-icon-fix.css?v=CHAT_ICON_1';
+    document.head.appendChild(link);
+  }
+
   function neutralizeTransition(){
     const overlay = document.getElementById('page-overlay');
     if (overlay) {
@@ -48,9 +59,13 @@
   }, true);
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', neutralizeTransition, { once: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      neutralizeTransition();
+      loadStaticFanHubIconFix();
+    }, { once: true });
   } else {
     neutralizeTransition();
+    loadStaticFanHubIconFix();
   }
 
   window.addEventListener('pageshow', neutralizeTransition);
