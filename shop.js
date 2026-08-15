@@ -321,6 +321,19 @@ async function loadShopProducts() {
   }
 }
 
+function renderShopSkeletons() {
+  const grid = document.getElementById('products-grid');
+  if (!grid || grid.children.length) return;
+  grid.innerHTML = Array.from({ length: 6 }, (_, index) => `
+    <div class="shop-product-skeleton" aria-hidden="true" style="--skeleton-delay:${index * 70}ms">
+      <div class="skeleton-image"></div>
+      <div class="skeleton-copy">
+        <span></span><strong></strong><strong></strong><i></i>
+      </div>
+    </div>
+  `).join('');
+}
+
 async function loadAIRecommendations() {
   const wrap = document.getElementById('ai-recommendations-wrap');
   const grid = document.getElementById('ai-products-grid');
@@ -1903,8 +1916,12 @@ function showToast(msg) {
 updateActiveFilters();
 
 (async function initShopRealtime() {
-  await loadShopWishlist();
-  await loadShopProducts();
+  renderShopSkeletons();
+  await Promise.all([
+    loadShopWishlist(),
+    loadShopProducts()
+  ]);
+  syncWishlistButtons();
 })();
 
 console.log('%c🛒 PADDOX — Shop Page Loaded', 'color:#e8002d;font-size:14px;font-weight:bold;');
