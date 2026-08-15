@@ -334,3 +334,25 @@ body.pdx-cinematic-page [role="button"]:focus-visible{
     animation-iteration-count:1 !important;
   }
 }
+
+/* Shop hero desktop framing: position-only corrections, no portrait scaling. */
+@media(min-width:901px){
+  body.pdx-shop-v2 .shop-hero-content{
+    padding-bottom:104px !important;
+  }
+  body.pdx-shop-v2 .shop-merch-backdrop img{
+    transform:none !important;
+  }
+  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(1) img{
+    object-position:58% 31% !important;
+  }
+  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(2) img{
+    object-position:24% 25% !important;
+  }
+  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(3) img{
+    object-position:68% 30% !important;
+  }
+  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(4) img{
+    object-position:50% 16% !important;
+  }
+}
