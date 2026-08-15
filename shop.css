@@ -5520,3 +5520,47 @@ body .modal-meta{
     max-width:100% !important;
   }
 }
+
+/* PADDOX SHOP S2.1 — catalogue loading state */
+body.pdx-shop-v2 .shop-product-skeleton{
+  min-height:438px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:18px;
+  background:linear-gradient(165deg,rgba(20,22,26,.86),rgba(8,9,11,.96));
+}
+body.pdx-shop-v2 .skeleton-image,
+body.pdx-shop-v2 .skeleton-copy span,
+body.pdx-shop-v2 .skeleton-copy strong,
+body.pdx-shop-v2 .skeleton-copy i{
+  position:relative;
+  display:block;
+  overflow:hidden;
+  background:rgba(255,255,255,.065);
+}
+body.pdx-shop-v2 .skeleton-image{
+  height:258px;
+  margin:7px 7px 0;
+  border-radius:13px;
+}
+body.pdx-shop-v2 .skeleton-copy{padding:20px 18px;}
+body.pdx-shop-v2 .skeleton-copy span{width:34%;height:7px;margin-bottom:14px;border-radius:99px;}
+body.pdx-shop-v2 .skeleton-copy strong{width:82%;height:12px;margin-bottom:9px;border-radius:99px;}
+body.pdx-shop-v2 .skeleton-copy strong+strong{width:58%;}
+body.pdx-shop-v2 .skeleton-copy i{width:42%;height:20px;margin-top:30px;border-radius:99px;}
+body.pdx-shop-v2 .shop-product-skeleton :is(.skeleton-image,.skeleton-copy span,.skeleton-copy strong,.skeleton-copy i)::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.11),transparent);
+  animation:pdxShopSkeleton 1.25s var(--skeleton-delay,0ms) ease-in-out infinite;
+}
+@keyframes pdxShopSkeleton{to{transform:translateX(100%);}}
+@media(max-width:620px){
+  body.pdx-shop-v2 .shop-product-skeleton{min-height:410px;}
+  body.pdx-shop-v2 .skeleton-image{height:246px;}
+}
+@media(prefers-reduced-motion:reduce){
+  body.pdx-shop-v2 .shop-product-skeleton :is(.skeleton-image,.skeleton-copy span,.skeleton-copy strong,.skeleton-copy i)::after{animation:none;}
+}
