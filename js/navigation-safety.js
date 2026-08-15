@@ -6,6 +6,24 @@
 (function initPaddoxNativeNavigation(){
   'use strict';
 
+  function loadGlobalNavAuth(){
+    if (!document.getElementById('pdx-nav-auth-style')) {
+      const style = document.createElement('link');
+      style.id = 'pdx-nav-auth-style';
+      style.rel = 'stylesheet';
+      style.href = 'paddox-nav-auth.css?v=NAV_AUTH_1';
+      document.head.appendChild(style);
+    }
+
+    if (!document.querySelector('script[data-pdx-nav-auth]')) {
+      const script = document.createElement('script');
+      script.src = 'paddox-nav-auth.js?v=NAV_AUTH_1';
+      script.defer = true;
+      script.dataset.pdxNavAuth = '1';
+      document.head.appendChild(script);
+    }
+  }
+
   function loadFanHubEnhancements(){
     if (!/fanhub\.html$/i.test(window.location.pathname)) return;
 
@@ -63,6 +81,8 @@
       return false;
     }
   }
+
+  loadGlobalNavAuth();
 
   document.addEventListener('click', event => {
     const target = event.target;
