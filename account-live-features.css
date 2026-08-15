@@ -1,0 +1,195 @@
+/* ============================================================
+   PADDOX ACCOUNT — live Collection + Fantasy ML
+   ============================================================ */
+body.pdx-account2-safe .collection-premium-shell,
+body.pdx-account2-safe #page-fantasy .set-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 90% 0,rgba(232,0,45,.075),transparent 32%),
+    linear-gradient(145deg,rgba(14,17,23,.9),rgba(6,8,12,.95));
+  box-shadow:0 24px 70px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+body.pdx-account2-safe .collection-premium-shell{padding:18px}
+body.pdx-account2-safe .collection-command-strip{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:18px;
+}
+body.pdx-account2-safe .collection-command-card{
+  min-height:86px;
+  padding:16px 17px;
+  border:1px solid rgba(255,255,255,.075) !important;
+  border-radius:12px !important;
+  background:rgba(255,255,255,.026) !important;
+}
+body.pdx-account2-safe .collection-command-card span{
+  display:block;
+  color:rgba(255,255,255,.38);
+  font:700 .58rem/1 var(--font-c);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+body.pdx-account2-safe .collection-command-card strong{
+  display:block;
+  margin-top:12px;
+  color:#fff;
+  font:400 1.65rem/1 var(--font-d);
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+body.pdx-account2-safe .pdx-collection-livebar,
+body.pdx-account2-safe .pdx-fantasy-livebar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:0 0 16px;
+  padding:11px 13px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:11px;
+  background:rgba(255,255,255,.024);
+}
+body.pdx-account2-safe .pdx-live-label{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#fff;
+  font:700 .62rem/1 var(--font-c);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+body.pdx-account2-safe .pdx-live-label::before{
+  content:"";
+  width:6px;height:6px;border-radius:50%;
+  background:#24d8a8;
+  box-shadow:0 0 10px rgba(36,216,168,.55);
+}
+body.pdx-account2-safe .pdx-live-time{
+  color:rgba(255,255,255,.34);
+  font:600 .58rem/1 var(--font-c);
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+
+body.pdx-account2-safe .col-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+body.pdx-account2-safe .pdx-collectible-card{
+  position:relative;
+  min-height:220px;
+  overflow:hidden;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 90% 10%,var(--rarity-glow,rgba(232,0,45,.09)),transparent 38%),
+    rgba(255,255,255,.022);
+}
+body.pdx-account2-safe .pdx-collectible-card::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;width:74px;height:2px;
+  background:var(--rarity-line,#e8002d);
+  box-shadow:0 0 18px var(--rarity-glow,rgba(232,0,45,.28));
+}
+body.pdx-account2-safe .pdx-collectible-card[data-rarity="Rare"]{--rarity-line:#55b7ff;--rarity-glow:rgba(85,183,255,.16)}
+body.pdx-account2-safe .pdx-collectible-card[data-rarity="Epic"]{--rarity-line:#d06cff;--rarity-glow:rgba(208,108,255,.16)}
+body.pdx-account2-safe .pdx-collectible-card[data-rarity="Legendary"]{--rarity-line:#e1b94e;--rarity-glow:rgba(225,185,78,.18)}
+body.pdx-account2-safe .pdx-collectible-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+body.pdx-account2-safe .pdx-collectible-icon{font-size:1.8rem;filter:drop-shadow(0 7px 18px rgba(0,0,0,.28))}
+body.pdx-account2-safe .pdx-collectible-rarity{
+  padding:5px 8px;border:1px solid rgba(255,255,255,.1);border-radius:999px;
+  color:rgba(255,255,255,.48);font:700 .51rem/1 var(--font-c);letter-spacing:.14em;text-transform:uppercase
+}
+body.pdx-account2-safe .pdx-collectible-card h3{
+  margin:18px 0 7px;color:#fff;font:400 1.65rem/1 var(--font-d);letter-spacing:.055em;text-transform:uppercase
+}
+body.pdx-account2-safe .pdx-collectible-card p{margin:0;color:rgba(255,255,255,.43);font-size:.73rem;line-height:1.55}
+body.pdx-account2-safe .pdx-collectible-meta{
+  margin-top:17px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);
+  color:rgba(255,255,255,.30);font:600 .55rem/1.35 var(--font-c);letter-spacing:.11em;text-transform:uppercase
+}
+body.pdx-account2-safe .pdx-collectible-share{
+  margin-top:14px;padding:9px 12px;border:1px solid rgba(232,0,45,.22);border-radius:8px;
+  color:#fff;background:rgba(232,0,45,.07);font:700 .57rem/1 var(--font-c);letter-spacing:.14em;text-transform:uppercase;cursor:pointer
+}
+body.pdx-account2-safe .pdx-collectible-share:hover{border-color:rgba(232,0,45,.48);background:rgba(232,0,45,.14)}
+
+body.pdx-account2-safe .pdx-next-unlock{
+  min-height:188px;padding:18px;border:1px dashed rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.014)
+}
+body.pdx-account2-safe .pdx-next-unlock small{color:#ff315e;font:700 .53rem/1 var(--font-c);letter-spacing:.15em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-next-unlock h4{margin:11px 0 6px;color:#fff;font:400 1.3rem/1 var(--font-d);letter-spacing:.05em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-next-unlock p{margin:0;color:rgba(255,255,255,.38);font-size:.7rem;line-height:1.5}
+body.pdx-account2-safe .pdx-progress-track{height:5px;margin-top:17px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.07)}
+body.pdx-account2-safe .pdx-progress-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#e8002d,#ff315e);box-shadow:0 0 12px rgba(232,0,45,.22)}
+body.pdx-account2-safe .pdx-progress-copy{margin-top:8px;color:rgba(255,255,255,.34);font:600 .55rem/1 var(--font-c);letter-spacing:.08em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-collection-section-title{grid-column:1/-1;margin:6px 0 -2px;color:rgba(255,255,255,.4);font:700 .6rem/1 var(--font-c);letter-spacing:.18em;text-transform:uppercase}
+
+/* Fantasy */
+body.pdx-account2-safe #page-fantasy .set-card{padding:24px !important}
+body.pdx-account2-safe #page-fantasy .set-title{display:flex;align-items:center;gap:9px}
+body.pdx-account2-safe #page-fantasy .set-card>p{max-width:760px;color:rgba(255,255,255,.45);line-height:1.65}
+body.pdx-account2-safe #fantasy-prediction-results{margin-top:20px !important}
+body.pdx-account2-safe #fantasy-prediction-results>.save-btn{
+  min-width:220px;border-radius:9px !important;clip-path:none !important
+}
+body.pdx-account2-safe #fantasy-results-container{
+  display:block !important;
+  width:100%;
+  margin-top:18px !important;
+}
+body.pdx-account2-safe .pdx-fantasy-livebar{margin-bottom:12px}
+body.pdx-account2-safe .pdx-fantasy-meta{
+  display:grid;grid-template-columns:1.25fr repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px
+}
+body.pdx-account2-safe .pdx-fantasy-meta-card{
+  min-height:76px;padding:13px 14px;border:1px solid rgba(255,255,255,.075);border-radius:11px;background:rgba(255,255,255,.024)
+}
+body.pdx-account2-safe .pdx-fantasy-meta-card small{display:block;color:rgba(255,255,255,.32);font:700 .53rem/1 var(--font-c);letter-spacing:.14em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-fantasy-meta-card strong{display:block;margin-top:9px;color:#fff;font:400 1.12rem/1.05 var(--font-d);letter-spacing:.045em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-fantasy-quality[data-quality="high"] strong{color:#25d8a9}
+body.pdx-account2-safe .pdx-fantasy-quality[data-quality="medium"] strong{color:#e1b94e}
+body.pdx-account2-safe .pdx-fantasy-quality[data-quality="low"] strong{color:#ff6b7f}
+body.pdx-account2-safe .pdx-fantasy-note{
+  margin-bottom:14px;padding:11px 13px;border-left:2px solid #e8002d;color:rgba(255,255,255,.43);background:rgba(232,0,45,.035);font-size:.7rem;line-height:1.55
+}
+body.pdx-account2-safe .pdx-fantasy-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+body.pdx-account2-safe .pdx-fantasy-card{
+  position:relative;min-height:235px;padding:17px;overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:13px;
+  background:radial-gradient(circle at 100% 0,rgba(232,0,45,.10),transparent 38%),rgba(255,255,255,.022)
+}
+body.pdx-account2-safe .pdx-fantasy-card:first-child{border-color:rgba(225,185,78,.32);box-shadow:inset 0 1px 0 rgba(225,185,78,.08)}
+body.pdx-account2-safe .pdx-fantasy-rank{color:#ff315e;font:400 2rem/1 var(--font-d);letter-spacing:.05em}
+body.pdx-account2-safe .pdx-fantasy-card:first-child .pdx-fantasy-rank{color:#e1b94e}
+body.pdx-account2-safe .pdx-fantasy-card h3{margin:14px 0 4px;color:#fff;font:400 1.45rem/1 var(--font-d);letter-spacing:.04em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-fantasy-team{min-height:28px;color:rgba(255,255,255,.38);font-size:.65rem;line-height:1.4}
+body.pdx-account2-safe .pdx-fantasy-points{margin-top:15px;color:#fff;font:400 2.15rem/1 var(--font-d)}
+body.pdx-account2-safe .pdx-fantasy-points span{margin-left:4px;color:rgba(255,255,255,.30);font:700 .52rem/1 var(--font-c);letter-spacing:.12em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-fantasy-inputs{margin-top:13px;padding-top:11px;border-top:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.34);font:600 .55rem/1.45 var(--font-c);letter-spacing:.07em;text-transform:uppercase}
+body.pdx-account2-safe .pdx-live-error{padding:18px;border:1px solid rgba(232,0,45,.22);border-radius:11px;color:#ff8294;background:rgba(232,0,45,.055);font-size:.76rem;line-height:1.55}
+body.pdx-account2-safe .pdx-live-loading{display:flex;align-items:center;gap:10px;padding:18px;color:rgba(255,255,255,.42);font-size:.74rem}
+body.pdx-account2-safe .pdx-live-loading::before{content:"";width:14px;height:14px;border:2px solid rgba(255,255,255,.14);border-top-color:#e8002d;border-radius:50%;animation:pdxLiveSpin .8s linear infinite}
+@keyframes pdxLiveSpin{to{transform:rotate(360deg)}}
+
+@media(max-width:1300px){body.pdx-account2-safe .pdx-fantasy-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1050px){body.pdx-account2-safe .col-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+  body.pdx-account2-safe .collection-command-strip,
+  body.pdx-account2-safe .pdx-fantasy-meta{grid-template-columns:1fr 1fr}
+  body.pdx-account2-safe .pdx-fantasy-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  body.pdx-account2-safe .collection-command-strip,
+  body.pdx-account2-safe .col-grid,
+  body.pdx-account2-safe .pdx-fantasy-meta,
+  body.pdx-account2-safe .pdx-fantasy-grid{grid-template-columns:1fr}
+}
