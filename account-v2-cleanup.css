@@ -1,0 +1,85 @@
+/* ============================================================
+   PADDOX ACCOUNT 2.0 — cleanup pass
+   - remove AI Credits from Account UI
+   - repair Collection / Fantasy sidebar icons
+   ============================================================ */
+
+body.pdx-account2-safe .ai-credits-box,
+body.pdx-account2-safe .ai-credit-dash-card,
+body.pdx-account2-safe #side-ai-credits,
+body.pdx-account2-safe #dash-ai-credits,
+body.pdx-account2-safe [class*="ai-credit"],
+body.pdx-account2-safe [id*="ai-credit"]{
+  display:none !important;
+}
+
+/* Keep dashboard metrics balanced after removing AI Credits. */
+body.pdx-account2-safe .dash-stats{
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+}
+
+/* Sidebar icon repair — keep the existing Account 2.0 visual language. */
+body.pdx-account2-safe .acc-nav-item .acc-collection-icon,
+body.pdx-account2-safe .acc-nav-item .acc-fantasy-icon{
+  position:relative !important;
+  display:inline-grid !important;
+  place-items:center !important;
+  flex:0 0 18px !important;
+  width:18px !important;
+  height:18px !important;
+  min-width:18px !important;
+  color:currentColor !important;
+  background:none !important;
+  border:0 !important;
+  box-shadow:none !important;
+  font-size:0 !important;
+  line-height:0 !important;
+  overflow:visible !important;
+}
+
+body.pdx-account2-safe .acc-nav-item .acc-collection-icon::before,
+body.pdx-account2-safe .acc-nav-item .acc-fantasy-icon::before{
+  content:"" !important;
+  display:block !important;
+  width:18px !important;
+  height:18px !important;
+  background:currentColor !important;
+  opacity:.95;
+  -webkit-mask-repeat:no-repeat !important;
+  mask-repeat:no-repeat !important;
+  -webkit-mask-position:center !important;
+  mask-position:center !important;
+  -webkit-mask-size:contain !important;
+  mask-size:contain !important;
+}
+
+/* Collection: layered collectible cards. */
+body.pdx-account2-safe .acc-nav-item .acc-collection-icon::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M5 4.5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2Zm2.2 3.2v8.6h7.6V7.7H7.2Zm9.1.5h1.2v7.6h-1.2V8.2ZM5.5 8.2h.8v7.6h-.8V8.2Z'/%3E%3C/svg%3E") !important;
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M5 4.5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2Zm2.2 3.2v8.6h7.6V7.7H7.2Zm9.1.5h1.2v7.6h-1.2V8.2ZM5.5 8.2h.8v7.6h-.8V8.2Z'/%3E%3C/svg%3E") !important;
+}
+
+/* Fantasy Team: trophy / competition mark. */
+body.pdx-account2-safe .acc-nav-item .acc-fantasy-icon::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 3h10v3h3v2.2c0 3-1.7 5.2-4.4 5.8A5 5 0 0 1 13 16.8V19h3v2H8v-2h3v-2.2A5 5 0 0 1 8.4 14C5.7 13.4 4 11.2 4 8.2V6h3V3Zm2 2v6a3 3 0 0 0 6 0V5H9ZM6 8v.2c0 1.6.6 2.7 1.7 3.3A5 5 0 0 1 7 9V8H6Zm11 0v1c0 .9-.2 1.8-.7 2.5 1.1-.6 1.7-1.7 1.7-3.3V8h-1Z'/%3E%3C/svg%3E") !important;
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 3h10v3h3v2.2c0 3-1.7 5.2-4.4 5.8A5 5 0 0 1 13 16.8V19h3v2H8v-2h3v-2.2A5 5 0 0 1 8.4 14C5.7 13.4 4 11.2 4 8.2V6h3V3Zm2 2v6a3 3 0 0 0 6 0V5H9ZM6 8v.2c0 1.6.6 2.7 1.7 3.3A5 5 0 0 1 7 9V8H6Zm11 0v1c0 .9-.2 1.8-.7 2.5 1.1-.6 1.7-1.7 1.7-3.3V8h-1Z'/%3E%3C/svg%3E") !important;
+}
+
+body.pdx-account2-safe .acc-nav-item:hover .acc-collection-icon::before,
+body.pdx-account2-safe .acc-nav-item:hover .acc-fantasy-icon::before,
+body.pdx-account2-safe .acc-nav-item.on .acc-collection-icon::before,
+body.pdx-account2-safe .acc-nav-item.on .acc-fantasy-icon::before{
+  opacity:1;
+}
+
+@media(max-width:900px){
+  body.pdx-account2-safe .dash-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+@media(max-width:560px){
+  body.pdx-account2-safe .dash-stats{
+    grid-template-columns:1fr !important;
+  }
+}
