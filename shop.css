@@ -4340,33 +4340,40 @@ body.pdx-shop-v2 .shop-raceweek-panel{
   min-height:430px;
   position:relative;
   display:grid;
-  grid-template-columns:1fr 330px;
+  grid-template-columns:1fr;
   align-items:center;
   overflow:hidden;
   padding:64px 72px;
   border:1px solid var(--shop-line);
   background:
-    radial-gradient(circle at 12% 50%,rgba(237,0,56,.24),transparent 34%),
-    linear-gradient(115deg,#111318 0%,#08090b 62%,#101217 100%);
+    linear-gradient(90deg,rgba(4,5,7,.97) 0%,rgba(4,5,7,.91) 34%,rgba(4,5,7,.66) 55%,rgba(4,5,7,.12) 82%),
+    linear-gradient(to top,rgba(4,5,7,.68),transparent 58%),
+    url('assets/shop/raceweek-ferrari.webp?v=S3_2') center 44%/cover no-repeat;
+  box-shadow:0 30px 80px rgba(0,0,0,.34);
 }
 body.pdx-shop-v2 .shop-raceweek-panel::before{
   content:"";
   position:absolute;
   inset:0;
-  opacity:.26;
-  background:repeating-linear-gradient(118deg,transparent 0 52px,rgba(255,255,255,.06) 53px,transparent 54px);
+  z-index:1;
+  opacity:.42;
+  background:
+    radial-gradient(circle at 12% 54%,rgba(237,0,56,.34),transparent 34%),
+    repeating-linear-gradient(118deg,transparent 0 52px,rgba(255,255,255,.045) 53px,transparent 54px);
+  pointer-events:none;
 }
 body.pdx-shop-v2 .raceweek-number{
   position:absolute;
-  right:28%;
-  bottom:-88px;
-  color:rgba(255,255,255,.025);
+  right:4%;
+  bottom:-96px;
+  z-index:1;
+  color:rgba(255,255,255,.055);
   font-family:var(--font-display);
   font-size:24rem;
   font-weight:900;
   line-height:1;
 }
-body.pdx-shop-v2 .raceweek-copy{position:relative;z-index:2;max-width:650px;}
+body.pdx-shop-v2 .raceweek-copy{position:relative;z-index:2;max-width:650px;text-shadow:0 2px 28px rgba(0,0,0,.72);}
 body.pdx-shop-v2 .raceweek-copy h2{font-size:clamp(3.8rem,6vw,6.7rem);}
 body.pdx-shop-v2 .raceweek-copy>p{
   max-width:520px;
@@ -4375,28 +4382,6 @@ body.pdx-shop-v2 .raceweek-copy>p{
   font-size:.9rem;
   line-height:1.75;
 }
-body.pdx-shop-v2 .raceweek-circuit{
-  position:relative;
-  z-index:2;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:24px;
-}
-body.pdx-shop-v2 .raceweek-circuit img{
-  width:100%;
-  max-width:290px;
-  filter:drop-shadow(0 0 24px rgba(237,0,56,.24));
-  opacity:.82;
-}
-body.pdx-shop-v2 .raceweek-circuit span{
-  font-family:var(--font-condensed);
-  font-size:.6rem;
-  font-weight:700;
-  letter-spacing:.3em;
-  color:rgba(255,255,255,.45);
-}
-
 /* Services and footer */
 body.pdx-shop-v2 .shop-service-strip{
   width:var(--shop-rail);
@@ -4507,8 +4492,7 @@ body.pdx-shop-v2 .shop-footer-bottom{
   }
   body.pdx-shop-v2 .shop-sidebar.mobile-open{transform:translateX(0) !important;}
   body.pdx-shop-v2 .products-area{padding:0 !important;}
-  body.pdx-shop-v2 .shop-raceweek-panel{grid-template-columns:1fr 240px;padding:52px 46px;}
-  body.pdx-shop-v2 .raceweek-circuit img{max-width:220px;}
+  body.pdx-shop-v2 .shop-raceweek-panel{grid-template-columns:1fr;padding:52px 46px;background-position:58% center;}
   body.pdx-shop-v2 .shop-service-strip{grid-template-columns:repeat(2,1fr);}
   body.pdx-shop-v2 .shop-service-strip>div:nth-child(3){border-top:1px solid var(--shop-line);}
   body.pdx-shop-v2 .shop-service-strip>div:nth-child(4){border-top:1px solid var(--shop-line);}
@@ -4573,10 +4557,17 @@ body.pdx-shop-v2 .shop-footer-bottom{
   body.pdx-shop-v2 .products-grid.list-view .pcard{display:flex !important;flex-direction:column !important;}
   body.pdx-shop-v2 .products-grid.list-view .pcard-img-wrap{height:230px !important;min-height:230px !important;}
   body.pdx-shop-v2 .shop-raceweek{margin-bottom:66px;}
-  body.pdx-shop-v2 .shop-raceweek-panel{display:block;min-height:0;padding:44px 24px;}
+  body.pdx-shop-v2 .shop-raceweek-panel{
+    display:block;
+    min-height:500px;
+    padding:44px 24px;
+    background:
+      linear-gradient(90deg,rgba(4,5,7,.95),rgba(4,5,7,.74) 68%,rgba(4,5,7,.35)),
+      linear-gradient(to top,rgba(4,5,7,.76),transparent 58%),
+      url('assets/shop/raceweek-ferrari.webp?v=S3_2') 58% center/cover no-repeat;
+  }
   body.pdx-shop-v2 .raceweek-copy h2{font-size:clamp(3rem,14vw,4.35rem);}
   body.pdx-shop-v2 .raceweek-copy>p{font-size:.82rem;}
-  body.pdx-shop-v2 .raceweek-circuit{display:none;}
   body.pdx-shop-v2 .raceweek-number{right:-28px;bottom:-38px;font-size:13rem;}
   body.pdx-shop-v2 .shop-service-strip{grid-template-columns:1fr;margin-bottom:64px;}
   body.pdx-shop-v2 .shop-service-strip>div{
