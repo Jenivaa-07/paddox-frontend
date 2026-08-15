@@ -35,12 +35,12 @@
       'account-v2-safe.css?v=ACC_SAFE_1',
       'account-v2-brand-fix.css?v=ACC_SAFE_BRAND_1',
       'account-v2-cleanup.css?v=ACC_SAFE_CLEANUP_2',
-      'account-live-features.css?v=ACC_LIVE_2',
+      'account-live-features.css?v=ACC_LIVE_3',
       'account.js?v=A4_7C_11',
       'account-v2-safe.js?v=ACC_SAFE_1',
       'account-v2-brand-fix.js?v=ACC_SAFE_BRAND_1',
       'account-v2-cleanup.js?v=ACC_SAFE_CLEANUP_2',
-      'account-live-features.js?v=ACC_LIVE_2',
+      'account-live-features.js?v=ACC_LIVE_3',
       'cinematic-pages.css?v=C1_0'
     ]
   };
@@ -91,11 +91,11 @@
         document.body.classList.add('pdx-account2-safe');
         appendStylesheet('pdx-account2-brand-style', 'account-v2-brand-fix.css?v=ACC_SAFE_BRAND_1');
         appendStylesheet('pdx-account2-cleanup-style', 'account-v2-cleanup.css?v=ACC_SAFE_CLEANUP_2');
-        appendStylesheet('pdx-account-live-style', 'account-live-features.css?v=ACC_LIVE_2');
+        appendStylesheet('pdx-account-live-style', 'account-live-features.css?v=ACC_LIVE_3');
         appendScript('script[data-pdx-account2-safe]', 'account-v2-safe.js?v=ACC_SAFE_1', 'pdxAccount2Safe');
         appendScript('script[data-pdx-account2-brand]', 'account-v2-brand-fix.js?v=ACC_SAFE_BRAND_1', 'pdxAccount2Brand');
         appendScript('script[data-pdx-account2-cleanup]', 'account-v2-cleanup.js?v=ACC_SAFE_CLEANUP_2', 'pdxAccount2Cleanup');
-        appendScript('script[data-pdx-account-live]', 'account-live-features.js?v=ACC_LIVE_2', 'pdxAccountLive');
+        appendScript('script[data-pdx-account-live]', 'account-live-features.js?v=ACC_LIVE_3', 'pdxAccountLive');
       };
 
       if (document.body) boot();
