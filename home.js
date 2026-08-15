@@ -4393,7 +4393,7 @@ function pdxH34cSectorSVG(track, mode = 'mini') {
   function autoScroll(now){
     if (!strip || !track) return;
     if (!lastFrame) lastFrame = now;
-    const elapsed = Math.min(64, now - lastFrame) / 1000;
+    const elapsed = Math.min(1000, now - lastFrame) / 1000;
     lastFrame = now;
     const paused = dragging || now < resumeAt || document.hidden || reducedMotion.matches;
     if (!paused && loopWidth) strip.scrollLeft = wrap(strip.scrollLeft + (38 * elapsed));
