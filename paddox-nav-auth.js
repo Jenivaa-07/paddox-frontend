@@ -1,6 +1,8 @@
 /* ============================================================
    PADDOX — Shared signed-in navbar account controller
    Uses the existing first-party HttpOnly cookie session.
+   Cache-first rendering keeps cross-page navigation feeling instant;
+   the cookie-backed profile is still revalidated in the background.
    ============================================================ */
 (function initPaddoxNavAuth(){
   'use strict';
@@ -10,6 +12,7 @@
 
   let currentProfile = null;
   let syncPromise = null;
+  const NAV_CACHE_KEY = 'paddox_nav_profile_v1';
 
   const clean = value => String(value || '').trim();
 
@@ -39,10 +42,30 @@
     return user;
   }
 
-  /* Keep the auth styling at the very end of the cascade. The page-specific
-     Home/Shop/Fan Hub/Pit Wall/Account styles are loaded after the shared
-     bootstrap, so re-appending this link here prevents their legacy SIGN UP
-     CTA rules from repainting the signed-in profile as a red rectangle. */
+  function readCachedProfile(){
+    const candidates = [
+      sessionStorage.getItem(NAV_CACHE_KEY),
+      localStorage.getItem('paddox_user')
+    ];
+    for (const raw of candidates) {
+      if (!raw) continue;
+      try {
+        const user = JSON.parse(raw);
+        if (user && typeof user === 'object' && (user.email || user._id || user.id)) return user;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  function rememberProfile(user){
+    if (!user || typeof user !== 'object') return;
+    try { sessionStorage.setItem(NAV_CACHE_KEY, JSON.stringify(user)); } catch (_) {}
+  }
+
+  function clearCachedProfile(){
+    try { sessionStorage.removeItem(NAV_CACHE_KEY); } catch (_) {}
+  }
+
   function promoteAuthStyles(){
     let style = document.getElementById('pdx-nav-auth-style');
     if (!style) {
@@ -189,6 +212,7 @@
   function renderSignedIn(user){
     currentProfile = user;
     window.__PADDOX_NAV_USER__ = user;
+    rememberProfile(user);
     document.documentElement.classList.add('pdx-user-signed-in');
     promoteAuthStyles();
     renderDesktop(user);
@@ -199,6 +223,7 @@
   function renderSignedOut(){
     currentProfile = null;
     window.__PADDOX_NAV_USER__ = null;
+    clearCachedProfile();
     document.documentElement.classList.remove('pdx-user-signed-in');
     window.dispatchEvent(new CustomEvent('paddox:nav-auth-ready', { detail:{ user:null } }));
   }
@@ -223,9 +248,9 @@
     if (!authScreen || authScreen.dataset.pdxNavObserved === '1') return;
     authScreen.dataset.pdxNavObserved = '1';
 
-    let previousDisplay = getComputedStyle(authScreen).display;
+    let previousDisplay = authScreen.style.display || getComputedStyle(authScreen).display;
     const observer = new MutationObserver(() => {
-      const nextDisplay = getComputedStyle(authScreen).display;
+      const nextDisplay = authScreen.style.display || getComputedStyle(authScreen).display;
       if (previousDisplay !== 'none' && nextDisplay === 'none') {
         window.setTimeout(() => syncAuth({ force:true }), 80);
       }
@@ -238,6 +263,11 @@
     if (!document.getElementById('navbar')) return;
     promoteAuthStyles();
     observeAccountLogin();
+
+    /* Render the last verified identity immediately; network validation follows
+       without making every page transition wait for Render/API latency. */
+    const cached = readCachedProfile();
+    if (cached) renderSignedIn(cached);
     syncAuth();
   }
 
