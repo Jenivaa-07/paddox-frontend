@@ -160,3 +160,232 @@
     bind();
   }
 })();
+
+
+/* ============================================================
+   PADDOX Fan Hub — Quotes Repair
+   1. Restores the missing canvas footer icon helpers used by the
+      quote image generator.
+   2. Fixes sticky-tab navigation so a newly selected Fan Hub tab
+      always opens from the beginning of its section.
+   3. Adds final quote-page layout guards after the cinematic CSS.
+   ============================================================ */
+(function initPaddoxQuoteRepairs(){
+  'use strict';
+
+  function installCanvasIconHelpers() {
+    if (typeof window.drawQuoteIconShield !== 'function') {
+      window.drawQuoteIconShield = function drawQuoteIconShield(ctx, x, y) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = 'rgba(255,255,255,.86)';
+        ctx.fillStyle = 'rgba(232,0,45,.13)';
+        ctx.lineWidth = 2.6;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(15, 0);
+        ctx.lineTo(28, 5);
+        ctx.lineTo(26, 19);
+        ctx.quadraticCurveTo(24, 29, 15, 35);
+        ctx.quadraticCurveTo(6, 29, 4, 19);
+        ctx.lineTo(2, 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = '#e8002d';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(9, 17);
+        ctx.lineTo(13.5, 21.5);
+        ctx.lineTo(21.5, 12.5);
+        ctx.stroke();
+        ctx.restore();
+      };
+    }
+
+    if (typeof window.drawQuoteIconShare !== 'function') {
+      window.drawQuoteIconShare = function drawQuoteIconShare(ctx, x, y) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = 'rgba(255,255,255,.86)';
+        ctx.lineWidth = 2.6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        ctx.beginPath();
+        ctx.roundRect?.(0, 8, 30, 25, 7);
+        if (typeof ctx.roundRect !== 'function') {
+          ctx.rect(0, 8, 30, 25);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#e8002d';
+        ctx.beginPath();
+        ctx.moveTo(15, 20);
+        ctx.lineTo(15, 0);
+        ctx.moveTo(8, 7);
+        ctx.lineTo(15, 0);
+        ctx.lineTo(22, 7);
+        ctx.stroke();
+        ctx.restore();
+      };
+    }
+
+    if (typeof window.drawQuoteIconStar !== 'function') {
+      window.drawQuoteIconStar = function drawQuoteIconStar(ctx, x, y) {
+        const outer = 15;
+        const inner = 6.5;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.beginPath();
+        for (let i = 0; i < 10; i += 1) {
+          const radius = i % 2 === 0 ? outer : inner;
+          const angle = -Math.PI / 2 + (Math.PI * i) / 5;
+          const px = Math.cos(angle) * radius;
+          const py = Math.sin(angle) * radius;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(232,0,45,.22)';
+        ctx.strokeStyle = 'rgba(255,255,255,.86)';
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      };
+    }
+  }
+
+  function absoluteOffsetTop(node) {
+    let top = 0;
+    let current = node;
+    while (current) {
+      top += Number(current.offsetTop || 0);
+      current = current.offsetParent;
+    }
+    return top;
+  }
+
+  function scrollFanHubToStart(behavior = 'smooth') {
+    const tabsBar = document.getElementById('hub-tabs-bar');
+    if (!tabsBar) return;
+
+    const navbar = document.getElementById('navbar');
+    const navHeight = navbar?.getBoundingClientRect().height || 68;
+    const target = Math.max(0, absoluteOffsetTop(tabsBar) - navHeight - 1);
+    window.scrollTo({ top: target, behavior });
+  }
+
+  function repairTabNavigation() {
+    document.querySelectorAll('.hub-tab').forEach(tab => {
+      if (tab.dataset.pdxScrollRepair === '1') return;
+      tab.dataset.pdxScrollRepair = '1';
+      tab.addEventListener('click', () => {
+        window.setTimeout(() => scrollFanHubToStart('smooth'), 36);
+      });
+    });
+
+    document.querySelectorAll('.hub-hero-chips .hero-chip[role="button"]').forEach(chip => {
+      if (chip.dataset.pdxScrollRepair === '1') return;
+      chip.dataset.pdxScrollRepair = '1';
+      chip.addEventListener('click', () => {
+        window.setTimeout(() => scrollFanHubToStart('smooth'), 36);
+      });
+    });
+  }
+
+  function installQuoteLayoutGuards() {
+    if (document.getElementById('pdx-quote-repair-style')) return;
+
+    const style = document.createElement('style');
+    style.id = 'pdx-quote-repair-style';
+    style.textContent = `
+      body.pdx-fanhub-v2 #sec-quotes{
+        scroll-margin-top:170px !important;
+      }
+      body.pdx-fanhub-v2 #sec-quotes.on{
+        padding-top:82px !important;
+      }
+      body.pdx-fanhub-v2 #sec-quotes .sec-header{
+        margin-top:0 !important;
+        margin-bottom:26px !important;
+      }
+      body.pdx-fanhub-v2 #sec-quotes .quote-controls{
+        position:relative !important;
+        z-index:2 !important;
+        margin-bottom:22px !important;
+      }
+      body.pdx-fanhub-v2 #sec-quotes .quotes-layout{
+        position:relative !important;
+        z-index:1 !important;
+        align-items:start !important;
+      }
+      body.pdx-fanhub-v2 #sec-quotes .quote-featured,
+      body.pdx-fanhub-v2 #sec-quotes .quotes-list{
+        min-width:0 !important;
+      }
+      body.pdx-fanhub-v2 #sec-quotes .qf-premium-card{
+        min-height:520px !important;
+      }
+      body.pdx-fanhub-v2 #sec-quotes .qf-actions{
+        position:relative !important;
+        z-index:3 !important;
+        margin-top:16px !important;
+      }
+      body.pdx-fanhub-v2 .quote-preview-modal{
+        z-index:99999 !important;
+      }
+      body.pdx-fanhub-v2 .quote-preview-card{
+        width:min(600px,94vw) !important;
+        max-height:90vh !important;
+      }
+      body.pdx-fanhub-v2 .quote-preview-frame{
+        max-height:62vh !important;
+        overflow:auto !important;
+      }
+      @media(max-width:1080px){
+        body.pdx-fanhub-v2 #sec-quotes .quotes-layout{
+          grid-template-columns:1fr !important;
+        }
+      }
+      @media(max-width:760px){
+        body.pdx-fanhub-v2 #sec-quotes.on{
+          padding-top:62px !important;
+        }
+        body.pdx-fanhub-v2 #sec-quotes .qf-premium-card{
+          min-height:0 !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function verifyQuotePreviewRuntime() {
+    installCanvasIconHelpers();
+
+    // Keep the existing premium generator. The missing helper functions above
+    // were the ReferenceError that stopped buildQuoteShareCanvas at the footer.
+    if (typeof window.shareQuoteImage !== 'function') {
+      console.warn('PADDOX quote image share handler is not available yet.');
+    }
+  }
+
+  function bind() {
+    installCanvasIconHelpers();
+    installQuoteLayoutGuards();
+    repairTabNavigation();
+    verifyQuotePreviewRuntime();
+
+    // The cinematic stylesheet is injected at DOM-ready. Re-appending our
+    // runtime style keeps these narrowly-scoped repair rules last in cascade.
+    const repairStyle = document.getElementById('pdx-quote-repair-style');
+    if (repairStyle?.parentNode === document.head) document.head.appendChild(repairStyle);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind, { once:true });
+  } else {
+    bind();
+  }
+})();
