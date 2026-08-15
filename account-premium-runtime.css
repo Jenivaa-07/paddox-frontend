@@ -1,0 +1,24 @@
+/* PADDOX Account 2.0 — runtime mode guard
+   Loaded after account-premium.css so inline auth/dashboard state remains authoritative. */
+body.pdx-account-v2.pdx-account-auth-mode .auth-screen{
+  display:grid !important;
+}
+body.pdx-account-v2.pdx-account-auth-mode .acc-screen{
+  display:none !important;
+}
+body.pdx-account-v2.pdx-account-garage-mode .auth-screen{
+  display:none !important;
+}
+body.pdx-account-v2.pdx-account-garage-mode .acc-screen{
+  display:grid !important;
+}
+
+/* If account.js changes the inline state before the observer runs, honour it. */
+body.pdx-account-v2 .auth-screen[style*="display: none"],
+body.pdx-account-v2 .auth-screen[style*="display:none"]{
+  display:none !important;
+}
+body.pdx-account-v2 .acc-screen[style*="display: grid"],
+body.pdx-account-v2 .acc-screen[style*="display:grid"]{
+  display:grid !important;
+}
