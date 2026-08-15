@@ -11,13 +11,13 @@
       const style = document.createElement('link');
       style.id = 'pdx-nav-auth-style';
       style.rel = 'stylesheet';
-      style.href = 'paddox-nav-auth.css?v=NAV_AUTH_2';
+      style.href = 'paddox-nav-auth.css?v=NAV_AUTH_3';
       document.head.appendChild(style);
     }
 
     if (!document.querySelector('script[data-pdx-nav-auth]')) {
       const script = document.createElement('script');
-      script.src = 'paddox-nav-auth.js?v=NAV_AUTH_1';
+      script.src = 'paddox-nav-auth.js?v=NAV_AUTH_2';
       script.defer = true;
       script.dataset.pdxNavAuth = '1';
       document.head.appendChild(script);
