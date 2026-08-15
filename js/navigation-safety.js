@@ -6,15 +6,32 @@
 (function initPaddoxNativeNavigation(){
   'use strict';
 
-  function loadStaticFanHubIconFix(){
+  function loadFanHubEnhancements(){
     if (!/fanhub\.html$/i.test(window.location.pathname)) return;
-    if (document.getElementById('pdx-fanhub-chat-icon-fix')) return;
 
-    const link = document.createElement('link');
-    link.id = 'pdx-fanhub-chat-icon-fix';
-    link.rel = 'stylesheet';
-    link.href = 'fanhub-chat-icon-fix.css?v=CHAT_ICON_1';
-    document.head.appendChild(link);
+    if (!document.getElementById('pdx-fanhub-chat-icon-fix')) {
+      const iconStyle = document.createElement('link');
+      iconStyle.id = 'pdx-fanhub-chat-icon-fix';
+      iconStyle.rel = 'stylesheet';
+      iconStyle.href = 'fanhub-chat-icon-fix.css?v=CHAT_ICON_1';
+      document.head.appendChild(iconStyle);
+    }
+
+    if (!document.getElementById('pdx-fanhub-chat-reactions-style')) {
+      const reactionStyle = document.createElement('link');
+      reactionStyle.id = 'pdx-fanhub-chat-reactions-style';
+      reactionStyle.rel = 'stylesheet';
+      reactionStyle.href = 'fanhub-chat-reactions.css?v=REACTIONS_1';
+      document.head.appendChild(reactionStyle);
+    }
+
+    if (!document.querySelector('script[data-pdx-chat-reactions]')) {
+      const reactionScript = document.createElement('script');
+      reactionScript.src = 'fanhub-chat-reactions.js?v=REACTIONS_1';
+      reactionScript.defer = true;
+      reactionScript.dataset.pdxChatReactions = '1';
+      document.head.appendChild(reactionScript);
+    }
   }
 
   function neutralizeTransition(){
@@ -61,11 +78,11 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       neutralizeTransition();
-      loadStaticFanHubIconFix();
+      loadFanHubEnhancements();
     }, { once: true });
   } else {
     neutralizeTransition();
-    loadStaticFanHubIconFix();
+    loadFanHubEnhancements();
   }
 
   window.addEventListener('pageshow', neutralizeTransition);
