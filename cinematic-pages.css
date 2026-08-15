@@ -334,30 +334,3 @@ body.pdx-cinematic-page [role="button"]:focus-visible{
     animation-iteration-count:1 !important;
   }
 }
-
-/* Shop hero portrait art direction — keeps the four drivers on one visual line. */
-@media(min-width:901px){
-  body.pdx-shop-v2 .shop-merch-backdrop figure img{
-    transform-origin:center top;
-  }
-  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(1) img{
-    object-position:58% 15% !important;
-    transform:scale(1.12);
-    transform-origin:58% 16%;
-  }
-  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(2) img{
-    object-position:42% 30% !important;
-    transform:scale(1.01);
-    transform-origin:42% 24%;
-  }
-  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(3) img{
-    object-position:52% 27% !important;
-    transform:scale(1.03);
-    transform-origin:52% 22%;
-  }
-  body.pdx-shop-v2 .shop-merch-backdrop figure:nth-child(4) img{
-    object-position:50% 38% !important;
-    transform:scale(1.01);
-    transform-origin:50% 28%;
-  }
-}
