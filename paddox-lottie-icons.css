@@ -1,0 +1,264 @@
+/* ============================================================
+   PADDOX LOTTIE MOTION SYSTEM
+   Shared animated icon treatment for primary navigation, dock,
+   and Fan Hub controls. Lottie data is rendered by LottieFiles'
+   dotLottie Web Component.
+   ============================================================ */
+
+:root{
+  --pdx-lottie-red:#ed0038;
+  --pdx-lottie-white:#f6f7f9;
+  --pdx-lottie-panel:rgba(8,10,14,.84);
+}
+
+.pdx-lottie-icon{
+  position:relative !important;
+  display:inline-grid !important;
+  place-items:center !important;
+  flex:0 0 auto;
+  isolation:isolate;
+  overflow:visible !important;
+  font-size:0 !important;
+  line-height:0 !important;
+  background-image:none !important;
+}
+.pdx-lottie-icon::before,
+.pdx-lottie-icon::after{
+  content:none !important;
+  display:none !important;
+  background:none !important;
+  box-shadow:none !important;
+}
+.pdx-lottie-icon > svg,
+.pdx-lottie-icon > img:not(.pdx-lottie-fallback){
+  display:none !important;
+}
+.pdx-lottie-player{
+  display:block;
+  width:100% !important;
+  height:100% !important;
+  min-width:100%;
+  min-height:100%;
+  pointer-events:none !important;
+  overflow:visible !important;
+  filter:drop-shadow(0 0 0 rgba(237,0,56,0));
+  transition:filter .24s ease, transform .24s ease;
+}
+
+/* Top navigation */
+.nl-icon.pdx-lottie-icon,
+.mob-icon.pdx-lottie-icon{
+  width:20px !important;
+  height:20px !important;
+}
+.nav-search-btn .pdx-lottie-icon,
+.nav-cart-btn .pdx-lottie-icon,
+.search-icon-anim.pdx-lottie-icon,
+.cart-icon-anim.pdx-lottie-icon{
+  width:22px !important;
+  height:22px !important;
+}
+.nav-link:hover .pdx-lottie-player,
+.nav-link.active .pdx-lottie-player,
+.nav-search-btn:hover .pdx-lottie-player,
+.nav-cart-btn:hover .pdx-lottie-player{
+  filter:drop-shadow(0 0 7px rgba(237,0,56,.48));
+}
+
+/* Fan Hub hero / tab / cards */
+.fh-chip-icon.pdx-lottie-icon,
+.fh-tab-icon.pdx-lottie-icon,
+.comm-title-icon.pdx-lottie-icon,
+.search-mini-icon.pdx-lottie-icon,
+.pdx-chat-room-mark .pdx-lottie-icon,
+.pdx-chat-empty-mark .pdx-lottie-icon{
+  width:27px !important;
+  height:27px !important;
+}
+.fh-chip-icon.pdx-lottie-icon{ margin-right:7px; }
+.fh-tab-icon.pdx-lottie-icon{ margin-right:8px; }
+.comm-title-icon.pdx-lottie-icon{ margin-right:9px; }
+.hero-chip:hover .pdx-lottie-player,
+.hub-tab:hover .pdx-lottie-player,
+.hub-tab.on .pdx-lottie-player,
+.comm-card-title:hover .pdx-lottie-player,
+.pdx-chat-room-mark:hover .pdx-lottie-player{
+  filter:drop-shadow(0 0 8px rgba(237,0,56,.55));
+}
+
+/* ============================================================
+   GLOBAL PADDOX DOCK
+   Home/Shop already provide markup. The shared Lottie runtime
+   creates the same structure on the remaining core user pages.
+   ============================================================ */
+body.paddox-dock-global{
+  padding-bottom:max(100px, env(safe-area-inset-bottom, 0px) + 86px);
+}
+.pdx-dock-outer{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:max(18px, env(safe-area-inset-bottom, 0px) + 12px) !important;
+  top:auto !important;
+  z-index:9900 !important;
+  transform:translateX(-50%) !important;
+  width:max-content !important;
+  max-width:calc(100vw - 24px) !important;
+  pointer-events:none;
+  margin:0 !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:0 !important;
+}
+.pdx-dock-panel{
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:center !important;
+  gap:8px !important;
+  min-height:70px;
+  padding:9px 11px !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:22px !important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.018)),
+    rgba(6,8,12,.86) !important;
+  backdrop-filter:blur(22px) saturate(1.45) !important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.45) !important;
+  box-shadow:
+    0 26px 70px rgba(0,0,0,.58),
+    0 0 0 1px rgba(237,0,56,.05),
+    inset 0 1px 0 rgba(255,255,255,.07) !important;
+  pointer-events:auto;
+}
+.pdx-dock-panel::before{
+  content:'';
+  position:absolute;
+  left:16%;
+  right:16%;
+  top:-1px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(237,0,56,.8),transparent);
+  box-shadow:0 0 18px rgba(237,0,56,.28);
+  pointer-events:none;
+}
+.pdx-dock-item{
+  --pdx-dock-size:50px;
+  position:relative !important;
+  display:grid !important;
+  place-items:center !important;
+  width:var(--pdx-dock-size) !important;
+  height:var(--pdx-dock-size) !important;
+  min-width:42px !important;
+  min-height:42px !important;
+  padding:0 !important;
+  border:1px solid rgba(255,255,255,.09) !important;
+  border-radius:15px !important;
+  color:rgba(255,255,255,.68) !important;
+  text-decoration:none !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.012)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035) !important;
+  transform-origin:50% 100%;
+  transition:border-color .2s ease,background .2s ease,box-shadow .2s ease,color .2s ease !important;
+  overflow:visible !important;
+}
+.pdx-dock-item:hover,
+.pdx-dock-item:focus-visible{
+  color:#fff !important;
+  border-color:rgba(237,0,56,.42) !important;
+  background:linear-gradient(145deg,rgba(237,0,56,.16),rgba(255,255,255,.035)) !important;
+  box-shadow:0 12px 32px rgba(237,0,56,.14),inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.pdx-dock-item.active,
+.pdx-dock-item[aria-current="page"]{
+  color:#fff !important;
+  border-color:rgba(255,23,72,.72) !important;
+  background:
+    radial-gradient(circle at 50% 28%,rgba(255,255,255,.14),transparent 42%),
+    linear-gradient(145deg,#ed0038,#a00025) !important;
+  box-shadow:
+    0 12px 34px rgba(237,0,56,.28),
+    0 0 22px rgba(237,0,56,.12),
+    inset 0 1px 0 rgba(255,255,255,.19) !important;
+}
+.pdx-dock-icon{
+  width:29px !important;
+  height:29px !important;
+  display:grid !important;
+  place-items:center !important;
+  color:inherit !important;
+  overflow:visible !important;
+}
+.pdx-dock-icon.pdx-lottie-icon .pdx-lottie-player{
+  width:29px !important;
+  height:29px !important;
+}
+.pdx-dock-item:hover .pdx-lottie-player,
+.pdx-dock-item:focus-visible .pdx-lottie-player,
+.pdx-dock-item.active .pdx-lottie-player{
+  filter:drop-shadow(0 0 8px rgba(255,255,255,.24)) drop-shadow(0 0 10px rgba(237,0,56,.34));
+}
+.pdx-dock-label{
+  position:absolute !important;
+  left:50% !important;
+  bottom:calc(100% + 10px) !important;
+  z-index:3;
+  transform:translate(-50%,7px) scale(.96) !important;
+  opacity:0;
+  visibility:hidden;
+  white-space:nowrap;
+  padding:6px 9px !important;
+  border:1px solid rgba(255,255,255,.1) !important;
+  border-radius:8px !important;
+  background:rgba(5,7,10,.94) !important;
+  color:#fff !important;
+  font:700 10px/1.1 Inter,Arial,sans-serif !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase;
+  box-shadow:0 10px 30px rgba(0,0,0,.4) !important;
+  pointer-events:none;
+  transition:opacity .16s ease,transform .16s ease,visibility .16s ease !important;
+}
+.pdx-dock-item:hover .pdx-dock-label,
+.pdx-dock-item:focus-visible .pdx-dock-label{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0) scale(1) !important;
+}
+
+/* Keep legacy SVGs hidden after the Lottie upgrade. */
+.pdx-dock-icon.pdx-lottie-icon svg{ display:none !important; }
+
+@media(max-width:720px){
+  .pdx-dock-outer{
+    bottom:max(10px, env(safe-area-inset-bottom, 0px) + 7px) !important;
+    max-width:calc(100vw - 14px) !important;
+  }
+  .pdx-dock-panel{
+    gap:5px !important;
+    min-height:60px;
+    padding:7px 8px !important;
+    border-radius:18px !important;
+  }
+  .pdx-dock-item{
+    --pdx-dock-size:45px !important;
+    width:45px !important;
+    height:45px !important;
+    min-width:45px !important;
+    min-height:45px !important;
+    border-radius:13px !important;
+  }
+  .pdx-dock-icon,
+  .pdx-dock-icon.pdx-lottie-icon .pdx-lottie-player{
+    width:25px !important;
+    height:25px !important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .pdx-lottie-player{
+    transition:none !important;
+  }
+  .pdx-dock-item{
+    transition:none !important;
+  }
+}
