@@ -35,6 +35,14 @@
       script.defer = true;
       script.dataset.pdxLottieIcons = '2';
       script.onerror = () => console.warn('PADDOX Lottie icon system could not be loaded.');
+      script.addEventListener('load', () => {
+        if (document.querySelector('script[data-pdx-lottie-shop-fix]')) return;
+        const fix = document.createElement('script');
+        fix.src = 'paddox-lottie-icons-v2-hotfix.js?v=L2_0_1';
+        fix.defer = true;
+        fix.dataset.pdxLottieShopFix = '1';
+        document.head.appendChild(fix);
+      }, { once:true });
       document.head.appendChild(script);
     }
   }
