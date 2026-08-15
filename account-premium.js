@@ -13,6 +13,17 @@
     else fn();
   };
 
+  function promotePremiumStyles(){
+    let style = document.getElementById('pdx-account-premium-style');
+    if (!style) {
+      style = document.createElement('link');
+      style.id = 'pdx-account-premium-style';
+      style.rel = 'stylesheet';
+    }
+    style.href = 'account-premium.css?v=ACC2_1';
+    document.head.appendChild(style);
+  }
+
   function upgradeBrandLockup(){
     const logo = document.querySelector('#navbar .nav-logo');
     if (!logo || logo.dataset.pdxAccountBrand === '1') return;
@@ -227,6 +238,7 @@
 
   ready(() => {
     if (!/account(?:\.html)?$/i.test(window.location.pathname)) return;
+    promotePremiumStyles();
     document.body.classList.add('pdx-account-v2','pdx-cinematic-page','paddox-dock-account');
     document.body.dataset.pdxPage = 'account';
     upgradeBrandLockup();
