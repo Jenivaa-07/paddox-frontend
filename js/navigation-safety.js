@@ -16,6 +16,19 @@
       document.head.appendChild(style);
     }
 
+    /* Critical fallback rules are inline so a newly mounted dock stays visible
+       even while the external Lottie runtime or shared stylesheet is loading. */
+    if (!document.getElementById('pdx-lottie-critical-style')) {
+      const critical = document.createElement('style');
+      critical.id = 'pdx-lottie-critical-style';
+      critical.textContent = `
+        .pdx-dock-panel{position:relative!important}
+        .pdx-dock-icon svg{width:26px;height:26px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .pdx-dock-icon svg circle{fill:none;stroke:currentColor}
+      `;
+      document.head.appendChild(critical);
+    }
+
     if (!document.querySelector('script[data-pdx-lottie-icons]')) {
       const script = document.createElement('script');
       script.src = 'paddox-lottie-icons.js?v=L1_0';
