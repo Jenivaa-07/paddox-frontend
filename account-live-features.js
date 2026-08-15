@@ -20,6 +20,8 @@
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#039;');
 
+  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
   const formatDate = value => {
     const date = new Date(value || '');
     if (Number.isNaN(date.getTime())) return 'Just unlocked';
@@ -46,6 +48,8 @@
     if (!response.ok || payload.success === false) {
       const error = new Error(payload.message || payload.detail || `Request failed (${response.status})`);
       error.status = response.status;
+      error.code = payload.code || '';
+      error.detail = payload.detail || '';
       throw error;
     }
     return payload.data || payload;
@@ -192,19 +196,90 @@
       <div class="pdx-fantasy-grid">${cards || '<div class="pdx-live-error">The model returned no driver predictions.</div>'}</div>`;
   }
 
+  function fantasyLoadingMessage(container, text, detail = ''){
+    if (!container) return;
+    container.innerHTML = `
+      <div class="pdx-live-loading">
+        <strong>${esc(text)}</strong>
+        ${detail ? `<div style="margin-top:7px;opacity:.72">${esc(detail)}</div>` : ''}
+      </div>`;
+  }
+
   async function loadFantasy(force = true){
     if (fantasyLoading) return;
     const container = document.getElementById('fantasy-results-container');
     if (!container) return;
+
     fantasyLoading = true;
-    container.innerHTML = '<div class="pdx-live-loading">Fetching current F1 inputs and running the trained Random Forest model…</div>';
+    let stageTimer1 = null;
+    let stageTimer2 = null;
+
+    const startProgressMessages = () => {
+      clearTimeout(stageTimer1);
+      clearTimeout(stageTimer2);
+      fantasyLoadingMessage(container,
+        'Fetching current F1 inputs and running the trained Random Forest model…',
+        'Live qualifying, recent finishes and constructor data are being prepared.'
+      );
+      stageTimer1 = setTimeout(() => {
+        fantasyLoadingMessage(container,
+          'Waking PADDOX AI on Render…',
+          'A cold AI instance can take a little longer on the first prediction.'
+        );
+      }, 7000);
+      stageTimer2 = setTimeout(() => {
+        fantasyLoadingMessage(container,
+          'Loading the trained fantasy model…',
+          'The real Random Forest artifact is being prepared — no fake fallback is being used.'
+        );
+      }, 22000);
+    };
+
     try {
-      const data = await api(`/fantasy/next-race${force ? '?refresh=1' : ''}`);
-      fantasyLoadedAt = Date.now();
-      renderFantasy(data);
+      startProgressMessages();
+
+      let lastError = null;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const suffix = force || attempt > 0 ? '?refresh=1' : '';
+          const data = await api(`/fantasy/next-race${suffix}`);
+          fantasyLoadedAt = Date.now();
+          clearTimeout(stageTimer1);
+          clearTimeout(stageTimer2);
+          renderFantasy(data);
+          return;
+        } catch (err) {
+          lastError = err;
+          const retryable = err.status === 503 && attempt === 0;
+          if (!retryable) throw err;
+
+          clearTimeout(stageTimer1);
+          clearTimeout(stageTimer2);
+          fantasyLoadingMessage(container,
+            'PADDOX AI is warming up — retrying automatically…',
+            err.code === 'MODEL_NOT_READY'
+              ? 'The trained model is still loading inside the AI service.'
+              : 'The first request woke the AI service. One automatic retry is starting.'
+          );
+          await delay(3500);
+          startProgressMessages();
+        }
+      }
+
+      if (lastError) throw lastError;
     } catch (err) {
-      container.innerHTML = `<div class="pdx-live-error"><strong>Fantasy ML unavailable.</strong><br>${esc(err.message)}<br><br>Make sure the backend and paddox-ai services are both deployed and the fantasy model is READY.</div>`;
+      clearTimeout(stageTimer1);
+      clearTimeout(stageTimer2);
+      const detail = err.detail ? `<br><span style="opacity:.72">${esc(err.detail)}</span>` : '';
+      container.innerHTML = `
+        <div class="pdx-live-error">
+          <strong>Fantasy ML could not start.</strong><br>
+          ${esc(err.message)}${detail}<br><br>
+          The page did not substitute fake predictions. If this remains after the fresh Render deploy, check paddox-ai model readiness.
+        </div>`;
     } finally {
+      clearTimeout(stageTimer1);
+      clearTimeout(stageTimer2);
       fantasyLoading = false;
     }
   }
