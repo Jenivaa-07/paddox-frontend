@@ -48,10 +48,18 @@
 
     const action = document.getElementById('adm-action-btn');
     if (action) {
-      const hide = page === 'overview' || page === 'orders';
-      action.hidden = hide;
-      action.classList.toggle('is-hidden', hide);
-      action.style.display = hide ? 'none' : '';
+      const showProductAction = page === 'products';
+      action.hidden = !showProductAction;
+      action.classList.toggle('is-hidden', !showProductAction);
+      action.style.display = showProductAction ? '' : 'none';
+      if (showProductAction) {
+        action.textContent = '+ ADD PRODUCT';
+        action.onclick = () => {
+          if (typeof window.openAddModal === 'function') window.openAddModal();
+        };
+      } else {
+        action.onclick = null;
+      }
     }
   }
 
@@ -62,6 +70,9 @@
       }
       if (page === 'orders' && typeof window.loadOrders === 'function') {
         window.loadOrders(true);
+      }
+      if (page === 'products' && typeof window.loadProducts === 'function') {
+        window.loadProducts(true);
       }
     } catch (error) {
       console.warn('PADDOX Admin page sync failed:', page, error);
