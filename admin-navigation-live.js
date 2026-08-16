@@ -74,6 +74,9 @@
       if (page === 'products' && typeof window.loadProducts === 'function') {
         window.loadProducts(true);
       }
+      if (page === 'inventory' && typeof window.loadInventory === 'function') {
+        window.loadInventory(true);
+      }
     } catch (error) {
       console.warn('PADDOX Admin page sync failed:', page, error);
     }
@@ -122,7 +125,6 @@
       const select = () => {
         const page = item.dataset.page;
         activatePage(page, { updateHash:true });
-        // Legacy listeners may run in the same click. Win last deterministically.
         window.setTimeout(() => activatePage(page, { updateHash:false }), 0);
       };
 
@@ -143,7 +145,6 @@
       activatePage(activePageFromHash(), { updateHash:false });
     });
 
-    // Override legacy helper used by Overview links/buttons.
     window.switchPage = function paddoxAdminSwitchPage(page){
       return activatePage(page, { updateHash:true });
     };
