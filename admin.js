@@ -1,7 +1,7 @@
 /* ============================================================
    PADDOX ADMIN — Stable JavaScript entrypoint
    Loads legacy dashboard, runtime repair, authenticated fetch bridge,
-   live Overview, Orders, Products, then deterministic navigation.
+   live Overview, Orders, Products, Inventory, then deterministic navigation.
    ============================================================ */
 'use strict';
 (function paddoxAdminStableEntrypoint(){
@@ -11,7 +11,8 @@
   const overview = '/admin-overview-live.js?v=A5_OVERVIEW_1';
   const orders = '/admin-orders-live.js?v=A5_ORDERS_1';
   const products = '/admin-products-live.js?v=A5_PRODUCTS_1';
-  const navigation = '/admin-navigation-live.js?v=A5_NAV_2';
+  const inventory = '/admin-inventory-live.js?v=A5_INVENTORY_1';
+  const navigation = '/admin-navigation-live.js?v=A5_NAV_3';
 
   if (document.readyState === 'loading') {
     document.write(`<script src="${legacy}"><\/script>`);
@@ -20,6 +21,7 @@
     document.write(`<script src="${overview}"><\/script>`);
     document.write(`<script src="${orders}"><\/script>`);
     document.write(`<script src="${products}"><\/script>`);
+    document.write(`<script src="${inventory}"><\/script>`);
     document.write(`<script src="${navigation}"><\/script>`);
     return;
   }
@@ -39,6 +41,7 @@
     .then(() => loadScript(overview))
     .then(() => loadScript(orders))
     .then(() => loadScript(products))
+    .then(() => loadScript(inventory))
     .then(() => loadScript(navigation))
     .catch(error => console.error('PADDOX Admin bootstrap failed:', error));
 })();
