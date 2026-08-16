@@ -1,11 +1,27 @@
 {
   "rewrites": [
     {
+      "source": "/admin.css",
+      "destination": "/admin-failsafe.css"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "https://paddox-backend.onrender.com/api/$1"
     }
   ],
   "headers": [
+    {
+      "source": "/admin.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/admin-failsafe.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
     {
       "source": "/js/navigation-safety.js",
       "headers": [
