@@ -1,15 +1,15 @@
 /* ============================================================
    PADDOX ADMIN — Runtime Bootstrap / Repair Layer
-   Loaded last by admin.html.
-   - repairs the historically missing admin-icons.js request
+   Loaded immediately after admin-legacy.js by the stable admin.js entrypoint.
    - accepts both canonical data.user nesting and legacy top-level user
+   - verifies and paints the signed-in Admin identity independently
    - injects the Admin cinematic runtime stylesheet
    - removes stale AI-era presentation without touching live data logic
    ============================================================ */
 (function paddoxAdminRuntimeBootstrap(){
   'use strict';
 
-  const RUNTIME_VERSION = 'A5_0_0';
+  const RUNTIME_VERSION = 'A5_0_1';
   const STYLE_ID = 'paddox-admin-runtime-style';
 
   function injectRuntimeStyles(){
@@ -23,6 +23,24 @@
 
   function responseUser(payload){
     return payload?.data?.user || payload?.user || null;
+  }
+
+  function adminDisplayName(user = {}){
+    return user.name || user.fullName || [user.firstName, user.lastName].filter(Boolean).join(' ') || (user.email ? String(user.email).split('@')[0] : '') || 'PADDOX Admin';
+  }
+
+  function paintAdminIdentity(user = {}){
+    const displayName = adminDisplayName(user);
+    const email = user.email || 'Verified administrator';
+
+    document.querySelectorAll('.admin-profile-name, #admin-profile-name').forEach(el => {
+      el.textContent = displayName;
+      el.classList.remove('is-fallback');
+    });
+    document.querySelectorAll('.admin-profile-email, #admin-profile-email').forEach(el => {
+      el.textContent = email;
+      el.classList.remove('is-fallback');
+    });
   }
 
   async function requestCurrentUser(){
@@ -42,17 +60,21 @@
     return responseUser(payload);
   }
 
-  /* Override the legacy checks before DOMContentLoaded fires. */
+  /* Override legacy globals after admin-legacy.js defines them but before
+     DOMContentLoaded runs. The legacy startup therefore resolves these repaired
+     functions when it performs its auth gate and identity refresh. */
   window.checkAdminAccess = async function checkAdminAccess(){
     try {
-      const user = await requestCurrentUser();
+      const user = window.PADDOX_ADMIN_USER || await requestCurrentUser();
       if (!user || String(user.role || '').toLowerCase() !== 'admin') {
+        document.documentElement.dataset.adminSession = 'denied';
         window.location.replace('account.html');
         return false;
       }
 
       window.PADDOX_ADMIN_USER = user;
       document.documentElement.dataset.adminSession = 'verified';
+      paintAdminIdentity(user);
       return true;
     } catch (error) {
       console.warn('PADDOX Admin access check failed:', error?.message || error);
@@ -67,27 +89,30 @@
       const user = window.PADDOX_ADMIN_USER || await requestCurrentUser();
       if (!user) return null;
       window.PADDOX_ADMIN_USER = user;
-
-      const displayName =
-        user.name ||
-        user.fullName ||
-        [user.firstName, user.lastName].filter(Boolean).join(' ') ||
-        'PADDOX Admin';
-      const email = user.email || 'Verified administrator';
-
-      document.querySelectorAll('.admin-profile-name, #admin-profile-name').forEach(el => {
-        el.textContent = displayName;
-      });
-      document.querySelectorAll('.admin-profile-email, #admin-profile-email').forEach(el => {
-        el.textContent = email;
-      });
-
-      return user;
+      paintAdminIdentity(user);
+      return { ...user, name: adminDisplayName(user) };
     } catch (error) {
       console.warn('PADDOX Admin identity refresh failed:', error?.message || error);
       return null;
     }
   };
+
+  /* The old startup waited for Orders + Products + Assets + Users before
+     updating the footer identity. Verify the badge independently so a slow
+     data module can never leave "Verifying admin session…" on screen. */
+  async function hydrateAdminSessionBadge(){
+    try {
+      const user = window.PADDOX_ADMIN_USER || await requestCurrentUser();
+      if (!user || String(user.role || '').toLowerCase() !== 'admin') return;
+      window.PADDOX_ADMIN_USER = user;
+      document.documentElement.dataset.adminSession = 'verified';
+      paintAdminIdentity(user);
+    } catch (error) {
+      const email = document.getElementById('admin-profile-email');
+      if (email) email.textContent = 'Admin session unavailable';
+      console.warn('PADDOX Admin badge verification delayed:', error?.message || error);
+    }
+  }
 
   function installAdminBranding(){
     document.body.classList.add('pdx-admin-runtime');
@@ -95,14 +120,8 @@
     const title = document.querySelector('.adm-badge-label');
     if (title) title.textContent = 'Race Control';
 
-    const topbarSub = document.querySelector('.adm-topbar-sub');
-    if (topbarSub && !topbarSub.dataset.pdxRuntimeCopy) {
-      topbarSub.dataset.pdxRuntimeCopy = '1';
-      topbarSub.textContent = 'PADDOX OPERATIONS • LIVE COMMERCE + FAN CONTROL';
-    }
-
     /* AI Prompt Studio was removed from PADDOX. Hide any stale AI-credit card
-       left behind in the legacy Admin markup while keeping the user loader safe. */
+       left behind in the legacy Admin markup while keeping user data intact. */
     document.querySelectorAll('.users-ai-stat-card').forEach(card => {
       card.hidden = true;
       card.setAttribute('aria-hidden', 'true');
@@ -111,7 +130,6 @@
     const usersGrid = document.querySelector('.users-stat-grid');
     if (usersGrid) usersGrid.classList.add('pdx-users-stat-grid-clean');
 
-    /* Mark the primary operational pages for the cinematic CSS layer. */
     ['overview','orders','products','coupons','inventory','assets','fanquotes','fanpolls','collectibles','fantrivia','fandrivers','users','analytics','moderation']
       .forEach(name => document.getElementById(`adm-${name}`)?.classList.add('pdx-admin-operational-page'));
   }
@@ -133,7 +151,7 @@
     if (!topbarSub) return;
     const now = new Date();
     const stamp = now.toLocaleString('en-IN', {
-      day:'2-digit', month:'short', year:'numeric',
+      weekday:'short', day:'2-digit', month:'short', year:'numeric',
       hour:'2-digit', minute:'2-digit'
     });
     topbarSub.textContent = `${stamp} • PADDOX OPERATIONS`;
@@ -157,6 +175,7 @@
     bindNavigationTelemetry();
     updateLiveClock();
     window.setInterval(updateLiveClock, 60 * 1000);
+    void hydrateAdminSessionBadge();
 
     requestAnimationFrame(() => {
       document.body.classList.add('pdx-admin-runtime-ready');
