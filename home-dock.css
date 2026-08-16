@@ -1,257 +1,168 @@
-/* PADDOX Home — Shop dock parity lock
-   Keeps the existing Home dock markup/JS and matches the Shop dock presentation. */
-
-body.paddox-dock-home {
-  --pdx-dock-accent: #ff1839;
-  --pdx-dock-base: 50px;
-  --pdx-dock-max: 70px;
-  --pdx-dock-distance: 180px;
-  padding-bottom: 118px;
+/* PADDOX Home — exact Shop dock parity.
+   This is the Shop dock styling copied 1:1, with only the body scope changed
+   from .paddox-dock-shop to .paddox-dock-home. */
+body.paddox-dock-home{
+  padding-bottom:104px;
 }
-
 body.paddox-dock-home #navbar .nav-links,
-body.paddox-dock-home #hamburger,
-body.paddox-dock-home #mobile-menu {
-  display: none !important;
+body.paddox-dock-home #navbar .hamburger,
+body.paddox-dock-home #navbar .mobile-menu{
+  display:none !important;
 }
 
-body.paddox-dock-home .pdx-dock-outer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: max(18px, env(safe-area-inset-bottom));
-  z-index: 260;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-  padding: 0 16px;
+body.paddox-dock-home .pdx-dock-outer{
+  position:fixed;
+  left:50%;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  z-index:2400;
+  display:flex;
+  justify-content:center;
+  width:max-content;
+  max-width:calc(100vw - 24px);
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+body.paddox-dock-home .pdx-dock-panel{
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+  min-height:70px;
+  padding:9px 10px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:22px;
+  background:linear-gradient(155deg,rgba(20,21,25,.88),rgba(5,6,8,.94));
+  box-shadow:0 22px 65px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.07),0 0 0 1px rgba(232,0,45,.05);
+  backdrop-filter:blur(24px) saturate(145%);
+  -webkit-backdrop-filter:blur(24px) saturate(145%);
+  pointer-events:auto;
+}
+body.paddox-dock-home .pdx-dock-item{
+  --pdx-dock-size:50px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  flex:0 0 var(--pdx-dock-size);
+  width:var(--pdx-dock-size);
+  height:var(--pdx-dock-size);
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:15px;
+  color:rgba(255,255,255,.62);
+  background:rgba(255,255,255,.045);
+  text-decoration:none;
+  transform-origin:50% 100%;
+  transition:color .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+body.paddox-dock-home .pdx-dock-item::after{
+  content:"";
+  position:absolute;
+  bottom:5px;
+  left:50%;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:transparent;
+  transform:translateX(-50%);
+}
+body.paddox-dock-home .pdx-dock-item:is(:hover,:focus-visible){
+  color:#fff;
+  border-color:rgba(255,255,255,.22);
+  background:rgba(255,255,255,.10);
+  outline:none;
+}
+body.paddox-dock-home .pdx-dock-item.active{
+  color:#fff;
+  border-color:rgba(255,28,72,.52);
+  background:linear-gradient(145deg,rgba(232,0,45,.9),rgba(139,0,29,.82));
+  box-shadow:0 10px 30px rgba(232,0,45,.28),inset 0 1px 0 rgba(255,255,255,.22);
+}
+body.paddox-dock-home .pdx-dock-item.active::after{background:#fff;box-shadow:0 0 8px rgba(255,255,255,.9);}
+body.paddox-dock-home .pdx-dock-icon{
+  display:grid;
+  place-items:center;
+  width:23px;
+  height:23px;
+}
+body.paddox-dock-home .pdx-dock-icon svg{
+  width:100%;
+  height:100%;
+  overflow:visible;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+body.paddox-dock-home .pdx-dock-label{
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 12px);
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;
+  color:#fff;
+  background:rgba(5,6,8,.94);
+  box-shadow:0 10px 30px rgba(0,0,0,.38);
+  font:700 .58rem/1 var(--font-condensed);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  opacity:0;
+  transform:translate(-50%,7px);
+  transition:opacity .16s ease,transform .16s ease;
+  pointer-events:none;
+}
+body.paddox-dock-home .pdx-dock-item:is(:hover,:focus-visible) .pdx-dock-label{
+  opacity:1;
+  transform:translate(-50%,0);
 }
 
-body.paddox-dock-home .pdx-dock-panel {
-  pointer-events: auto;
-  min-height: 64px;
-  display: flex;
-  align-items: flex-end;
-  gap: 7px;
-  padding: 7px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 16px;
-  background:
-    linear-gradient(180deg, rgba(24,24,27,.84), rgba(8,8,10,.94)),
-    radial-gradient(circle at 22% 0%, rgba(232,0,45,.12), transparent 52%);
-  box-shadow:
-    0 16px 48px rgba(0,0,0,.42),
-    inset 0 1px 0 rgba(255,255,255,.05),
-    inset 0 -1px 0 rgba(0,0,0,.42);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  backdrop-filter: blur(18px) saturate(150%);
-}
-
-body.paddox-dock-home .pdx-dock-item {
-  --pdx-dock-size: var(--pdx-dock-base);
-  position: relative;
-  width: var(--pdx-dock-base);
-  height: var(--pdx-dock-size);
-  flex: 0 0 var(--pdx-dock-size);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  border: 0;
-  border-radius: 12px;
-  color: rgba(255,255,255,.75);
-  text-decoration: none;
-  background: transparent;
-  outline: none;
-  transition:
-    color .22s ease,
-    background .22s ease,
-    box-shadow .22s ease,
-    transform .22s ease;
-  will-change: height, flex-basis;
-}
-
-body.paddox-dock-home .pdx-dock-item:hover,
-body.paddox-dock-home .pdx-dock-item:focus-visible {
-  color: #fff;
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-}
-
-body.paddox-dock-home .pdx-dock-item.active {
-  color: #fff;
-}
-
-body.paddox-dock-home .pdx-dock-item.active::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 2px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--pdx-dock-accent);
-  transform: translateX(-50%);
-  box-shadow: 0 0 8px rgba(255,24,57,.65);
-}
-
-body.paddox-dock-home .pdx-dock-icon {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)),
-    rgba(255,255,255,.015);
-  border: 1px solid rgba(255,255,255,.06);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
-  transition:
-    transform .22s cubic-bezier(.22,.61,.36,1),
-    border-color .22s ease,
-    background .22s ease;
-}
-
-body.paddox-dock-home .pdx-dock-item:hover .pdx-dock-icon,
-body.paddox-dock-home .pdx-dock-item:focus-visible .pdx-dock-icon {
-  transform: translateY(-1px);
-  border-color: rgba(255,255,255,.12);
-  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.025));
-}
-
-body.paddox-dock-home .pdx-dock-item.active .pdx-dock-icon {
-  border-color: rgba(255,24,57,.26);
-  background: linear-gradient(180deg, rgba(255,24,57,.14), rgba(255,255,255,.02));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    0 0 16px rgba(255,24,57,.10);
-}
-
-body.paddox-dock-home .pdx-dock-icon svg {
-  width: 18px;
-  height: 18px;
-  display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-body.paddox-dock-home .pdx-dock-label {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 9px);
-  min-width: max-content;
-  padding: 6px 9px;
-  border-radius: 7px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(10,10,12,.92);
-  color: #f7f7f8;
-  box-shadow: 0 8px 20px rgba(0,0,0,.34);
-  font-family: var(--font-b, Inter, sans-serif);
-  font-size: .64rem;
-  font-weight: 700;
-  letter-spacing: .075em;
-  text-transform: uppercase;
-  opacity: 0;
-  visibility: hidden;
-  transform: translate(-50%, 5px);
-  transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-body.paddox-dock-home .pdx-dock-item:hover .pdx-dock-label,
-body.paddox-dock-home .pdx-dock-item:focus-visible .pdx-dock-label {
-  opacity: 1;
-  visibility: visible;
-  transform: translate(-50%, 0);
-}
-
-@media (max-width: 1120px) {
-  body.paddox-dock-home .pdx-dock-item {
-    --pdx-dock-base: 48px;
+@media(max-width:720px), (hover:none){
+  body.paddox-dock-home{padding-bottom:92px;}
+  body.paddox-dock-home .pdx-dock-outer{
+    right:10px;
+    bottom:max(10px,env(safe-area-inset-bottom));
+    left:10px;
+    width:auto;
+    max-width:none;
+    transform:none;
   }
-
-  body.paddox-dock-home .pdx-dock-icon {
-    width: 29px;
-    height: 29px;
+  body.paddox-dock-home .pdx-dock-panel{
+    width:100%;
+    min-height:64px;
+    justify-content:space-around;
+    gap:3px;
+    padding:7px;
+    border-radius:18px;
   }
+  body.paddox-dock-home .pdx-dock-item{
+    --pdx-dock-size:auto !important;
+    display:flex;
+    flex:1 1 0;
+    flex-direction:column;
+    gap:4px;
+    width:auto !important;
+    height:50px !important;
+    border-radius:12px;
+  }
+  body.paddox-dock-home .pdx-dock-icon{width:19px;height:19px;}
+  body.paddox-dock-home .pdx-dock-label{
+    position:static;
+    display:block;
+    padding:0;
+    border:0;
+    color:inherit;
+    background:none;
+    box-shadow:none;
+    font-size:.43rem;
+    opacity:1;
+    transform:none;
+  }
+  body.paddox-dock-home .pdx-dock-item::after{bottom:2px;}
 }
-
-@media (max-width: 900px) {
-  body.paddox-dock-home {
-    padding-bottom: 92px;
-  }
-
-  body.paddox-dock-home #navbar {
-    display: none;
-  }
-
-  body.paddox-dock-home .pdx-dock-outer {
-    bottom: max(9px, env(safe-area-inset-bottom));
-    padding: 0 8px;
-  }
-
-  body.paddox-dock-home .pdx-dock-panel {
-    width: auto;
-    max-width: min(92vw, 390px);
-    min-height: 0;
-    gap: 2px;
-    padding: 5px;
-    border-radius: 13px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  body.paddox-dock-home .pdx-dock-item {
-    --pdx-dock-base: 48px;
-    --pdx-dock-size: var(--pdx-dock-base) !important;
-    width: var(--pdx-dock-base);
-    height: var(--pdx-dock-base);
-    flex-basis: var(--pdx-dock-base);
-    padding: 4px;
-    border-radius: 11px;
-    transform: none !important;
-  }
-
-  body.paddox-dock-home .pdx-dock-icon {
-    width: 31px;
-    height: 31px;
-    border-radius: 8px;
-  }
-
-  body.paddox-dock-home .pdx-dock-icon svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  body.paddox-dock-home .pdx-dock-label {
-    display: none;
-  }
+@media(max-width:620px){
+  body.paddox-dock-home #navbar .nav-cta-btn{display:none !important;}
 }
-
-@media (max-width: 480px) {
-  body.paddox-dock-home {
-    padding-bottom: 84px;
-  }
-
-  body.paddox-dock-home .pdx-dock-panel {
-    width: auto;
-    max-width: 92vw;
-    gap: 1px;
-    padding: 4px;
-  }
-
-  body.paddox-dock-home .pdx-dock-item {
-    --pdx-dock-base: clamp(42px, 12vw, 47px);
-  }
-
-  body.paddox-dock-home .pdx-dock-icon {
-    width: 29px;
-    height: 29px;
-  }
+@media(max-width:390px){
+  body.paddox-dock-home #navbar .nav-search-btn{display:none !important;}
+  body.paddox-dock-home .pdx-dock-label{font-size:.39rem;letter-spacing:.08em;}
 }
