@@ -1,17 +1,10 @@
 /* ============================================================
-   PADDOX ADMIN — Production Failsafe Layer
-   Keeps the legacy admin presentation intact while preventing
-   the dashboard from becoming invisible if reveal JS fails.
+   PADDOX ADMIN — Production visibility failsafe
+   This file intentionally contains overrides only.
    ============================================================ */
 
-/* Load the exact legacy stylesheet from the known-good repository commit.
-   This avoids a Vercel rewrite loop when /admin.css is routed here. */
-@import url("https://cdn.jsdelivr.net/gh/Jenivaa-07/paddox-frontend@71619d270a00c3d984e93fd974a5ed6982e58a1f/admin.css");
-
-/* Critical visibility guarantee.
-   The legacy stylesheet starts every .reveal-up element at opacity:0 and
-   relies on JavaScript to add .in-view. If any earlier legacy initializer
-   throws, the entire Overview looks empty even though the HTML is present. */
+/* The legacy Admin starts these sections invisible and expects JS to add
+   .in-view. A runtime error must never be able to hide the dashboard. */
 .reveal-up,
 .reveal-up.in-view,
 .adm-page.on .reveal-up {
@@ -20,7 +13,6 @@
   visibility: visible !important;
 }
 
-/* Do not make admin functionality depend on animation completion. */
 .reveal-up,
 .reveal-up.delay-1,
 .reveal-up.delay-2,
@@ -28,8 +20,6 @@
   transition-delay: 0s !important;
 }
 
-/* Preserve page visibility contract even when an animation/runtime patch
-   leaves stale inline styles behind. */
 .adm-page.on {
   display: block !important;
   opacity: 1 !important;
@@ -40,7 +30,6 @@
   min-height: calc(100vh - var(--topbar-h, 64px));
 }
 
-/* Small operational polish while the legacy admin is being hardened. */
 #adm-overview.on {
   animation: paddoxAdminFailsafeIn .22s ease-out both;
 }
@@ -50,7 +39,6 @@
   to { opacity: 1; transform: none; }
 }
 
-/* Respect reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   .reveal-up,
   .adm-page.on,
