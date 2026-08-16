@@ -2,7 +2,7 @@
    PADDOX ADMIN — Stable stylesheet entrypoint
    Keeps the complete legacy Admin UI local, then applies only
    critical production safety overrides from admin-failsafe.css.
-   Inventory production sync trigger: A5_INVENTORY_1.
+   Inventory production sync trigger: A5_INVENTORY_REDEPLOY_2.
    ============================================================ */
 @import url("/admin-legacy.css?v=A5_STABLE_1");
 @import url("/admin-failsafe.css?v=A5_STABLE_1");
