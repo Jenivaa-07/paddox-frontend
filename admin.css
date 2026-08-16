@@ -2,7 +2,7 @@
    PADDOX ADMIN — Stable stylesheet entrypoint
    Keeps the complete legacy Admin UI local, then applies only
    critical production safety overrides from admin-failsafe.css.
-   Digital Assets production sync trigger: A5_ASSETS_REDEPLOY_1.
+   Fan Quotes + Digital Assets production sync trigger: A5_QUOTES_REDEPLOY_1.
    ============================================================ */
 @import url("/admin-legacy.css?v=A5_STABLE_1");
 @import url("/admin-failsafe.css?v=A5_STABLE_1");
