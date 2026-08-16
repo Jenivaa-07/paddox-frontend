@@ -16,7 +16,7 @@
   const coupons = '/admin-coupons-live.js?v=A5_COUPONS_1';
   const assets = '/admin-assets-live.js?v=A5_ASSETS_1';
   const fanquotes = '/admin-fanquotes-live.js?v=A5_FANQUOTES_1';
-  const fanpolls = '/admin-fanpolls-live.js?v=A5_FANPOLLS_1';
+  const fanpolls = '/admin-fanpolls-live.js?v=A5_FANPOLLS_3';
   const navigation = '/admin-navigation-live.js?v=A5_NAV_3';
 
   if (document.readyState === 'loading') {
