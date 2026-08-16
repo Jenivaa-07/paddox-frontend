@@ -1,6 +1,7 @@
 /* ============================================================
-   PADDOX Fan Hub — Driver Statistics Refresh
-   Focused polish for the driver-statistics experience.
+   PADDOX Fan Hub — Driver Statistics Broadcast Refresh
+   Formula-style live broadcast treatment for the 2026 driver grid.
+   Presentation only: live API, images, logos, compare + career logic remain intact.
    ============================================================ */
 
 /* User-requested removal: FAN SIGNAL / Digital Trackside panel. */
@@ -8,7 +9,7 @@ body.pdx-fanhub-v2 .pdx-fanhub-showcase{
   display:none !important;
 }
 
-/* With the right-side showcase removed, let the hero breathe naturally. */
+/* Keep the Fan Hub hero breathing room from the previous refresh. */
 body.pdx-fanhub-v2 .hub-hero{
   min-height:680px !important;
 }
@@ -23,169 +24,466 @@ body.pdx-fanhub-v2 .hub-hero-title{
   max-width:760px !important;
   font-size:clamp(4.8rem,7.6vw,8.4rem) !important;
 }
-body.pdx-fanhub-v2 .hub-hero-sub{
-  max-width:620px !important;
+body.pdx-fanhub-v2 .hub-hero-sub{max-width:620px !important;}
+
+/* ============================================================
+   DRIVER STATS / BROADCAST STAGE
+   ============================================================ */
+body.pdx-fanhub-v2 #sec-drivers{
+  position:relative !important;
+  width:min(1580px,calc(100% - 52px)) !important;
+  margin-inline:auto !important;
+  padding:80px 0 122px !important;
+  isolation:isolate;
+}
+body.pdx-fanhub-v2 #sec-drivers::before{
+  content:'';
+  position:absolute;
+  inset:-40px -70px 0;
+  z-index:-2;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 8% 18%,rgba(232,0,45,.15),transparent 29%),
+    radial-gradient(circle at 92% 48%,rgba(232,0,45,.07),transparent 28%),
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:auto,auto,70px 70px,70px 70px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 94%,transparent);
+  mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 94%,transparent);
+}
+body.pdx-fanhub-v2 #sec-drivers::after{
+  content:'';
+  position:absolute;
+  top:144px;
+  right:-42px;
+  width:440px;
+  height:1px;
+  z-index:-1;
+  background:linear-gradient(90deg,transparent,rgba(232,0,45,.8));
+  box-shadow:0 0 20px rgba(232,0,45,.24);
 }
 
-/* ── Driver section shell ── */
-body.pdx-fanhub-v2 #sec-drivers{
-  width:min(1480px,calc(100% - 56px)) !important;
-  margin-inline:auto !important;
-  padding:82px 0 110px !important;
-}
+/* ============================================================
+   SECTION HEADER — TV GRAPHIC HIERARCHY
+   ============================================================ */
 body.pdx-fanhub-v2 #sec-drivers .sec-header{
+  position:relative !important;
   display:grid !important;
-  grid-template-columns:1fr auto !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  grid-template-rows:auto auto !important;
   align-items:end !important;
-  gap:28px !important;
-  margin-bottom:24px !important;
-  padding:0 0 22px !important;
-  border-bottom:1px solid rgba(255,255,255,.10) !important;
+  gap:7px 34px !important;
+  margin:0 0 24px !important;
+  padding:0 0 30px !important;
+  overflow:visible !important;
+  border-bottom:1px solid rgba(255,255,255,.11) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .sec-header::before{
+  content:'2026 FIA FORMULA ONE WORLD CHAMPIONSHIP';
+  position:absolute;
+  right:0;
+  top:-22px;
+  color:rgba(255,255,255,.27);
+  font:800 .52rem/1 var(--font-c);
+  letter-spacing:.19em;
+}
+body.pdx-fanhub-v2 #sec-drivers .sec-header::after{
+  content:'LIVE';
+  position:absolute;
+  right:0;
+  bottom:-13px;
+  min-width:58px;
+  padding:7px 11px;
+  border:1px solid rgba(58,240,181,.25);
+  border-radius:999px;
+  color:#3af0b5;
+  background:#090d0d;
+  box-shadow:0 0 20px rgba(58,240,181,.07);
+  font:900 .50rem/1 var(--font-c);
+  letter-spacing:.2em;
+  text-align:center;
 }
 body.pdx-fanhub-v2 #sec-drivers .section-label{
   grid-column:1 !important;
-  align-self:end !important;
-  margin:0 0 3px !important;
-  color:rgba(255,255,255,.45) !important;
-  font-size:.64rem !important;
+  grid-row:1 !important;
+  margin:0 0 7px !important;
+  color:rgba(255,255,255,.42) !important;
+  font-size:.62rem !important;
   letter-spacing:.22em !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .section-label .section-mark{
-  background:linear-gradient(90deg,#e8002d,rgba(232,0,45,.08)) !important;
+  width:48px !important;
+  background:linear-gradient(90deg,#e8002d,rgba(232,0,45,.04)) !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .section-title{
-  grid-column:2 !important;
+  grid-column:1 / -1 !important;
+  grid-row:2 !important;
   margin:0 !important;
-  font-size:clamp(3.7rem,5.4vw,6rem) !important;
-  line-height:.84 !important;
-  text-align:right !important;
+  color:#fff !important;
+  font-size:clamp(4.6rem,7.3vw,8.2rem) !important;
+  line-height:.78 !important;
+  letter-spacing:-.025em !important;
+  text-align:left !important;
+  text-shadow:0 22px 60px rgba(0,0,0,.38) !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .section-title::before{
   content:'02';
   display:inline-block;
-  margin-right:14px;
-  color:rgba(255,255,255,.08);
-  font-size:.46em;
+  margin-right:18px;
+  color:rgba(255,255,255,.06);
+  font-size:.45em;
   vertical-align:top;
 }
+body.pdx-fanhub-v2 #sec-drivers .section-title .accent{
+  color:#e8002d !important;
+  text-shadow:0 0 32px rgba(232,0,45,.12) !important;
+}
 
-/* Live telemetry strip */
+/* ============================================================
+   LIVE FEED STRIP
+   ============================================================ */
 body.pdx-fanhub-v2 #sec-drivers .drv-live-meta{
-  min-height:48px !important;
-  margin:0 0 14px !important;
-  padding:0 16px !important;
+  position:relative !important;
+  min-height:58px !important;
   display:flex !important;
   align-items:center !important;
   justify-content:space-between !important;
+  gap:18px !important;
+  margin:0 0 28px !important;
+  padding:0 20px !important;
+  overflow:hidden !important;
   border:1px solid rgba(255,255,255,.10) !important;
   border-left:3px solid #e8002d !important;
-  border-radius:10px !important;
-  color:rgba(255,255,255,.66) !important;
-  background:linear-gradient(90deg,rgba(232,0,45,.07),rgba(255,255,255,.025) 42%,rgba(255,255,255,.012)) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04) !important;
-  font-size:.66rem !important;
-  letter-spacing:.13em !important;
+  border-radius:11px !important;
+  color:rgba(255,255,255,.62) !important;
+  background:
+    linear-gradient(90deg,rgba(232,0,45,.105),rgba(255,255,255,.025) 36%,rgba(255,255,255,.012)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 18px 44px rgba(0,0,0,.18) !important;
+  font:800 .61rem/1 var(--font-c) !important;
+  letter-spacing:.14em !important;
+  text-transform:uppercase !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-live-meta::after{
+  content:'PADDOX  /  TIMING TOWER';
+  color:rgba(255,255,255,.27);
+  font:800 .52rem/1 var(--font-c);
+  letter-spacing:.18em;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-live-dot{
-  width:7px !important;
-  height:7px !important;
+  width:8px !important;
+  height:8px !important;
+  margin-right:8px !important;
   background:#3af0b5 !important;
-  box-shadow:0 0 12px rgba(58,240,181,.72) !important;
+  box-shadow:0 0 14px rgba(58,240,181,.82) !important;
+  animation:pdxDriverLivePulse 1.8s ease-in-out infinite !important;
+}
+@keyframes pdxDriverLivePulse{
+  0%,100%{opacity:.55;transform:scale(.86)}
+  50%{opacity:1;transform:scale(1.15)}
 }
 
-/* Current grid selector */
+/* ============================================================
+   DRIVER GRID — PODIUM + FULL TIMING TOWER
+   12-column grid: first three = podium row, rest = 4-column grid.
+   ============================================================ */
 body.pdx-fanhub-v2 #sec-drivers .drv-selector{
   display:grid !important;
-  grid-template-columns:repeat(6,minmax(0,1fr)) !important;
-  gap:8px !important;
-  max-height:214px !important;
-  margin:0 0 24px !important;
-  padding:10px !important;
-  overflow-y:auto !important;
-  border:1px solid rgba(255,255,255,.075) !important;
-  border-radius:12px !important;
-  background:rgba(255,255,255,.018) !important;
+  grid-template-columns:repeat(12,minmax(0,1fr)) !important;
+  grid-auto-flow:row dense !important;
+  gap:13px !important;
+  max-height:none !important;
+  margin:0 0 42px !important;
+  padding:24px !important;
+  overflow:visible !important;
+  border:1px solid rgba(255,255,255,.085) !important;
+  border-radius:22px !important;
+  background:
+    radial-gradient(circle at 50% -15%,rgba(232,0,45,.105),transparent 36%),
+    linear-gradient(145deg,#101116,#050608 72%) !important;
+  box-shadow:0 36px 90px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-selector::before{
+  content:'CHAMPIONSHIP ORDER  /  SELECT DRIVER';
+  grid-column:1 / -1;
+  display:block;
+  margin:1px 0 8px;
+  padding-bottom:15px;
+  border-bottom:1px solid rgba(255,255,255,.075);
+  color:rgba(255,255,255,.34);
+  font:900 .56rem/1 var(--font-c);
+  letter-spacing:.21em;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-selector::-webkit-scrollbar{width:3px}
 body.pdx-fanhub-v2 #sec-drivers .drv-selector::-webkit-scrollbar-thumb{background:#e8002d}
+
 body.pdx-fanhub-v2 #sec-drivers .drv-pill{
   --mx:50%;
   --my:50%;
+  --team-color:#e8002d;
   position:relative !important;
+  grid-column:span 3 !important;
   min-width:0 !important;
-  min-height:64px !important;
-  padding:9px 10px !important;
-  gap:10px !important;
+  min-height:142px !important;
+  display:grid !important;
+  grid-template-columns:78px minmax(0,1fr) !important;
+  align-items:center !important;
+  gap:16px !important;
+  padding:18px !important;
   overflow:hidden !important;
-  border:1px solid rgba(255,255,255,.075) !important;
-  border-left:2px solid var(--team-color,#e8002d) !important;
-  border-radius:9px !important;
+  border:1px solid rgba(255,255,255,.078) !important;
+  border-left:3px solid var(--team-color,#e8002d) !important;
+  border-radius:13px !important;
+  color:#fff !important;
   background:
-    radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.09),transparent 35%),
-    linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012)) !important;
-  box-shadow:none !important;
-  transition:transform .22s ease,border-color .22s ease,background .22s ease,box-shadow .22s ease !important;
+    radial-gradient(circle at 0 50%,color-mix(in srgb,var(--team-color,#e8002d) 13%,transparent),transparent 50%),
+    linear-gradient(145deg,rgba(255,255,255,.048),rgba(255,255,255,.012)),
+    #090b0f !important;
+  box-shadow:0 15px 34px rgba(0,0,0,.22) !important;
+  transform:none !important;
+  transition:transform .24s ease,border-color .24s ease,background .24s ease,box-shadow .24s ease !important;
+  isolation:isolate !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    linear-gradient(115deg,transparent 0 64%,rgba(255,255,255,.025) 64.4%,transparent 65%),
+    linear-gradient(90deg,transparent,rgba(255,255,255,.025),transparent);
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill::after{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  width:90px;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--team-color,#e8002d));
+  box-shadow:0 0 18px color-mix(in srgb,var(--team-color,#e8002d) 26%,transparent);
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-pill:hover{
-  transform:translateY(-2px) !important;
-  border-color:color-mix(in srgb,var(--team-color,#e8002d) 55%,rgba(255,255,255,.15)) !important;
-  box-shadow:0 12px 26px rgba(0,0,0,.24) !important;
+  z-index:4 !important;
+  transform:translateY(-5px) !important;
+  border-color:color-mix(in srgb,var(--team-color,#e8002d) 62%,rgba(255,255,255,.18)) !important;
+  box-shadow:
+    0 28px 58px rgba(0,0,0,.34),
+    0 0 30px color-mix(in srgb,var(--team-color,#e8002d) 14%,transparent) !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-pill.on{
-  border-color:color-mix(in srgb,var(--team-color,#e8002d) 72%,rgba(255,255,255,.16)) !important;
+  z-index:3 !important;
+  transform:translateY(-3px) !important;
+  border-color:color-mix(in srgb,var(--team-color,#e8002d) 72%,rgba(255,255,255,.18)) !important;
   background:
-    radial-gradient(circle at 10% 50%,color-mix(in srgb,var(--team-color,#e8002d) 20%,transparent),transparent 54%),
-    rgba(255,255,255,.045) !important;
-  box-shadow:0 0 0 1px color-mix(in srgb,var(--team-color,#e8002d) 24%,transparent),0 12px 34px rgba(0,0,0,.28) !important;
-}
-body.pdx-fanhub-v2 #sec-drivers .dp-av{
-  width:42px !important;
-  height:42px !important;
-  flex:0 0 42px !important;
-  border-width:1px !important;
-  box-shadow:0 8px 22px rgba(0,0,0,.25) !important;
-}
-body.pdx-fanhub-v2 #sec-drivers .dp-name{
-  color:#fff !important;
-  font-size:.82rem !important;
-  font-weight:800 !important;
-  letter-spacing:.08em !important;
-}
-body.pdx-fanhub-v2 #sec-drivers .dp-team{
-  margin-top:3px !important;
-  color:rgba(255,255,255,.42) !important;
-  font-size:.56rem !important;
+    radial-gradient(circle at 0 50%,color-mix(in srgb,var(--team-color,#e8002d) 25%,transparent),transparent 55%),
+    linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.014)),
+    #0b0d12 !important;
+  box-shadow:
+    0 27px 62px rgba(0,0,0,.36),
+    0 0 0 1px color-mix(in srgb,var(--team-color,#e8002d) 24%,transparent),
+    0 0 34px color-mix(in srgb,var(--team-color,#e8002d) 18%,transparent) !important;
 }
 
-/* Main selected-driver workspace */
-body.pdx-fanhub-v2 #sec-drivers .drv-panel{
+/* Top-three broadcast spotlight: P2 | P1 | P3 */
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(2){order:1 !important;}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1){order:2 !important;}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(3){order:3 !important;}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(n+4){order:4 !important;}
+body.pdx-fanhub-v2 #sec-drivers .drv-selector::before{order:0 !important;}
+
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3){
+  grid-column:span 4 !important;
+  min-height:286px !important;
+  grid-template-columns:1fr !important;
+  grid-template-rows:auto 1fr auto !important;
+  align-content:end !important;
+  justify-items:center !important;
+  gap:13px !important;
+  padding:24px 22px 23px !important;
+  text-align:center !important;
+  border-width:1px !important;
+  border-top:2px solid var(--team-color,#e8002d) !important;
+  border-left:1px solid rgba(255,255,255,.08) !important;
+  border-radius:17px !important;
+  background:
+    radial-gradient(circle at 50% 2%,color-mix(in srgb,var(--team-color,#e8002d) 24%,transparent),transparent 48%),
+    linear-gradient(160deg,#181a20,#07080b 70%) !important;
+  box-shadow:0 26px 58px rgba(0,0,0,.32) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3)::before{
+  background:
+    repeating-linear-gradient(118deg,transparent 0 52px,rgba(255,255,255,.026) 53px,transparent 54px) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1){
+  min-height:328px !important;
+  border-color:color-mix(in srgb,var(--team-color,#e8002d) 64%,rgba(255,255,255,.16)) !important;
+  box-shadow:
+    0 34px 76px rgba(0,0,0,.42),
+    0 0 42px color-mix(in srgb,var(--team-color,#e8002d) 18%,transparent) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1)::after{
+  content:'P1  /  CHAMPIONSHIP LEADER';
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(2)::after{
+  content:'P2  /  CHASING';
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(3)::after{
+  content:'P3  /  PODIUM';
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3)::after{
+  top:14px;
+  right:14px;
+  width:auto;
+  height:auto;
+  padding:6px 8px;
+  border:1px solid color-mix(in srgb,var(--team-color,#e8002d) 38%,rgba(255,255,255,.12));
+  border-radius:5px;
+  color:rgba(255,255,255,.72);
+  background:rgba(5,6,8,.62);
+  box-shadow:none;
+  font:900 .47rem/1 var(--font-c);
+  letter-spacing:.12em;
+}
+
+/* Driver avatars */
+body.pdx-fanhub-v2 #sec-drivers .dp-av{
+  position:relative !important;
+  z-index:2 !important;
+  width:74px !important;
+  height:74px !important;
+  flex:0 0 74px !important;
+  overflow:hidden !important;
+  border:1px solid var(--team-color,#e8002d) !important;
+  border-radius:50% !important;
+  background:#111319 !important;
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.38),
+    0 0 0 5px rgba(255,255,255,.022),
+    0 0 23px color-mix(in srgb,var(--team-color,#e8002d) 17%,transparent) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-av{
+  width:140px !important;
+  height:140px !important;
+  flex-basis:140px !important;
+  margin-top:10px !important;
+  border-width:2px !important;
+  box-shadow:
+    0 23px 46px rgba(0,0,0,.46),
+    0 0 0 7px rgba(255,255,255,.022),
+    0 0 36px color-mix(in srgb,var(--team-color,#e8002d) 23%,transparent) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1) .dp-av{
+  width:162px !important;
+  height:162px !important;
+  flex-basis:162px !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .dp-av img,
+body.pdx-fanhub-v2 #sec-drivers .drv-big-av img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-initials{
   display:grid !important;
-  grid-template-columns:minmax(300px,360px) minmax(0,1fr) !important;
+  place-items:center !important;
+  width:100% !important;
+  height:100% !important;
+  color:#fff !important;
+  font:900 1.4rem/1 var(--font-d) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .drv-initials{
+  font-size:2.7rem !important;
+}
+
+/* Driver name + team */
+body.pdx-fanhub-v2 #sec-drivers .dp-name{
+  position:relative !important;
+  z-index:2 !important;
+  color:#fff !important;
+  font:900 1.58rem/.9 var(--font-d) !important;
+  letter-spacing:.045em !important;
+  text-transform:uppercase !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-name{
+  font-size:2.7rem !important;
+  letter-spacing:.035em !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1) .dp-name{
+  font-size:3.1rem !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .dp-team{
+  position:relative !important;
+  z-index:2 !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  margin-top:7px !important;
+  color:rgba(255,255,255,.43) !important;
+  font:700 .55rem/1.25 var(--font-c) !important;
+  letter-spacing:.09em !important;
+  text-transform:uppercase !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-team{
+  justify-content:center !important;
+  margin-top:8px !important;
+  font-size:.63rem !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .fan-team-logo.mini{
+  width:20px !important;
+  height:20px !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .fan-team-logo.mini{
+  width:25px !important;
+  height:25px !important;
+}
+
+/* ============================================================
+   DRIVER FOCUS WORKSPACE
+   ============================================================ */
+body.pdx-fanhub-v2 #sec-drivers .drv-panel{
+  position:relative !important;
+  display:grid !important;
+  grid-template-columns:minmax(410px,480px) minmax(0,1fr) !important;
   gap:18px !important;
   align-items:stretch !important;
-  margin-top:0 !important;
+  margin:0 0 42px !important;
+  padding-top:42px !important;
 }
+body.pdx-fanhub-v2 #sec-drivers .drv-panel::before{
+  content:'DRIVER FOCUS  /  LIVE PERFORMANCE PROFILE';
+  position:absolute;
+  top:0;
+  left:0;
+  color:rgba(255,255,255,.37);
+  font:900 .57rem/1 var(--font-c);
+  letter-spacing:.21em;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-panel::after{
+  content:'LIVE DATA';
+  position:absolute;
+  top:-4px;
+  right:0;
+  padding:6px 9px 6px 20px;
+  color:#3af0b5;
+  background:radial-gradient(circle at 10px 50%,#3af0b5 0 3px,transparent 4px);
+  font:900 .49rem/1 var(--font-c);
+  letter-spacing:.16em;
+}
+
 body.pdx-fanhub-v2 #sec-drivers .drv-card,
 body.pdx-fanhub-v2 #sec-drivers .drv-stats-right{
   position:relative !important;
-  min-height:470px !important;
+  min-height:590px !important;
   overflow:hidden !important;
   border:1px solid rgba(255,255,255,.10) !important;
-  border-radius:14px !important;
+  border-radius:20px !important;
   background:
-    radial-gradient(circle at 50% 0,rgba(232,0,45,.075),transparent 34%),
-    linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015)),
-    #090b0f !important;
-  box-shadow:0 26px 70px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.045) !important;
-}
-body.pdx-fanhub-v2 #sec-drivers .drv-card{
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  padding:32px 28px 26px !important;
-  text-align:center !important;
-  border-top:1px solid rgba(255,255,255,.10) !important;
+    radial-gradient(circle at 50% 0,rgba(232,0,45,.09),transparent 36%),
+    linear-gradient(145deg,rgba(255,255,255,.048),rgba(255,255,255,.012)),
+    #07090d !important;
+  box-shadow:0 32px 82px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.04) !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-card::before,
 body.pdx-fanhub-v2 #sec-drivers .drv-stats-right::after{
@@ -195,270 +493,505 @@ body.pdx-fanhub-v2 #sec-drivers .drv-stats-right::after{
   right:0;
   top:0;
   height:2px;
-  background:linear-gradient(90deg,#e8002d,rgba(232,0,45,.16),transparent 74%);
+  background:linear-gradient(90deg,#e8002d,rgba(232,0,45,.2),transparent 74%);
+  box-shadow:0 0 18px rgba(232,0,45,.17);
+}
+
+body.pdx-fanhub-v2 #sec-drivers .drv-card{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  padding:40px 38px 30px !important;
+  text-align:center !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-card::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    linear-gradient(120deg,transparent 0 67%,rgba(255,255,255,.025) 67.5%,transparent 68%),
+    radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--team-color,#e8002d) 12%,transparent),transparent 36%);
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-card > *{
+  position:relative !important;
+  z-index:2 !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .drv-card-shine{
+  position:absolute !important;
+  inset:-30% auto auto -25% !important;
+  width:75% !important;
+  height:62% !important;
+  z-index:1 !important;
+  pointer-events:none !important;
+  background:radial-gradient(circle,color-mix(in srgb,var(--team-color,#e8002d) 20%,transparent),transparent 68%) !important;
+  filter:blur(28px) !important;
+  opacity:.7 !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-num-bg{
-  right:18px !important;
-  top:10px !important;
-  color:rgba(255,255,255,.035) !important;
-  font-size:9.5rem !important;
+  position:absolute !important;
+  right:12px !important;
+  top:-4px !important;
+  color:rgba(255,255,255,.034) !important;
+  font:900 13rem/.8 var(--font-d) !important;
+  letter-spacing:-.06em !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-big-av{
-  width:184px !important;
-  height:184px !important;
-  min-width:184px !important;
-  min-height:184px !important;
-  margin:6px auto 22px !important;
+  width:256px !important;
+  height:256px !important;
+  min-width:256px !important;
+  min-height:256px !important;
+  margin:9px auto 29px !important;
+  overflow:hidden !important;
   border:2px solid var(--team-color,#e8002d) !important;
   border-radius:50% !important;
-  background:#101319 !important;
-  box-shadow:0 22px 55px rgba(0,0,0,.42),0 0 0 7px rgba(255,255,255,.025),0 0 34px color-mix(in srgb,var(--team-color,#e8002d) 22%,transparent) !important;
+  background:#111319 !important;
+  box-shadow:
+    0 31px 68px rgba(0,0,0,.48),
+    0 0 0 9px rgba(255,255,255,.025),
+    0 0 50px color-mix(in srgb,var(--team-color,#e8002d) 26%,transparent) !important;
   animation:none !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-name{
-  position:relative !important;
-  z-index:2 !important;
-  margin-bottom:5px !important;
+  margin:0 0 6px !important;
   color:#fff !important;
-  font-size:2.3rem !important;
-  line-height:.95 !important;
-  letter-spacing:.02em !important;
+  font:900 clamp(3rem,4vw,4.15rem)/.86 var(--font-d) !important;
+  letter-spacing:.005em !important;
+  text-transform:uppercase !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-team{
-  margin-bottom:13px !important;
-  font-size:.70rem !important;
-  letter-spacing:.13em !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  margin:4px 0 14px !important;
+  font:800 .70rem/1 var(--font-c) !important;
+  letter-spacing:.12em !important;
+  text-transform:uppercase !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-country{
-  margin-bottom:17px !important;
-  color:rgba(255,255,255,.62) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  margin:0 0 20px !important;
+  color:rgba(255,255,255,.58) !important;
+  font-size:.70rem !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .driver-flag-shell{
+  width:30px !important;
+  height:20px !important;
+  overflow:hidden !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  border-radius:4px !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .driver-flag-shell img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-tags{
   width:100% !important;
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:7px !important;
-  margin:0 0 18px !important;
+  margin:0 0 20px !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-tag{
-  flex:1 1 0 !important;
-  min-width:max-content !important;
-  padding:7px 8px !important;
-  border:1px solid rgba(255,255,255,.085) !important;
+  min-width:0 !important;
+  padding:9px 8px !important;
+  border:1px solid rgba(255,255,255,.08) !important;
   border-radius:7px !important;
-  color:rgba(255,255,255,.72) !important;
-  background:rgba(255,255,255,.032) !important;
-  font-size:.58rem !important;
+  color:rgba(255,255,255,.66) !important;
+  background:rgba(255,255,255,.025) !important;
+  font:800 .53rem/1 var(--font-c) !important;
+  letter-spacing:.08em !important;
+  white-space:nowrap !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-detail-btn{
   width:100% !important;
-  min-height:46px !important;
+  min-height:50px !important;
   margin-top:auto !important;
   border:1px solid rgba(255,255,255,.12) !important;
-  border-radius:8px !important;
+  border-radius:9px !important;
   color:#fff !important;
-  background:linear-gradient(110deg,rgba(232,0,45,.90),rgba(232,0,45,.68)) !important;
-  box-shadow:0 14px 30px rgba(232,0,45,.14) !important;
+  background:linear-gradient(110deg,#e8002d,#9e001f) !important;
+  box-shadow:0 17px 36px rgba(232,0,45,.16) !important;
+  font:900 .63rem/1 var(--font-c) !important;
+  letter-spacing:.14em !important;
+  text-transform:uppercase !important;
+  transition:transform .2s ease,box-shadow .2s ease !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-detail-btn:hover{
   transform:translateY(-2px) !important;
-  box-shadow:0 18px 34px rgba(232,0,45,.22) !important;
+  box-shadow:0 22px 44px rgba(232,0,45,.25) !important;
 }
 
-/* Performance dashboard */
+/* ============================================================
+   PERFORMANCE TELEMETRY PANEL
+   ============================================================ */
 body.pdx-fanhub-v2 #sec-drivers .drv-stats-right{
-  padding:30px !important;
+  padding:38px !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .drv-stats-right::before{
-  content:'2026 PERFORMANCE  /  CAREER CONTEXT';
+  content:'PADDOX LIVE ANALYTICS  /  DRIVER PERFORMANCE';
   display:block;
-  margin-bottom:24px;
-  color:rgba(255,255,255,.40);
-  font-family:var(--font-c);
-  font-size:.62rem;
-  font-weight:800;
+  margin-bottom:30px;
+  color:rgba(255,255,255,.37);
+  font:900 .58rem/1 var(--font-c);
   letter-spacing:.20em;
 }
 body.pdx-fanhub-v2 #sec-drivers .stat-bars{
   display:grid !important;
-  grid-template-columns:1fr 1fr !important;
-  gap:18px 22px !important;
-}
-body.pdx-fanhub-v2 #sec-drivers .sb-row{
-  min-height:84px !important;
-  padding:14px 15px !important;
-  border:1px solid rgba(255,255,255,.07) !important;
-  border-radius:10px !important;
-  background:rgba(255,255,255,.022) !important;
-}
-body.pdx-fanhub-v2 #sec-drivers .sb-hd{
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   gap:16px !important;
 }
+body.pdx-fanhub-v2 #sec-drivers .sb-row{
+  position:relative !important;
+  min-height:106px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:space-between !important;
+  padding:18px !important;
+  overflow:hidden !important;
+  border:1px solid rgba(255,255,255,.072) !important;
+  border-radius:11px !important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.036),rgba(255,255,255,.012)) !important;
+}
+body.pdx-fanhub-v2 #sec-drivers .sb-row::after{
+  content:'';
+  position:absolute;
+  right:-28px;
+  top:-28px;
+  width:80px;
+  height:80px;
+  border:1px solid rgba(255,255,255,.025);
+  border-radius:50%;
+}
+body.pdx-fanhub-v2 #sec-drivers .sb-hd{
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:space-between !important;
+  gap:18px !important;
+}
 body.pdx-fanhub-v2 #sec-drivers .sb-lbl{
-  color:rgba(255,255,255,.40) !important;
-  font-size:.61rem !important;
+  color:rgba(255,255,255,.37) !important;
+  font:800 .56rem/1.25 var(--font-c) !important;
   letter-spacing:.14em !important;
+  text-transform:uppercase !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .sb-val{
   color:#fff !important;
-  font-size:1.12rem !important;
+  font:900 1.48rem/.9 var(--font-d) !important;
+  letter-spacing:.02em !important;
+  white-space:nowrap !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .sb-track{
-  height:4px !important;
-  margin-top:8px !important;
+  height:5px !important;
+  margin-top:13px !important;
+  overflow:hidden !important;
   border-radius:99px !important;
-  background:rgba(255,255,255,.07) !important;
+  background:rgba(255,255,255,.065) !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .sb-fill{
+  height:100% !important;
   border-radius:99px !important;
-  box-shadow:0 0 14px color-mix(in srgb,currentColor 24%,transparent) !important;
+  box-shadow:0 0 18px currentColor !important;
+  transition:width .75s cubic-bezier(.2,.8,.2,1) !important;
 }
+body.pdx-fanhub-v2 #sec-drivers .career-wins-row{
+  border-color:rgba(215,184,95,.18) !important;
+  background:linear-gradient(145deg,rgba(215,184,95,.055),rgba(255,255,255,.012)) !important;
+}
+
+/* Metric tower */
 body.pdx-fanhub-v2 #sec-drivers .cmp-grid{
   display:grid !important;
   grid-template-columns:repeat(5,minmax(0,1fr)) !important;
-  gap:10px !important;
-  margin-top:24px !important;
+  gap:9px !important;
+  margin-top:28px !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .cmp-c{
+  position:relative !important;
   min-width:0 !important;
-  min-height:112px !important;
+  min-height:132px !important;
   display:flex !important;
   flex-direction:column !important;
   align-items:flex-start !important;
   justify-content:flex-end !important;
   padding:16px !important;
+  overflow:hidden !important;
   text-align:left !important;
-  border:1px solid rgba(255,255,255,.08) !important;
+  border:1px solid rgba(255,255,255,.075) !important;
   border-radius:10px !important;
   background:
-    linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015)) !important;
-  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease !important;
+    radial-gradient(circle at 100% 0,rgba(232,0,45,.055),transparent 58%),
+    rgba(255,255,255,.022) !important;
 }
-body.pdx-fanhub-v2 #sec-drivers .cmp-c:hover{
-  transform:translateY(-3px) !important;
-  border-color:rgba(232,0,45,.28) !important;
-  box-shadow:0 16px 30px rgba(0,0,0,.22) !important;
+body.pdx-fanhub-v2 #sec-drivers .cmp-c::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  width:34px;
+  height:2px;
+  background:#e8002d;
 }
 body.pdx-fanhub-v2 #sec-drivers .cmp-v{
   color:#fff !important;
-  font-size:2.15rem !important;
-  line-height:1 !important;
+  font:900 clamp(1.7rem,2.2vw,2.45rem)/.85 var(--font-d) !important;
+  letter-spacing:.01em !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .cmp-l{
-  margin-top:8px !important;
-  color:rgba(255,255,255,.38) !important;
-  font-size:.58rem !important;
-  letter-spacing:.16em !important;
-}
-body.pdx-fanhub-v2 #sec-drivers .career-wins-card{
-  position:relative !important;
-  overflow:hidden !important;
-  border-color:rgba(215,184,95,.24) !important;
-  background:
-    radial-gradient(circle at 88% 12%,rgba(215,184,95,.18),transparent 44%),
-    linear-gradient(145deg,rgba(215,184,95,.065),rgba(255,255,255,.015)) !important;
+  margin-top:9px !important;
+  color:rgba(255,255,255,.35) !important;
+  font:800 .49rem/1 var(--font-c) !important;
+  letter-spacing:.13em !important;
+  text-transform:uppercase !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .career-wins-card::before{
-  content:'CAREER';
-  position:absolute;
-  top:10px;
-  right:10px;
-  color:rgba(215,184,95,.58);
-  font-family:var(--font-c);
-  font-size:.48rem;
-  font-weight:800;
-  letter-spacing:.16em;
+  background:#d7b85f !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .career-wins-card .cmp-v{
-  color:#e1c87d !important;
+  color:#d7b85f !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .career-wins-card.is-loading .cmp-v{
-  opacity:.45;
+  opacity:.35 !important;
 }
 
-/* Compare drivers becomes a lower, cleaner analysis panel. */
+/* ============================================================
+   DRIVER COMPARE — BROADCAST CONTROL DESK
+   ============================================================ */
 body.pdx-fanhub-v2 #sec-drivers .driver-compare-shell{
-  margin-top:20px !important;
-  padding:24px !important;
+  position:relative !important;
+  margin-top:0 !important;
+  padding:30px !important;
   overflow:hidden !important;
   border:1px solid rgba(255,255,255,.09) !important;
-  border-top:2px solid rgba(232,0,45,.52) !important;
-  border-radius:14px !important;
+  border-radius:20px !important;
   background:
-    radial-gradient(circle at 0 0,rgba(232,0,45,.08),transparent 28%),
-    linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),
-    #090b0f !important;
-  box-shadow:0 24px 60px rgba(0,0,0,.28) !important;
+    radial-gradient(circle at 0 0,rgba(232,0,45,.095),transparent 31%),
+    linear-gradient(145deg,#101116,#06070a) !important;
+  box-shadow:0 30px 78px rgba(0,0,0,.31),inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
-body.pdx-fanhub-v2 #sec-drivers .compare-head{
-  align-items:end !important;
-  margin-bottom:18px !important;
-  padding-bottom:16px !important;
-  border-bottom:1px solid rgba(255,255,255,.07) !important;
+body.pdx-fanhub-v2 #sec-drivers .driver-compare-shell::before{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:2px;
+  background:linear-gradient(90deg,#e8002d,rgba(232,0,45,.16),transparent 70%);
+}
+body.pdx-fanhub-v2 #sec-drivers .compare-kicker{
+  color:#e8002d !important;
+  font:900 .55rem/1 var(--font-c) !important;
+  letter-spacing:.2em !important;
+  text-transform:uppercase !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .compare-head h3{
-  font-size:2.15rem !important;
+  margin-top:8px !important;
+  color:#fff !important;
+  font:900 clamp(2.2rem,3.3vw,3.5rem)/.9 var(--font-d) !important;
 }
+body.pdx-fanhub-v2 #sec-drivers .compare-head h3 span{color:#e8002d !important;}
 body.pdx-fanhub-v2 #sec-drivers .compare-head p{
-  max-width:500px !important;
-  color:rgba(255,255,255,.46) !important;
+  max-width:520px !important;
+  color:rgba(255,255,255,.42) !important;
+  line-height:1.55 !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .compare-controls{
-  gap:10px !important;
+  margin-top:22px !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .compare-controls label{
-  padding:10px 12px !important;
-  border:1px solid rgba(255,255,255,.075) !important;
-  border-radius:9px !important;
-  background:rgba(255,255,255,.02) !important;
+  color:rgba(255,255,255,.40) !important;
+  font:800 .54rem/1 var(--font-c) !important;
+  letter-spacing:.14em !important;
+  text-transform:uppercase !important;
 }
 body.pdx-fanhub-v2 #sec-drivers .compare-controls select{
-  border-radius:7px !important;
-  background:#0b0d12 !important;
+  min-height:48px !important;
+  margin-top:8px !important;
+  border:1px solid rgba(255,255,255,.09) !important;
+  border-radius:8px !important;
+  color:#fff !important;
+  background:#0c0e13 !important;
 }
 
-@media(max-width:1180px){
-  body.pdx-fanhub-v2 #sec-drivers .drv-selector{
-    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+/* ============================================================
+   RESPONSIVE / BROADCAST ADAPTATION
+   ============================================================ */
+@media(max-width:1320px){
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill{
+    grid-column:span 4 !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3){
+    grid-column:span 4 !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-panel{
+    grid-template-columns:390px minmax(0,1fr) !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-big-av{
+    width:225px !important;
+    height:225px !important;
+    min-width:225px !important;
+    min-height:225px !important;
   }
   body.pdx-fanhub-v2 #sec-drivers .cmp-grid{
     grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   }
 }
 
-@media(max-width:900px){
-  body.pdx-fanhub-v2 .hub-hero-content{
-    width:calc(100% - 48px) !important;
-    margin-inline:24px !important;
-  }
+@media(max-width:1020px){
   body.pdx-fanhub-v2 #sec-drivers{
-    width:calc(100% - 32px) !important;
-    padding-top:62px !important;
-  }
-  body.pdx-fanhub-v2 #sec-drivers .sec-header{
-    grid-template-columns:1fr !important;
-  }
-  body.pdx-fanhub-v2 #sec-drivers .section-title{
-    grid-column:1 !important;
-    text-align:left !important;
+    width:min(100% - 34px,1580px) !important;
   }
   body.pdx-fanhub-v2 #sec-drivers .drv-selector{
-    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    padding:18px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3){
+    grid-column:span 12 !important;
+    min-height:218px !important;
+    grid-template-columns:145px minmax(0,1fr) !important;
+    grid-template-rows:1fr !important;
+    justify-items:start !important;
+    text-align:left !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-team{
+    justify-content:flex-start !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-av,
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1) .dp-av{
+    width:140px !important;
+    height:140px !important;
+    flex-basis:140px !important;
+    margin:0 !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill{
+    grid-column:span 6 !important;
   }
   body.pdx-fanhub-v2 #sec-drivers .drv-panel{
     grid-template-columns:1fr !important;
   }
-  body.pdx-fanhub-v2 #sec-drivers .drv-card,
-  body.pdx-fanhub-v2 #sec-drivers .drv-stats-right{
+  body.pdx-fanhub-v2 #sec-drivers .drv-card{
     min-height:0 !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .stat-bars{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   }
 }
 
-@media(max-width:640px){
+@media(max-width:720px){
   body.pdx-fanhub-v2 .hub-hero{
-    min-height:610px !important;
+    min-height:560px !important;
+  }
+  body.pdx-fanhub-v2 .hub-hero-content{
+    width:auto !important;
+    max-width:none !important;
+    margin-left:20px !important;
+    margin-right:20px !important;
+    padding-top:52px !important;
+    padding-bottom:58px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers{
+    width:min(100% - 22px,1580px) !important;
+    padding:60px 0 88px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .sec-header{
+    padding-bottom:23px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .sec-header::before{
+    display:none !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .section-title{
+    font-size:clamp(3.5rem,16vw,5.4rem) !important;
+    line-height:.82 !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .section-title::before{
+    display:block !important;
+    margin:0 0 7px !important;
+    font-size:.28em !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-live-meta{
+    min-height:52px !important;
+    padding:0 14px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-live-meta::after{
+    display:none !important;
   }
   body.pdx-fanhub-v2 #sec-drivers .drv-selector{
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    max-height:270px !important;
+    grid-template-columns:1fr !important;
+    padding:13px !important;
+    border-radius:16px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-selector::before{
+    grid-column:1 !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill,
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3){
+    grid-column:1 !important;
+    min-height:138px !important;
+    grid-template-columns:82px minmax(0,1fr) !important;
+    grid-template-rows:1fr !important;
+    justify-items:start !important;
+    gap:15px !important;
+    padding:16px !important;
+    text-align:left !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3)::after{
+    top:8px !important;
+    right:8px !important;
+    padding:5px 6px !important;
+    font-size:.40rem !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-av,
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1) .dp-av,
+  body.pdx-fanhub-v2 #sec-drivers .dp-av{
+    width:78px !important;
+    height:78px !important;
+    flex-basis:78px !important;
+    margin:0 !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-name,
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(1) .dp-name,
+  body.pdx-fanhub-v2 #sec-drivers .dp-name{
+    font-size:1.75rem !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill:nth-child(-n+3) .dp-team{
+    justify-content:flex-start !important;
+    font-size:.53rem !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-panel{
+    padding-top:38px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-card,
+  body.pdx-fanhub-v2 #sec-drivers .drv-stats-right{
+    min-height:0 !important;
+    border-radius:15px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-card{
+    padding:31px 20px 22px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-big-av{
+    width:205px !important;
+    height:205px !important;
+    min-width:205px !important;
+    min-height:205px !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-name{
+    font-size:2.8rem !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-num-bg{
+    font-size:9rem !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-tags{
+    grid-template-columns:1fr !important;
+  }
+  body.pdx-fanhub-v2 #sec-drivers .drv-stats-right{
+    padding:22px !important;
   }
   body.pdx-fanhub-v2 #sec-drivers .stat-bars{
     grid-template-columns:1fr !important;
@@ -466,7 +999,18 @@ body.pdx-fanhub-v2 #sec-drivers .compare-controls select{
   body.pdx-fanhub-v2 #sec-drivers .cmp-grid{
     grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   }
-  body.pdx-fanhub-v2 #sec-drivers .career-wins-card{
-    grid-column:1 / -1 !important;
+  body.pdx-fanhub-v2 #sec-drivers .cmp-c{
+    min-height:105px !important;
   }
+  body.pdx-fanhub-v2 #sec-drivers .driver-compare-shell{
+    padding:21px !important;
+    border-radius:15px !important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.pdx-fanhub-v2 #sec-drivers .drv-live-dot{animation:none !important;}
+  body.pdx-fanhub-v2 #sec-drivers .drv-pill,
+  body.pdx-fanhub-v2 #sec-drivers .sb-fill,
+  body.pdx-fanhub-v2 #sec-drivers .drv-detail-btn{transition:none !important;}
 }
