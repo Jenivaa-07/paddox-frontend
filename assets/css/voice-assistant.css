@@ -1,3 +1,6 @@
+/* Home dock parity: scoped to body.paddox-dock-home in home-dock.css */
+@import url('../../home-dock.css?v=SHOP_DOCK_1_0');
+
 /* Voice Assistant Overlay Styles */
 #voice-assistant-overlay {
   position: fixed;
