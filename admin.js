@@ -17,6 +17,7 @@
   const assets = '/admin-assets-live.js?v=A5_ASSETS_1';
   const fanquotes = '/admin-fanquotes-live.js?v=A5_FANQUOTES_1';
   const fanpolls = '/admin-fanpolls-live.js?v=A5_FANPOLLS_3';
+  const fanpollsPolish = '/admin-fanpolls-polish.js?v=A5_FANPOLLS_POLISH_1';
   const navigation = '/admin-navigation-live.js?v=A5_NAV_3';
 
   if (document.readyState === 'loading') {
@@ -31,6 +32,7 @@
     document.write(`<script src="${assets}"><\/script>`);
     document.write(`<script src="${fanquotes}"><\/script>`);
     document.write(`<script src="${fanpolls}"><\/script>`);
+    document.write(`<script src="${fanpollsPolish}"><\/script>`);
     document.write(`<script src="${navigation}"><\/script>`);
     return;
   }
@@ -55,6 +57,7 @@
     .then(() => loadScript(assets))
     .then(() => loadScript(fanquotes))
     .then(() => loadScript(fanpolls))
+    .then(() => loadScript(fanpollsPolish))
     .then(() => loadScript(navigation))
     .catch(error => console.error('PADDOX Admin bootstrap failed:', error));
 })();
