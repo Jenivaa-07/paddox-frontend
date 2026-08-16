@@ -1,7 +1,7 @@
 /* ============================================================
    PADDOX ADMIN — Stable JavaScript entrypoint
    Loads legacy dashboard, runtime repair, authenticated fetch bridge,
-   live Overview, Orders, Products, Inventory, then deterministic navigation.
+   live Overview, Orders, Products, Inventory, Coupons, then navigation.
    ============================================================ */
 'use strict';
 (function paddoxAdminStableEntrypoint(){
@@ -12,6 +12,7 @@
   const orders = '/admin-orders-live.js?v=A5_ORDERS_1';
   const products = '/admin-products-live.js?v=A5_PRODUCTS_1';
   const inventory = '/admin-inventory-live.js?v=A5_INVENTORY_1';
+  const coupons = '/admin-coupons-live.js?v=A5_COUPONS_1';
   const navigation = '/admin-navigation-live.js?v=A5_NAV_3';
 
   if (document.readyState === 'loading') {
@@ -22,6 +23,7 @@
     document.write(`<script src="${orders}"><\/script>`);
     document.write(`<script src="${products}"><\/script>`);
     document.write(`<script src="${inventory}"><\/script>`);
+    document.write(`<script src="${coupons}"><\/script>`);
     document.write(`<script src="${navigation}"><\/script>`);
     return;
   }
@@ -42,6 +44,7 @@
     .then(() => loadScript(orders))
     .then(() => loadScript(products))
     .then(() => loadScript(inventory))
+    .then(() => loadScript(coupons))
     .then(() => loadScript(navigation))
     .catch(error => console.error('PADDOX Admin bootstrap failed:', error));
 })();
