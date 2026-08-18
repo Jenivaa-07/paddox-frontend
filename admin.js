@@ -12,7 +12,7 @@
   const overview = '/admin-overview-live.js?v=A5_OVERVIEW_1';
   const orders = '/admin-orders-live.js?v=A5_ORDERS_1';
   const products = '/admin-products-live.js?v=A5_PRODUCTS_1';
-  const productsDnD = '/admin-products-dnd.js?v=A5_PRODUCTS_DND_1';
+  const productsDnD = '/admin-products-dnd.js?v=A5_PRODUCTS_DND_2_WEB';
   const inventory = '/admin-inventory-live.js?v=A5_INVENTORY_1';
   const coupons = '/admin-coupons-live.js?v=A5_COUPONS_1';
   const assets = '/admin-assets-live.js?v=A5_ASSETS_1';
