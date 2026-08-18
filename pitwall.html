@@ -7,17 +7,17 @@
   <script src="js/navigation-safety.js?v=N1_0"></script>
   <link rel="stylesheet" href="pitwall.css?v=19_3"/>
   <link rel="stylesheet" href="cinematic-pages.css?v=C1_0"/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="pitwall-premium.css?v=PW2_0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet"/>
 </head>
-<body class="page-transition-init">
+<body class="page-transition-init pdx-pitwall-v2 paddox-dock-pitwall">
   <canvas id="particles-canvas"></canvas>
   <div id="page-overlay"></div>
 
   <nav id="navbar">
     <div class="nav-inner">
-      <a href="index.html" class="nav-logo">
-        <span class="helmet-wrap" id="helmet-wrap"><img src="assets/paddox-logo-icon-web.png?v=A4_10C_4" alt="PADDOX Logo" class="brand-logo-icon"></span>
-        <span class="logo-text">PADDO<span class="logo-x">X</span></span>
+      <a href="index.html" class="nav-logo paddox-brand-lockup" id="nav-logo" aria-label="PADDOX Home">
+        <img src="assets/paddox-logo-horizontal-white.png?v=S1_2" alt="PADDOX Motorsport Lifestyle" class="brand-lockup-logo"/>
       </a>
       <ul class="nav-links">
         <li><a href="index.html" class="nav-link"><span class="nl-icon nav-home-icon" aria-hidden="true"></span><span class="nl-label">Home</span><span class="nl-underline"></span></a></li>
@@ -46,6 +46,32 @@
     </div>
   </nav>
 
+  <!-- PADDOX DOCK — exact Shop destination set, Pit Wall active -->
+  <nav class="pdx-dock-outer" id="pdx-dock" aria-label="Primary navigation">
+    <div class="pdx-dock-panel" id="pdx-dock-panel" role="toolbar" aria-label="Paddox destinations">
+      <a href="index.html" class="pdx-dock-item" aria-label="Home" aria-describedby="pdx-dock-label-home">
+        <span class="pdx-dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.7l8.5 6.8v9.2h-5.4v-6.2H8.9v6.2H3.5z"/></svg></span>
+        <span class="pdx-dock-label" id="pdx-dock-label-home" role="tooltip">Home</span>
+      </a>
+      <a href="shop.html" class="pdx-dock-item" aria-label="Shop" aria-describedby="pdx-dock-label-shop">
+        <span class="pdx-dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.2 8.2h13.6l1 11.3H4.2z"/><path d="M8.4 8.2V6.7a3.6 3.6 0 0 1 7.2 0v1.5"/></svg></span>
+        <span class="pdx-dock-label" id="pdx-dock-label-shop" role="tooltip">Shop</span>
+      </a>
+      <a href="fanhub.html" class="pdx-dock-item" aria-label="Fan Hub" aria-describedby="pdx-dock-label-fanhub">
+        <span class="pdx-dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M2.8 19c.5-3.5 2.4-5.3 5.2-5.3s4.7 1.8 5.2 5.3M13.2 15.1c1-.9 2.2-1.3 3.7-1.3 2.4 0 3.8 1.6 4.3 4.5"/></svg></span>
+        <span class="pdx-dock-label" id="pdx-dock-label-fanhub" role="tooltip">Fan Hub</span>
+      </a>
+      <a href="pitwall.html" class="pdx-dock-item active" aria-label="Pit Wall" aria-current="page" aria-describedby="pdx-dock-label-pitwall">
+        <span class="pdx-dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18.5a8 8 0 1 1 16 0"/><path d="m12 18.5 4.6-6.2"/><path d="M6.4 14.7 4.7 14M8.6 11.5 7.4 10M12 10V8M15.4 11.5l1.2-1.5M17.6 14.7l1.7-.7"/></svg></span>
+        <span class="pdx-dock-label" id="pdx-dock-label-pitwall" role="tooltip">Pit Wall</span>
+      </a>
+      <a href="account.html" class="pdx-dock-item" aria-label="Account" aria-describedby="pdx-dock-label-account">
+        <span class="pdx-dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.2 20c.5-4.1 2.8-6.2 6.8-6.2s6.3 2.1 6.8 6.2"/></svg></span>
+        <span class="pdx-dock-label" id="pdx-dock-label-account" role="tooltip">Account</span>
+      </a>
+    </div>
+  </nav>
+
   <main class="pit-page">
     <section class="pit-hero">
       <div class="pit-grid-bg"></div>
@@ -56,17 +82,32 @@
           <div>
             <div class="pit-kicker"><span class="live-pulse"></span> Live Session Center</div>
             <h1 class="pit-title">PIT WALL <span>DATA</span></h1>
-            <p class="pit-sub">Choose a Grand Prix session and view available timing, weather, driver and race-control data.</p>
+            <p class="pit-sub">A race-operations workspace for session timing, lap and sector data, tyre state, track weather, race-control messages and PADDOX predictive intelligence.</p>
             <div class="pit-hero-actions">
               <button class="pit-primary" id="refresh-btn"><span class="pit-btn-icon pit-refresh-icon" aria-hidden="true"></span> Refresh Session Data</button>
               <a href="fanhub.html" class="pit-secondary"><span class="pit-btn-icon pit-back-icon" aria-hidden="true"></span> Back to Fan Hub</a>
             </div>
           </div>
-</div>
+
+          <aside class="pit-hero-command" aria-label="Pit Wall data pipeline">
+            <div class="pit-command-head"><span>Race operations pipeline</span><strong>Connected</strong></div>
+            <div class="pit-command-stack">
+              <div class="pit-command-source"><i>01</i><span><b>Race Calendar</b><small>Round, circuit and weekend context</small></span><em>Jolpica</em></div>
+              <div class="pit-command-source"><i>02</i><span><b>Session Telemetry</b><small>Laps, stints, weather and control feed</small></span><em>OpenF1</em></div>
+              <div class="pit-command-source"><i>03</i><span><b>Predictive Layer</b><small>Selected-session timing to race inference</small></span><em>PADDOX AI</em></div>
+            </div>
+            <div class="pit-command-foot"><span>Real-data first</span><span>No simulated telemetry</span></div>
+          </aside>
+        </div>
       </div>
     </section>
 
     <section class="pit-dashboard">
+      <div class="pit-section-intro">
+        <div><span>01 · Race Operations</span><h2>SESSION COMMAND CENTER</h2></div>
+        <p>Select a season, Grand Prix and session. PADDOX resolves the race weekend, requests available session data and keeps the workspace refreshed while timing is available.</p>
+      </div>
+
       <div class="pit-top-strip">
         <div>
           <span class="strip-label">Next Race</span>
@@ -80,8 +121,6 @@
           <div><b id="cd-s">--</b><span>SEC</span></div>
         </div>
       </div>
-
-
 
       <div class="pit-selector-strip">
         <div class="selector-block">
@@ -118,7 +157,6 @@
       </div>
 
       <div class="live-notice" id="live-notice">Select a session to view available Pit Wall data.</div>
-
       <div class="session-tabs" id="session-tabs"></div>
 
       <div class="pit-kpi-grid">
@@ -139,7 +177,7 @@
       <div class="pit-layout">
         <section class="pit-panel timing-panel">
           <div class="panel-head">
-            <div><span class="panel-tag" id="timing-panel-tag">Timing Feed</span><h2 id="timing-title">Session Lap, Sector & Tyre Feed</h2></div>
+            <div><span class="panel-tag" id="timing-panel-tag">Timing Feed</span><h2 id="timing-title">Session Lap, Sector &amp; Tyre Feed</h2></div>
             <button class="mini-btn" id="sort-standings">Sort: Position</button>
           </div>
           <div class="timing-table" id="timing-table">
@@ -158,24 +196,25 @@
           </section>
         </aside>
       </div>
-      <div class="pit-layout" id="predictive-layout" style="display: none; margin-top: 2rem;">
-        <section class="pit-panel ai-panel" style="width: 100%;">
+
+      <div class="pit-layout pit-ai-layout" id="predictive-layout">
+        <section class="pit-panel ai-panel">
           <div class="panel-head">
-            <div><span class="panel-tag ai-tag" style="background: linear-gradient(90deg, #ff0055, #a300ff); color: white; border: none;">AI Analytics Engine</span><h2>Temporal Race Predictor</h2></div>
-            <button class="mini-btn ai-btn" id="refresh-predictions" style="border-color: #a300ff; color: #a300ff;">Refresh Prediction</button>
+            <div><span class="panel-tag ai-tag">AI Analytics Engine</span><h2>Predictive Race Intelligence</h2></div>
+            <button class="mini-btn ai-btn" id="refresh-predictions">Refresh Prediction</button>
           </div>
-          <div class="predictive-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; padding: 1.5rem;">
-            <div class="predictive-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
-              <h3 style="margin-top: 0; color: #fff; font-size: 1.1rem; margin-bottom: 1rem;">Race Evolution</h3>
-              <canvas id="race-evolution-chart" style="width: 100%; max-height: 250px;"></canvas>
+          <div class="predictive-grid">
+            <div class="predictive-card">
+              <h3>Current Position vs Predicted Finish</h3>
+              <canvas id="race-evolution-chart"></canvas>
             </div>
-            <div class="predictive-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
-              <h3 style="margin-top: 0; color: #fff; font-size: 1.1rem; margin-bottom: 1rem;">Driver Outcomes (Top 3 Win Probability)</h3>
-              <div id="driver-outcomes-list" class="outcomes-list" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+            <div class="predictive-card">
+              <h3>Predicted Driver Order</h3>
+              <div id="driver-outcomes-list" class="outcomes-list"></div>
             </div>
-            <div class="predictive-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
-              <h3 style="margin-top: 0; color: #fff; font-size: 1.1rem; margin-bottom: 1rem;">Strategy Probabilities</h3>
-              <div id="strategy-probs-list" class="strategy-list" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+            <div class="predictive-card">
+              <h3>Model &amp; Input Quality</h3>
+              <div id="strategy-probs-list" class="strategy-list"></div>
             </div>
           </div>
         </section>
@@ -195,6 +234,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.8.3/dist/socket.io.min.js"></script>
   <script src="pitwall.js?v=19_4"></script>
+  <script src="pitwall-predictive-live.js?v=PW2_AI_1"></script>
+  <script src="pitwall-dock.js?v=PW2_DOCK_1"></script>
   <script src="cinematic-pages.js?v=C1_0"></script>
 </body>
 </html>
