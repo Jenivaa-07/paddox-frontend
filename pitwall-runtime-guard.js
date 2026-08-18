@@ -1,11 +1,22 @@
 /* ============================================================
    PADDOX Pit Wall — Runtime Guard
-   Keeps the live session refresh fast without re-running predictive inference
-   every 12 seconds. New session = immediate inference; automatic refreshes are
-   limited to once per minute; the user Refresh Prediction button always forces.
+   Loads the Shop-parity hero override and keeps live session refresh fast
+   without re-running predictive inference every 12 seconds.
+   New session = immediate inference; automatic refreshes are limited to once
+   per minute; the user Refresh Prediction button always forces.
    ============================================================ */
 (function installPitWallRuntimeGuard(){
   'use strict';
+
+  /* Keep the telemetry/dashboard CSS intact and layer the hero redesign last so
+     it wins cleanly over the older Pit Wall hero rules. */
+  if (!document.getElementById('pitwall-hero-shop-parity')) {
+    const link = document.createElement('link');
+    link.id = 'pitwall-hero-shop-parity';
+    link.rel = 'stylesheet';
+    link.href = 'pitwall-hero-shop-parity.css?v=PW4_1';
+    document.head.appendChild(link);
+  }
 
   const realPredict = typeof loadPredictiveData === 'function'
     ? loadPredictiveData
