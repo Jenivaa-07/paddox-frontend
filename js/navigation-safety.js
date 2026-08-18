@@ -20,8 +20,8 @@
   ];
 
   const ROUTE_ASSETS = {
-    'index.html': ['home.css?v=H4_6_2', 'home.js?v=H4_6_2'],
-    'shop.html': ['shop.css?v=S3_4', 'shop.js?v=S3_1', 'cinematic-pages.css?v=C1_0'],
+    'index.html': ['home.css?v=H4_6_2', 'home.js?v=H4_6_2', 'product-quickview-images.js?v=QV_IMG_1'],
+    'shop.html': ['shop.css?v=S3_4', 'shop.js?v=S3_1', 'cinematic-pages.css?v=C1_0', 'product-quickview-images.js?v=QV_IMG_1'],
     'fanhub.html': [
       'fanhub.css?v=F1_8_quote_canvas_premium_code',
       'fanhub-premium.css?v=FH2_0',
@@ -74,6 +74,16 @@
   function loadGlobalNavAuth(){
     appendStylesheet('pdx-nav-auth-style', 'paddox-nav-auth.css?v=NAV_AUTH_3');
     appendScript('script[data-pdx-nav-auth]', 'paddox-nav-auth.js?v=NAV_AUTH_4', 'pdxNavAuth');
+  }
+
+  function loadProductQuickViewImages(){
+    const route = window.location.pathname.split('/').filter(Boolean).pop() || 'index.html';
+    if (route !== 'index.html' && route !== 'shop.html') return;
+    appendScript(
+      'script[data-pdx-quickview-images]',
+      'product-quickview-images.js?v=QV_IMG_1',
+      'pdxQuickviewImages'
+    );
   }
 
   function loadAccount2Safe(){
@@ -212,6 +222,7 @@
   }
 
   loadGlobalNavAuth();
+  loadProductQuickViewImages();
   loadAccount2Safe();
   installSpeculationRules();
 
@@ -244,12 +255,14 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       neutralizeTransition();
+      loadProductQuickViewImages();
       loadAccount2Safe();
       loadFanHubEnhancements();
       scheduleIdleWarmup();
     }, { once:true });
   } else {
     neutralizeTransition();
+    loadProductQuickViewImages();
     loadAccount2Safe();
     loadFanHubEnhancements();
     scheduleIdleWarmup();
@@ -257,6 +270,7 @@
 
   window.addEventListener('pageshow', () => {
     neutralizeTransition();
+    loadProductQuickViewImages();
     loadAccount2Safe();
   });
 })();
