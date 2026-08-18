@@ -12,6 +12,7 @@
   const overview = '/admin-overview-live.js?v=A5_OVERVIEW_1';
   const orders = '/admin-orders-live.js?v=A5_ORDERS_1';
   const products = '/admin-products-live.js?v=A5_PRODUCTS_1';
+  const productsDnD = '/admin-products-dnd.js?v=A5_PRODUCTS_DND_1';
   const inventory = '/admin-inventory-live.js?v=A5_INVENTORY_1';
   const coupons = '/admin-coupons-live.js?v=A5_COUPONS_1';
   const assets = '/admin-assets-live.js?v=A5_ASSETS_1';
@@ -27,6 +28,7 @@
     document.write(`<script src="${overview}"><\/script>`);
     document.write(`<script src="${orders}"><\/script>`);
     document.write(`<script src="${products}"><\/script>`);
+    document.write(`<script src="${productsDnD}"><\/script>`);
     document.write(`<script src="${inventory}"><\/script>`);
     document.write(`<script src="${coupons}"><\/script>`);
     document.write(`<script src="${assets}"><\/script>`);
@@ -52,6 +54,7 @@
     .then(() => loadScript(overview))
     .then(() => loadScript(orders))
     .then(() => loadScript(products))
+    .then(() => loadScript(productsDnD))
     .then(() => loadScript(inventory))
     .then(() => loadScript(coupons))
     .then(() => loadScript(assets))
