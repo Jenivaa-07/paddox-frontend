@@ -1,143 +1,162 @@
 /* ============================================================
-   PADDOX — Shared Quick View Image Controller
-   Home + Shop
-
-   Re-mounts product images with DOM Image elements instead of relying on
-   fragile inline <img onerror="..."> markup. Product media is resolved from
-   the live /api/products payload so both pages always use the Cloudinary URLs
-   stored by the admin product workflow.
+   PADDOX — Quick View Gallery Controller V2
+   Reliable Home + Shop product media galleries.
    ============================================================ */
-(function initPaddoxQuickViewImages(){
+(function initPaddoxQuickViewGalleryV2(){
   'use strict';
 
-  if (window.__PADDOX_QUICKVIEW_IMAGES_V1__) return;
-  window.__PADDOX_QUICKVIEW_IMAGES_V1__ = true;
+  if (window.__PADDOX_QUICKVIEW_GALLERY_V2__) return;
+  window.__PADDOX_QUICKVIEW_GALLERY_V2__ = true;
 
   const PRODUCT_ENDPOINT = '/api/products?limit=100';
-  const QUICK_VIEW_SELECTOR = '.quick-view,[data-quick-view],.product-quick-view';
+  let activeProductId = '';
   let productPromise = null;
-  let lastProductId = '';
-  let renderToken = 0;
+  let syncTimer = 0;
+  let rendering = false;
+  let lastSignature = '';
 
   function injectStyles(){
-    if (document.getElementById('pdx-qv-image-style')) return;
+    if (document.getElementById('pdx-qv-gallery-v2-style')) return;
     const style = document.createElement('style');
-    style.id = 'pdx-qv-image-style';
+    style.id = 'pdx-qv-gallery-v2-style';
     style.textContent = `
       #modal-img-main.pdx-qv-stage,
       #modal-img-wrap.pdx-qv-stage{
         position:relative!important;
         overflow:hidden!important;
       }
-      #modal-img-main .pdx-qv-main-image,
-      #modal-img-wrap .pdx-qv-main-image{
+      #modal-img-main .pdx-qv-main,
+      #modal-img-wrap .pdx-qv-main{
         display:block!important;
         width:100%!important;
         height:100%!important;
         max-width:100%!important;
         max-height:100%!important;
-        margin:auto!important;
+        margin:0 auto!important;
         object-fit:contain!important;
         object-position:center!important;
         opacity:1!important;
         visibility:visible!important;
-        filter:none!important;
         transform:none!important;
+        filter:none!important;
+        background:#fff!important;
         position:relative!important;
         z-index:2!important;
       }
-      #modal-img-wrap.pdx-qv-stage{
-        padding-bottom:96px!important;
+      #modal-img-thumbs.pdx-qv-thumbs{
+        display:flex!important;
+        visibility:visible!important;
+        opacity:1!important;
+        width:min(100%,450px)!important;
+        min-height:72px!important;
+        max-width:450px!important;
+        align-items:center!important;
+        justify-content:flex-start!important;
+        gap:9px!important;
+        padding:12px 2px 2px!important;
+        margin:0 auto!important;
+        overflow-x:auto!important;
+        overflow-y:hidden!important;
+        scrollbar-width:thin!important;
+        background:transparent!important;
+        position:relative!important;
+        z-index:8!important;
       }
-      .pdx-qv-home-gallery{
-        position:absolute;
-        left:18px;
-        right:18px;
-        bottom:16px;
-        z-index:5;
-        display:flex;
-        justify-content:center;
-        gap:8px;
-        padding:8px;
-        border:1px solid rgba(255,255,255,.18);
-        border-radius:14px;
-        background:rgba(5,7,10,.78);
-        backdrop-filter:blur(14px);
-        -webkit-backdrop-filter:blur(14px);
-      }
+      #modal-img-thumbs.pdx-qv-thumbs:empty{display:none!important;}
       .pdx-qv-thumb{
-        width:58px;
-        height:58px;
-        flex:0 0 58px;
-        padding:3px;
-        overflow:hidden;
-        border:1px solid rgba(255,255,255,.18);
-        border-radius:9px;
-        background:#f4f4f4;
-        cursor:pointer;
-        transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        width:62px!important;
+        height:62px!important;
+        min-width:62px!important;
+        flex:0 0 62px!important;
+        padding:3px!important;
+        margin:0!important;
+        overflow:hidden!important;
+        border:1px solid rgba(255,255,255,.20)!important;
+        border-radius:10px!important;
+        background:#f3f3f3!important;
+        cursor:pointer!important;
+        opacity:1!important;
+        visibility:visible!important;
+        transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease!important;
       }
-      .pdx-qv-thumb:hover{transform:translateY(-2px);border-color:rgba(232,0,45,.7)}
+      .pdx-qv-thumb:hover{
+        transform:translateY(-2px)!important;
+        border-color:rgba(232,0,45,.72)!important;
+      }
+      .pdx-qv-thumb.on,
       .pdx-qv-thumb.active{
-        border-color:#e8002d;
-        box-shadow:0 0 0 2px rgba(232,0,45,.18);
+        border-color:#e8002d!important;
+        box-shadow:0 0 0 2px rgba(232,0,45,.18)!important;
       }
       .pdx-qv-thumb img{
         display:block!important;
         width:100%!important;
         height:100%!important;
+        max-width:none!important;
         object-fit:contain!important;
         object-position:center!important;
+        background:#fff!important;
         opacity:1!important;
         visibility:visible!important;
         filter:none!important;
+        transform:none!important;
       }
-      .pdx-qv-image-fallback{
-        position:absolute;
-        inset:0;
-        z-index:2;
-        display:grid;
-        place-items:center;
-        padding:28px;
-        color:rgba(255,255,255,.65);
-        background:linear-gradient(145deg,#15181d,#0b0d11);
-        font:700 .72rem/1.5 Inter,Arial,sans-serif;
-        letter-spacing:.08em;
-        text-align:center;
-        text-transform:uppercase;
+      #modal-img-wrap.pdx-qv-home-stage{
+        padding-bottom:92px!important;
       }
-      #modal-img-thumbs .pdx-qv-thumb{
-        width:64px!important;
-        height:64px!important;
-        flex-basis:64px!important;
-      }
-      #modal-img-thumbs.pdx-qv-thumbs{
+      .pdx-qv-home-thumbs{
+        position:absolute!important;
+        left:18px!important;
+        right:18px!important;
+        bottom:15px!important;
+        z-index:9!important;
         display:flex!important;
-        flex-wrap:wrap!important;
         align-items:center!important;
-        justify-content:center!important;
+        justify-content:flex-start!important;
         gap:8px!important;
+        min-height:68px!important;
+        padding:6px 8px!important;
+        overflow-x:auto!important;
+        overflow-y:hidden!important;
+        border:1px solid rgba(255,255,255,.16)!important;
+        border-radius:13px!important;
+        background:rgba(8,8,10,.82)!important;
+        backdrop-filter:blur(14px)!important;
+        -webkit-backdrop-filter:blur(14px)!important;
+        scrollbar-width:thin!important;
+      }
+      .pdx-qv-home-thumbs .pdx-qv-thumb{
+        width:54px!important;
+        height:54px!important;
+        min-width:54px!important;
+        flex-basis:54px!important;
       }
       @media(max-width:560px){
-        #modal-img-wrap.pdx-qv-stage{padding-bottom:78px!important}
-        .pdx-qv-home-gallery{left:10px;right:10px;bottom:10px;padding:6px;gap:6px}
-        .pdx-qv-thumb{width:48px;height:48px;flex-basis:48px}
-        #modal-img-thumbs .pdx-qv-thumb{width:52px!important;height:52px!important;flex-basis:52px!important}
+        #modal-img-wrap.pdx-qv-home-stage{padding-bottom:78px!important;}
+        .pdx-qv-home-thumbs{left:10px!important;right:10px!important;bottom:10px!important;min-height:58px!important;}
+        .pdx-qv-home-thumbs .pdx-qv-thumb,
+        #modal-img-thumbs.pdx-qv-thumbs .pdx-qv-thumb{
+          width:48px!important;height:48px!important;min-width:48px!important;flex-basis:48px!important;
+        }
       }
     `;
     document.head.appendChild(style);
   }
 
-  function imageUrl(value){
-    if (!value) return '';
-    if (typeof value === 'string') return value.trim();
-    if (typeof value === 'object') {
-      return String(value.url || value.secure_url || value.secureUrl || value.src || value.image || '').trim();
-    }
-    return '';
+  function getId(product){
+    return String(product?._id || product?.id || '').trim();
   }
 
-  function normalizeImages(product){
+  function mediaUrl(value){
+    if (!value) return '';
+    if (typeof value === 'string') return value.trim();
+    return String(value.url || value.secure_url || value.secureUrl || value.src || '').trim();
+  }
+
+  function imagesFor(product){
     const candidates = [];
     if (Array.isArray(product?.images)) candidates.push(...product.images);
     if (product?.image) candidates.push(product.image);
@@ -146,9 +165,10 @@
 
     const seen = new Set();
     return candidates
-      .map(imageUrl)
+      .map(mediaUrl)
       .map(url => url.replace(/^http:\/\//i, 'https://'))
       .filter(url => {
+        if (!url) return false;
         if (!/^https?:\/\//i.test(url) && !/^data:image\//i.test(url) && !url.startsWith('/')) return false;
         if (seen.has(url)) return false;
         seen.add(url);
@@ -156,221 +176,229 @@
       });
   }
 
-  function productId(product){
-    return String(product?._id || product?.id || '').trim();
-  }
-
-  async function getProducts(force = false){
+  async function products(force = false){
     if (!productPromise || force) {
       productPromise = fetch(PRODUCT_ENDPOINT, {
         credentials:'include',
         headers:{ Accept:'application/json' },
         cache:'no-store'
-      })
-        .then(async response => {
-          if (!response.ok) throw new Error(`Product media request failed (${response.status})`);
-          const payload = await response.json();
-          const rows = Array.isArray(payload?.data)
-            ? payload.data
-            : Array.isArray(payload?.products)
-              ? payload.products
-              : [];
-          return rows;
-        })
-        .catch(error => {
-          productPromise = null;
-          throw error;
-        });
+      }).then(async response => {
+        if (!response.ok) throw new Error(`products ${response.status}`);
+        const payload = await response.json();
+        if (Array.isArray(payload?.data)) return payload.data;
+        if (Array.isArray(payload?.products)) return payload.products;
+        if (Array.isArray(payload)) return payload;
+        return [];
+      }).catch(error => {
+        productPromise = null;
+        throw error;
+      });
     }
     return productPromise;
   }
 
-  async function getProduct(id){
-    const key = String(id || '').trim();
-    if (!key) return null;
-    let rows = await getProducts(false);
-    let product = rows.find(item => productId(item) === key) || null;
-    if (!product) {
-      rows = await getProducts(true);
-      product = rows.find(item => productId(item) === key) || null;
+  function modalIsOpen(){
+    const overlay = document.getElementById('modal-overlay');
+    if (!overlay) return false;
+    return overlay.classList.contains('open') || overlay.classList.contains('show') || overlay.getAttribute('aria-hidden') === 'false';
+  }
+
+  async function resolveProduct(){
+    const rows = await products(false);
+    const visibleName = String(document.getElementById('modal-name')?.textContent || '').trim();
+
+    if (activeProductId) {
+      const byId = rows.find(item => getId(item) === String(activeProductId));
+      if (byId && (!visibleName || String(byId.name || '').trim() === visibleName)) return byId;
     }
-    return product;
+
+    if (visibleName) {
+      const byName = rows.find(item => String(item?.name || '').trim() === visibleName);
+      if (byName) {
+        activeProductId = getId(byName);
+        return byName;
+      }
+    }
+
+    return null;
   }
 
-  function createImage(url, alt, onFailure){
-    const image = new Image();
-    image.className = 'pdx-qv-main-image';
-    image.alt = alt || 'PADDOX product';
-    image.decoding = 'async';
-    image.loading = 'eager';
-    image.referrerPolicy = 'no-referrer';
-    image.addEventListener('error', () => onFailure?.(), { once:true });
-    image.src = url;
-    return image;
+  function buildMainImage(url, name){
+    const img = new Image();
+    img.className = 'pdx-qv-main';
+    img.alt = name || 'PADDOX product';
+    img.decoding = 'async';
+    img.loading = 'eager';
+    img.referrerPolicy = 'no-referrer';
+    img.src = url;
+    return img;
   }
 
-  function showFallback(stage){
-    if (!stage) return;
-    stage.querySelectorAll('.pdx-qv-main-image,.pdx-qv-image-fallback').forEach(node => node.remove());
-    const fallback = document.createElement('div');
-    fallback.className = 'pdx-qv-image-fallback';
-    fallback.textContent = 'Product image is temporarily unavailable';
-    stage.appendChild(fallback);
-  }
+  function setMain(stage, urls, index, productName, thumbs){
+    if (!stage || !urls.length) return;
+    let selected = Math.max(0, Math.min(Number(index) || 0, urls.length - 1));
+    let attempts = 0;
 
-  function mountMain(stage, images, selectedIndex, alt, onSelected){
-    if (!stage || !images.length) return showFallback(stage);
-    const start = Math.max(0, Math.min(Number(selectedIndex) || 0, images.length - 1));
-    let attempt = 0;
-
-    const tryImage = index => {
+    const tryAt = current => {
       if (!stage.isConnected) return;
-      const safeIndex = (index + images.length) % images.length;
-      stage.querySelectorAll('.pdx-qv-main-image,.pdx-qv-image-fallback').forEach(node => node.remove());
-      const image = createImage(images[safeIndex], alt, () => {
-        attempt += 1;
-        if (attempt < images.length) tryImage(safeIndex + 1);
-        else showFallback(stage);
+      selected = (current + urls.length) % urls.length;
+      stage.querySelectorAll('.pdx-qv-main,.modal-product-img').forEach(node => node.remove());
+      const img = buildMainImage(urls[selected], productName);
+      img.addEventListener('error', () => {
+        attempts += 1;
+        if (attempts < urls.length) tryAt(selected + 1);
+      }, { once:true });
+      stage.prepend(img);
+      thumbs?.querySelectorAll('.pdx-qv-thumb').forEach((thumb, i) => {
+        thumb.classList.toggle('on', i === selected);
+        thumb.classList.toggle('active', i === selected);
       });
-      stage.prepend(image);
-      onSelected?.(safeIndex);
     };
 
-    tryImage(start);
+    tryAt(selected);
   }
 
-  function createThumb(images, index, alt, select){
+  function thumbButton(urls, index, productName, select){
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = `pdx-qv-thumb${index === 0 ? ' active' : ''}`;
-    button.setAttribute('aria-label', `View product image ${index + 1}`);
+    button.className = `modal-thumb pdx-qv-thumb${index === 0 ? ' on active' : ''}`;
+    button.setAttribute('aria-label', `View ${productName || 'product'} image ${index + 1}`);
 
-    const image = new Image();
-    image.alt = '';
-    image.decoding = 'async';
-    image.loading = 'lazy';
-    image.referrerPolicy = 'no-referrer';
-    image.src = images[index];
-    button.appendChild(image);
+    const img = new Image();
+    img.alt = '';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.referrerPolicy = 'no-referrer';
+    img.src = urls[index];
+    button.appendChild(img);
 
     button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      select(index, button);
+      select(index);
     });
     return button;
   }
 
-  function setActiveThumb(container, index){
-    if (!container) return;
-    Array.from(container.querySelectorAll('.pdx-qv-thumb')).forEach((thumb, thumbIndex) => {
-      thumb.classList.toggle('active', thumbIndex === index);
-    });
-  }
-
-  function renderShopGallery(product, images){
+  function renderShop(product, urls){
     const stage = document.getElementById('modal-img-main');
     const thumbs = document.getElementById('modal-img-thumbs');
-    if (!stage) return false;
+    if (!stage || !thumbs) return false;
 
     stage.classList.add('pdx-qv-stage');
-    if (thumbs) {
-      thumbs.classList.add('pdx-qv-thumbs');
-      thumbs.replaceChildren();
-    }
+    thumbs.classList.add('pdx-qv-thumbs');
+    thumbs.replaceChildren();
 
-    const select = (index, button) => {
-      mountMain(stage, images, index, product?.name, selected => {
-        setActiveThumb(thumbs, selected);
-      });
-      if (button) setActiveThumb(thumbs, index);
-    };
-
-    images.forEach((_, index) => thumbs?.appendChild(createThumb(images, index, product?.name, select)));
-    mountMain(stage, images, 0, product?.name, selected => setActiveThumb(thumbs, selected));
+    const select = index => setMain(stage, urls, index, product.name, thumbs);
+    urls.forEach((url, index) => thumbs.appendChild(thumbButton(urls, index, product.name, select)));
+    setMain(stage, urls, 0, product.name, thumbs);
     return true;
   }
 
-  function renderHomeGallery(product, images){
+  function renderHome(product, urls){
     const stage = document.getElementById('modal-img-wrap');
     if (!stage) return false;
 
-    stage.classList.add('pdx-qv-stage', 'modal-img-has-photo');
-    stage.querySelectorAll('.pdx-qv-home-gallery').forEach(node => node.remove());
-
+    stage.classList.add('pdx-qv-stage', 'pdx-qv-home-stage', 'modal-img-has-photo');
     const gallery = document.createElement('div');
-    gallery.className = 'pdx-qv-home-gallery';
+    gallery.className = 'pdx-qv-home-thumbs';
     gallery.setAttribute('aria-label', 'Product image gallery');
 
-    const select = (index, button) => {
-      mountMain(stage, images, index, product?.name, selected => setActiveThumb(gallery, selected));
-      if (button) setActiveThumb(gallery, index);
-    };
+    const select = index => setMain(stage, urls, index, product.name, gallery);
+    urls.forEach((url, index) => gallery.appendChild(thumbButton(urls, index, product.name, select)));
 
-    images.forEach((_, index) => gallery.appendChild(createThumb(images, index, product?.name, select)));
+    stage.replaceChildren();
     stage.appendChild(gallery);
-    mountMain(stage, images, 0, product?.name, selected => setActiveThumb(gallery, selected));
+    setMain(stage, urls, 0, product.name, gallery);
     return true;
   }
 
-  async function repairQuickView(id){
-    const token = ++renderToken;
+  async function syncGallery(){
+    if (rendering || !modalIsOpen()) return;
+    rendering = true;
     try {
-      const product = await getProduct(id);
-      if (token !== renderToken || !product) return;
-      const images = normalizeImages(product);
-      if (!images.length) return;
+      const product = await resolveProduct();
+      if (!product || !modalIsOpen()) return;
+      const urls = imagesFor(product);
+      if (!urls.length) return;
 
-      /* Shop and Home use different modal media containers. Whichever exists
-         on the current page is repaired without touching the modal's cart,
-         pricing, sizing or wishlist logic. */
-      if (!renderShopGallery(product, images)) renderHomeGallery(product, images);
+      const signature = `${getId(product)}:${urls.join('|')}`;
+      const alreadyRendered = signature === lastSignature && (
+        document.querySelector('#modal-img-thumbs.pdx-qv-thumbs .pdx-qv-thumb') ||
+        document.querySelector('#modal-img-wrap .pdx-qv-home-thumbs .pdx-qv-thumb')
+      );
+      if (alreadyRendered) return;
+
+      if (!renderShop(product, urls)) renderHome(product, urls);
+      lastSignature = signature;
     } catch (error) {
-      console.warn('[PADDOX Quick View] Could not refresh product media:', error);
+      console.warn('[PADDOX Quick View] Gallery sync skipped:', error);
+    } finally {
+      rendering = false;
     }
   }
 
-  function extractClickedProductId(target){
-    if (!(target instanceof Element)) return '';
-    const quick = target.closest(QUICK_VIEW_SELECTOR);
-    if (!quick) return '';
-    return String(
-      quick.getAttribute('data-id') ||
-      quick.getAttribute('data-product-id') ||
-      quick.closest('[data-id]')?.getAttribute('data-id') ||
-      quick.closest('[data-product-id]')?.getAttribute('data-product-id') ||
-      ''
-    ).trim();
+  function scheduleSync(delay = 30){
+    clearTimeout(syncTimer);
+    syncTimer = window.setTimeout(syncGallery, delay);
   }
 
-  function queueRepair(id){
-    if (!id) return;
-    lastProductId = id;
-    /* Existing Home/Shop handlers run on the clicked button first. Scheduling
-       the repair lets their modal content populate, then replaces only media. */
-    window.setTimeout(() => repairQuickView(id), 0);
-    window.setTimeout(() => repairQuickView(id), 180);
+  function captureProductFromClick(event){
+    if (!(event.target instanceof Element)) return;
+    if (event.target.closest('.pwish')) return;
+
+    const trigger = event.target.closest('.quick-view,.quick-view-btn,.pcard');
+    if (!trigger) return;
+    const card = trigger.closest('.pcard') || trigger;
+    const id = trigger.getAttribute('data-id') || card.getAttribute('data-id') || '';
+    if (id) activeProductId = String(id);
+
+    scheduleSync(20);
+    window.setTimeout(() => scheduleSync(10), 140);
+    window.setTimeout(() => scheduleSync(10), 420);
+  }
+
+  function installObserver(){
+    const overlay = document.getElementById('modal-overlay');
+    if (!overlay || overlay.dataset.pdxGalleryV2 === '1') return;
+    overlay.dataset.pdxGalleryV2 = '1';
+
+    const observer = new MutationObserver(mutations => {
+      if (rendering) return;
+      const relevant = mutations.some(mutation => {
+        if (mutation.type === 'attributes') return mutation.target === overlay;
+        const target = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement;
+        if (!target) return false;
+        if (target.closest('.pdx-qv-home-thumbs,#modal-img-thumbs.pdx-qv-thumbs')) return false;
+        return true;
+      });
+      if (relevant && modalIsOpen()) scheduleSync(45);
+    });
+
+    observer.observe(overlay, {
+      attributes:true,
+      attributeFilter:['class','aria-hidden'],
+      childList:true,
+      subtree:true,
+      characterData:true
+    });
   }
 
   injectStyles();
+  document.addEventListener('click', captureProductFromClick, true);
 
-  document.addEventListener('click', event => {
-    const id = extractClickedProductId(event.target);
-    if (id) queueRepair(id);
-  }, false);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      installObserver();
+      scheduleSync(80);
+    }, { once:true });
+  } else {
+    installObserver();
+    scheduleSync(80);
+  }
 
-  /* Backup for modal-opening code paths that do not originate from the visible
-     Quick View button (for example recommendation cards added later). */
-  const installObserver = () => {
-    const overlay = document.getElementById('modal-overlay');
-    if (!overlay || overlay.dataset.pdxQvObserver === '1') return;
-    overlay.dataset.pdxQvObserver = '1';
-    new MutationObserver(() => {
-      const open = overlay.classList.contains('open') || overlay.classList.contains('show') || overlay.getAttribute('aria-hidden') === 'false';
-      if (open && lastProductId) window.setTimeout(() => repairQuickView(lastProductId), 20);
-    }).observe(overlay, { attributes:true, attributeFilter:['class','aria-hidden'] });
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installObserver, { once:true });
-  else installObserver();
+  window.addEventListener('pageshow', () => {
+    installObserver();
+    if (modalIsOpen()) scheduleSync(80);
+  });
 })();
