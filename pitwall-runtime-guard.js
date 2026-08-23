@@ -29,7 +29,9 @@
   addStyle('pitwall-replay-ui-style', 'pitwall-replay-ui.css?v=PW_REPLAY_1');
 
   addScript('pitwall-replay-ui-script', 'pitwall-replay-ui.js?v=PW_REPLAY_1', () => {
-    addScript('pitwall-replay-mount-script', 'pitwall-replay-mount.js?v=PW_REPLAY_2');
+    addScript('pitwall-replay-mount-script', 'pitwall-replay-mount.js?v=PW_REPLAY_2', () => {
+      addScript('pitwall-fastf1-replay-script', 'pitwall-fastf1-replay.js?v=PW_FASTF1_1');
+    });
   });
   addScript('pitwall-live-stream-script', 'pitwall-live-stream.js?v=PW_STREAM_1');
 })();
