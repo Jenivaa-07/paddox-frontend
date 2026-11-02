@@ -8,12 +8,6 @@ const RECEIPT_ORDER_API = '/api/orders';
 const BRAND_LOGO_PATH = 'assets/paddox-logo-lockup-receipt-clean.png?v=18_0_13';
 const BRAND_ICON_PATH = 'assets/paddox-logo-icon-official.png?v=18_0_14';
 
-function receiptToken() {
-  return (
-    ''
-  );
-}
-
 function showToast(message) {
   const toast = document.getElementById('toast');
   if (!toast) return;
@@ -60,7 +54,7 @@ function paymentStatusLabel(status = '') {
 }
 
 function paymentReference(payment = {}) {
-  return payment.razorpayPaymentId || payment.transactionId || payment.reference || '-';
+  return payment.demoReference || payment.razorpayPaymentId || payment.transactionId || payment.reference || 'Demo checkout — no payment processed';
 }
 
 function formatDate(value) {
@@ -74,16 +68,8 @@ async function loadReceipt() {
   const card = document.getElementById('receipt-card');
   const actions = document.getElementById('receipt-actions');
   const orderId = orderIdFromUrl();
-  const token = receiptToken();
-
   if (!orderId) {
     card.innerHTML = `<div class="receipt-loading"><p>Order id missing.</p></div>`;
-    return;
-  }
-
-  if (!token) {
-    showToast('Please login to view receipt');
-    setTimeout(() => window.location.href = 'account.html', 900);
     return;
   }
 
@@ -138,7 +124,9 @@ function renderReceipt(order) {
   const paymentLabel = paymentStatusLabel(status);
   const methodLabel = paymentMethodLabel(payment.method || order.paymentMethod);
   const createdAt = formatDate(order.createdAt);
-  const paidAt = formatDate(payment.paidAt || order.paidAt || order.createdAt);
+  const paidAt = payment.paidAt || order.paidAt
+    ? formatDate(payment.paidAt || order.paidAt)
+    : (payment.provider === 'demo' ? 'Not processed — demo checkout' : 'Pending');
   const orderNo = order.orderNumber || order._id || order.id || order.orderId;
   const items = Array.isArray(order.items) ? order.items : [];
   const isDigitalOrder = order.orderType === 'digital' || items.some(item => item.itemType === 'digital' || item.asset || item.downloadUrl);
@@ -204,10 +192,10 @@ function renderReceipt(order) {
           <img src="${BRAND_ICON_PATH}" alt="PADDOX icon" class="receipt-logo-icon-clean">
           <div class="receipt-logo-word">PADDO<span>X</span></div>
         </div>
-        <p>Premium motorsport merchandise<br>Official order payment receipt</p>
+        <p>Premium motorsport merchandise<br>Demo checkout order receipt</p>
       </div>
       <div class="receipt-title-wrap">
-        <div class="receipt-kicker">OFFICIAL RECEIPT</div>
+        <div class="receipt-kicker">DEMO CHECKOUT</div>
         <h1>ORDER RECEIPT</h1>
         <div class="receipt-number">#${esc(orderNo)}</div>
       </div>
@@ -217,11 +205,11 @@ function renderReceipt(order) {
       <div class="receipt-chip ${status}">
         <span>Payment Status</span>
         <strong>${esc(paymentLabel)}</strong>
-        <em>${esc(methodLabel)}</em>
+        <em>${esc(methodLabel)}${payment.provider === 'demo' ? ' · DEMO ONLY' : ''}</em>
       </div>
       <div class="receipt-small-line"><span>Issued</span><strong>${esc(createdAt)}</strong></div>
       <div class="receipt-small-line"><span>Payment Date</span><strong>${esc(paidAt)}</strong></div>
-      <div class="receipt-small-line"><span>Transaction ID</span><strong>${esc(paymentReference(payment))}</strong></div>
+      <div class="receipt-small-line"><span>${payment.provider === 'demo' ? 'Demo Reference' : 'Transaction ID'}</span><strong>${esc(paymentReference(payment))}</strong></div>
     </section>
 
     <section class="receipt-two-col">
@@ -229,7 +217,7 @@ function renderReceipt(order) {
         <h3>ORDER DETAILS</h3>
         <div class="receipt-line"><span>Order ID</span><strong>#${esc(orderNo)}</strong></div>
         <div class="receipt-line"><span>Order Status</span><strong>${esc(order.status || 'placed')}</strong></div>
-        <div class="receipt-line"><span>Payment Method</span><strong>${esc(methodLabel)}</strong></div>
+        <div class="receipt-line"><span>Payment Method</span><strong>${esc(methodLabel)}${payment.provider === 'demo' ? ' (Demo)' : ''}</strong></div>
         ${couponCode ? `<div class="receipt-line receipt-coupon-line"><span>Coupon Used</span><strong>${esc(couponCode)}</strong></div>` : ''}
       </div>
       <div class="receipt-box">
