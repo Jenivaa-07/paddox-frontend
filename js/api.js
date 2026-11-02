@@ -238,7 +238,13 @@ const connectSocket = () => {
     // The API client keeps the short-lived access token in memory only.
     // Send it in the Socket.IO auth handshake because the API cookie is
     // first-party on the Vercel rewrite domain, not the separate Render host.
-    auth: { token: TokenManager.getAccess() },
+    auth: callback => {
+      const sendToken = () => callback({ token: TokenManager.getAccess() });
+      if (TokenManager.getAccess()) return sendToken();
+      // On a fresh page load, refresh through the same-origin API first so
+      // the short-lived access token can be supplied to the Render socket.
+      AuthAPI.refresh().then(sendToken).catch(() => callback({}));
+    },
     withCredentials: true,
     transports: ['websocket', 'polling'],
   });
