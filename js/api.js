@@ -235,8 +235,12 @@ const connectSocket = () => {
   if (typeof io === 'undefined') return null;
   /* Phase 7: No token passed in socket auth — relies on credentialed cookie session */
   const socket = io(SOCKET_URL, {
+    // The API client keeps the short-lived access token in memory only.
+    // Send it in the Socket.IO auth handshake because the API cookie is
+    // first-party on the Vercel rewrite domain, not the separate Render host.
+    auth: { token: TokenManager.getAccess() },
     withCredentials: true,
-    transports : ['websocket','polling'],
+    transports: ['websocket', 'polling'],
   });
   socket.on('connect',    () => console.log('🔌 Socket connected'));
   socket.on('disconnect', () => console.log('🔌 Socket disconnected'));
